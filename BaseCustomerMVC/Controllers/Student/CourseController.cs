@@ -46,6 +46,9 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LearningHistoryService _learningHistoryService;
         private readonly CenterService _centerService;
 
+        private readonly NewsService _newsService;
+        private readonly NewsCategoryService _newsCategoryService;
+
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, StudentClassViewModel> _mappingList;
         //private readonly MappingEntity<ClassSubjectEntity, StudentClassViewModelV2> _mappingList;
@@ -85,6 +88,8 @@ namespace BaseCustomerMVC.Controllers.Student
             , LearningHistoryService learningHistoryService
             , CalendarHelper calendarHelper
             , CenterService centerService
+            , NewsService newsService
+            , NewsCategoryService newsCategoryService
             )
         {
             _lessonProgressService = lessonProgressService;
@@ -119,6 +124,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _calendarHelper = calendarHelper;
             _centerService = centerService;
+            _newsCategoryService = newsCategoryService;
+            _newsService = newsService;
 
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
@@ -637,6 +644,36 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Model = model;
             return View();
         }
+
+        /*
+         * Xem các khóa học khác
+         */
+        public IActionResult OtherCourse(string basis)
+        {
+            var centerID = "";
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                {
+                    ViewBag.Center = center;
+                    centerID = center.ID;
+                }
+            }
+
+            var category = _newsCategoryService.GetItemByCode("san-pham");
+
+            var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.CategoryID == category.ID && o.IsHot == true);
+            ViewBag.List_Courses = data.ToList();
+            ViewBag.Subjects = _subjectService.GetAll().ToList();
+            ViewBag.Grades = _gradeService.GetAll().ToList();
+            return View();
+        }
+
+        //public JsonResult GetListProduct()
+        //{
+
+        //}
 
         //public IActionResult Calendar(DefaultModel model, string id, string ClassID)
         //{

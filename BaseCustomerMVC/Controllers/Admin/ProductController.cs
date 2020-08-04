@@ -59,10 +59,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
 
-        public async Task<JsonResult> CreateOrUpdate(NewsEntity item, IFormFile Thumbnail, string CategoryCode="san-pham")
+        public async Task<JsonResult> CreateOrUpdate(NewsEntity item, IFormFile Thumbnail)
         {
-            if (item.CategoryID == null)
-                item.CategoryID = _serviceNewCate.GetItemByCode(CategoryCode).ID;
+            //if (item.CategoryID == null)
+            //    item.CategoryID = _serviceNewCate.GetItemByCode(CategoryCode).ID;
 
             //if (item.Sale != 0)
             //{
@@ -78,8 +78,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.IsActive = true;
                 item.IsPublic = false; //mac dinh se khong public
                 item.Type = "san-pham";
-                if (item.CenterID == "0") item.IsPublic = true;
-                else item.IsPublic = false;
 
                 var pos = 0;
                 while (_serviceNews.GetItemByCode(item.Code) != null)
@@ -126,8 +124,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 else
                     item.Thumbnail = olditem.Thumbnail;
 
-                if (item.CenterID == "0") item.IsPublic = true;
-                else item.IsPublic = false;
+                item.Type = olditem.Type;
 
                 _serviceNews.Save(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()

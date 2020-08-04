@@ -181,20 +181,20 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_courses">
-                                <a href="#" :title="item.Title">
+                                <a onclick="DetailProduct()" :title="item.Title">
                                     <div class="box radius">
                                         <div class="thumb" style="position:relative;">
-                                            <img v-if="item.Thumbnail" :src="'/Upload/News/'+item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
-                                            <img v-else :src="'/Upload/News/'+item.Thumbnail" alt="">
+                                            <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                            <img v-else :src="item.Thumbnail" alt="">
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
                                             @*<a :href="'@processUrl("DetailProduct","Home")/?code='+item.Code" :title="item.Title" class="title">{{item.Title}}</a>*@
-                                            <a onclick="DetailProduct()" :title="item.Title" class="title">{{item.Title}}</a>
+                                            <a onclick="DetailProduct()" :title="item.Title" class="title"><marquee width="100%" behavior="slide">{{item.Title}}</marquee></a>
                                             @*<a data-toggle="modal" href="#DetailProduct">Open Modal</a>*@
                                             <div class="hide" id="code" :title="item.Code"></div>
                                             @*<p>
@@ -205,12 +205,14 @@
                                                     <div class="c-right" style="font-size:13px; font-weight:bold"></div>
                                                 </div>
                                                 <div class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
-                                                    {{formatPrice(parseInt(item.Price*(100-item.Discount)/100)) }} VNĐ
+                                                    {{formatPrice(item.Discount) }} VNĐ
                                                 </div>
                                                 <div>
                                                     <span style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
                                                 </div>
-                                                <button class="btn btn-danger w-100 mt-2" onclick="BuyNow(this)">Mua ngay</button>
+                                                <div>
+                                                    <button class="btn btn-danger w-100 mt-2 col-sm-9" onclick="BuyNow(this)">Mua ngay</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -429,7 +431,7 @@
                     debugger
                     var modal = $('#DetailProduct');
                     $(modal).find('.modal-title').text(response.data.Title);
-                    $(modal).find('[name=thumbnail]').attr('src', '/Upload/News/' + response.data.Thumbnail);
+                    $(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
                     $(modal).find('[name=Content]').html(response.data.Content);
                     //console.log(_that.active_course);
                 }).catch(e => { });

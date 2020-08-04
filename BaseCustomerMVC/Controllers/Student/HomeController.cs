@@ -68,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var category = _newsCategoryService.GetItemByCode("san-pham");
 
-            var data=_newsService.CreateQuery().Find(o=>o.CenterID==centerID && o.IsActive==true && o.CategoryID==category.ID);
+            var data=_newsService.CreateQuery().Find(o=>o.CenterID==centerID && o.Type=="san-pham").Limit(6);
 
             //var list_courses= 
 
@@ -272,6 +272,11 @@ namespace BaseCustomerMVC.Controllers.Student
             if (!string.IsNullOrEmpty(centerID))
             {
                 filter.Add(Builders<NewsEntity>.Filter.Where(o => o.CenterID == centerID));
+            }
+
+            if (!string.IsNullOrEmpty(centerID))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(o => o.Type == "san-pham"));
             }
 
             var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter));
