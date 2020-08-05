@@ -22,6 +22,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly AccountService _accountService;
         private readonly CenterService _centerService;
         private readonly NewsService _newsService;
+        private readonly NewsCategoryService _newsCategoryService;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
@@ -31,13 +32,15 @@ namespace BaseCustomerMVC.Controllers.Student
             IOptions<DefaultConfigs> defaultvalue,
             CenterService centerService,
             StudentService studentService,
-            NewsService newsService
+            NewsService newsService,
+            NewsCategoryService newsCategoryService
             )
         {
             _studentService = studentService;
             _accountService = accountService;
             _centerService = centerService;
             _fileProcess = fileProcess;
+            _newsCategoryService = newsCategoryService;
             _httpContextAccessor = httpContextAccessor;
             _session = _httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
@@ -48,6 +51,7 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
+            var centerID = "";
             ViewBag.Student = student;
             if (student != null)
                 ViewBag.AllCenters = student.Centers.Where(t => _centerService.GetItemByID(t).ExpireDate >= DateTime.Now).Select(t => _centerService.GetItemByID(t)).ToList();
@@ -56,11 +60,30 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center != null)
+                {
                     ViewBag.Center = center;
+                    centerID = center.ID;
+                }
             }
+
+            var category = _newsCategoryService.GetItemByCode("san-pham");
+
+            var data=_newsService.CreateQuery().Find(o=>o.CenterID==centerID && o.Type=="san-pham").Limit(6);
+
+            //var list_courses= 
+
+            ViewBag.List_Courses = data.ToList();
             //var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
             //HttpContext.Session.SetString("userAvatar", avatar);
             return View();
+        }
+
+        public JsonResult DetailProduct(string Code)
+        {
+            //var code = HttpContext.Request.Query["code"].ToString();
+            var detail_product = _newsService.CreateQuery().Find(o => o.Code.Equals(Code)).FirstOrDefault();
+            ViewBag.Title = detail_product.Title;
+            return Json(detail_product);
         }
 
         public IActionResult Profile()
@@ -249,6 +272,11 @@ namespace BaseCustomerMVC.Controllers.Student
             if (!string.IsNullOrEmpty(centerID))
             {
                 filter.Add(Builders<NewsEntity>.Filter.Where(o => o.CenterID == centerID));
+            }
+
+            if (!string.IsNullOrEmpty(centerID))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(o => o.Type == "san-pham"));
             }
 
             var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter));

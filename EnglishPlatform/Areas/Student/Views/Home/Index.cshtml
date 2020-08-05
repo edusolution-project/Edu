@@ -5,6 +5,7 @@
     var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     BaseCustomerEntity.Database.CenterEntity _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
     var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
+    var list_courses = ViewBag.List_Courses as List<BaseCustomerEntity.Database.NewsEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -173,51 +174,82 @@
                 </li>
             </ul>
         </div>
-        @if (center == "eduso")
-        {
-            <div class="module">
-                <div class="col-md-12">
-                    <div class="box mb-3">
-                        <div class="heading flex mb-2">
-                            <h4 class="box-head">Các khóa học khác</h4>
-                            <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
-                        </div>
-                        <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
-                            <ul class="box list-scroll">
-                                <li v-for="(item,k) in hot_course">
-                                    <a href="#" :title="item.courseName">
-                                        <div class="box radius">
-                                            <div class="thumb" style="position:relative;">
-                                                <img v-if="item.thumb" :src="item.thumb" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
-                                                <img v-else src="/pictures/ielts1.png" alt="">
-                                            </div>
-                                            <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
-                                                <a href="#" :title="item.courseName" class="title">{{item.courseName}}</a>
-                                                @*<p>
-                                                        <i class="ti-files"></i>{{item.description}}
-                                                    </p>*@
-                                                <div class="c-bot" style="text-align:right;">
-                                                    <div>
-                                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                                    </div>
-                                                    <div class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
-                                                        {{item.discount}} VND
-                                                    </div>
-                                                    <div>
-                                                        <span style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{item.price}} VND)</span>
-                                                    </div>
-                                                    <button class="btn btn-danger w-100 mt-2">Mua ngay</button>
+        @*@if (center == "eduso")
+        {*@
+        <div class="module">
+            <div class="col-md-12">
+                <div class="box mb-3">
+                    <div class="heading flex mb-2">
+                        <h4 class="box-head">Các khóa học khác</h4>
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                    </div>
+                    <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
+                        <ul class="box list-scroll">
+                            <li v-for="(item,k) in list_courses">
+                                <a onclick="DetailProduct()" :title="item.Title">
+                                    <div class="box radius">
+                                        <div class="thumb" style="position:relative;">
+                                            <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                            <img v-else :src="item.Thumbnail" alt="">
+                                        </div>
+                                        <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
+                                            @*<a :href="'@processUrl("DetailProduct","Home")/?code='+item.Code" :title="item.Title" class="title">{{item.Title}}</a>*@
+                                            <a onclick="DetailProduct()" :title="item.Title" class="title"><marquee width="100%" behavior="slide">{{item.Title}}</marquee></a>
+                                            @*<a data-toggle="modal" href="#DetailProduct">Open Modal</a>*@
+                                            <div class="hide" id="code" :title="item.Code"></div>
+                                            @*<p>
+                                                <i class="ti-files"></i>{{item.description}}
+                                            </p>*@
+                                            <div class="c-bot" style="text-align:right;">
+                                                <div>
+                                                    <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                                </div>
+                                                <div class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
+                                                    {{formatPrice(item.Discount) }} VNĐ
+                                                </div>
+                                                <div>
+                                                    <span style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                </div>
+                                                <div>
+                                                    <button class="btn btn-danger w-100 mt-2 col-sm-9" onclick="BuyNow(this)">Mua ngay</button>
                                                 </div>
                                             </div>
                                         </div>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        }
+        </div>
+        @*}*@
+
+        <!-- Modal -->
+        <div class="modal fade" id="DetailProduct" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title"></h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <img name="thumbnail" />
+                        </div>
+                        <div class="form-group" name="Content">
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -226,10 +258,11 @@
     new Vue({
         el: ".module",
         mounted() {
-            this.getWeekLesson()
-            this.getActiveCourse()
-            this.getFinishCourse()
-            this.getNewFeed()
+            this.getWeekLesson();
+            this.getActiveCourse();
+            this.getFinishCourse();
+            this.getNewFeed();
+            this.list_courses = @Html.Raw(Json.Serialize(list_courses));
         },
         data: {
             lesson_week: [
@@ -265,6 +298,7 @@
                     price: "1,500,000"
                 }
             ],
+            list_courses: @Html.Raw(Json.Serialize(list_courses)),
             discussion: [
             ],
             finish_course: [
@@ -282,7 +316,6 @@
                 let _form = new FormData()
                 _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 let _url = '@processUrl("GetActiveListV2", "Course")'
-
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log("Active")
@@ -377,7 +410,35 @@
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
+            formatPrice(value) {
+                let val = (value / 1).toFixed(2).replace(',', '.')
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            },
         }
     });
+
+        var DetailProduct = function () {
+            //alert(1);
+            $("#DetailProduct").modal();
+            var code = $("#code").attr('title');
+            let _form = new FormData();
+            _form.append('Code', code);
+            let _url = '@processUrl("DetailProduct", "Home")';
+            axios.post(_url, _form)
+                .then(response => {
+                    //console.log("Active")
+                    //onsole.log(response.data)
+                    debugger
+                    var modal = $('#DetailProduct');
+                    $(modal).find('.modal-title').text(response.data.Title);
+                    $(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
+                    $(modal).find('[name=Content]').html(response.data.Content);
+                    //console.log(_that.active_course);
+                }).catch(e => { });
+        }
+
+        var BuyNow = function (obj) {
+            alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
+        }
     </script>
 }
