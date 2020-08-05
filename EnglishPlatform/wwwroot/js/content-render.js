@@ -289,7 +289,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        //console.log(config.mod);
+        console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -334,6 +334,11 @@ var Lesson = (function () {
                     $(sort).prop("disabled", true);
                 }
 
+
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                lessonButton.append(btnExplain);
+
+
                 //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
                 lessonButton.append(create);
@@ -343,7 +348,7 @@ var Lesson = (function () {
                 //headerRow.append(lessonButton);
 
                 lesson_action_holder.empty().prepend(lessonButton);
-
+                
                 break;
             case mod.TEACHERVIEW:
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
@@ -764,6 +769,7 @@ var Lesson = (function () {
                 else {
                     lessonFooter.hide();
                 }
+                
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
@@ -2217,7 +2223,7 @@ var Lesson = (function () {
                     $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (parseInt(i) - 1) + "]."));
                     $(listFieldQuestion[i]).attr("order", (parseInt(i) - 1));
                     $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
-                });   
+                });
             }
             //debugger
             if (result.value) {
@@ -2793,7 +2799,7 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
-       
+
         //itembox.append(ItemRow);
         switch (data.Type) {
             default:
@@ -3442,7 +3448,7 @@ var Lesson = (function () {
         });
     }
 
-    var AnswerQuestion = function (_this,_that) {
+    var AnswerQuestion = function (_this, _that) {
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
         // dataset trên item
@@ -3502,9 +3508,9 @@ var Lesson = (function () {
         //console.log($("input[name=ExamID]"));
         //if (type != "ESSAY") {
 
-            dataform.append("LessonPartID", partID);
-            dataform.append("AnswerID", answerID);
-            dataform.append("QuestionID", questionId);
+        dataform.append("LessonPartID", partID);
+        dataform.append("AnswerID", answerID);
+        dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
         //debugger;
         var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
@@ -3736,17 +3742,17 @@ var Lesson = (function () {
         var vInstance = CKEDITOR.instances["inputES-" + id];
         var value = vInstance.getData();
         saveAnswerForStudent(id, "0", value, "ESSAY");
-        
+
         var obj = {
             dataset: {
                 partId: self.parentElement.id,
                 type: "ESSAY",
-                questionId:id
+                questionId: id
             },
             id: id,
             value: value,
         }
-        AnswerQuestion(obj,self);
+        AnswerQuestion(obj, self);
     }
 
     var ApplyAdditionVocabStyle = function () {
@@ -3780,7 +3786,7 @@ var Lesson = (function () {
         //new File([file], cloneQuestion.children[5].children[1].children[1].value);
         debugger
 
-        $(_this).parent().parent().append(cloneQuestion);   
+        $(_this).parent().parent().append(cloneQuestion);
     }
 
     window.LessonInstance = {} || Lesson;
@@ -3874,6 +3880,7 @@ var hideModal = function (modalId) {
 var submitForm = function (event, modalId, callback) {
     event.preventDefault();
     $('.btnSaveForm').hide();
+    console.log('Save');
 
     var form = $(modalId).find('form');
     var Form = form.length > 0 ? form[0] : window.partForm;
@@ -3881,7 +3888,6 @@ var submitForm = function (event, modalId, callback) {
 
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
-
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
@@ -3918,36 +3924,42 @@ var submitForm = function (event, modalId, callback) {
     xhr.open('POST', actionUrl);
     xhr.send(formdata);
     xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            var data = JSON.parse(xhr.responseText);
-            if (data.Error == null || data.Error == "") {
-                //switch (actionUrl) {
-                //case "Lesson/" + urlLesson.CreateOrUpdate:
-                //render.lesson(data.data);
-                //document.location = urlLesson.Location + data.Data.ID;
-                //document.location = document.location;
-                //    break;
-                //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
-                //    var part = data.Data;
-                //   //render.part(part);
-                if (callback == "addPart") {
-                    var part = data.Data;
-                    window.AddPart(part);
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                var data = JSON.parse(xhr.responseText);
+                if (data.Error == null || data.Error == "") {
+                    //switch (actionUrl) {
+                    //case "Lesson/" + urlLesson.CreateOrUpdate:
+                    //render.lesson(data.data);
+                    //document.location = urlLesson.Location + data.Data.ID;
+                    //document.location = document.location;
+                    //    break;
+                    //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
+                    //    var part = data.Data;
+                    //   //render.part(part);
+                    if (callback == "addPart") {
+                        var part = data.Data;
+                        window.AddPart(part);
+                    }
+                    else {
+                        if (callback == null)
+                            window.ReloadData();
+                        else
+                            callback;
+                    }
+                    hideModal(modalId);
                 }
                 else {
-                    if (callback == null)
-                        window.ReloadData();
-                    else
-                        callback;
+                    alert(data.Error);
                 }
-                hideModal(modalId);
             }
             else {
-                alert(data.Error);
+                console.log(xhr.status);
+                alert("Có lỗi, hãy thực hiện lại");
             }
+            $('.btnSaveForm').siblings('.pending').remove();
+            $('.btnSaveForm').show();
         }
-        $('.btnSaveForm').siblings('.pending').remove();
-        $('.btnSaveForm').show();
     }
 }
 

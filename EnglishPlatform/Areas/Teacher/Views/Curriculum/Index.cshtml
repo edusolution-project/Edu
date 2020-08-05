@@ -540,7 +540,7 @@
                         return false;
                     }
 
-                    if ($("#joinCourseID option:selected").val())
+                    //if ($("#joinCourseID option:selected").val())
 
                     //if ($("#newName").val() == "" || $("#newName").val() == null) {
                     //    alert("Chưa ghi tên chương mới sau khi ghép");
@@ -781,7 +781,7 @@
                 @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
                 <select v-model="mergeItem.JoinCourseID" class="form-control" required>
                     <option value="">Chọn khóa học</option>m
-                    <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID" :value="item.ID">{{item.Name}}</option>
+                    <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID && item.SubjectID == mergeItem.SubjectID" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
         </div>

@@ -2806,8 +2806,9 @@ fillquiz {
 .fillquiz {
     background: #e6712d4d;
     display: inline;
-    padding: 8px;
+    padding: 5px 8px;
     border-radius: 3px;
+    outline: none;
     line-height: 25px;
     border: solid 1px #999;
 }
