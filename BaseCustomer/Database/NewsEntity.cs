@@ -51,6 +51,8 @@ namespace BaseCustomerEntity.Database
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
         public bool IsPublic { get; set; }
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
