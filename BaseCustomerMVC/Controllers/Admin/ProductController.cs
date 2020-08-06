@@ -200,7 +200,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         [HttpPost]
         public JsonResult GetDetail(string id)
         {
-            var data = _serviceNews.GetItemByID(id);
+            var data = _serviceNews.CreateQuery().Find(o=>o.ID==id && o.Type.ToLower()=="san-pham").FirstOrDefault();
 
             var response = new Dictionary<string, object>
             {
