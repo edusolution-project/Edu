@@ -16,6 +16,11 @@ namespace BaseHub
 
         }
 
+        public Task AddToGroups(List<string> groups,string user)
+        {
+            return Task.CompletedTask;
+        }
+
         public Task RemoveMessage(string user, string messageId)
         {
             var listUser = _connections.GetConnections(user);

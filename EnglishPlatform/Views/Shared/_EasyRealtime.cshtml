@@ -773,6 +773,71 @@
         }
 
     });
+
+    var checklistNotificaiton = function () {
+        var listElement = document.body.querySelectorAll("div.noti");
+        return listElement == null ? 0 : listElement.length;
+    }
+    var closeNoti = function (_this) {
+        if (_this.className == "noti alert alert-success") {
+            _this.remove();
+        }
+        else {
+            closeNoti(_this.parentElement);
+        }
+    }
+    var createNotification = function (data,state,isChatGroup) { //state = 1 bỏ qua , 0 ->  0 user to user , 1 user to group
+        var div = document.createElement("div");
+        var bottom = 9 * checklistNotificaiton();
+        div.classList = "noti alert alert-success";
+        div.setAttribute("style", "width: 225px;height: 83px;position: absolute;z-index: 99999;top: " + bottom +"%;right: 10px;background: #b4e28acc;padding:0");
+        var body = document.createElement("div");
+        body.setAttribute("style", "position: relative; width:100%; height: 100%;padding : 30px");
+        var close = document.createElement("button");
+        close.innerHTML = "x";
+        close.classList = "btn btn-close";
+        close.setAttribute("style", "position: absolute; top: 0; bottom: 0; right: 0; width : 30px; height : 30px");
+        close.setAttribute("onclick","closeNoti(this)")
+        body.appendChild(close);
+        div.appendChild(body);
+        body.innerHTML += data.userSend + " gửi tin nhắn cho bạn";
+
+        body.onclick = function (event) {
+            closeNoti(event.target);
+            var dataID = data.message.receiver;
+            var root = document.getElementById("easy-real-time-app");
+            var box = document.querySelector(".box-chat-eduso");
+            if (box != null) {
+                if (!box.classList.contains("open")) {
+                    box.classList.add("open");
+                }
+                if (state == 1) {
+                    var x = root.querySelector(".ul-slider-bar-left > [data-type='NewFeed']");
+                    onActiveThis(x);
+                }
+                else {
+                    var x = root.querySelector(".ul-slider-bar-left > [data-type='Chat']");
+                    onActiveThis(x);
+                    if (!isChatGroup) {
+                        var y = root.querySelector("[data-type='User']");
+                        onActiveThis(y);
+                        dataID = data.message.sender;
+                    } else {
+                        var y = root.querySelector("[data-type='Group']");
+                        onActiveThis(y);
+                    }
+                }
+                var itemActive = root.querySelector("[data-item-id='" + dataID + "'] > a");
+                if (!itemActive.parentElement.classList.contains("active")) {
+                    itemActive.click();
+                }
+            }
+            //console.log(data);
+        }
+
+        document.body.appendChild(div);
+    }
+
     connection.on("Online", function (data) {
         if (typeof (data) == "object" && data.length != void 0) {
             for (var i = 0; i < data.length; i++) {
@@ -860,6 +925,7 @@
                 }
             }
             else {
+                createNotification(data, state,1);
                 // chat group
                 if (state == 0) {
                     // new feed active
@@ -942,7 +1008,7 @@
 
         }
 
-
+        
         //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
         //content: "này yêu nhau không ?"
         //medias: []
@@ -985,6 +1051,7 @@
         var ulTab = rootElement.querySelector('ul[data-ul-id="ul-slider-bar-left"]');
         var liTopic = ulTab.children[0];
         var liChat = ulTab.children[1];
+        createNotification(data, state,0);
         if (state == 0) {
             var span = liTopic.querySelector("span");
             if (span.innerHTML == "") {
@@ -1005,8 +1072,6 @@
                 span.innerHTML = number.toString();
             }
         }
-
-
     })
 </script>
 <script type="text/javascript">
@@ -1125,8 +1190,8 @@
         }
     }
 
-    var renderItemGroup = function (id,name) {
-        return `<div class="Item-group" data-item-id="${id}"><a href="javascript:void 0;" onclick="OpenGroup('${id}','${name}')">${name}</a><span></span><button class="btn btn-sm float-right"> i </button></div>`;
+    var renderItemGroup = function (id, name) {
+        return `<div class="Item-group" data-item-id="${id}"><a href="javascript:void 0;" onclick="OpenGroup('${id}','${name.replace("'","")}')">${name}</a><span></span><button class="btn btn-sm float-right"> i </button></div>`;
     }
     var renderDataStudent = function (data) {
         var rootElemet = getRootElement();
