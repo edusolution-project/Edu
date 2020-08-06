@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CenterService _centerService;
         private readonly NewsService _newsService;
         private readonly NewsCategoryService _newsCategoryService;
+        private readonly ClassService _classService;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
@@ -33,7 +34,8 @@ namespace BaseCustomerMVC.Controllers.Student
             CenterService centerService,
             StudentService studentService,
             NewsService newsService,
-            NewsCategoryService newsCategoryService
+            NewsCategoryService newsCategoryService,
+            ClassService classService
             )
         {
             _studentService = studentService;
@@ -45,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _session = _httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
             _newsService = newsService;
+            _classService = classService;
         }
 
         public IActionResult Index(string basis)
@@ -296,7 +299,42 @@ namespace BaseCustomerMVC.Controllers.Student
             var student = _studentService.GetItemByID(_studentid);
             ViewData["Title"] = "Thanh toán khóa học";
             //var classid = HttpContext.Request.Query["id"];
+            var ClassID = Request.Path.ToString().Substring(Request.Path.ToString().LastIndexOf('/')+1);
+            ViewBag.Class = _classService.GetItemByID(ClassID);
+            //var _class=
             return View();
+        }
+
+        public JsonResult JoinClass(string ClassID)
+        {
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+
+            if (string.IsNullOrEmpty(ClassID))
+                return Json(new { error = "Lớp không tồn tại" });
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+                return Json(new { error = "Lớp không tồn tại" });
+            //var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+                return Json(new { error = "Học viên không tồn tại" });
+            if (student.JoinedClasses == null)
+            {
+                student.JoinedClasses = new List<string> { };
+                _studentService.Save(student);//init JoinedClass;
+            }
+            if (student.Centers == null)
+            {
+                student.Centers = new List<string> { };
+                _studentService.Save(student);//init Center;
+            }
+            if (_studentService.IsStudentInClass(ClassID, student.ID))
+            {
+                return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
+            }
+            if (_studentService.JoinClass(ClassID, student.ID, @class.Center) > 0)
+                return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
+            return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
         #endregion
     }

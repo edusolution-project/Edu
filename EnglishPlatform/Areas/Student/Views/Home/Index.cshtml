@@ -226,37 +226,50 @@
 
         <!-- Modal -->
 
-        <div class="modal fade" id="DetailProduct" role="dialog" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-lg">
+        <div class="modal fade" id="DetailProduct" tabindex="-1"  role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3 class="modal-title"></h3>
+                        <h3 class="modal-title">{{detailProduct.Title}}</h3>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body" style="overflow-y:scroll;max-height:600px;position:relative">
-                        @*<div class="form-group" style="position:fixed">
-                            <div class="col-sm-6">
-                                Giá: 
+                    <div class="modal-body" style="overflow-y:scroll;max-height:600px;">
+                        <div class="container-fluid" >
+                            <div class="row col-sm-9">
+                                @*<div class="form-group">
+                                    <img name="thumbnail" />
+                                </div>*@
+                                <div class="form-group" name="Content" v-html="detailProduct.Content">
+                                    @*{{detailProduct.Content}}*@
+                                </div>
                             </div>
-                            <div class="col-sm-6">
-                                Giá khuyến mại:
-                                <span class="price font-weight-bold text-danger ml-auto" id="PriceDiscount" style="font-size:130%; text-align:right;">
-                                </span>
+                            <div class="row col-sm-3 position-fixed" style="right:40px">
+                                <div class="form-group col-sm-12" id="price">
+                                    @*<div>
+                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                    </div>*@
+                                    <div v-if="detailProduct.Discount!=''" class="price font-weight-bold text-danger ml-auto col-sm-12">
+                                        Giá khuyến mại: <span style="font-size:130%; text-align:right;">{{formatPrice(detailProduct.Discount)}} VNĐ</span>
+                                    </div>
+                                    <div>
+                                        <span v-if="detailProduct.Discount!=''" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1 col-sm-12">
+                                        Giá gốc: ({{formatPrice(detailProduct.Price)}} VNĐ)</span>
+                                        <span v-else class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
+                                        Giá: {{formatPrice(detailProduct.Price)}} VNĐ</span>
+                                    </div>
+                                </div>
+                                <div class="form-group col-sm-12" style="text-align:center">
+                                    <button type="button" class="btn btn-primary" v-on:click="BuyNow(detailProduct.ClassID)" title="Mua ngay">Mua ngay</button>
+                                </div>
                             </div>
-                        </div>*@
-                        <div class="form-group">
-                            <img name="thumbnail" />
-                        </div>
-                        <div class="form-group" name="Content">
-
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    @*<div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
                         <button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>
-                    </div>
+                    </div>*@
                 </div>
             </div>
         </div>
@@ -313,7 +326,8 @@
             discussion: [
             ],
             finish_course: [
-            ]
+            ],
+            detailProduct: [],
         },
         watch: {
             lesson_week: function (val) {
@@ -421,36 +435,38 @@
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
+            DetailProduct(ID) {
+                let _that=this
+                $("#DetailProduct").modal()
+                let _form = new FormData();
+                _form.append('ID', ID);
+                let _url = '@processUrl("DetailProduct", "Home")';
+                axios.post(_url, _form)
+                .then(response => {
+                    //debugger
+                    //var modal = $('#DetailProduct');
+                    //$(modal).find('.modal-title').text(response.data.Title);
+                    //$(modal).find('[name=Content]').html(response.data.Content);
+                    //$(modal).find('[id=PriceDiscount]').text(response.data.Discount);
+                    _that.detailProduct = response.data;
+                    debugger
+                }).catch(e => { });
+            },
             formatPrice(value) {
                 let val = (value / 1).toFixed(0)
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
             },
-            DetailProduct(ID) {
-               // alert(ID)
-                $("#DetailProduct").modal()
-                  let _form = new FormData();
-            _form.append('ID', ID);
-            let _url = '@processUrl("DetailProduct", "Home")';
-            axios.post(_url, _form)
-                .then(response => {
-                    //console.log("Active")
-                    //onsole.log(response.data)
-                    debugger
-                    var modal = $('#DetailProduct');
-                    $(modal).find('.modal-title').text(response.data.Title);
-                    //$(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
-                    $(modal).find('[name=Content]').html(response.data.Content);
-                    $(modal).find('[id=PriceDiscount]').text(response.data.Discount);
-                    //$(modal).find('[id=Price]').text(response.data.Discount);
-                    //console.log(_that.active_course);
-                }).catch(e => { });
-            }
+            BuyNow(classid) {
+                debugger
+                window.location.href = '@processUrl("Payment", "Home")/' + classid;
+            },
         }
     });
 
-        var BuyNow = function (classid) {
+        @*var BuyNow = function (classid) {
             //alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
-            window.location.href = '@processUrl("Payment", "Home")/classid';
-        }
+            debugger
+            window.location.href = '@processUrl("Payment", "Home")/' + classid;
+        }*@
     </script>
 }
