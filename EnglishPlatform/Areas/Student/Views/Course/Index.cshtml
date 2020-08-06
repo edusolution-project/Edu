@@ -35,7 +35,7 @@
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 ml-md-2">
                 <select name="" v-model="grade" v-on:change="changeGrade()">
                     <option value="">Chọn cấp độ</option>
                     <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
@@ -55,7 +55,7 @@
         <div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
-                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name" class="w-100"></a>
+                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="cacheStatic(item.Thumb,256)" :alt="item.Name" class="w-100"></a>
                     <div class="detail box">
                         <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
                         <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
@@ -191,8 +191,8 @@
                     _form.append('SubjectID', _that.subject)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
-                    _form.append('StartDate', _that.sDate)
-                    _form.append('EndDate', _that.eDate)
+                    //_form.append('StartDate', _that.sDate)
+                    //_form.append('EndDate', _that.eDate)
                     let _url = '@processUrl("GetList", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -263,6 +263,11 @@
                     _that.startdate = moment(new Date(1800,1,1)),
                     _that.enddate = moment(new Date(1800,1,1)),
                     GetCourse();
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
                 },
                 repDate(svalue, evalue) {
                     this.eDate = evalue;

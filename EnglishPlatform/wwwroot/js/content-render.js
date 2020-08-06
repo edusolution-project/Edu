@@ -348,7 +348,7 @@ var Lesson = (function () {
                 //headerRow.append(lessonButton);
 
                 lesson_action_holder.empty().prepend(lessonButton);
-                
+
                 break;
             case mod.TEACHERVIEW:
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
@@ -769,7 +769,7 @@ var Lesson = (function () {
                 else {
                     lessonFooter.hide();
                 }
-                
+
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
@@ -1199,7 +1199,7 @@ var Lesson = (function () {
 
                 //renderMediaContent(data, itemBody, "");
                 container.append(tabsitem);
-                console.log(data.Questions);
+                //console.log(data.Questions);
 
                 //totalQuiz = data.Questions.length;
                 if (data.Questions.length > 0) {
@@ -1347,7 +1347,7 @@ var Lesson = (function () {
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
                     boxHeader.append($("<h5>", {
-                        "class": "title green-color", "html": breakLine(data.Content)
+                        "class": "title blue-color", "html": breakLine(data.Content)
                         //+ point
                     }));
                 else
@@ -2212,18 +2212,17 @@ var Lesson = (function () {
         }).then((result) => {
             //alert(1);
             var container = $('.lesson_parts > .part_content');
-            var template = $('.question_template > fieldset');
             var listFieldQuestion = $(container).find(".fieldQuestion");
-            var currentpos = listFieldQuestion.length;
             var removeQuestion = $(obj).parent()[0];
-            var index = removeQuestion.getAttribute("order");//vị trí câu hỏi cần xoa
-            for (var i = parseInt(index) + 1; i < parseInt(currentpos); i++) {
+            var index = removeQuestion.getAttribute("order");//vị trí câu hỏi cần xóa
+            for (var i = parseInt(index) + 1; i < listFieldQuestion.length; i++) {
                 var question = "Questions[" + i + "].";
+                $(listFieldQuestion[i]).attr("order", (parseInt(i) - 1));
+                $(listFieldQuestion[i]).find("[name^='" + question + "Order']").val((parseInt(i) - 1));
                 $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
                     $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (parseInt(i) - 1) + "]."));
-                    $(listFieldQuestion[i]).attr("order", (parseInt(i) - 1));
-                    $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
                 });
+                $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
             }
             //debugger
             if (result.value) {
@@ -2255,7 +2254,7 @@ var Lesson = (function () {
         wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Path", "for": "mediapath" }));
         switch (type) {
             case "IMG":
-                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "image/*" }));
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "image/jpeg,image/png,image/gif,image/bmp" }));
                 break;
             case "VIDEO":
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "video/*" }));
@@ -3063,7 +3062,7 @@ var Lesson = (function () {
                 var boxHeader = $("<div>", { "class": "quiz-box-header" });
                 if (data.Content != null)
                     boxHeader.append($("<h5>", {
-                        "class": "title", "html": breakLine(data.Content)
+                        "class": "title blue-color", "html": breakLine(data.Content)
                         //+ point
                     }));
                 else
@@ -3762,14 +3761,12 @@ var Lesson = (function () {
     var CloneQuestion = function (_this) {
         var container = $('.lesson_parts > .part_content');
         var template = $('.question_template > fieldset');
-        var currentpos = $(container).find(".fieldQuestion").length;
+        //var currentpos = $(container).find(".fieldQuestion").length;
 
         var cloneQuestion = $(_this).parent()[0].cloneNode(true);
-        debugger
         var index = cloneQuestion.getAttribute("order");//vị trí câu hỏi cần nhân bản
+        var currentpos = parseInt(index) + 1;
         cloneQuestion.firstChild.value = "";
-        //cloneQuestion.children[6].children[0].children[1].value = "";
-        //cloneQuestion.children[6].children[0].children[2].value = "";
         var answerWrapper = $(cloneQuestion).find("[class=answer-wrapper]")[0];
         for (var i = 0; i < answerWrapper.childElementCount - 1; i++) {
             answerWrapper.children[i].children[1].value = "";
@@ -3784,10 +3781,24 @@ var Lesson = (function () {
         $(cloneQuestion).find("[class=fieldset_title]").text("Quiz " + (parseInt(currentpos) + 1).toString());
 
         //new File([file], cloneQuestion.children[5].children[1].children[1].value);
-        debugger
-
-        $(_this).parent().parent().append(cloneQuestion);
+        //debugger
+        $(_this).parent().after(cloneQuestion);
+        var listFieldQuestion = $(container).find(".fieldQuestion");
+        for (var i = parseInt(index) + 1; i < listFieldQuestion.length; i++) {
+            console.log(i);
+            var question = "Questions[" + (parseInt(i) - 1) + "].";
+            var quizField = listFieldQuestion[i];
+            $(listFieldQuestion[i]).attr("order", i);
+            $(listFieldQuestion[i]).find("[name^='" + question + "Order']").val(i);
+            $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
+                $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + i + "]."));
+            });
+            $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + (parseInt(i) + 1));
+        }
     }
+
+
+    //$(_this).parent().parent().append(cloneQuestion);
 
     window.LessonInstance = {} || Lesson;
 

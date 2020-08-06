@@ -79,8 +79,8 @@
                             <li v-for="(item,k) in active_course">
                                 <div class="box radius">
                                     <div class="thumb">
-                                        <img v-if="item.thumb" :src="item.thumb" alt="">
-                                        <img v-else src="/pictures/ielts1.png" alt="">
+                                        <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
+                                        <img v-else :src="cacheStatic('/pictures/ielts1.png',256)" alt="">
                                     </div>
                                     <div class="padding-15 inner">
                                         <a :href="'@processUrl("Detail","Class")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
@@ -252,6 +252,11 @@
                 //console.log(time);
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY")
+            },
+            cacheStatic(src, width) {
+                if (src.startsWith("http"))
+                    return src;
+                return "https://static.eduso.vn/" + src + "?w=" + width;
             },
             shortenString(str, length) {
                 if (str.length <= length)

@@ -1854,7 +1854,7 @@
     var openImage = function () {
         var form = getFormRealTimeApp();
         var inputFile = form.querySelector("input[type='file']");
-        inputFile.setAttribute("accept", "image/*");
+        inputFile.setAttribute("accept", "image/jpeg,image/png,image/gif,image/bmp");
         inputFile.click();
     }
     var openAttach = function () {

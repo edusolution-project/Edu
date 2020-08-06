@@ -2,7 +2,7 @@
 @{ ViewData["Title"] = "Danh sách gói học";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var listcenter = ViewBag.listcenter as List<BaseCustomerEntity.Database.CenterEntity>;
-    }
+}
 
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
 </script>
@@ -10,69 +10,68 @@
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
     {
-<input type="hidden" name="ArrID" value="" /> <!-- DataTales Example -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="float-right">
-                                    <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Add(this)" data-toggle="modal" data-target="#ProductModal"> <i class="fas fa-plus"></i> </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-start align-items-center">
-                            @*<span class="">
-                                    Lọc
-                                </span>
-                                <select id="categoryID" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="LoadData()">
-                                    <option value="">-- Tất cả danh mục --</option>
-                                </select>*@
-                            <span class="">
-                                Sắp xếp theo
-                            </span>
-                            <select id="sortNews" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="">
-                                <option value="">-- Mặc định --</option>
-                                <option value="NewNews">Gói học mới nhất</option>
-                                <option value="OldNews">Gói học cũ nhất</option>
-                            </select>
+        <input type="hidden" name="ArrID" value="" /> <!-- DataTales Example -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="m-0 font-weight-bold text-primary">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="float-right">
+                            <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Add(this)" data-toggle="modal" data-target="#ProductModal"> <i class="fas fa-plus"></i> </button>
                         </div>
                     </div>
+                </div>
+                <div class="d-flex justify-content-start align-items-center">
+                    @*<span class="">
+                            Lọc
+                        </span>
+                        <select id="categoryID" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="LoadData()">
+                            <option value="">-- Tất cả danh mục --</option>
+                        </select>*@
+                    <span class="">
+                        Sắp xếp theo
+                    </span>
+                    <select id="sortNews" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="">
+                        <option value="">-- Mặc định --</option>
+                        <option value="NewNews">Gói học mới nhất</option>
+                        <option value="OldNews">Gói học cũ nhất</option>
+                    </select>
+                </div>
+            </div>
 
 
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                <thead>
-                                    <tr>
-                                        <th class='text-center'>STT</th>
-                                        <th class='text-center'>Ảnh</th>
-                                        <th class='text-center'>Tên gói học</th>
-                                        <th class='text-center'>Cơ sở</th>
-                                        <th class='text-center'>Lớp</th>
-                                        <th class='text-center'>Giá</th>
-                                        <th class='text-center'>Khuyến mại</th>
-                                        <th class='text-center'>Hoạt động</th>
-                                        <th class='text-center'>Public</th>
-                                        <th class='text-center'></th>
-                                        @*<th class='text-center'></th>*@
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class='text-center'>STT</th>
+                                <th class='text-center'>Ảnh</th>
+                                <th class='text-center'>Tên gói học</th>
+                                <th class='text-center'>Cơ sở</th>
+                                <th class='text-center'>Lớp</th>
+                                <th class='text-center'>Giá</th>
+                                <th class='text-center'>Khuyến mại</th>
+                                <th class='text-center'>Hoạt động</th>
+                                <th class='text-center'>Public</th>
+                                <th class='text-center'></th>
+                                @*<th class='text-center'></th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                    <div class="card-footer">
-                        Trang
-                        <select id="pageIndex" onchange="LoadData()">
-                        </select> / <span id="totalPage"></span>
-                    </div>
-                </div>}
+            <div class="card-footer">
+                Trang
+                <select id="pageIndex" onchange="LoadData()">
+                </select> / <span id="totalPage"></span>
+            </div>
+        </div>}
 </div>
 
 @* Modal create form *@
@@ -104,20 +103,20 @@
                                     <div class="col-sm-12">
                                         <select id="CenterID" name="CenterID" class="form-control" onchange="renderClass()" required>
                                             <option value="">--- Lựa chọn cơ sở ---</option>
-                                            <option value="0">Công khai</option>
+                                            @*<option value="0">Công khai</option>*@
                                             @foreach (var item in listcenter)
                                             {
-                                        <option value="@item.ID">@item.Name</option>
-}
+                                                <option value="@item.ID">@item.Name</option>
+                                            }
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-group col-sm-6">
-                                <select id="ClassID" name="ClassID" class="form-control"required>
+                                <select id="ClassID" name="ClassID" class="form-control" required>
                                     <option value="">--- Lựa chọn Lớp ---</option>
-                                    @*<option v-for="(item, index) in items" :value="item.ID">{{item.Name}}</option>*@
+                                    <option v-for="(item, index) in items" :value="item.ID">{{item.Name}}</option>
                                 </select>
                             </div>
 
@@ -125,7 +124,7 @@
 
                         <div class="form-row" id="salePrice">
                             <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm (VNĐ)" required/>
+                                <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm (VNĐ)" required />
                             </div>
                             <div class="form-group col-sm-6">
                                 <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá (VNĐ)" />
@@ -149,12 +148,12 @@
                         <div class="form-row">
                             <div class="form-group col-md-8">
                                 @*<div class="form-row">
-                    <div class="form-group col-md-12">
-                        <input type="datetime-local" class="form-control" placeholder="Ngày đăng" name="PublishDate" id="PublishDate">
-                        <input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">
-                        <input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">
-                    </div>
-                </div>*@
+                                        <div class="form-group col-md-12">
+                                            <input type="datetime-local" class="form-control" placeholder="Ngày đăng" name="PublishDate" id="PublishDate">
+                                            <input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">
+                                            <input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">
+                                        </div>
+                                    </div>*@
 
                                 <div class="form-row">
                                     <div class="input-group col-md-12">
@@ -244,7 +243,7 @@
 
     var renderClass = function (ClassID="") {
         modal = $(".modal-body");
-        removeoption();
+        //removeoption();
         var centerID=$(modal).find("[name=CenterID]").val();
 
         _url = '@Url.Action("GetClass", "Product", new { Area = "admin" })'
@@ -488,9 +487,9 @@
             }
             CKEDITOR.replace("Content");
         });
-        
+
         //$("#ClassID").val(ClassID).find("option[value=" + ClassID + "]").attr('selected', true);
-        
+
     }
 
     function ExcuteOnlyItems(id, url, fn, check) {

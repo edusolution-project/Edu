@@ -66,7 +66,7 @@
                     </td>
                     <td>
                         <template v-if="item.Image">
-                            <img :src="item.Image" style="max-width:100px; max-height:100px;" />
+                            <img :src="cacheStatic(item.Image,100)" style="max-width:100px; max-height:100px;" />
                         </template>
                     </td>
                     <td>{{item.SubjectName}}</td>
@@ -632,6 +632,11 @@
                     //$(obj).siblings(".btnAddfile").text(obj.files[0].name);
                     readURL(obj);
                 },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                },
                 readURL(input) {
                     if(input.files && input.files[0]) {
                         var reader = new FileReader();
@@ -680,7 +685,7 @@
                 <label for="">Bìa sách</label>
                 <div>
                     <button class="btn btn-info" onclick="chooseFile(this)">Chọn file</button>
-                    <input type="file" name="cover" class="d-none" onchange="updateFile(this)" accept="image/*">
+                    <input type="file" name="cover" class="d-none" onchange="updateFile(this)" accept="image/jpeg,image/png,image/gif,image/bmp">
                     <img :src="addItem.Image" />
                 </div>
             </b-col>

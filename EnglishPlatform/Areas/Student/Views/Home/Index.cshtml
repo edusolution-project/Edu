@@ -102,8 +102,8 @@
                                 <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
-                                            <img v-if="item.thumb" :src="item.thumb" alt="">
-                                            <img v-else src="/pictures/ielts1.png" alt="">
+                                            <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
+                                            <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
                                         </div>
                                         <div class="padding-15 inner">
                                             <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
@@ -189,7 +189,7 @@
                                 <a onclick="DetailProduct()" :title="item.Title">
                                     <div class="box radius">
                                         <div class="thumb" style="position:relative;">
-                                            <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                            <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
                                             <img v-else :src="item.Thumbnail" alt="">
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
@@ -270,33 +270,33 @@
             active_course: [
             ],
             hot_course: [
-                {
-                    courseid: 999,
-                    courseName: "Luyện thi IELTS cấp tốc",
-                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                    lesson_count: 87,
-                    thumb: "/pictures/ielts.png",
-                    discount: '3,000,000',
-                    price: '7,999,000'
-                },
-                {
-                    courseid: 1000,
-                    courseName: "Kĩ năng mềm cho sinh viên",
-                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                    lesson_count: 87,
-                    thumb: "/pictures/softskill.jpg",
-                    discount: '300,000',
-                    price: '799,000'
-                },
-                {
-                    courseid: 1001,
-                    courseName: "Thiết kế đồ họa chuyên nghiệp",
-                    description: "Thiết kế chuyên nghiệp trong 30 buổi",
-                    lesson_count: 39,
-                    thumb: "/pictures/design2.jpg",
-                    discount: '420,000',
-                    price: "1,500,000"
-                }
+                //{
+                //    courseid: 999,
+                //    courseName: "Luyện thi IELTS cấp tốc",
+                //    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                //    lesson_count: 87,
+                //    thumb: "/pictures/ielts.png",
+                //    discount: '3,000,000',
+                //    price: '7,999,000'
+                //},
+                //{
+                //    courseid: 1000,
+                //    courseName: "Kĩ năng mềm cho sinh viên",
+                //    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                //    lesson_count: 87,
+                //    thumb: "/pictures/softskill.jpg",
+                //    discount: '300,000',
+                //    price: '799,000'
+                //},
+                //{
+                //    courseid: 1001,
+                //    courseName: "Thiết kế đồ họa chuyên nghiệp",
+                //    description: "Thiết kế chuyên nghiệp trong 30 buổi",
+                //    lesson_count: 39,
+                //    thumb: "/pictures/design2.jpg",
+                //    discount: '420,000',
+                //    price: "1,500,000"
+                //}
             ],
             list_courses: @Html.Raw(Json.Serialize(list_courses)),
             discussion: [
@@ -410,8 +410,13 @@
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
+            cacheStatic(src, width) {
+                if (src.startsWith("http"))
+                    return src;
+                return "https://static.eduso.vn/" + src + "?w=" + width;
+            },
             formatPrice(value) {
-                let val = (value / 1).toFixed(2).replace(',', '.')
+                let val = (value / 1).toFixed(0).replace(',', '.')
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             },
         }

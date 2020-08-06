@@ -137,43 +137,67 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult GetList(DefaultModel model, ClassEntity entity, string basis)
         {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+                return Json(new { Err = "Không được phép truy cập" });
+
+
             var filter = new List<FilterDefinition<ClassEntity>>();
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Json(new { Err = "Không được phép truy cập" });
-            }
-            else
-            {
-                var currentStudent = _studentService.GetItemByID(userId);
-                if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
-                    return Json(new { });
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
-            }
-            if (!string.IsNullOrEmpty(model.SearchText))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
-            }
-            if (model.StartDate > new DateTime(2000, 1, 1))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
-            }
-            if (model.EndDate > new DateTime(2000, 1, 1))
-            {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
-            }
+
+            //class filter
+            var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+
+            var classIds = new List<string>();
+
+            classIds = currentStudent.JoinedClasses;
+            if (classIds == null || classIds.Count() == 0)
+                return Json(new { Data = new List<StudentClassViewModel>() });
+
+
+
+
+
+
+            //classSubject filter
+            var csFilter = new List<FilterDefinition<ClassSubjectEntity>>();
             if (!string.IsNullOrEmpty(entity.GradeID))
             {
-                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.GradeID == entity.GradeID));
+                csFilter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == entity.GradeID));
             }
             else
             {
                 if (!string.IsNullOrEmpty(entity.SubjectID))
-                    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
+                    csFilter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
+            }
+            if (csFilter.Count > 0)
+            {
+                classIds = _classSubjectService.CreateQuery().Find(Builders<ClassSubjectEntity>.Filter.And(csFilter))
+                    .Project(t => t.ClassID).ToList()
+                    .Distinct()
+                    .Where(t => classIds.Contains(t)).ToList();
+            }
+
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => classIds.Contains(o.ID)));
+
+            if (!string.IsNullOrEmpty(model.SearchText))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
+            }
+            
+            if (model.StartDate > new DateTime(2000, 1, 1))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
+            }
+            
+            if (model.EndDate > new DateTime(2000, 1, 1))
+            {
+                filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);

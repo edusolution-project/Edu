@@ -1800,9 +1800,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private async Task CloneLesson(CourseLessonEntity item, string _userCreate)
         {
-            if (item.Media != null && item.Media.Path != null)
-                if (!item.Media.Path.StartsWith("http://"))
-                    item.Media.Path = "http://" + _publisherHost + item.Media.Path;
+            //if (item.Media != null && item.Media.Path != null)
+            //    if (!item.Media.Path.StartsWith("http://"))
+            //        item.Media.Path = "http://" + _publisherHost + item.Media.Path;
 
             _lessonService.CreateQuery().InsertOne(item);
 
@@ -1819,7 +1819,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     OriginID = _child.ID,
                     Title = _child.Title,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
+                    Description = _child.Description,
                     IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
@@ -1831,11 +1831,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Created = DateTime.Now,
                     CourseID = item.CourseID,
                 };
-                if (_item.Media != null && _item.Media.Path != null)
-                    //if (!_item.Media.Path.StartsWith("http://"))
-                    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
-                    if (_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                //if (_item.Media != null && _item.Media.Path != null)
+                //    //if (!_item.Media.Path.StartsWith("http://"))
+                //    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                //    if (_item.Media.Path.StartsWith("http://"))
+                //        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonPart(_item, _userCreate);
             }
         }
@@ -1851,7 +1851,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     OriginID = _child.ID,
                     Content = _child.Content,
                     CreateUser = _userCreate,
-                    Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
+                    Description = _child.Description,
                     Media = _child.Media,
                     Point = _child.Point,
                     Order = _child.Order,
@@ -1860,10 +1860,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Created = DateTime.Now,
                     CourseID = item.CourseID,
                 };
-                //change Media path
-                if (_item.Media != null && _item.Media.Path != null)
-                    if (!_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                ////change Media path
+                //if (_item.Media != null && _item.Media.Path != null)
+                //    if (!_item.Media.Path.StartsWith("http://"))
+                //        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonQuestion(_item, _userCreate);
             }
         }
@@ -1887,11 +1887,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Created = DateTime.Now,
                     CourseID = item.CourseID
                 };
-                if (_item.Media != null && _item.Media.Path != null)
-                    //if (!_item.Media.Path.StartsWith("http://"))
-                    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
-                    if (_item.Media.Path.StartsWith("http://"))
-                        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                //if (_item.Media != null && _item.Media.Path != null)
+                //    //if (!_item.Media.Path.StartsWith("http://"))
+                //    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                //    if (_item.Media.Path.StartsWith("http://"))
+                //        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
                 await CloneLessonAnswer(_item);
             }
         }
