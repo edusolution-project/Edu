@@ -186,32 +186,31 @@
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_courses">
-                                <a onclick="DetailProduct()" :title="item.Title">
-                                    <div class="box radius">
+                                <a v-on:click="DetailProduct(item.ID)" :title="item.Title">
+                                    <div class="box radius" style="height:240px">
                                         <div class="thumb" style="position:relative;">
                                             <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
                                             <img v-else :src="item.Thumbnail" alt="">
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
-                                            @*<a :href="'@processUrl("DetailProduct","Home")/?code='+item.Code" :title="item.Title" class="title">{{item.Title}}</a>*@
-                                            <a onclick="DetailProduct()" :title="item.Title" class="title"><marquee width="100%" behavior="slide">{{item.Title}}</marquee></a>
-                                            @*<a data-toggle="modal" href="#DetailProduct">Open Modal</a>*@
-                                            <div class="hide" id="code" :title="item.Code"></div>
-                                            @*<p>
-                                                <i class="ti-files"></i>{{item.description}}
-                                            </p>*@
+                                            
+                                            <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%" behavior="slide">{{item.Title}}</marquee></a>
+                                            
+                                            
+                                            
                                             <div class="c-bot" style="text-align:right;">
                                                 <div>
                                                     <div class="c-right" style="font-size:13px; font-weight:bold"></div>
                                                 </div>
-                                                <div class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
+                                                <div v-if="item.Discount!=''" class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
                                                     {{formatPrice(item.Discount) }} VNĐ
                                                 </div>
                                                 <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                    <span v-if="item.Discount!=''" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                    <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
                                                 </div>
                                                 <div>
-                                                    <button class="btn btn-danger w-100 mt-2 col-sm-9" onclick="BuyNow(this)">Mua ngay</button>
+                                                    <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -226,8 +225,9 @@
         @*}*@
 
         <!-- Modal -->
+
         <div class="modal fade" id="DetailProduct" role="dialog" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3 class="modal-title"></h3>
@@ -235,7 +235,17 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="overflow-y:scroll;max-height:600px;position:relative">
+                        @*<div class="form-group" style="position:fixed">
+                            <div class="col-sm-6">
+                                Giá: 
+                            </div>
+                            <div class="col-sm-6">
+                                Giá khuyến mại:
+                                <span class="price font-weight-bold text-danger ml-auto" id="PriceDiscount" style="font-size:130%; text-align:right;">
+                                </span>
+                            </div>
+                        </div>*@
                         <div class="form-group">
                             <img name="thumbnail" />
                         </div>
@@ -250,6 +260,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </section>
 
@@ -411,18 +422,14 @@
                 }
             },
             formatPrice(value) {
-                let val = (value / 1).toFixed(2).replace(',', '.')
-                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                let val = (value / 1).toFixed(0)
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
             },
-        }
-    });
-
-        var DetailProduct = function () {
-            //alert(1);
-            $("#DetailProduct").modal();
-            var code = $("#code").attr('title');
-            let _form = new FormData();
-            _form.append('Code', code);
+            DetailProduct(ID) {
+               // alert(ID)
+                $("#DetailProduct").modal()
+                  let _form = new FormData();
+            _form.append('ID', ID);
             let _url = '@processUrl("DetailProduct", "Home")';
             axios.post(_url, _form)
                 .then(response => {
@@ -431,14 +438,19 @@
                     debugger
                     var modal = $('#DetailProduct');
                     $(modal).find('.modal-title').text(response.data.Title);
-                    $(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
+                    //$(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
                     $(modal).find('[name=Content]').html(response.data.Content);
+                    $(modal).find('[id=PriceDiscount]').text(response.data.Discount);
+                    //$(modal).find('[id=Price]').text(response.data.Discount);
                     //console.log(_that.active_course);
                 }).catch(e => { });
+            }
         }
+    });
 
-        var BuyNow = function (obj) {
-            alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
+        var BuyNow = function (classid) {
+            //alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
+            window.location.href = '@processUrl("Payment", "Home")/classid';
         }
     </script>
 }
