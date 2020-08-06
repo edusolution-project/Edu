@@ -88,7 +88,7 @@
 </div>
 
 <!-- Modal Create Form -->
-<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div class="modal fade " id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
@@ -109,7 +109,8 @@
                             <div class="form-group col-md-4">
                                 <div class="form-row">
                                     <div class="col-sm-12">
-                                        <select id="CategoryCode" name="CategoryCode" class="form-control" onchange="renderProduct()" required>
+                                        @*<select id="CategoryCode" name="CategoryCode" class="form-control" onchange="renderProduct()" required>*@
+                                        <select id="CategoryCode" name="CategoryCode" class="form-control" required>
                                             <option value="">--- Lựa chọn danh mục ---</option>
                                             @{ for (int i = 0; newscategory != null && i < newscategory.Count; i++)
                                                 {
@@ -121,7 +122,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
+                        @*<div class="form-row">
                             <div class="form-group col-sm-12">
                                 <select id="CenterID" name="CenterID" class="form-control" onchange="renderProduct()" required>
                                     <option value="">--- Lựa chọn cơ sở ---</option>
@@ -140,7 +141,7 @@
                             <div class="form-group col-sm-6">
                                 <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá(%)" />
                             </div>
-                        </div>
+                        </div>*@
 
                         <div class="form-row">
                             <div class="form-group col-sm-12">

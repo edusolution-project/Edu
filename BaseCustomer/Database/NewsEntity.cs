@@ -80,10 +80,10 @@ namespace BaseCustomerEntity.Database
 
         public void ChangeStatus(List<string> IDs, bool status, string check)
         {
-            //if (check.Equals("IsTop"))
-            //{
-            //    CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
-            //}
+            if (check.Equals("IsTop"))
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
+            }
             if (check.Equals("IsHot"))
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsHot, status));
