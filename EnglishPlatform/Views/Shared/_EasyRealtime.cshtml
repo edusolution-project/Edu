@@ -1051,7 +1051,9 @@
         var ulTab = rootElement.querySelector('ul[data-ul-id="ul-slider-bar-left"]');
         var liTopic = ulTab.children[0];
         var liChat = ulTab.children[1];
-        createNotification(data, state,0);
+        if (sender.id != g_CurrentUser.id) {
+            createNotification(data, state, 0);
+        }
         if (state == 0) {
             var span = liTopic.querySelector("span");
             if (span.innerHTML == "") {
