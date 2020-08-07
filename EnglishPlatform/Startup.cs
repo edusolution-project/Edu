@@ -268,6 +268,11 @@ namespace EnglishPlatform
                     defaults: new { controller = "News", action = "Detail" }
                 );
                 routes.MapRoute(
+                    name: "product-detail",
+                    template: "chi-tiet-khoa-hoc/{code}",
+                    defaults: new { controller = "News", action = "DetailProduct" }
+                );
+                routes.MapRoute(
                  name: "default",
                  template: "{controller=home}/{action=index}/{id?}"
                 );

@@ -33,10 +33,10 @@
                     <span class="">
                         Sắp xếp theo
                     </span>
-                    <select id="sortNews" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="">
+                    <select id="sortProduct" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="sortProduct()">
                         <option value="">-- Mặc định --</option>
-                        <option value="NewNews">Gói học mới nhất</option>
-                        <option value="OldNews">Gói học cũ nhất</option>
+                        <option value="newProduct">Gói học mới nhất</option>
+                        <option value="oldProduct">Gói học cũ nhất</option>
                     </select>
                 </div>
             </div>
@@ -75,7 +75,7 @@
 </div>
 
 @* Modal create form *@
-<div class="modal fade" id="ProductModal" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+<div class="modal fade bd-example-modal-lg" id="ProductModal" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("CreateOrUpdate", "Product", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
@@ -86,7 +86,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="overflow-y:auto;max-height:600px">
                     <form>
 
                         <div class="form-row">
@@ -103,7 +103,6 @@
                                     <div class="col-sm-12">
                                         <select id="CenterID" name="CenterID" class="form-control" onchange="renderClass()" required>
                                             <option value="">--- Lựa chọn cơ sở ---</option>
-                                            @*<option value="0">Công khai</option>*@
                                             @foreach (var item in listcenter)
                                             {
                                                 <option value="@item.ID">@item.Name</option>
@@ -182,23 +181,48 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" onclick="Submits('AddForm', '@Url.Action("CreateOrUpdate", "Product")', 'CreateOrUpdate', loadData)">Lưu</button>
+                    <button type="button" class="btn btn-primary btn-submit" name="Save" onclick="Submits('AddForm', '@Url.Action("CreateOrUpdate", "Product")', 'CreateOrUpdate', loadData)">Lưu</button>
                 </div>
             </div>
         }
     </div>
 </div>
 
+<!-- Large modal -->
+<div class="modal fade module" id="DetailProduct" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="overflow-y:scroll;max-height:600px;">
+                <div class="container-fluid">
+                    <div class="row col-sm-9" name="Content">
+
+                        <div class="row col-sm-3 position-fixed" style="right:380px">
+                            <div class="form-group col-sm-12" id="price">
+
+                            </div>
+                            <div class="form-group col-sm-12" style="text-align:center">
+                                <button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*<div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>
+                </div>*@
+        </div>
+    </div>
+</div>
+
+
 <script>
-    //new Vue({
-    //    el: '#tbody',
-    //    methods: {
-    //        formatPrice(value) {
-    //            let val = (value / 1).toFixed(2).replace(',', '.')
-    //            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    //        },
-    //    }
-    //});
 
     var Add = function (obj) {
         var modal = document.querySelector(obj.getAttribute("data-target"));
@@ -263,7 +287,7 @@
                         items :result.Data
                     },
                     mounted() {
-                        $('#ClassID option[value=' + item.Data[$(listselect[i]).attr("name")] + ']').attr('selected', 'selected');
+                        $('#ClassID option[value=' + ClassID + ']').attr('selected', 'selected');
                     }
                 });
             }
@@ -330,8 +354,10 @@
                             "<td class='text-center'>" + item.Discount + "</td>" +
                             isActive +
                             public +
-                            "<td class='text-center' style='width: 130px;'><button onclick=\"Edits('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-edit'></i> </button>" +
-                            //"<td class='text-center'>"+
+                            "<td class='text-center' style='width: 130px;'>" +
+                            "<button onclick =\"Preview('" + item.ID + "')\" type='button' class='btn btn-primary' data-placement='top' title='Xem trước' > <i class='fas fa-eye'></i> </button>" +
+                            "<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +
+                            "<button onclick =\"Edits('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
@@ -440,6 +466,7 @@
     function Edits(id, urlGetData, urlPostData, _this) {
         //Add(_this);
         var modal = document.querySelector(_this.getAttribute("data-target"));
+        $(modal).find('[id=ProductTitle]').text("Sửa thông tin gói học");
         var form = modal.querySelector('form');
         var inputID = form.querySelector('input[name="ID"]');
         if (inputID == null) {
@@ -502,6 +529,75 @@
             //console.log(res);
             return false;
         })
+    }
+
+    function Preview(id) {
+        var modal = $('#DetailProduct');
+        $(modal).find('.modal-title').text("");
+        $(modal).find('[id=price]').empty();
+        $(modal).find('[name=Content]').empty();
+        var data = new FormData();
+        data.append("ID", id);
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetDetail", "Product", new { Area = "admin" })',
+            data: { id: id },
+            dataType: "json",
+            success: function (result) {
+                $(modal).find('.modal-title').text(result.Data.Title);
+                //$(modal).find('[name=thumbnail]').attr('src', response.data.Thumbnail);
+                $(modal).find('[name=Content]').append(result.Data.Content);
+                //$(modal).find('[id=PriceDiscount]').text(result.Data.Discount);
+                var html = "";
+                if (result.Data.Discount != "") {
+                    html = "<div class='row col-sm-3 position-fixed' style='right:380px'>"+
+                        '<div class="form-group col-sm-12" id="price">'+
+                        "<div class='price font-weight-bold text-danger ml-auto col-sm-12'>" +
+                        "Giá khuyến mại: <span style='font-size:130%; text-align:right;'>" + result.Data.Discount+" VNĐ</span>" +
+                        "</div>" +
+                        "<div>" +
+                        "<span style='color: #999; text-decoration:line-through; font-size:90%;' class='mt-1 mb-1 col-sm-12'>" +
+                        "Giá gốc: (" + result.Data.Price +") VNĐ)" +
+                        "</span>" +
+                        "</div>" +
+                        "</div >"+
+                        '<div class="form-group col-sm-12" style="text-align:center">'+
+                            '<button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>'+
+                        "</div>"+
+                        "</div >"
+                }
+                else {
+                    html = "<div class='row col-sm-3 position-fixed' style='right:40px'>" +
+                        '<div class="form-group col-sm-12" id="price">' +
+                        "<div>" +
+                        "<span style='color: #999; text-decoration:line-through; font-size:90%;' class='mt-1 mb-1 col-sm-12'>" +
+                        "Giá gốc: ("+result.Data.Price+") VNĐ)" +
+                        "</span>" +
+                        "<span class='price font-weight-bold text-danger ml-auto col-sm-12' style='font-size:130%; text-align:right;'>" +
+                        " Giá: " + result.Data.Discount+" VNĐ" +
+                        "</span>" +
+                        "</div>"+
+                    "</div >" +
+                        '<div class="form-group col-sm-12" style="text-align:center">' +
+                        '<button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>' +
+                        "</div>" +
+                        "</div >"
+                }
+                $(modal).find('[name=Content]').append(html);
+                //$(modal).find('[id=price]').append(html);
+            }
+        });
+        $("#DetailProduct").modal();
+    }
+
+    function Clone(id, urlGetData, urlPostData, _this) {
+        Edits(id, urlGetData, urlPostData, _this)
+        var modal = $("#ProductModal");
+        $(modal).find("[name=Save").removeAttr("onclick");
+        $(modal).find("[name=Save").text("Nhân bản");
+        $(modal).find("[name=Save").attr("onclick", "Submits('AddForm', '/admin/Product/Clone', 'CreateOrUpdate', loadData)");
+        $(modal).find("[id=ProductTitle").text("Nhân bản gói học")
+
     }
 
     $(document).ready(function () {

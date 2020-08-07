@@ -45,7 +45,6 @@ namespace EnglishPlatform.Controllers
             ViewBag.newsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(5).ToList();
             ViewBag.newsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(2).ToList();
             return View();
-
         }
 
         public IActionResult Category(DefaultModel model, string catcode)
@@ -81,7 +80,15 @@ namespace EnglishPlatform.Controllers
         {
             var cat = _newsCategoryService.GetItemByCode(catcode);
             ViewBag.Category = cat;
-            var news = _newsService.GetItemByCode(newscode);
+            var filter = new List<FilterDefinition<NewsEntity>>();
+
+            if (!string.IsNullOrEmpty(newscode))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.ID == newscode));
+            }
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type == null));
+
+            var news = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).FirstOrDefault();
             ViewBag.News = news;
             if (news == null || !news.IsActive)
             {
@@ -113,6 +120,7 @@ namespace EnglishPlatform.Controllers
             }
             filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsActive == true));
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type==null));
 
             var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
                 .SortByDescending(t => t.PublishDate);
@@ -127,6 +135,13 @@ namespace EnglishPlatform.Controllers
                 { "Model", model }
             };
             return new JsonResult(response);
+        }
+
+        public IActionResult DetailProduct(string code)
+        {
+            var detail = _newsService.CreateQuery().Find(o => o.Code.Equals(code) && o.Type == "san-pham").FirstOrDefault();
+            ViewBag.detail = detail;
+            return View();
         }
 
         //[Route("/login")]

@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết khóa học";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var detail = ViewBag.detail as List<BaseCustomerEntity.Database.NewsEntity>;
+}
+
+    <div class="category-box pt-5 pb-5">
+        <div class="inner-content">
+            <div class="content-box">
+                <div class="box-title d-flex justify-content-center mb-5">
+                    @ViewBag.detail.Title
+                    <div class="underline"></div>
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="form-group">
+                                @ViewBag.detail.Summary
+                            </div>
+
+                            <div class="form-group">
+                                @Html.Raw(ViewBag.detail.Content)
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="background-color:#f2f3f5">
+                            <div class="form-group">
+                                <img src="@ViewBag.detail.Thumbnail" class="w-100" />
+                            </div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-sm-4" style="font-size: 130%;text-align:right">Giá gốc: </label>
+                                    <div class="col-sm-8" style="text-align:right"><span class="mt-1 mb-1" style="color: rgb(153, 153, 153); text-decoration: line-through; font-size: 90%;text-align:right">@ViewBag.detail.Discount VND</span></div>
+                                </div>
+                                
+                                <div class="row">
+                                    <label class="col-sm-4" style="font-size: 130%;text-align:right">Giá: </label>
+                                    <div class="col-sm-8 price font-weight-bold text-danger ml-auto " style="font-size: 130%;text-align:right">
+                                        @ViewBag.detail.Price VND
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button onclick="BuyNow(this)" class="btn btn-danger w-100 mt-2 col-sm-12">Mua ngay</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style>
+            .form-group div {
+                border-radius: 5px
+            }
+        </style>
+
+

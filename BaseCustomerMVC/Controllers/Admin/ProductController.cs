@@ -200,7 +200,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         [HttpPost]
         public JsonResult GetDetail(string id)
         {
-            var data = _serviceNews.GetItemByID(id);
+            var data = _serviceNews.CreateQuery().Find(o=>o.ID==id && o.Type.ToLower()=="san-pham").FirstOrDefault();
 
             var response = new Dictionary<string, object>
             {
@@ -219,10 +219,38 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
-                var delete = _serviceNews.Collection.DeleteMany(o => o.ID==model.ArrID);
                 _fileProcess.DeleteFile(_serviceNews.GetItemByID(model.ArrID).Thumbnail);
+                var delete = _serviceNews.Collection.DeleteMany(o => o.ID==model.ArrID);
                 return new JsonResult(delete);
             }
+        }
+
+
+        [HttpPost]
+        [Obsolete]
+        public async Task<JsonResult> Clone(NewsEntity item)
+        {
+            var itemClone = _serviceNews.GetItemByID(item.ID);
+            //var newItem=new NewsEntity();
+            //newItem = item;
+            //newItem.OriginID = item.ID;
+            //newItem.ID = null;
+
+            var new_product= new MappingEntity<NewsEntity, NewsEntity>().Clone(itemClone, new NewsEntity());
+            new_product.OriginID = itemClone.ID;
+            new_product.CreateDate = DateTime.Now;
+            new_product.Thumbnail = itemClone.Thumbnail;
+            new_product.Type = itemClone.Type;
+            new_product.CenterID = item.CenterID;
+            new_product.ClassID = item.ClassID;
+
+            await _serviceNews.CreateQuery().InsertOneAsync(new_product);
+
+            Dictionary<string, object> Dataresponse = new Dictionary<string, object>()
+            {
+                {"Data",new_product}
+            };
+            return new JsonResult(Dataresponse);
         }
 
         [HttpPost]

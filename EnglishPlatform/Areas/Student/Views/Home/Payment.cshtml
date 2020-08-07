@@ -1,0 +1,36 @@
+﻿@{
+    //ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
+    //var _class = ViewBag.Class as List<BaseCustomerEntity.Database.ClassEntity>;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
+}
+
+<div class="container">
+    <form>
+        <input type="text" class="hide" name="ClassID" id="ClassID" value="@ViewBag.Class.ID" />
+        <input type="text" name="ClassName" readonly value="@ViewBag.Class.Name" />
+        <input type="text" name="Price" readonly />
+        <button onclick="Thanhtoan()">Thanh toán</button>
+    </form>
+</div>
+
+<script>
+    var Thanhtoan= function () {
+        var ClassID = document.getElementById("ClassID").value;
+        $.ajax({
+            type: "POST",
+            url: '@processUrl("JoinClass","Home")',
+            data: { ClassID: ClassID },
+            dataType: "json",
+            success: function (data) {
+                alert(data.msg)
+            }
+        });
+    }
+</script>

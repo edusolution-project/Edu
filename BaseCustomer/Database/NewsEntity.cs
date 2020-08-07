@@ -51,6 +51,8 @@ namespace BaseCustomerEntity.Database
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
         public bool IsPublic { get; set; }
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
@@ -80,10 +82,10 @@ namespace BaseCustomerEntity.Database
 
         public void ChangeStatus(List<string> IDs, bool status, string check)
         {
-            //if (check.Equals("IsTop"))
-            //{
-            //    CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
-            //}
+            if (check.Equals("IsTop"))
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsTop, status));
+            }
             if (check.Equals("IsHot"))
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsHot, status));

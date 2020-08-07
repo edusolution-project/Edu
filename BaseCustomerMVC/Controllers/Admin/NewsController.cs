@@ -193,6 +193,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     item.PublishDate = item.CreateDate;//publish now
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.IsActive = true;
+
+                item.Type = "news";
                 
                 var pos = 0;
                 while (_serviceNews.GetItemByCode(item.Code) != null)
@@ -238,6 +240,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 else
                     item.Thumbnail = olditem.Thumbnail;
+                item.Type = "news";
 
                 _serviceNews.Save(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -266,6 +269,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 filter.Add(Builders<NewsEntity>.Filter.Where(o => o.CategoryID == CategoryID));
             }
+            filter.Add(Builders<NewsEntity>.Filter.Where(o => o.Type.ToLower() == "news" || o.Type==null));
 
             //===========
             var hasfilter = _serviceNews.Collection.Find(Builders<NewsEntity>.Filter.And(filter));/*.Sort(Builders<NewsEntity>.Sort.Descending(tbl=>tbl.CreateDate));*/
@@ -318,7 +322,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         [HttpPost]
         public JsonResult GetDetailsNews(string id)
         {
-            var data = _serviceNews.GetItemByID(id);
+            var _data = _serviceNews.CreateQuery().Find(o=>o.ID==id && o.Type.ToLower()=="news").FirstOrDefault();
+            var data=_data!=null?_data: _serviceNews.CreateQuery().Find(o => o.ID == id).FirstOrDefault();
             var CategoryCode = _serviceNewCate.GetItemByID(data.CategoryID);
 
             //var categoryname = _serviceNewCate.getNameCategoryByID(id).Name;
