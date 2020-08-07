@@ -287,7 +287,7 @@ var ExamReview = (function () {
         var content = renderContent(data);
 
         bodyExam.append(content);
-
+        
         if ($('textarea[data-type=ESSAY]').length > 0) {
             $(document).ready(function () {
                 $('textarea[data-type=ESSAY]').each(function () {
@@ -644,7 +644,7 @@ var ExamReview = (function () {
             var point = item.PointEssay; // điểm giáo viên chấm
 
             if (config.isTeacher) {
-                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + data.ID + '" style="padding:10px; border:1px solid #ccc">';
                 if (content != "" && content != null) {
                     html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
                 } else {
@@ -653,8 +653,8 @@ var ExamReview = (function () {
                 html += '<div> Điểm :<input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + item.MaxPoint + '</div>';
                 html += '<i>Đáp án đúng :</i>';
                 var realContent = content == null ? "" : content;
-                html += '<div><textarea style="width:100%; padding:5px" rows="6">' + realContent + '</textarea></div>';
-
+                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + data.ID +'">' + realContent + '</textarea></div>';
+                
                 //upload file
                 var type = "type='file'";
                 var strFile = "this.parentElement.querySelector('input[" + type + "]')";
@@ -673,9 +673,10 @@ var ExamReview = (function () {
                 html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
 
                 html += '</fieldset>';
+                html += "<script>if (CKEDITOR) {CKEDITOR.replace('TEXT_CKEDITOR_" + data.ID + "',{extraPlugins: '',image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],image2_disableResizer: true});}</script>";
             } else {
                 if (point == 0 && content == null) {
-                    html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
+                    html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + data.ID + '" style="padding:10px; border:1px solid #ccc">';
                     html += 'Chưa chấm điểm';
                     html += '</fieldset>';
                 } else {
@@ -726,7 +727,7 @@ var ExamReview = (function () {
         if (arr.includes("image")) {
             return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
-        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
+        return '<div class="media-holder"><a target="_blank" href="' + data.Path + '" style="display:block">Download</a></div>';
     }
 
     var renderMediaAnswer = function (data) {
@@ -741,7 +742,7 @@ var ExamReview = (function () {
         if (arr.includes("image")) {
             return '<div class="media-holder "><img src="' + data.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '" class="img-fluid lazy" title="' + data.Name + '"></div>';
         }
-        return '<div class="media-holder"><a href="' + data.Path + '" style="display:block">Download</a></div>';
+        return '<div class="media-holder"><a target="_blank" href="' + data.Path + '" style="display:block">Download</a></div>';
     }
 
     var renderContent = function (data) {
@@ -824,9 +825,10 @@ var ExamReview = (function () {
 
     var updatePoint = function (_this, id, obj) {
         if (obj == void 0) {
+            var qID = _this.offsetParent.id.replace("essay-teacher-", "");
             var _url = config.url.point;
             var point = _this.offsetParent.querySelector('input[type="number"]').value;
-            var answer = _this.offsetParent.querySelector('textarea').value;
+            var answer = CKEDITOR.instances["TEXT_CKEDITOR_" + qID].getData();
             var isLAst = _this.offsetParent.dataset.last;
             //console.log(point, answer);
 
@@ -835,7 +837,7 @@ var ExamReview = (function () {
             _form.append("Point", point);
             _form.append("RealAnswerValue", answer);
             _form.append("isLast", isLAst);
-            var qID = _this.offsetParent.id.replace("essay-teacher-", "");
+            
             var files = document.querySelector('[data-target="' + qID + '"]>input[type="file"]');
             if (files != null) {
                 for (var x = 0; x < files.files.length; x++) {
