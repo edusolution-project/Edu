@@ -4,6 +4,8 @@
     var listcenter = ViewBag.listcenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
 
+<script src="~/js/minify/common.min.js?20200326"></script>
+<script src="~/js/minify/common.lib.min.js?20200326"></script>
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
 </script>
 <!-- Begin Page Content -->
@@ -280,14 +282,14 @@
                 centerID: centerID
             },
             success: function (result) {
-                debugger
+                //debugger
                 new Vue({
                     el: '#ClassID',
                     data: {
                         items :result.Data
                     },
                     mounted() {
-                        $('#ClassID option[value=' + ClassID + ']').attr('selected', 'selected');
+                        //$('#ClassID option[value=' + ClassID + ']').attr('selected', 'selected');
                     }
                 });
             }
@@ -316,7 +318,7 @@
             data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex},
             dataType:"json",
             success: function (data) {
-                debugger
+                //debugger
                 var body = $('#dataTable tbody');
                 body.html("");
                 //var option = $('#input-option');

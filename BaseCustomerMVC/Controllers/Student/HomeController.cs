@@ -83,9 +83,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult DetailProduct(string ID)
         {
-            //var code = HttpContext.Request.Query["code"].ToString();
             var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type=="san-pham").FirstOrDefault();
-            ViewBag.Title = detail_product.Title;
+            ViewBag.Title = detail_product?.Title;
             return Json(detail_product);
         }
 
