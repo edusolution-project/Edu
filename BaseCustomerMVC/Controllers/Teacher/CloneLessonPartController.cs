@@ -121,6 +121,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             case "QUIZ1":
                             case "QUIZ2":
                             case "QUIZ3":
+                            case "QUIZ4":
                             case "ESSAY":
                                 result.Add(new CloneLessonPartViewModel(part)
                                 {
@@ -352,13 +353,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
             {
-                var quizPart = new List<string> { "ESSAY", "QUIZ1", "QUIZ2", "QUIZ3" };
+                var quizPart = new List<string> { "ESSAY", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4" };
                 switch (lessonpart.Type)
                 {
                     case "ESSAY":
                     case "QUIZ1":
                     case "QUIZ2":
                     case "QUIZ3":
+                    case "QUIZ4":
                         if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizPart.Contains(item.Type)) == 1)//only 1 quiz part (new part)
                         {
                             //increase 

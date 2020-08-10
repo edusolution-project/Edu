@@ -345,7 +345,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
-            List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+            List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
             var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
@@ -471,6 +471,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     case "QUIZ1":
                     case "QUIZ3":
+                    case "QUIZ4":
                     case "ESSAY":
                         convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery()
                             .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()

@@ -243,6 +243,7 @@ var ExamReview = (function () {
         }
         return index;
     }
+
     var _eventGotoSelection = function (event) {
         var id = this.parentElement.dataset.id;
         var partID = this.parentElement.dataset.part;
@@ -346,13 +347,15 @@ var ExamReview = (function () {
 
         var html = '<div id="pills-part-' + data.ID + '" style="' + styleTeacher + '"  class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
-
+        //console.log(data);
         switch (data.Type) {
             case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
                 break;
             case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
             case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+                break;
+            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
             case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
@@ -382,13 +385,28 @@ var ExamReview = (function () {
         if (cautraloidung == cautraloi) { _check = true; }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
-
+        console.log(data);
+        //console.log(type);
         if (data.AnswerID != null && data.AnswerID != "") {
-            var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
-            if (!_check)//wrong answer
-                if (type == "QUIZ3")
-                    _answer.addClass("bg-danger");
-            $('#' + quizId + ' .student-answer').append(_answer);
+            switch (type) {
+                case "QUIZ1":
+                    var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
+                    $('#' + quizId + ' .student-answer').append(_answer);
+                    break;
+                case "QUIZ3":
+                    var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
+                    if (!_check)//wrong answer                        
+                            _answer.addClass("bg-danger");
+                    $('#' + quizId + ' .student-answer').append(_answer);
+                    break;
+                case "QUIZ4":
+                    var IDs = data.AnswerID.split(',');
+                    IDs.forEach(function (value) {
+                        $('#' + quizId + ' .student-answer').append($('#' + value).clone().removeClass("d-none"));
+                    });
+                    break;
+            }
+            
         }
         else { //"QUIZ2"
             if (type == "ESSAY") {
@@ -513,7 +531,7 @@ var ExamReview = (function () {
     }
 
     var renderQUIZ2 = function (data) {
-        console.log(data);
+        //console.log(data);
         //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -597,6 +615,58 @@ var ExamReview = (function () {
 
         }
         html += '</div></div></div>';
+        return html;
+    }
+
+    var renderQUIZ4 = function (data) {
+        //writeLog("renderQUIZ4", data);
+        var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
+        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        if (data.Title != null)
+            html += '<h5 class="title">' + data.Title + '</h5 >';
+        if (data.Description != null)
+            html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
+        html += renderMedia(data.Media) + toggleButton + '</div></div>';
+        html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+        for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+            var item = data.Questions[i];
+            html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="QUIZ4">';
+            html += '<div class="quiz-box-header"><h5 class="title">' + item.Content + '</h5>' + renderMedia(item.Media) + '</div>';
+            html += '<div class="answer-wrapper">';
+            html += '<div class="student-answer">';
+            html += '<fieldset class="answer-item d-inline mr-3 align-top">';
+            html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
+            html += '<label class="answer-text form-check-label"><i>Trả lời: </i></label>';
+            html += '</div>';
+            html += '</fieldset>';
+            html += '</div>';
+            html += '<div>';
+            html += '<fieldset class="answer-item d-inline mr-3 align-top">';
+            html += '<div style="cursor: pointer; display:inline-block" class="form-check">';
+            html += '<label class="answer-text form-check-label"><i>Đáp án đúng: </i></label>';
+            html += '</div>';
+            html += '</fieldset>';
+            for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
+                var answer = item.CloneAnswers[x];
+                //if(!answer.IsCorrect) continue;
+                html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
+                html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
+                if (answer.IsCorrect)
+                    html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
+                else
+                    html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + answer.Content + '</del></label>';
+                html += '</div>';
+                html += renderMedia(answer.Media);
+                html += '</fieldset>';
+            }
+            html += '</div>';
+            var description = "";
+            if (item.Description != null)
+                description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
+            html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
+            html += '</div></div>';
+        }
+        html += '</div></div>';
         return html;
     }
 
@@ -778,7 +848,7 @@ var ExamReview = (function () {
         _totalPart = data.Part.length;
         if (_totalPart <= 1)
             next_btn.prop("disabled", true);
-
+        //console.log(data.Part);
         for (var i = 0; i < data.Part.length; i++) {
             var item = data.Part[i];
             var icon = arrIcon[item.Type];

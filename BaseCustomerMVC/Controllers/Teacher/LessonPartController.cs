@@ -373,6 +373,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             case "QUIZ1":
                             case "QUIZ2":
                             case "QUIZ3":
+                            case "QUIZ4":
                             case "ESSAY":
                                 result.Add(new LessonPartViewModel(part)
                                 {

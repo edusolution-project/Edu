@@ -289,7 +289,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        console.log(config.mod);
+        //console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -449,6 +449,7 @@ var Lesson = (function () {
                 case "QUIZ1":
                 case "QUIZ2":
                 case "QUIZ3":
+                case "QUIZ4":
                 case "ESSAY":
                     switchUIMode(UIMode.EXAM_ONLY);
                     break;
@@ -497,7 +498,7 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
-                console.log("student exam");
+                console.log("studentexam");
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -1026,6 +1027,7 @@ var Lesson = (function () {
         //    toggleExpand(this);
         //});
 
+
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
@@ -1089,6 +1091,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "QUIZ1":
+            case "QUIZ4":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -1340,7 +1343,8 @@ var Lesson = (function () {
                 break;
             case "ESSAY":
                 break;
-            default:
+            case "QUIZ1":
+            case "QUIZ4":
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
 
                 var itembox = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
@@ -1407,11 +1411,23 @@ var Lesson = (function () {
                     answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
                 container.append(answer);
                 break;
-            default:
+            case "QUIZ1":
+                console.log(answer);
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
-                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "name": "rd_" + data.ParentID }));
+                form.append($("<input>", { "id": data.ID, "type": "radio", "class": "input-checkbox answer-checkbox form-check-input", "name": "rd_" + data.ParentID, checked: data.IsCorrect, style: 'pointer-events: none;' }));
+                if (data.Content != null)
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
+                renderMediaContent(data, answer);
+                container.append(answer);
+                break;
+            case "QUIZ4":
+                console.log(data);
+                var form = $("<div>", { "class": "form-check" });
+                answer.append(form);
+                form.append($("<input>", { "type": "hidden" }));
+                form.append($("<input>", { "id": data.ID, "type": "checkbox", "class": "input-checkbox answer-checkbox form-check-input", "name": "rd_" + data.ParentID, checked: data.IsCorrect, style: 'pointer-events: none;' }));
                 if (data.Content != null)
                     form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
                 renderMediaContent(data, answer);
@@ -1675,7 +1691,8 @@ var Lesson = (function () {
             .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
         //}
         //else {
-        $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn đáp án đúng</option>")
+        $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn 1 đáp án đúng</option>")
+            .append("<option value='QUIZ4'>QUIZ: Chọn 1/nhiều đáp án</option>")
             .append("<option value='QUIZ2'>QUIZ: Điền từ</option>")
             .append("<option value='QUIZ3'>QUIZ: Nối đáp án</option>")
             .append("<option value='ESSAY'>QUIZ: Essay</option>");
@@ -1847,6 +1864,7 @@ var Lesson = (function () {
                 contentholder.append($("<input>", { "type": "text", "name": "Description", "class": "input-text form-control", "placeholder": "Danh sách từ vựng" }).val(description));
                 break;
             case "QUIZ1"://Trắc nghiệm chuẩn
+            case "QUIZ4"://Trắc nghiệm chuẩn
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.ID" }));
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
@@ -2865,6 +2883,7 @@ var Lesson = (function () {
                 container.append(tabsitem);
                 break;
             case "QUIZ1":
+            case "QUIZ4":
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -2894,7 +2913,6 @@ var Lesson = (function () {
                 }
 
                 //Render Question
-                //console.log(data.Questions.length);
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                     var item = data.Questions[i];
                     renderFillQuestionStudent(item, i);
@@ -3167,12 +3185,33 @@ var Lesson = (function () {
 
                 //container.append(answer);
                 break;
-            default:
+            case "QUIZ1":
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "radio",
+                    "class": "input-checkbox answer-checkbox form-check-input",
+                    "onclick": "AnswerQuestion(this)",
+                    "data-part-id": partid,
+                    "data-lesson-id": config.lesson_id,
+                    "data-question-id": data.ParentID,
+                    "data-id": data.ID,
+                    "data-type": template,
+                    "data-value": data.Content,
+                    "name": "rd_" + data.ParentID
+                }));
+                if (data.Content != null)
+                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
+                renderMediaContent(data, answer);
+                container.append(answer);
+                break;
+            case "QUIZ4":
+                var form = $("<div>", { "class": "form-check" });
+                answer.append(form);
+                form.append($("<input>", { "type": "hidden" }));
+                form.append($("<input>", {
+                    "id": data.ID, "type": "checkbox",
                     "class": "input-checkbox answer-checkbox form-check-input",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
@@ -3452,7 +3491,7 @@ var Lesson = (function () {
         //    return;
         // dataset trên item
         var dataset = _this.dataset;
-        //console.log(dataset);
+        //console.log(_this);
         //loại câu hỏi
         var type = dataset.type;
 
@@ -3465,13 +3504,22 @@ var Lesson = (function () {
         //nội dung câu trả lời
         var value = "";
         //console.log(dataset);
-        console.log(dataset);
         switch (type) {
             case "QUIZ1":
                 partID = dataset.partId;
                 questionId = dataset.questionId;
                 answerID = dataset.id;
                 value = dataset.value;
+                break;
+            case "QUIZ4":
+                partID = dataset.partId;
+                questionId = dataset.questionId;
+                answerID = '';
+                value = '';
+                $('#' + dataset.questionId).find('.answer-checkbox:checked').each(function (index, obj) {
+                    answerID = (answerID == '' ? '' : (answerID + ',')) + $(obj)[0].dataset.id;
+                    value = (value == '' ? '' : (value + ',')) + $(obj)[0].dataset.value;
+                })
                 break;
             case "QUIZ2":
                 partID = dataset.partId;
@@ -3596,6 +3644,7 @@ var Lesson = (function () {
 
     var delAnswerForStudentNoRender = function (quizID) {
         removeLocalData(quizID);
+        console.log("Delete Q " + quizID);
         var dataform = new FormData();
         dataform.append("ExamID", $('#ExamID').val());
         dataform.append("QuestionID", quizID);
@@ -3705,6 +3754,12 @@ var Lesson = (function () {
             case "QUIZ1":
                 var answer = $('#' + answerID);
                 $(answer).find("input[type='radio']").attr("checked", "");
+                break;
+            case "QUIZ4":
+                var answerIDs = answerID.split(',');
+                answerIDs.forEach(function (_idValue) {
+                    $('#' + _idValue).find("input[type='checkbox']").attr("checked", "");
+                })
                 break;
             case "QUIZ2":
                 var quiz = $('#inputQZ2-' + quizID);

@@ -4,8 +4,6 @@
     var listcenter = ViewBag.listcenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
 
-<script src="~/js/minify/common.min.js?20200326"></script>
-<script src="~/js/minify/common.lib.min.js?20200326"></script>
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
 </script>
 <!-- Begin Page Content -->
@@ -35,7 +33,7 @@
                     <span class="">
                         Sắp xếp theo
                     </span>
-                    <select id="sortProduct" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="sortProduct()">
+                    <select id="sortProduct" class="searchCenter search-box form-control ml-1" style="width:300px;" onchange="Sort()">
                         <option value="">-- Mặc định --</option>
                         <option value="newProduct">Gói học mới nhất</option>
                         <option value="oldProduct">Gói học cũ nhất</option>
@@ -116,8 +114,7 @@
 
                             <div class="form-group col-sm-6">
                                 <select id="ClassID" name="ClassID" class="form-control" required>
-                                    <option value="">--- Lựa chọn Lớp ---</option>
-                                    <option v-for="(item, index) in items" :value="item.ID">{{item.Name}}</option>
+                                    <option value="">--- Lựa chọn Lớp ---</option>                                  
                                 </select>
                             </div>
 
@@ -134,32 +131,16 @@
 
                         <div class="form-row">
                             <div class="form-group col-sm-12">
-                                <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt" required>
-
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-sm-12">
-                                <label>Chi tiết sản phẩm</label>
-                                <textarea name="Content" id="Content" class="form-control" required></textarea>
-                            </div>
+                                <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt">
+                           </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
-                                @*<div class="form-row">
-                                        <div class="form-group col-md-12">
-                                            <input type="datetime-local" class="form-control" placeholder="Ngày đăng" name="PublishDate" id="PublishDate">
-                                            <input type="hidden" name="PublishDate" class="hiddenDate" id="PublishDate">
-                                            <input type="hidden" name="CreateDate" class="CreateDate" id="CreateDate">
-                                        </div>
-                                    </div>*@
-
                                 <div class="form-row">
                                     <div class="input-group col-md-12">
-                                        <label for="exampleFormControlFile1">Ảnh đại diện: </label>
-                                        <input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
+                                        @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
+                                        <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
                                     </div>
                                 </div>
 
@@ -177,6 +158,12 @@
                             <div class="form-group col-md-4">
                                 <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
                                 <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-sm-12">
+                                <label>Chi tiết sản phẩm</label>
+                                <textarea name="Content" id="Content" class="form-control" required></textarea>
                             </div>
                         </div>
                     </form>
@@ -225,7 +212,6 @@
 
 
 <script>
-
     var Add = function (obj) {
         var modal = document.querySelector(obj.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Thêm tin gói học");
@@ -266,10 +252,9 @@
 
         $(form).find("input:disabled").removeAttr("disabled");
     }
-
     var renderClass = function (ClassID="") {
         modal = $(".modal-body");
-        //removeoption();
+        removeoption();
         var centerID=$(modal).find("[name=CenterID]").val();
 
         _url = '@Url.Action("GetClass", "Product", new { Area = "admin" })'
@@ -289,7 +274,7 @@
                         items :result.Data
                     },
                     mounted() {
-                        //$('#ClassID option[value=' + ClassID + ']').attr('selected', 'selected');
+                        $('#ClassID option[value=' + ClassID + ']').attr('selected', 'selected');
                     }
                 });
             }
@@ -311,11 +296,12 @@
         var startDate = $("#startDate_sort").val();
         var endDate = $("#endDate_sort").val();
         var pageIndex = $('#pageIndex').val();
+        var sort = $('#sortProduct').val();
         var pageSize = 6;
         $.ajax({
             type: "POST",
             url: '@Url.Action("getListProduct", "Product", new { Area = "admin" })',
-            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex},
+            data: { SearchText: searchText, StartDate: startDate, EndDate: endDate, pageSize: pageSize, pageIndex: pageIndex, Sort: sort },
             dataType:"json",
             success: function (data) {
                 //debugger
@@ -435,11 +421,6 @@
         $(form).find("input:disabled").removeAttr("disabled");
 
         var data = new FormData(form);
-
-        //data.delete("IsHot");
-        //data.append("IsHot", $(form).find("#IsHot").prop("checked"));
-        //data.delete("IsTop");
-        //data.append("IsTop", $(form).find("#IsTop").prop("checked"));
         data.delete("IsActive");
         data.append("IsActive", $(form).find("#IsActive").prop("checked"));
         data.delete("Content");
@@ -469,6 +450,8 @@
         //Add(_this);
         var modal = document.querySelector(_this.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Sửa thông tin gói học");
+        $(modal).find("[name=Save").text("Lưu");
+        $(modal).find("[name=Save").attr("onclick", "Submits('AddForm', '/admin/Product/CreateOrUpdate', 'CreateOrUpdate', loadData)");
         var form = modal.querySelector('form');
         var inputID = form.querySelector('input[name="ID"]');
         if (inputID == null) {
@@ -503,8 +486,9 @@
                 $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
                 renderClass(item.Data[$(listselect[i]).attr("name")]);
             }
+            //debugger
 
-            document.getElementById("img").setAttribute("src", item.Thumbnail);
+            document.getElementById("img").setAttribute("src", item.Data.Thumbnail);
 
             var txtarea = $(form).find('textarea');
             for (var i = 0; i < txtarea.length; i++) {
@@ -600,6 +584,10 @@
         $(modal).find("[name=Save").attr("onclick", "Submits('AddForm', '/admin/Product/Clone', 'CreateOrUpdate', loadData)");
         $(modal).find("[id=ProductTitle").text("Nhân bản gói học")
 
+    }
+
+    var Sort = function () {
+        loadData();
     }
 
     $(document).ready(function () {
