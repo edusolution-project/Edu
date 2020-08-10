@@ -6,17 +6,18 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class NewsViewModel:NewsEntity
+    public class HistoryTransactionViewModel:HistoryTransactionEntity
     {
-        [JsonProperty("CategoryName")]
-        public List<NewsCategoryEntity> CategoryName { get; set; }
+        [JsonProperty("Title")]
+        public string Title { get; set; }
         [JsonProperty("CenterName")]
         public string CenterName { get; set; }
         [JsonProperty("ClassName")]
         public string ClassName { get; set; }
-        [JsonProperty("TotalPrice")]
-        public double TotalPrice { get; set; }
-        [JsonProperty("Students")]
-        public double Students { get; set; }
+        [JsonProperty("StudentName")]
+        public string StudentName { get; set; }
+        [JsonProperty("ProductName")]
+        public string ProductName { get; set; }
+
     }
 }

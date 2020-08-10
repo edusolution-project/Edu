@@ -1,7 +1,7 @@
 ﻿@{
     //ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    //var _class = ViewBag.Class as List<BaseCustomerEntity.Database.ClassEntity>;
+    var product = ViewBag.Product as List<BaseCustomerMVC.Models.NewsViewModel>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -13,22 +13,25 @@
 
 <div class="container">
     <form>
-        <input type="text" class="hide" name="ClassID" id="ClassID" value="@ViewBag.Class.ID" />
-        <input type="text" name="ClassName" readonly value="@ViewBag.Class.Name" />
-        <input type="text" name="Price" readonly />
+        <input type="text" class="hide" name="ID" id="ID" value="@ViewBag.Product.ID" />
+        <input type="text" name="ClassName" readonly value="@ViewBag.Product.ClassName" />
+        <input type="text" name="Price" value="@ViewBag.Product.Price" readonly />
         <button onclick="Thanhtoan()">Thanh toán</button>
     </form>
 </div>
 
 <script>
     var Thanhtoan= function () {
-        var ClassID = document.getElementById("ClassID").value;
+        var ID = document.getElementById("ID").value;
+        var Center = '@center';
+        //debugger
         $.ajax({
             type: "POST",
             url: '@processUrl("JoinClass","Home")',
-            data: { ClassID: ClassID },
+            data: { ID: ID, basis: Center },
             dataType: "json",
             success: function (data) {
+                //debugger
                 alert(data.msg)
             }
         });

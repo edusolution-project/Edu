@@ -1,0 +1,241 @@
+﻿@using BaseCustomerEntity.Database;
+@{
+    ViewData["Title"] = "Danh sách khóa học";
+    Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
+    var listhistory = ViewBag.ListHistory as List<BaseCustomerMVC.Models.NewsViewModel>;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+<script>
+    setActiveMenu("home");
+</script>
+
+@section Scripts{
+    <section class="module">
+        <div class="container">
+            <div class="card-header" v-cloak>
+                <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
+                    <div class="box filter-box d-none m-1">
+                        <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                        <span class="ic ic-picker inactive"></span>
+                    </div>
+                    @*<div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+                            <select v-model="subject">
+                                <option value="">Chọn chương trình</option>
+                                <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                            </select>
+                        </div>*@
+                    <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                        <button><i class="ic ic-find"></i></button>
+                        <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
+                    </div>
+                    @*@if (isHeadteacher)
+                        {
+                            <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                                <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+                            </div>
+                        }*@
+                    @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
+                </div>
+            </div>
+
+            <div class="card-body" v-cloak>
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th class='text-center'>#</th>
+                            <th class='text-center'>Tên gói học</th>
+                            <th class='text-center'>Tên lớp học</th>
+                            <th class='text-center'>Tên cơ sở</th>
+                            <th class='text-center'>Số học viên</th>
+                            <th class='text-center'>Tổng tiền</th>
+                            <th class='text-center'></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in items" v-if="parseInt(item.Students)>0">
+                            <td class='text-center'>{{parseInt(k)+1}}</td>
+                            <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.Title}}</a></td>
+                            <td class='text-center'>{{item.ClassName}}</td>
+                            <td class='text-center'>{{item.CenterName}}</td>
+                            <td class='text-center'>{{item.Students}}</td>
+                            <td class='text-center'>{{formatPrice(item.TotalPrice)}} VND</td>
+                            <td class='text-center'><a href="javascript:;" v-on:click="ViewDetail(item.ID)">Xem chi tiết >>></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="box margin-t20 flex">
+                    <div class="paging-view">
+                        Hiển thị:
+                        <select v-on:change="getData()">
+                            <option value="10">10 kết quả</option>
+                            <option value="20">20 kết quả</option>
+                            <option value="30">30 kết quả</option>
+                        </select>
+                    </div>
+                    <div class="page-control">
+                        <div class="inner">
+                            @*<button v-on:click="goPage(0)"><i class="ti-angle-left"></i></button>
+                                <button v-on:click="goPage(page - 1)"><i class="ti-angle-double-left"></i></button>
+                                <input type="text" v-model="page" v-on:change="getData()" />
+                                <button v-on:click="goPage(page + 1)"><i class="ti-angle-double-right"></i></button>
+                                <button v-on:click="goPage(max_page)"><i class="ti-angle-right"></i></button>*@
+                        </div>
+                        <div class="right">
+                            <b-pagination v-model="page"
+                                          :total-rows="totalRec"
+                                          :per-page="view"
+                                          v-on:input="getData()"></b-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal View Detail-->
+        <b-modal size="xl" id="ViewProduct" :title="viewproduct.Title">
+            <div class="row form-group" style="overflow-y:scroll;max-height:500px;" >
+                <div class="col-md-12" v-html="viewproduct.Content">
+                </div>
+            </div>
+        </b-modal> 
+        
+        <b-modal size="xl" id="ViewDetail" title="Danh sách giao dịch">
+            <div class="row form-group" style="overflow-y:scroll;max-height:500px;" >
+                <div class="col-md-12">
+                    <div class="card-body">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th class='text-center'>#</th>
+                                    <th class='text-center'>Học viên</th>
+                                    <th class='text-center'>Gói học</th>
+                                    <th class='text-center'>Lớp</th>
+                                    <th class='text-center'>Ngày mua</th>
+                                    <th class='text-center'>Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item,k) in viewdetail">
+                                    <td class='text-center'>{{parseInt(k)+1}}</td>
+                                    <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.StudentName}}</a></td>
+                                    <td class='text-center'>{{item.ProductName}}</td>
+                                    <td class='text-center'>{{item.ClassName}}</td>
+                                    <td class='text-center'>{{format_date(item.DayBuy)}}</td>
+                                    <td class='text-center'>{{formatPrice(item.Price)}} VND</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+        </b-modal>
+
+    </section>
+    <style>
+        .height-245 {
+            height: 268px;
+        }
+    </style>
+    <script>
+    new Vue({
+        el: '.module',
+        mounted() {
+            window.InitDate = this.initDate
+        },
+        data: {
+            items: @Html.Raw(Json.Serialize(listhistory)),
+            view: 10,
+            totalRec: 0,
+            page: 1,
+            searchTerm: '',
+            viewdetail: [],
+            viewproduct:'',
+        },
+        watch: {
+            searchTerm: function () {
+                if (this.searchTimeout != null)
+                    clearTimeout(this.searchTimeout)
+                var fn = this.getData
+                this.searchTimeout = setTimeout(function () {
+                    fn()
+                    fn = null
+                }, 500)
+            },
+        },
+        methods: {
+            formatPrice(value) {
+                let val = (value / 1).toFixed(0)
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            },
+            ViewDetail(id) {
+                //alert(id)
+                let _that = this;
+                _that.$bvModal.show('ViewDetail');
+                let _form = new FormData()
+                _form.append('Center', '@center')
+                _form.append('ID', id)
+                let _url = '@processUrl("GetDetail", "Product")'
+                axios.post(_url, _form)
+                    .then(response => {
+                        //debugger
+                        _that.viewdetail = response.data.ViewDetail;
+                        this.viewdetail = _that.viewdetail
+                    }).catch(e => { })
+            },
+            getData() {
+                debugger
+                let _that = this
+                    let _form = new FormData()
+                    //_form.append('SubjectID', _that.subject)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    //_form.append('StartDate', _that.sDate)
+                    //_form.append('EndDate', _that.eDate)
+                    _form.append('SearchText', _that.searchTerm)
+                    _form.append('Center', '@center')
+
+                let _url = '@processUrl("GetListProduct", "Product")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.tableData = response.data.Data;
+                            this.tableData = _that.tableData
+                            this.totalRec = response.data.Model.totalRecord
+                            console.log(totalRec)
+                            //var tt = response.data.Model.totalRecord;
+                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
+                            //console.log(_that.active_course);
+                        }).catch(e => { })
+            },
+            ViewProduct(id) {
+               //alert(id)
+                let _that = this;
+                _that.$bvModal.show('ViewProduct');
+                let _form = new FormData()
+                _form.append('Center', '@center')
+                _form.append('ID', id)
+                let _url = '@processUrl("GetDetail", "Product")'
+                axios.post(_url, _form)
+                    .then(response => {
+                        //debugger
+                        _that.viewproduct = response.data.ViewProduct;
+                        this.viewproduct = _that.viewproduct
+                    }).catch(e => { })
+            },
+            format_date(value) {
+                if (value) {
+                    return moment(String(value)).format('DD-MM-YYYY')
+                }
+            },
+        }
+    });
+    </script>
+}
+@section Modals{
+}
