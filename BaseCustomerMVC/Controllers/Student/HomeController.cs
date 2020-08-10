@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -24,6 +25,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly NewsService _newsService;
         private readonly NewsCategoryService _newsCategoryService;
         private readonly ClassService _classService;
+        private readonly HistoryTransactionService _historyTransactionService;
+        private readonly MappingEntity<NewsEntity, NewsViewModel> _mapping;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public DefaultConfigs _default { get; }
@@ -35,7 +38,8 @@ namespace BaseCustomerMVC.Controllers.Student
             StudentService studentService,
             NewsService newsService,
             NewsCategoryService newsCategoryService,
-            ClassService classService
+            ClassService classService,
+            HistoryTransactionService historyTransactionService
             )
         {
             _studentService = studentService;
@@ -48,6 +52,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _default = defaultvalue.Value;
             _newsService = newsService;
             _classService = classService;
+            _historyTransactionService = historyTransactionService;
+            _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
         }
 
         public IActionResult Index(string basis)
@@ -71,11 +77,17 @@ namespace BaseCustomerMVC.Controllers.Student
 
             //var category = _newsCategoryService.GetItemByCode("san-pham");
 
-            var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
+            //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
+            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive==true).Limit(6);
 
-            //var list_courses= 
+            List<NewsEntity> _data = new List<NewsEntity>();
+            foreach(var item in data.ToList())
+            {
+                if (item.Targets.Find(x => x == centerID)!=null && item.Targets!=null || item.CenterID==centerID)
+                    _data.Add(item);
+            }
 
-            ViewBag.List_Courses = data.ToList();
+            ViewBag.List_Courses = _data.ToList();
             //var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
             //HttpContext.Session.SetString("userAvatar", avatar);
             return View();
@@ -293,22 +305,66 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-        public IActionResult Payment(string classid)
+        public IActionResult Payment(string ID)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
-            ViewData["Title"] = "Thanh toán khóa học";
-            //var classid = HttpContext.Request.Query["id"];
-            var ClassID = Request.Path.ToString().Substring(Request.Path.ToString().LastIndexOf('/')+1);
-            ViewBag.Class = _classService.GetItemByID(ClassID);
-            //var _class=
+
+            var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
+
+            NewsViewModel DataResponse =
+               _mapping.AutoOrtherType(inforProduct, new NewsViewModel()
+               {
+                    //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
+                    ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
+                   CenterName = inforProduct.CenterID == null || inforProduct.CenterID == "0" || inforProduct.CenterID == "" ? null : _centerService.GetItemByID(inforProduct.CenterID).Name
+
+               });
+
+            ViewBag.Product = DataResponse;
             return View();
         }
 
-        public JsonResult JoinClass(string ClassID)
+        //[HttpPost]
+        //public async Task<JsonResult> Payment(string ID)
+        //{
+        //    string _studentid = User.Claims.GetClaimByType("UserID").Value;
+        //    var student = _studentService.GetItemByID(_studentid);
+
+        //    var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
+
+        //    var Dataresponse = new Dictionary<string, object>()
+        //    {
+        //        {"Product",inforProduct },
+        //        {"Student",student},
+        //        {"Success","OK" }
+        //    };
+        //    return Json(Dataresponse);
+        //}
+
+        public JsonResult JoinClass(string ID,string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
+
+            var product = _newsService.GetItemByID(ID);
+            var ClassID = product.ClassID;
+
+            if(student.Centers.Where(o=>o==ClassID)==null)
+            student.Centers.Add(ClassID);
+
+            _studentService.CreateQuery().ReplaceOne(o=>o.ID==student.ID,student);
+
+            //tạo lịch sử giao dịch
+            var historyTransaction = new HistoryTransactionEntity();
+            historyTransaction.StudentID = student.ID;
+            historyTransaction.NewsID = ID;//mua san pham nao
+            historyTransaction.Price = product.Discount == 0 ? product.Price : product.Discount;
+            historyTransaction.CenterID = _centerService.GetItemByCode(basis).ID;
+            historyTransaction.DayBuy = DateTime.UtcNow;
+
+            _historyTransactionService.CreateOrUpdate(historyTransaction);
+            //hết tạo lịch sử giao dịch
 
             if (string.IsNullOrEmpty(ClassID))
                 return Json(new { error = "Lớp không tồn tại" });
@@ -318,6 +374,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //var student = _studentService.GetItemByID(StudentID);
             if (student == null)
                 return Json(new { error = "Học viên không tồn tại" });
+
             if (student.JoinedClasses == null)
             {
                 student.JoinedClasses = new List<string> { };
@@ -333,7 +390,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
             }
             if (_studentService.JoinClass(ClassID, student.ID, @class.Center) > 0)
+            {
+
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
+            }    
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
         #endregion

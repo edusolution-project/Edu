@@ -45,14 +45,18 @@ namespace BaseCustomerEntity.Database
         public double Price { get; set; }
         [JsonProperty("Discount")]
         public double Discount { get; set; }
-        //[JsonProperty("PriceSale")]
-        //public double PriceSale { get; set; }
+        [JsonProperty("PriceSale")]
+        public double PriceSale { get; set; }
         [JsonProperty("Type")]
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
         public bool IsPublic { get; set; }
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
+        [JsonProperty("Targets")]
+        public List<string> Targets { get; set; }
+        [JsonProperty("Limit")]
+        public int Limit { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
