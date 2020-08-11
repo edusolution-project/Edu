@@ -55,7 +55,7 @@
     <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học tuần này ({{lesson_week != null ? lesson_week.length : 0}})</h4>
+                <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
                 @*<a href="@processUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
@@ -102,8 +102,8 @@
                                 <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
-                                            <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
-                                            <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
+                                            <img v-if="item.thumb" :src="item.thumb" alt="">
+                                            <img v-else src="/pictures/ielts1.png" alt="">
                                         </div>
                                         <div class="padding-15 inner">
                                             <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
@@ -175,7 +175,7 @@
             </ul>
         </div>
         @*@if (center == "eduso")
-            {*@
+        {*@
         <div class="module">
             <div class="col-md-12">
                 <div class="box mb-3">
@@ -189,23 +189,25 @@
                                 <a v-on:click="DetailProduct(item.ID)" :title="item.Title">
                                     <div class="box radius" style="height:240px">
                                         <div class="thumb" style="position:relative;">
-                                            <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                            <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
                                             <img v-else :src="item.Thumbnail" alt="">
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
-
-                                            <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%" behavior="slide" onmouseout="this.start()">{{item.Title}}</marquee></a>
-
+                                            
+                                            <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%" behavior="slide">{{item.Title}}</marquee></a>
+                                            
+                                            
+                                            
                                             <div class="c-bot" style="text-align:right;">
                                                 <div>
                                                     <div class="c-right" style="font-size:13px; font-weight:bold"></div>
                                                 </div>
-                                                <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                                <div v-if="item.Discount!=''" class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
                                                     {{formatPrice(item.Discount) }} VNĐ
                                                 </div>
                                                 <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
+                                                    <span v-if="item.Discount!=''" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                    <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
                                                 </div>
                                                 <div>
                                                     <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
@@ -224,31 +226,30 @@
 
         <!-- Modal -->
 
-        <div class="modal fade" id="DetailProduct" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
-                <div class="modal-content" style="position:absolute;top: 0; bottom: 0;">
+        <div class="modal fade" id="DetailProduct" tabindex="-1"  role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
                     <div class="modal-header">
                         <h3 class="modal-title">{{detailProduct.Title}}</h3>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body" style="position:absolute;top: 70px; bottom: 0; left: 0; right: 0">
-                        <div class="container-fluid" style="position:absolute; top: 10px; bottom: 10px; overflow:auto;">
-                            <div class="row col-sm-9">
-                                @*<div class="form-group">
-                                        <img name="thumbnail" />
-                                    </div>*@
-                                <div class="form-group" name="Content" v-html="detailProduct.Content" style="text-align:justify">
-                                    @*{{detailProduct.Content}}*@
+                    <div class="modal-body" style="overflow-y:scroll;max-height:600px;">
+                            <div class="container-fluid">
+                                <div class="row col-sm-9">
+                                    @*<div class="form-group">
+                    <img name="thumbnail" />
+                </div>*@
+                                    <div class="form-group" name="Content" v-html="detailProduct.Content">
+                                        @*{{detailProduct.Content}}*@
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row col-sm-3 position-fixed p3" style="right:40px;">
-                                <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
+                                <div class="row col-sm-3 position-fixed" style="right:40px">
                                     <div class="form-group col-sm-12" id="price">
                                         @*<div>
-                                                <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                            </div>*@
+                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                    </div>*@
                                         <div v-if="detailProduct.Discount!=''" class="price font-weight-bold text-danger ml-auto col-sm-12">
                                             Giá khuyến mại: <span style="font-size:130%; text-align:right;">{{formatPrice(detailProduct.Discount)}} VNĐ</span>
                                         </div>
@@ -262,12 +263,16 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-sm-12" style="text-align:center">
-                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ClassID)" title="Mua ngay">Mua ngay</button>
+                                        <button type="button" class="btn btn-primary" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
+                                        @*<button type="button" class="btn btn-primary" v-on:click="'@processUrl("Payment", "Home")/' + detailProduct.ID" title="Mua ngay">Mua ngay</button>*@
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
+                    @*<div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" onclick="BuyNow(this)" title="Mua ngay">Mua ngay</button>
+                    </div>*@
                 </div>
             </div>
         </div>
@@ -292,33 +297,33 @@
             active_course: [
             ],
             hot_course: [
-                //{
-                //    courseid: 999,
-                //    courseName: "Luyện thi IELTS cấp tốc",
-                //    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                //    lesson_count: 87,
-                //    thumb: "/pictures/ielts.png",
-                //    discount: '3,000,000',
-                //    price: '7,999,000'
-                //},
-                //{
-                //    courseid: 1000,
-                //    courseName: "Kĩ năng mềm cho sinh viên",
-                //    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                //    lesson_count: 87,
-                //    thumb: "/pictures/softskill.jpg",
-                //    discount: '300,000',
-                //    price: '799,000'
-                //},
-                //{
-                //    courseid: 1001,
-                //    courseName: "Thiết kế đồ họa chuyên nghiệp",
-                //    description: "Thiết kế chuyên nghiệp trong 30 buổi",
-                //    lesson_count: 39,
-                //    thumb: "/pictures/design2.jpg",
-                //    discount: '420,000',
-                //    price: "1,500,000"
-                //}
+                {
+                    courseid: 999,
+                    courseName: "Luyện thi IELTS cấp tốc",
+                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                    lesson_count: 87,
+                    thumb: "/pictures/ielts.png",
+                    discount: '3,000,000',
+                    price: '7,999,000'
+                },
+                {
+                    courseid: 1000,
+                    courseName: "Kĩ năng mềm cho sinh viên",
+                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
+                    lesson_count: 87,
+                    thumb: "/pictures/softskill.jpg",
+                    discount: '300,000',
+                    price: '799,000'
+                },
+                {
+                    courseid: 1001,
+                    courseName: "Thiết kế đồ họa chuyên nghiệp",
+                    description: "Thiết kế chuyên nghiệp trong 30 buổi",
+                    lesson_count: 39,
+                    thumb: "/pictures/design2.jpg",
+                    discount: '420,000',
+                    price: "1,500,000"
+                }
             ],
             list_courses: @Html.Raw(Json.Serialize(list_courses)),
             discussion: [
@@ -396,6 +401,7 @@
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY HH:mm")
             },
+
             shortenString(str, length) {
                 if (str.length <= length)
                     return str;
@@ -432,32 +438,33 @@
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
-            cacheStatic(src, width) {
-                if (src.startsWith("http"))
-                    return src;
-                return "https://static.eduso.vn/" + src + "?w=" + width;
-            },
-            formatPrice(value) {
-                let val = (value / 1).toFixed(0).replace(',', '.')
-                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            },
-            BuyNow(classid) {
-                Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
-                //debugger
-                //window.location.href = '@processUrl("Payment", "Home")/' + classid;
-            },
             DetailProduct(ID) {
-                let _that = this
+                let _that=this
+                $("#DetailProduct").modal()
                 let _form = new FormData();
                 _form.append('ID', ID);
                 let _url = '@processUrl("DetailProduct", "Home")';
                 axios.post(_url, _form)
-                    .then(response => {
-                        _that.detailProduct = response.data;
-                        $("#DetailProduct").modal();
-                    }).catch(e => { });
+                .then(response => {
+                    _that.detailProduct = response.data;
+                }).catch(e => { });
+            },
+            formatPrice(value) {
+                let val = (value / 1).toFixed(0)
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            },
+            BuyNow(id) {
+                //debugger
+                window.location.href = '@processUrl("Payment", "Home")/' + id;
+                //alert(id)
             },
         }
     });
+
+        @*var BuyNow = function (classid) {
+            //alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
+            debugger
+            window.location.href = '@processUrl("Payment", "Home")/' + classid;
+        }*@
     </script>
 }

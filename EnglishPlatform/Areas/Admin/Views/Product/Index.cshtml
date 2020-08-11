@@ -4,8 +4,12 @@
     var listcenter = ViewBag.listcenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
 
-<script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
-</script>
+<script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
@@ -55,7 +59,7 @@
                                 <th class='text-center'>Giá</th>
                                 <th class='text-center'>Khuyến mại</th>
                                 <th class='text-center'>Hoạt động</th>
-                                <th class='text-center'>Public</th>
+                                @*<th class='text-center'>Public</th>*@
                                 <th class='text-center'></th>
                                 @*<th class='text-center'></th>*@
                             </tr>
@@ -68,7 +72,7 @@
 
             <div class="card-footer">
                 Trang
-                <select id="pageIndex" onchange="LoadData()">
+                <select id="pageIndex" onchange="loadData()">
                 </select> / <span id="totalPage"></span>
             </div>
         </div>}
@@ -97,7 +101,6 @@
                         </div>
 
                         <div class="form-row">
-
                             <div class="form-group col-md-6">
                                 <div class="form-row">
                                     <div class="col-sm-12">
@@ -112,9 +115,38 @@
                                 </div>
                             </div>
 
-                            <div class="form-group col-sm-6">
+                            <div class="form-group col-md-6">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                            Chọn cơ sở khác <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu subjectSelect" role="menu">
+                                            @{
+                                                for (int i = 0; listcenter != null && i < listcenter.Count; i++)
+                                                {
+                                                    <li>
+                                                        <a>
+                                                            <input type="checkbox" id="@listcenter[i].ID" /><span class="lbl"> @listcenter[i].Name </span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div class="subject_wrapper d-none">
+                                    </div>
+                                    <input type="text" class="form-control subjectDisplay" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group col-sm-12">
                                 <select id="ClassID" name="ClassID" class="form-control" required>
-                                    <option value="">--- Lựa chọn Lớp ---</option>                                  
+                                    <option value="">--- Lựa chọn Lớp ---</option>
+                                    @*<option v-for="(item, index) in items" :value="item.ID">{{item.Name}}</option>*@
                                 </select>
                             </div>
 
@@ -132,11 +164,13 @@
                         <div class="form-row">
                             <div class="form-group col-sm-12">
                                 <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt">
-                           </div>
+
+                            </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
+
                                 <div class="form-row">
                                     <div class="input-group col-md-12">
                                         @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
@@ -160,12 +194,15 @@
                                 <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-group col-sm-12">
                                 <label>Chi tiết sản phẩm</label>
                                 <textarea name="Content" id="Content" class="form-control" required></textarea>
                             </div>
                         </div>
+
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -212,6 +249,7 @@
 
 
 <script>
+
     var Add = function (obj) {
         var modal = document.querySelector(obj.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Thêm tin gói học");
@@ -241,6 +279,10 @@
         if (txtarea.value != null) {
             txtarea.value = "";
         }
+
+        //$('.selectpicker').change(function (e) {
+        //    //alert(e.target.value);
+        //});
         //while (parseInt($(".modal-body").find(".Class").length > 0)) {
         //    $(".modal-body").find(".Class").remove();
         //}
@@ -252,6 +294,7 @@
 
         $(form).find("input:disabled").removeAttr("disabled");
     }
+
     var renderClass = function (ClassID="") {
         modal = $(".modal-body");
         removeoption();
@@ -323,13 +366,13 @@
                             isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "Product", new { Area = "admin" })',loadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
                         }
 
-                        var public = "";
+                        @*var public = "";
                         if (item.IsPublic) {
                             public = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish", "Product", new { Area = "admin" })',loadData,'IsPublic')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
                         }
                         else {
                             public = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "Product", new { Area = "admin" })',loadData,'IsPublic')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
-                        }
+                        }*@
                         body.append("<tr>" +
                             "<td class='text-center'>" + (data.Model.pageSize*data.Model.pageIndex + i+1) + "</td>" +
                             "<td class='text-center'>" +
@@ -341,7 +384,7 @@
                             "<td class='text-center'>"+item.Price+"</td>" +
                             "<td class='text-center'>" + item.Discount + "</td>" +
                             isActive +
-                            public +
+                            //public +
                             "<td class='text-center' style='width: 130px;'>" +
                             "<button onclick =\"Preview('" + item.ID + "')\" type='button' class='btn btn-primary' data-placement='top' title='Xem trước' > <i class='fas fa-eye'></i> </button>" +
                             "<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +
@@ -418,13 +461,28 @@
                 }
             }
         }
+
+        var targets = "";
+        $(".subjectSelect input[type=checkbox]").each(function () {
+            if ($(this).is(":checked")) {
+                targets += $(this).attr('id')+",";
+                }
+        });
+        debugger
+
         $(form).find("input:disabled").removeAttr("disabled");
 
         var data = new FormData(form);
+
+        //data.delete("IsHot");
+        //data.append("IsHot", $(form).find("#IsHot").prop("checked"));
+        //data.delete("IsTop");
+        //data.append("IsTop", $(form).find("#IsTop").prop("checked"));
         data.delete("IsActive");
         data.append("IsActive", $(form).find("#IsActive").prop("checked"));
         data.delete("Content");
         data.append("Content", CKEDITOR.instances.Content.getData());
+        data.append("Targets", targets);
 
         //data.append("Content", CKEDITOR.instances.Content.getData());
         showLoading("Sending data ...");
@@ -450,8 +508,8 @@
         //Add(_this);
         var modal = document.querySelector(_this.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Sửa thông tin gói học");
-        $(modal).find("[name=Save").text("Lưu");
-        $(modal).find("[name=Save").attr("onclick", "Submits('AddForm', '/admin/Product/CreateOrUpdate', 'CreateOrUpdate', loadData)");
+        $(modal).find("[name=Save]").text("Lưu");
+        $(modal).find("[name=Save]").attr("onclick", "Submits('AddForm', '/admin/Product/CreateOrUpdate', 'CreateOrUpdate', loadData)");
         var form = modal.querySelector('form');
         var inputID = form.querySelector('input[name="ID"]');
         if (inputID == null) {
@@ -483,9 +541,31 @@
 
             var listselect = $(form).find('select');
             for (var i = 0; i < listselect.length; i++) {
-                $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
-                renderClass(item.Data[$(listselect[i]).attr("name")]);
+                    $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
+                    renderClass(item.Data[$(listselect[i]).attr("name")]);
             }
+
+            var targets = item.Data.Targets;
+            $('.subject_wrapper').empty();
+            $(".subjectDisplay").val('');
+            $('.subjectSelect input[type=checkbox]').prop("checked", false);
+            var line = '';
+            if (targets != null && targets.length > 0)
+                for (var i = 0; i < targets.length; i++) {
+                    debugger
+                    //console.log(subjects);
+                    $(".subjectSelect input[type=checkbox]#" + targets[i]).prop("checked", true);
+                    
+                    $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: targets[i] }));
+                }
+            
+            $(".subjectSelect input[type=checkbox]").each(function () {
+                if ($(this).is(":checked")) {
+                    line += ($("+ span", this).text().trim() + "; ");
+                }
+            });
+            $(".subjectDisplay").val(line);
+
             //debugger
 
             document.getElementById("img").setAttribute("src", item.Data.Thumbnail);
@@ -579,12 +659,28 @@
     function Clone(id, urlGetData, urlPostData, _this) {
         Edits(id, urlGetData, urlPostData, _this)
         var modal = $("#ProductModal");
-        $(modal).find("[name=Save").removeAttr("onclick");
-        $(modal).find("[name=Save").text("Nhân bản");
-        $(modal).find("[name=Save").attr("onclick", "Submits('AddForm', '/admin/Product/Clone', 'CreateOrUpdate', loadData)");
-        $(modal).find("[id=ProductTitle").text("Nhân bản gói học")
+        $(modal).find("[name=Save]").removeAttr("onclick");
+        $(modal).find("[name=Save]").text("Nhân bản");
+        $(modal).find("[name=Save]").attr("onclick", "Submits('AddForm', '/admin/Product/Clone', 'CreateOrUpdate', loadData)");
+        $(modal).find("[id=ProductTitle]").text("Nhân bản gói học")
 
     }
+
+    $(".subjectSelect input[type=checkbox]").each(function () {
+        $(this).change(function () {
+            $('.subject_wrapper').empty();
+            $(".subjectDisplay").val('');
+            var line = '';
+            $(".subjectSelect input[type=checkbox]").each(function () {
+                if ($(this).is(":checked")) {
+                    line += ($("+ span", this).text().trim() + "; ");
+                    id = $(this).attr('id');
+                    $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: id }));
+                }
+            });
+            $(".subjectDisplay").val(line);
+        });
+    });
 
     var Sort = function () {
         loadData();
@@ -593,6 +689,8 @@
     $(document).ready(function () {
         loadData();
     });
+
+    //$('select').selectpicker();
 
 </script>
 

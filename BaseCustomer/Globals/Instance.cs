@@ -80,6 +80,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<NewsService>();
             services.AddSingleton<QCService>();
 			services.AddSingleton<UserAndRoleService>();
+            services.AddSingleton<HistoryTransactionService>();
             return services;
         }
     }

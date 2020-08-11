@@ -69,13 +69,24 @@ namespace BaseCustomerMVC.Controllers.Admin
             //    item.PriceSale = item.Price - item.Price * item.Sale / 100;
             //}
 
+            //item.Targets.RemoveAt(item.Targets.Count - 1);       
+            //var a=item.Targets[0].ToString();
+
+            foreach(var target in item.Targets[0].ToString().Split(','))
+            {
+                if(target!=null||target!="")
+                item.Targets.Add(target);
+            }
+            item.Targets.RemoveAt(0);
+            item.Targets.RemoveAt(item.Targets.Count - 1);
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.CreateDate = DateTime.UtcNow;
                 if (item.PublishDate < new DateTime(1900, 1, 1))
                     item.PublishDate = item.CreateDate;//publish now
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
-                item.IsActive = true;
+                //item.IsActive = true;
                 item.IsPublic = false; //mac dinh se khong public
                 item.Type = "san-pham";
 
@@ -162,6 +173,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult getListProduct(DefaultModel model)
         {
             var data = _serviceNews.CreateQuery().Find(o => o.Type.Equals("san-pham"));
+            if (model.Sort != null)
+                data = model.Sort.ToLower().Equals("newproduct") ? data.SortByDescending(o => o.ID) : data.SortBy(o => o.ID);
 
             model.TotalRecord = data.CountDocuments();
             var list = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
