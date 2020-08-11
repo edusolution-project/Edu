@@ -1398,7 +1398,7 @@ var Lesson = (function () {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -1543,7 +1543,7 @@ var Lesson = (function () {
                         $(prevHolder).find(".placeholder").show();
                     }
                     else {
-                        $(prevHolder).append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        $(prevHolder).append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                     }
                 }
 
@@ -1580,7 +1580,7 @@ var Lesson = (function () {
                     if ($(prevHolder).find(".placeholder").length > 0)
                         $(prevHolder).find(".placeholder").show();
                     else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 }
 
                 //AnswerQuestion(this);
@@ -1872,19 +1872,19 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px", "title": "Nhân bản câu hỏi" }));
 
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Câu hỏi" }));
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append(
                     $("<div>", { class: "mt-1 d-none" }).append($("<label>", { "class": "input_label mr-1", "text": "Điểm" }))
-                        .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" })));
-                questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" })));
+                        .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1" })));
+                questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Trả lời (đánh dấu nếu đúng)" })));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
                 answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
+                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích" }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -1893,7 +1893,7 @@ var Lesson = (function () {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "ToggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Trả lời" }));
                 answerTemplate.append($("<div>", { "class": "media_holder mt-1" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1966,12 +1966,12 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Câu hỏi", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 quizWrapper.append($("<label>", { "class": "input_label d-none", "text": "Điểm " }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "d-none input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "d-none input-text part_point form-control", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -1985,7 +1985,7 @@ var Lesson = (function () {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "checked": "checked", "tabindex": 0, "onclick": "ToggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer (tick if correct)", "tabindex": 0 }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Trả lời (đánh dấu nếu đúng)", "tabindex": 0 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
@@ -2000,7 +2000,7 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Add question", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
 
                 //Add question
@@ -2010,8 +2010,8 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
 
@@ -2019,20 +2019,9 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-
-
+                contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
+                contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data != null ? data.Point : 0}));
                 if (data != null && data.Questions != null) {
-                    //only 1 question
-                    console.log(data.Questions);
-                    contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
-                    if (data.Questions.length == 1) {
-                        contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data.Questions[0].Point }));
-                    }
-
-                    //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    //    var quiz = data.Questions[i];
-                    //    addNewQuestion(quiz);
-                    //}
                 }
                 else
                     addNewQuestion();
@@ -2082,7 +2071,7 @@ var Lesson = (function () {
         var template = $('.question_template > fieldset');
         var currentpos = $(container).find(".fieldQuestion").length;
         var clone = template.clone();
-        $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
+        $(clone).find('.fieldset_title').text("Câu hỏi " + (currentpos + 1));
         $(clone).attr("Order", currentpos);
         $(clone).find("[name='Questions.Order']").val(currentpos);
         if (data != null) {
@@ -2240,7 +2229,7 @@ var Lesson = (function () {
                 $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
                     $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (parseInt(i) - 1) + "]."));
                 });
-                $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
+                $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + i);
             }
             //debugger
             if (result.value) {
@@ -3162,7 +3151,7 @@ var Lesson = (function () {
                 $(placeholder).removeClass("no-child");
                 placeholder.empty().append($("<div>", {
                     "class": "pane-item placeholder",
-                    "text": "Drop your answer here"
+                    "text": "Thả câu trả lời ở đây"
                 }));
 
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
@@ -3833,7 +3822,7 @@ var Lesson = (function () {
         });
         cloneQuestion.children[1].value = currentpos;
         cloneQuestion.setAttribute("order", currentpos);
-        $(cloneQuestion).find("[class=fieldset_title]").text("Quiz " + (parseInt(currentpos) + 1).toString());
+        $(cloneQuestion).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(currentpos) + 1).toString());
 
         //new File([file], cloneQuestion.children[5].children[1].children[1].value);
         //debugger
@@ -3848,7 +3837,7 @@ var Lesson = (function () {
             $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
                 $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + i + "]."));
             });
-            $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + (parseInt(i) + 1));
+            $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(i) + 1));
         }
     }
 
