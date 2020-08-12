@@ -417,8 +417,15 @@ button, input, a {
 }
 
     #sidebar .logo {
-        width: 128px
+        max-width: 100%;
     }
+
+        #sidebar .logo img {
+            max-height: 100px;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+        }
 
     #sidebar .card-header {
         border: none;

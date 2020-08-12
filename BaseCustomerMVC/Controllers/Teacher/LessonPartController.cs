@@ -165,191 +165,200 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public async Task<JsonResult> CreateOrUpdate(string basis, LessonPartViewModel item, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
-            //try
-            //{
-            var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
-            var createduser = User.Claims.GetClaimByType("UserID").Value;
-            if (parentLesson != null)
+            try
             {
-                if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
-                var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
-                if (item.ID == "0" || item.ID == null) //create
+                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
+                var createduser = User.Claims.GetClaimByType("UserID").Value;
+                if (parentLesson != null)
                 {
-                    item.CourseID = parentLesson.CourseID;
-                    item.Created = DateTime.Now;
-                    var maxItem = _lessonPartService.CreateQuery()
-                        .Find(o => o.ParentID == item.ParentID)
-                        .SortByDescending(o => o.Order).FirstOrDefault();
-                    item.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                    item.Updated = DateTime.Now;
+                    if (item.Media != null && item.Media.Name == null) item.Media = null;//valid Media
+                    var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
+                    if (item.ID == "0" || item.ID == null) //create
+                    {
+                        item.CourseID = parentLesson.CourseID;
+                        item.Created = DateTime.Now;
+                        var maxItem = _lessonPartService.CreateQuery()
+                            .Find(o => o.ParentID == item.ParentID)
+                            .SortByDescending(o => o.Order).FirstOrDefault();
+                        item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                        item.Updated = DateTime.Now;
 
-                    if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || (!item.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == item.Media.Name))))
-                    {
-                        item.Media = null;
-                    }
-                    else
-                    {
-                        if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
+                        if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || (!item.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == item.Media.Name))))
                         {
-                            item.Media.Created = DateTime.Now;
-                            item.Media.Size = 0;
-                            item.Media.Path = item.Media.Name.Trim();
+                            item.Media = null;
                         }
                         else
                         {
-                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
-                            if (file != null)
+                            if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                             {
                                 item.Media.Created = DateTime.Now;
-                                item.Media.Size = file.Length;
-                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                item.Media.Size = 0;
+                                item.Media.Path = item.Media.Name.Trim();
+                            }
+                            else
+                            {
+                                var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                if (file != null)
+                                {
+                                    item.Media.Created = DateTime.Now;
+                                    item.Media.Size = file.Length;
+                                    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                }
                             }
                         }
                     }
-                }
-                else // Update
-                {
-                    var olditem = _lessonPartService.GetItemByID(item.ID);
-                    if (olditem == null)
-                        return new JsonResult(new Dictionary<string, object>
+                    else // Update
+                    {
+                        var olditem = _lessonPartService.GetItemByID(item.ID);
+                        if (olditem == null)
+                            return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Item Not Found" }
                             });
 
-                    if ((olditem.Media != null && item.Media != null && olditem.Media.Path != item.Media.Path)
-                        || (olditem.Media == null && item.Media != null))//Media change
-                    {
-                        if (files == null || !files.Any(f => f.Name == item.Media.Name))
-                            return new JsonResult(new Dictionary<string, object>
+                        if ((olditem.Media != null && item.Media != null && olditem.Media.Path != item.Media.Path)
+                            || (olditem.Media == null && item.Media != null))//Media change
+                        {
+                            if (files == null || !files.Any(f => f.Name == item.Media.Name))
+                                return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Upload Fails" }
                             });
 
-                        var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
-                        item.Media.Created = DateTime.Now;
-                        item.Media.Size = file.Length;
-                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
+                            item.Media.Created = DateTime.Now;
+                            item.Media.Size = file.Length;
+                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                        }
+
+                        item.Updated = DateTime.Now;
+                        item.Created = olditem.Created;
+                        item.Order = olditem.Order;
+                        item.CourseID = parentLesson.CourseID;
                     }
 
-                    item.Updated = DateTime.Now;
-                    item.Created = olditem.Created;
-                    item.Order = olditem.Order;
-                    item.CourseID = parentLesson.CourseID;
-                }
+                    var lessonpart = item.ToEntity();
+                    if (lessonpart.ID != null)
+                    {
+                        _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                    }
+                    else
+                    {
+                        _lessonPartService.CreateQuery().InsertOne(lessonpart);
+                    }
+                    item.ID = lessonpart.ID;
 
-                var lessonpart = item.ToEntity();
-                if (lessonpart.ID != null)
-                {
-                    _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
-                }
-                else
-                {
-                    _lessonPartService.CreateQuery().InsertOne(lessonpart);
-                }
-                item.ID = lessonpart.ID;
+                    switch (lessonpart.Type)
+                    {
+                        case "ESSAY":
 
-                switch (lessonpart.Type)
-                {
-                    case "ESSAY":
-
-                        _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
-                        var question = new LessonPartQuestionEntity
-                        {
-                            CourseID = lessonpart.CourseID,
-                            Content = "",
-                            Description = "",
-                            ParentID = lessonpart.ID,
-                            CreateUser = createduser,
-                            Point = lessonpart.Point,
-                            Created = lessonpart.Created,
-                        };
-                        _questionService.Save(question);
-                        break;
-                    case "VOCAB":
-                        if (lessonpart.Description != null && lessonpart.Description.Length > 0)
-                        {
-                            var vocabArr = lessonpart.Description.Split('|');
-                            if (vocabArr != null && vocabArr.Length > 0)
+                            _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
+                            var question = new LessonPartQuestionEntity
                             {
-                                foreach (var vocab in vocabArr)
+                                CourseID = lessonpart.CourseID,
+                                Content = "",
+                                Description = "",
+                                ParentID = lessonpart.ID,
+                                CreateUser = createduser,
+                                Point = lessonpart.Point,
+                                Created = lessonpart.Created,
+                            };
+                            _questionService.Save(question);
+                            break;
+                        case "VOCAB":
+                            if (lessonpart.Description != null && lessonpart.Description.Length > 0)
+                            {
+                                var vocabArr = lessonpart.Description.Split('|');
+                                if (vocabArr != null && vocabArr.Length > 0)
                                 {
-                                    var vocabulary = vocab.Trim().ToLower();
-                                    _ = GetVocabByCambridge(vocabulary);
-                                    _ = GetVocabByTraTu(vocabulary);
+                                    foreach (var vocab in vocabArr)
+                                    {
+                                        var vocabulary = vocab.Trim().ToLower();
+                                        _ = GetVocabByCambridge(vocabulary);
+                                        _ = GetVocabByTraTu(vocabulary);
+                                    }
                                 }
                             }
-                        }
-                        break;
-                    case "QUIZ2": //remove all previous question
-                        var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
-                        foreach (var quizid in oldQuizIds)
-                            _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
-                        _questionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
+                            break;
+                        case "QUIZ2": //remove all previous question
+                            var oldQuizIds = _questionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
+                            foreach (var quizid in oldQuizIds)
+                                _answerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                            _questionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
 
-                        if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
-                        {
-                            var newdescription = "";
-                            if (item.Questions == null || item.Questions.Count == 0)
-                                item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
-                            lessonpart.Description = newdescription;
-                            _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
-                        }
-                        else
-                        {
-                            //No Question
-                        }
-
-                        item.CourseID = parentLesson.CourseID;
-
-                        if (item.Questions != null && item.Questions.Count > 0)
-                        {
-                            await SaveQuestionFromView(item, createduser, files, basis);
-                        }
-
-                        break;
-                    default:
-                        if (RemovedQuestions != null & RemovedQuestions.Count > 0)
-                        {
-                            _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
-
-                            foreach (var quizID in RemovedQuestions)
+                            if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
                             {
-                                _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                                var newdescription = "";
+                                if (item.Questions == null || item.Questions.Count == 0)
+                                    item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
+                                lessonpart.Description = newdescription;
+                                _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
                             }
-                        }
+                            else
+                            {
+                                //No Question
+                            }
 
-                        if (RemovedAnswers != null & RemovedAnswers.Count > 0)
-                            _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
-                        item.CourseID = parentLesson.CourseID;
+                            item.CourseID = parentLesson.CourseID;
 
-                        if (item.Questions != null && item.Questions.Count > 0)
-                        {
-                            await SaveQuestionFromView(item, createduser, files);
-                        }
-                        break;
-                }
+                            if (item.Questions != null && item.Questions.Count > 0)
+                            {
+                                await SaveQuestionFromView(item, createduser, files, basis);
+                            }
 
-                IDictionary<string, object> valuePairs = new Dictionary<string, object>
+                            break;
+                        default:
+                            if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                            {
+                                _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
+
+                                foreach (var quizID in RemovedQuestions)
+                                {
+                                    _answerService.CreateQuery().DeleteMany(o => o.ParentID == quizID);
+                                }
+                            }
+
+                            if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                                _answerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
+                            item.CourseID = parentLesson.CourseID;
+
+                            if (item.Questions != null && item.Questions.Count > 0)
+                            {
+                                await SaveQuestionFromView(item, createduser, files);
+                            }
+                            break;
+                    }
+
+                    IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
                             //{ "LessonPartExtends", files }
                         };
 
-                return new JsonResult(new Dictionary<string, object>
+                    return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", item },
                                 {"Error", null }
                             });
-            }
-            else
-            {
-                return new JsonResult(new Dictionary<string, object>
+                }
+                else
+                {
+                    return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
                                 {"Error", "Parent Item Not found" }
                             });
+                }
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", e.Message }
+                });
             }
         }
 

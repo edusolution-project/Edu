@@ -3982,16 +3982,7 @@ var submitForm = function (event, modalId, callback) {
         if (xhr.readyState == 4) {
             if (xhr.status == 200) {
                 var data = JSON.parse(xhr.responseText);
-                if (data.Error == null || data.Error == "") {
-                    //switch (actionUrl) {
-                    //case "Lesson/" + urlLesson.CreateOrUpdate:
-                    //render.lesson(data.data);
-                    //document.location = urlLesson.Location + data.Data.ID;
-                    //document.location = document.location;
-                    //    break;
-                    //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
-                    //    var part = data.Data;
-                    //   //render.part(part);
+                if (data.Error == null || data.Error == "") {                   
                     if (callback == "addPart") {
                         var part = data.Data;
                         window.AddPart(part);
