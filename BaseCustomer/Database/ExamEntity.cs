@@ -154,6 +154,7 @@ namespace BaseCustomerEntity.Database
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
                 //bài chọn hoặc nối đáp án
+
                 if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
                 {
                     switch (part.Type)
@@ -161,6 +162,7 @@ namespace BaseCustomerEntity.Database
                         case "QUIZ1":
                             if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
                             _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -170,6 +172,7 @@ namespace BaseCustomerEntity.Database
                             //ID not match => check value
                             if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
                                 _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -186,11 +189,11 @@ namespace BaseCustomerEntity.Database
                                     isCorrect = false;
                                     break;
                                 }
-
                             }
                             if (isCorrect)
                             {
-                                _correctanswer = realAnswers.First();
+                                _correctanswer = realAnswers.FirstOrDefault();
+                                if (_correctanswer == null) continue;
                                 _correctanswer.ID = examDetail.AnswerID;
                                 _correctanswer.Content = examDetail.AnswerValue;
                             }

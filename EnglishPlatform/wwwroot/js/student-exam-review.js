@@ -444,7 +444,8 @@ var ExamReview = (function () {
     var renderAUDIO = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block part-column"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        //longht sửa 
+        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="audio/mpeg">Your browser does not support the audio tag</audio></div>';
         html += '</div>';
         return html;
     }

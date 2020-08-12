@@ -78,12 +78,12 @@ namespace BaseCustomerMVC.Controllers.Student
             //var category = _newsCategoryService.GetItemByCode("san-pham");
 
             //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
-            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive==true).Limit(6);
+            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true).Limit(6);
 
             List<NewsEntity> _data = new List<NewsEntity>();
-            foreach(var item in data.ToList())
+            foreach (var item in data.ToList())
             {
-                if (item.Targets.Find(x => x == centerID)!=null && item.Targets!=null || item.CenterID==centerID)
+                if ((item.Targets != null && item.Targets.Find(x => x == centerID) != null) || item.CenterID == centerID)
                     _data.Add(item);
             }
 
@@ -95,7 +95,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult DetailProduct(string ID)
         {
-            var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type=="san-pham").FirstOrDefault();
+            var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type == "san-pham").FirstOrDefault();
             ViewBag.Title = detail_product?.Title;
             return Json(detail_product);
         }
@@ -188,7 +188,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult UploadPhoto(IFormFile fileUpload)
         {
-            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName,"Avatar").Result;
+            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
             // Cap nhat vao truong avartar
             string _studentId = User.Claims.GetClaimByType("UserID").Value;
             StudentEntity oldAcc = _studentService.GetItemByID(_studentId);
@@ -314,8 +314,8 @@ namespace BaseCustomerMVC.Controllers.Student
             NewsViewModel DataResponse =
                _mapping.AutoOrtherType(inforProduct, new NewsViewModel()
                {
-                    //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
-                    ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
+                   //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
+                   ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
                    CenterName = inforProduct.CenterID == null || inforProduct.CenterID == "0" || inforProduct.CenterID == "" ? null : _centerService.GetItemByID(inforProduct.CenterID).Name
 
                });
@@ -341,7 +341,7 @@ namespace BaseCustomerMVC.Controllers.Student
         //    return Json(Dataresponse);
         //}
 
-        public JsonResult JoinClass(string ID,string basis)
+        public JsonResult JoinClass(string ID, string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
@@ -349,10 +349,10 @@ namespace BaseCustomerMVC.Controllers.Student
             var product = _newsService.GetItemByID(ID);
             var ClassID = product.ClassID;
 
-            if(student.Centers.Where(o=>o==ClassID)==null)
-            student.Centers.Add(ClassID);
+            if (student.Centers.Where(o => o == ClassID) == null)
+                student.Centers.Add(ClassID);
 
-            _studentService.CreateQuery().ReplaceOne(o=>o.ID==student.ID,student);
+            _studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
 
             //tạo lịch sử giao dịch
             var historyTransaction = new HistoryTransactionEntity();
@@ -392,7 +392,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
 
                 return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
-            }    
+            }
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
         #endregion
