@@ -105,7 +105,7 @@
             </div>
         </b-modal> 
         
-        <b-modal size="xl" id="ViewDetail" title="Danh sách giao dịch">
+        <b-modal size="xl" id="ViewDetail" :title="title">
             <div class="row form-group" style="overflow-y:scroll;max-height:500px;" >
                 <div class="col-md-12">
                     <div class="card-body">
@@ -114,7 +114,7 @@
                                 <tr>
                                     <th class='text-center'>#</th>
                                     <th class='text-center'>Học viên</th>
-                                    <th class='text-center'>Gói học</th>
+                                    @*<th class='text-center'>Gói học</th>*@
                                     <th class='text-center'>Lớp</th>
                                     <th class='text-center'>Ngày mua</th>
                                     <th class='text-center'>Giá</th>
@@ -123,8 +123,8 @@
                             <tbody>
                                 <tr v-for="(item,k) in viewdetail">
                                     <td class='text-center'>{{parseInt(k)+1}}</td>
-                                    <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.StudentName}}</a></td>
-                                    <td class='text-center'>{{item.ProductName}}</td>
+                                    <td class='text-center'><a href="javascript:;">{{item.StudentName}}</a></td>
+                                    @*<td class='text-center'>{{item.ProductName}}</td>*@
                                     <td class='text-center'>{{item.ClassName}}</td>
                                     <td class='text-center'>{{format_date(item.DayBuy)}}</td>
                                     <td class='text-center'>{{formatPrice(item.Price)}} VND</td>
@@ -155,7 +155,8 @@
             page: 1,
             searchTerm: '',
             viewdetail: [],
-            viewproduct:'',
+            viewproduct: '',
+            title:'',
         },
         watch: {
             searchTerm: function () {
@@ -183,8 +184,9 @@
                 let _url = '@processUrl("GetDetail", "Product")'
                 axios.post(_url, _form)
                     .then(response => {
-                        //debugger
                         _that.viewdetail = response.data.ViewDetail;
+                        _that.title = response.data.ViewProduct.Title;
+                        this.title = _that.title;
                         this.viewdetail = _that.viewdetail
                     }).catch(e => { })
             },
@@ -230,7 +232,7 @@
             },
             format_date(value) {
                 if (value) {
-                    return moment(String(value)).format('DD-MM-YYYY')
+                    return moment(String(value)).format('MM:HH DD-MM-YYYY')
                 }
             },
         }

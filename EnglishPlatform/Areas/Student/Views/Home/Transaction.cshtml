@@ -1,0 +1,17 @@
+﻿@{
+    //ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
+    var product = ViewBag.Product as List<BaseCustomerMVC.Models.NewsViewModel>;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
+}
+<div class="container">
+    <div class=" form-group">
+        @ViewBag.message
+    </div>
+</div>

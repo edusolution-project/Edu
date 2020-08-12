@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace BaseCustomerEntity.Database
 {
-    public class HistoryTransactionEntity:EntityBase
+    public class TransactionEntity:EntityBase
     {
         [JsonProperty("StudentID")]
         public string StudentID { get; set; }
@@ -26,15 +26,19 @@ namespace BaseCustomerEntity.Database
          
         [JsonProperty("TradingID")] //mã giao dịch, lấy từ ngân hàng
         public string TradingID { get; set; }
+        [JsonProperty("DayPayment")] //thoi gian thuc hien thanh toan
+        public DateTime DayPayment { get; set; }
+        [JsonProperty("StatusPayment")] //thoi gian thuc hien thanh toan
+        public bool StatusPayment { get; set; }
     }
 
-    public class HistoryTransactionService: ServiceBase<HistoryTransactionEntity>
+    public class TransactionService: ServiceBase<TransactionEntity>
     {
         private readonly IndexService _indexService;
-        public HistoryTransactionService(IConfiguration config, IndexService indexService) : base(config)
+        public TransactionService(IConfiguration config, IndexService indexService) : base(config)
         {
             _indexService = indexService;
-            var indexs = new List<CreateIndexModel<HistoryTransactionEntity>> { };
+            var indexs = new List<CreateIndexModel<TransactionEntity>> { };
             Collection.Indexes.CreateManyAsync(indexs);
         }
     }

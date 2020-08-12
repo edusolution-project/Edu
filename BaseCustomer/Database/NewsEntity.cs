@@ -45,8 +45,6 @@ namespace BaseCustomerEntity.Database
         public double Price { get; set; }
         [JsonProperty("Discount")]
         public double Discount { get; set; }
-        [JsonProperty("PriceSale")]
-        public double PriceSale { get; set; }
         [JsonProperty("Type")]
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
