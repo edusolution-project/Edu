@@ -55,7 +55,7 @@
     <div class="card-body" v-cloak>
         <div class="box mb-3">
             <div class="heading flex mb-2">
-                <h4 class="box-head">Bài học tuần này ({{lesson_week.length}})</h4>
+                <h4 class="box-head">Bài học tuần này ({{lesson_week != null ? lesson_week.length : 0}})</h4>
                 @*<a href="@processUrl("Index","Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
             </div>
             <div class="box bg-1 padding-15">
@@ -102,8 +102,8 @@
                                 <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
-                                            <img v-if="item.thumb" :src="item.thumb" alt="">
-                                            <img v-else src="/pictures/ielts1.png" alt="">
+                                            <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
+                                            <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
                                         </div>
                                         <div class="padding-15 inner">
                                             <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
@@ -152,21 +152,43 @@
                 </div>
             </div>
         </div>
+        <div class="module d-none">
+            <div class="col-md-12 margin-b20">
+                <div class="heading flex">
+                    <h4 class="box-head">Lớp học đã kết thúc</h4>
+                    <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                </div>
+            </div>
+            <ul class="row">
+                <li class="col-md-4 less-done list" v-for="(item,k) in finish_course">
+                    <div class="box radius">
+                        <a :href="'@processUrl("Detail", "Course")/' + item.id" class="flex">
+                            <span class="per">{{item.per + '%'}}</span>
+                            <div class="info">
+                                <span>{{item.title}}</span>
+                                <span>{{item.score.toFixed(2)}}%</span>
+                            </div>
+                            <span class="arr-right ti-arrow-right"></span>
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
 
         <div class="row">
             <div class="col-md-12">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        @*<a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_courses">
                                 <a v-on:click="DetailProduct(item.ID)" :title="item.Title">
                                     <div class="box radius" style="height:240px">
-                                        <div class="thumb" style="position:relative;width: 165px;">
-                                            <img v-if="item.Thumbnail" :src="item.Thumbnail" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                                        <div class="thumb" style="position:relative;">
+                                            <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
                                             <img v-else :src="item.Thumbnail" alt="">
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
@@ -177,12 +199,12 @@
                                                 <div>
                                                     <div class="c-right" style="font-size:13px; font-weight:bold"></div>
                                                 </div>
-                                                <div v-if="item.Discount != 0" class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">
+                                                <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
                                                     {{formatPrice(item.Discount) }} VNĐ
                                                 </div>
                                                 <div>
-                                                    <span v-if="item.Discount!=0" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
+                                                    <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                    @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
                                                 </div>
                                                 <div>
                                                     <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
@@ -291,35 +313,6 @@
             ],
             active_course: [
             ],
-            hot_course: [
-                {
-                    courseid: 999,
-                    courseName: "Luyện thi IELTS cấp tốc",
-                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                    lesson_count: 87,
-                    thumb: "/pictures/ielts.png",
-                    discount: '3,000,000',
-                    price: '7,999,000'
-                },
-                {
-                    courseid: 1000,
-                    courseName: "Kĩ năng mềm cho sinh viên",
-                    description: "Kĩ năng hot nhất cho sinh viên mới ra trường",
-                    lesson_count: 87,
-                    thumb: "/pictures/softskill.jpg",
-                    discount: '300,000',
-                    price: '799,000'
-                },
-                {
-                    courseid: 1001,
-                    courseName: "Thiết kế đồ họa chuyên nghiệp",
-                    description: "Thiết kế chuyên nghiệp trong 30 buổi",
-                    lesson_count: 39,
-                    thumb: "/pictures/design2.jpg",
-                    discount: '420,000',
-                    price: "1,500,000"
-                }
-            ],
             list_courses: @Html.Raw(Json.Serialize(list_courses)),
             discussion: [
             ],
@@ -396,7 +389,6 @@
                 if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
                 return moment(time).format("DD/MM/YYYY HH:mm")
             },
-
             shortenString(str, length) {
                 if (str.length <= length)
                     return str;
@@ -433,20 +425,30 @@
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
             },
+            cacheStatic(src, width) {
+                if (src.startsWith("http"))
+                    return src;
+                return "https://static.eduso.vn/" + src + "?w=" + width;
+            },
+            formatPrice(value) {
+                let val = (value / 1).toFixed(0).replace(',', '.')
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+            },
+            @*BuyNow(classid) {
+                Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
+                //debugger
+                //window.location.href = '@processUrl("Payment", "Home")/' + classid;
+            },*@
             DetailProduct(ID) {
-                let _that=this
-                $("#DetailProduct").modal()
+                let _that = this
                 let _form = new FormData();
                 _form.append('ID', ID);
                 let _url = '@processUrl("DetailProduct", "Home")';
                 axios.post(_url, _form)
-                .then(response => {
-                    _that.detailProduct = response.data;
-                }).catch(e => { });
-            },
-            formatPrice(value) {
-                let val = (value / 1).toFixed(0)
-                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                    .then(response => {
+                        _that.detailProduct = response.data;
+                        $("#DetailProduct").modal();
+                    }).catch(e => { });
             },
             BuyNow(id) {
                 //debugger
@@ -455,11 +457,5 @@
             },
         }
     });
-
-        @*var BuyNow = function (classid) {
-            //alert("Bạn đã mua thành công gói học. Bạn muốn học ngay?")
-            debugger
-            window.location.href = '@processUrl("Payment", "Home")/' + classid;
-        }*@
     </script>
 }
