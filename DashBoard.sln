@@ -43,7 +43,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Math", "Math\Math.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoEmailEduso", "AutoEmailEduso\AutoEmailEduso.csproj", "{5CA8C7B7-2503-4FCA-BAA3-89FDAD861F4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseCoreEmail", "BaseCoreEmail\BaseCoreEmail.csproj", "{54FAAA80-B027-4B32-8131-7BDABF398025}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseCoreEmail", "BaseCoreEmail\BaseCoreEmail.csproj", "{54FAAA80-B027-4B32-8131-7BDABF398025}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
