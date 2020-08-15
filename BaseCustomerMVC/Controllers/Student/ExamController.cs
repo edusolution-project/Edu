@@ -500,7 +500,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
-            exam = _examService.Complete(exam, lesson, out point);
+            exam = _examService.CompleteNoEssay(exam, lesson, out point);
             return new JsonResult(new
             {
                 Point = point,

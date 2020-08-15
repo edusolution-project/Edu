@@ -155,7 +155,7 @@ var ExamReview = (function () {
                 style: "font-size: 150%",
 
             }).append("Kết quả: ").append($('<span>',
-                { class: "text-primary", text: _correctQuiz + "/" + config.exam.MaxPoint })).append(" (" + durationFormat(duration) + ")"));
+                { class: "text-primary", text: config.exam.Point + "/" + config.exam.MaxPoint })).append(" (" + durationFormat(duration) + ")"));
 
         var totalhead = document.getElementById('total-point-head');
         if (totalhead) {
@@ -212,11 +212,11 @@ var ExamReview = (function () {
                     daCham++;
                 } else {
                     if (detail) {
-                        if (item.RealAnswerEssay) {
+                        console.log(item);
+                        if (item.RealAnswerEssay || item.PointEssay >= 0) {
+                            _class = "essay success";
                             if (item.PointEssay <= 0) {
                                 _class = "essay danger";
-                            } else {
-                                _class = "essay success";
                             }
                             _class += " checked";
                             title = "Đã chấm";
@@ -224,12 +224,12 @@ var ExamReview = (function () {
                         }
                         else {
                             _class = "essay unchecked";
-                            title = "chưa chấm";
+                            title = "Chưa chấm";
                         }
                     }
                     else {
                         _class = "essay bg-warning";
-                        title = "chưa làm";
+                        title = "Chưa làm";
                     }
                 }
             }
