@@ -532,6 +532,6 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        
+
     }
 }

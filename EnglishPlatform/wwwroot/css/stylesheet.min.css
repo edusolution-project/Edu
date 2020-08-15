@@ -2900,3 +2900,14 @@ fillquiz, fillquiz.quiz-item {
     color: green;
     font-weight: 700;
 }
+
+ul li {
+    list-style-position: inside;
+}
+
+.editorck {
+    min-height: 100px;
+    width: 100%;
+    border: solid 1px #CCC;
+    border-radius: 3px;
+}

@@ -374,7 +374,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                             ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                             MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                            MaxPoint = examview.MaxPoint
+                            MaxPoint = z.Point
                         }))?.ToList()
                 })).ToList()
             });
@@ -732,8 +732,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,
                                DoPoint =
                                (lastexam != null && lastexam.Status) ?
-                               r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100.00 / lastexam.MaxPoint : 0) :
-                                    (lastexam.QuestionsTotal > 0 ? lastexam.QuestionsPass * 100.00 / lastexam.QuestionsTotal : 0) : 0,//completed exam only
+                               //r.TemplateType == LESSON_TEMPLATE.EXAM ?
+                               //(lastexam.MaxPoint > 0 ? lastexam.Point * 100.00 / lastexam.MaxPoint : 0) :
+                                    (r.Point > 0 ? lastexam.Point * 100.00 / r.Point : 0)
+                                    : 0,//completed exam only
                                Tried = lastexam != null ? lastexam.Number : 0,
                                LastExam = (lastexam != null && lastexam.Status
                                ) ? lastexam.ID : null

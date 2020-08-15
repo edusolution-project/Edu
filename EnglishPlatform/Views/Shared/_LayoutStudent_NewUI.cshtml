@@ -24,6 +24,7 @@
 
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
+    <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
 
     <script type="text/javascript">
         const g_CurrentUser = {
@@ -36,8 +37,21 @@
     </script>
 </head>
 <body>
-   
+
     <style>
+        ::-webkit-scrollbar {
+            width: 5px; /* for vertical scrollbars */
+            height: 5px; /* for horizontal scrollbars */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
         [v-cloak], [cloak-holder] {
             display: none
         }

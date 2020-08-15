@@ -154,7 +154,6 @@ namespace BaseCustomerEntity.Database
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
                 //bài chọn hoặc nối đáp án
-
                 if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
                 {
                     switch (part.Type)

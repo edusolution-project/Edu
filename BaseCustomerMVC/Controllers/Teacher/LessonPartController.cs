@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using MongoDB.Bson.Serialization.Serializers;
 using System.Net;
 using System.IO;
+using MongoDB.Driver.Core.Operations;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -35,6 +36,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartAnswerService _answerService;
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
+
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public LessonPartController(
             //GradeService gradeservice,
@@ -72,15 +75,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult ChangePosition(string ID, int pos)
         {
-            var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            var item = _lessonPartService.GetItemByID(ID);
             if (item == null) return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", null },
                         {"Error", "Data not found" }
                     });
 
-            var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
-            ).SingleOrDefault();
+            var parentLesson = _lessonService.GetItemByID(item.ParentID);
 
             if (parentLesson != null)
             {
@@ -140,7 +142,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetDetail(string ID)
         {
-            var part = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            var part = _lessonPartService.GetItemByID(ID);
             if (part == null) return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", null },
@@ -167,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID).SingleOrDefault();
+                var parentLesson = _lessonService.GetItemByID(item.ParentID);
                 var createduser = User.Claims.GetClaimByType("UserID").Value;
                 if (parentLesson != null)
                 {
@@ -197,7 +199,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             else
                             {
-                                var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                                var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
                                 if (file != null)
                                 {
                                     item.Media.Created = DateTime.Now;
@@ -227,7 +229,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {"Error", "Upload Fails" }
                             });
 
-                            var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();//update media
+                            var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();//update media
                             item.Media.Created = DateTime.Now;
                             item.Media.Size = file.Length;
                             item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
@@ -259,7 +261,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 CourseID = lessonpart.CourseID,
                                 Content = "",
-                                Description = "",
+                                Description = item.Questions == null ? "" : item.Questions[0].Description,
                                 ParentID = lessonpart.ID,
                                 CreateUser = createduser,
                                 Point = lessonpart.Point,
@@ -330,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             break;
                     }
-
+                    calculateLessonPoint(item.ParentID);
                     IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
@@ -348,7 +350,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                {"Error", "Parent Item Not found" }
+                                {"Error", "Không tìm thấy bài học" }
                             });
                 }
             }
@@ -366,12 +368,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetList(string LessonID)
         {
-            var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
+            var root = _lessonService.GetItemByID(LessonID);
             var data = new Dictionary<string, object> { };
 
             if (root != null)
             {
-                var listLessonPart = _lessonPartService.CreateQuery().Find(o => o.ParentID == LessonID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                var listLessonPart = _lessonPartService.GetByLessonID(LessonID).ToList();
                 if (listLessonPart != null && listLessonPart.Count > 0)
                 {
                     var result = new List<LessonPartViewModel>();
@@ -416,6 +418,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private string RenderVocab(string description)
         {
             string result = "";
+            if (string.IsNullOrEmpty(description)) return result;
             var vocabs = description.Split('|');
             if (vocabs == null || vocabs.Count() == 0)
                 return description;
@@ -444,17 +447,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-
-                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                var item = _lessonPartService.GetItemByID(ID);
                 if (item == null) return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                {"Error", "Item Not Found" }
+                                {"Error", "Không tìm thấy nội dung" }
                             });
 
-                var parentLesson = _lessonService.CreateQuery().Find(o => o.ID == item.ParentID
-                //&& o.CreateUser == UserID TODO:remove later
-                ).SingleOrDefault(); //Chỉ remove được các part thuộc lesson do mình up
+                var parentLesson = _lessonService.GetItemByID(item.ParentID);
 
                 if (parentLesson != null)
                 {
@@ -464,7 +464,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
                     //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
                     //}
+                    var isQuiz = quizType.Contains(item.Type);
                     await RemoveLessonPart(ID);
+                    if (isQuiz)
+                        calculateLessonPoint(parentLesson.ID);
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -495,7 +498,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                var item = _lessonPartService.GetItemByID(ID);
                 if (item == null) return;
 
                 var questions = _questionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
@@ -513,8 +516,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                //var item = _questionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
-                //if (item == null) return;
                 await _answerService.CreateQuery().DeleteManyAsync(o => o.ParentID == ID);
                 await _questionService.RemoveAsync(ID);
             }
@@ -861,7 +862,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 }
                                 else
                                 {
-                                    var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();
+                                    var file = files.Where(f => f.Name == quiz.Media.Name).FirstOrDefault();
                                     if (file != null)
                                     {
                                         quiz.Media.Created = DateTime.Now;
@@ -888,7 +889,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         else
                         {
 
-                            var file = files.Where(f => f.Name == quiz.Media.Name).SingleOrDefault();//update media
+                            var file = files.Where(f => f.Name == quiz.Media.Name).FirstOrDefault();//update media
                             quiz.Media.Created = DateTime.Now;
                             quiz.Media.Size = file.Length;
                             quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
@@ -951,7 +952,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         }
                                         else
                                         {
-                                            var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();
+                                            var file = files.Where(f => f.Name == answer.Media.Name).FirstOrDefault();
                                             if (file != null)
                                             {
                                                 answer.Media.Created = DateTime.Now;
@@ -959,7 +960,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                                 answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
                                             }
                                         }
-
                                     }
                                 }
                             }
@@ -978,7 +978,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     answer.Media = null;
                                 else
                                 {
-                                    var file = files.Where(f => f.Name == answer.Media.Name).SingleOrDefault();//update media
+                                    var file = files.Where(f => f.Name == answer.Media.Name).FirstOrDefault();//update media
                                     answer.Media.Created = DateTime.Now;
                                     answer.Media.Size = file.Length;
                                     answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
@@ -1004,6 +1004,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
             }
+        }
+
+        //TODO: Need update later
+        private double calculateLessonPoint(string lessonId)
+        {
+            var point = 0.0;
+            var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            foreach (var part in parts)
+            {
+                if (part.Type == "ESSAY")
+                {
+                    point += part.Point;
+                }
+                else
+                {
+                    point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                }
+            }
+            _lessonService.UpdateLessonPoint(lessonId, point);
+            return point;
         }
     }
 

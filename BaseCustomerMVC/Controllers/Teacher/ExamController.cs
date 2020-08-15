@@ -266,9 +266,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
                     var progress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, student.ID, lesson.ID);
                     var tried = examresult.Count();
-                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
-                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
-                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
+                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
 
                     var lastEx = examresult.FirstOrDefault();
                     result.Add(new StudentLessonResultViewModel(student)
@@ -280,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         TriedCount = tried,
                         LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
                         OpenCount = progress?.TotalLearnt ?? 0,
-                        LastPoint = lastEx != null ? (lastEx.QuestionsTotal > 0 ? lastEx.QuestionsPass * 100 / lastEx.QuestionsTotal : 0) : 0,
+                        LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
                         IsCompleted = lastEx != null && lastEx.Status,
                         ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList()
                     });
