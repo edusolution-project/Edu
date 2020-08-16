@@ -43,7 +43,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Math", "Math\Math.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoEmailEduso", "AutoEmailEduso\AutoEmailEduso.csproj", "{5CA8C7B7-2503-4FCA-BAA3-89FDAD861F4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BaseCoreEmail", "BaseCoreEmail\BaseCoreEmail.csproj", "{54FAAA80-B027-4B32-8131-7BDABF398025}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BaseCoreEmail", "BaseCoreEmail\BaseCoreEmail.csproj", "{54FAAA80-B027-4B32-8131-7BDABF398025}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleLib", "E:\ggg\google\GoogleLib\GoogleLib.csproj", "{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +121,10 @@ Global
 		{54FAAA80-B027-4B32-8131-7BDABF398025}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54FAAA80-B027-4B32-8131-7BDABF398025}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54FAAA80-B027-4B32-8131-7BDABF398025}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,6 +147,7 @@ Global
 		{1B144105-ABC7-412A-A923-6E4EBEEE71E1} = {CB6A55AC-5DD6-4C78-85BD-77142660C6CC}
 		{5CA8C7B7-2503-4FCA-BAA3-89FDAD861F4A} = {D6733407-1104-4EDD-A7B9-05B1BCA864E6}
 		{54FAAA80-B027-4B32-8131-7BDABF398025} = {41C3BDCD-A0B7-4EB7-A833-5BAB2B8EAC80}
+		{A5912B91-8F7A-4EDD-9DE4-554D3B33BFB0} = {79E43CF4-517A-429A-98E5-0E10FDFB2296}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {366F4E1B-3316-4A63-BDBD-AB06A9DB34E8}
