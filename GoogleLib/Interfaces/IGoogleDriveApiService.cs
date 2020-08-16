@@ -21,5 +21,7 @@ namespace GoogleLib.Interfaces
         string CreateLinkViewFile(string fileId);
         string CreateLinkPreViewFile(string fileId);
         string CreateLinkThumbnail(string fileId);
+        string GetMimeType(string fileName);
+        string UploadFileStatic(string fileName, string mimeType, MemoryStream stream, string parents = "");
     }
 }

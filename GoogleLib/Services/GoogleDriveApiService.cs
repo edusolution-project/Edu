@@ -69,7 +69,7 @@ namespace GoogleLib.Services
                 }
             }
         }
-        private string GetMimeType(string fileName)
+        public string GetMimeType(string fileName)
         {
             var provider = new FileExtensionContentTypeProvider();
             if (!provider.TryGetContentType(fileName, out string contentType))
@@ -118,6 +118,41 @@ namespace GoogleLib.Services
 
             return null;
         }
+
+
+        public string UploadFileStatic(string fileName,string mimeType, MemoryStream stream, string parents = "")
+        {
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                Google.Apis.Drive.v3.Data.File file = new Google.Apis.Drive.v3.Data.File()
+                {
+                    Name = fileName,
+                    Description = "File uploaded by GoogleDriveApiService",
+                    MimeType = mimeType,
+                };
+                if (!string.IsNullOrEmpty(parents))
+                {
+                    file.Parents = new List<string>() { parents };
+                }
+
+                var fileRequest = _driveService.Files.Create(file, stream, mimeType);
+                fileRequest.Fields = "files(id,name,mimetype)";
+                IUploadProgress result = fileRequest.Upload();
+                if (result.Status == UploadStatus.Completed)
+                {
+                    var fileID = fileRequest.ResponseBody.Id;
+                    _ = ShareFile(fileID);
+                    return fileID;
+                }
+                else
+                {
+                    return result.Exception.Message;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// tao shared file 
         /// </summary>
