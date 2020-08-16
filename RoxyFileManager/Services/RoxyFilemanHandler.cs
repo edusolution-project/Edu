@@ -1,4 +1,5 @@
 ﻿using FileManagerCore.Globals;
+using GoogleLib.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -867,6 +868,16 @@ namespace FileManagerCore.Services
                 }
             }
             return ret;
+        }
+
+        public string UploadFileWithGoogleDrive(IGoogleDriveApiService googleDriveApiService, string folderId, HttpContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool DeleteFileWithGoogleDrive(IGoogleDriveApiService googleDriveApiService, string fileId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,6 +6,7 @@ using Google.Apis.Services;
 using Google.Apis.Upload;
 using Google.Apis.Util.Store;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,6 +36,17 @@ namespace GoogleLib.Services
         {
             if (string.IsNullOrEmpty(fileStorge)) { fileStorge = "Drive.Storge"; }
             _driveService = GetDriveService(file, user, appName, fileStorge).Result;
+        }
+        private readonly IConfiguration _configuration;
+        /// <summary>
+        /// dung file / khong
+        /// </summary>
+        /// <param name="isWithFile"></param>
+        /// <param name="fileSetting"></param>
+        public GoogleDriveApiService(bool isWithFile,string fileSetting = "appsettings.json")
+        {
+            _configuration = new ConfigurationBuilder().AddJsonFile(fileSetting, optional: true, reloadOnChange: true).Build();
+            _driveService = isWithFile ? GetDriveServiceWithFile().Result : GetDriveService().Result;
         }
 
         public async Task<string> Delete(string fileId)
@@ -312,5 +324,50 @@ namespace GoogleLib.Services
         {
             return URL_THUMBNAIL.Replace("{id}", fileId);
         }
+
+        private async Task<DriveService> GetDriveService(string clientId, string clientSecret, string user, string appName, string fileStorge)
+        {
+            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    new ClientSecrets() { ClientId = clientId, ClientSecret = clientSecret },
+                    new[] {
+                            DriveService.Scope.Drive,
+                            DriveService.Scope.DriveAppdata,
+                            DriveService.Scope.DriveScripts,
+                            DriveService.Scope.DriveReadonly,
+                            DriveService.Scope.DrivePhotosReadonly,
+                            DriveService.Scope.DriveMetadataReadonly,
+                            DriveService.Scope.DriveMetadata,
+                            DriveService.Scope.DriveFile
+                    },
+                    user, CancellationToken.None, new FileDataStore(fileStorge));
+            // Create the service.
+            var service = new DriveService(new BaseClientService.Initializer()
+            {
+                HttpClientInitializer = credential,
+                ApplicationName = appName,
+            });
+            return service;
+        }
+
+        private async Task<DriveService> GetDriveService()
+        {
+            string clientId = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_ID")?.Value,
+                clientSecret = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_SECRET")?.Value,
+                user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
+                appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
+                fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
+
+            return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
+        }
+        private async Task<DriveService> GetDriveServiceWithFile()
+        {
+            string file = _configuration.GetSection("GOOGLE:DRIVE:FILE")?.Value,
+                user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
+                appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
+                fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
+
+            return await GetDriveService(file, user, appName, fileStorge);
+        }
+
     }
 }
