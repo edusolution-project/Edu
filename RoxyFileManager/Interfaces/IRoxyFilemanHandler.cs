@@ -12,7 +12,7 @@ namespace FileManagerCore.Interfaces
     {
 
         List<string> UploadFileWithGoogleDrive(string center,string user,HttpContext context);
-        bool DeleteFileWithGoogleDrive(string fileId);
+        bool DeleteFileWithGoogleDrive(string fileId, string center, string user);
 
         List<DIRLIST> ListDirTree(string type);
         List<FILESLIST> ListFiles(string path, string type);
