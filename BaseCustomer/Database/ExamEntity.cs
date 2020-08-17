@@ -216,7 +216,9 @@ namespace BaseCustomerEntity.Database
                                         quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
                                 }
                         }
-                        if (quiz2answer.Contains(NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim())))
+                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim());
+
+                        if (quiz2answer.Contains(normalizeAns))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
@@ -368,7 +370,8 @@ namespace BaseCustomerEntity.Database
                 .Replace("‘", "'")
                 .Replace("’", "'")
                 .Replace("“", "\"")
-                .Replace("”", "\"");
+                .Replace("”", "\"")
+                .Replace(" ", " ");
         }
     }
 }
