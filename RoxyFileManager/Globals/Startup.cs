@@ -1,5 +1,9 @@
-﻿using FileManagerCore.Interfaces;
+﻿using BaseCustomerEntity.Database;
+using FileManagerCore.Interfaces;
 using FileManagerCore.Services;
+using GoogleLib.Factory;
+using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -10,8 +14,13 @@ namespace FileManagerCore.Globals
 {
     public static class Startup
     {
+        public static IGoogleDriveApiService GoogleDrive = GoogleFactory.GetGoogleDrive();
         public static IServiceCollection AddRoxyFileManger(this IServiceCollection service)
         {
+            service.AddSingleton<FolderManagerService>();
+            service.AddSingleton<FileManagerService>();
+            service.AddSingleton<FolderCenterService>();
+            service.AddSingleton<IGoogleDriveApiService, GoogleDriveApiService>();
             service.AddSingleton<GConfig>();
             service.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
             return service;

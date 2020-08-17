@@ -17,6 +17,7 @@ namespace GoogleLib.Interfaces
         string UploadFile(string fileUpload, string parents = "");
         object UploadFile(string fileName, MemoryStream memoryStream, string mimeType, string parents = "");
         string UploadFileStatic(string fileUpload, string parents = "");
+        string UploadFileStatic(string fileName, string mimeType, Stream stream, string parents = "");
         Task<byte[]> ViewFile(string fileId);
         string CreateLinkViewFile(string fileId);
         string CreateLinkPreViewFile(string fileId);

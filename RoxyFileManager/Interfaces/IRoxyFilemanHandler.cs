@@ -11,8 +11,8 @@ namespace FileManagerCore.Interfaces
     public interface IRoxyFilemanHandler
     {
 
-        string UploadFileWithGoogleDrive(IGoogleDriveApiService googleDriveApiService , string folderId, HttpContext context);
-        bool DeleteFileWithGoogleDrive(IGoogleDriveApiService googleDriveApiService, string fileId);
+        List<string> UploadFileWithGoogleDrive(string center,string user,HttpContext context);
+        bool DeleteFileWithGoogleDrive(string fileId);
 
         List<DIRLIST> ListDirTree(string type);
         List<FILESLIST> ListFiles(string path, string type);

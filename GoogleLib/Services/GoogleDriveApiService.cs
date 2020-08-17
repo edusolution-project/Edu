@@ -43,10 +43,15 @@ namespace GoogleLib.Services
         /// </summary>
         /// <param name="isWithFile"></param>
         /// <param name="fileSetting"></param>
-        public GoogleDriveApiService(bool isWithFile,string fileSetting = "appsettings.json")
+        public GoogleDriveApiService(string fileSetting = "appsettings.json")
         {
             _configuration = new ConfigurationBuilder().AddJsonFile(fileSetting, optional: true, reloadOnChange: true).Build();
-            _driveService = isWithFile ? GetDriveServiceWithFile().Result : GetDriveService().Result;
+            _driveService = GetDriveService().Result;
+        }
+        public GoogleDriveApiService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            _driveService = GetDriveService().Result;
         }
 
         public async Task<string> Delete(string fileId)
@@ -132,7 +137,7 @@ namespace GoogleLib.Services
         }
 
 
-        public string UploadFileStatic(string fileName,string mimeType, MemoryStream stream, string parents = "")
+        public string UploadFileStatic(string fileName,string mimeType, Stream stream, string parents = "")
         {
             if (!string.IsNullOrEmpty(fileName))
             {
@@ -351,23 +356,22 @@ namespace GoogleLib.Services
 
         private async Task<DriveService> GetDriveService()
         {
-            string clientId = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_ID")?.Value,
+            string file = _configuration.GetSection("GOOGLE:DRIVE:FILE")?.Value,
+                clientId = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_ID")?.Value,
                 clientSecret = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_SECRET")?.Value,
                 user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
                 appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
                 fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
-
-            return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
+            if (string.IsNullOrEmpty(file))
+            {
+                return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
+            }
+            else
+            {
+                return await GetDriveService(file, user, appName, fileStorge);
+            }
         }
-        private async Task<DriveService> GetDriveServiceWithFile()
-        {
-            string file = _configuration.GetSection("GOOGLE:DRIVE:FILE")?.Value,
-                user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
-                appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
-                fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
-
-            return await GetDriveService(file, user, appName, fileStorge);
-        }
+        
 
     }
 }
