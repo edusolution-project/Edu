@@ -888,23 +888,42 @@ namespace FileManagerCore.Services
         /// <param name="user"></param>
         /// <param name="context"></param>
         /// <returns>List fileId</returns>
-        public List<string> UploadFileWithGoogleDrive(string center,string user,HttpContext context)
+        public List<MediaResponseModel> UploadFileWithGoogleDrive(string center,string user,HttpContext context)
         {
             string folderId = GetFolder(center, user);
             var listFile = context.Request.Form.Files;
-            var count = listFile != null ? 0 : listFile.Count;
-            List<string> response = new List<string>();
+            var count = listFile == null ? 0 : listFile.Count;
+            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            List<MediaResponseModel> response = new List<MediaResponseModel>();
             for (int i = 0; i < count; i++)
             {
                 IFormFile file = listFile[i];
                 FileInfo f = new FileInfo(file.FileName);
-                string extends = _googleDriveService.GetMimeType(file.FileName);
-                string fileId = _googleDriveService.UploadFileStatic(f.Name, extends, file.OpenReadStream(), folderId);
-                response.Add(fileId);
+                string filename = MakeUniqueFilename(path, f.Name);
+                string dest = Path.Combine(path, filename);
+                string fileId = "";
+                using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+                {
+                    file.CopyTo(stream);
+                    fileId = _googleDriveService.UploadFileStatic(filename, _googleDriveService.GetMimeType(dest), stream, folderId);
+                    stream.Close();
+                }
+                //using (var stream = new FileStream(dest, FileMode.Create))
+                //{
+                //    file.CopyTo(stream);
+
+                //    stream.Close();
+                //}
+                //DeleteFile(dest);
+
+                response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
 
                 _fileManagerService.Collection.InsertOne(new FileManagerEntity()
                 {
-                    Extends = extends,
+                    Extends = f.Extension,
                     FileID = fileId,
                     FolderID = folderId,
                     Name = file.Name,
@@ -938,7 +957,7 @@ namespace FileManagerCore.Services
             {
                 centerFolder = CreateFolderCenter(center);
             }
-            string folderId = _folderManagerService.GetFolderID(center, user);
+            string folderId = _folderManagerService.GetFolderID(centerFolder, user);
             if (string.IsNullOrEmpty(folderId))
             {
                 folderId = CreateFolderUser(centerFolder, user);

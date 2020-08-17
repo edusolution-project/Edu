@@ -119,7 +119,7 @@ namespace GoogleLib.Services
                 System.IO.MemoryStream stream = new System.IO.MemoryStream(byteArray);
 
                 var fileRequest = _driveService.Files.Create(file, stream, GetMimeType(fileUpload));
-                fileRequest.Fields = "files(id,name,mimetype)";
+                fileRequest.Fields = "id";
                 IUploadProgress result = fileRequest.Upload();
                 if (result.Status == UploadStatus.Completed)
                 {
@@ -153,7 +153,7 @@ namespace GoogleLib.Services
                 }
 
                 var fileRequest = _driveService.Files.Create(file, stream, mimeType);
-                fileRequest.Fields = "files(id,name,mimetype)";
+                fileRequest.Fields = "id";
                 IUploadProgress result = fileRequest.Upload();
                 if (result.Status == UploadStatus.Completed)
                 {
