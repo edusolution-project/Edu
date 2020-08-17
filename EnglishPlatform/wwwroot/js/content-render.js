@@ -2108,9 +2108,9 @@ var Lesson = (function () {
                 CKEDITOR.on('dialogDefinition', function (ev) {
                     var dialogName = ev.data.name,
                         dialogDefinition = ev.data.definition;
-                    console.log(ev.data);
+                    //console.log(ev.data);
                     if (dialogName === 'textfield') {
-                        console.log(ev.data);
+                      //  console.log(ev.data);
                         dialogDefinition.removeContents('info');
                     }
                 });
@@ -4016,14 +4016,14 @@ var hideModal = function (modalId) {
 var submitForm = function (event, modalId, callback) {
     event.preventDefault();
     $('.btnSaveForm').hide();
-    console.log('Save');
+    //console.log('Save');
 
     var form = $(modalId).find('form');
     var Form = form.length > 0 ? form[0] : window.partForm;
     var formdata = new FormData(Form);
 
 
-    console.log(formdata);
+    //console.log(formdata);
 
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
