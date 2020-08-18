@@ -213,10 +213,10 @@ namespace BaseCustomerEntity.Database
                                 foreach (var ans in answer.Content.Split('/'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
+                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));
                                 }
                         }
-                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim());
+                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.Trim());
 
                         if (quiz2answer.Contains(normalizeAns))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
