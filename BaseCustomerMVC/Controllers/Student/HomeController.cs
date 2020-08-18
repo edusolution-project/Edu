@@ -81,13 +81,17 @@ namespace BaseCustomerMVC.Controllers.Student
             //var category = _newsCategoryService.GetItemByCode("san-pham");
 
             //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
-            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive==true).Limit(6);
+            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true).Limit(6);
 
             List<NewsEntity> _data = new List<NewsEntity>();
-            foreach(var item in data.ToList())
+            foreach (var item in data.ToList())
             {
+
                 //if (item.Targets == null) continue;
-                if (item.Targets !=null && item.Targets.Find(x => x == centerID) != null || item.CenterID == centerID)
+                if (item.Targets != null && item.Targets.Find(x => x == centerID) != null || item.CenterID == centerID)
+
+                if ((item.Targets != null && item.Targets.Find(x => x == centerID) != null) || item.CenterID == centerID)
+
                     _data.Add(item);
                 //else continue;
             }
@@ -100,7 +104,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult DetailProduct(string ID)
         {
-            var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type=="san-pham").FirstOrDefault();
+            var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type == "san-pham").FirstOrDefault();
             ViewBag.Title = detail_product?.Title;
             return Json(detail_product);
         }
@@ -193,7 +197,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult UploadPhoto(IFormFile fileUpload)
         {
-            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName,"Avatar").Result;
+            var pathImage = _fileProcess.SaveMediaAsync(fileUpload, fileUpload.FileName, "Avatar").Result;
             // Cap nhat vao truong avartar
             string _studentId = User.Claims.GetClaimByType("UserID").Value;
             StudentEntity oldAcc = _studentService.GetItemByID(_studentId);
@@ -319,8 +323,8 @@ namespace BaseCustomerMVC.Controllers.Student
             NewsViewModel DataResponse =
                _mapping.AutoOrtherType(inforProduct, new NewsViewModel()
                {
-                    //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
-                    ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
+                   //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
+                   ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
                    CenterName = inforProduct.CenterID == null || inforProduct.CenterID == "0" || inforProduct.CenterID == "" ? null : _centerService.GetItemByID(inforProduct.CenterID).Name
 
                });
@@ -368,7 +372,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult PaymentStatus(string basis,string ID=null,string Phone=null,string Name=null)
+        public JsonResult PaymentStatus(string basis, string ID = null, string Phone = null, string Name = null)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
@@ -383,7 +387,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var Error = "";
             if (string.IsNullOrEmpty(ClassID))
-                Error+= "Lớp không tồn tại";
+                Error += "Lớp không tồn tại";
             var @class = _classService.GetItemByID(ClassID);
             if (@class == null)
                 Error += "Lớp không tồn tại";
@@ -428,8 +432,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                 conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
                 conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
-                var price = product.Discount!=0?product.Discount:product.Price;
-                conn.AddDigitalOrderField("vpc_Amount", price.ToString()+"00");
+                var price = product.Discount != 0 ? product.Discount : product.Price;
+                conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                 //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
                 conn.AddDigitalOrderField("vpc_ReturnURL", "http://localhost:61259/eduso/student/Home/Transaction?ID=" + ID + "&center=" + basis);
                 // Thong tin them ve khach hang. De trong neu khong co thong tin
@@ -452,7 +456,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
-        public string JoinClass(string ID,string basis)
+        public string JoinClass(string ID, string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
@@ -463,7 +467,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //thêm sinh viên vào cơ sở khác
             if (student.Centers.Where(o => o == center.ID) == null)
                 student.Centers.Add(center.ID);
-                _studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
+            _studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
             //
 
             //if (string.IsNullOrEmpty(ClassID))
@@ -495,10 +499,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    student.Centers.Add(ClassID);
 
                 //_studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
-                return "Học viên đã được thêm vào lớp" ;
+                return "Học viên đã được thêm vào lớp";
             }
             return "Có lỗi, vui lòng thực hiện lại";
         }
+
 
         public IActionResult Transaction()
         {
@@ -531,7 +536,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var redirec = $"http://localhost:61259/{center}/student/Course";
                 TempData["message"] = "Thanh toán Không thành công!";
                 return RedirectToAction(redirec);
-            }    
+            }
             //if (vpc_TxnResponseCode.Equals("0"))
             //{
             //    if (string.IsNullOrEmpty(ClassID))
@@ -565,7 +570,11 @@ namespace BaseCustomerMVC.Controllers.Student
             //    return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
             //}
             //return Json(new { msg = message });
+
+            // return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
         }
-#endregion
+        // return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
+
     }
 }
+#endregion
