@@ -30,6 +30,19 @@ $.fn.textWidth = function (text, font) {
 
 var _openingPart = '';
 
+CKEDITOR.disableAutoInline = true;
+CKEDITOR.config.disallowedContent = 'script; *[on*]';
+CKEDITOR.config.allowedContent = false;
+CKEDITOR.config.removeDialogTabs = 'textfield';
+CKEDITOR.config.removePlugins = 'forms';
+CKEDITOR.on('instanceCreated', function (event) {
+    var editor = event.editor;
+    editor.on('instanceReady', function (e) {
+        $(e.editor.element.$).removeAttr("title").attr('title', $(e.editor.element.$).attr('data-title'));
+    });
+});
+CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
+
 var Lesson = (function () {
 
     var _totalPart = 0;
@@ -89,12 +102,40 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
-                renderExam();
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'redo':
+                            redoExam();
+                            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
+                            break;
+                        default:
+                            renderExam();
+                    }
+                }
+                else
+                    renderExam();
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 renderStandardLayout();
-                renderLecture();
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'redo':
+                            redoExam();
+                            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
+                            break;
+                        default:
+                            renderLecture();
+                    }
+                }
+                else
+                    renderLecture();
                 break;
             case mod.STUDENT_REVIEW:
                 renderStandardLayout();
@@ -1013,7 +1054,7 @@ var Lesson = (function () {
                 break;
             default:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + time
+                    "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
                     //+ point
                 }));
                 break;
@@ -1025,9 +1066,7 @@ var Lesson = (function () {
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", style: "cursor:pointer", part: data.ID, onclick: "toggleExpand(this)" });
         //$(collapseSwitch).click(function () {
         //    toggleExpand(this);
-        //});
-
-
+        //});        
         //itembox.append(ItemRow);
         switch (data.Type) {
             case "TEXT":
@@ -1122,6 +1161,7 @@ var Lesson = (function () {
                 //Render Question
                 totalQuiz = data.Questions.length;
                 var fillquizs = itembox.find("fillquiz");
+
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
 
                     var item = data.Questions[i];
@@ -1208,8 +1248,20 @@ var Lesson = (function () {
                 if (data.Questions.length > 0) {
                     var esid = "inputES-" + data.Questions[0].ID;
                     itemBody.append($("<label>", { text: "Trả lời: " }));
-                    itemBody.append($("<textarea>", { id: esid, class: "w-100" }));
-                    CKEDITOR.replace(esid);
+                    //itemBody.append($("<textarea>", { id: esid, class: "w-100" }));
+                    itemBody.append($("<div>", { id: esid, class: "editorck w-100", contenteditable: true }));
+
+
+                    //CKEDITOR.replace(esid);
+                    CKEDITOR.inline(esid, {
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    });
+
+                    if (data.Questions[0].Description !== null) {
+                        var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Questions[0].Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
+                        itemBody.append($("<div>", { "class": "quiz-item" }).append(extend));
+                    }
+
                     itemBody.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", disabled: "disabled" }));
                     itemBody.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", disabled: "disabled" }));
                 }
@@ -1398,7 +1450,7 @@ var Lesson = (function () {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -1412,7 +1464,7 @@ var Lesson = (function () {
                 container.append(answer);
                 break;
             case "QUIZ1":
-                console.log(answer);
+                //console.log(answer);
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
@@ -1423,7 +1475,7 @@ var Lesson = (function () {
                 container.append(answer);
                 break;
             case "QUIZ4":
-                console.log(data);
+                //console.log(data);
                 var form = $("<div>", { "class": "form-check" });
                 answer.append(form);
                 form.append($("<input>", { "type": "hidden" }));
@@ -1543,7 +1595,7 @@ var Lesson = (function () {
                         $(prevHolder).find(".placeholder").show();
                     }
                     else {
-                        $(prevHolder).append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        $(prevHolder).append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                     }
                 }
 
@@ -1580,7 +1632,7 @@ var Lesson = (function () {
                     if ($(prevHolder).find(".placeholder").length > 0)
                         $(prevHolder).find(".placeholder").show();
                     else
-                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Drop your answer here" }));
+                        prevHolder.append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 }
 
                 //AnswerQuestion(this);
@@ -1713,7 +1765,7 @@ var Lesson = (function () {
         $('#action').val(config.url.save_part);
         switch (data.Type) {
             case "QUIZ2":
-                $("#partModal").find('.btnSaveForm').attr("onclick", "submitQuizFill(event)");
+                $("#partModal").find('.btnSaveForm').attr("onclick", "submitForm(event)");
                 break;
             default:
                 $("#partModal").find('.btnSaveForm').attr("onclick", "submitForm(event)");
@@ -1816,11 +1868,12 @@ var Lesson = (function () {
         answer_template_holder.empty();
 
         contentholder.append($("<label>", { "class": "title", "text": "Tiêu đề:" }));
-        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề" }));
+        contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề", "required": "required" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
-
-        var desc = $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" });
+        contentholder.append($("<label>", { "class": "title", "text": "Mô tả:" }));
+        //var desc = $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" });
+        var desc = $("<div>", { "id": "editor", class: "editorck mb-3 p-2", "name": "Description", "data-title": "Nội dung giới thiệu", contenteditable: true });
         contentholder.append($("<div>", { class: "mb-2" }).append(desc));
 
         var description = "";
@@ -1828,7 +1881,9 @@ var Lesson = (function () {
         if (data != null && data.Description != null)
             description = data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/");
 
-        desc.val(description);
+        CKEDITOR.allowedContent = true;
+        //desc.val(description);
+        desc.html(description)
         switch (type) {
             case "TEXT"://Text
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập nội dung" }));
@@ -1859,7 +1914,8 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "VOCAB":
-                desc.remove();
+                desc.parent().prev().remove();
+                desc.parent().remove();
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập danh sách từ vựng, cách nhau bởi dấu |" }));
                 contentholder.append($("<input>", { "type": "text", "name": "Description", "class": "input-text form-control", "placeholder": "Danh sách từ vựng" }).val(description));
                 break;
@@ -1872,19 +1928,23 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px", "title": "Nhân bản câu hỏi" }));
 
-                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Question" }));
+                questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Câu hỏi" }));
+
                 questionTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(questionTemplate.find(".media_holder"), "Questions.");
                 questionTemplate.append($("<div>", { "class": "media_preview" }));
                 questionTemplate.append(
                     $("<div>", { class: "mt-1 d-none" }).append($("<label>", { "class": "input_label mr-1", "text": "Điểm" }))
-                        .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Point", "value": "1" })));
-                questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Answer (tick if correct)" })));
+                        .append($("<input>", { "type": "text", "name": "Questions.Point", "class": "input-text part_point form-control", "placeholder": "Điểm", "value": "1" })));
+                questionTemplate.append($("<div>", { class: "mt-1" }).append($("<label>", { "class": "part_label", "text": "Trả lời (đánh dấu nếu đúng)" })));
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
                 answer_wrapper.append($("<input>", { "type": "button", "class": "btn btn-primary btnAddAnswer ml-3", "value": "+", "onclick": "AddNewAnswer(this)" }));
                 questionTemplate.append(answer_wrapper);
-                questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Explanation" }));
+                //questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích" }));
+                questionTemplate.append($("<label>", { "class": "input_label mr-1", "text": "Giải thích đáp án" }));
+                questionTemplate.append($("<input>", { "class": "input_label mr-1", "type": "checkbox", "id": "Explain", "name": "Explain", "onclick":"GiaiThich(this)" }));
+                questionTemplate.append($("<div>", { class: "hide", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -1893,7 +1953,7 @@ var Lesson = (function () {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect" }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "onclick": "ToggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer" }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Trả lời" }));
                 answerTemplate.append($("<div>", { "class": "media_holder mt-1" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
@@ -1923,6 +1983,8 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
 
+                CKEDITOR.config.allowedContent = true;
+                CKEDITOR.allowedContent = true;
                 //Add First Question
                 var quizContent = $.parseHTML("<div>" + description + "</div>");
                 var fillquizs = $(quizContent).find("fillquiz");
@@ -1931,7 +1993,7 @@ var Lesson = (function () {
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
 
                         var quiz = data.Questions[i];
-                        //console.log(quiz);
+                        console.log(quiz);
                         var input = $(fillquizs[i]).find("input");
                         var answers = [];
                         if (quiz.Answers.length > 0) {
@@ -1945,13 +2007,14 @@ var Lesson = (function () {
                             //$(input).attr("size", size);
                             $(input).attr("dsp", quiz.Content);
                             $(input).attr("placeholder", content);
-                            $(input).attr("value", content);
+                            $(input).attr("value", content).attr("contenteditable", false).attr("readonly", "true");
 
                         }
                         $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
+                        $(fillquizs[i]).attr("contenteditable", false).attr("readonly", "true").after(" ");
                     }
                     //console.log($(quizContent).prop("innerHTML"));
-                    desc.val($(quizContent).prop("innerHTML"));
+                    desc.html($(quizContent).prop("innerHTML"));
                 }
 
                 //else
@@ -1966,12 +2029,12 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px" }));
 
                 var quizWrapper = $("<div>", { "class": "quiz-wrapper" });
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Question", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Content", "class": "input-text quiz-text form-control input-sm", "placeholder": "Câu hỏi", "tabindex": 0 }));
                 quizWrapper.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(quizWrapper.find(".media_holder"), "Questions.");
                 quizWrapper.append($("<div>", { "class": "media_preview" }));
                 quizWrapper.append($("<label>", { "class": "input_label d-none", "text": "Điểm " }));
-                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "d-none input-text part_point form-control", "placeholder": "Point", "value": "1", "tabindex": 0 }));
+                quizWrapper.append($("<input>", { "type": "text", "name": "Questions.Point", "class": "d-none input-text part_point form-control", "placeholder": "Điểm", "value": "1", "tabindex": 0 }));
                 questionTemplate.append(quizWrapper);
 
                 var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
@@ -1985,7 +2048,7 @@ var Lesson = (function () {
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.ParentID", "value": 0 }));
                 answerTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Answers.IsCorrect", "value": true }));
                 answerTemplate.append($("<input>", { "type": "checkbox", "class": "input-checkbox answer-checkbox", "checked": "checked", "tabindex": 0, "onclick": "ToggleCorrectAnswer(this)" }));
-                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Answer (tick if correct)", "tabindex": 0 }));
+                answerTemplate.append($("<input>", { "type": "text", "name": "Questions.Answers.Content", "class": "input-text answer-text form-control", "placeholder": "Trả lời (đánh dấu nếu đúng)", "tabindex": 0 }));
                 answerTemplate.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(answerTemplate.find(".media_holder"), "Questions.Answers.");
                 answerTemplate.append($("<div>", { "class": "media_preview" }));
@@ -2000,7 +2063,7 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Add question", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
+                contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
 
                 //Add question
@@ -2010,29 +2073,22 @@ var Lesson = (function () {
                         addNewQuestion(quiz);
                     }
                 }
-                else
-                    addNewQuestion();
+                //else
+                //    addNewQuestion();
                 break;
             case "ESSAY"://Tự luận
-
                 contentholder.append($("<div>", { "class": "media_holder" }));
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
-
-
+                contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
+                contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data != null ? data.Point : 0 }));
+                var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
+                questionTemplate.append($("<label>", { "class": "input_label mr-1", "text": "Giải thích đáp án" }));
+                questionTemplate.append($("<div>", { class: "editorck mt-3 mb-3 p-2", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
+                question_template_holder.append(questionTemplate);
                 if (data != null && data.Questions != null) {
-                    //only 1 question
-                    console.log(data.Questions);
-                    contentholder.append($("<label>", { "class": "title", "text": "Điểm" }));
-                    if (data.Questions.length == 1) {
-                        contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data.Questions[0].Point }));
-                    }
-
-                    //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    //    var quiz = data.Questions[i];
-                    //    addNewQuestion(quiz);
-                    //}
+                    addNewQuestion(data.Questions[0]);
                 }
                 else
                     addNewQuestion();
@@ -2041,8 +2097,6 @@ var Lesson = (function () {
 
                 break;
         }
-        //CKEDITOR.replace("editor");        
-        CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
 
         switch (type) {
             case "QUIZ2":
@@ -2052,22 +2106,32 @@ var Lesson = (function () {
                     removeDialogTabs: 'textfield',
                     removePlugins: 'forms'
                 });
-                CKEDITOR.on('dialogDefinition', function (ev) {
-                    var dialogName = ev.data.name,
-                        dialogDefinition = ev.data.definition;
-                    console.log(ev.data);
-                    if (dialogName === 'textfield') {
-                        console.log(ev.data);
-                        dialogDefinition.removeContents('info');
-                    }
-                });
+                //CKEDITOR.on('dialogDefinition', function (ev) {
+                //    var dialogName = ev.data.name,
+                //        dialogDefinition = ev.data.definition;
+                //    //console.log(ev.data);
+                //    if (dialogName === 'textfield') {
+                //      //  console.log(ev.data);
+                //        dialogDefinition.removeContents('info');
+                //    }
+                //});
+                //CKEDITOR.inline('editor', {
+                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
+                //});
                 break;
             case "VOCAB":
                 break;
             default:
-                CKEDITOR.replace('editor', {
-                    allowedContent: true,
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                for (name in CKEDITOR.instances) {
+                    CKEDITOR.instances[name].destroy(true);
+                }
+                $('.editorck').each(function (idx, obj) {
+                    //CKEDITOR.inline($(obj)[0], {
+                    //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    //});
+                    CKEDITOR.replace($(obj)[0], {
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    });
                 });
                 break;
         }
@@ -2077,12 +2141,44 @@ var Lesson = (function () {
     }
     //end renderPartTemplate
 
+    //fix hien thi ckeditor 18-08-2020
+    var GiaiThich = function (obj) {
+        debugger
+        var modal = obj.parentElement;
+        var status = $('#Explain').prop('checked');
+        if (status == true) {
+            $(modal).children()[13].setAttribute("class", "editorck mt - 3 mb - 3 p - 2");
+            for (name in CKEDITOR.instances) {
+                CKEDITOR.instances[name].destroy(true);
+            }
+            $('.editorck').each(function (idx, obj) {
+                //CKEDITOR.inline($(obj)[0], {
+                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                //});
+                CKEDITOR.replace($(obj)[0], {
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                });
+            });
+        }
+        else {
+            $(modal).children()[13].setAttribute("class", "hide");
+            //CKEDITOR.replace("editorck mt - 3 mb - 3 p - 2", {
+            //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            //});
+            for (name in CKEDITOR.instances) {
+                CKEDITOR.instances[name].destroy(true);
+            }
+        }
+        //(editorck mt - 3 mb - 3 p - 2)
+        //alert(obj);
+    }
+
     var addNewQuestion = function (data = null) {
         var container = $('.lesson_parts > .part_content');
         var template = $('.question_template > fieldset');
         var currentpos = $(container).find(".fieldQuestion").length;
         var clone = template.clone();
-        $(clone).find('.fieldset_title').text("Quiz " + (currentpos + 1));
+        $(clone).find('.fieldset_title').text("Câu hỏi " + (currentpos + 1));
         $(clone).attr("Order", currentpos);
         $(clone).find("[name='Questions.Order']").val(currentpos);
         if (data != null) {
@@ -2093,16 +2189,25 @@ var Lesson = (function () {
             if (data.Content != null)
                 $(clone).find("[name='Questions.Content']").val(data.Content);
             if (data.Description != null)
-                $(clone).find("[name='Questions.Description']").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
+                //$(clone).find("[name='Questions.Description']").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
+                $(clone).find("[name='Questions.Description']").html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
             if (data.Media != null) {
                 renderAddMedia(clone.find(".media_holder"), "Questions.", "", data.Media);
                 renderMediaContent(data, clone.find(".media_preview:first"), "");
             }
         }
+        //console.log(data);
+        //CKEDITOR.inline($(clone).find("[name='Questions.Description']")[0], {
+        //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        //});
+        CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
+            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        });
 
         $(clone).find("[name^='Questions.']").each(function () {
             $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
         });
+
         $(container).append(clone);
         if (data != null && data.Answers != null) {
             for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
@@ -2228,7 +2333,6 @@ var Lesson = (function () {
             confirmButtonText: 'Xóa',
             cancelButtonText: 'Bỏ qua'
         }).then((result) => {
-            //alert(1);
             var container = $('.lesson_parts > .part_content');
             var listFieldQuestion = $(container).find(".fieldQuestion");
             var removeQuestion = $(obj).parent()[0];
@@ -2240,7 +2344,7 @@ var Lesson = (function () {
                 $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
                     $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (parseInt(i) - 1) + "]."));
                 });
-                $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + i);
+                $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + i);
             }
             //debugger
             if (result.value) {
@@ -2608,12 +2712,13 @@ var Lesson = (function () {
                 renderQuizCounter();
             }
             else {
+                console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -2788,7 +2893,7 @@ var Lesson = (function () {
             lessonitem = $("<li>", { "class": "nav-item" });
             listPartContainer.append(lessonitem);
         }
-
+        console.log(data);
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
         lessonitem.append(itemtitle);
 
@@ -2809,7 +2914,7 @@ var Lesson = (function () {
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
         boxHeader.append($("<h5>", {
-            "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + time
+            "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
             //+ point
         }));
 
@@ -3162,7 +3267,7 @@ var Lesson = (function () {
                 $(placeholder).removeClass("no-child");
                 placeholder.empty().append($("<div>", {
                     "class": "pane-item placeholder",
-                    "text": "Drop your answer here"
+                    "text": "Thả câu trả lời ở đây"
                 }));
 
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
@@ -3326,7 +3431,6 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
-
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
 
             var limit = lastExam.limit;
@@ -3831,24 +3935,29 @@ var Lesson = (function () {
         $(cloneQuestion).find("[name^='" + question + "']").each(function () {
             $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (currentpos) + "]."));
         });
+
+        CKEDITOR.inline($(cloneQuestion).find('.editorck')[0], {
+            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        });
+
         cloneQuestion.children[1].value = currentpos;
         cloneQuestion.setAttribute("order", currentpos);
-        $(cloneQuestion).find("[class=fieldset_title]").text("Quiz " + (parseInt(currentpos) + 1).toString());
+        $(cloneQuestion).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(currentpos) + 1).toString());
 
         //new File([file], cloneQuestion.children[5].children[1].children[1].value);
         //debugger
         $(_this).parent().after(cloneQuestion);
         var listFieldQuestion = $(container).find(".fieldQuestion");
         for (var i = parseInt(index) + 1; i < listFieldQuestion.length; i++) {
-            console.log(i);
+            //console.log(i);
             var question = "Questions[" + (parseInt(i) - 1) + "].";
-            var quizField = listFieldQuestion[i];
+            //var quizField = listFieldQuestion[i];
             $(listFieldQuestion[i]).attr("order", i);
             $(listFieldQuestion[i]).find("[name^='" + question + "Order']").val(i);
             $(listFieldQuestion[i]).find("[name^='" + question + "']").each(function () {
                 $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + i + "]."));
             });
-            $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Quiz " + (parseInt(i) + 1));
+            $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(i) + 1));
         }
     }
 
@@ -3901,6 +4010,7 @@ var Lesson = (function () {
     window.PrevPart = prevPart;
 
     window.SwitchMode = switchMode;
+    window.GiaiThich = GiaiThich;
     return LessonInstance;
 }());
 
@@ -3946,17 +4056,27 @@ var hideModal = function (modalId) {
 var submitForm = function (event, modalId, callback) {
     event.preventDefault();
     $('.btnSaveForm').hide();
-    console.log('Save');
+    //console.log('Save');
 
     var form = $(modalId).find('form');
     var Form = form.length > 0 ? form[0] : window.partForm;
     var formdata = new FormData(Form);
+
+
+    //console.log(formdata);
 
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
+
+    $('.editorck').each(function (idx, obj) {
+        //console.log(obj);
+        var name = $(obj).attr('name');
+        formdata.append(name, $(obj).html());
+    });
+
     var err = false;
     var requires = $(Form).find(':required');
 
@@ -3994,15 +4114,6 @@ var submitForm = function (event, modalId, callback) {
             if (xhr.status == 200) {
                 var data = JSON.parse(xhr.responseText);
                 if (data.Error == null || data.Error == "") {
-                    //switch (actionUrl) {
-                    //case "Lesson/" + urlLesson.CreateOrUpdate:
-                    //render.lesson(data.data);
-                    //document.location = urlLesson.Location + data.Data.ID;
-                    //document.location = document.location;
-                    //    break;
-                    //case "LessonPart/" + urlLessonPart.CreateOrUpdate:
-                    //    var part = data.Data;
-                    //   //render.part(part);
                     if (callback == "addPart") {
                         var part = data.Data;
                         window.AddPart(part);
@@ -4037,63 +4148,73 @@ var submitQuizFill = function (event, modalId, callback) {
     var Form = form.length > 0 ? form[0] : window.partForm;
     var formdata = new FormData(Form);
 
-    if ($('textarea[name="Description"]').length > 0) {
-        formdata.delete("Description");
+    //if ($('textarea[name="Description"]').length > 0) {
+    //    formdata.delete("Description");
 
-        var CKEContent = CKEDITOR.instances.editor.getData();
-        //var description = $.parseHTML("<div>" + CKEContent + "</div>");
-        //var quizs = $(description).find("fillquiz");
-        //if (quizs.length > 0) {
-        //    var pos = -1;
-        //    for (var i = 0; i < quizs.length; i++) {
-        //        var question = quizs[i];
-        //        var inp = $(question).find("input");
-        //        if (inp.length == 0) {
-        //            $(question).attr('bad', 1);
-        //            continue; //skip empty fillquiz
-        //        }
-        //        pos++;
-        //        //console.log(inp);
-        //        var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
-        //        var display = $(inp).attr("dsp");
-        //        if (display == null) display = "";
-        //        var explanation = $(question).attr("title");
-        //        if (explanation == null) explain = "";
+    //    var CKEContent = CKEDITOR.instances.editor.getData();
+    //    //var description = $.parseHTML("<div>" + CKEContent + "</div>");
+    //    //var quizs = $(description).find("fillquiz");
+    //    //if (quizs.length > 0) {
+    //    //    var pos = -1;
+    //    //    for (var i = 0; i < quizs.length; i++) {
+    //    //        var question = quizs[i];
+    //    //        var inp = $(question).find("input");
+    //    //        if (inp.length == 0) {
+    //    //            $(question).attr('bad', 1);
+    //    //            continue; //skip empty fillquiz
+    //    //        }
+    //    //        pos++;
+    //    //        //console.log(inp);
+    //    //        var answers = $(inp).attr("ans") == null ? $(inp).attr("placeholder") : $(inp).attr("ans");
+    //    //        var display = $(inp).attr("dsp");
+    //    //        if (display == null) display = "";
+    //    //        var explanation = $(question).attr("title");
+    //    //        if (explanation == null) explain = "";
 
-        //        if (answers != null) {
-        //            //console.log(answers);    
-        //            formdata.append("Questions[" + pos + "].Order", pos);
-        //            formdata.append("Questions[" + pos + "].Point", 1);
-        //            formdata.append("Questions[" + pos + "].Content", display);
-        //            formdata.append("Questions[" + pos + "].Description", explanation);
+    //    //        if (answers != null) {
+    //    //            //console.log(answers);    
+    //    //            formdata.append("Questions[" + pos + "].Order", pos);
+    //    //            formdata.append("Questions[" + pos + "].Point", 1);
+    //    //            formdata.append("Questions[" + pos + "].Content", display);
+    //    //            formdata.append("Questions[" + pos + "].Description", explanation);
 
-        //            var ans = answers.split("|");
-        //            if (ans.length > 0) {
-        //                for (var j = 0; j < ans.length; j++) {
-        //                    var an = ans[j].trim();
-        //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].Content", an);
-        //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].IsCorrect", true);
-        //                }
-        //                //console.log(ans);
-        //            }
+    //    //            var ans = answers.split("|");
+    //    //            if (ans.length > 0) {
+    //    //                for (var j = 0; j < ans.length; j++) {
+    //    //                    var an = ans[j].trim();
+    //    //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].Content", an);
+    //    //                    formdata.append("Questions[" + pos + "].Answers[" + j + "].IsCorrect", true);
+    //    //                }
+    //    //                //console.log(ans);
+    //    //            }
 
-        //            $(question).removeAttr("title");
-        //            $(question).find("input").removeAttr("ans");
-        //            $(question).find("input").removeAttr("dsp");
-        //            $(question).find("input").attr("placeholder", "");
-        //            //$(question).find("input").attr("size", "10");
-        //            //$(question).find("input").attr("value", "");
-        //        }
-        //    }
-        //}
-        ////console.log(CKEContent);
-        ////console.log($(description).prop("innerHTML"));
-        //$(description).find("[bad=1]").remove();//remove all bad fillquiz;
+    //    //            $(question).removeAttr("title");
+    //    //            $(question).find("input").removeAttr("ans");
+    //    //            $(question).find("input").removeAttr("dsp");
+    //    //            $(question).find("input").attr("placeholder", "");
+    //    //            //$(question).find("input").attr("size", "10");
+    //    //            //$(question).find("input").attr("value", "");
+    //    //        }
+    //    //    }
+    //    //}
+    //    ////console.log(CKEContent);
+    //    ////console.log($(description).prop("innerHTML"));
+    //    //$(description).find("[bad=1]").remove();//remove all bad fillquiz;
 
-        //console.log("Description", $(description).prop("innerHTML"));
-        //formdata.append("Description", $(description).prop("innerHTML"));
-        formdata.append("Description", CKEContent);
-    }
+    //    //console.log("Description", $(description).prop("innerHTML"));
+    //    //formdata.append("Description", $(description).prop("innerHTML"));
+    //    formdata.append("Description", CKEContent);
+
+
+    //}
+
+    $('.editorck').each(function (idx, obj) {
+        console.log(obj);
+        var name = $(obj).attr('name');
+        formdata.append(name, $(obj).html());
+    });
+
+
     var err = false;
     var requires = $(Form).find(':required');
 
