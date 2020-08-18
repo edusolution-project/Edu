@@ -105,7 +105,7 @@
                                 <div class="form-row">
                                     <div class="col-sm-12">
                                         <select id="CenterID" name="CenterID" class="form-control" onchange="renderClass()" required>
-                                            <option value="">--- Lựa chọn cơ sở ---</option>
+                                            <option value="0">--- Lựa chọn cơ sở ---</option>
                                             @foreach (var item in listcenter)
                                             {
                                                 <option value="@item.ID">@item.Name</option>
@@ -298,7 +298,13 @@
     var renderClass = function (ClassID="") {
         modal = $(".modal-body");
         removeoption();
-        var centerID=$(modal).find("[name=CenterID]").val();
+        var centerID = $(modal).find("[name=CenterID]").val();
+        //debugger
+        //for (i = 0; i < $(modal).find("[type=checkbox]").length - 2; i++) {
+        //    if ($($(modal).find("[type=checkbox]")[i]).attr("id") == centerID) {
+        //        $('#'+centerID).remove();
+        //    }
+        //}
 
         _url = '@Url.Action("GetClass", "Product", new { Area = "admin" })'
 
@@ -329,7 +335,7 @@
             .find('option')
             .remove()
             .end()
-            .append('<option value="">--- Lựa chọn lớp ---</option>' + '<option :value="item.ID" v-for="item in items">{{item.Name}}</option>')
+            .append('<option value="0">--- Lựa chọn lớp ---</option>' + '<option :value="item.ID" v-for="item in items">{{item.Name}}</option>')
             .val('whatever')
             ;
     }
@@ -389,7 +395,7 @@
                             "<button onclick =\"Preview('" + item.ID + "')\" type='button' class='btn btn-primary' data-placement='top' title='Xem trước' > <i class='fas fa-eye'></i> </button>" +
                             "<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +
                             "<button onclick =\"Edits('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-edit'></i> </button>" +
-                            "<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
+                            @*"<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +*@
                             "</td > " +
                             "</tr>"
                         );

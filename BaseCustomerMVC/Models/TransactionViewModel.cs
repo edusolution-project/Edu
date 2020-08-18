@@ -6,7 +6,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class HistoryTransactionViewModel:HistoryTransactionEntity
+    public class TransactionViewModel:TransactionEntity
     {
         [JsonProperty("Title")]
         public string Title { get; set; }

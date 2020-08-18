@@ -23,6 +23,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using BaseCustomerEntity.Globals;
 
 namespace EnglishPlatform.Controllers
 {
@@ -76,6 +77,7 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        //lay chi tiet tin
         public IActionResult Detail(string catcode, string newscode)
         {
             var cat = _newsCategoryService.GetItemByCode(catcode);
@@ -84,11 +86,22 @@ namespace EnglishPlatform.Controllers
 
             if (!string.IsNullOrEmpty(newscode))
             {
-                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.ID == newscode));
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Code == newscode));
             }
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type == null));
 
-            var news = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).FirstOrDefault();
+            var listnews = _newsService.CreateQuery().Find(x => x.Type == "news" || x.Type==null).ToList();
+            foreach(var item in listnews)
+            {
+                if (item.Code == null)
+                {
+                    item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                }
+            }
+
+            //var news = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).FirstOrDefault();
+            var news = listnews.Find(x=>x.Code==newscode);
+            
             ViewBag.News = news;
             if (news == null || !news.IsActive)
             {
@@ -125,6 +138,13 @@ namespace EnglishPlatform.Controllers
             var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
                 .SortByDescending(t => t.PublishDate);
             model.TotalRecord = data.CountDocuments();
+            foreach(var item in data.ToList())
+            {
+                if (item.Code == null)
+                {
+                    item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                }
+            }
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();

@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using OfficeOpenXml.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +28,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly NewsService _newsService;
         private readonly NewsCategoryService _newsCategoryService;
         private readonly ClassService _classService;
-        private readonly HistoryTransactionService _historyTransactionService;
+        private readonly TransactionService _TransactionService;
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mapping;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -39,7 +42,7 @@ namespace BaseCustomerMVC.Controllers.Student
             NewsService newsService,
             NewsCategoryService newsCategoryService,
             ClassService classService,
-            HistoryTransactionService historyTransactionService
+            TransactionService historyTransactionService
             )
         {
             _studentService = studentService;
@@ -52,7 +55,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _default = defaultvalue.Value;
             _newsService = newsService;
             _classService = classService;
-            _historyTransactionService = historyTransactionService;
+            _TransactionService = historyTransactionService;
             _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
         }
 
@@ -83,7 +86,7 @@ namespace BaseCustomerMVC.Controllers.Student
             List<NewsEntity> _data = new List<NewsEntity>();
             foreach (var item in data.ToList())
             {
-                if ((item.Targets != null && item.Targets.Find(x => x == centerID) != null) || item.CenterID == centerID)
+                if ((item.Targets != null && item.Targets.Find(x => x == centerID) != null))
                     _data.Add(item);
             }
 
@@ -321,6 +324,8 @@ namespace BaseCustomerMVC.Controllers.Student
                });
 
             ViewBag.Product = DataResponse;
+            ViewBag.Student = student;
+            ViewData["Title"] = "Thông tin thanh toán: " + inforProduct.Title;
             return View();
         }
 
@@ -341,38 +346,132 @@ namespace BaseCustomerMVC.Controllers.Student
         //    return Json(Dataresponse);
         //}
 
-        public JsonResult JoinClass(string ID, string basis)
+
+        //get ip client
+        public string GetIPAddress()
+        {
+            var IPAddress = "";
+            IPHostEntry Host = default(IPHostEntry);
+            string Hostname = null;
+            Hostname = System.Environment.MachineName;
+            Host = Dns.GetHostEntry(Hostname);
+            foreach (IPAddress IP in Host.AddressList)
+            {
+                if (IP.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    IPAddress = Convert.ToString(IP);
+                }
+            }
+            return IPAddress;
+        }
+
+        [HttpPost]
+        public JsonResult PaymentStatus(string basis,string ID=null,string Phone=null,string Name=null)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
 
+            //var ID = Request.Form["ID"].ToString();
+            //var Name = Request.Form["Name"].ToString();
+            //var Phone= Request.Form["Phone"].ToString();
+            var Address = Request.Form["Address"].ToString();
+
             var product = _newsService.GetItemByID(ID);
             var ClassID = product.ClassID;
 
-            if (student.Centers.Where(o => o == ClassID) == null)
-                student.Centers.Add(ClassID);
-
-            _studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
-
-            //tạo lịch sử giao dịch
-            var historyTransaction = new HistoryTransactionEntity();
-            historyTransaction.StudentID = student.ID;
-            historyTransaction.NewsID = ID;//mua san pham nao
-            historyTransaction.Price = product.Discount == 0 ? product.Price : product.Discount;
-            historyTransaction.CenterID = _centerService.GetItemByCode(basis).ID;
-            historyTransaction.DayBuy = DateTime.UtcNow;
-
-            _historyTransactionService.CreateOrUpdate(historyTransaction);
-            //hết tạo lịch sử giao dịch
-
+            var Error = "";
             if (string.IsNullOrEmpty(ClassID))
-                return Json(new { error = "Lớp không tồn tại" });
+                Error+= "Lớp không tồn tại";
             var @class = _classService.GetItemByID(ClassID);
             if (@class == null)
-                return Json(new { error = "Lớp không tồn tại" });
+                Error += "Lớp không tồn tại";
             //var student = _studentService.GetItemByID(StudentID);
             if (student == null)
-                return Json(new { error = "Học viên không tồn tại" });
+                Error += "Học viên không tồn tại";
+            if (_studentService.IsStudentInClass(ClassID, student.ID))
+            {
+                Error += "Học viên đã có trong lớp.Giao dịch không thành công!";
+                var dataresponse = new Dictionary<string, object>()
+                {
+                    {"Url","" },
+                    {"Error", Error}
+                };
+                return Json(dataresponse);
+            }
+            else
+            {
+                //tạo lịch sử giao dịch
+                var historyTransaction = new TransactionEntity();
+                historyTransaction.StudentID = student.ID;
+                historyTransaction.NewsID = ID;//mua san pham nao
+                historyTransaction.Price = product.Discount == 0 ? product.Price : product.Discount;
+                historyTransaction.CenterID = _centerService.GetItemByID(product.CenterID).ID;
+                historyTransaction.DayBuy = DateTime.UtcNow;
+                historyTransaction.StatusPayment = false;
+
+                _TransactionService.CreateOrUpdate(historyTransaction);
+
+                string SECURE_SECRET = "6D0870CDE5F24F34F3915FB0045120DB";
+                // Khoi tao lop thu vien va gan gia tri cac tham so gui sang cong thanh toan
+                VPCRequest conn = new VPCRequest("https://mtf.onepay.vn/paygate/vpcpay.op");
+                conn.SetSecureSecret(SECURE_SECRET);
+                // Add the Digital Order Fields for the functionality you wish to use
+                // Core Transaction Fields
+                conn.AddDigitalOrderField("AgainLink", "https://mtf.onepay.vn/paygate/vpcpay.op");
+                conn.AddDigitalOrderField("Title", "Thanh toán khóa học " + product.Title);
+                conn.AddDigitalOrderField("vpc_Locale", "en");//Chon ngon ngu hien thi tren cong thanh toan (vn/en)
+                conn.AddDigitalOrderField("vpc_Version", "2");
+                conn.AddDigitalOrderField("vpc_Command", "pay");
+                conn.AddDigitalOrderField("vpc_Merchant", "TESTONEPAY");
+                conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
+                conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
+                conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
+                var price = product.Discount==0?product.Discount:product.Price;
+                conn.AddDigitalOrderField("vpc_Amount", price.ToString()+"00");
+                //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
+                conn.AddDigitalOrderField("vpc_ReturnURL", "http://localhost:61259/eduso/student/Home/Transaction?ID=" + ID + "&center=" + basis);
+                // Thong tin them ve khach hang. De trong neu khong co thong tin
+                conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
+                conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);
+                conn.AddDigitalOrderField("vpc_Customer_Name", Name);
+                // Dia chi IP cua khach hang
+                string IPAddress = GetIPAddress();
+                conn.AddDigitalOrderField("vpc_TicketNo", IPAddress);
+                // Chuyen huong trinh duyet sang cong thanh toan
+                String url = conn.Create3PartyQueryString();
+                //return Redirect(url);
+                var dataresponse = new Dictionary<string, object>()
+                {
+                    {"Url",url },
+                    {"Error","" }
+                };
+                return Json(dataresponse);
+                //hết tạo lịch sử giao dịch
+            }
+        }
+
+        public string JoinClass(string ID,string basis)
+        {
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            var product = _newsService.GetItemByID(ID);
+            var center = _centerService.GetItemByCode(basis);
+            var ClassID = product.ClassID;
+
+            //thêm sinh viên vào cơ sở khác
+            if (student.Centers.Where(o => o == center.ID) == null)
+                student.Centers.Add(center.ID);
+                _studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
+            //
+
+            //if (string.IsNullOrEmpty(ClassID))
+            //    return "Lớp không tồn tại";
+            var @class = _classService.GetItemByID(ClassID);
+            //if (@class == null)
+            //    return "Lớp không tồn tại" ;
+            ////var student = _studentService.GetItemByID(StudentID);
+            //if (student == null)
+            //    return "Học viên không tồn tại";
 
             if (student.JoinedClasses == null)
             {
@@ -386,15 +485,74 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             if (_studentService.IsStudentInClass(ClassID, student.ID))
             {
-                return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
+                return "Học viên đã có trong lớp";
             }
             if (_studentService.JoinClass(ClassID, student.ID, @class.Center) > 0)
             {
+                //if (student.Centers.Where(o => o == ClassID) == null)
+                //    student.Centers.Add(ClassID);
 
-                return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
+                //_studentService.CreateQuery().ReplaceOne(o => o.ID == student.ID, student);
+                return "Học viên đã được thêm vào lớp" ;
             }
-            return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
+            return "Có lỗi, vui lòng thực hiện lại";
         }
-        #endregion
+
+        public IActionResult Transaction()
+        {
+            var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
+            var idproduct = Request.Query["ID"].ToString();
+            var center = Request.Query["center"].ToString();
+            var transaction = Request.Query["vpc_MerchTxnRef"].ToString();
+            if (vpc_TxnResponseCode.Equals("0"))
+            {
+                var vpc_TransactionNo = Request.Query["vpc_TransactionNo"].ToString();
+                var historyTransaction = _TransactionService.CreateQuery().Find(o => o.ID == transaction).FirstOrDefault();
+                historyTransaction.StatusPayment = true;
+                historyTransaction.DayPayment = DateTime.UtcNow;
+                historyTransaction.TradingID = vpc_TransactionNo;
+
+                JoinClass(idproduct, center);
+                ViewBag.message = "Thanh toán thành công!";
+            }
+            else
+            {
+                ViewBag.message = "Thanh toán không thành công!";
+            }    
+            //if (vpc_TxnResponseCode.Equals("0"))
+            //{
+            //    if (string.IsNullOrEmpty(ClassID))
+            //        return Json(new { error = "Lớp không tồn tại" });
+            //    var @class = _classService.GetItemByID(ClassID);
+            //    if (@class == null)
+            //        return Json(new { error = "Lớp không tồn tại" });
+            //    //var student = _studentService.GetItemByID(StudentID);
+            //    if (student == null)
+            //        return Json(new { error = "Học viên không tồn tại" });
+
+            //    if (student.JoinedClasses == null)
+            //    {
+            //        student.JoinedClasses = new List<string> { };
+            //        _studentService.Save(student);//init JoinedClass;
+            //    }
+            //    if (student.Centers == null)
+            //    {
+            //        student.Centers = new List<string> { };
+            //        _studentService.Save(student);//init Center;
+            //    }
+            //    if (_studentService.IsStudentInClass(ClassID, student.ID))
+            //    {
+            //        return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
+            //    }
+            //    if (_studentService.JoinClass(ClassID, student.ID, @class.Center) > 0)
+            //    {
+
+            //        return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
+            //    }
+            //    return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
+            //}
+            return View();
+        }
+#endregion
     }
 }

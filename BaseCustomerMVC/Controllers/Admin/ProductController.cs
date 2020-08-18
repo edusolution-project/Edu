@@ -71,14 +71,17 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             //item.Targets.RemoveAt(item.Targets.Count - 1);       
             //var a=item.Targets[0].ToString();
-
-            foreach(var target in item.Targets[0].ToString().Split(','))
+            if(item.Targets[0]!=null)
             {
-                if(target!=null||target!="")
-                item.Targets.Add(target);
+                foreach (var target in item.Targets[0].ToString().Split(','))
+                {
+                    if (target != null || target != "")
+                        item.Targets.Add(target);
+                }
+                item.Targets.Remove(item.CenterID);
+                item.Targets.RemoveAt(0);
+                item.Targets.RemoveAt(item.Targets.Count - 1);
             }
-            item.Targets.RemoveAt(0);
-            item.Targets.RemoveAt(item.Targets.Count - 1);
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
