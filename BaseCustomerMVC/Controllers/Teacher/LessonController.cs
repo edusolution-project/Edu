@@ -787,6 +787,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 switch (part.Type)
                 {
                     case "QUIZ1":
+                    case "QUIZ4":
                     case "QUIZ3":
                     case "ESSAY":
                         convertedPart.Questions = _clonequestionService.CreateQuery()

@@ -1,4 +1,5 @@
-﻿using Core_v2.Repositories;
+﻿using Core_v2.Globals;
+using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
@@ -128,10 +130,15 @@ namespace BaseCustomerEntity.Database
             point = 0;
             var pass = 0;
             var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
-
+            var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
             {
+                // check câu trả lời đúng
+                bool isTrue = false;
                 var examDetail = listDetails[i];
+
+                // giá trị câu trả lời 
+                //var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
 
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
@@ -142,51 +149,92 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var _realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
-                var realanswer = _realAnswers.FirstOrDefault();
-                if (realanswer != null)
-                {
-                    examDetail.RealAnswerID = realanswer.ID;
-                    examDetail.RealAnswerValue = realanswer.Content;
-                }
-
                 //bài chọn hoặc nối đáp án
-                if (!string.IsNullOrEmpty(examDetail.AnswerID))
+                if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
                 {
-                    var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
-                    if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
-
-
                     switch (part.Type)
                     {
-                        case "QUIZ1": //chọn đáp án
-                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID);//chọn đúng đáp án
+                        case "QUIZ1":
+                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            examDetail.RealAnswerID = _correctanswer.ID;
+                            examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
-                        case "QUIZ3": //nối đáp án
-                            _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
+                        case "QUIZ3":
+                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            //ID not match => check value
+                            if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
+                                _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+                            examDetail.RealAnswerID = _correctanswer.ID;
+                            examDetail.RealAnswerValue = _correctanswer.Content;
+                            break;
+                        case "QUIZ4":
+                            var realIds = examDetail.AnswerID.Split(',');
+                            examDetail.RealAnswerID = string.Join(",", realAnswers.Select(t => t.ID));
+                            examDetail.RealAnswerValue = string.Join(",", realAnswers.Select(t => t.Content));
+                            if (realIds.Length != realAnswers.Count()) continue;//incorrect
+                            var isCorrect = true;
+                            foreach (var id in realIds)
+                            {
+                                if (realAnswers.FirstOrDefault(t => t.ID == id) == null)//incorrect
+                                {
+                                    isCorrect = false;
+                                    break;
+                                }
+
+                            }
+                            if (isCorrect)
+                            {
+                                _correctanswer = realAnswers.First();
+                                _correctanswer.ID = examDetail.AnswerID;
+                                _correctanswer.Content = examDetail.AnswerValue;
+                            }
                             break;
                     }
+
+                    //var _realAnswers = realAnswers?.FirstOrDefault();//multiple correct answers
+                    ////var realanswer = _realAnswers.FirstOrDefault();
+                    //if (_realAnswers != null)
+                    //{
+                    //    examDetail.RealAnswerID = _realAnswers.ID;
+                    //    examDetail.RealAnswerValue = _realAnswers.Content;
+                    //}
+
+
+                    //isTrue =
+                    //    (!string.IsNullOrEmpty(answerID) && realAnswers.Any(t => t.ID == answerID)) ||
+                    //    //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
+                    //    (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
+
+                    //_correctanswer = isTrue
+                    //    ? _realAnswers
+                    //    : null;//chọn đúng đáp án
+
                 }
                 else //bài điền từ
                 {
                     if (examDetail.AnswerValue != null)
                     {
+                        var _realAnwserQuiz2 = realAnswers?.ToList();
+
+                        if (_realAnwserQuiz2 == null) continue;
                         List<string> quiz2answer = new List<string>();
-                        foreach (var answer in _realAnswers)
+                        foreach (var answer in _realAnwserQuiz2)
                         {
                             if (!string.IsNullOrEmpty(answer.Content))
                                 foreach (var ans in answer.Content.Split('/'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(ans.Trim().ToLower());
+                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
                                 }
                         }
-
-                        if (quiz2answer.Contains(examDetail.AnswerValue.ToLower().Trim()))
-                            _correctanswer = _realAnswers.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
+                        if (quiz2answer.Contains(NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim())))
+                            _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
                 }
@@ -298,6 +346,13 @@ namespace BaseCustomerEntity.Database
             await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamEntity>.Update.Set("ClassSubjectID", classSubject.ID));
         }
 
-
+        private string NormalizeSpecialApostrophe(string originStr)
+        {
+            return originStr
+                .Replace("‘", "'")
+                .Replace("’", "'")
+                .Replace("“", "\"")
+                .Replace("”", "\"");
+        }
     }
 }

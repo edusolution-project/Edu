@@ -46,6 +46,10 @@ namespace EnglishPlatform
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            services.Configure<FormOptions>(options =>
+            {
+                options.ValueCountLimit = int.MaxValue;
+            });
             services.AddAuthentication(Cookies.DefaultLogin) // Sets the default scheme to cookies
                 .AddCookie(Cookies.DefaultLogin, options =>
                 {
@@ -123,7 +127,7 @@ namespace EnglishPlatform
                 var routingFeature = context.Features[typeof(IRoutingFeature)] as IRoutingFeature;
                 //context.Features[typeof(IEndpointFeature)];
                 RouteData routeValues = routingFeature?.RouteData;
-                if(routeValues != null)
+                if (routeValues != null)
                 {
                     if (routeValues.Values.Keys.Contains("basis"))
                     {

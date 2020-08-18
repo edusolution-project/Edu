@@ -2805,16 +2805,23 @@ fillquiz {
 
 .fillquiz {
     background: #e6712d4d;
-    display: inline;
-    padding: 5px 8px;
+    display: inline-block;
+    padding: 1px 8px;
     border-radius: 3px;
-    line-height: 33px;
+    outline: none;
+    /*line-height: 25px;*/
     border: solid 1px #999;
 }
 
 fillquiz, fillquiz.quiz-item {
-    display: inline-block !important;
+    display: inline-block;
     width: auto;
+    line-height: 25px;
+    text-indent: 0;
+}
+
+.quiz-item.selection {
+    background: #EEE;
 }
 
 .fillquiz:empty::before {

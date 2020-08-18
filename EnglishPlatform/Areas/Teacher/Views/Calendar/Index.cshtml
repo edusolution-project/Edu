@@ -122,7 +122,8 @@
 @section Scripts{
     @*longht add 2020-01-12*@
     <script src="~/js/calendar/js/jquery.timepicker.min.js"></script>
-    <script src="~/js/calendar/js/sweetalert.min.js"></script>
+    <script src="~/js/lib/sweetalert2@9.js"></script>
+    @*<script src="~/js/calendar/js/sweetalert.min.js"></script>*@
     <script src="~/js/lib/schedule.js"></script>
     <script src="/js/calendar/js/Calendar.js"></script>
     <script>
@@ -131,7 +132,7 @@
             if (self.dataset.url == void 0 || self.dataset.url == null) {
                 return;
             } else {
-                window.open(self.dataset.url,"_blank");
+                window.open(self.dataset.url, "_blank");
             }
         }
         var changeTime = function (date) {
@@ -343,7 +344,7 @@
                                 var Title = `Time : ${time.getDate()}-${time.getMonth() + 1}-${time.getFullYear()}`;
 
                                 var str = `Học viên : ${jsonData.StudentName}`;
-                                swal({
+                                Swal.fire({
                                     title: Title,
                                     type: "info",
                                     text: str,
@@ -354,7 +355,7 @@
                                     cancelButtonText: "close",
                                     closeOnConfirm: false
                                 }, function () {
-                                    swal.close();
+                                    Swal.close();
                                     var _skype = jsonData.Skype;
                                     if (jsonData.Skype == null) {
                                         _skype = skype;
@@ -442,7 +443,7 @@
                 document.body.classList.remove("open-add-event");
                 return;
             }
-            swal({
+            Swal.fire({
                 title: "Bạn muốn hủy thông tin trên?",
                 text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
                 type: "warning",
@@ -461,7 +462,7 @@
                     }
                     textarea.value = "";
                     document.body.classList.remove("open-add-event");
-                    swal("Hủy!", "Đã hủy thành công.", "success");
+                    Swal.fire("Hủy!", "Đã hủy thành công.", "success");
                 });
         }
         document.getElementById("btn-cancel-event-class").onclick = function () {
@@ -472,7 +473,7 @@
                 document.body.classList.remove("open-add-event");
                 return;
             }
-            swal({
+            Swal.fire({
                 title: "Bạn muốn hủy thông tin trên?",
                 text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
                 type: "warning",
@@ -492,7 +493,7 @@
                     if (textarea != null) textarea.value = "";
                     document.body.classList.remove("open-add-event");
                     document.body.classList.remove("open-add-event-class");
-                    swal("Hủy!", "Đã hủy thành công.", "success");
+                    Swal.fire("Hủy!", "Đã hủy thành công.", "success");
                 });
         }
 
@@ -524,7 +525,7 @@
                 }
 
                 if (title.length < 5) {
-                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                    return Swal.fire("", "Tiêu đề không thể bỏ trống.", "warning");
                 }
 
             newFormData.append("Title", title);
@@ -537,7 +538,7 @@
                     var dataJson = JSON.parse(data);
                     if (dataJson.code == 201) {
                         if (isUpdate) {
-                            swal("Update!", "Cập nhật thành công.", "success");
+                            Swal.fire("Update!", "Cập nhật thành công.", "success");
                             EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
                             var event = {
                                 id: dataJson.data.ID,
@@ -548,7 +549,7 @@
                             EduCalendar.schedule.EduCalendar.addEvent(event);
                         }
                         else {
-                            swal("Tạo mới!", "Đã tạo thành công.", "success");
+                            Swal.fire("Tạo mới!", "Đã tạo thành công.", "success");
                             var event = {
                                 id: dataJson.data.ID,
                                 title: dataJson.data.Title,
@@ -560,9 +561,9 @@
 
                     }
                     else
-                        swal("Tạo mới!", dataJson.msg, "warning");
+                        Swal.fire("Tạo mới!", dataJson.msg, "warning");
                 } else {
-                     swal("Tạo mới!", "thất bại", "warning");
+                    Swal.fire("Tạo mới!", "thất bại", "warning");
                 }
                 document.body.classList.remove("open-add-event");
 
@@ -604,7 +605,7 @@
                 }
 
                 if (title.length < 5) {
-                    return swal("", "Tiêu đề không thể bỏ trống.", "warning");
+                    return Swal.fire("", "Tiêu đề không thể bỏ trống.", "warning");
                 }
 
                 newFormData.append("Title", title);
@@ -618,7 +619,7 @@
                         var dataJson = JSON.parse(data);
                         if (dataJson.code == 201) {
                             if (isUpdate) {
-                                swal("Update!", "Cập nhật thành công.", "success");
+                                Swal.fire("Update!", "Cập nhật thành công.", "success");
                                 EduCalendar.schedule.EduCalendar.getEventById(dataJson.data.ID).remove();
                                 var event = {
                                     id: dataJson.data.ID,
@@ -630,7 +631,7 @@
                                 EduCalendar.schedule.EduCalendar.addEvent(event);
                             }
                             else {
-                                swal("Tạo mới!", "Đã tạo thành công.", "success");
+                                Swal.fire("Tạo mới!", "Đã tạo thành công.", "success");
                                 var event = {
                                     id: dataJson.data.ID,
                                     title: dataJson.data.Title,
@@ -642,9 +643,9 @@
 
                         }
                         else
-                            swal("Tạo mới!", dataJson.msg, "warning");
+                            Swal.fire("Tạo mới!", dataJson.msg, "warning");
                     } else {
-                         swal("Tạo mới!", "thất bại", "warning");
+                        Swal.fire("Tạo mới!", "thất bại", "warning");
                     }
                      document.body.classList.remove("open-add-event-class");
                 })
@@ -654,7 +655,7 @@
 
         document.getElementById("btn-delete-event").onclick = function () {
 
-            swal({
+            Swal.fire({
                 title: "Bạn muốn xóa thông tin trên?",
                 text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
                 type: "warning",
@@ -675,13 +676,13 @@
                             var event = EduCalendar.schedule.EduCalendar.getEventById(id);
                             if (event != null) {
                                 event.remove();
-                                swal("Xóa!", "Đã hủy thành công.", "success");
+                                Swal.fire("Xóa!", "Đã hủy thành công.", "success");
                             }
                             else {
-                                swal("Xóa!", "không thể xóa", "warning");
+                                Swal.fire("Xóa!", "không thể xóa", "warning");
                             }
                         } else {
-                            swal("Xóa!", "không thể xóa", "error");
+                            Swal.fire("Xóa!", "không thể xóa", "error");
                         }
                     })
                 });
@@ -691,7 +692,7 @@
 
         document.getElementById("btn-delete-event-class").onclick = function () {
 
-            swal({
+            Swal.fire({
                 title: "Bạn muốn xóa thông tin trên?",
                 text: "Dữ liệu bạn đã ghi sẽ bị mất !!",
                 type: "warning",
@@ -712,13 +713,13 @@
                             var event = EduCalendar.schedule.EduCalendar.getEventById(id);
                             if (event != null) {
                                 event.remove();
-                                swal("Xóa!", "Đã hủy thành công.", "success");
+                                Swal.fire("Xóa!", "Đã hủy thành công.", "success");
                             }
                             else {
-                                swal("Xóa!", "không thể xóa", "warning");
+                                Swal.fire("Xóa!", "không thể xóa", "warning");
                             }
                         } else {
-                            swal("Xóa!", "không thể xóa", "error");
+                            Swal.fire("Xóa!", "không thể xóa", "error");
                         }
                     })
                 });

@@ -86,9 +86,10 @@ namespace BaseCustomerMVC.Controllers.Student
             List<NewsEntity> _data = new List<NewsEntity>();
             foreach(var item in data.ToList())
             {
-                if ( item.Targets!=null || item.CenterID==centerID)
-                    //item.Targets.Find(x => x == centerID) != null &&
+                //if (item.Targets == null) continue;
+                if (item.Targets !=null && item.Targets.Find(x => x == centerID) != null || item.CenterID == centerID)
                     _data.Add(item);
+                //else continue;
             }
 
             ViewBag.List_Courses = _data.ToList();
@@ -99,9 +100,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public JsonResult DetailProduct(string ID)
         {
-            //var code = HttpContext.Request.Query["code"].ToString();
             var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type=="san-pham").FirstOrDefault();
-            ViewBag.Title = detail_product.Title;
+            ViewBag.Title = detail_product?.Title;
             return Json(detail_product);
         }
 
@@ -280,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
         }
 
-        #region getCourse
+        #region getCourse and Payment
         [HttpPost]
         public JsonResult getListCourse()
         {
@@ -428,7 +428,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                 conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
                 conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
-                var price = product.Discount==0?product.Discount:product.Price;
+                var price = product.Discount!=0?product.Discount:product.Price;
                 conn.AddDigitalOrderField("vpc_Amount", price.ToString()+"00");
                 //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
                 conn.AddDigitalOrderField("vpc_ReturnURL", "http://localhost:61259/eduso/student/Home/Transaction?ID=" + ID + "&center=" + basis);
@@ -502,6 +502,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Transaction()
         {
+            //var message = "";
             var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
             var idproduct = Request.Query["ID"].ToString();
             var center = Request.Query["center"].ToString();
@@ -515,11 +516,21 @@ namespace BaseCustomerMVC.Controllers.Student
                 historyTransaction.TradingID = vpc_TransactionNo;
 
                 JoinClass(idproduct, center);
-                ViewBag.message = "Thanh thanh toán thành công!";
+                ViewBag.message = "Thanh toán thành công!";
+                var redirec = $"http://localhost:61259/{center}/student/Course";
+                //TempData["message"] = "Thanh toán thành công!";
+                //Response.WriteAsync("<script>alert('Thanh toan thanh cong')</script>");
+                return Redirect(redirec);
+                //return View();
+                //message = "Thanh thanh toán thành công!";
             }
             else
             {
-                ViewBag.message = "Thanh thanh toán không thành công!";
+                ViewBag.message = "Thanh toán không thành công!";
+                //message = "Thanh thanh toán không thành công!";
+                var redirec = $"http://localhost:61259/{center}/student/Course";
+                TempData["message"] = "Thanh toán Không thành công!";
+                return RedirectToAction(redirec);
             }    
             //if (vpc_TxnResponseCode.Equals("0"))
             //{
@@ -553,7 +564,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //    }
             //    return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
             //}
-            return View();
+            //return Json(new { msg = message });
         }
 #endregion
     }

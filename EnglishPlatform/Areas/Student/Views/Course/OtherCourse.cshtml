@@ -29,13 +29,13 @@
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1">
                 <select v-model="subject" v-on:change="changeSubject()">
                     <option value="">Chọn chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 ml-md-2">
                 <select name="" v-model="grade" v-on:change="changeGrade()">
                     <option value="">Chọn cấp độ</option>
                     <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
@@ -45,6 +45,10 @@
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" placeholder="Tên lớp cần tìm">
             </div>
+            <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                <input type="checkbox" v-on:click="getMyCourse()"/>
+                <span>Lớp học đã tham gia</span>
+            </div>
         </div>
     </div>
 
@@ -53,16 +57,29 @@
     </div>
     <div class="card-body" v-cloak>
         <div class="row row-list">
-            <div class="col-md-3 course-item" v-for="(item,k) in list_course">
+            <div class="col-md-3 course-item" v-for="(item,k) in list_courses">
                 <div class="box radius">
-                    <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="item.Thumb" :alt="item.Name" class="w-100"></a>
-                    <div class="detail box">
-                        <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="" class="title">{{item.Name}}</a>
-                        <p><i class="ti-time"></i>{{formatShortDate(item.EndDate)}}</p>
-                        <div class="c-bot flex-row flex align-items-center">
-                            <a :href="'@processUrl("Detail", "Course")/' + item.ID" title="Học ngay" class="btn-learn">Học ngay</a>
-                            <div class="ml-auto">
-                                {{item.CompletePercent + '%'}}<span class="ic ic-subtag ml-1" style="margin-bottom: -1px"></span>
+                    <div class="thumb" style="position:relative;">
+                        <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                        <img v-else :src="item.Thumbnail" alt="">
+                    </div>
+                    <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
+
+
+                        <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%">{{item.Title}}</marquee></a>
+                        <div class="c-bot" style="text-align:right;">
+                            <div>
+                                <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                            </div>
+                            <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                {{formatPrice(item.Discount) }} VNĐ
+                            </div>
+                            <div>
+                                <span style="color: #999; text-decoration:line-through; font-size:80%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
+                            </div>
+                            <div>
+                                <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                             </div>
                         </div>
                     </div>
@@ -122,7 +139,7 @@
             mounted() {
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
-                this.list_courses=@Html.Raw(Json.Serialize(list_courses));
+                //this.list_courses=@Html.Raw(Json.Serialize(list_courses));
                 console.log(this.list_grades_full);
                 this.changeSubject()
                 window.ChooseCalendar = this.chooseCalendar
@@ -140,7 +157,7 @@
                 });
             },
             data: {
-                list_course: @Html.Raw(Json.Serialize(list_courses)),
+                list_courses: @Html.Raw(Json.Serialize(list_courses)),
                 list_subject: [],
                 list_grades_full: [],
                 list_grades: [],
@@ -173,7 +190,7 @@
             },
             methods: {
                 getCourse() {
-                    let _that = this
+                    @*let _that = this
                     let _form = new FormData()
                     _form.append('GradeID', _that.grade)
                     _form.append('SubjectID', _that.subject)
@@ -181,13 +198,14 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('StartDate', _that.sDate)
                     _form.append('EndDate', _that.eDate)
-                    let _url = '@processUrl("GetList", "Course")'
+                    let _url = '@processUrl("GetListProduct", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data)
-                            _that.list_course = response.data.Data;
+                            debugger
+                            _that.list_courses = response.data.Data;
                             //console.log(_that.active_course);
-                        }).catch(e => { })
+                        }).catch(e => { })*@
                 },
                 changeSubject() {
                     let _that = this
@@ -255,6 +273,18 @@
                 repDate(svalue, evalue) {
                     this.eDate = evalue;
                     this.sDate = svalue;
+                },
+                formatPrice(value) {
+                    let val = (value / 1).toFixed(0)
+                    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                },
+                getMyCourse() {
+                    
                 }
             }
         });

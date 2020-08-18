@@ -21,9 +21,9 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b justify-content-between align-items-start">
-            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.Details.Count)</span></h2>
+            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/<span id="total-point-head"></span>)</span></h2>
             <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
-            <button class="btn btn-sm btn-circle btn-primary"  onclick="NextPart()">NextPart</button>
+            <button class="btn btn-sm btn-circle btn-primary" onclick="NextPart()">NextPart</button>
         </div>
     </div>
     <div class="card-body" style="height:100%">
@@ -32,10 +32,14 @@
         </div>
     </div>
 </section>
-@section style{ 
+@section style{
     <link href="~/css/minify/detail.min.css" rel="stylesheet" />
 }
 @section Scripts{
+    <script src="~/js/plugins/ck4/ckeditor.js"></script>
+    <script >
+        var CKEDITOR_BASEPATH = '/Scripts/ckeditor/';
+    </script>
     <script src="~/js/student-exam-review.js?20200525"></script>
     <script>
         //localStorage.clear();
@@ -60,54 +64,57 @@
         };
         var widget = new ExamReview();
         widget.onReady(config);
-        console.log(widget);
     </script>
     <style>
         div#review_navition {
             margin-bottom: 30px;
-            border-bottom:1px solid #ccc;
-        }
-        div#review_navition > ul {
-            list-style: none;
-            display: block;
-            margin: 0;
-            padding: 5px;
+            border-bottom: 1px solid #ccc;
         }
 
-        div#review_navition > ul > li {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border-radius:50%;
-            margin-left: 5px;
-        }
-
-            div#review_navition > ul > li > a {
-                cursor: pointer;
+            div#review_navition > ul {
+                list-style: none;
                 display: block;
-                text-align: center;
-                padding: 4px;
-                color: #fff;
-                font-weight: 500;
-                border: 1px solid #ccc;
-                border-radius: 50%;
-                box-shadow: 0 0 10px #ccc;
+                margin: 0;
+                padding: 5px;
             }
 
-            div#review_navition > ul > li.unchecked > a{
-                background:#ccc;
-            }
-            div#review_navition > ul > li.success > a {
-                background: #385623;
-            }
+                div#review_navition > ul > li {
+                    display: inline-block;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    margin-left: 5px;
+                }
 
-        div#review_navition > ul > li.danger > a {
-            background: #dc3545;
-        }
-            div#review_navition > ul > li > a.selection {
-                border-color: #004085;
-                box-shadow: 0 0 10px #004085;
-            }
+                    div#review_navition > ul > li > a {
+                        cursor: pointer;
+                        display: block;
+                        text-align: center;
+                        padding: 4px;
+                        color: #fff;
+                        font-weight: 500;
+                        border: 1px solid #ccc;
+                        border-radius: 50%;
+                        box-shadow: 0 0 10px #ccc;
+                    }
+
+                    div#review_navition > ul > li.unchecked > a {
+                        background: #ccc;
+                    }
+
+                    div#review_navition > ul > li.success > a {
+                        background: #385623;
+                    }
+
+                    div#review_navition > ul > li.danger > a {
+                        background: #dc3545;
+                    }
+
+                    div#review_navition > ul > li > a.selection {
+                        border-color: #004085;
+                        box-shadow: 0 0 10px #004085;
+                    }
+
         .right-content .left-col {
             padding: 0 12px;
             position: absolute;

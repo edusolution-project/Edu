@@ -373,6 +373,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             case "QUIZ1":
                             case "QUIZ2":
                             case "QUIZ3":
+                            case "QUIZ4":
                             case "ESSAY":
                                 result.Add(new LessonPartViewModel(part)
                                 {
@@ -411,7 +412,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace(" ", "-"));
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=
@@ -561,8 +562,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
             }
-            if (listExp == null || listExp.Count == 0)
-                return;
+            //if (listExp == null || listExp.Count == 0)
+            //    return;
 
             using (var client = new WebClient())
             {
@@ -820,7 +821,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var maxItem = _questionService.CreateQuery()
                         .Find(o => o.ParentID == item.ID)
                         .SortByDescending(o => o.Order).FirstOrDefault();
-                    quiz.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                    quiz.Order = questionVM.Order;
                     quiz.Created = DateTime.Now;
                     quiz.Updated = DateTime.Now;
                     quiz.CreateUser = createuser;
@@ -885,7 +886,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
-                    quiz.Order = oldquiz.Order;
+                    quiz.Order = questionVM.Order;
                     quiz.Created = oldquiz.Created;
                     quiz.Updated = DateTime.Now;
                 }
