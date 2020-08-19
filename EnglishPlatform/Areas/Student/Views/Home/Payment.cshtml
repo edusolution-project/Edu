@@ -14,61 +14,73 @@
     }
 }
 
-<div class="module" id="dashboard_content">
-    @*<form action="@processUrl("PaymentStatus","Home")" method="post">*@
-    @*<input type="text" class="hide" name="ID" id="ID" value="@ViewBag.Product.ID" />
-        <input type="text" name="ClassName" readonly value="@ViewBag.Product.ClassName" />
-        <input type="text" name="Price" value="@ViewBag.Product.Price" readonly />
-        <button onclick="Thanhtoan()">Thanh toán</button>*@
+<div id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b justify-content-between align-items-start">
+            <div>
+                <h2 class="title">Thông tin đơn hàng</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
 
-    @* Thong tin don hang *@
-    <div class="form-group">
-        <input type="hidden" class="hide" id="ID" name="ID" value="@product.ID" />
-        <h3>Đơn hàng</h3>
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-            <thead>
-                <tr>
-                    <th class='text-center'>#</th>
-                    <th class='text-center'>Tên gói học</th>
-                    <th class='text-center'>Giá tiền</th>
-                    @*<th class='text-center'>Số lượng</th>
-                        <th class='text-center'>Thành tiền</th>*@
-                </tr>
-            </thead>
+        @* Thong tin don hang *@
+        <div class="form-group">
+            <input type="hidden" id="ID" name="ID" value="@product.ID" />
+
+            <table class="table table-bordered" id="ed_table" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th class='text-center'>#</th>
+                        <th class='text-center'>Tên gói học</th>
+                        <th class='text-center'>Giá tiền</th>
+                        @*<th class='text-center'>Số lượng</th>
+                            <th class='text-center'>Thành tiền</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class='text-center'>1</td>
+                        <td class='text-center'><a href="javascript:;" class="text-dark">@product.Title</a></td>
+                        <td class='text-center'>@(product.Discount > 0 ? product.Discount.ToString("#,#"):"0") VND</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-header">
+        <div class="flex border-b justify-content-between align-items-start">
+            <div>
+                <h2 class="title">Thông tin đặt hàng</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row card-body">
+
+        <table class="table" id="dataTable" width="100%" cellspacing="0">
             <tbody>
                 <tr>
-                    <td class='text-center'>1</td>
-                    <td class='text-center'><a href="javascript:;">@product.Title</a></td>
-                    <td class='text-center'>@product.Discount.ToString("0,0.##") VND</td>
+                    <th>Họ tên(*)</th>
+                    <td><input class="form-control" type="text" id="Name" name="Name" placeholder="Họ và tên" value="@student.FullName" required /></td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại(*)</th>
+                    <td><input type="text" class="form-control" id="Phone" name="Phone" placeholder="Số điện thoại" value="@student.Phone" required /></td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ(*)</th>
+                    <td><input type="text" class="form-control" id="Address" name="Address" placeholder="Địa chỉ" value="@student.Address" required /></td>
+                </tr>
+                <tr>
+                    <td colspan="2" onclick="Thanhtoan()"><button class="btn btn-primary">Thanh toán</button></td>
                 </tr>
             </tbody>
         </table>
     </div>
-
-    <div class="form-row">
-        <h3>Thông tin đặt hàng</h3>
-        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>Họ tên(*)</th>
-                    <td><input type="text" id="Name" name="Name" placeholder="Họ và tên" value="@student.FullName" required /></td>
-                </tr>
-                <tr>
-                    <th>Số điện thoại(*)</th>
-                    <td><input type="text" id="Phone" name="Phone" placeholder="Số điện thoại" value="@student.Phone" required /></td>
-                </tr>
-                <tr>
-                    <th>Địa chỉ(*)</th>
-                    <td><input type="text" id="Address" name="Address" placeholder="Địa chỉ" value="@student.Address" required /></td>
-                </tr>
-                <tr>
-                    <td colspan="2" onclick="Thanhtoan()"><button>Thanh toán</button></td>
-                </tr>
-            </thead>
-        </table>
-    </div>
     @*</form>*@
 </div>
+    </div>
 
 <script>
     var Thanhtoan= function () {

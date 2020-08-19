@@ -435,11 +435,11 @@
                 let val = (value / 1).toFixed(0).replace(',', '.')
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             },
-            @*BuyNow(classid) {
+            BuyNow(classid) {
                 Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
                 //debugger
                 //window.location.href = '@processUrl("Payment", "Home")/' + classid;
-            },*@
+            },
             DetailProduct(ID) {
                 let _that = this
                 let _form = new FormData();
@@ -450,10 +450,11 @@
                         _that.detailProduct = response.data;
                         $("#DetailProduct").modal();
                     }).catch(e => { });
-            },
+            }
+            @*,
             BuyNow(id) {
                 window.location.href = '@processUrl("Payment", "Home")/' + id;
-            },
+            },*@
         }
     });
     </script>
