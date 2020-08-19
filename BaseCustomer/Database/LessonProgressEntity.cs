@@ -91,15 +91,14 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task<LessonProgressEntity> UpdateLastPoint(ExamEntity item, bool updateTried = true)
+        public async Task<LessonProgressEntity> UpdateLastPoint(ExamEntity item)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null) return null;
             var currentProgress = GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
-                //var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
-                var point = item.MaxPoint > 0 ? (item.Point * 100.0 / item.MaxPoint) : 0;
+                var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
                 currentProgress = new LessonProgressEntity
                 {
                     ClassID = item.ClassID,
@@ -123,18 +122,13 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var avg = currentProgress.AvgPoint * currentProgress.Tried;
-                if (updateTried)
-                {
-                    if (currentProgress.Tried > item.Number)
-                        currentProgress.Tried++;
-                    else
-                        currentProgress.Tried = item.Number;
-                }
+                if (currentProgress.Tried > item.Number)
+                    currentProgress.Tried++;
+                else
+                    currentProgress.Tried = item.Number;
 
-                //New: use real point, not count question
-                //var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
-                var point = item.MaxPoint > 0 ? (item.Point * 100.0 / item.MaxPoint) : 0;
 
+                var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
                 //convert point => percent
                 //var point = item.MaxPoint == 0 ? 0 : (item.Point * 100 / item.MaxPoint);
                 currentProgress.PointChange = point - currentProgress.LastPoint;

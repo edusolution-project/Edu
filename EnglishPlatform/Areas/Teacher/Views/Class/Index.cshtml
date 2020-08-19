@@ -87,6 +87,7 @@
                         <div class="d-flex btn-group" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
                              }>
                             @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
+                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="fas fa-clone"></i></a>
                             <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
                             <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
@@ -680,8 +681,45 @@
                             })
                     }
                 },
+                CloneClass() {
+                    var modal = $('#CloneModal');
+                    //debugger
+                    let _url = '@processUrl("CloneClass","Class")'
+                    let _that = this
+
+                    let _form = new FormData()
+                    if (_that.class_info.ID != null)
+                        _form.append('ID', _that.class_info.ID)
+                    _form.append('Name', $(modal).find('[id=Name]').val())
+                    _form.append('CenterCode', '@center')
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.isLoading = false;
+                            console.log(response.data);
+                            if (response.data.Error != null)
+                                alert(response.data.Error)
+                            else {
+
+                                this.getData();
+                                _that.$bvModal.hide('CloneModal');
+                                console.log(_that.class_info.ID);
+
+                                if (_that.class_info.ID == null)//add
+                                {
+                                    var data = response.data.Data;
+                                    _that.class_info.ID = data.ID;
+                                    _that.manageStudent();
+                                }
+
+                            }
+                        }).catch(e => {
+                            _that.isLoading = false
+                            console.log("Error: " + e)
+                        })
+                },
                 //Modal Event
-                showClassModal(obj) {                    
+                showClassModal(obj) {
                     let _that = this;
                     if (obj == null) {
                         _that.class_info =
@@ -778,6 +816,12 @@
                             }).catch(e => { })
                     }
                     _that.$bvModal.show('modal_class')
+                },
+                showCloneModal(obj) {
+                    let _that = this;
+                    _that.class_info.Name = obj.Name;
+                    _that.class_info.ID = obj.ID;
+                    _that.$bvModal.show('CloneModal')
                 },
                 hideModal(modalid) {
                     if (modalid == null)
@@ -1234,42 +1278,42 @@
                     <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" >
                                 <option value="">Chọn chương trình</option>
                                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" >
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" >
                                 <option value="">Chọn môn học</option>
                                 <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
+                            <select v-model="sub.CourseID" class="form-control" >
                                 <option value="">Chọn bài giảng</option>
                                 <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
+                            <select v-model="sub.TeacherID" class="form-control">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
                         <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)"  title="Xóa môn học"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)"  title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                         </div>
                     </li>
                 </ul>
@@ -1386,6 +1430,29 @@
             </template>
         </template>
     </b-modal>
+
+
+@* Modal Clone *@
+<b-modal :no-close-on-backdrop="true" id="CloneModal" centered title="Nhân bản">
+    <b-col class="form-group">
+        <label  >Lớp:</label>
+        <input type="text" class="form-control" :value="class_info.Name" readonly/>
+        <input type="hidden" value="{{class_info.ID}}" name="ID" id="ID" />
+    </b-col>
+    <b-col class="form-group">
+        <label class="label">Tên lớp mới: </label>
+        <input type="text" class="form-control" :value="class_info.Name" name="Name" id="Name" />
+    </b-col>
+    <template v-slot:modal-footer="{ ok, cancel}">
+        <template v-if="student_data.isLoading">
+            <b-button>Đang gửi dữ liệu ...</b-button>
+        </template>
+        <template v-else>
+            <b-button variant="success" v-on:click="CloneClass()">Nhân bản</b-button>
+            <b-button variant="danger" v-on:click="hideModal('CloneModal')">Huỷ</b-button>
+        </template>
+    </template>
+</b-modal>
 
 
 }

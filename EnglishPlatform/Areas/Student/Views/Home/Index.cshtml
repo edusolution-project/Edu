@@ -174,13 +174,14 @@
                 </li>
             </ul>
         </div>
-
-        <div class="row">
+        @*@if (center == "eduso")
+        {*@
+        <div class="module">
             <div class="col-md-12">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        @*<a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
@@ -203,7 +204,7 @@
                                                     {{formatPrice(item.Discount) }} VNĐ
                                                 </div>
                                                 <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                    <span style="color: #999; text-decoration:line-through; font-size:80%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
                                                     @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
                                                 </div>
                                                 <div>
@@ -219,82 +220,85 @@
                 </div>
             </div>
         </div>
+    </div>
+        @*}*@
 
-        <div class="row">
-            <div class="col-md-12 margin-b20">
-                <div class="heading flex">
-                    <h4 class="box-head">Lớp học đã kết thúc</h4>
-                    <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
-                </div>
-
-                <div class="box bg-1 padding-15" style="margin-bottom: 20px;">
-                    <ul class="box list-scroll mb-0">
-                        <li class="less-done mb-0 list bg-white" v-for="(item,k) in finish_course" style="width: 165px;">
-                            <div class="box radius">
-                                <a :href="'@processUrl("Detail", "Course")/' + item.id" class="flex">
-                                    <span class="per">{{item.per + '%'}}</span>
-                                    <div class="info">
-                                        <span>{{item.title}}</span>
-                                        <span>{{item.score.toFixed(2)}}%</span>
-                                    </div>
-                                    @*<span class="arr-right ti-arrow-right"></span>*@
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
         <!-- Modal -->
 
-        <div class="modal fade" id="DetailProduct" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
-                <div class="modal-content h-100">
-                    <div class="modal-header">
-                        <h3 class="modal-title">{{detailProduct.Title}}</h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container-fluid">
-                            <div class="col-sm-9" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 10px; overflow: auto;">
-                                @*<div class="form-group">
-                                        <img name="thumbnail" />
-                                    </div>*@
-                                <div class="form-group" name="Content" v-html="detailProduct.Content" style="text-align:justify">
-                                    @*{{detailProduct.Content}}*@
-                                </div>
+    <div class="modal fade" id="DetailProduct" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
+            <div class="modal-content" style="position:absolute;top: 0; bottom: 0;">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{detailProduct.Title}}</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body" style="overflow-y:scroll;max-height:600px;">
+                    <div class="container-fluid">
+                        <div class="row col-sm-9">
+                            @*<div class="form-group">
+                                <img name="thumbnail" />
+                            </div>*@
+                            <div class="form-group" name="Content" v-html="detailProduct.Content">
+                                @*{{detailProduct.Content}}*@
                             </div>
-                            <div class="col-sm-3" style="position:absolute; right: 0; top: 10px;">
-                                <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
-                                    <div class="form-group col-sm-12" id="price">
-                                        @*<div>
-                                                <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                        </div>
+                        <div class="row col-sm-3 position-fixed" style="right:40px">
+                            <div class="form-group col-sm-12" id="price">
+                                @*<div>
+                                    <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                </div>*@
+
+                                <div class="modal-body" style="position:absolute;top: 70px; bottom: 0; left: 0; right: 0">
+                                    <div class="container-fluid" style="position:absolute; top: 10px; bottom: 10px; overflow:auto;">
+                                        <div class="row col-sm-9">
+                                            @*<div class="form-group">
+                                                <img name="thumbnail" />
                                             </div>*@
-                                        <div v-if="detailProduct.Discount!=''" class="price font-weight-bold text-danger ml-auto col-sm-12">
-                                            Giá khuyến mại: <span style="font-size:130%; text-align:right;">{{formatPrice(detailProduct.Discount)}} VNĐ</span>
+                                            <div class="form-group" name="Content" v-html="detailProduct.Content" style="text-align:justify">
+                                                @*{{detailProduct.Content}}*@
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span v-if="detailProduct.Discount > 0" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1 col-sm-12">
-                                                Giá gốc: ({{formatPrice(detailProduct.Price)}} VNĐ)
-                                            </span>
-                                            <span class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
-                                                Giá bán: {{formatPrice(detailProduct.Discount)}} VNĐ
-                                            </span>
+                                        <div class="row col-sm-3 position-fixed p3" style="right:40px;">
+                                            <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
+                                                <div class="form-group col-sm-12" id="price">
+                                                    @*<div>
+                                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                                    </div>*@
+
+                                                    <div v-if="detailProduct.Discount!=''" class="price font-weight-bold text-danger ml-auto col-sm-12">
+                                                        Giá khuyến mại: <span style="font-size:130%; text-align:right;">{{formatPrice(detailProduct.Discount)}} VNĐ</span>
+                                                    </div>
+                                                    <div>
+                                                        <span v-if="detailProduct.Discount!=''" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1 col-sm-12">
+                                                            Giá gốc: ({{formatPrice(detailProduct.Price)}} VNĐ)
+                                                        </span>
+                                                        <span v-else class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
+                                                            Giá: {{formatPrice(detailProduct.Price)}} VNĐ
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-sm-12" style="text-align:center">
+
+                                                    <button type="button" class="btn btn-primary" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
+                                                    @*<button type="button" class="btn btn-primary" v-on:click="'@processUrl("Payment", "Home")/' + detailProduct.ID" title="Mua ngay">Mua ngay</button>*@
+
+                                                    <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ClassID)" title="Mua ngay">Mua ngay</button>
+
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="form-group col-sm-12" style="text-align:center">
-                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-
     </div>
 </section>
 
@@ -448,7 +452,6 @@
                 axios.post(_url, _form)
                     .then(response => {
                         _that.detailProduct = response.data;
-                        $("#DetailProduct").modal();
                     }).catch(e => { });
             }
             @*,

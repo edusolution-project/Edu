@@ -56,14 +56,5 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
-
-        public IEnumerable<LessonPartEntity> GetByLessonID(string LessonID)
-        {
-            return CreateQuery().Find(o => o.ParentID == LessonID)
-                                .SortBy(q => q.Order)
-                                .ThenBy(q => q.ID).ToEnumerable();
-        }
-
-        
     }
 }

@@ -275,7 +275,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
         }
 
-        #region getCourse
+        #region getCourse and Payment
         [HttpPost]
         public JsonResult getListCourse()
         {
@@ -508,6 +508,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Transaction()
         {
+            //var message = "";
             var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
             var idproduct = Request.Query["ID"].ToString();
             var center = Request.Query["center"].ToString();
@@ -523,10 +524,14 @@ namespace BaseCustomerMVC.Controllers.Student
                     historyTransaction.TradingID = vpc_TransactionNo;
                     JoinClass(idproduct, center);
                     ViewBag.message = "Thanh toán thành công!";
+                    var redirec = $"/{center}/student/Course";
+                    return Redirect(redirec);
                 }   
                 else
                     ViewBag.message = "Giao dịch không hợp lệ không thành công!";
 
+                JoinClass(idproduct, center);
+                ViewBag.message = "Thanh toán thành công!";
             }
             else
             {

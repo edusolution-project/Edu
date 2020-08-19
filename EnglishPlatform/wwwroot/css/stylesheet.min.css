@@ -417,15 +417,8 @@ button, input, a {
 }
 
     #sidebar .logo {
-        max-width: 100%;
+        width: 128px
     }
-
-        #sidebar .logo img {
-            max-height: 100px;
-            max-width: 100%;
-            width: auto;
-            height: auto;
-        }
 
     #sidebar .card-header {
         border: none;
@@ -2899,15 +2892,4 @@ fillquiz, fillquiz.quiz-item {
 .vocab-meaning b {
     color: green;
     font-weight: 700;
-}
-
-ul li {
-    list-style-position: inside;
-}
-
-.editorck {
-    min-height: 100px;
-    width: 100%;
-    border: solid 1px #CCC;
-    border-radius: 3px;
 }

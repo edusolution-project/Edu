@@ -90,8 +90,9 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" style="overflow-y:auto;max-height:600px">
-                    <form>
+                <form>
+                    <div class="modal-body" style="overflow-y:auto;max-height:600px">
+
 
                         <div class="form-row">
                             <div class="form-group col-md-12">
@@ -146,7 +147,6 @@
                             <div class="form-group col-sm-12">
                                 <select id="ClassID" name="ClassID" class="form-control" required>
                                     <option value="">--- Lựa chọn Lớp ---</option>
-                                    @*<option v-for="(item, index) in items" :value="item.ID">{{item.Name}}</option>*@
                                 </select>
                             </div>
 
@@ -165,50 +165,53 @@
                             <div class="form-group col-sm-12">
                                 <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt">
 
+
                             </div>
+
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-md-8">
 
-                                <div class="form-row">
-                                    <div class="input-group col-md-12">
-                                        @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
-                                        <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
-                                    </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+
+                            <div class="form-row">
+                                <div class="input-group col-md-12">
+                                    @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
+                                    <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
                                 </div>
+                            </div>
 
-                                <div class="form-row">
-                                    <div class="input-group col-md-6">
-                                        <div class="col-sm-10">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
-                                                <label class="form-check-label">Hoạt động</label>
-                                            </div>
+                            <div class="form-row">
+                                <div class="input-group col-md-6">
+                                    <div class="col-sm-10">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                            <label class="form-check-label">Hoạt động</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group col-md-4">
-                                <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
-                                <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
-                            </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-sm-12">
-                                <label>Chi tiết sản phẩm</label>
-                                <textarea name="Content" id="Content" class="form-control" required></textarea>
-                            </div>
+                        <div class="form-group col-md-4">
+                            <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
+                            <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
                         </div>
+                    </div>
 
+                    <div class="form-row">
+                        <div class="form-group col-sm-12">
+                            <label>Chi tiết sản phẩm</label>
+                            <textarea name="Content" id="Content" class="form-control" required></textarea>
+                        </div>
+                    </div>
 
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-submit" name="Save" onclick="Submits('AddForm', '@Url.Action("CreateOrUpdate", "Product")', 'CreateOrUpdate', loadData)">Lưu</button>
-                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-submit" name="Save" onclick="Submits('AddForm', '@Url.Action("CreateOrUpdate", "Product")', 'CreateOrUpdate', loadData)">Lưu</button>
+                    </div>
+                </form>
             </div>
         }
     </div>
@@ -249,7 +252,6 @@
 
 
 <script>
-
     var Add = function (obj) {
         var modal = document.querySelector(obj.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Thêm tin gói học");
@@ -294,7 +296,6 @@
 
         $(form).find("input:disabled").removeAttr("disabled");
     }
-
     var renderClass = function (ClassID="") {
         modal = $(".modal-body");
         removeoption();
@@ -479,11 +480,6 @@
         $(form).find("input:disabled").removeAttr("disabled");
 
         var data = new FormData(form);
-
-        //data.delete("IsHot");
-        //data.append("IsHot", $(form).find("#IsHot").prop("checked"));
-        //data.delete("IsTop");
-        //data.append("IsTop", $(form).find("#IsTop").prop("checked"));
         data.delete("IsActive");
         data.append("IsActive", $(form).find("#IsActive").prop("checked"));
         data.delete("Content");
@@ -514,8 +510,13 @@
         //Add(_this);
         var modal = document.querySelector(_this.getAttribute("data-target"));
         $(modal).find('[id=ProductTitle]').text("Sửa thông tin gói học");
+
         $(modal).find("[name=Save]").text("Lưu");
         $(modal).find("[name=Save]").attr("onclick", "Submits('AddForm', '/admin/Product/CreateOrUpdate', 'CreateOrUpdate', loadData)");
+
+        $(modal).find("[name=Save]").text("Lưu");
+        $(modal).find("[name=Save]").attr("onclick", "Submits('AddForm', '/admin/Product/CreateOrUpdate', 'CreateOrUpdate', loadData)");
+
         var form = modal.querySelector('form');
         var inputID = form.querySelector('input[name="ID"]');
         if (inputID == null) {
@@ -550,6 +551,8 @@
                     $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
                     renderClass(item.Data[$(listselect[i]).attr("name")]);
             }
+            //debugger
+
 
             var targets = item.Data.Targets;
             $('.subject_wrapper').empty();
@@ -573,6 +576,7 @@
             $(".subjectDisplay").val(line);
 
             //debugger
+
 
             document.getElementById("img").setAttribute("src", item.Data.Thumbnail);
 
@@ -672,6 +676,7 @@
 
     }
 
+
     $(".subjectSelect input[type=checkbox]").each(function () {
         $(this).change(function () {
             $('.subject_wrapper').empty();
@@ -687,6 +692,7 @@
             $(".subjectDisplay").val(line);
         });
     });
+
 
     var Sort = function () {
         loadData();

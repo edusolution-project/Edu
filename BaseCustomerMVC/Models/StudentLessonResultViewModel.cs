@@ -50,10 +50,9 @@ namespace BaseCustomerMVC.Models
             QuestionsDone = t.QuestionsDone;
             QuestionsPass = t.QuestionsPass;
             QuestionsTotal = t.QuestionsTotal;
-            Point = t.Point;
+            Point = t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0;
             Status = t.Status;
             Marked = t.Marked;
-            MaxPoint = t.MaxPoint;
         }
 
         [JsonProperty("ExamID")]
@@ -70,8 +69,6 @@ namespace BaseCustomerMVC.Models
         public long QuestionsDone { get; set; }
         [JsonProperty("QuestionsPass")]
         public long QuestionsPass { get; set; }
-        [JsonProperty("MaxPoint")]
-        public double MaxPoint { get; set; }
         [JsonProperty("Status")]
         public bool Status { get; set; }
     }

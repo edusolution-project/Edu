@@ -685,14 +685,46 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
 
-            var category = _newsCategoryService.GetItemByCode("san-pham");
-
-            var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.CategoryID == category.ID && o.IsHot == true);
-            ViewBag.List_Courses = data.ToList();
+            var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.Type == "san-pham").ToList();
+            ViewBag.List_Courses = data;
             ViewBag.Subjects = _subjectService.GetAll().ToList();
             ViewBag.Grades = _gradeService.GetAll().ToList();
             return View();
         }
+        //public JsonResult GetMyCourse(bool myCourse,string basis)
+        //{
+        //    if (myCourse)
+        //    {
+        //        string userID = User.Claims.GetClaimByType("UserID").Value;
+        //        var student = _studentService.GetItemByID(userID);
+        //        var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.Type == "san-pham").ToList();
+        //        var DataResponse = new Dictionary<string, object>()
+        //        {
+        //            {"Data",data }
+        //        };
+        //        return Json(DataResponse);
+        //    }
+        //    else
+        //    {
+        //        var centerID = "";
+        //        if (!string.IsNullOrEmpty(basis))
+        //        {
+        //            var center = _centerService.GetItemByCode(basis);
+        //            if (center != null)
+        //            {
+        //                ViewBag.Center = center;
+        //                centerID = center.ID;
+        //            }
+        //        }
+
+        //        var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.Type == "san-pham").ToList();
+        //        var DataResponse = new Dictionary<string, object>()
+        //        {
+        //            {"Data",data }
+        //        };
+        //        return Json(DataResponse);
+        //    }
+        //}
 
         //public JsonResult GetListProduct()
         //{

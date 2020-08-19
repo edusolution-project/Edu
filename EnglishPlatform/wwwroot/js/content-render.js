@@ -1881,7 +1881,7 @@ var Lesson = (function () {
         if (data != null && data.Description != null)
             description = data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/");
 
-        CKEDITOR.allowedContent = false;
+        CKEDITOR.allowedContent = true;
         //desc.val(description);
         desc.html(description)
         switch (type) {
@@ -1943,7 +1943,8 @@ var Lesson = (function () {
                 questionTemplate.append(answer_wrapper);
                 //questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích" }));
                 questionTemplate.append($("<label>", { "class": "input_label mr-1", "text": "Giải thích đáp án" }));
-                questionTemplate.append($("<div>", { class: "editorck mt-3 mb-3 p-2", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
+                questionTemplate.append($("<input>", { "class": "input_label mr-1", "type": "checkbox", "id": "Explain", "name": "Explain", "onclick":"GiaiThich(this)" }));
+                questionTemplate.append($("<div>", { class: "hide", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -2099,24 +2100,24 @@ var Lesson = (function () {
 
         switch (type) {
             case "QUIZ2":
-                //CKEDITOR.replace('editor', {
-                //    allowedContent: true,
-                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
-                //    removeDialogTabs: 'textfield',
-                //    removePlugins: 'forms'
+                CKEDITOR.replace('editor', {
+                    allowedContent: true,
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
+                    removeDialogTabs: 'textfield',
+                    removePlugins: 'forms'
+                });
+                //CKEDITOR.on('dialogDefinition', function (ev) {
+                //    var dialogName = ev.data.name,
+                //        dialogDefinition = ev.data.definition;
+                //    //console.log(ev.data);
+                //    if (dialogName === 'textfield') {
+                //      //  console.log(ev.data);
+                //        dialogDefinition.removeContents('info');
+                //    }
                 //});
-                CKEDITOR.on('dialogDefinition', function (ev) {
-                    var dialogName = ev.data.name,
-                        dialogDefinition = ev.data.definition;
-                    //console.log(ev.data);
-                    if (dialogName === 'textfield') {
-                      //  console.log(ev.data);
-                        dialogDefinition.removeContents('info');
-                    }
-                });
-                CKEDITOR.inline('editor', {
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
-                });
+                //CKEDITOR.inline('editor', {
+                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz'
+                //});
                 break;
             case "VOCAB":
                 break;
@@ -2125,7 +2126,10 @@ var Lesson = (function () {
                     CKEDITOR.instances[name].destroy(true);
                 }
                 $('.editorck').each(function (idx, obj) {
-                    CKEDITOR.inline($(obj)[0], {
+                    //CKEDITOR.inline($(obj)[0], {
+                    //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    //});
+                    CKEDITOR.replace($(obj)[0], {
                         extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                     });
                 });
@@ -2136,6 +2140,38 @@ var Lesson = (function () {
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
     //end renderPartTemplate
+
+    //fix hien thi ckeditor 18-08-2020
+    var GiaiThich = function (obj) {
+        debugger
+        var modal = obj.parentElement;
+        var status = $('#Explain').prop('checked');
+        if (status == true) {
+            $(modal).children()[13].setAttribute("class", "editorck mt - 3 mb - 3 p - 2");
+            for (name in CKEDITOR.instances) {
+                CKEDITOR.instances[name].destroy(true);
+            }
+            $('.editorck').each(function (idx, obj) {
+                //CKEDITOR.inline($(obj)[0], {
+                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                //});
+                CKEDITOR.replace($(obj)[0], {
+                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                });
+            });
+        }
+        else {
+            $(modal).children()[13].setAttribute("class", "hide");
+            //CKEDITOR.replace("editorck mt - 3 mb - 3 p - 2", {
+            //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            //});
+            for (name in CKEDITOR.instances) {
+                CKEDITOR.instances[name].destroy(true);
+            }
+        }
+        //(editorck mt - 3 mb - 3 p - 2)
+        //alert(obj);
+    }
 
     var addNewQuestion = function (data = null) {
         var container = $('.lesson_parts > .part_content');
@@ -2160,8 +2196,11 @@ var Lesson = (function () {
                 renderMediaContent(data, clone.find(".media_preview:first"), "");
             }
         }
-        console.log(data);
-        CKEDITOR.inline($(clone).find("[name='Questions.Description']")[0], {
+        //console.log(data);
+        //CKEDITOR.inline($(clone).find("[name='Questions.Description']")[0], {
+        //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        //});
+        CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
             extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
         });
 
@@ -3971,6 +4010,7 @@ var Lesson = (function () {
     window.PrevPart = prevPart;
 
     window.SwitchMode = switchMode;
+    window.GiaiThich = GiaiThich;
     return LessonInstance;
 }());
 

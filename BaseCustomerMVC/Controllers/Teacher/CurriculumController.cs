@@ -1112,7 +1112,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
          */
 
         [HttpPost]
-        public async Task<JsonResult> JoinChapter(string ID, string JoinChapter, string newName)
+        public async Task<JsonResult> JoinChapter(string ID, string JoinChapter, string newName,string CreateNewChapter="off")
         {
             try
             {
@@ -1147,33 +1147,73 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //new_chapter=rootItem;
                 //new_chapter.ID = null;
                 //_chapterService.CreateQuery().InsertOne(new_chapter);
-                if (newName != null || newName != "")
-                    orgChapter.Name = newName;
-                var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
+                if (CreateNewChapter.Equals("on"))
                 {
-                    Order = currentChapIndex,
-                }, _userCreate, orgChapter.CourseID); ;
+                    if (newName != null || newName != "")
+                        orgChapter.Name = newName;
+                    var chapter = await CloneChapter(new CourseChapterEntity(orgChapter)
+                    {
+                        Order = currentChapIndex,
+                    }, _userCreate, orgChapter.CourseID); ;
 
-                var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
-                //var new_lesson = new CourseLessonEntity();
-                foreach (var o in joinLessons.ToEnumerable())
-                {
-                    var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
-                    new_lesson.CreateUser = _userCreate;
-                    new_lesson.Created = DateTime.Now;
-                    new_lesson.ChapterID = chapter.ID;
-                    new_lesson.OriginID = o.ID;
-                    new_lesson.Order = currentLessonIndex++;
-                    await CloneLesson(new_lesson, _userCreate);
-                }
+                    var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
+                    //var new_lesson = new CourseLessonEntity();
+                    foreach (var o in joinLessons.ToEnumerable())
+                    {
+                        var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
+                        new_lesson.CreateUser = _userCreate;
+                        new_lesson.Created = DateTime.Now;
+                        new_lesson.ChapterID = chapter.ID;
+                        new_lesson.OriginID = o.ID;
+                        new_lesson.Order = currentLessonIndex++;
+                        await CloneLesson(new_lesson, _userCreate);
+                    }
 
-                var new_chapter = _chapterService.GetItemByID(chapter.ID);
+                    var new_chapter = _chapterService.GetItemByID(chapter.ID);
 
-                return new JsonResult(new Dictionary<string, object>
+                    return new JsonResult(new Dictionary<string, object>
                 {
                     { "Data", new_chapter },
                     { "Error", null }
                 });
+
+                }
+                else
+                {
+                    if (joinLessons != null && joinLessons.ToList().Count > 0)
+                    {
+                        foreach (var lesson in joinLessons.ToList())
+                        {
+                            lesson.ChapterID = rootItem.ID;
+                            lesson.Order = (int)currentLessonIndex++;
+                            _lessonService.CreateQuery().ReplaceOne(o => o.ID == lesson.ID, lesson);
+                        }
+                    }
+
+                    var subChapters = _chapterService.Collection.Find(o => o.ParentID == joinItem.OriginID && o.CourseID == joinItem.CourseID);
+                    foreach (var o in subChapters.ToEnumerable())
+                    {
+                        await CloneChapter(new CourseChapterEntity(o)
+                        {
+                            OriginID = o.ID,
+                            CourseID = rootItem.CourseID,
+                            ParentID = rootItem.ID, //Edit by VietPhung 20190701
+                            CreateUser = _userCreate,
+                            IsActive = true,
+                            IsAdmin = false,
+                        }, _userCreate, orgChapter.CourseID);
+                    }
+
+                    ChangeChapterPosition(joinItem, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
+                    _chapterService.Remove(joinItem.ID);
+
+                    return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", rootItem },
+                    { "Error", null }
+                });
+                }
+
             }
             catch (Exception ex)
             {
@@ -1237,13 +1277,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var item = _lessonPartService.GetItemByID(ID);
+                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
                 if (item == null) return;
 
-                var questions = _lessonPartQuestionService.GetByPartID(item.ID);
-
-                foreach(var question in questions)
-                    RemoveQuestion(question.ID);
+                var questions = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
+                for (int i = 0; questions != null && i < questions.Count; i++)
+                    RemoveQuestion(questions[i].ID);
                 _lessonPartService.Remove(ID);
             }
             catch (Exception ex)

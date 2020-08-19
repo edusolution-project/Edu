@@ -241,90 +241,92 @@
     </div>
 
     <!--    Hòa thêm 8/7/2020    -->
-    <div class="modal fade" role="dialog" id="copyLessonModel">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="titleClone">Nhân bản </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="@processUrl("CopyLesson","Curriculum")" name="copyLessonForm" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="LessonID" value="" />
-                        <input type="hidden" name="CourseID" value="@Data.ID" />
-                        <input type="hidden" name="ChapterID" value="" />
+<div class="modal fade" role="dialog" id="copyLessonModel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titleClone">Nhân bản </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="@processUrl("CopyLesson","Curriculum")" name="copyLessonForm" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="LessonID" value="" />
+                    <input type="hidden" name="CourseID" value="@Data.ID" />
+                    <input type="hidden" name="ChapterID" value="" />
 
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label class="col-form-label">Tiêu đề:</label>
-                                <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
-                                       }>
-                            </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="col-form-label">Tiêu đề:</label>
+                            <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
+                                   }>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="form-group col-md-12">
-                                <label class="col-form-label">Chương:</label>
-                                <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
-                                        }>
-                                    <option value="0">------</option>
-                                    @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
-                                        {
-                                            <option value="@listChapter[i].ID">@listChapter[i].Name</option>
-                                        }
-                                    }
-                                </select>
-                            </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="col-form-label">Chương:</label>
+                            <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
+                                    }>
+                                <option value="0">------</option>
+                                @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                    {
+                    		<option value="@listChapter[i].ID">@listChapter[i].Name</option>
+				    } 
+			        }
+                            </select>
                         </div>
+                    </div>
 
-                        @*<div class="row chooseOrder">
-                                <div class="form-group col-md-12">
-                                    <label class="col-form-label">Thứ tự:</label>
-                                    <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
-                                </div>
-                            </div>*@
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return CloneLesson()">Lưu thay đổi</button>
-                </div>
+                    @*<div class="row chooseOrder">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Thứ tự:</label>
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                            </div>
+                        </div>*@
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return CloneLesson()">Lưu thay đổi</button>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinChapterModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="#" name="joinChapterModal" enctype="multipart/form-data" method="post">
-                        <input type="hidden" name="ID" />
-                        <input type="hidden" name="ChapterID" value="" />
-                        <div class="form-group">
-                            <label class="col-form-label">Ghép Chương: </label><br />
-                            <label name="rootItem"></label><br />
-                            <label class="col-form-label"> với: </label>
-                            <select name="JoinChapter" class="form-control" required></select> <br />
-                            <label class="col-form-label"> Tên chương mới: </label>
-                            <input type="text" class="form-control" name="newName" placeholder="Tên chương mới" />
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","Curriculum")','join' , AddChapterCallback)">Lưu</button>
-                </div>
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinChapterModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" name="joinChapterModal" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="ID" />
+                    <input type="hidden" name="ChapterID" value="" />
+                    <div class="form-group">
+                        <label class="col-form-label">Ghép Chương: </label><br />
+                        <label name="rootItem"></label><br />
+                        <label class="col-form-label"> với: </label>
+                        <select name="JoinChapter" class="form-control" required></select> <br />
+                        <label class="col-form-label">Tạo chương mới</label>
+                        <input type="checkbox" name="CreateNewChapter" id="CreateNewChapter" onchange="IsCreateNewChapter(this)" /> <br />
+                        <label class="col-form-label hide" id="NewLable"> Tên chương mới: </label>
+                        <input type="text" class="form-control hide" name="newName" id="newName" placeholder="Tên chương mới" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","Curriculum")','join' , AddChapterCallback)">Lưu</button>
             </div>
         </div>
     </div>
+</div>
     <!--    End     -->
 
     <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
@@ -996,7 +998,7 @@
         //debugger
         modal.find("[name=rootItem]").text($(currentItem).find("[name=Name]").text());
         modal.find("[name=newName]").val($(currentItem).find("[name=Name]").text());
-        debugger
+        //debugger
         var lessonholder = modal.find("[name=JoinChapter]");
         $(lessonholder).empty();
         $(currentItem.parent()).siblings().each(function () {
@@ -1008,6 +1010,19 @@
         });
 
         return false;
+    }
+
+    function IsCreateNewChapter(obj) {
+        //debugger
+        var isCreateNewChapter = $('#CreateNewChapter').prop('checked')
+        if (isCreateNewChapter == true) {
+            $("#NewLable").attr("class", "col-form-label");
+            $("#newName").attr("class", "form-control");
+        }
+        else {
+            $("#NewLable").attr("class", "hide");
+            $("#newName").attr("class", "hide");
+        }
     }
 
     /*

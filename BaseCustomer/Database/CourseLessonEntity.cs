@@ -85,10 +85,5 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ChapterID == ChapterID).ToEnumerable();
         }
-
-        public void UpdateLessonPoint(string ID, double point)
-        {
-            CreateQuery().UpdateOne(t => t.ID == ID, Builders<CourseLessonEntity>.Update.Set(t => t.Point, point));
-        }
     }
 }
