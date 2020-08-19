@@ -652,7 +652,7 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
-                    string zoomId = teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom.Replace("-", "");
+                    string zoomId = (teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom).Replace("-", "").Replace(" ", "");
                     //ViewBag.Role = "0";
                     ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = zoomId });
                 }
