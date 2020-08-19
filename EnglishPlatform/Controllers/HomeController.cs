@@ -206,10 +206,10 @@ namespace EnglishPlatform.Controllers
                             string centerCode = center.Code;
                             string roleCode = "";
                             var tc = _teacherService.GetItemByID(user.UserID);
-                            var st = _studentService.GetItemByID(user.UserID);
-
-
-
+                            var st =
+                                user.Type == "teacher" ?
+                                _studentService.GetStudentByEmail(user.UserName) :
+                                _studentService.GetItemByID(user.UserID);
 
                             var defaultUser = new UserModel() { };
                             switch (Type)

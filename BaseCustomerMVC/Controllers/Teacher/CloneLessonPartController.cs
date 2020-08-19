@@ -46,6 +46,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
 
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+
         public CloneLessonPartController(
             GradeService gradeservice,
             SubjectService subjectService,
@@ -279,7 +281,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         CourseID = lessonpart.CourseID,
                         Content = "",
-                        Description = "",
+                        Description = item.Questions == null ? "" : item.Questions[0].Description,
                         ParentID = lessonpart.ID,
                         CreateUser = createduser,
                         Point = lessonpart.Point,
@@ -350,26 +352,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     break;
             }
 
-
-            if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
+            calculateLessonPoint(item.ParentID);
+            if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && quizType.Contains(item.Type))
             {
-                var quizPart = new List<string> { "ESSAY", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4" };
-                switch (lessonpart.Type)
+                if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 1)//only 1 quiz part (new part)
                 {
-                    case "ESSAY":
-                    case "QUIZ1":
-                    case "QUIZ2":
-                    case "QUIZ3":
-                    case "QUIZ4":
-                        if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizPart.Contains(item.Type)) == 1)//only 1 quiz part (new part)
-                        {
-                            //increase 
-                            _chapterService.IncreasePracticeCount(parentLesson.ChapterID, 1);
-                        }
-                        break;
+                    //increase 
+                    _chapterService.IncreasePracticeCount(parentLesson.ChapterID, 1);
                 }
             }
-
 
             IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
@@ -427,23 +418,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var parentLesson = _lessonService.GetItemByID(item.ParentID);
                 if (parentLesson != null)
-                    if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
+                {
+                    var isQuiz = quizType.Contains(item.Type);
+                    if (isQuiz)
                     {
-                        var quizPart = new List<string> { "ESSAY", "QUIZ1", "QUIZ2", "QUIZ3" };
-                        switch (item.Type)
+                        calculateLessonPoint(parentLesson.ID);
+                        if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
-                            case "ESSAY":
-                            case "QUIZ1":
-                            case "QUIZ2":
-                            case "QUIZ3":
-                                if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizPart.Contains(item.Type)) == 0)//no quiz part (new part)
-                                {
-                                    //increase 
-                                    _chapterService.IncreasePracticeCount(parentLesson.ChapterID, -1);
-                                }
-                                break;
+                            if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 0)//no quiz part (new part)
+                            {
+                                //increase 
+                                _chapterService.IncreasePracticeCount(parentLesson.ChapterID, -1);
+                            }
                         }
                     }
+                }
 
             }
             catch (Exception ex)
@@ -839,7 +828,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             //_fileProcess.DeleteFile(oldquiz.Media.Path);
                         }
-                            
+
 
                         if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
                             quiz.Media = null;
@@ -947,7 +936,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     //_fileProcess.DeleteFile(oldanswer.Media.Path);
                                 }
-                                    
+
 
                                 if (files == null || !files.Any(f => f.Name == answer.Media.Name))
                                     answer.Media = null;
@@ -980,82 +969,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)
+
+        //TODO: Need update later
+        private double calculateLessonPoint(string lessonId)
         {
-            Description = item.Description;
-            var questionList = new List<QuestionViewModel>();
-            //extract Question from Description
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(item.Description);
-            var fillquizs = doc.DocumentNode.SelectNodes(".//fillquiz[*[contains(@class,\"fillquiz\")]]");
-            if (fillquizs == null || fillquizs.Count() == 0)
-                return questionList;
-
-            for (int i = 0; i < fillquizs.Count(); i++)
+            var point = 0.0;
+            var parts = _service.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            foreach (var part in parts)
             {
-                var quiz = fillquizs[i];
-
-                var inputNode = quiz.SelectSingleNode(".//*[contains(@class,\"fillquiz\")]");
-                if (inputNode == null)
+                if (part.Type == "ESSAY")
                 {
-                    continue;
+                    point += part.Point;
                 }
-
-                var ans = inputNode.GetAttributeValue("ans", null);
-                if (ans == null)
-                    ans = inputNode.GetAttributeValue("placeholder", null);
-                if (string.IsNullOrEmpty(ans))
+                else
                 {
-                    inputNode.Remove();
-                    continue;
+                    point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
                 }
-                var Question = new QuestionViewModel
-                {
-                    ParentID = item.ID,
-                    CourseID = item.CourseID,
-                    CreateUser = creator,
-                    Order = i,
-                    Point = 1,
-                    Content = inputNode.GetAttributeValue("dsp", null),//phần hiển thị cho học viên
-                    Description = quiz.GetAttributeValue("title", null),//phần giải thích đáp án
-                    Answers = new List<LessonPartAnswerEntity>
-                    {
-                    }
-
-                };
-
-                var ansArr = ans.Split('|');
-                foreach (var answer in ansArr)
-                {
-                    if (!string.IsNullOrEmpty(answer.Trim()))
-                    {
-                        Question.Answers.Add(new LessonPartAnswerEntity
-                        {
-                            CourseID = item.CourseID,
-                            CreateUser = creator,
-                            IsCorrect = true,
-                            Content = answer.Trim()
-                        });
-                    }
-                }
-
-                questionList.Add(Question);
-                var clearnode = HtmlNode.CreateNode("<input></input>");
-                clearnode.AddClass("fillquiz");
-                inputNode.Remove();
-                quiz.Attributes.Remove("contenteditable");
-                quiz.Attributes.Remove("readonly");
-                quiz.Attributes.Remove("title");
-                quiz.ChildNodes.Add(clearnode);
             }
-
-            var removeNodes = doc.DocumentNode.SelectNodes(".//fillquiz[not(input)]");
-            if (removeNodes != null && removeNodes.Count() > 0)
-                foreach (var node in removeNodes)
-                    node.Remove();
-
-            Description = doc.DocumentNode.OuterHtml.ToString();
-            return questionList;
+            _lessonService.UpdateLessonPoint(lessonId, point);
+            return point;
         }
 
         //private async Task SaveQuestionFromView(LessonPartViewModel item, string createuser = "auto", IFormFileCollection files = null)

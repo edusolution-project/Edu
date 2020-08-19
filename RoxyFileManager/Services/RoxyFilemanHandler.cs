@@ -99,6 +99,7 @@ namespace FileManagerCore.Services
                             file.CopyTo(stream);
                             stream.Close();
                         }
+                        item.Type = Path.GetExtension(dest);
                         if (item.Extends == "image")
                         {
                             int.TryParse(_gConfig.MAX_IMAGE_WIDTH, out int w);
@@ -152,6 +153,7 @@ namespace FileManagerCore.Services
                             file.CopyTo(stream);
                             stream.Close();
                         }
+                        item.Type = Path.GetExtension(dest);
                         if (item.Extends == "image")
                         {
                             int.TryParse(_gConfig.MAX_IMAGE_WIDTH, out int w);

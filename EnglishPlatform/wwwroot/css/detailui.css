@@ -190,7 +190,9 @@ footer {
         background-color: #28a745 !important;
     }
 
-.QUIZ1 .answer-item, .QUIZ2 .answer-item {
+.QUIZ1 .answer-item,
+.QUIZ4 .answer-item,
+.QUIZ2 .answer-item {
     max-width: 30%;
     padding-right: 10px;
     display: inline-block;
