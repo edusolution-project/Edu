@@ -561,10 +561,10 @@
                     debugger
                     //console.log(subjects);
                     $(".subjectSelect input[type=checkbox]#" + targets[i]).prop("checked", true);
-                    
+
                     $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: targets[i] }));
                 }
-            
+
             $(".subjectSelect input[type=checkbox]").each(function () {
                 if ($(this).is(":checked")) {
                     line += ($("+ span", this).text().trim() + "; ");

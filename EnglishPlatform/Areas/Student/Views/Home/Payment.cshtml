@@ -1,8 +1,11 @@
 ﻿@{
-    //ViewData["Title"] = "Trang chủ - " + DateTime.Now.ToString("D");
+
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    var product = ViewBag.Product as List<BaseCustomerMVC.Models.NewsViewModel>;
+
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var product = ViewBag.Product as BaseCustomerMVC.Models.NewsViewModel;
+    ViewData["Title"] = "Thông tin thanh toán: " + product?.Title;
+    var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
     string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
@@ -11,70 +14,59 @@
     }
 }
 
-<div class="container">
+<div class="module" id="dashboard_content">
     @*<form action="@processUrl("PaymentStatus","Home")" method="post">*@
-        @*<input type="text" class="hide" name="ID" id="ID" value="@ViewBag.Product.ID" />
+    @*<input type="text" class="hide" name="ID" id="ID" value="@ViewBag.Product.ID" />
         <input type="text" name="ClassName" readonly value="@ViewBag.Product.ClassName" />
         <input type="text" name="Price" value="@ViewBag.Product.Price" readonly />
         <button onclick="Thanhtoan()">Thanh toán</button>*@
 
-        @* Thong tin don hang *@
-        <div class="form-group">
-            <input type="text" class="hide" id="ID" name="ID" value="@ViewBag.Product.ID" />
-            <h3>Đơn hàng</h3>
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th class='text-center'>#</th>
-                        <th class='text-center'>Tên gói học</th>
-                        <th class='text-center'>Đơn giá</th>
-                        @*<th class='text-center'>Số lượng</th>
+    @* Thong tin don hang *@
+    <div class="form-group">
+        <input type="hidden" class="hide" id="ID" name="ID" value="@product.ID" />
+        <h3>Đơn hàng</h3>
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th class='text-center'>#</th>
+                    <th class='text-center'>Tên gói học</th>
+                    <th class='text-center'>Giá tiền</th>
+                    @*<th class='text-center'>Số lượng</th>
                         <th class='text-center'>Thành tiền</th>*@
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class='text-center'>1</td>
-                        <td class='text-center'><a href="javascript:;">@ViewBag.Product.Title</a></td>
-                        @if (ViewBag.Product.Discount == 0)
-                        {
-                            <td class='text-center'>@ViewBag.Product.Price.ToString("0,0.##") VND</td>
-                        }
-                        else
-                        {
-                            <td class='text-center'>@ViewBag.Product.Discount.ToString("0,0.##") VND</td>
-                        }
-                        @*<td class='text-center'>1</td>
-        <td class='text-center'>{{item.Students}}</td>
-        <td class='text-center'>{{formatPrice(item.TotalPrice)}} VND</td>
-        <td class='text-center'><a href="javascript:;" v-on:click="ViewDetail(item.ID)">Xem chi tiết >>></a></td>*@
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class='text-center'>1</td>
+                    <td class='text-center'><a href="javascript:;">@product.Title</a></td>
+                    <td class='text-center'>@product.Discount.ToString("0,0.##") VND</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-        <div class="form-row">
-            <h3>Thông tin đặt hàng</h3>
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Họ tên(*)</th>
-                        <td><input type="text" id="Name" name="Name" placeholder="Họ và tên" value="@ViewBag.Student.FullName" required /></td>
-                    </tr>
-                    <tr>
-                        <th>Số điện thoại(*)</th>
-                        <td><input type="text" id="Phone" name="Phone" placeholder="Số điện thoại" value="@ViewBag.Student.Phone" required /></td>
-                    </tr>
-                    <tr>
-                        <th>Địa chỉ(*)</th>
-                        <td><input type="text" id="Address" name="Address" placeholder="Địa chỉ" value="@ViewBag.Student.Address" required /></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" onclick="Thanhtoan()"><button>Thanh toán</button></td>
-                    </tr>
-                </thead>
-            </table>
-        </div>
+    <div class="form-row">
+        <h3>Thông tin đặt hàng</h3>
+        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Họ tên(*)</th>
+                    <td><input type="text" id="Name" name="Name" placeholder="Họ và tên" value="@student.FullName" required /></td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại(*)</th>
+                    <td><input type="text" id="Phone" name="Phone" placeholder="Số điện thoại" value="@student.Phone" required /></td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ(*)</th>
+                    <td><input type="text" id="Address" name="Address" placeholder="Địa chỉ" value="@student.Address" required /></td>
+                </tr>
+                <tr>
+                    <td colspan="2" onclick="Thanhtoan()"><button>Thanh toán</button></td>
+                </tr>
+            </thead>
+        </table>
+    </div>
     @*</form>*@
 </div>
 
@@ -92,10 +84,6 @@
             data: { basis: Center, ID: ID, Phone: Phone, Name: Name },
             dataType: "json",
             success: function (data) {
-                //console.log(data.Url);
-                //return false;
-                //debugger
-
                 if (data.Url != "") {
                     window.location.href = data.Url
                 }
