@@ -422,7 +422,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
                                 var name = workSheet.Cells[i, 2].Value.ToString();
-                                var phone = workSheet.Cells[i, 4].Value.ToString();
+                                var phone = workSheet.Cells[i, 4].Value != null ? workSheet.Cells[i, 4].Value.ToString().Trim() : "";
                                 var role = (workSheet.Cells[i, 5].Value != null && workSheet.Cells[i, 5].Value.ToString() == "x") ? headTeacherRole.ID : teacherRole.ID;
 
                                 var teacher = _teacherService.GetItemByEmail(email);

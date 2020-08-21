@@ -38,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _schedulemapping;
         private readonly VocabularyService _vocabularyService;
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
         //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
@@ -345,7 +346,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var chapter = _chapterService.GetItemByID(lesson.ChapterID);
 
-            List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+            var ExamTypes = quizType;
 
             var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
@@ -367,14 +368,14 @@ namespace BaseCustomerMVC.Controllers.Student
                         .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                         {
                             CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                            AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                            AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
                             Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
                             TypeAnswer = o.Type,
-                            RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                            RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                             PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                             ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                             MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                            MaxPoint = examview.MaxPoint
+                            MaxPoint = z.Point
                         }))?.ToList()
                 })).ToList()
             });
@@ -533,7 +534,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (endtime < DateTime.UtcNow) // hết thời gian 
                     {
                         // => kết thúc bài kt
-                        lastexam = _examService.Complete(lastexam, lesson, out _);
+                        lastexam = _examService.CompleteNoEssay(lastexam, lesson, out _);
                         //throw new NotImplementedException();
                         //lastexam.Status = true;
                         ////TODO: Chấm điểm last exam
@@ -732,8 +733,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,
                                DoPoint =
                                (lastexam != null && lastexam.Status) ?
-                               r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam.MaxPoint > 0 ? lastexam.Point * 100.00 / lastexam.MaxPoint : 0) :
-                                    (lastexam.QuestionsTotal > 0 ? lastexam.QuestionsPass * 100.00 / lastexam.QuestionsTotal : 0) : 0,//completed exam only
+                               //r.TemplateType == LESSON_TEMPLATE.EXAM ?
+                               //(lastexam.MaxPoint > 0 ? lastexam.Point * 100.00 / lastexam.MaxPoint : 0) :
+                                    (r.Point > 0 ? lastexam.Point * 100.00 / r.Point : 0)
+                                    : 0,//completed exam only
                                Tried = lastexam != null ? lastexam.Number : 0,
                                LastExam = (lastexam != null && lastexam.Status
                                ) ? lastexam.ID : null

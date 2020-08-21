@@ -51,5 +51,10 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public IEnumerable<LessonPartQuestionEntity> GetByPartID(string PartID)
+        {
+            return CreateQuery().Find(o => o.ParentID == PartID).ToEnumerable();
+        }
     }
 }

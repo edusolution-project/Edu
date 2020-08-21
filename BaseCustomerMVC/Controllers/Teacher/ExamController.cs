@@ -38,7 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly LessonProgressService _lessonProgressService;
-        private readonly ScoreService _scoreService;
+        //private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         public ExamController(ExamService service,
@@ -55,7 +55,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
             , LessonProgressService lessonProgressService
-            , ScoreService scoreService
+            //, ScoreService scoreService
             , IRoxyFilemanHandler roxyFilemanHandler
             )
         {
@@ -73,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _lessonProgressService = lessonProgressService;
-            _scoreService = scoreService;
+            //_scoreService = scoreService;
             _roxyFilemanHandler = roxyFilemanHandler;
         }
 
@@ -266,9 +266,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
                     var progress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, student.ID, lesson.ID);
                     var tried = examresult.Count();
-                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
-                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
-                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.QuestionsTotal > 0 ? t.QuestionsPass * 100 / t.QuestionsTotal : 0);
+                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
 
                     var lastEx = examresult.FirstOrDefault();
                     result.Add(new StudentLessonResultViewModel(student)
@@ -280,7 +280,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         TriedCount = tried,
                         LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
                         OpenCount = progress?.TotalLearnt ?? 0,
-                        LastPoint = lastEx != null ? (lastEx.QuestionsTotal > 0 ? lastEx.QuestionsPass * 100 / lastEx.QuestionsTotal : 0) : 0,
+                        LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
                         IsCompleted = lastEx != null && lastEx.Status,
                         ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList()
                     });
@@ -308,7 +308,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast=false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast = false)
         {
             try
             {
@@ -317,51 +317,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
                     var point = 0.0;
-                    var ExamDetails = _examDetailService.Collection.Find(o => o.ExamID == currentExam.ID)?.ToList();
-                    if (ExamDetails != null && ExamDetails.Count > 0)
-                    {
-                        foreach (var detail in ExamDetails)
-                        {
-                            var _detail = _examDetailService.GetItemByID(detail.ID);
-                            if (_detail != null)
-                            {
-                                _detail.Point = detail.Point;
-                                point += detail.Point;
-                                _detail.Updated = DateTime.Now;
-                                _examDetailService.CreateQuery().ReplaceOne(e => e.ID == _detail.ID, _detail);
-                            }
-
-                        }
-
-                        currentExam.Marked = true;
-                        _service.CreateQuery().UpdateOne(Builders<ExamEntity>.Filter.Eq(o => o.ID, currentExam.ID), Builders<ExamEntity>.Update.Set(o => o.Marked, true));
-                        currentExam.Marked = true;
-                        currentExam.Updated = DateTime.Now;
-                        var lesson = _lessonService.GetItemByID(currentExam.LessonID);
-                        var score = new ScoreEntity()
-                        {
-                            ClassID = currentExam.ClassID,
-                            LessonID = currentExam.LessonID,
-                            Multiple = lesson.Multiple,
-                            ScoreType = lesson.Etype,
-                            StudentID = currentExam.StudentID,
-                            TeacherID = currentExam.TeacherID,
-                            Updated = DateTime.Now,
-                            Point = 0,
-                            MaxPoint = lesson.Point
-                        };
-
-                        currentExam.Point = point;
-                        score.Point = point;
-
-                        _service.CreateQuery().ReplaceOne(e => e.ID == currentExam.ID, currentExam);
-                        _scoreService.CreateQuery().InsertOne(score);
-                        
-                        return new JsonResult(new Dictionary<string, object>
+                    var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                    currentExam.Point = point;
+                    currentExam.Marked = true;
+                    currentExam = _service.CompleteFull(currentExam, lesson, out point);
+                    return new JsonResult(new Dictionary<string, object>
                         {
                             { "Data", _service.GetItemByID(oldItem.ExamID) }
                         });
-                    }
                 }
                 else
                 {

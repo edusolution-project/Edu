@@ -1277,12 +1277,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var item = _lessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                var item = _lessonPartService.GetItemByID(ID);
                 if (item == null) return;
 
-                var questions = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
-                for (int i = 0; questions != null && i < questions.Count; i++)
-                    RemoveQuestion(questions[i].ID);
+                var questions = _lessonPartQuestionService.GetByPartID(item.ID);
+
+                foreach(var question in questions)
+                    RemoveQuestion(question.ID);
                 _lessonPartService.Remove(ID);
             }
             catch (Exception ex)

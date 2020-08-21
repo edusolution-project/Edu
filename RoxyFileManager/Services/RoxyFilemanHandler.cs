@@ -94,11 +94,13 @@ namespace FileManagerCore.Services
                         string filename = MakeUniqueFilename(path, DateTime.Now.Ticks.ToString()+f.Extension);
                         string dest = Path.Combine(path, filename);
                         item.Extends = GetFileType(f.Extension);
+                        
                         using (var stream = new FileStream(dest, FileMode.Create))
                         {
                             file.CopyTo(stream);
                             stream.Close();
                         }
+                        item.Type = Path.GetExtension(dest);
                         if (item.Extends == "image")
                         {
                             int.TryParse(_gConfig.MAX_IMAGE_WIDTH, out int w);
@@ -152,6 +154,7 @@ namespace FileManagerCore.Services
                             file.CopyTo(stream);
                             stream.Close();
                         }
+                        item.Type = Path.GetExtension(dest);
                         if (item.Extends == "image")
                         {
                             int.TryParse(_gConfig.MAX_IMAGE_WIDTH, out int w);

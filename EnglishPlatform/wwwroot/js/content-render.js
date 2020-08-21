@@ -2149,20 +2149,25 @@ var Lesson = (function () {
         var index = parseInt($(modal).attr('order'));
         debugger
         if (status == true) {
-            $(modal.lastElementChild).attr("class", "editorck mt-3 mb-3 p-2")
-            for (name in CKEDITOR.instances) {
-                CKEDITOR.instances[name].destroy(true);
-            }
-            CKEDITOR.replace(modal.lastElementChild, {
+            //$(modal.lastElementChild).attr("class", "editorck mt-3 mb-3 p-2")
+            $(modal).find('[name^=Description]').attr('class', 'editorck mt-3 mb-3 p-2');
+            //if (modal.lastElementChild.getAttribute('id').includes('editor')) {
+            if (modal.lastElementChild.getAttribute('id') == null) {
+                CKEDITOR.replace(modal.lastElementChild, {
                     extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                 });
+            }
+            else {
+                $(modal.lastElementChild).removeAttr("style");
+                $(modal.lastElementChild).removeAttr("visibility");
+            }
         }
         else {
-            debugger
-            for (name in CKEDITOR.instances) {
-                //CKEDITOR.instances.name.destroy();
-            }
-            $(modal.lastElementChild).attr("class", "hide");
+            //CKEDITOR.destroy[modal.lastElementChild.getAttribute("id")];
+            //CKEDITOR.instances[modal.lastElementChild.getAttribute("id")];
+            //$(modal.lastElementChild).remove();
+            $(modal).find('[class^=editorck]').attr('class', 'hide');
+            $(modal.lastElementChild).attr("style", "display:none");
         };
     }
 

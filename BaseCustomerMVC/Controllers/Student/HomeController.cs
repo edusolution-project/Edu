@@ -78,27 +78,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
 
-            //var category = _newsCategoryService.GetItemByCode("san-pham");
-
-            //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
-            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true).Limit(6);
-
-            List<NewsEntity> _data = new List<NewsEntity>();
-            foreach (var item in data.ToList())
+            var filter = new List<FilterDefinition<NewsEntity>>();
+            if (!string.IsNullOrEmpty(centerID))
             {
-
-                //if (item.Targets == null) continue;
-                if (item.Targets != null && item.Targets.Find(x => x == centerID) != null || item.CenterID == centerID)
-
-                if ((item.Targets != null && item.Targets.Find(x => x == centerID) != null) || item.CenterID == centerID)
-
-                    _data.Add(item);
-                //else continue;
+                filter.Add(Builders<NewsEntity>.Filter.Where(o => o.Targets.Any(x => x.Equals(centerID)) || o.CenterID == centerID));
             }
+            filter.Add(Builders<NewsEntity>.Filter.Where(o => o.Type=="san-pham" && o.IsActive==true));
+            var data = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).Limit(6);
+            //var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive==true && o.Targets.Any(x=>x.Equals(centerID)) || o.CenterID==centerID).Limit(6);
 
-            ViewBag.List_Courses = _data.ToList();
-            //var avatar = student != null && !string.IsNullOrEmpty(student.Avatar) ? student.Avatar : _default.defaultAvatar;
-            //HttpContext.Session.SetString("userAvatar", avatar);
+            ViewBag.List_Courses = data.ToList();
             return View();
         }
 

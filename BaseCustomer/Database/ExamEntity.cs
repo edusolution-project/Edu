@@ -124,7 +124,7 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point)
         {
             exam.Status = true;
             point = 0;
@@ -161,6 +161,7 @@ namespace BaseCustomerEntity.Database
                         case "QUIZ1":
                             if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
                             _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -170,6 +171,7 @@ namespace BaseCustomerEntity.Database
                             //ID not match => check value
                             if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
                                 _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -186,39 +188,20 @@ namespace BaseCustomerEntity.Database
                                     isCorrect = false;
                                     break;
                                 }
-
                             }
                             if (isCorrect)
                             {
-                                _correctanswer = realAnswers.First();
+                                _correctanswer = realAnswers.FirstOrDefault();
+                                if (_correctanswer == null) continue;
                                 _correctanswer.ID = examDetail.AnswerID;
                                 _correctanswer.Content = examDetail.AnswerValue;
                             }
                             break;
                     }
-
-                    //var _realAnswers = realAnswers?.FirstOrDefault();//multiple correct answers
-                    ////var realanswer = _realAnswers.FirstOrDefault();
-                    //if (_realAnswers != null)
-                    //{
-                    //    examDetail.RealAnswerID = _realAnswers.ID;
-                    //    examDetail.RealAnswerValue = _realAnswers.Content;
-                    //}
-
-
-                    //isTrue =
-                    //    (!string.IsNullOrEmpty(answerID) && realAnswers.Any(t => t.ID == answerID)) ||
-                    //    //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
-                    //    (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
-
-                    //_correctanswer = isTrue
-                    //    ? _realAnswers
-                    //    : null;//chọn đúng đáp án
-
                 }
                 else //bài điền từ
                 {
-                    if (examDetail.AnswerValue != null)
+                    if (examDetail.AnswerValue != null && part.Type == "QUIZ2")
                     {
                         var _realAnwserQuiz2 = realAnswers?.ToList();
 
@@ -233,7 +216,9 @@ namespace BaseCustomerEntity.Database
                                         quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
                                 }
                         }
-                        if (quiz2answer.Contains(NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim())))
+                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim());
+
+                        if (quiz2answer.Contains(normalizeAns))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
@@ -282,6 +267,39 @@ namespace BaseCustomerEntity.Database
                 Task.WhenAll(cttask
                     //, cstask, ctask
                     );
+            }
+
+            return exam;
+        }
+
+        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
+        {
+            exam.Status = true;
+            point = 0;
+            var pass = 0;
+            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+            foreach (var detail in listDetails)
+                point += detail.Point;
+
+            exam.Point = point;
+            exam.Updated = DateTime.Now;
+            exam.MaxPoint = lesson.Point;
+            exam.QuestionsDone = listDetails.Count();
+
+            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam, false).Result;
+            Save(exam);
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
+            )
+            {
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                Task.WhenAll(cttask, cstask, ctask);
+            }
+            else
+            {
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+                Task.WhenAll(cttask);
             }
 
             return exam;
@@ -352,7 +370,8 @@ namespace BaseCustomerEntity.Database
                 .Replace("‘", "'")
                 .Replace("’", "'")
                 .Replace("“", "\"")
-                .Replace("”", "\"");
+                .Replace("”", "\"")
+                .Replace(" ", " ");
         }
     }
 }

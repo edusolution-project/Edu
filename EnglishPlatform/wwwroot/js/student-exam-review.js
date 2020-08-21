@@ -15,6 +15,7 @@ var ExamReview = (function () {
     var _type = 0;
     var _totalQuiz = 0;
     var _correctQuiz = 0;
+
     function ExamReview() {
         //window.ExamReview = {} || ExamReview;
         this.onReady = onReady;
@@ -22,6 +23,7 @@ var ExamReview = (function () {
         this.Notification = notification;
         this.GetConfig = getConfig;
     }
+
     var prevPart = function () {
         var panes = $('.tab-pane');
         var index = panes.index($('.tab-pane.active'));
@@ -153,7 +155,7 @@ var ExamReview = (function () {
                 style: "font-size: 150%",
 
             }).append("Kết quả: ").append($('<span>',
-                { class: "text-primary", text: _correctQuiz + "/" + _totalQuiz })).append(" (" + durationFormat(duration) + ")"));
+                { class: "text-primary", text: config.exam.Point + "/" + config.exam.MaxPoint })).append(" (" + durationFormat(duration) + ")"));
 
         var totalhead = document.getElementById('total-point-head');
         if (totalhead) {
@@ -191,7 +193,7 @@ var ExamReview = (function () {
                         var cautraloidung = detail.RealAnswerValue == null ? '' : detail.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
                         var cautraloi = detail.AnswerValue;//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
                         var _check = false;
-                        if (cautraloidung == cautraloi) { _check = true; }                        
+                        if (cautraloidung == cautraloi) { _check = true; }
                         if (detail.AnswerID != null && detail.AnswerID == detail.RealAnswerID) { _check = true; }
                         if (detail.Point > 0) { _check = true; }
                         if (!_check) {
@@ -210,30 +212,31 @@ var ExamReview = (function () {
                     daCham++;
                 } else {
                     if (detail) {
-                        if (item.RealAnswerEssay) {
+                        console.log(item);
+                        if (item.RealAnswerEssay || item.PointEssay >= 0) {
+                            _class = "essay success";
                             if (item.PointEssay <= 0) {
-                                _class = "danger";
-                            } else {
-                                _class = "success";
+                                _class = "essay danger";
                             }
                             _class += " checked";
                             title = "Đã chấm";
                             daCham++;
                         }
                         else {
-                            _class = "unchecked";
-                            title = "chưa chấm";
+                            _class = "essay unchecked";
+                            title = "Chưa chấm";
                         }
                     }
                     else {
-                        _class = "bg-warning";
-                        title = "chưa làm";
+                        _class = "essay bg-warning";
+                        title = "Chưa làm";
                     }
                 }
             }
             var li = document.createElement("li");
             li.dataset.id = item.ID;
             li.dataset.part = data.ID;
+            li.dataset.maxpoint = item.MaxPoint;
             li.classList = "item-review-nav " + _class;
             li.innerHTML = '<a>' + index + '</a>';
             li.querySelector("a").addEventListener("click", _eventGotoSelection);
@@ -248,6 +251,9 @@ var ExamReview = (function () {
         var id = this.parentElement.dataset.id;
         var partID = this.parentElement.dataset.part;
         var part = document.getElementById("pills-part-" + partID);
+        
+
+
         if (part != null) {
             var el = part.querySelector("[id='" + id + "']");
             if (!part.classList.contains("active")) {
@@ -268,7 +274,9 @@ var ExamReview = (function () {
             //console.log(el);
             el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
-
+            var panes = $('.tab-pane');
+            var index = panes.index($('.tab-pane.active'));
+            goPartInx(index);
         }
     }
 
@@ -288,7 +296,7 @@ var ExamReview = (function () {
         var content = renderContent(data);
 
         bodyExam.append(content);
-        
+
         if ($('textarea[data-type=ESSAY]').length > 0) {
             $(document).ready(function () {
                 $('textarea[data-type=ESSAY]').each(function () {
@@ -379,13 +387,13 @@ var ExamReview = (function () {
     var renderAnswer = function (data, type) {
         var quizId = data.QuestionID;
 
-        var cautraloidung = data.RealAnswerEssay == null ? '':  data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var _check = false;
         if (cautraloidung == cautraloi) { _check = true; }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
-        console.log(data);
         //console.log(type);
         if (data.AnswerID != null && data.AnswerID != "") {
             switch (type) {
@@ -396,7 +404,7 @@ var ExamReview = (function () {
                 case "QUIZ3":
                     var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
                     if (!_check)//wrong answer                        
-                            _answer.addClass("bg-danger");
+                        _answer.addClass("bg-danger");
                     $('#' + quizId + ' .student-answer').append(_answer);
                     break;
                 case "QUIZ4":
@@ -406,7 +414,7 @@ var ExamReview = (function () {
                     });
                     break;
             }
-            
+
         }
         else { //"QUIZ2"
             if (type == "ESSAY") {
@@ -444,7 +452,8 @@ var ExamReview = (function () {
     var renderAUDIO = function (data) {
         var title = '<div class="part-box-header col-md-2 d-inline-block part-column"><h5 class="title">' + data.Title + '</h5></div>';
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
-        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="' + data.Media.Extension + '">Your browser does not support the audio tag</audio></div>';
+        //longht sửa 
+        html += '<div class="media-holder ' + data.Type + '"><audio controls=""><source src="' + data.Media.Path + '" type="audio/mpeg">Your browser does not support the audio tag</audio></div>';
         html += '</div>';
         return html;
     }
@@ -696,7 +705,7 @@ var ExamReview = (function () {
             html += '</fieldset>';
             var anwerMedia = item.MediasAnswer;
             var medias = item.Medias;//file học viên upload
-            console.log(item);
+            //console.log(item);
             html += '<fieldset class="col-md-12">';
             if (medias != null && medias.length > 0) {
                 html += '<div class="attachment mt-3"><strong>File đính kèm:</strong> ';
@@ -709,10 +718,9 @@ var ExamReview = (function () {
             }
             html += '</fieldset>';
 
-
             var content = item.RealAnswerEssay;// cau tra loi cua giao vien
             var point = item.PointEssay; // điểm giáo viên chấm
-
+            console.log(item);
             if (config.isTeacher) {
                 html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + data.ID + '" style="padding:10px; border:1px solid #ccc">';
                 if (content != "" && content != null) {
@@ -721,10 +729,10 @@ var ExamReview = (function () {
                     html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
                 html += '<div> Điểm :<input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + item.MaxPoint + '</div>';
-                html += '<i>Đáp án đúng :</i>';
+                html += '<i>Bài chữa :</i>';
                 var realContent = content == null ? "" : content;
-                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + data.ID +'">' + realContent + '</textarea></div>';
-                
+                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + data.ID + '">' + realContent + '</textarea></div>';
+
                 //upload file
                 var type = "type='file'";
                 var strFile = "this.parentElement.querySelector('input[" + type + "]')";
@@ -736,7 +744,7 @@ var ExamReview = (function () {
                     html += renderMediaAnswer(mediaFile);
                 }
                 html += '</div>'
-                var textBtn = content == null && point == 0 ? "chấm điểm" : "chấm lại";
+                var textBtn = ((content == null || content == '') && point == 0) ? "chấm điểm" : "chấm lại";
 
                 var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
 
@@ -745,6 +753,7 @@ var ExamReview = (function () {
                 html += '</fieldset>';
                 html += "<script>if (CKEDITOR) {CKEDITOR.replace('TEXT_CKEDITOR_" + data.ID + "',{extraPlugins: '',image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],image2_disableResizer: true});}</script>";
             } else {
+
                 if (point == 0 && content == null) {
                     html += '<fieldset class="answer-item col-md-12" id="essay-teacher-' + data.ID + '" style="padding:10px; border:1px solid #ccc">';
                     html += 'Chưa chấm điểm';
@@ -766,10 +775,10 @@ var ExamReview = (function () {
                     }
                 }
             }
-            //var description = "";
-            //if (item.Description != null)
-            //    description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
-            //html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
+            var description = "";
+            if (item.Description != null)
+                description = item.Description.replace(/\n/g, '<br/>').replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
+            html += '<div class="explaination d-none text-info p-3"><i>' + description + '</i></div>';
             html += '</div></div>';
         }
         html += '</div></div>';
@@ -907,7 +916,7 @@ var ExamReview = (function () {
             _form.append("Point", point);
             _form.append("RealAnswerValue", answer);
             _form.append("isLast", isLAst);
-            
+
             var files = document.querySelector('[data-target="' + qID + '"]>input[type="file"]');
             if (files != null) {
                 for (var x = 0; x < files.files.length; x++) {

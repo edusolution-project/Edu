@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly GroupService _groupService;
 
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public ClassController(
             AccountService accountService,
@@ -1296,6 +1297,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(userId);
             var teachersHead = _teacherService.GetAll();
+
             TeacherEntity _teacher = null;
             foreach(var t in teachersHead.ToList())
             {
@@ -1784,7 +1786,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ExamEntity data = _examService.GetItemByID(model.ID);
                 if (data != null)
                 {
-                    List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+                    var ExamTypes = quizType;
 
                     var lesson = _lessonService.GetItemByID(data.LessonID);
 
@@ -1808,14 +1810,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
                                     CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                    AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
                                     Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
                                     TypeAnswer = o.Type,
-                                    RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                    RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                                    MaxPoint = examview.MaxPoint
+                                    MaxPoint = z.Point
                                 }))?.ToList()
                         })).ToList()
                     });
