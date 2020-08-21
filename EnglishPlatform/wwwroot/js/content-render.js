@@ -2085,7 +2085,8 @@ var Lesson = (function () {
                 contentholder.append($("<input>", { "name": "Point", "class": "input-text quiz-text form-control", "placeholder": ">= 0", type: "number", value: data != null ? data.Point : 0 }));
                 var questionTemplate = $("<fieldset>", { "class": "fieldQuestion", "Order": 0 });
                 questionTemplate.append($("<label>", { "class": "input_label mr-1", "text": "Giải thích đáp án" }));
-                questionTemplate.append($("<div>", { class: "editorck mt-3 mb-3 p-2", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
+                questionTemplate.append($("<input>", { "class": "input_label mr-1", "type": "checkbox", "id": "Explain", "name": "Explain", "onclick": "GiaiThich(this)" }));
+                questionTemplate.append($("<div>", { class: "hide", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
                 question_template_holder.append(questionTemplate);
                 if (data != null && data.Questions != null) {
                     addNewQuestion(data.Questions[0]);
@@ -2141,36 +2142,28 @@ var Lesson = (function () {
     }
     //end renderPartTemplate
 
-    //fix hien thi ckeditor 18-08-2020
+    //fix hien thi ckeditor 19-08-2020
     var GiaiThich = function (obj) {
-        debugger
         var modal = obj.parentElement;
-        var status = $('#Explain').prop('checked');
+        var status = $(obj).prop('checked');
+        var index = parseInt($(modal).attr('order'));
+        debugger
         if (status == true) {
-            $(modal).children()[13].setAttribute("class", "editorck mt - 3 mb - 3 p - 2");
+            $(modal.lastElementChild).attr("class", "editorck mt-3 mb-3 p-2")
             for (name in CKEDITOR.instances) {
                 CKEDITOR.instances[name].destroy(true);
             }
-            $('.editorck').each(function (idx, obj) {
-                //CKEDITOR.inline($(obj)[0], {
-                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-                //});
-                CKEDITOR.replace($(obj)[0], {
+            CKEDITOR.replace(modal.lastElementChild, {
                     extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                 });
-            });
         }
         else {
-            $(modal).children()[13].setAttribute("class", "hide");
-            //CKEDITOR.replace("editorck mt - 3 mb - 3 p - 2", {
-            //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-            //});
+            debugger
             for (name in CKEDITOR.instances) {
-                CKEDITOR.instances[name].destroy(true);
+                //CKEDITOR.instances.name.destroy();
             }
-        }
-        //(editorck mt - 3 mb - 3 p - 2)
-        //alert(obj);
+            $(modal.lastElementChild).attr("class", "hide");
+        };
     }
 
     var addNewQuestion = function (data = null) {
@@ -2200,9 +2193,9 @@ var Lesson = (function () {
         //CKEDITOR.inline($(clone).find("[name='Questions.Description']")[0], {
         //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
         //});
-        CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
-            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-        });
+        //CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
+        //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+        //});
 
         $(clone).find("[name^='Questions.']").each(function () {
             $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
