@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Danh sách khóa học";
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    var listhistory = ViewBag.ListHistory as List<BaseCustomerMVC.Models.NewsViewModel>;
+    var transactions = ViewBag.ListHistory as List<BaseCustomerMVC.Models.NewsViewModel>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -63,7 +63,7 @@
                             <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.Title}}</a></td>
                             <td class='text-center'>{{item.ClassName}}</td>
                             <td class='text-center'>{{item.CenterName}}</td>
-                            <td class='text-center'>{{item.Students}}</td>
+                            <td class='text-center'>{{item.Transactions}}</td>
                             <td class='text-center'>{{formatPrice(item.TotalPrice)}} VND</td>
                             <td class='text-center'><a href="javascript:;" v-on:click="ViewDetail(item.ID)">Xem chi tiết >>></a></td>
                         </tr>
@@ -149,7 +149,7 @@
             window.InitDate = this.initDate
         },
         data: {
-            items: @Html.Raw(Json.Serialize(listhistory)),
+            items: @Html.Raw(Json.Serialize(transactions)),
             view: 10,
             totalRec: 0,
             page: 1,

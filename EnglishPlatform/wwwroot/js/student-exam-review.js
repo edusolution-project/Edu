@@ -179,9 +179,10 @@ var ExamReview = (function () {
 
     var renderItemNavigation = function (el, data, index) {
         var examDetails = config.exam.Details;
+        
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
-
+            console.log(item);
             var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
             if (examDetail) {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;

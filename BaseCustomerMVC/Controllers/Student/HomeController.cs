@@ -101,10 +101,18 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(detail_product);
         }
 
-        public IActionResult Profile()
+        public IActionResult Profile(string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _studentService.GetItemByID(_studentid);
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                {
+                    ViewBag.Center = center;
+                }
+            }
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
             _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
@@ -421,7 +429,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
                     conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
-                    var price = product.Discount == 0 ? product.Discount : product.Price;
+                    var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                     //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
                     conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID }));
@@ -508,7 +516,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Transaction()
         {
-            //var message = "";
             var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
             var idproduct = Request.Query["ID"].ToString();
             var center = Request.Query["center"].ToString();
@@ -529,46 +536,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 }   
                 else
                     ViewBag.message = "Giao dịch không hợp lệ không thành công!";
-
-                JoinClass(idproduct, center);
-                ViewBag.message = "Thanh toán thành công!";
             }
             else
             {
                 ViewBag.message = "Thanh toán không thành công!";
-            }
-            //if (vpc_TxnResponseCode.Equals("0"))
-            //{
-            //    if (string.IsNullOrEmpty(ClassID))
-            //        return Json(new { error = "Lớp không tồn tại" });
-            //    var @class = _classService.GetItemByID(ClassID);
-            //    if (@class == null)
-            //        return Json(new { error = "Lớp không tồn tại" });
-            //    //var student = _studentService.GetItemByID(StudentID);
-            //    if (student == null)
-            //        return Json(new { error = "Học viên không tồn tại" });
-
-            //    if (student.JoinedClasses == null)
-            //    {
-            //        student.JoinedClasses = new List<string> { };
-            //        _studentService.Save(student);//init JoinedClass;
-            //    }
-            //    if (student.Centers == null)
-            //    {
-            //        student.Centers = new List<string> { };
-            //        _studentService.Save(student);//init Center;
-            //    }
-            //    if (_studentService.IsStudentInClass(ClassID, student.ID))
-            //    {
-            //        return Json(new { data = @class, msg = "Học viên đã có trong lớp" });
-            //    }
-            //    if (_studentService.JoinClass(ClassID, student.ID, @class.Center) > 0)
-            //    {
-
-            //        return Json(new { data = @class, msg = "Học viên đã được thêm vào lớp" });
-            //    }
-            //    return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
-            //}
+            }        
             return View();
         }
         #endregion

@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly GroupService _groupService;
 
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public ClassController(
             AccountService accountService,
@@ -1134,6 +1135,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
+                        item.TotalLessons += lessoncount;
                         //var skill = _skillService.GetItemByID(csubject.SkillID);
                         //if (skill == null) continue;
                         //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1295,16 +1297,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var center = _centerService.GetItemByCode(CenterCode);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(userId);
-            var teachersHead = _teacherService.GetAll();
-            TeacherEntity _teacher = null;
-            foreach(var t in teachersHead.ToList())
-            {
-                if(t.Centers.Find(x=>x.CenterID.Equals(center.ID))!=null && _teacherHelper.HasRole(t.ID, center.ID, "head-teacher"))
-                {
-                    _teacher = t;
-                    break;
-                }
-            }
+			//VERY BAD
+            //var teachersHead = _teacherService.GetAll();
+            //TeacherEntity _teacher = null;
+            //foreach(var t in teachersHead.ToList())
+            //{
+            //    if(t.Centers.Find(x=>x.CenterID.Equals(center.ID))!=null && _teacherHelper.HasRole(t.ID, center.ID, "head-teacher"))
+            //    {
+            //        _teacher = t;
+            //        break;
+            //    }
+            //}
+			//_teacher = t;
 
             var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
             newData.ID = null;
@@ -1328,7 +1332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ncbj.CourseID = csubject.CourseID;
                     ncbj.GradeID = csubject.GradeID;
                     ncbj.SubjectID = csubject.SubjectID;
-                    ncbj.TeacherID = _teacher.ID;
+                    ncbj.TeacherID = teacher.ID;
                     var newMember = new ClassMemberEntity();
                     long lessoncount = 0;
                     //csubject.TeacherID = teacher.ID;
@@ -1339,6 +1343,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         newData.Subjects.Add(csubject.SubjectID);
                     if (!newData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                         newData.Members.Add(newMember);
+                    newData.TotalLessons += lessoncount;
                     //var skill = _skillService.GetItemByID(csubject.SkillID);
                     //if (skill == null) continue;
                     //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1380,7 +1385,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, bool notify = true)
         {
             member = new ClassMemberEntity();
             lessoncount = 0;
@@ -1419,7 +1424,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByID(@class.Center);
 
                 _classSubjectService.Save(nSbj);
-                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 
@@ -1784,7 +1789,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ExamEntity data = _examService.GetItemByID(model.ID);
                 if (data != null)
                 {
-                    List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+                    var ExamTypes = quizType;
 
                     var lesson = _lessonService.GetItemByID(data.LessonID);
 
@@ -1808,10 +1813,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
                                     CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                    AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
                                     Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
                                     TypeAnswer = o.Type,
-                                    RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                    RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,

@@ -50,6 +50,11 @@ namespace BaseCustomerEntity.Database
         {
             await Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
         }
+
+        public IEnumerable<LessonPartQuestionEntity> GetByPartID(string PartID)
+        {
+            return CreateQuery().Find(o => o.ParentID == PartID).ToEnumerable();
+        }
     }
 
 }

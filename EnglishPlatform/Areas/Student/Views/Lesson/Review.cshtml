@@ -120,7 +120,8 @@
             background-color: #28a745 !important;
         }
 
-    .QUIZ1 .answer-item {
+    .QUIZ1 .answer-item
+    .QUIZ4 .answer-item {
         max-width: 25%;
     }
 
@@ -142,6 +143,7 @@
                 height: 30px;
                 border-radius: 50%;
                 margin-left: 5px;
+                position: relative;
             }
 
                 div#QuizNav > ul > li > a {
@@ -177,6 +179,24 @@
                 div#QuizNav > ul > li:hover > a {
                     background-color: #2791f7;
                 }
+
+    .item-review-nav.essay::before {
+        content: attr(data-maxpoint);
+        pointer-events: none;
+        position: absolute;
+        top: -4px;
+        right: -7px;
+        font-size: 80%;
+        font-weight: bold;
+        text-shadow: 1px 1px 1px green;
+        background: #FFF;
+        height: 16px;
+        width: 16px;
+        line-height: 12px;
+        text-align: center;
+        border-radius: 10px;
+        border: solid 1px #CCC;
+    }
 </style>
 
 <div class="left-col">
@@ -194,7 +214,7 @@
 </div>
 @section Footer { }
 @section Scripts{
-    <script src="~/js/student-exam-review.js"></script>
+    <script src="~/js/student-exam-review.js?@DateTime.Now.ToString("ddMMyyyy")v2"></script>
     <script>
         //localStorage.clear();
 

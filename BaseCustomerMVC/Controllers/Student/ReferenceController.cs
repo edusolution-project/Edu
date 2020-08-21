@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
+        private readonly CenterService _centerService;
 
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
@@ -29,7 +30,8 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService classService,
             FileProcess fileProcess,
             IHostingEnvironment env,
-            ReferenceService referenceService
+            ReferenceService referenceService,
+            CenterService centerService
             )
         {
             _studentService = studentService;
@@ -37,10 +39,11 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = classService;
             _referenceService = referenceService;
             _fileProcess = fileProcess;
+            _centerService = centerService;
             _env = env;
         }
 
-        public IActionResult Index(DefaultModel model, int old = 0)
+        public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var classIds = _studentService.GetItemByID(UserID).JoinedClasses;
@@ -51,6 +54,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 .Find(t => classIds.Contains(t.ID))
                 .SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate)
                 .ToList();
+            }
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                {
+                    ViewBag.Center = center;
+                }
             }
             ViewBag.AllClass = myClasses;
             ViewBag.User = UserID;

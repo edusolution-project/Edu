@@ -35,6 +35,12 @@ CKEDITOR.config.disallowedContent = 'script; *[on*]';
 CKEDITOR.config.allowedContent = false;
 CKEDITOR.config.removeDialogTabs = 'textfield';
 CKEDITOR.config.removePlugins = 'forms';
+
+CKEDITOR.config.basicEntities = false;
+CKEDITOR.config.entities_greek = false;
+CKEDITOR.config.entities_latin = false;
+CKEDITOR.config.entities_additional = '';
+
 CKEDITOR.on('instanceCreated', function (event) {
     var editor = event.editor;
     editor.on('instanceReady', function (e) {
@@ -1252,10 +1258,12 @@ var Lesson = (function () {
                     itemBody.append($("<div>", { id: esid, class: "editorck w-100", contenteditable: true }));
 
 
-                    //CKEDITOR.replace(esid);
-                    CKEDITOR.inline(esid, {
+                    CKEDITOR.replace(esid, {
                         extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                     });
+                    //CKEDITOR.inline(esid, {
+                    //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    //});
 
                     if (data.Questions[0].Description !== null) {
                         var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Questions[0].Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
@@ -1926,7 +1934,7 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
-                questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove clone", "value": "+", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px", "title": "Nhân bản câu hỏi" }));
+                questionTemplate.append($("<div>", { "class": "quiz-remove clone", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px;width: 26px;height: 26px;", "title": "Nhân bản câu hỏi" }).append($("<i>", {'class':'ti-layers', style: 'top:5px; left:5px; position:absolute'})));
 
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Câu hỏi" }));
 
@@ -1943,8 +1951,8 @@ var Lesson = (function () {
                 questionTemplate.append(answer_wrapper);
                 //questionTemplate.append($("<textarea>", { "rows": "2", "name": "Questions.Description", "class": "input-text part_description form-control", "placeholder": "Giải thích" }));
                 questionTemplate.append($("<label>", { "class": "input_label mr-1", "text": "Giải thích đáp án" }));
-                questionTemplate.append($("<input>", { "class": "input_label mr-1", "type": "checkbox", "id": "Explain", "name": "Explain", "onclick":"GiaiThich(this)" }));
-                questionTemplate.append($("<div>", { class: "hide", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
+                questionTemplate.append($("<input>", { "class": "input_label mr-1 chkToggleExplain", "type": "checkbox", "name": "Explain", "onclick": "ToggleQuizExplain(this)" }));
+                questionTemplate.append($("<div>", { class: "d-none editorck", "name": "Questions.Description", "data-title": "Giải thích đáp án", "style": "width: 100%; height: 100%; border: solid 1px #CCC", contenteditable: true }));
                 question_template_holder.append(questionTemplate);
 
                 var answerTemplate = $("<fieldset>", { "class": "answer-box m-1" });
@@ -1975,6 +1983,11 @@ var Lesson = (function () {
                 }
                 //else
                 //    addNewQuestion();
+                $('.editorck').not('.d-none').each(function (idx, obj) {
+                    CKEDITOR.replace($(obj)[0], {
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    });
+                });
                 break;
             case "QUIZ2"://Trắc nghiệm dạng điền từ
 
@@ -2016,7 +2029,6 @@ var Lesson = (function () {
                     //console.log($(quizContent).prop("innerHTML"));
                     desc.html($(quizContent).prop("innerHTML"));
                 }
-
                 //else
                 //    addNewQuestion();
                 break;
@@ -2092,6 +2104,11 @@ var Lesson = (function () {
                 }
                 else
                     addNewQuestion();
+                        $('.editorck').each(function (idx, obj) {
+            CKEDITOR.replace($(obj)[0], {
+                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            });
+        });
                 break;
             default:
 
@@ -2122,17 +2139,6 @@ var Lesson = (function () {
             case "VOCAB":
                 break;
             default:
-                for (name in CKEDITOR.instances) {
-                    CKEDITOR.instances[name].destroy(true);
-                }
-                $('.editorck').each(function (idx, obj) {
-                    //CKEDITOR.inline($(obj)[0], {
-                    //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-                    //});
-                    CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-                    });
-                });
                 break;
         }
 
@@ -2142,35 +2148,20 @@ var Lesson = (function () {
     //end renderPartTemplate
 
     //fix hien thi ckeditor 18-08-2020
-    var GiaiThich = function (obj) {
-        debugger
-        var modal = obj.parentElement;
-        var status = $('#Explain').prop('checked');
+    var ToggleQuizExplain = function (obj) {
+        //debugger
+        var parent = obj.parentElement;
+        var cke = $(parent).find(".editorck");
+        var status = $(parent).find('.chkToggleExplain').prop('checked');
         if (status == true) {
-            $(modal).children()[13].setAttribute("class", "editorck mt - 3 mb - 3 p - 2");
-            for (name in CKEDITOR.instances) {
-                CKEDITOR.instances[name].destroy(true);
-            }
-            $('.editorck').each(function (idx, obj) {
-                //CKEDITOR.inline($(obj)[0], {
-                //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-                //});
-                CKEDITOR.replace($(obj)[0], {
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-                });
+            CKEDITOR.replace($(cke)[0], {
+                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
             });
         }
         else {
-            $(modal).children()[13].setAttribute("class", "hide");
-            //CKEDITOR.replace("editorck mt - 3 mb - 3 p - 2", {
-            //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-            //});
-            for (name in CKEDITOR.instances) {
-                CKEDITOR.instances[name].destroy(true);
-            }
+            CKEDITOR.instances[$(parent).find('[id^=cke_editor]').attr('id').replace('cke_', '')].destroy();
+            $(cke).html('');
         }
-        //(editorck mt - 3 mb - 3 p - 2)
-        //alert(obj);
     }
 
     var addNewQuestion = function (data = null) {
@@ -2188,21 +2179,21 @@ var Lesson = (function () {
                 $(clone).find("[name='Questions.Point']").val(data.Point);
             if (data.Content != null)
                 $(clone).find("[name='Questions.Content']").val(data.Content);
-            if (data.Description != null)
+            if (data.Description != null) {
+                $(clone).find('.chkToggleExplain').prop('checked', true);
                 //$(clone).find("[name='Questions.Description']").val(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
                 $(clone).find("[name='Questions.Description']").html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"));
+            }
             if (data.Media != null) {
                 renderAddMedia(clone.find(".media_holder"), "Questions.", "", data.Media);
                 renderMediaContent(data, clone.find(".media_preview:first"), "");
             }
         }
-        //console.log(data);
-        //CKEDITOR.inline($(clone).find("[name='Questions.Description']")[0], {
-        //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-        //});
-        CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
-            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-        });
+
+        if ($(clone).find('.chkToggleExplain').prop('checked'))
+            CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
+                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            });
 
         $(clone).find("[name^='Questions.']").each(function () {
             $(this).attr("name", $(this).attr("name").replace("Questions.", "Questions[" + (currentpos) + "]."));
@@ -3922,7 +3913,25 @@ var Lesson = (function () {
         var template = $('.question_template > fieldset');
         //var currentpos = $(container).find(".fieldQuestion").length;
 
+        //check if toggle Explain is on =>  destroy CK before clone
+        var showEX = false;
+        if ($(_this).parent().find('.chkToggleExplain').length > 0)
+            if ($(_this).parent().find('.chkToggleExplain').prop("checked")) {
+                CKEDITOR.instances[$(_this).parent().find('.d-none.editorck').siblings("[id^=cke_]").attr('id').replace('cke_', '')].destroy();
+                showEX = true;
+            }
+
+
         var cloneQuestion = $(_this).parent()[0].cloneNode(true);
+        if (showEX) {
+            CKEDITOR.replace($(_this).parent().find('.editorck')[0], {
+                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            });
+            CKEDITOR.replace($(cloneQuestion).find('.editorck')[0], {
+                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+            });
+            $(cloneQuestion).find('.chkToggleExplain').prop("checked", true);
+        }
         var index = cloneQuestion.getAttribute("order");//vị trí câu hỏi cần nhân bản
         var currentpos = parseInt(index) + 1;
         cloneQuestion.firstChild.value = "";
@@ -3936,9 +3945,7 @@ var Lesson = (function () {
             $(this).attr("name", $(this).attr("name").replace(question, "Questions[" + (currentpos) + "]."));
         });
 
-        CKEDITOR.inline($(cloneQuestion).find('.editorck')[0], {
-            extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-        });
+        //cloneDescription
 
         cloneQuestion.children[1].value = currentpos;
         cloneQuestion.setAttribute("order", currentpos);
@@ -3960,9 +3967,6 @@ var Lesson = (function () {
             $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(i) + 1));
         }
     }
-
-
-    //$(_this).parent().parent().append(cloneQuestion);
 
     window.LessonInstance = {} || Lesson;
 
@@ -4010,7 +4014,7 @@ var Lesson = (function () {
     window.PrevPart = prevPart;
 
     window.SwitchMode = switchMode;
-    window.GiaiThich = GiaiThich;
+    window.ToggleQuizExplain = ToggleQuizExplain;
     return LessonInstance;
 }());
 
@@ -4071,10 +4075,12 @@ var submitForm = function (event, modalId, callback) {
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
 
-    $('.editorck').each(function (idx, obj) {
-        //console.log(obj);
-        var name = $(obj).attr('name');
-        formdata.append(name, $(obj).html());
+    $('div.editorck').each(function (idx, obj) {
+        if ($(this).siblings("[id^=cke_]").length > 0) {
+            var name = $(obj).attr('name');
+            ckeid = $(this).siblings("[id^=cke_]").attr('id').replace('cke_','');
+            formdata.append(name, CKEDITOR.instances[ckeid].getData());
+        }
     });
 
     var err = false;

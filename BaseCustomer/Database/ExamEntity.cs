@@ -51,7 +51,8 @@ namespace BaseCustomerEntity.Database
         public long QuestionsDone { get; set; }
         [JsonProperty("QuestionsPass")]
         public long QuestionsPass { get; set; }
-
+        [JsonProperty("LastPoint")]
+        public double LastPoint { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -104,10 +105,10 @@ namespace BaseCustomerEntity.Database
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
-        public bool IsOverTime(string ID)
+        public bool IsOver(string ID)
         {
             var item = GetItemByID(ID);
-            if (item == null) return false;
+            if (item == null || item.Status) return true;//break if exam not found or completed
             if (item.Timer == 0) return false;
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             if (count <= 0)
@@ -116,6 +117,7 @@ namespace BaseCustomerEntity.Database
             }
             return count <= 0;
         }
+        
         public Task UpdateStatus(ExamEntity exam)
         {
             exam.Status = true;
@@ -124,7 +126,7 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point)
         {
             exam.Status = true;
             point = 0;
@@ -161,6 +163,7 @@ namespace BaseCustomerEntity.Database
                         case "QUIZ1":
                             if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
                             _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -170,6 +173,7 @@ namespace BaseCustomerEntity.Database
                             //ID not match => check value
                             if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
                                 _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+                            if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
@@ -186,39 +190,20 @@ namespace BaseCustomerEntity.Database
                                     isCorrect = false;
                                     break;
                                 }
-
                             }
                             if (isCorrect)
                             {
-                                _correctanswer = realAnswers.First();
+                                _correctanswer = realAnswers.FirstOrDefault();
+                                if (_correctanswer == null) continue;
                                 _correctanswer.ID = examDetail.AnswerID;
                                 _correctanswer.Content = examDetail.AnswerValue;
                             }
                             break;
                     }
-
-                    //var _realAnswers = realAnswers?.FirstOrDefault();//multiple correct answers
-                    ////var realanswer = _realAnswers.FirstOrDefault();
-                    //if (_realAnswers != null)
-                    //{
-                    //    examDetail.RealAnswerID = _realAnswers.ID;
-                    //    examDetail.RealAnswerValue = _realAnswers.Content;
-                    //}
-
-
-                    //isTrue =
-                    //    (!string.IsNullOrEmpty(answerID) && realAnswers.Any(t => t.ID == answerID)) ||
-                    //    //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
-                    //    (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
-
-                    //_correctanswer = isTrue
-                    //    ? _realAnswers
-                    //    : null;//chọn đúng đáp án
-
                 }
                 else //bài điền từ
                 {
-                    if (examDetail.AnswerValue != null)
+                    if (examDetail.AnswerValue != null && part.Type == "QUIZ2")
                     {
                         var _realAnwserQuiz2 = realAnswers?.ToList();
 
@@ -289,6 +274,42 @@ namespace BaseCustomerEntity.Database
             return exam;
         }
 
+        //Hoàn thành bài tự luận
+        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
+        {
+            var oldEx = GetItemByID(exam.ID);
+            exam.Status = true;
+            point = 0;
+            var pass = 0;
+            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+            foreach (var detail in listDetails)
+                point += detail.Point;
+
+            exam.Point = point;
+            exam.LastPoint = oldEx != null ? oldEx.Point : 0;
+            exam.Updated = DateTime.Now;
+            exam.MaxPoint = lesson.Point;
+            exam.QuestionsDone = listDetails.Count();
+
+            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+            Save(exam);
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
+            )
+            {
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                Task.WhenAll(cttask, cstask, ctask);
+            }
+            else
+            {
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+                Task.WhenAll(cttask);
+            }
+
+            return exam;
+        }
+
         public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
         {
             var result = false;
@@ -354,7 +375,8 @@ namespace BaseCustomerEntity.Database
                 .Replace("‘", "'")
                 .Replace("’", "'")
                 .Replace("“", "\"")
-                .Replace("”", "\"");
+                .Replace("”", "\"")
+                .Replace(" ", " ");
         }
     }
 }
