@@ -12,28 +12,28 @@
     }
 }
 <script>
-    setActiveMenu("home");
+    setActiveMenu("product");
 </script>
 
 @section Scripts{
     <section class="module" id="dashboard_content">
         <div >
-            <div class="card-header" v-cloak>
+            <div class="card-header">
                 <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
-                    <div class="box filter-box d-none m-1">
+                    @*<div class="box filter-box d-none m-1">
                         <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                         <span class="ic ic-picker inactive"></span>
-                    </div>
+                    </div>*@
                     @*<div class="box filter-box col-12 col-md-3 ml-0 mb-1">
                             <select v-model="subject">
                                 <option value="">Chọn chương trình</option>
                                 <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>*@
-                    <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                    @*<div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
                         <button><i class="ic ic-find"></i></button>
                         <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
-                    </div>
+                    </div>*@
                     @*@if (isHeadteacher)
                         {
                             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
@@ -45,7 +45,7 @@
             </div>
 
             <div class="card-body" v-cloak>
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="ed_table" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th class='text-center'>#</th>

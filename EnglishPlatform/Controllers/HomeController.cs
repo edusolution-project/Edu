@@ -157,13 +157,20 @@ namespace EnglishPlatform.Controllers
         [Route("/login")]
         public IActionResult Login()
         {
-            long limit = 0;
-            long count = _accountService.CreateQuery().CountDocuments(_ => true);
-            if (count <= limit)
-            {
-                startPage();
-            }
+            //long limit = 0;
+            //long count = _accountService.CreateQuery().CountDocuments(_ => true);
+            //if (count <= limit)
+            //{
+            //    startPage();
+            //}
             return View();
+        }
+
+        [Route("/logincp")]
+        public IActionResult LoginCP()
+        {
+            ViewBag.Adm = true;
+            return View("Login");
         }
 
         [HttpPost]
@@ -474,7 +481,7 @@ namespace EnglishPlatform.Controllers
             };
             var headteacherRole = new RoleEntity()
             {
-                Name = "Trưởng bộ môn",
+                Name = "GV Quản lý",
                 Code = "head-teacher",
                 Type = ACCOUNT_TYPE.TEACHER,
                 CreateDate = DateTime.Now,

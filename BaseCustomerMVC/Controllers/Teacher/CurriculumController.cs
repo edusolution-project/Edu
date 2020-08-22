@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionService _lessonPartQuestionService;
 
         private readonly TeacherService _teacherService;
+        private readonly TeacherHelper _teacherHelper;
         private readonly ModCourseService _modservice;
         private readonly ModSubjectService _modsubjectService;
         private readonly ModChapterService _modchapterService;
@@ -90,6 +91,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  LessonPartAnswerService lessonPartAnswerService,
                  LessonPartQuestionService lessonPartQuestionService,
                  TeacherService teacherService,
+                 TeacherHelper teacherHelper,
                  ModCourseService modservice
 
                 , RoleService roleService
@@ -141,6 +143,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //_lessonExtendService = lessonExtendService;
             _teacherService = teacherService;
+            _teacherHelper = teacherHelper;
             _modservice = modservice;
 
             //_modprogramService = modprogramService;
@@ -206,9 +209,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.AllCenters = teacher.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name, ID = t.CenterID }).ToList();
 
-            var centerRole = teacher.Centers.FirstOrDefault(t => t.Code == basis).RoleID;
-
-            if (_roleService.GetItemByID(centerRole).Code != "head-teacher")
+            if (!_teacherHelper.HasRole(UserID, center.ID, "head-teacher"))
                 ViewBag.Teachers = new List<UserViewModel> { new UserViewModel { ID = teacher.ID, Name = teacher.FullName } };
             else
                 ViewBag.Teachers = _teacherService.Collection.Find(t => t.Centers.Any(o => o.Code == basis)).ToEnumerable().Select(t => new UserViewModel { ID = t.ID, Name = t.FullName }).ToList();
@@ -230,23 +231,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(string basis, string ID)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
-            return Redirect($"{HttpContext.Request.Host.Value}/{TempData["center_router"]?.ToString()}/{Url.Action("Modules", "Curriculum")}/{ID}");
+            return Redirect($"{basis}/{Url.Action("Modules", "Curriculum")}/{ID}");
         }
 
         public IActionResult Modules(string basis, string ID)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
             if (string.IsNullOrEmpty("ID"))
                 return Redirect($"/{basis}{Url.Action("Index")}");
 
@@ -264,6 +253,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.Data = data;
             ViewBag.Title = data.Name;
+
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
@@ -280,12 +270,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //if (!User.IsInRole("head-teacher"))
             //    return Redirect("/");
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
+            //if (!string.IsNullOrEmpty(basis))
+            //{
+            //    var center = _centerService.GetItemByCode(basis);
+            //    if (center != null)
+            //        ViewBag.Center = center;
+            //}
 
             if (CourseID == null)
             {

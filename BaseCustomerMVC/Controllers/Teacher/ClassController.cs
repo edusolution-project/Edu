@@ -168,13 +168,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
-            var center = new CenterEntity();
-            if (!string.IsNullOrEmpty(basis))
-            {
-                center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
+
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
@@ -186,7 +180,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = _skillService.GetList();
             }
-
+            var center = new CenterEntity();
+            if (!string.IsNullOrEmpty(basis))
+            {
+                center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
@@ -199,14 +199,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(DefaultModel model, string basis)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
-                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
-            }
+            //if (!string.IsNullOrEmpty(basis))
+            //{
+            //    var center = _centerService.GetItemByCode(basis);
+            //    if (center != null)
+            //        ViewBag.Center = center;
+            //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //    ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
+            //}
+
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)

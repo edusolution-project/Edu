@@ -1,18 +1,17 @@
 ﻿@using Microsoft.AspNetCore.Http
+@model BaseCustomerEntity.Database.CenterEntity
 @{
-    var _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
-    string center = ViewContext.RouteData.Values["basis"]?.ToString();
     var isHeadTeacher = ViewBag.IsHeadTeacher ?? false;
     string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
 
-        return $"/{center}{url}";
+        return $"/{Model.Code}{url}";
     }
 }
 <aside class="sidebar" id="sidebar">
     <div class="card-header">
-        <a href="/@center/teacher" class="logo" title="@_center.Name" style="max-height:100px;"><img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" /></a>
+        <a href="/@Model.Code/teacher" class="logo" title="@Model.Name" style="max-height:100px;"><img src="@(Model.Image != null ? Model.Image : "/images/Logo.png")" /></a>
     </div>
     <div class="menu-bar">
         <ul>
@@ -34,12 +33,9 @@
                     <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
                 </li>
             }
-            @if (isHeadTeacher)
-            {
-                <li for="student">
-                    <a href="@processUrl("Index", "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
-                </li>
-            }
+            <li for="student">
+                <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+            </li>
             <li for="calendar">
                 <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Quản lý lịch dạy</a>
             </li>

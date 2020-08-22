@@ -9,7 +9,7 @@
     var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
+    //List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
 
     string processUrl(string act, string ctrl, Object param = null)
     {
