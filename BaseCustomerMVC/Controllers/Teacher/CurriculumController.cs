@@ -122,8 +122,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , ClassService classService
                  , LessonScheduleService lessonScheduleService
                  , ExamDetailService examDetailService
-                 , StudentService studentService,
-                 CourseLessonService courseLessonService
+                 , StudentService studentService
+                 , CourseLessonService courseLessonService
 
                  )
         {

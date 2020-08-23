@@ -361,23 +361,23 @@ namespace BaseCustomerMVC.Controllers.Student
                         return new JsonResult(item);
                     }
 
-                    var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
-
+                    //var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
+                    var dataFiles = _roxyFilemanHandler.UploadFileWithGoogleDrive(basis, User.FindFirst("UserID").Value, HttpContext);
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
                     var oldItem = _examDetailService.CreateQuery().Find(o => o.ExamID == item.ExamID && o.QuestionID == item.QuestionID).FirstOrDefault();
                     exam.Updated = DateTime.Now;
-                    if (dataFiles.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
+                    if (dataFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
-                        for (int i = 0; i < listFiles.Count; i++)
+                        for (int i = 0; i < dataFiles.Count; i++)
                         {
                             var media = new Media()
                             {
                                 Created = DateTime.Now,
-                                Extension = listFiles[i].Extends,
-                                Name = listFiles[i].Path,
-                                OriginalName = listFiles[i].Path,
-                                Path = listFiles[i].Path
+                                Extension = dataFiles[i].Extends,
+                                Name = dataFiles[i].Path,
+                                OriginalName = dataFiles[i].Path,
+                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(dataFiles[i].Path)
                             };
                             listMedia.Add(media);
                         }

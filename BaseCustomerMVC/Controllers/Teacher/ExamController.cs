@@ -346,7 +346,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         oldItem.MediasAnswers = listMedia;
                     }
-
                     oldItem.RealAnswerValue = RealAnswerValue;
                     oldItem.Point = Point;
                     _examDetailService.CreateOrUpdate(oldItem);

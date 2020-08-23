@@ -336,7 +336,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        //console.log(config.mod);
+        console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -504,7 +504,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        //console.log(_UImode);
+        console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -1934,7 +1934,7 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
-                questionTemplate.append($("<div>", { "class": "quiz-remove clone", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px;width: 26px;height: 26px;", "title": "Nhân bản câu hỏi" }).append($("<i>", {'class':'ti-layers', style: 'top:5px; left:5px; position:absolute'})));
+                questionTemplate.append($("<div>", { "class": "quiz-remove clone", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px;width: 26px;height: 26px;", "title": "Nhân bản câu hỏi" }).append($("<i>", { 'class': 'ti-layers', style: 'top:5px; left:5px; position:absolute' })));
 
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Câu hỏi" }));
 
@@ -2104,11 +2104,11 @@ var Lesson = (function () {
                 }
                 else
                     addNewQuestion();
-                        $('.editorck').each(function (idx, obj) {
-            CKEDITOR.replace($(obj)[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-            });
-        });
+                $('.editorck').each(function (idx, obj) {
+                    CKEDITOR.replace($(obj)[0], {
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    });
+                });
                 break;
             default:
 
@@ -2640,7 +2640,7 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2884,7 +2884,7 @@ var Lesson = (function () {
             lessonitem = $("<li>", { "class": "nav-item" });
             listPartContainer.append(lessonitem);
         }
-        console.log(data);
+        //console.log(data);
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
         lessonitem.append(itemtitle);
 
@@ -2894,9 +2894,9 @@ var Lesson = (function () {
             //clear old-tab
             tabsitem = $('#pills-part-' + data.ID).empty();
         }
-        else
+        else {
             tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-
+        }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
@@ -2912,7 +2912,6 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
-
         //itembox.append(ItemRow);
         switch (data.Type) {
             default:
@@ -3426,7 +3425,6 @@ var Lesson = (function () {
 
             var limit = lastExam.limit;
             var tried = lastExam.number;
-            console.log(lastExam);
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }));
@@ -3440,7 +3438,7 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.questionsPass == null ? 0 : lastExam.questionsPass) + "/" + lastExam.questionsTotal }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4078,7 +4076,7 @@ var submitForm = function (event, modalId, callback) {
     $('div.editorck').each(function (idx, obj) {
         if ($(this).siblings("[id^=cke_]").length > 0) {
             var name = $(obj).attr('name');
-            ckeid = $(this).siblings("[id^=cke_]").attr('id').replace('cke_','');
+            ckeid = $(this).siblings("[id^=cke_]").attr('id').replace('cke_', '');
             formdata.append(name, CKEDITOR.instances[ckeid].getData());
         }
     });
