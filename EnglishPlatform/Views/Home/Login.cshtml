@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EDUSO Login</title>
     <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
-    <link href="~/css/be-vietnam-font.css" rel="stylesheet" />
+    @*<link href="~/css/be-vietnam-font.css" rel="stylesheet" />*@
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
     <script src="~/js/vue@2.6.0.js"></script>
     <script src="~/js/axios.min.js"></script>
@@ -26,10 +26,19 @@
                 <div class="col-md-7">
                     <div class="box" id="box_login">
                         <div class="card-header">
-                            <h3 v-if="signin">Đăng nhập với tài khoản</h3>
+                            <h3 v-if="signin">
+                                @if (ViewBag.Adm == null)
+                                {
+                                    @: Đăng nhập với tài khoản
+                                }
+                                else
+                                {
+                                    @: Quản trị hệ thống
+                                }
+                            </h3>
                             <h3 v-if="forgot"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Quên mật khẩu</h3>
                             <h3 v-if="signup"><button class="btn-back" v-on:click="changeState(99)"><i class="icon-back"></i></button>Đăng ký tài khoản giáo viên</h3>
-                            <div class="note" v-if="signin">Bạn là giáo viên & chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>
+                            @*<div class="note" v-if="signin">Bạn là giáo viên & chưa có tài khoản? <a href="javascript:;" title="Đăng ký ngay!" v-on:click="changeState()">Đăng ký ngay!</a> </div>*@
                             <div class="note" v-if="forgot">Vui lòng nhập địa chỉ Email để nhận mật khẩu mới.</div>
                         </div>
                         <div class="card-body">
@@ -52,16 +61,21 @@
                             <div class="form-group" v-if="signin">
                                 <label for="username">Tài khoản đăng nhập</label>
                                 <select class="form-control" name="Type" id="usertype" v-model="usertype">
-                                    <option value="student" selected>Học viên</option>
-                                    <option value="teacher">Giáo viên</option>
-                                    <option value="admin">Quản trị hệ thống</option>
+                                    <template v-if="cp">
+                                        <option value="admin">Quản trị hệ thống</option>
+                                    </template>
+                                    <template v-else>
+                                        <option value="student" selected>Học viên</option>
+                                        <option value="teacher">Giáo viên</option>
+                                    </template>
+
                                 </select>
                             </div>
                             <div class="center">
                                 <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signin" :disabled="disable" v-on:click="signIn()">Đăng nhập</button>
                                 <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="forgot" :disabled="disable" v-on:click="renewPass()">Đặt lại mật khẩu</button>
                                 <button type="button" class="btn btn-sign" v-bind:class="{disabled : disable}" v-if="signup" :disabled="disable" v-on:click="signUp()">Đăng ký</button>
-                                <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin" v-on:click="changeState(2)">Quên mật khẩu?</a>
+                                <a href="javascript:;" title="Quên mật khẩu?" class="forgot-link" v-if="signin && !cp" v-on:click="changeState(2)">Quên mật khẩu?</a>
                             </div>
                         </div>
                     </div>
@@ -77,9 +91,10 @@
 		mounted(){
 		},
         data: {
+            cp: @(ViewBag.Adm == null ? "false" : "true"),
             email : '',
             password : '',
-            usertype : 'student',
+            usertype : '@(ViewBag.Adm == null ? "student" : "admin")',
             name : '',
             phone : '',
             disable : false,
@@ -169,13 +184,15 @@
                 _that.disable = true
                 let _form = new FormData()
                 _form.append('UserName', _that.email)
-
                 axios.post(_that.action, _form)
                     .then(response => {
-                        if(response.data.StatusCode){
-                            window.location.href= response.data.Location
-                        }else{
-                            alert(response.data.StatusDesc)
+                        debugger
+                        if (response.data.Status) {
+                            alert("Vui lòng check mail để xác nhận thay đổi mật khẩu!")
+                            window.location.href= response.data.Url
+                        }
+                        else {
+                            alert(response.data.Error)
                             _that.disable = false
                         }
                      }).catch(e=>{

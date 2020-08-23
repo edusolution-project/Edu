@@ -23,6 +23,8 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using Microsoft.Extensions.Configuration;
 
 namespace EnglishPlatform.Controllers
 {
@@ -39,6 +41,7 @@ namespace EnglishPlatform.Controllers
         private readonly MailHelper _mailHelper;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
+        private readonly LessonScheduleService _scheduleService;
         private readonly CalendarHelper _calendarHelper;
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
@@ -47,6 +50,8 @@ namespace EnglishPlatform.Controllers
         private readonly NewsCategoryService _newsCategoryService;
         private readonly QCService _QCService;
         public DefaultConfigs _default { get; }
+
+        private string host;
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
@@ -59,11 +64,13 @@ namespace EnglishPlatform.Controllers
             , MailHelper mailHelper
             , UserAndRoleService userAndRoleService
             , CenterService centerService
+            , LessonScheduleService scheduleService
             , AuthorityService authorityService
             , ILog log
             , NewsService newsService
             , NewsCategoryService newsCategoryService
             , QCService QCService
+            , IConfiguration iConfig
             )
         {
             _accessesService = accessesService;
@@ -77,6 +84,7 @@ namespace EnglishPlatform.Controllers
             _studentHelper = new StudentHelper(studentService, accountService);
             _calendarHelper = calendarHelper;
             _log = log;
+            _scheduleService = scheduleService;
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
             _userAndRoleService = userAndRoleService;
@@ -85,6 +93,7 @@ namespace EnglishPlatform.Controllers
             _newsService = newsService;
             _newsCategoryService = newsCategoryService;
             _QCService = QCService;
+            host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
         public IActionResult Index()
@@ -154,13 +163,20 @@ namespace EnglishPlatform.Controllers
         [Route("/login")]
         public IActionResult Login()
         {
-            long limit = 0;
-            long count = _accountService.CreateQuery().CountDocuments(_ => true);
-            if (count <= limit)
-            {
-                startPage();
-            }
+            //long limit = 0;
+            //long count = _accountService.CreateQuery().CountDocuments(_ => true);
+            //if (count <= limit)
+            //{
+            //    startPage();
+            //}
             return View();
+        }
+
+        [Route("/logincp")]
+        public IActionResult LoginCP()
+        {
+            ViewBag.Adm = true;
+            return View("Login");
         }
 
         [HttpPost]
@@ -440,6 +456,134 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        //Quên mật khẩu
+        public async Task<JsonResult> ForgotAPI(string UserName)
+        {
+            var Error = "";
+            var Status = false;
+            var Url = "";
+            var StatusDesc = "";
+            try
+            {
+                var user = _accountService.GetAccountByEmail(UserName);
+                if (user == null)
+                {
+                    Error += "Tài khoản không tồn tại! Vui lòng nhập lại tài khoản";
+                }
+                else
+                {
+                    var OTP = new Random().Next(100000, 999999).ToString();
+                    var VerificationCodes = Core_v2.Globals.Security.Encrypt(OTP);
+                    if (_accountService.CreateQuery().Find(x => x.VerificationCodes == VerificationCodes).Any())
+                    {
+                        OTP = new Random().Next(100000, 999999).ToString();
+                    }
+                    user.VerificationCodes = Core_v2.Globals.Security.Encrypt(OTP);
+                    user.TimeOut = DateTime.Now; //Thời gian tồn tại mã xác nhận, max 300s
+                    _accountService.CreateOrUpdate(user);
+
+                    var resetLink = $"http://{host}/forgot-password?code={OTP}";
+                    _ = _mailHelper.SendResetPassConfirm(user, resetLink,OTP);
+                    Status = true;
+                    Url = $"http://{host}/forgot-password";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusDesc = ex.Message;
+            }
+
+            var DataRespone = new Dictionary<string, object>()
+            {
+                {"Status",Status },
+                {"Error",Error },
+                {"Url",Url },
+                {"StatusDesc",StatusDesc }
+            };
+            return Json(DataRespone);
+        }
+
+        [Route("/forgot-password")]
+        public IActionResult ForgotPassword(string code="0")
+        {
+            if (code != "0")
+                ViewBag.VerificationCodes = code;
+            return View();
+        }
+
+        //[HttpPost]
+        //[Route("/forgot-password")]
+        //[ValidateAntiForgeryToken]
+        //public JsonResult ResetPassword(string Email)
+        //{
+        //    return View("ForgotPassword");
+        //}
+
+        ////[Route("/forgot-password")]
+        ////[HttpPost]
+        //public IActionResult ForgotPassword(string VerificationCodes = "")
+        //{
+        //    ViewBag.VerificationCodes = VerificationCodes;
+        //    return View();
+        //}
+
+        //dat lai mat khau
+        [HttpPost]
+        //[Route("/forgot-password")]
+        //[ValidateAntiForgeryToken]
+        public JsonResult ResetPassword(string NewPassword, string Email = "", string VerificationCodes = "")
+        {
+            var Error = "";
+            var Message = "";
+            var Url = "";
+            var Status = false;
+            if (Email != "" && VerificationCodes != "")
+            {
+                var user = _accountService.GetAccountByEmail(Email);
+                if (user == null)
+                {
+                    Error += $"Email: {Email} không tồn tại!";
+                    Status = false;
+                }
+                else
+                {
+                    var checkTimeOut = DateTime.Now;
+                    var TotalSeconds = (checkTimeOut - user.TimeOut).TotalSeconds;
+
+                    if (TotalSeconds < 0 && TotalSeconds > 300)
+                    {
+                        Error = "Mã xác thực đã hết hạn, vui lòng thực hiện lại từ đầu!";
+                        Status = false;
+                    }
+                    else if (user.VerificationCodes != Core_v2.Globals.Security.Encrypt(VerificationCodes))
+                    {
+                        Error = "Mã xác thực không đúng";
+                        Status = false;
+                    }
+                    else
+                    {
+                        user.PassTemp = Core_v2.Globals.Security.Encrypt(NewPassword);
+                        user.PassWord = Core_v2.Globals.Security.Encrypt(NewPassword);
+                        user.TimeOut = new DateTime(1990, 01, 01, 00, 00, 00);
+                        user.VerificationCodes = "";
+                        _accountService.CreateOrUpdate(user);
+                        _ = _mailHelper.SendPasswordChangeNotify(user);
+                        Message = "Thay đổi mật khẩu thành công!Quay lại trang đăng nhập";
+                        Url = $"http://{host}/login";
+                        Status = true;
+                    }
+                }
+            }
+            var DataRespone = new Dictionary<string, object>()
+            {
+                {"Message",Message },
+                {"Error",Error },
+                {"Url",Url },
+                {"Status",Status }
+            };
+            return Json(DataRespone);
+        }
+
         private void StartAuthority()
         {
             if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
@@ -471,7 +615,7 @@ namespace EnglishPlatform.Controllers
             };
             var headteacherRole = new RoleEntity()
             {
-                Name = "Trưởng bộ môn",
+                Name = "GV Quản lý",
                 Code = "head-teacher",
                 Type = ACCOUNT_TYPE.TEACHER,
                 CreateDate = DateTime.Now,
@@ -529,21 +673,6 @@ namespace EnglishPlatform.Controllers
 
             return RedirectToAction("Login");
         }
-
-        [Route("/forgot-password")]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [Route("/forgot-password")]
-        [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string Email)
-        {
-            return View();
-        }
-
 
         [HttpPost]
         public IActionResult UploadImage(IFormFile upload, string CKEditorFuncNum, string CKEditor, string langCode)
@@ -624,6 +753,7 @@ namespace EnglishPlatform.Controllers
         {
             var @event = _calendarHelper.GetByEventID(ID);
             var teacher = _teacherService.GetItemByID(@event.TeacherID);//check teacher of class
+
             if (teacher == null)
                 throw (new Exception("Teacher not found"));
             if (@event != null)
@@ -648,11 +778,26 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
-                    string zoomId = teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom.Replace("-", "");
+                    string zoomId = (teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom).Replace("-", "").Replace(" ", "");
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = zoomId });
                 }
             }
+
+            var schedule = _scheduleService.GetItemByID(@event.ScheduleID);
+            if (schedule != null)
+            {
+                try
+                {
+                    var center = _centerService.GetItemByID(_classService.GetItemByID(schedule.ClassID).Center).Code;
+                    ViewBag.LessonUrl = $"/{center}/student/Lesson/Detail/{schedule.LessonID}/{schedule.ClassSubjectID}";
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+
             return View();
         }
 
