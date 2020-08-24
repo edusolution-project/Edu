@@ -1129,7 +1129,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var teacher = _teacherService.GetItemByID(csubject.TeacherID);
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
+                        long examcount = 0;
+                        long practicecount = 0;
+                        var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount, out examcount, out practicecount);
                         if (!item.Skills.Contains(csubject.SkillID))
                             item.Skills.Add(csubject.SkillID);
                         if (!item.Subjects.Contains(csubject.SubjectID))
@@ -1137,6 +1139,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
                         item.TotalLessons += lessoncount;
+                        item.TotalExams += examcount;
+                        item.TotalPractice += practicecount;
                         //var skill = _skillService.GetItemByID(csubject.SkillID);
                         //if (skill == null) continue;
                         //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1180,6 +1184,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (creator != null)
                     oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
+                oldData.TotalExams = 0;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1200,9 +1205,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var newMember = new ClassMemberEntity();
                             long lessoncount = 0;
+                            long examcount = 0;
+                            long practicecount = 0;
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
-                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
+                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
                             }
@@ -1237,6 +1244,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
                             oldData.TotalLessons += lessoncount;
+                            oldData.TotalExams += examcount;
+                            oldData.TotalPractice += practicecount;
                         }
                     }
                 }
@@ -1250,7 +1259,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //create new subject
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
+                        long examcount = 0;
+                        long practicecount = 0;
+                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
                         if (string.IsNullOrEmpty(nSbj.ID))//Error
                             continue;
 
@@ -1261,6 +1272,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             oldData.Members.Add(newMember);
                         oldData.TotalLessons += lessoncount;
+                        oldData.TotalExams += examcount;
+                        oldData.TotalPractice += practicecount;
                     }
                 }
 
@@ -1278,7 +1291,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 //refresh class total lesson => no need
-                _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
+                //_ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1292,13 +1305,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult CloneClass(string ID,string CenterCode,string Name)
+        public JsonResult CloneClass(string ID, string CenterCode, string Name)
         {
             var oldData = _service.GetItemByID(ID);
             var center = _centerService.GetItemByCode(CenterCode);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(userId);
-			//VERY BAD
+            //VERY BAD
             //var teachersHead = _teacherService.GetAll();
             //TeacherEntity _teacher = null;
             //foreach(var t in teachersHead.ToList())
@@ -1309,7 +1322,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //        break;
             //    }
             //}
-			//_teacher = t;
+            //_teacher = t;
 
             var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
             newData.ID = null;
@@ -1324,7 +1337,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _service.CreateQuery().InsertOne(newData);
 
-           var classSubjects = _classSubjectService.CreateQuery().Find(o => o.ClassID == oldData.ID).ToList();
+            var classSubjects = _classSubjectService.CreateQuery().Find(o => o.ClassID == oldData.ID).ToList();
             if (classSubjects != null && classSubjects.Count > 0)
             {
                 foreach (var csubject in classSubjects)
@@ -1336,8 +1349,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ncbj.TeacherID = teacher.ID;
                     var newMember = new ClassMemberEntity();
                     long lessoncount = 0;
+                    long examcount = 0;
+                    long practicecount = 0;
                     //csubject.TeacherID = teacher.ID;
-                    var nID = CreateNewClassSubject(ncbj, newData, out newMember, out lessoncount);
+                    var nID = CreateNewClassSubject(ncbj, newData, out newMember, out lessoncount, out examcount, out practicecount);
                     if (!newData.Skills.Contains(csubject.SkillID))
                         newData.Skills.Add(csubject.SkillID);
                     if (!newData.Subjects.Contains(csubject.SubjectID))
@@ -1345,6 +1360,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (!newData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                         newData.Members.Add(newMember);
                     newData.TotalLessons += lessoncount;
+                    newData.TotalExams += examcount;
+                    newData.TotalPractice += practicecount;
                     //var skill = _skillService.GetItemByID(csubject.SkillID);
                     //if (skill == null) continue;
                     //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1386,10 +1403,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, bool notify = true)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, out long examcount, out long practicecount, bool notify = true)
         {
             member = new ClassMemberEntity();
             lessoncount = 0;
+            examcount = 0;
+            practicecount = 0;
             try
             {
                 var subject = _subjectService.GetItemByID(nSbj.SubjectID);
@@ -1404,6 +1423,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 lessoncount = course.TotalLessons;
+                examcount = course.TotalLessons;
+                practicecount = course.TotalPractices;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                 if (teacher == null || !teacher.IsActive || !teacher.Subjects.Contains(nSbj.SubjectID))
@@ -1419,6 +1440,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
                 nSbj.TotalLessons = course.TotalLessons;
+                nSbj.TotalPractices = course.TotalPractices;
 
                 var skill = _skillService.GetItemByID(nSbj.SkillID);
 

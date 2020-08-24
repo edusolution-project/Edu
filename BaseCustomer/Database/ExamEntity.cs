@@ -264,8 +264,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
-                //var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                //var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress);
                 Task.WhenAll(cttask
                     //, cstask, ctask
                     );
@@ -304,6 +304,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress);
                 Task.WhenAll(cttask);
             }
 

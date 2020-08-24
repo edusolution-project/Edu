@@ -172,7 +172,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList(),
                     RoleID = role.ID,
-                    RoleName = role.Name,
+                    RoleName = role.Name
                     //AccountID = account.ID
                 });
 

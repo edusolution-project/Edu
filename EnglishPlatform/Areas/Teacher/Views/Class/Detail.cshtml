@@ -122,8 +122,8 @@
                         <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                         <td>{{formatTime(item.LastDate)}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.AvgPracticePoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                        @*<td class="text-danger" v-bind:class="{good : (item.AvgPracticePoint > 50)}">{{item.AvgPracticePoint > 0 ?  item.AvgPracticePoint.toFixed(2) : '0.00'}}%</td>*@
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
                         <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                     </tr>
                 </tbody>
@@ -690,10 +690,10 @@
                         key: 'last_update',
                         label: 'Lần học cuối'
                     },
-                    {
-                        key: 'practice',
-                        label: 'Điểm luyện tập'
-                    },
+                    //{
+                    //    key: 'practice',
+                    //    label: 'Điểm luyện tập'
+                    //},
                     {
                         key: 'score',
                         label: 'Điểm kiểm tra'
@@ -977,6 +977,7 @@
                     let _url = '@processUrl("GetClassResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
+                            console.log(response.data);
                             _that.studentData = response.data.Data;
                             this.studentData = _that.studentData
                             this.totalRec = response.data.Model.totalRecord

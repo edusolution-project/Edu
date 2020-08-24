@@ -3,6 +3,7 @@ using Core_v2.Globals;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -79,7 +80,9 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassID = classSubject.ClassID;
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
+
                 _chapterService.Save(newchapter);
+
                 newID = newchapter.ID;
             }
 
@@ -111,19 +114,20 @@ namespace BaseCustomerMVC.Globals
                 lessoncounter = lessons.Count;
             }
 
-            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
-            if (subchaps.Count > 0)
+            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID).AsEnumerable();
+            if (subchaps.Count() > 0)
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
                     lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
-            if (newchapter != null)
-            {
-                newchapter.TotalLessons = lessoncounter;
-                newchapter.PracticeCount = _chapterService.CountChapterPractice(newchapter.ID, newchapter.ClassSubjectID);
-                _chapterService.Save(newchapter);
-            }
+
+            //if (newchapter != null)
+            //{
+            //    newchapter.TotalLessons = lessoncounter;
+            //    newchapter.PracticeCount = _chapterService.CountChapterPractice(newchapter.ID, newchapter.ClassSubjectID);
+            //    _chapterService.Save(newchapter);
+            //}
             return lessoncounter;
         }
     }

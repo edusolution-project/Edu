@@ -39,6 +39,7 @@ namespace BaseCustomerEntity.Database
         private LessonService _lessonService;
         private CloneLessonPartService _lessonPartService;
         //private ChapterProgressService _chapterProgressService;
+        private List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public ChapterService(IConfiguration config) : base(config)
         {
@@ -62,9 +63,12 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
+        public async Task IncreaseLessonCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
         {
-            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>().Inc(t => t.TotalLessons, increment));
+            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
             if (r.ModifiedCount > 0)
             {
                 if (listid == null)
@@ -76,10 +80,10 @@ namespace BaseCustomerEntity.Database
                 {
                     if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
                     {
-                        if (listid.IndexOf(current.ParentID) < 0) _ = IncreaseLessonCount(current.ParentID, increment, listid);
+                        if (listid.IndexOf(current.ParentID) < 0) _ = IncreaseLessonCounter(current.ParentID, lesInc, examInc, pracInc, listid);
                     }
                     else
-                        _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
+                        _ = _courseService.IncreaseLessonCounter(current.CourseID, lesInc, examInc, pracInc);
                 }
             }
         }
@@ -124,7 +128,7 @@ namespace BaseCustomerEntity.Database
             var lessonids = _lessonService.CreateQuery().Find(t => t.TemplateType == LESSON_TEMPLATE.LECTURE && t.ChapterID == chapterID).Project(t => t.ID).ToEnumerable();
             if (lessonids != null && lessonids.Count() > 0)
             {
-                var quizList = new List<string> { "QUIZ1", "QUIZ2", "QUZI3", "ESSAY" };
+                var quizList = quizType;
                 foreach (var id in lessonids)
                 {
                     if (_lessonPartService.CreateQuery().Find(t => t.ParentID == id && quizList.Contains(t.Type)).CountDocuments() > 0)

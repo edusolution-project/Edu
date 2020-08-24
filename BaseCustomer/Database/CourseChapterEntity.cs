@@ -4,13 +4,14 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
     public class CourseChapterEntity : EntityBase
     {
-        
+
         public CourseChapterEntity() { }
 
         public CourseChapterEntity(CourseChapterEntity o)
@@ -64,6 +65,8 @@ namespace BaseCustomerEntity.Database
         public long TotalLessons { get; set; }
         [JsonProperty("TotalExams")]
         public long TotalExams { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
     }
     public class CourseChapterService : ServiceBase<CourseChapterEntity>
     {
@@ -90,9 +93,12 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
+        public async Task IncreaseLessonCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
         {
-            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseChapterEntity>().Inc(t => t.TotalLessons, increment));
+            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseChapterEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
             if (r.ModifiedCount > 0)
             {
                 if (listid == null)
@@ -105,18 +111,18 @@ namespace BaseCustomerEntity.Database
                     if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
                     {
                         if (listid.IndexOf(current.ParentID) < 0)
-                            _ = IncreaseLessonCount(current.ParentID, increment, listid);
+                            _ = IncreaseLessonCounter(current.ParentID, lesInc, examInc, pracInc, listid);
                     }
                     else
-                        _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
+                        _ = _courseService.IncreaseLessonCounter(current.CourseID, lesInc, examInc, pracInc);
                 }
 
             }
         }
 
-        public List<CourseChapterEntity> GetSubChapters(string CourseID, string ParentID)
+        public IEnumerable<CourseChapterEntity> GetSubChapters(string CourseID, string ParentID)
         {
-            return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+            return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
     }
 }

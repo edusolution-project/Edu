@@ -33,6 +33,12 @@ namespace BaseCustomerEntity.Database
         public double AvgPoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
+        [JsonProperty("PracticePoint")]
+        public double PracticePoint { get; internal set; }
+        [JsonProperty("PracticeDone")]
+        public long PracticeDone { get; set; }
+        [JsonProperty("PracticeAvgPoint")]
+        public double PracticeAvgPoint { get; internal set; }
     }
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
@@ -72,8 +78,7 @@ namespace BaseCustomerEntity.Database
             {
                 var totalLessons = _lessonService.CountClassLesson(item.ClassID);
 
-                //create new progress
-                await Collection.InsertOneAsync(new ClassProgressEntity
+                progress = new ClassProgressEntity
                 {
                     StudentID = item.StudentID,
                     Completed = 1,
@@ -82,7 +87,10 @@ namespace BaseCustomerEntity.Database
                     ClassID = currentObj.ID,
                     LastDate = DateTime.Now,
                     LastLessonID = item.LessonID
-                });
+                };
+
+                //create new progress
+                await Collection.InsertOneAsync(progress);
             }
             else
             {
@@ -110,6 +118,23 @@ namespace BaseCustomerEntity.Database
                     progress.ExamDone++;
                 progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+            }
+        }
+
+        public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
+        {
+            var progress = GetStudentResult(item.ClassID, item.StudentID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.ExamDone == 0)//new
+                    progress.PracticeDone++;
+                progress.PracticePoint += (pointchange > 0 ? pointchange : item.PointChange);
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
@@ -154,7 +179,9 @@ namespace BaseCustomerEntity.Database
                      .Inc(t => t.Completed, 0 - clssbj.Completed)
                      .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
                      .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
-                     .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons);
+                     .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons)
+                     .Inc(t => t.PracticePoint, 0 - clssbj.PracticePoint)
+                     .Inc(t => t.PracticeDone, 0 - clssbj.PracticeDone);
             await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
         }
 

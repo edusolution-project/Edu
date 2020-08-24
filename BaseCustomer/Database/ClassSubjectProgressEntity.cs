@@ -27,10 +27,17 @@ namespace BaseCustomerEntity.Database
         public DateTime LastDate { get; set; }
         [JsonProperty("ExamDone")]
         public long ExamDone { get; set; }
+
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
+        [JsonProperty("PracticePoint")]
+        public double PracticePoint { get; internal set; }
+        [JsonProperty("PracticeDone")]
+        public long PracticeDone { get; set; }
+        [JsonProperty("PracticeAvgPoint")]
+        public double PracticeAvgPoint { get; internal set; }
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>
@@ -106,6 +113,24 @@ namespace BaseCustomerEntity.Database
                     progress.ExamDone++;
                 progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+            }
+        }
+
+        public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
+        {
+            var progress = GetItemByClassSubjectID(item.ClassSubjectID, item.StudentID);
+            var change = (pointchange > 0 ? pointchange : item.PointChange);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    progress.PracticeDone++;
+                progress.PracticePoint += change;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }

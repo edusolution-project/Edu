@@ -49,6 +49,10 @@ namespace BaseCustomerEntity.Database
         public string LearningOutcomes { get; set; }  // Mục tiêu môn học
         [JsonProperty("TotalLessons")]
         public long TotalLessons { get; set; }
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
     }
@@ -83,9 +87,12 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task IncreaseLessonCount(string ID, long increment)
+        public async Task IncreaseLessonCounter(string ID, long lesInc, long examInc, long pracInc)
         {
-            await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>().Inc(t => t.TotalLessons, increment));
+            await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
         }
     }
 }

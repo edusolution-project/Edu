@@ -856,6 +856,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 _classSubjectService.Save(nSbj);
                 //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+                
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

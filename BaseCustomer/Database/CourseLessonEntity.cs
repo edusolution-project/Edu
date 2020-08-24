@@ -32,6 +32,8 @@ namespace BaseCustomerEntity.Database
         public string Code { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
+        [JsonProperty("IsPractice")]  //TEMPLATE TYPE == LECTURE && HAS QUIZ
+        public bool IsPractice { get; set; }
         [JsonProperty("IsAdmin")]
         public bool IsAdmin { get; set; }
         [JsonProperty("Order")]
@@ -84,6 +86,13 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<CourseLessonEntity> GetChapterLesson(string ChapterID)
         {
             return Collection.Find(t => t.ChapterID == ChapterID).ToEnumerable();
+        }
+
+        public IEnumerable<CourseLessonEntity> GetChapterLesson(string CourseID, string ChapterID)
+        {
+            if (!string.IsNullOrEmpty(ChapterID) && ChapterID != "0")
+                return GetChapterLesson(ChapterID);
+            return Collection.Find(t => t.CourseID == CourseID && t.ChapterID == "0").ToEnumerable();
         }
 
         public void UpdateLessonPoint(string ID, double point)
