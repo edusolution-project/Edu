@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Microsoft.AspNetCore.Razor.Language;
 using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -46,7 +47,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private IConfiguration _configuration;
         private readonly string _defaultPass;
 
-
         public StudentManageController(
             AccountService accountService,
             RoleService roleService,
@@ -69,6 +69,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
+
             )
         {
             _accountService = accountService;
@@ -142,6 +143,70 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Student = student;
             return View();
+        }
+
+        public async Task<JsonResult> CreateNewStudent(StudentEntity student, string center)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            var centerID = _centerService.GetItemByCode(center).ID;
+            var Status = false;
+
+            if (student.FullName == "" ||student.Email=="") return null;
+
+            if (!ExistEmail(student.Email))
+            {
+                student.CreateDate = DateTime.Now;
+                student.IsActive = true;
+                student.UserCreate = teacher.ID;
+                student.Centers = new List<string>(){centerID};
+                //student.Centers.Add(centerID);
+                _studentService.CreateQuery().InsertOne(student);
+                Status = true;
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",student },
+                        {"Error",null },
+                        {"Msg","Thêm thành công" },
+                        {"Status",Status }
+                    };
+                var account = new AccountEntity()
+                {
+                    CreateDate = DateTime.Now,
+                    IsActive = true,
+                    PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                    PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                    UserCreate = student.UserCreate,
+                    Type = ACCOUNT_TYPE.STUDENT,
+                    UserID = student.ID,
+                    UserName = student.Email.ToLower().Trim(),
+                    RoleID = _roleService.GetItemByCode("student").ID
+                };
+                _accountService.CreateQuery().InsertOne(account);
+                return new JsonResult(response);
+            }
+            else
+            {
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",student },
+                        {"Msg","Email đã được sử dụng" }
+                    };
+                return new JsonResult(response);
+            }
+
+        }
+
+        [Obsolete]
+        private bool ExistEmail(string email)
+        {
+            var _currentData = _studentService.CreateQuery().Find(o => o.Email == email);
+            if (_currentData.Count() > 0 || email=="")
+            {
+                return true;
+            }
+            return false;
         }
 
         public async Task<JsonResult> RemoveStudent(string ClassID, string StudentID)
@@ -243,7 +308,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
                         Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+            //var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+            var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
 
@@ -254,8 +320,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                        string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses)) :
-                        _classService.GetItemByID(ClassID).Name
+                        (t.JoinedClasses==null?"Đang chờ vào lớp": string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                        _classService.GetItemByID(ClassID).Name,
                 }));
 
             var response = new Dictionary<string, object>
@@ -284,7 +350,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return Json(_studentService.Search(term, 100));
         }
 
-        #region Batch Import
+                    #region Batch Import
         [HttpPost]
         [Obsolete]
         public async Task<JsonResult> ImportStudent(string basis, string ClassID)
@@ -457,7 +523,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
-        #endregion
+                    #endregion
 
         private bool HasRole(string userid, string center, string role)
         {
