@@ -77,7 +77,7 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    @*<td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>*@
+                    <td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>
                 </tr>
             </tbody>
         </table>
@@ -318,10 +318,10 @@
                     //    key: 'score',
                     //    label: 'Kết quả'
                     //},
-                    //{
-                    //    key: 'actions',
-                    //    label: 'Tác vụ'
-                    //}
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
                 ],
                 tableData: [
                 ],
@@ -592,10 +592,11 @@
                     let _form = new FormData()
                     //_form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
+                    //debugger
                     let _url = '@processUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
-                            if (response.data.error != null) {
+                            if (response.data.error != "") {
                                 alert(response.data.error);
                                 return false;
                             }

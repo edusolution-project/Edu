@@ -158,7 +158,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 student.IsActive = true;
                 student.UserCreate = teacher.ID;
                 student.Centers = new List<string>() { centerID };
-                //student.Centers.Add(centerID);
                 _studentService.CreateQuery().InsertOne(student);
                 Status = true;
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -196,34 +195,59 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-        [Obsolete]
+        //[Obsolete]
         private bool ExistEmail(string email)
         {
             var _currentData = _studentService.CreateQuery().Find(o => o.Email == email);
-            if (_currentData.Count() > 0 || email == "")
+            if (_currentData.Count() > 0)
             {
                 return true;
             }
             return false;
         }
 
-        public async Task<JsonResult> RemoveStudent(string ClassID, string StudentID)
+        public async Task<JsonResult> RemoveStudent(string StudentID,string basis, string JoinedClasses = null, string ClassID = null)
         {
-            if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+            var Error = "";
+            try
             {
-                return Json(new
+                //if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+                if (string.IsNullOrEmpty(StudentID))
                 {
-                    error = "Thông tin không chính xác"
-                });
+                    return Json(new
+                    {
+                        error = "Thông tin không chính xác"
+                    });
+                }
+                //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
+                var student = _studentService.GetItemByID(StudentID);
+                var center = _centerService.GetItemByCode(basis);
+                var Classes = _studentService.GetItemByID(StudentID).JoinedClasses;
+                //Classed.
+                if (Classes != null)
+                    foreach (var @class in Classes)
+                    {
+                        if (_studentService.LeaveClass(@class, StudentID) > 0)
+                        {
+                            //remove history, exam, exam detail, progress...
+                            await _learningHistoryService.RemoveClassStudentHistory(@class, StudentID);
+                            await _examService.RemoveClassStudentExam(@class, StudentID);
+                        }
+                    }
+                //_accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
+                student.Centers.Remove(center.ID);
+                _studentService.CreateOrUpdate(student);
             }
-            //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
-            if (_studentService.LeaveClass(ClassID, StudentID) > 0)
+            catch (Exception ex)
             {
-                //remove history, exam, exam detail, progress...
-                await _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
-                await _examService.RemoveClassStudentExam(ClassID, StudentID);
+                Error = ex.Message;
             }
-            return Json(new { msg = "đã xóa học viên" });
+            var Datarespone = new Dictionary<string, object>
+            {
+                { "msg","đã xóa học viên" },
+                { "error",Error}
+            };
+            return Json(Datarespone);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -263,26 +287,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
             var classids = new List<string>();
+            var checkClass = false;
             if (!string.IsNullOrEmpty(ClassID))
             {
+                checkClass = true;
                 classids.Add(ClassID);
             }
             else
             {
                 if (!string.IsNullOrEmpty(SubjectID))
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                { filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID)); checkClass = true; }
+
                 if (!string.IsNullOrEmpty(TeacherID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(SkillID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(GradeID))
+                {
+
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                    checkClass = true;
+                }
                 classids =
                     filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
                 : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
             }
 
-            if (classids == null || classids.Count() == 0)
+            if (checkClass && classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Model", model }
@@ -300,14 +337,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
             }
 
-            if (string.IsNullOrEmpty(model.SearchText))
+            if (checkClass)
                 stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
-            else
+            if (!string.IsNullOrEmpty(model.SearchText))
+
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
-                        Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            //var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
-            var list = _studentService.GetAll().SortByDescending(t => t.ID);
+            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+            //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
 
@@ -318,7 +355,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                        (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
 
