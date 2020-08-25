@@ -82,9 +82,13 @@ function Submit(formName, url, actionName, fn) {
     $(form).find("input:disabled").removeAttr("disabled");
 
     var data = new FormData(form);
+    //var CreateNewChapter = form.querySelector('input[name=CreateNewChapter]').checked;
+    //data.append("CreateNewChapter", CreateNewChapter);
+    //debugger
     showLoading("Sending data ...");
     Ajax(_url, _method, data, true)
         .then(function (res) {
+            debugger
             hideLoading();
             if (fn != void 0) fn(res);
         }).catch(function (res) {

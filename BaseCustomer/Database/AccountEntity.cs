@@ -32,6 +32,10 @@ namespace BaseCustomerEntity.Database
         public DateTime CreateDate { get; set; }
         [JsonProperty("Phone")]
         public string Phone { get; set; }
+        [JsonProperty("VerificationCodes")]
+        public string VerificationCodes { get; set; }
+        [JsonProperty("TimeOut")]
+        public DateTime TimeOut { get; set; }
 
     }
     public class AccountService : ServiceBase<AccountEntity>

@@ -84,12 +84,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
 
+
             //var category = _newsCategoryService.GetItemByCode("san-pham");
 
             //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
             var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6);
 
             ViewBag.List_Courses = data.ToList();
+
 
             return View();
         }
@@ -429,14 +431,16 @@ namespace BaseCustomerMVC.Controllers.Student
                     conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
                     conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
-                    var price = product.Discount;
-                    conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
+                    //conn.AddDigitalOrderField("vpc_OrderInfo", $"Thanh toán khóa học: {product.Title}"); //THong tin don hang
+                    var price = product.Discount==0?product.Price*100:product.Discount*100;
+                    conn.AddDigitalOrderField("vpc_Amount", price.ToString());
                     //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
-                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID }));
+                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID,basis }));
                     // Thong tin them ve khach hang. De trong neu khong co thong tin
                     conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
                     conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);
                     conn.AddDigitalOrderField("vpc_Customer_Name", Name);
+                    conn.AddDigitalOrderField("vpc_Customer_Address", Address);
                     // Dia chi IP cua khach hang
                     string IPAddress = GetIPAddress();
                     conn.AddDigitalOrderField("vpc_TicketNo", IPAddress);
@@ -518,7 +522,8 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
             var idproduct = Request.Query["ID"].ToString();
-            var center = Request.Query["center"].ToString();
+            var basis = Request.Query["basis"].ToString();
+            var center = _newsService.GetItemByID(idproduct).CenterID;
             var transactionID = Request.Query["vpc_MerchTxnRef"].ToString();
             if (vpc_TxnResponseCode.Equals("0"))
             {
@@ -530,18 +535,24 @@ namespace BaseCustomerMVC.Controllers.Student
                     historyTransaction.DayPayment = DateTime.UtcNow;
                     historyTransaction.TradingID = vpc_TransactionNo;
                     JoinClass(idproduct, center);
-                    ViewBag.message = "Thanh toán thành công!";
-                    var redirec = $"/{center}/student/Course";
+                    //ViewBag.message = "Thanh toán thành công!";
+                    var redirec = $"/{basis}/student/Course";
                     return Redirect(redirec);
                 }   
                 else
+                {
                     ViewBag.message = "Giao dịch không hợp lệ không thành công!";
+                    var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                    return Redirect(redirec);
+                }    
             }
             else
             {
-                ViewBag.message = "Thanh toán không thành công!";
+                //ViewBag.message = "Thanh toán không thành công!";
+                var redirec = "http://" + host + processUrl(basis, "Payment", "Home")+$"/{idproduct}";
+                return Redirect(redirec);
             }        
-            return View();
+            //return View();
         }
         #endregion
 

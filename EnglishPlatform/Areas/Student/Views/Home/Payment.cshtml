@@ -60,18 +60,60 @@
 
         <table class="table" id="dataTable" width="100%" cellspacing="0">
             <tbody>
-                <tr>
-                    <th>Họ tên(*)</th>
-                    <td><input class="form-control" type="text" id="Name" name="Name" placeholder="Họ và tên" value="@student.FullName" required /></td>
+                <tr class="row">
+                    <td class="form-group col-sm-7">
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Họ tên(*)</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="Name" name="Name" value="@student.FullName" placeholder="Họ tên(*)" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Số điện thoại(*)</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="Phone" name="Phone" value="@student.Phone" placeholder="Số điện thoại(*)" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">Địa chỉ(*)</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" id="Address" name="Address" value="@student.Address" placeholder="Địa chỉ(*)" required>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="form-group col-sm-5">
+                        <div class="col-sm-12">
+                            <h5 class="col-sm-12">Bạn cần đọc kĩ các điều khoản sau: </h5>
+                            <div class="col-sm-12" style="height:150px;overflow-y:auto;border:solid darkgray">
+                                <span style="font-weight:bold">1. Điều khoản thanh toán</span><br />
+                                Phương thức thanh toán sẽ được các bên lựa chọn dựa vào mức độ tin cậy giữa các bên, khả năng thanh toán, hoặc phụ thuộc đối tượng hàng hóa.
+
+                                Đối với các doanh nghiệp nội địa, thường áp dụng phương thức chuyển khoản hoặc tiền mặt. Những phương thức này có thể áp dụng đối với những đơn hàng số lượng ít và giá trị hợp đồng không cao. Tuy nhiên trong lĩnh vực ngoại thương, do sự khác biệt văn hóa, sự chênh lệch về khả năng tài chính, quy mô cũng như về đồng tiền thanh toán, các bên có thể áp dụng phương thức mang tính chất chuyên nghiệp hơn và có sự hỗ trợ từ bên thứ ba - thường là các tổ chức tín dụng, ngân hàng như:
+
+                                + Chuyển tiền bằng điện (Telegraphic Transfer – T/T);
+
+                                + Chuyển tiền bằng thư (Mail Transfer – M/T);
+
+                                + Phương thức thanh toán nhờ thu( Collection of payment);
+
+                                + Phương thức tín dụng chứng từ (Letter of credit – L/C);
+
+                                + Một số phương thức khác theo tập quán thanh toán quốc tế.
+
+                                Các bên cần thỏa thuận rõ ràng phương thức thanh toán. Phương thức thanh toán thường có sự liên hệ với thời điểm giao hàng, nhận các chứng từ.
+                            </div>
+                        </div>
+                        <div class="form-check col-sm-12">
+                            <input class="form-check-input" type="checkbox" id="status" name="status">
+                            <label class="form-check-label" for="status">
+                                Tôi đã đọc và chấp nhận các điều khoản trên
+                            </label>
+                        </div>
+                    </td>
                 </tr>
-                <tr>
-                    <th>Số điện thoại(*)</th>
-                    <td><input type="text" class="form-control" id="Phone" name="Phone" placeholder="Số điện thoại" value="@student.Phone" required /></td>
-                </tr>
-                <tr>
-                    <th>Địa chỉ(*)</th>
-                    <td><input type="text" class="form-control" id="Address" name="Address" placeholder="Địa chỉ" value="@student.Address" required /></td>
-                </tr>
+                
                 <tr>
                     <td colspan="2" onclick="Thanhtoan()"><button class="btn btn-primary">Thanh toán</button></td>
                 </tr>
@@ -80,29 +122,50 @@
     </div>
     @*</form>*@
 </div>
-    </div>
 
 <script>
-    var Thanhtoan= function () {
-        var ID = document.getElementById("ID").value;
-        var Name = document.getElementById("Name").value;
-        var Address = document.getElementById("Address").value;
-        var Phone = document.getElementById("Phone").value;
-        var Center = '@center';
-        //debugger
-        $.ajax({
-            type: "POST",
-            url: '@processUrl("PaymentStatus", "Home")',
-            data: { basis: Center, ID: ID, Phone: Phone, Name: Name },
-            dataType: "json",
-            success: function (data) {
-                if (data.Url != "") {
-                    window.location.href = data.Url
-                }
-                else {
-                    alert(data.Error)
-                }
+
+    var Thanhtoan = function () {
+        var status = $('#status').prop('checked');
+
+        var modal = $('#dataTable');
+        var requires = $(modal).find(':required');
+        var err = false;
+        requires.each(function () {
+            if ($(this).val() == "" || $(this).val() == null) {
+                alert("Vui lòng điền đủ thông tin");
+                $(this).focus();
+                err = true;
+                return false;
             }
         });
+
+        if (err) return false;
+
+        if (status) {
+            var ID = document.getElementById("ID").value;
+            var Name = document.getElementById("Name").value;
+            var Address = document.getElementById("Address").value;
+            var Phone = document.getElementById("Phone").value;
+            var Center = '@center';
+            //debugger
+            $.ajax({
+                type: "POST",
+                url: '@processUrl("PaymentStatus", "Home")',
+                data: { basis: Center, ID: ID, Phone: Phone, Name: Name },
+                dataType: "json",
+                success: function (data) {
+                    if (data.Url != "") {
+                        window.location.href = data.Url
+                    }
+                    else {
+                        alert(data.Error)
+                    }
+                }
+            });
+        }
+        else {
+            alert("Bạn cần đọc các điều khoản và chấp nhận với các điều khoản đã nêu!");
+        }
     }
 </script>

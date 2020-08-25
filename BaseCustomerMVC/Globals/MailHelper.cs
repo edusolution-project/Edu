@@ -130,17 +130,26 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendResetPassConfirm(AccountEntity user, string resetLink)
+        public async Task SendResetPassConfirm(AccountEntity user, string resetLink="",string OTP="")
         {
-            string subject = "Xác nhận yêu cầu đổi mật khẩu đăng nhập tại Eduso";
-            string body = "Chào " + user.Name + "," +
-                "<p>Bạn hoặc ai đó đã yêu cầu thay đổi mật khẩu đăng nhập tại website Eduso.vn</p>" +
-                "<p>Vui lòng click vào link xác thực gửi kèm để xác nhận yêu cầu đổi mật khẩu</p>" +
-                "<p><i><a href='" + resetLink + ">" + resetLink + "</a></i></p>" +
-                "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
-                "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
-            var toAddress = new List<string> { user.UserName };
-            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
+            try
+            {
+                string subject = "Xác nhận yêu cầu đổi mật khẩu đăng nhập tại Eduso";
+                string body = "Chào " + user.Name + "," +
+                    "<p>Bạn hoặc ai đó đã yêu cầu thay đổi mật khẩu đăng nhập tại website Eduso.vn</p>" +
+                    "<p>Vui lòng click vào" +
+                    $"<a href={resetLink}> Link Xác Thực</a> " +
+                    "để tiến hành đổi mật khẩu</p>" +
+                    $"Hoặc bạn có thể nhập mã OTP để tiến hành thay đổi mật khẩu: {OTP} (OTP tồn tại trong 5 phút)" +
+                    "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                    "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
+                var toAddress = new List<string> { user.UserName };
+                _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
+            }
+            catch(Exception ex)
+            {
+                //ex.Message;
+            }
         }
 
         public async Task SendPasswordChangeNotify(AccountEntity user)

@@ -102,8 +102,7 @@
 </style>
 <body>
     <main id="main">
-        @await Component.InvokeAsync("SidebarTeacher", new { centerCode = center })
-        @*@await Html.PartialAsync("_sidebarTeacherNewUI")*@
+        @await Html.PartialAsync("_sidebarTeacherNewUI")
         @RenderBody()
         <aside class="sidebar" id="sidebar_right">
             <div class="box padding-15" id="plan_box">

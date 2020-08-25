@@ -345,6 +345,10 @@
                 uploadfile: {
                     file: null,
                 },
+                nameStudent: '',
+                emailStudent: '',
+                phoneStudent: '',
+                birthdayStudent: '',
             },
             watch: {
                 search_subject_id: function () {
@@ -359,11 +363,11 @@
                 search_class_id: function () {
                     this.getData()
                 },
-                searchTerm: function(){
-                    if(this.searchTimeout != null)
+                searchTerm: function () {
+                    if (this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
-                    this.searchTimeout = setTimeout(function(){
+                    this.searchTimeout = setTimeout(function () {
                         fn()
                         fn = null
                     }, 500)
@@ -503,14 +507,14 @@
                     this.add_student.email = student.Email
                     this.add_student.id = student.ID
                 },
-                chooseClass(_class){
+                chooseClass(_class) {
                     this.search_class_id = _class.ID;
                 },
                 createStudent() {
                     let _that = this
                     let _form = new FormData()
                     if (_that.add_student.class_id == '') {
-                        Swal.fire('Chưa chọn lớp học','','warning');
+                        Swal.fire('Chưa chọn lớp học', '', 'warning');
                         return false;
                     }
                     if (_that.add_student.id == '') {
@@ -550,7 +554,7 @@
                         return false;
                     }
                     if (!_that.uploadfile.file) {
-                         alert('Chưa chọn danh sách học viên');
+                        alert('Chưa chọn danh sách học viên');
                         return false;
                     }
                     _form.append('ClassID', _that.add_student.class_id)
@@ -610,6 +614,40 @@
                 },
                 downloadTemplate() {
                     window.open("@processUrl("ExportTemplate", "StudentManage")");
+                },
+                createNewStudent() {
+                    let _that = this
+                    if (!_that.checkNull()) {
+                        let _url = '@processUrl("CreateNewStudent", "StudentManage")'
+                        let _form = new FormData()
+                        _form.append('FullName', _that.nameStudent)
+                        _form.append('Email', _that.emailStudent)
+                        _form.append('Phone', _that.phoneStudent)
+                        _form.append('DateBorn', _that.birthdayStudent)
+                        _form.append('center', '@center')
+                        //_form.append('Centers', '@center')
+                        //debugger
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if (response.data.Status) {
+                                    alert(response.data.Msg)
+                                    this.getData()
+                                    this.hideModal()
+                                }
+                                else alert(response.data.Error)
+                            }).catch(e => {
+                            
+                            })
+                    }
+                },
+                checkNull() {
+                    let _that = this
+                    //debugger
+                    if (_that.nameStudent == "" || _that.emailStudent == "" || _that.phoneStudent == "" || _that.birthdayStudent == "") {
+                        alert("Không được để trống")
+                        return true;
+                    }
+                    else return false;
                 }
             }
         });
@@ -617,24 +655,66 @@
 }
 
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên">
+    @*<b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên">
+            <b-col class="form-group">
+                <label for="">Họ tên</label>
+                <select v-model="add_student.class_id" class="form-control">
+                    <option value="">Chọn lớp</option>
+                    <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </b-col>
+            <b-col class="form-group">
+                <label for="">Học viên</label>
+                <autocomplete v-on:chooseitem="chooseStudent" :items="list_student" v-on:input="autocompleteStudent" />
+            </b-col>
+            <template v-slot:modal-footer="{ ok, cancel}">
+                <template v-if="isLoading">
+                    <b-button>Đang thực hiện...</b-button>
+                </template>
+                <template v-else>
+                    <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+                    <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+                </template>
+            </template>
+        </b-modal>*@
+
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="xl" >
         <b-col class="form-group">
-            <label for="">Lớp</label>
-            <select v-model="add_student.class_id" class="form-control">
-                <option value="">Chọn lớp</option>
-                <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
-            </select>
-        </b-col>
-        <b-col class="form-group">
-            <label for="">Học viên</label>
-            <autocomplete v-on:chooseitem="chooseStudent" :items="list_student" v-on:input="autocompleteStudent" />
+
+            <div class="form-group row">
+                <label for="Name" class="col-sm-2 col-form-label">Họ tên học viên</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="Name" name="Name" placeholder="Họ và tên" v-model="nameStudent" >
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="Email" name="Email" placeholder="Email" v-model="emailStudent" >
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Phone" class="col-sm-2 col-form-label">Số điện thoại</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="Phone" name="Phone" placeholder="Số điện thoại" v-model="phoneStudent" >
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Birthday" class="col-sm-2 col-form-label">Sinh nhật</label>
+                <div class="col-sm-10">
+                    <input type="date" class="form-control" id="Birthday" name="Birthday" placeholder="Ngày sinh" v-model="birthdayStudent" >
+                </div>
+            </div>
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
                 <b-button>Đang thực hiện...</b-button>
             </template>
             <template v-else>
-                <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+                <b-button variant="success" v-on:click="createNewStudent()">Lưu</b-button>
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>

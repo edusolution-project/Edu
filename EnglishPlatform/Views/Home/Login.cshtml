@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EDUSO Login</title>
     <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
-    <link href="~/css/be-vietnam-font.css" rel="stylesheet" />
+    @*<link href="~/css/be-vietnam-font.css" rel="stylesheet" />*@
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
     <script src="~/js/vue@2.6.0.js"></script>
     <script src="~/js/axios.min.js"></script>
@@ -184,13 +184,15 @@
                 _that.disable = true
                 let _form = new FormData()
                 _form.append('UserName', _that.email)
-
                 axios.post(_that.action, _form)
                     .then(response => {
-                        if(response.data.StatusCode){
-                            window.location.href= response.data.Location
-                        }else{
-                            alert(response.data.StatusDesc)
+                        debugger
+                        if (response.data.Status) {
+                            alert("Vui lòng check mail để xác nhận thay đổi mật khẩu!")
+                            window.location.href= response.data.Url
+                        }
+                        else {
+                            alert(response.data.Error)
                             _that.disable = false
                         }
                      }).catch(e=>{

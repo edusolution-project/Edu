@@ -56,16 +56,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
-            //if (teacher != null)
-            //    ViewBag.AllCenters = teacher.Centers;
+            if (teacher != null)
+                ViewBag.AllCenters = teacher.Centers;
 
-            //if (!string.IsNullOrEmpty(basis))
-            //{
-            //    var center = _centerService.GetItemByCode(basis);
-            //    if (center != null)
-            //        ViewBag.Center = center;
-            //    ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
-            //}
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
+            }
             var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == _teacherid) && o.IsActive == true)?
                 .SortBy(o => o.EndDate)
                 .ToList();

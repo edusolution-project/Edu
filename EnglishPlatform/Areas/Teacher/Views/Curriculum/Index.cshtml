@@ -7,8 +7,6 @@
     var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
-    var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
-    var defTeacher = ViewBag.User;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -162,7 +160,7 @@
                     },
                     {
                         key: 'creator',
-                        label: 'GV soạn thảo'
+                        label: 'Người tạo'
                     },
                     {
                         key: 'created_at',
@@ -183,8 +181,6 @@
                 list_subject: [],
                 list_grades_full: [],
                 list_courses: [],
-                list_teacher: @Html.Raw(Json.Serialize(teachers)),
-                def_teacher: '@defTeacher',
                 list_centers: @Html.Raw(Json.Serialize(allcenters)),
                 addItem: {
                     ID: '',
@@ -194,8 +190,7 @@
                     SkillID: '',
                     Description: '',
                     Init: false,
-                    Image: '',
-                    TeacherID: ''
+                    Image: ''
                 },
                 cloneItem: {
                     OriginID: '',
@@ -332,7 +327,7 @@
                     })
                 },
                 showEditItem(obj) {
-                    //console.log(obj);
+                    console.log(obj);
                     let _that = this;
                     if (obj == null) {
                         _that.addItem.ID = '';
@@ -342,10 +337,8 @@
                         _that.addItem.Name = '';
                         _that.addItem.SkillID = '';
                         _that.addItem.Image = '';
-                        _that.addItem.TeacherID = _that.def_teacher;
                     }
                     else {
-                        console.log(obj);
                         _that.addItem.ID = obj.ID;
                         _that.addItem.SubjectID = obj.SubjectID;
                         _that.$nextTick(() => {
@@ -355,7 +348,6 @@
                         _that.addItem.Name = obj.Name;
                         _that.addItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
-                        _that.addItem.TeacherID = obj.TeacherID;
                     }
                     _that.$bvModal.show('modal_event')
                 },
@@ -432,7 +424,6 @@
                     _form.append('CenterCode', _that.center)
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
-                    _form.append('TeacherID', _that.addItem.TeacherID)
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -691,15 +682,6 @@
         </div>
         <div>
             <b-col class="form-group">
-                <label for="">Giáo viên soạn thảo</label>
-                <select class="form-control" v-model="addItem.TeacherID">
-                    <option value="">Chọn giáo viên</option>
-                    <option v-for="(item,k) in list_teacher" :value="item.ID">{{item.Name}}</option>
-                </select>
-            </b-col>
-        </div>
-        <div>
-            <b-col class="form-group">
                 <label for="">Bìa sách</label>
                 <div>
                     <button class="btn btn-info" onclick="chooseFile(this)">Chọn file</button>
@@ -728,10 +710,12 @@
 
     <b-modal id="clone_event" centered title="Sao chép bài giảng">
         <input type="hidden" name="OriginID" v-model="cloneItem.OriginID" />
-        <b-col class="form-group">
-            <label class="col-form-label">Bài giảng gốc:</label>
-            <input type="text" class="form-control lock" id="rootCourseName" :value="cloneItem.OriginName" readonly>
-        </b-col>
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Bài giảng gốc:</label>
+                <input type="text" class="form-control lock" id="rootCourseName" :value="cloneItem.OriginName" readonly>
+            </div>
+        </div>
         <b-col class="form-group">
             <label for="">Tên bài giảng *</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="cloneItem.Name" ref="cloneName">
@@ -789,18 +773,23 @@
     <!--Hoa them 02-08-2020-->
     <b-modal id="merge_event" centered title="Ghép bài giảng">
         <input type="hidden" name="OriginID" v-model="mergeItem.OriginID" />
-        <b-col class="form-group">
-            <label class="col-form-label">Bài giảng gốc:</label>
-            <input type="text" class="form-control lock" id="rootCourseName" :value="mergeItem.OriginName" readonly>
-        </b-col>
-        <b-col class="form-group">
-            <label class="col-form-label">Ghép với bài giảng:</label>
-            @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
-            <select v-model="mergeItem.JoinCourseID" class="form-control" required>
-                <option value="">Chọn khóa học</option>m
-                <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID && item.SubjectID == mergeItem.SubjectID" :value="item.ID">{{item.Name}}</option>
-            </select>
-        </b-col>
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Bài giảng gốc:</label>
+                <input type="text" class="form-control lock" id="rootCourseName" :value="mergeItem.OriginName" readonly>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group">
+                <label class="col-form-label">Ghép với bài giảng:</label>
+                @*<input type="text" class="form-control lock" id="joinCourseName" :value="mergeItem.OriginName">*@
+                <select v-model="mergeItem.JoinCourseID" class="form-control" required>
+                    <option value="">Chọn khóa học</option>m
+                    <option v-for="(item) in list_courses" v-if="item.ID!=mergeItem.OriginID && item.SubjectID == mergeItem.SubjectID" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+        </div>
         <b-col class="form-group">
             <label for="">Tên bài giảng mới *</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng mới" v-model="mergeItem.Name" ref="mergeName">

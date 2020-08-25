@@ -61,7 +61,17 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public async Task<JsonResult> CreateOrUpdate(NewsEntity item, IFormFile Thumbnail)
         {
-            if(item.Targets != null && item.Targets.Count > 0)
+            //if (item.CategoryID == null)
+            //    item.CategoryID = _serviceNewCate.GetItemByCode(CategoryCode).ID;
+
+            //if (item.Sale != 0)
+            //{
+            //    item.PriceSale = item.Price - item.Price * item.Sale / 100;
+            //}
+
+            //item.Targets.RemoveAt(item.Targets.Count - 1);       
+            //var a=item.Targets[0].ToString();
+            if (item.Targets[0] != null)
             {
                 foreach (var target in item.Targets[0].ToString().Split(','))
                 {
@@ -72,6 +82,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Targets.RemoveAt(0);
                 item.Targets.RemoveAt(item.Targets.Count - 1);
             }
+            else item.Targets.RemoveAt(0);
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {

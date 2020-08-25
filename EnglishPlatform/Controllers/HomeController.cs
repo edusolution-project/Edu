@@ -23,6 +23,8 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using Microsoft.Extensions.Configuration;
 
 namespace EnglishPlatform.Controllers
 {
@@ -49,6 +51,8 @@ namespace EnglishPlatform.Controllers
         private readonly QCService _QCService;
         public DefaultConfigs _default { get; }
 
+        private string host;
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
@@ -66,6 +70,7 @@ namespace EnglishPlatform.Controllers
             , NewsService newsService
             , NewsCategoryService newsCategoryService
             , QCService QCService
+            , IConfiguration iConfig
             )
         {
             _accessesService = accessesService;
@@ -88,6 +93,7 @@ namespace EnglishPlatform.Controllers
             _newsService = newsService;
             _newsCategoryService = newsCategoryService;
             _QCService = QCService;
+            host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
         public IActionResult Index()
@@ -450,6 +456,134 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        //Quên mật khẩu
+        public async Task<JsonResult> ForgotAPI(string UserName)
+        {
+            var Error = "";
+            var Status = false;
+            var Url = "";
+            var StatusDesc = "";
+            try
+            {
+                var user = _accountService.GetAccountByEmail(UserName);
+                if (user == null)
+                {
+                    Error += "Tài khoản không tồn tại! Vui lòng nhập lại tài khoản";
+                }
+                else
+                {
+                    var OTP = new Random().Next(100000, 999999).ToString();
+                    var VerificationCodes = Core_v2.Globals.Security.Encrypt(OTP);
+                    if (_accountService.CreateQuery().Find(x => x.VerificationCodes == VerificationCodes).Any())
+                    {
+                        OTP = new Random().Next(100000, 999999).ToString();
+                    }
+                    user.VerificationCodes = Core_v2.Globals.Security.Encrypt(OTP);
+                    user.TimeOut = DateTime.Now; //Thời gian tồn tại mã xác nhận, max 300s
+                    _accountService.CreateOrUpdate(user);
+
+                    var resetLink = $"http://{host}/forgot-password?code={OTP}";
+                    _ = _mailHelper.SendResetPassConfirm(user, resetLink,OTP);
+                    Status = true;
+                    Url = $"http://{host}/forgot-password";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusDesc = ex.Message;
+            }
+
+            var DataRespone = new Dictionary<string, object>()
+            {
+                {"Status",Status },
+                {"Error",Error },
+                {"Url",Url },
+                {"StatusDesc",StatusDesc }
+            };
+            return Json(DataRespone);
+        }
+
+        [Route("/forgot-password")]
+        public IActionResult ForgotPassword(string code="0")
+        {
+            if (code != "0")
+                ViewBag.VerificationCodes = code;
+            return View();
+        }
+
+        //[HttpPost]
+        //[Route("/forgot-password")]
+        //[ValidateAntiForgeryToken]
+        //public JsonResult ResetPassword(string Email)
+        //{
+        //    return View("ForgotPassword");
+        //}
+
+        ////[Route("/forgot-password")]
+        ////[HttpPost]
+        //public IActionResult ForgotPassword(string VerificationCodes = "")
+        //{
+        //    ViewBag.VerificationCodes = VerificationCodes;
+        //    return View();
+        //}
+
+        //dat lai mat khau
+        [HttpPost]
+        //[Route("/forgot-password")]
+        //[ValidateAntiForgeryToken]
+        public JsonResult ResetPassword(string NewPassword, string Email = "", string VerificationCodes = "")
+        {
+            var Error = "";
+            var Message = "";
+            var Url = "";
+            var Status = false;
+            if (Email != "" && VerificationCodes != "")
+            {
+                var user = _accountService.GetAccountByEmail(Email);
+                if (user == null)
+                {
+                    Error += $"Email: {Email} không tồn tại!";
+                    Status = false;
+                }
+                else
+                {
+                    var checkTimeOut = DateTime.Now;
+                    var TotalSeconds = (checkTimeOut - user.TimeOut).TotalSeconds;
+
+                    if (TotalSeconds < 0 && TotalSeconds > 300)
+                    {
+                        Error = "Mã xác thực đã hết hạn, vui lòng thực hiện lại từ đầu!";
+                        Status = false;
+                    }
+                    else if (user.VerificationCodes != Core_v2.Globals.Security.Encrypt(VerificationCodes))
+                    {
+                        Error = "Mã xác thực không đúng";
+                        Status = false;
+                    }
+                    else
+                    {
+                        user.PassTemp = Core_v2.Globals.Security.Encrypt(NewPassword);
+                        user.PassWord = Core_v2.Globals.Security.Encrypt(NewPassword);
+                        user.TimeOut = new DateTime(1990, 01, 01, 00, 00, 00);
+                        user.VerificationCodes = "";
+                        _accountService.CreateOrUpdate(user);
+                        _ = _mailHelper.SendPasswordChangeNotify(user);
+                        Message = "Thay đổi mật khẩu thành công!Quay lại trang đăng nhập";
+                        Url = $"http://{host}/login";
+                        Status = true;
+                    }
+                }
+            }
+            var DataRespone = new Dictionary<string, object>()
+            {
+                {"Message",Message },
+                {"Error",Error },
+                {"Url",Url },
+                {"Status",Status }
+            };
+            return Json(DataRespone);
+        }
+
         private void StartAuthority()
         {
             if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)
@@ -539,21 +673,6 @@ namespace EnglishPlatform.Controllers
 
             return RedirectToAction("Login");
         }
-
-        [Route("/forgot-password")]
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [Route("/forgot-password")]
-        [ValidateAntiForgeryToken]
-        public IActionResult ForgotPassword(string Email)
-        {
-            return View();
-        }
-
 
         [HttpPost]
         public IActionResult UploadImage(IFormFile upload, string CKEditorFuncNum, string CKEditor, string langCode)

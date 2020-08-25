@@ -105,19 +105,20 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task UpdatePoint(LessonProgressEntity item, double pointchange = 0)
+        public async Task UpdatePoint(LessonProgressEntity item)
         {
             var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
-            {
                 return;
-            }
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
                     progress.ExamDone++;
-                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);
-                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+
+                progress.TotalPoint += item.PointChange;
+                if(progress.TotalPoint > 100)
+                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }

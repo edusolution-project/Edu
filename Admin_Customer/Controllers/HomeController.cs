@@ -166,7 +166,7 @@ namespace Admin_Customer.Controllers
             };
             var headteacherRole = new RoleEntity()
             {
-                Name = "GV Quản lý",
+                Name = "Trưởng bộ môn",
                 Code = "head-teacher",
                 Type = "teacher",
                 CreateDate = DateTime.Now,
