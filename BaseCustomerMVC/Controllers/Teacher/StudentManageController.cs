@@ -152,14 +152,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var centerID = _centerService.GetItemByCode(center).ID;
             var Status = false;
 
-            if (student.FullName == "" ||student.Email=="") return null;
+            if (student.FullName == "" || student.Email == "") return null;
 
             if (!ExistEmail(student.Email))
             {
                 student.CreateDate = DateTime.Now;
                 student.IsActive = true;
                 student.UserCreate = teacher.ID;
-                student.Centers = new List<string>(){centerID};
+                student.Centers = new List<string>() { centerID };
                 _studentService.CreateQuery().InsertOne(student);
                 Status = true;
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -208,7 +208,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return false;
         }
 
-        public async Task<JsonResult> RemoveStudent(string StudentID,string JoinedClasses=null, string ClassID=null)
+        public async Task<JsonResult> RemoveStudent(string StudentID,string basis, string JoinedClasses = null, string ClassID = null)
         {
             var Error = "";
             try
@@ -222,7 +222,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
                 //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
-                //var student = _studentService.GetItemByID(StudentID);
+                var student = _studentService.GetItemByID(StudentID);
+                var center = _centerService.GetItemByCode(basis);
                 var Classes = _studentService.GetItemByID(StudentID).JoinedClasses;
                 //Classed.
                 if (Classes != null)
@@ -235,8 +236,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             await _examService.RemoveClassStudentExam(@class, StudentID);
                         }
                     }
-                _accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
-                _studentService.CreateQuery().DeleteMany(o => o.ID == StudentID);
+                //_accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
+                student.Centers.Remove(center.ID);
+                _studentService.CreateOrUpdate(student);
             }
             catch (Exception ex)
             {
@@ -287,26 +289,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
             var classids = new List<string>();
+            var checkClass = false;
             if (!string.IsNullOrEmpty(ClassID))
             {
+                checkClass = true;
                 classids.Add(ClassID);
             }
             else
             {
                 if (!string.IsNullOrEmpty(SubjectID))
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                { filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID)); checkClass = true; }
+
                 if (!string.IsNullOrEmpty(TeacherID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(SkillID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(GradeID))
+                {
+
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                    checkClass = true;
+                }
                 classids =
                     filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
                 : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
             }
 
-            if (classids == null || classids.Count() == 0)
+            if (checkClass && classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Model", model }
@@ -324,13 +339,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
             }
 
-            if (string.IsNullOrEmpty(model.SearchText))
+            if (checkClass)
                 stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
-            else
+            if (!string.IsNullOrEmpty(model.SearchText))
+
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
-                        Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            var list = ClassID != null ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID) : _studentService.GetAll().SortByDescending(t => t.ID);
+            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
             //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
@@ -372,7 +387,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return Json(_studentService.Search(term, 100));
         }
 
-                    #region Batch Import
+        #region Batch Import
         [HttpPost]
         [Obsolete]
         public async Task<JsonResult> ImportStudent(string basis, string ClassID)
@@ -545,7 +560,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
-                    #endregion
+        #endregion
 
         private bool HasRole(string userid, string center, string role)
         {
