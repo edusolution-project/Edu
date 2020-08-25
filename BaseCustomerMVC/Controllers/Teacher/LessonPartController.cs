@@ -270,7 +270,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Created = lessonpart.Created,
                             };
                             _questionService.Save(question);
-                            parentLesson.IsPractice = true;
+                            isPractice = true;
                             break;
                         case "VOCAB":
                             if (lessonpart.Description != null && lessonpart.Description.Length > 0)
@@ -312,7 +312,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 await SaveQuestionFromView(item, createduser, files, basis);
                             }
-                            parentLesson.IsPractice = true;
+                            isPractice = true;
                             break;
                         default://QUIZ1,3,4
                             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
@@ -333,12 +333,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 await SaveQuestionFromView(item, createduser, files);
                             }
-                            parentLesson.IsPractice = true;
+                            isPractice = true;
                             break;
                     }
 
                     if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
+                    {
+                        parentLesson.IsPractice = isPractice;
+                        _lessonService.Save(parentLesson);
+                        //increase practice counter
                         await _courseHelper.ChangeLessonPracticeState(parentLesson);
+                    }
                     calculateLessonPoint(item.ParentID);
                     IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
@@ -471,10 +476,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
                     //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
                     //}
-                    var isQuiz = quizType.Contains(item.Type);
-                    await RemoveLessonPart(ID);
-                    if (isQuiz)
-                        calculateLessonPoint(parentLesson.ID);
+                    
+                    await RemoveLessonPart(ID);                   
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -511,6 +514,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 for (int i = 0; questions != null && i < questions.Count; i++)
                     await RemoveQuestion(questions[i].ID);
                 await _lessonPartService.RemoveAsync(ID);
+
+                var parentLesson = _lessonService.GetItemByID(item.ParentID);
+                if (parentLesson != null)
+                {
+                    var isQuiz = quizType.Contains(item.Type);
+                    if (isQuiz)
+                    {
+                        calculateLessonPoint(parentLesson.ID);
+                        if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
+                        {
+                            var quizPartCount = _lessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
+                            if (quizPartCount == 0)//no quiz part
+                            {
+                                parentLesson.IsPractice = false;
+                                _lessonService.Save(parentLesson);
+                                //decrease practice counter
+                                _ = _courseHelper.ChangeLessonPracticeState(parentLesson);
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

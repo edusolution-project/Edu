@@ -83,6 +83,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
+        private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
+
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
@@ -865,26 +867,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public async Task<string> CopyCourse(CourseEntity org_course, CourseEntity target_course, string _userCreate = "")
         {
-            var new_course = new CourseEntity()
-            {
-                OriginID = org_course.ID,
-                Name = target_course.Name,
-                Code = target_course.Code,
-                Description = target_course.Description,
-                GradeID = target_course.GradeID,
-                SubjectID = target_course.SubjectID,
-                TeacherID = _userCreate,
-                CreateUser = _userCreate,
-                Center = target_course.Center ?? org_course.Center,
-                SkillID = target_course.SkillID,
-                Image = org_course.Image,
-                Created = DateTime.Now,
-                Updated = DateTime.Now,
-                IsActive = false,
-                IsAdmin = false,
-                IsUsed = false,
-                Order = org_course.Order,
-            };
+            var new_course = _cloneCourseMapping.Clone(org_course, new CourseEntity());
+
+            new_course.OriginID = org_course.ID;
+            new_course.Name = target_course.Name;
+            new_course.Code = target_course.Code;
+            new_course.Description = target_course.Description;
+            new_course.GradeID = target_course.GradeID;
+            new_course.SubjectID = target_course.SubjectID;
+            new_course.TeacherID = _userCreate;
+            new_course.CreateUser = _userCreate;
+            new_course.Center = target_course.Center ?? org_course.Center;
+            new_course.SkillID = target_course.SkillID;
+            new_course.Created = DateTime.Now;
+            new_course.Updated = DateTime.Now;
+            new_course.IsActive = false;
+            new_course.IsUsed = false;
             _service.Collection.InsertOne(new_course);
 
             await CloneChapter(new CourseChapterEntity
@@ -991,6 +989,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var currentLessonIndex = (int)_lessonService.CountChapterLesson(rootChap.ID);
 
                 var joinLessons = _lessonService.GetChapterLesson(joinChap.ID).OrderBy(o => o.Order);
+                var joinSubChaps = _chapterService.GetSubChapters(joinChap.CourseID, joinChap.ID);
 
                 if (CreateNewChapter.Equals("on"))
                 {
@@ -1003,19 +1002,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
                     //var new_lesson = new CourseLessonEntity();
+                    if (joinLessons != null && joinLessons.Count() > 0)
+                        foreach (var o in joinLessons)
+                        {
+                            var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
+                            new_lesson.CreateUser = _userCreate;
+                            new_lesson.Created = DateTime.Now;
+                            new_lesson.ChapterID = newChapter.ID;
+                            new_lesson.OriginID = o.ID;
+                            new_lesson.Order = currentLessonIndex++;
+                            await CloneLesson(new_lesson, _userCreate);
+                        }
+                    if (joinSubChaps != null && joinSubChaps.Count() > 0)
+                        foreach (var o in joinSubChaps)
+                        {
+                            var clone_chap = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
+                            clone_chap.OriginID = o.ID;
+                            clone_chap.ParentID = newChapter.ID;
+                            clone_chap.Created = DateTime.Now;
+                            clone_chap.CreateUser = _userCreate;
+                            clone_chap.Order = currentChapIndex++;
+                            await CloneChapter(clone_chap, _userCreate, rootChap.CourseID);
+                        }
 
-                    foreach (var o in joinLessons)
-                    {
-                        var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
-                        new_lesson.CreateUser = _userCreate;
-                        new_lesson.Created = DateTime.Now;
-                        new_lesson.ChapterID = newChapter.ID;
-                        new_lesson.OriginID = o.ID;
-                        new_lesson.Order = currentLessonIndex++;
-                        await CloneLesson(new_lesson, _userCreate);
-                    }
-                    //add join chapter counter to course counter
-                    await _courseHelper.IncreaseCourseCounter(newChapter.CourseID, newChapter.TotalLessons, newChapter.TotalExams, newChapter.TotalPractices);
+                    //update new chapter counter
+                    newChapter.TotalExams += joinChap.TotalExams;
+                    newChapter.TotalLessons += joinChap.TotalLessons;
+                    newChapter.TotalPractices += joinChap.TotalPractices;
+                    _chapterService.Save(newChapter);
+
+                    //add join chapter counter to parent holder
+                    if (newChapter.ParentID == "0")
+                        await _courseHelper.IncreaseCourseCounter(newChapter.CourseID, newChapter.TotalLessons, newChapter.TotalExams, newChapter.TotalPractices);
+                    else
+                        await _courseHelper.IncreaseCourseChapterCounter(newChapter.ParentID, newChapter.TotalLessons, newChapter.TotalExams, newChapter.TotalPractices);
 
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -1026,30 +1046,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 else
                 {
                     //Append joinChapter's lessons to bottom of rootchap's lessons list
-                    if (joinLessons != null && joinLessons.ToList().Count > 0)
-                    {
+                    if (joinLessons != null && joinLessons.Count() > 0)
                         foreach (var lesson in joinLessons.ToList())
                         {
                             lesson.ChapterID = rootChap.ID;
                             lesson.Order = (int)currentLessonIndex++;
-                            _lessonService.CreateQuery().ReplaceOne(o => o.ID == lesson.ID, lesson);
+                            _lessonService.Save(lesson);
                         }
-                    }
                     //Append joinChapter's subchapter to bottom of rootchap's subchapter list
-                    var subChapters = _chapterService.GetSubChapters(joinChap.CourseID, joinChap.ParentID);
-                    foreach (var o in subChapters)
-                    {
-                        var clone_chap = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
-                        clone_chap.OriginID = o.ID;
-                        clone_chap.ParentID = rootChap.ID;
-                        clone_chap.Created = DateTime.Now;
-                        clone_chap.CreateUser = _userCreate;
-                        clone_chap.Order = currentChapIndex++;
-                        await CloneChapter(clone_chap, _userCreate, rootChap.CourseID);
-                    }
+                    if (joinSubChaps != null && joinSubChaps.Count() > 0)
+                        foreach (var subchap in joinSubChaps)
+                        {
+                            subchap.ParentID = rootChap.ParentID;
+                            subchap.Order = (int)currentChapIndex++;
+                            _chapterService.Save(subchap);
+                            //var clone_chap = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
+                            //clone_chap.OriginID = o.ID;
+                            //clone_chap.ParentID = rootChap.ID;
+                            //clone_chap.Created = DateTime.Now;
+                            //clone_chap.CreateUser = _userCreate;
+                            //clone_chap.Order = currentChapIndex++;
+                            //await CloneChapter(clone_chap, _userCreate, rootChap.CourseID);
+                        }
 
                     //add joinchap counter to root counter
-                    await _courseHelper.IncreaseCourseChapterCounter(rootChap.ID, joinChap.TotalLessons, joinChap.TotalExams, joinChap.TotalPractices);
+                    rootChap.TotalExams += joinChap.TotalExams;
+                    rootChap.TotalLessons += joinChap.TotalLessons;
+                    rootChap.TotalPractices += joinChap.TotalPractices;
+                    _chapterService.Save(rootChap);
+                    //await _courseHelper.IncreaseCourseChapterCounter(rootChap.ID, joinChap.TotalLessons, joinChap.TotalExams, joinChap.TotalPractices);
 
                     //Move joinChapter to bottom of parent chapter list to correct order
                     ChangeChapterPosition(joinChap, int.MaxValue);
@@ -1087,6 +1112,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             else
             {
                 var clone_chap = _cloneCourseChapterMapping.Clone(orgChapter, new CourseChapterEntity());
+                clone_chap.OriginID = orgChapter.ID;
                 clone_chap.Order = (int)_chapterService.GetSubChapters(orgChapter.CourseID, orgChapter.ParentID).Count();
                 var chapter = await CloneChapter(clone_chap, orgChapter.CreateUser, orgChapter.CourseID);
                 if (chapter.TotalLessons > 0)
@@ -1126,7 +1152,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (chapter.ParentID == "0")
                         await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0 - chapter.TotalLessons, 0 - chapter.TotalExams, 0 - chapter.TotalPractices);
                     else
-                        await _courseHelper.IncreaseCourseChapterCounter(chapter.ParentID, 0 - chapter.TotalLessons, chapter.TotalExams, chapter.TotalPractices);
+                        await _courseHelper.IncreaseCourseChapterCounter(chapter.ParentID, 0 - chapter.TotalLessons, 0 - chapter.TotalExams, 0 - chapter.TotalPractices);
 
                 //Remove chapter
                 await RemoveCourseChapter(chapter);
@@ -1167,7 +1193,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     new_lesson.ChapterID = item.ID;
                     new_lesson.CreateUser = _userCreate;
                     new_lesson.Created = DateTime.Now;
-                    new_lesson.IsAdmin = false;
                     new_lesson.OriginID = o.ID;
                     await CloneLesson(new_lesson, _userCreate);
                 }
@@ -1415,9 +1440,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (lesson != null)
                 {
                     if (lesson.ChapterID == "0")
-                        await _courseHelper.IncreaseCourseCounter(lesson.CourseID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+                        await _courseHelper.IncreaseCourseCounter(lesson.CourseID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
                     else
-                        await _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+                        await _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
                     await RemoveSingleLesson(lesson);
 
                     return new JsonResult(new Dictionary<string, object>

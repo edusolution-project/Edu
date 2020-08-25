@@ -87,9 +87,11 @@
                         <div class="d-flex btn-group" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
                              }>
                             @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
-                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="fas fa-clone"></i></a>
+
                             <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+
                             <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>

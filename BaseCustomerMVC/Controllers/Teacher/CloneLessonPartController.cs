@@ -202,6 +202,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var parentLesson = _lessonService.GetItemByID(item.ParentID);
             var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
 
+            var isPractice = parentLesson.IsPractice;
             if (parentLesson == null || currentCs == null)
             {
                 return new JsonResult(new Dictionary<string, object>
@@ -235,6 +236,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                     }
                 }
+
             }
             else // Update
             {
@@ -274,6 +276,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var lessonpart = item.ToEntity();
             _service.Save(lessonpart);
 
+
+
             item.ID = lessonpart.ID;
 
             switch (lessonpart.Type)
@@ -291,6 +295,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Created = lessonpart.Created,
                     };
                     _cloneQuestionService.Save(question);
+                    isPractice = true;
                     break;
                 case "VOCAB":
                     if (lessonpart.Description != null && lessonpart.Description.Length > 0)
@@ -331,7 +336,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         await SaveQuestionFromView(item, createduser, files, basis);
                     }
-
+                    isPractice = true;
                     break;
                 default:
                     if (RemovedQuestions != null & RemovedQuestions.Count > 0)
@@ -352,22 +357,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         await SaveQuestionFromView(item, createduser, files);
                     }
+                    isPractice = true;
                     break;
             }
 
-            calculateLessonPoint(item.ParentID);
-            if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && quizType.Contains(item.Type))
+            if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)
             {
-                if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 1)//only 1 quiz part (new part)
-                {
-                    parentLesson.IsPractice = true;
-                    _lessonService.Save(parentLesson);
+                parentLesson.IsPractice = isPractice;
+                _lessonService.Save(parentLesson);
 
-                    //updateLessonPractice 
-                    _ = _classHelper.ChangeLessonPracticeState(parentLesson);
-                }
+                //updateLessonPractice 
+                _ = _classHelper.ChangeLessonPracticeState(parentLesson);
             }
 
+
+            calculateLessonPoint(item.ParentID);
             IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
@@ -431,7 +435,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
-                            if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 0)//no quiz part (new part)
+                            var quizPartCount = _service.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
+                            if (quizPartCount == 0)//no quiz part
                             {
                                 parentLesson.IsPractice = false;
                                 _lessonService.Save(parentLesson);

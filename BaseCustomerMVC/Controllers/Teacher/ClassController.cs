@@ -645,7 +645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var total_students = _studentService.CountByClass(@class.ID);
             var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
             var total_lessons = _lessonService.CountClassLesson(@class.ID);
-            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ThenByDescending(t=> t.PracticePoint).ToList();
+            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ThenByDescending(t => t.PracticePoint).ToList();
             foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
             {
                 var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
@@ -1232,6 +1232,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                                 }
                                 _classSubjectService.Save(oSbj);
+                                examcount = oSbj.TotalExams;
+                                lessoncount = oSbj.TotalLessons;
+                                practicecount = oSbj.TotalPractices;
                                 newMember = new ClassMemberEntity
                                 {
                                     TeacherID = teacher.ID,
@@ -1246,6 +1249,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 oldData.Subjects.Add(nSbj.SubjectID);
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
+                            //add counter
+
                             oldData.TotalLessons += lessoncount;
                             oldData.TotalExams += examcount;
                             oldData.TotalPractices += practicecount;
@@ -1426,7 +1431,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 lessoncount = course.TotalLessons;
-                examcount = course.TotalLessons;
+                examcount = course.TotalExams;
                 practicecount = course.TotalPractices;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
@@ -1444,6 +1449,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.LearningOutcomes = course.LearningOutcomes;
                 nSbj.TotalLessons = course.TotalLessons;
                 nSbj.TotalPractices = course.TotalPractices;
+                nSbj.TotalExams = course.TotalExams;
 
                 var skill = _skillService.GetItemByID(nSbj.SkillID);
 

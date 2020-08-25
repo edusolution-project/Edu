@@ -435,10 +435,9 @@
         }));
         @if(!isLock)
         {
-        @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
-        @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-//@:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "tooltip", "data-placement": "top", "title": "Nhân bản", "onclick": "CloneLesson('" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
         rowData.append(leftPart);
         rowData.append(rightPart);
@@ -505,7 +504,7 @@
         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
         @if (!isLock)
         {
-            @:title_ePart.append($("<i>", { "class": "fas fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
+            @:title_ePart.append($("<i>", { "class": "far fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
             @:title_ePart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinChapterModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinChapter(this,'" + chapter.ID + "'); return false;" }));
             @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
         }
