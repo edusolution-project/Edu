@@ -330,8 +330,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
                         Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            //var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
-            var list = _studentService.GetAll().SortByDescending(t => t.ID);
+            var list = ClassID != null ? _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID) : _studentService.GetAll().SortByDescending(t => t.ID);
+            //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
 
@@ -342,7 +342,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                        (t.JoinedClasses==null?"Đang chờ vào lớp": string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
 
