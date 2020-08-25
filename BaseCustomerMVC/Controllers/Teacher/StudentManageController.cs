@@ -160,7 +160,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 student.IsActive = true;
                 student.UserCreate = teacher.ID;
                 student.Centers = new List<string>(){centerID};
-                //student.Centers.Add(centerID);
                 _studentService.CreateQuery().InsertOne(student);
                 Status = true;
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -198,34 +197,57 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-        [Obsolete]
+        //[Obsolete]
         private bool ExistEmail(string email)
         {
             var _currentData = _studentService.CreateQuery().Find(o => o.Email == email);
-            if (_currentData.Count() > 0 || email=="")
+            if (_currentData.Count() > 0)
             {
                 return true;
             }
             return false;
         }
 
-        public async Task<JsonResult> RemoveStudent(string ClassID, string StudentID)
+        public async Task<JsonResult> RemoveStudent(string StudentID,string JoinedClasses=null, string ClassID=null)
         {
-            if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+            var Error = "";
+            try
             {
-                return Json(new
+                //if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+                if (string.IsNullOrEmpty(StudentID))
                 {
-                    error = "Thông tin không chính xác"
-                });
+                    return Json(new
+                    {
+                        error = "Thông tin không chính xác"
+                    });
+                }
+                //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
+                //var student = _studentService.GetItemByID(StudentID);
+                var Classes = _studentService.GetItemByID(StudentID).JoinedClasses;
+                //Classed.
+                if (Classes != null)
+                    foreach (var @class in Classes)
+                    {
+                        if (_studentService.LeaveClass(@class, StudentID) > 0)
+                        {
+                            //remove history, exam, exam detail, progress...
+                            await _learningHistoryService.RemoveClassStudentHistory(@class, StudentID);
+                            await _examService.RemoveClassStudentExam(@class, StudentID);
+                        }
+                    }
+                _accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
+                _studentService.CreateQuery().DeleteMany(o => o.ID == StudentID);
             }
-            //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
-            if (_studentService.LeaveClass(ClassID, StudentID) > 0)
+            catch (Exception ex)
             {
-                //remove history, exam, exam detail, progress...
-                await _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
-                await _examService.RemoveClassStudentExam(ClassID, StudentID);
+                Error = ex.Message;
             }
-            return Json(new { msg = "đã xóa học viên" });
+            var Datarespone = new Dictionary<string, object>
+            {
+                { "msg","đã xóa học viên" },
+                { "error",Error}
+            };
+            return Json(Datarespone);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
