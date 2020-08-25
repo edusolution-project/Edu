@@ -25,6 +25,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
+        private readonly ClassHelper _classHelper;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
@@ -53,6 +54,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SubjectService subjectService,
             TeacherService teacherService,
             ClassService classService,
+            ClassHelper classHelper,
             ClassSubjectService classSubjectService,
             CourseService courseService,
             ChapterService chapterService,
@@ -74,6 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _courseService = courseService;
             _classSubjectService = classSubjectService;
             _classService = classService;
+            _classHelper = classHelper;
             _chapterService = chapterService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
@@ -357,8 +360,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 1)//only 1 quiz part (new part)
                 {
-                    //increase 
-                    _chapterService.IncreasePracticeCount(parentLesson.ChapterID, 1);
+                    parentLesson.IsPractice = true;
+                    _lessonService.Save(parentLesson);
+
+                    //updateLessonPractice 
+                    _ = _classHelper.ChangeLessonPracticeState(parentLesson);
                 }
             }
 
@@ -427,8 +433,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             if (_service.CreateQuery().CountDocuments(t => t.ParentID == item.ParentID && quizType.Contains(item.Type)) == 0)//no quiz part (new part)
                             {
-                                //increase 
-                                _chapterService.IncreasePracticeCount(parentLesson.ChapterID, -1);
+                                parentLesson.IsPractice = false;
+                                _lessonService.Save(parentLesson);
+                                //decrease Practice
+                                _ = _classHelper.ChangeLessonPracticeState(parentLesson);
                             }
                         }
                     }

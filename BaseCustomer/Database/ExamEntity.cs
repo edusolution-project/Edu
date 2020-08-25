@@ -117,7 +117,7 @@ namespace BaseCustomerEntity.Database
             }
             return count <= 0;
         }
-        
+
         public Task UpdateStatus(ExamEntity exam)
         {
             exam.Status = true;
@@ -126,7 +126,7 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         {
             exam.Status = true;
             point = 0;
@@ -234,14 +234,15 @@ namespace BaseCustomerEntity.Database
                     examDetail.RealAnswerID = _correctanswer.ID;
                     examDetail.RealAnswerValue = _correctanswer.Content;
                 }
-
-                examDetail.Updated = DateTime.Now;
+                if (updateTime)
+                    examDetail.Updated = DateTime.Now;
                 _examDetailService.CreateOrUpdate(examDetail);
             }
 
             exam.QuestionsPass = pass;
             exam.Point = point;
-            exam.Updated = DateTime.Now;
+            if (updateTime)
+                exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
@@ -275,7 +276,7 @@ namespace BaseCustomerEntity.Database
         }
 
         //Hoàn thành bài tự luận
-        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         {
             var oldEx = GetItemByID(exam.ID);
             exam.Status = true;
@@ -287,7 +288,8 @@ namespace BaseCustomerEntity.Database
 
             exam.Point = point;
             exam.LastPoint = oldEx != null ? oldEx.Point : 0;
-            exam.Updated = DateTime.Now;
+            if (updateTime)
+                exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
 

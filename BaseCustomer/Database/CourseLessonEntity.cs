@@ -92,7 +92,7 @@ namespace BaseCustomerEntity.Database
         {
             if (!string.IsNullOrEmpty(ChapterID) && ChapterID != "0")
                 return GetChapterLesson(ChapterID);
-            return Collection.Find(t => t.CourseID == CourseID && t.ChapterID == "0").ToEnumerable();
+            return Collection.Find(t => t.CourseID == CourseID && t.ChapterID == "0").SortBy(t => t.Order).ToEnumerable();
         }
 
         public void UpdateLessonPoint(string ID, double point)

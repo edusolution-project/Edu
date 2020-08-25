@@ -1108,6 +1108,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Subjects = new List<string>();
                 item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = cm.FullName } };
                 item.TotalLessons = 0;
+                item.TotalPractices = 0;
+                item.TotalExams = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
                 item.EndDate = item.EndDate.ToUniversalTime();
@@ -1140,7 +1142,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Members.Add(newMember);
                         item.TotalLessons += lessoncount;
                         item.TotalExams += examcount;
-                        item.TotalPractice += practicecount;
+                        item.TotalPractices += practicecount;
                         //var skill = _skillService.GetItemByID(csubject.SkillID);
                         //if (skill == null) continue;
                         //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1185,6 +1187,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
+                oldData.TotalPractices = 0;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1221,7 +1224,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
 
-                                if (oSbj.TeacherID != nSbj.TeacherID) //chage teacher
+                                if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
                                 {
                                     oSbj.TeacherID = nSbj.TeacherID;
                                     var skill = _skillService.GetItemByID(oSbj.SkillID);
@@ -1245,7 +1248,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 oldData.Members.Add(newMember);
                             oldData.TotalLessons += lessoncount;
                             oldData.TotalExams += examcount;
-                            oldData.TotalPractice += practicecount;
+                            oldData.TotalPractices += practicecount;
                         }
                     }
                 }
@@ -1273,7 +1276,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             oldData.Members.Add(newMember);
                         oldData.TotalLessons += lessoncount;
                         oldData.TotalExams += examcount;
-                        oldData.TotalPractice += practicecount;
+                        oldData.TotalPractices += practicecount;
                     }
                 }
 
@@ -1361,7 +1364,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         newData.Members.Add(newMember);
                     newData.TotalLessons += lessoncount;
                     newData.TotalExams += examcount;
-                    newData.TotalPractice += practicecount;
+                    newData.TotalPractices += practicecount;
                     //var skill = _skillService.GetItemByID(csubject.SkillID);
                     //if (skill == null) continue;
                     //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);

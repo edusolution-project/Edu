@@ -63,8 +63,8 @@ namespace BaseCustomerEntity.Database
         public long TotalLessons { get; set; }
         [JsonProperty("TotalExams")]
         public long TotalExams { get; set; }
-        [JsonProperty("TotalPractice")]
-        public long TotalPractice { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
         [JsonProperty("OriginID")]

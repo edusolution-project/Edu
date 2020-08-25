@@ -130,5 +130,47 @@ namespace BaseCustomerMVC.Globals
             //}
             return lessoncounter;
         }
+
+        public async Task IncreaseCourseChapterCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
+        {
+            var r = await _courseChapterService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseChapterEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
+            if (r.ModifiedCount > 0)
+            {
+                if (listid == null)
+                    listid = new List<string> { ID };
+                else
+                    listid.Add(ID);
+                var current = _courseChapterService.GetItemByID(ID);
+                if (current != null)
+                {
+                    if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
+                    {
+                        if (listid.IndexOf(current.ParentID) < 0)//prevent circular
+                            _ = IncreaseCourseChapterCounter(current.ParentID, lesInc, examInc, pracInc, listid);
+                    }
+                    else
+                        _ = IncreaseCourseCounter(current.CourseID, lesInc, examInc, pracInc);
+                }
+            }
+        }
+
+        public async Task IncreaseCourseCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
+        {
+            var r = await _courseService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
+        }
+
+        internal async Task ChangeLessonPracticeState(CourseLessonEntity lesson)
+        {
+            if (lesson.ChapterID != "0")
+                await IncreaseCourseChapterCounter(lesson.ChapterID, 0, 0, lesson.IsPractice ? 1 : -1);
+            else
+                await IncreaseCourseCounter(lesson.CourseID, 0, 0, lesson.IsPractice ? 1 : -1);
+        }
     }
 }

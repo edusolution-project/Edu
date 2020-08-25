@@ -35,6 +35,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartAnswerService _answerService;
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
+        private readonly CourseHelper _courseHelper;
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
@@ -52,7 +53,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
             FileProcess fileProcess,
-            VocabularyService vocabularyService
+            VocabularyService vocabularyService,
+            CourseHelper courseHelper
             )
         {
             //_gradeService = gradeservice;
@@ -69,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _answerService = answerService;
             _fileProcess = fileProcess;
             _vocabularyService = vocabularyService;
+            _courseHelper = courseHelper;
         }
 
         [HttpPost]
@@ -169,6 +172,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var parentLesson = _lessonService.GetItemByID(item.ParentID);
+                var isPractice = parentLesson.IsPractice;
                 var createduser = User.Claims.GetClaimByType("UserID").Value;
                 if (parentLesson != null)
                 {
@@ -254,7 +258,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     switch (lessonpart.Type)
                     {
                         case "ESSAY":
-
                             _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
                             var question = new LessonPartQuestionEntity
                             {
@@ -267,6 +270,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Created = lessonpart.Created,
                             };
                             _questionService.Save(question);
+                            parentLesson.IsPractice = true;
                             break;
                         case "VOCAB":
                             if (lessonpart.Description != null && lessonpart.Description.Length > 0)
@@ -308,9 +312,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 await SaveQuestionFromView(item, createduser, files, basis);
                             }
-
+                            parentLesson.IsPractice = true;
                             break;
-                        default:
+                        default://QUIZ1,3,4
                             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
                             {
                                 _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
@@ -329,8 +333,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 await SaveQuestionFromView(item, createduser, files);
                             }
+                            parentLesson.IsPractice = true;
                             break;
                     }
+
+                    if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
+                        await _courseHelper.ChangeLessonPracticeState(parentLesson);
                     calculateLessonPoint(item.ParentID);
                     IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
@@ -356,9 +364,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             catch (Exception e)
             {
                 return new JsonResult(new Dictionary<string, object>
-                            {
-                                { "Data", null },
-                                {"Error", e.Message }
+                {
+                    { "Data", null },
+                    {"Error", e.Message }
                 });
             }
         }
@@ -499,7 +507,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var item = _lessonPartService.GetItemByID(ID);
                 if (item == null) return;
-
                 var questions = _questionService.CreateQuery().Find(o => o.ParentID == ID).ToList();
                 for (int i = 0; questions != null && i < questions.Count; i++)
                     await RemoveQuestion(questions[i].ID);
@@ -1018,17 +1025,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var point = 0.0;
             var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
-            foreach (var part in parts)
-            {
-                if (part.Type == "ESSAY")
+            if (parts != null && parts.Count() > 0)
+                foreach (var part in parts)
                 {
-                    point += part.Point;
+                    if (part.Type == "ESSAY")
+                    {
+                        point += part.Point;
+                    }
+                    else
+                    {
+                        point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                    }
                 }
-                else
-                {
-                    point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
-                }
-            }
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }

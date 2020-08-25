@@ -27,7 +27,6 @@ namespace BaseCustomerMVC.Globals
 
         public LessonHelper(
             LessonService lessonService,
-
             LessonPartService lessonPartService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonPartAnswerService lessonPartAnswerService,

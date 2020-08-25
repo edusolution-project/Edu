@@ -284,8 +284,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
 
-
-
         [Obsolete]
         [HttpPost]
         public JsonResult GetCourse(string GradeID, string SubjectID)

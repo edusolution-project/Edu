@@ -14,7 +14,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    public class LessonController : TeacherController
+    public class LessonController : TeacherController //LESSON IN CLASS
     {
         private readonly GradeService _gradeService;
         private readonly SubjectService _subjectService;
@@ -22,6 +22,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
+        private readonly CourseChapterService _courseChapterService;
+
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -855,6 +857,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return result;
         }
+
+
+        public bool ChangePracticeState(string LessonID, bool isPractice)
+        {
+            return true;
+        }
+
+
         #endregion
     }
 }
