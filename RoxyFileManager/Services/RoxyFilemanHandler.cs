@@ -16,6 +16,7 @@ namespace FileManagerCore.Services
 {
     public class RoxyFilemanHandler : Interfaces.IRoxyFilemanHandler
     {
+        const string EDUSO_MANAGERFILE = "EDUSO_MANAGERFILE";
         private readonly FolderManagerService _folderManagerService;
 
         private readonly FileManagerService _fileManagerService;
@@ -911,14 +912,6 @@ namespace FileManagerCore.Services
                     fileId = _googleDriveService.UploadFileStatic(filename, _googleDriveService.GetMimeType(dest), stream, folderId);
                     stream.Close();
                 }
-                //using (var stream = new FileStream(dest, FileMode.Create))
-                //{
-                //    file.CopyTo(stream);
-
-                //    stream.Close();
-                //}
-                //DeleteFile(dest);
-
                 response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
 
                 _fileManagerService.Collection.InsertOne(new FileManagerEntity()
@@ -970,7 +963,7 @@ namespace FileManagerCore.Services
             string root = _folderCenterService.GetRoot();
             if (string.IsNullOrEmpty(root))
             {
-                root = _googleDriveService.CreateDirectory("EDUSO_MANAGERFILE", "Quản lý file của hệ thống").Id;
+                root = _googleDriveService.CreateDirectory(EDUSO_MANAGERFILE, "Quản lý file của hệ thống").Id;
                 _folderCenterService.CreateRoot(root);
             }
             return root;
@@ -978,7 +971,7 @@ namespace FileManagerCore.Services
 
         private string CreateFolderUser(string centerFolder,string user)
         {
-            string folderId = _googleDriveService.CreateDirectory(user, "User Folder " + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
+            string folderId = _googleDriveService.CreateDirectory(user, "User Folder create" + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
             _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
             {
                 Center = centerFolder,
