@@ -148,5 +148,6 @@ namespace BaseCustomerEntity.Database
         public double TotalPoint { get; set; }
         public long ExamDone { get; set; }
         public int Count { get; set; }
+        public double PracticePoint { get; set; }
     }
 }

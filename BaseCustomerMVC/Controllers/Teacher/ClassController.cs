@@ -645,7 +645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var total_students = _studentService.CountByClass(@class.ID);
             var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
             var total_lessons = _lessonService.CountClassLesson(@class.ID);
-            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ToList();
+            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ThenByDescending(t=> t.PracticePoint).ToList();
             foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
             {
                 var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()

@@ -190,7 +190,8 @@ namespace BaseCustomerEntity.Database
                 StudentID = t.StudentID,
                 AvgPoint = t.AvgPoint,
                 ExamDone = t.ExamDone,
-                TotalPoint = t.TotalPoint
+                TotalPoint = t.TotalPoint,
+                PracticePoint = t.PracticePoint
             }).ToEnumerable();
         }
 
