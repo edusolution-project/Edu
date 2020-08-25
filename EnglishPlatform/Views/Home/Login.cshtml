@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>EDUSO Login</title>
     <link href="~/css/bootstrap.4.3.1.min.css" rel="stylesheet" />
-    @*<link href="~/css/be-vietnam-font.css" rel="stylesheet" />*@
+    <link href="~/css/be-vietnam-font.css" rel="stylesheet" />
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
     <script src="~/js/vue@2.6.0.js"></script>
     <script src="~/js/axios.min.js"></script>
@@ -188,7 +188,7 @@
                     .then(response => {
                         debugger
                         if (response.data.Status) {
-                            alert("Vui lòng check mail để xác nhận thay đổi mật khẩu!")
+                            alert("Vui lòng kiểm tra email để xác nhận thay đổi mật khẩu!")
                             window.location.href= response.data.Url
                         }
                         else {

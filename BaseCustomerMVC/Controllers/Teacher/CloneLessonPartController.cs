@@ -744,13 +744,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 questionList.Add(Question);
-                var clearnode = HtmlNode.CreateNode("<input></input>");
-                clearnode.AddClass("fillquiz");
-                inputNode.Remove();
+
+                inputNode.Attributes.Remove("contenteditable");
+                inputNode.Attributes.Remove("readonly");
+                inputNode.Attributes.Remove("title");
+                inputNode.Attributes.Remove("value");
+                inputNode.Attributes.Remove("dsp");
+                inputNode.Attributes.Remove("ans");
+                inputNode.Attributes.Remove("placeholder");
+                inputNode.Attributes.Remove("size");
+
                 quiz.Attributes.Remove("contenteditable");
                 quiz.Attributes.Remove("readonly");
                 quiz.Attributes.Remove("title");
-                quiz.ChildNodes.Add(clearnode);
+                //quiz.ChildNodes.Add(clearnode);
             }
 
             var removeNodes = doc.DocumentNode.SelectNodes(".//fillquiz[not(input)]");

@@ -661,11 +661,19 @@ namespace BaseCustomerMVC.Controllers.Student
         //    return new JsonResult(response);
         //}
 
-        public IActionResult Index(DefaultModel model)
+        public IActionResult Index(DefaultModel model, string basis)
         {
             ViewBag.Subjects = _subjectService.GetAll().ToList();
             ViewBag.Grades = _gradeService.GetAll().ToList();
             ViewBag.Model = model;
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                {
+                    ViewBag.Center = center;
+                }
+            }
             return View();
         }
 
@@ -691,40 +699,6 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Grades = _gradeService.GetAll().ToList();
             return View();
         }
-        //public JsonResult GetMyCourse(bool myCourse,string basis)
-        //{
-        //    if (myCourse)
-        //    {
-        //        string userID = User.Claims.GetClaimByType("UserID").Value;
-        //        var student = _studentService.GetItemByID(userID);
-        //        var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.Type == "san-pham").ToList();
-        //        var DataResponse = new Dictionary<string, object>()
-        //        {
-        //            {"Data",data }
-        //        };
-        //        return Json(DataResponse);
-        //    }
-        //    else
-        //    {
-        //        var centerID = "";
-        //        if (!string.IsNullOrEmpty(basis))
-        //        {
-        //            var center = _centerService.GetItemByCode(basis);
-        //            if (center != null)
-        //            {
-        //                ViewBag.Center = center;
-        //                centerID = center.ID;
-        //            }
-        //        }
-
-        //        var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.IsActive == true && o.Type == "san-pham").ToList();
-        //        var DataResponse = new Dictionary<string, object>()
-        //        {
-        //            {"Data",data }
-        //        };
-        //        return Json(DataResponse);
-        //    }
-        //}
 
         //public JsonResult GetListProduct()
         //{

@@ -18,12 +18,8 @@ using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
-using System.Diagnostics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Microsoft.Extensions.Configuration;
 
 namespace EnglishPlatform.Controllers

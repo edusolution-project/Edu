@@ -30,7 +30,7 @@ namespace BaseCustomerMVC.Controllers.Student
             CalendarLogService calendarLogService,
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
-             //ClassStudentService classStudentService,
+            //ClassStudentService classStudentService,
             ClassService classService,
             TeacherService teacherService,
             StudentService studentService,
@@ -56,12 +56,12 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model)
         {
-            if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(new { code = 540}));
+            if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(new { code = 540 }));
             var userId = User?.FindFirst("UserID").Value;
             var currentStudent = _studentService.GetItemByID(userId);
             if (currentStudent == null || currentStudent.JoinedClasses == null) return Task.FromResult(new JsonResult(new { }));
             var data = _calendarHelper.GetListEvent(model.Start, model.End, currentStudent.JoinedClasses.ToList(), userId);
-            if(data == null) return Task.FromResult(new JsonResult(new { }));
+            if (data == null) return Task.FromResult(new JsonResult(new { }));
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]
@@ -91,7 +91,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 // check validate
             }
             var data = _calendarHelper.CreateEvent(item).Result;
-            if(data == null)
+            if (data == null)
             {
                 return new JsonResult(new
                 {
@@ -101,8 +101,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
 
-            return new JsonResult(new {
-                code =201,
+            return new JsonResult(new
+            {
+                code = 201,
                 msg = "tạo thành công",
                 data = data
             });

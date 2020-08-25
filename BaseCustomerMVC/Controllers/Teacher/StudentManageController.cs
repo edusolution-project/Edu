@@ -17,7 +17,6 @@ using Microsoft.Extensions.Configuration;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Microsoft.AspNetCore.Razor.Language;
 using OfficeOpenXml.ConditionalFormatting;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -69,7 +68,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
-
             )
         {
             _accountService = accountService;
@@ -152,14 +150,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var centerID = _centerService.GetItemByCode(center).ID;
             var Status = false;
 
-            if (student.FullName == "" ||student.Email=="") return null;
+            if (student.FullName == "" || student.Email == "") return null;
 
             if (!ExistEmail(student.Email))
             {
                 student.CreateDate = DateTime.Now;
                 student.IsActive = true;
                 student.UserCreate = teacher.ID;
-                student.Centers = new List<string>(){centerID};
+                student.Centers = new List<string>() { centerID };
                 //student.Centers.Add(centerID);
                 _studentService.CreateQuery().InsertOne(student);
                 Status = true;
@@ -202,7 +200,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private bool ExistEmail(string email)
         {
             var _currentData = _studentService.CreateQuery().Find(o => o.Email == email);
-            if (_currentData.Count() > 0 || email=="")
+            if (_currentData.Count() > 0 || email == "")
             {
                 return true;
             }
@@ -320,7 +318,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                        (t.JoinedClasses==null?"Đang chờ vào lớp": string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                        (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
 
@@ -350,7 +348,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return Json(_studentService.Search(term, 100));
         }
 
-                    #region Batch Import
+        #region Batch Import
         [HttpPost]
         [Obsolete]
         public async Task<JsonResult> ImportStudent(string basis, string ClassID)
@@ -479,7 +477,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                 }
                                 counter++;
-
                             }
                         }
                     }
@@ -523,7 +520,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
-                    #endregion
+        #endregion
 
         private bool HasRole(string userid, string center, string role)
         {

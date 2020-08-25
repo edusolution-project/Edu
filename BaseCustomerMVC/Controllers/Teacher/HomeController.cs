@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -45,19 +46,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(string basis)
         {
-            //ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
                 ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
-
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
-            }
+            ViewBag.Center = _centerService.GetItemByCode(basis);
             try
             {
                 _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
@@ -69,22 +62,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public IActionResult Profile(string basis)
+        public IActionResult Profile()
         {
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
-            if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
             if (teacher == null)
                 return Redirect("/login");
+            else
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
 
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(_teacherid, center.ID, "head-teacher");
-            }
             var account = _teacherService.GetItemByID(_teacherid);
             if (account == null)
                 return Redirect("/login");
@@ -340,6 +326,4 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //            });
         //}
     }
-
-
 }

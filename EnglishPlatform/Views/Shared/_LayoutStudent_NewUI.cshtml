@@ -26,9 +26,6 @@
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
 
-    <script src="~/mdbootstrap/js/bootstrap.js"></script>
-
-
     <script type="text/javascript">
         const g_CurrentUser = {
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
@@ -40,7 +37,7 @@
     </script>
 </head>
 <body>
-
+   
     <style>
         ::-webkit-scrollbar {
             width: 5px; /* for vertical scrollbars */
@@ -95,7 +92,7 @@
             }
         }
     </style>
-    <main id="main">
+    <main id="main">        
         @await Html.PartialAsync("_sideBarStudentNewUI")
         @RenderBody()
         <aside class="sidebar" id="sidebar_right">

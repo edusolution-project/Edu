@@ -293,21 +293,22 @@ namespace BaseCustomerEntity.Database
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
 
+            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
+
             var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
             Save(exam);
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
-            )
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
             {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress, pointchange);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress, pointchange);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress, pointchange);
                 Task.WhenAll(cttask, cstask, ctask);
             }
             else
             {
-                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress, pointchange);
                 Task.WhenAll(cttask);
             }
 

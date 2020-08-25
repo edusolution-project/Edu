@@ -338,7 +338,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return new JsonResult("Access Denied");
             }
-            if (!_examService.IsOverTime(item.ExamID))
+            if (!_examService.IsOver(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
 
@@ -451,7 +451,7 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public async Task<JsonResult> RemoveDetail(ExamDetailEntity item)
         {
-            if (!_examService.IsOverTime(item.ExamID))
+            if (!_examService.IsOver(item.ExamID))
             {
                 var exam = _examService.GetItemByID(item.ExamID);
                 //TODO: recheck history for doing exam
@@ -478,7 +478,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult("Access Deny");
+                return new JsonResult("Access Denied");
             }
         }
 
@@ -496,7 +496,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (exam.Status)
             {
                 //return new JsonResult(new { Point = exam.Point, MaxPoint = exam.MaxPoint, ID = exam.ID, Number = exam.Number, Limit = 0 });
-                return new JsonResult("Access deny");
+                return new JsonResult("Access Denied");
             }
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
@@ -504,7 +504,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(new
             {
                 Point = point,
-                MaxPoint = lesson.Point,
+                MaxPoint = exam.MaxPoint,
                 ID = exam.ID,
                 Number = exam.Number,
                 Limit = lesson.Limit,

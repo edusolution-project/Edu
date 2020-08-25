@@ -452,7 +452,7 @@ namespace EnglishPlatform.Controllers
         //    };
         //    var headteacherRole = new RoleEntity()
         //    {
-        //        Name = "Trưởng bộ môn",
+        //        Name = "GV Quản lý",
         //        Code = "head-teacher",
         //        Type = ACCOUNT_TYPE.TEACHER,
         //        CreateDate = DateTime.Now,
