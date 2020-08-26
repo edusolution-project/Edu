@@ -180,7 +180,6 @@
                     }).catch(e => { })
             },
             getData() {
-                debugger
                 let _that = this
                     let _form = new FormData()
                     _form.append('PageSize', _that.view)
@@ -192,7 +191,6 @@
 
                     axios.post(_url, _form)
                         .then(response => {
-                            debugger
                             _that.items = response.data.Data;
                             this.items = _that.items
                             this.totalRec = response.data.Model.totalRecord
