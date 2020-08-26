@@ -324,15 +324,19 @@ namespace BaseCustomerMVC.Controllers.Student
             if (exam == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
-            if (!exam.Status)
+            var lesson = _lessonService.GetItemByID(exam.LessonID);
+            if (lesson == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             if (exam.StudentID != UserID && exam.TeacherID != UserID)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
-            var lesson = _lessonService.GetItemByID(exam.LessonID);
-            if (lesson == null)
-                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+            if (!exam.Status)//Check review khi chưa kết thúc bài kiểm tra => hoàn thành bài
+            {
+                _examService.CompleteNoEssay(exam, _lessonService.GetItemByID(exam.LessonID), out _);
+                //return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+                exam = _examService.GetItemByID(exam.ID);
+            }
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 

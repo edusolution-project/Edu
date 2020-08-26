@@ -113,7 +113,21 @@
             <table id="ed_table" class="table">
                 <thead>
                     <tr>
-                        <th v-for="(field,k) in fields">{{field.label}}</th>
+                        <th rowspan="2">#</th>
+                        <th rowspan="2">Họ tên</th>
+                        <th rowspan="2">Tiến độ</th>
+                        <th rowspan="2">Lần học cuối</th>
+                        <th colspan="3">Luyện tập</th>
+                        <th colspan="3">Kiểm tra</th>
+                        <th rowspan="2">Xếp hạng</th>
+                    </tr>
+                    <tr>
+                        <th>Thực hiện</th>
+                        <th>TB</th>
+                        <th>TK</th>
+                        <th>Thực hiện</th>
+                        <th>TB</th>
+                        <th>TK</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,9 +136,13 @@
                         <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                         <td>{{formatTime(item.LastDate)}}</td>
-                        @*<td class="text-danger" v-bind:class="{good : (item.AvgPracticePoint > 50)}">{{item.AvgPracticePoint > 0 ?  item.AvgPracticePoint.toFixed(2) : '0.00'}}%</td>*@
+                        <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td>
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -690,10 +708,10 @@
                         key: 'last_update',
                         label: 'Lần học cuối'
                     },
-                    //{
-                    //    key: 'practice',
-                    //    label: 'Điểm luyện tập'
-                    //},
+                    {
+                        key: 'practice',
+                        label: 'Điểm luyện tập'
+                    },
                     {
                         key: 'score',
                         label: 'Điểm kiểm tra'

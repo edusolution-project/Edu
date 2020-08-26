@@ -27,17 +27,24 @@ namespace BaseCustomerEntity.Database
         public DateTime LastDate { get; set; }
         [JsonProperty("ExamDone")]
         public long ExamDone { get; set; }
-
+        [JsonProperty("TotalExams")]
+        public long TotalExams { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("ExamResult")]
+        public double ExamResult { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
         [JsonProperty("PracticePoint")]
-        public double PracticePoint { get; internal set; }
+        public double PracticePoint { get; set; }
         [JsonProperty("PracticeDone")]
         public long PracticeDone { get; set; }
         [JsonProperty("PracticeAvgPoint")]
-        public double PracticeAvgPoint { get; internal set; }
+        public double PracticeAvgPoint { get; set; }
+        [JsonProperty("PracticeResult")]
+        public double PracticeResult { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>

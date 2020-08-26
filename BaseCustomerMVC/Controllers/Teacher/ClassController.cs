@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
 using System.Drawing;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -643,9 +644,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = new List<StudentSummaryViewModel>();
 
             var total_students = _studentService.CountByClass(@class.ID);
-            var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
-            var total_lessons = _lessonService.CountClassLesson(@class.ID);
-            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ThenByDescending(t => t.PracticePoint).ToList();
+
+            //var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
+            //var total_lessons = _lessonService.CountClassLesson(@class.ID);
+            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ThenByDescending(t => t.PracticePoint).ThenByDescending(t => t.Count).ToList();
             foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
             {
                 var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
@@ -653,7 +655,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         ClassID = @class.ID,
                         StudentID = student.ID,
-                        TotalLessons = total_lessons,
+                        TotalLessons = @class.TotalLessons,
                     }, new StudentSummaryViewModel()
                     {
                         ClassName = @class.Name,
@@ -662,10 +664,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
 
                 summary.FullName = student.FullName;
-                if (results != null && (results.FindIndex(t => t.StudentID == student.ID) >= 0))
-                    summary.Rank = results.FindIndex(t => t.TotalPoint == summary.TotalPoint) + 1;
-                summary.AvgPoint = examCount > 0 ? summary.TotalPoint / examCount : 0;
-
+                //if (results != null && (results.FindIndex(t => t.StudentID == student.ID) >= 0))
+                summary.Rank = results.FindIndex(t => t.StudentID == summary.StudentID) + 1;
+                summary.ExamResult = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+                summary.TotalExams = @class.TotalExams;
+                summary.TotalPractices = @class.TotalPractices;
+                summary.PracticeResult = @class.TotalPractices > 0 ? summary.PracticePoint / @class.TotalPractices : 0;
                 data.Add(summary);
             }
             var response = new Dictionary<string, object>
@@ -1345,7 +1349,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _service.CreateQuery().InsertOne(newData);
 
-            var classSubjects = _classSubjectService.CreateQuery().Find(o => o.ClassID == oldData.ID).ToList();
+            var classSubjects = _classSubjectService.GetByClassID(oldData.ID);
             if (classSubjects != null && classSubjects.Count > 0)
             {
                 foreach (var csubject in classSubjects)
@@ -1456,7 +1460,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByID(@class.Center);
 
                 _classSubjectService.Save(nSbj);
-                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+                if (notify)
+                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

@@ -34,11 +34,11 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
         [JsonProperty("PracticePoint")]
-        public double PracticePoint { get; internal set; }
+        public double PracticePoint { get; set; }
         [JsonProperty("PracticeDone")]
         public long PracticeDone { get; set; }
         [JsonProperty("PracticeAvgPoint")]
-        public double PracticeAvgPoint { get; internal set; }
+        public double PracticeAvgPoint { get; set; }
     }
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
@@ -191,7 +191,8 @@ namespace BaseCustomerEntity.Database
                 AvgPoint = t.AvgPoint,
                 ExamDone = t.ExamDone,
                 TotalPoint = t.TotalPoint,
-                PracticePoint = t.PracticePoint
+                PracticePoint = t.PracticePoint,
+                Count = t.Completed
             }).ToEnumerable();
         }
 
