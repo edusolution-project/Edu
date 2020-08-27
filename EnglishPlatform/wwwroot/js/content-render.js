@@ -968,7 +968,7 @@ var Lesson = (function () {
         else
             //Temp fix 20200823
             tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane  w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+        //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane  w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
 
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
@@ -3907,6 +3907,7 @@ var Lesson = (function () {
             });
             $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(i) + 1));
         }
+        $(cloneQuestion).find("[name^='" + question + "ID']").val("");
     }
 
     window.LessonInstance = {} || Lesson;
