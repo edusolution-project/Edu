@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Startup = FileManagerCore.Globals.Startup;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -378,7 +379,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Extension = listFileUpload[i].Extends,
                                 Name = listFileUpload[i].Path,
                                 OriginalName = listFileUpload[i].Path,
-                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFileUpload[i].Path)
+                                Path = Startup.GetGoogleApi().CreateLinkViewFile(listFileUpload[i].Path)
                             };
                             listMedia.Add(media);
                         }

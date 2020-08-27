@@ -21,7 +21,6 @@ namespace FileManagerCore.Services
         private readonly FileManagerService _fileManagerService;
 
         private readonly FolderCenterService _folderCenterService;
-        private readonly IGoogleDriveApiService _googleDriveService;
         private readonly GConfig _gConfig;
         private readonly IHostingEnvironment _environment;
         private Dictionary<string, string> _lang { get; set; }
@@ -33,7 +32,6 @@ namespace FileManagerCore.Services
             _folderManagerService = folderManagerService;
             _fileManagerService = fileManagerService;
             _folderCenterService = folderCenterService;
-            _googleDriveService = Startup.GoogleDrive;
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {
@@ -908,7 +906,7 @@ namespace FileManagerCore.Services
                 using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
                 {
                     file.CopyTo(stream);
-                    fileId = _googleDriveService.UploadFileStatic(filename, _googleDriveService.GetMimeType(dest), stream, folderId);
+                    fileId = Startup.GetGoogleApi().UploadFileStatic(filename, Startup.GetGoogleApi().GetMimeType(dest), stream, folderId);
                     stream.Close();
                 }
                 //using (var stream = new FileStream(dest, FileMode.Create))
@@ -939,7 +937,7 @@ namespace FileManagerCore.Services
             {
                 if (_fileManagerService.RemoveFile(center, user, fileId))
                 {
-                    _googleDriveService.Delete(fileId);
+                    Startup.GetGoogleApi().Delete(fileId);
                     return true;
                 }
                 return false;
@@ -970,7 +968,7 @@ namespace FileManagerCore.Services
             string root = _folderCenterService.GetRoot();
             if (string.IsNullOrEmpty(root))
             {
-                root = _googleDriveService.CreateDirectory("EDUSO_MANAGERFILE", "Quản lý file của hệ thống").Id;
+                root = Startup.GetGoogleApi().CreateDirectory("EDUSO_MANAGERFILE", "Quản lý file của hệ thống").Id;
                 _folderCenterService.CreateRoot(root);
             }
             return root;
@@ -978,7 +976,7 @@ namespace FileManagerCore.Services
 
         private string CreateFolderUser(string centerFolder,string user)
         {
-            string folderId = _googleDriveService.CreateDirectory(user, "User Folder " + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
+            string folderId = Startup.GetGoogleApi().CreateDirectory(user, "User Folder " + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
             _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
             {
                 Center = centerFolder,
@@ -992,7 +990,7 @@ namespace FileManagerCore.Services
         private string CreateFolderCenter(string center)
         {
             string root = GetRoot();
-            string folderId = _googleDriveService.CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
+            string folderId = Startup.GetGoogleApi().CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
             _folderCenterService.CreateQuery().InsertOne(new FolderCenterEntity()
             {
                 Center = center,
