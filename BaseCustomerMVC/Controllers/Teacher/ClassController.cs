@@ -168,13 +168,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
-            var center = new CenterEntity();
-            if (!string.IsNullOrEmpty(basis))
-            {
-                center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
+
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
@@ -186,7 +180,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = _skillService.GetList();
             }
-
+            var center = new CenterEntity();
+            if (!string.IsNullOrEmpty(basis))
+            {
+                center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
@@ -199,14 +199,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(DefaultModel model, string basis)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
-                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
-            }
+            //if (!string.IsNullOrEmpty(basis))
+            //{
+            //    var center = _centerService.GetItemByCode(basis);
+            //    if (center != null)
+            //        ViewBag.Center = center;
+            //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //    ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
+            //}
+
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
@@ -825,7 +826,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetThisWeekLesson(DateTime today, string Center)
         {
-            today = today.ToUniversalTime();
+            today = DateTime.Now.ToUniversalTime();
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
@@ -1135,6 +1136,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
+                        item.TotalLessons += lessoncount;
                         //var skill = _skillService.GetItemByID(csubject.SkillID);
                         //if (skill == null) continue;
                         //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1330,7 +1332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ncbj.CourseID = csubject.CourseID;
                     ncbj.GradeID = csubject.GradeID;
                     ncbj.SubjectID = csubject.SubjectID;
-                    ncbj.TeacherID = _teacher.ID;
+                    ncbj.TeacherID = teacher.ID;
                     var newMember = new ClassMemberEntity();
                     long lessoncount = 0;
                     //csubject.TeacherID = teacher.ID;
@@ -1341,6 +1343,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         newData.Subjects.Add(csubject.SubjectID);
                     if (!newData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                         newData.Members.Add(newMember);
+                    newData.TotalLessons += lessoncount;
                     //var skill = _skillService.GetItemByID(csubject.SkillID);
                     //if (skill == null) continue;
                     //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1382,7 +1385,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, bool notify = true)
         {
             member = new ClassMemberEntity();
             lessoncount = 0;
@@ -1421,7 +1424,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByID(@class.Center);
 
                 _classSubjectService.Save(nSbj);
-                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

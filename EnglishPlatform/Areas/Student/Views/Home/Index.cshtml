@@ -175,17 +175,13 @@
             </ul>
         </div>
 
-        @*@if (center == "eduso")
-            {*@
-
-
         <div class="row">
 
             <div class="col-md-12">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        @*<a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
@@ -197,30 +193,20 @@
                                         <img v-else :src="item.Thumbnail" alt="">
                                     </div>
                                     <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
-
-
-
-                                        @*<a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%">{{item.Title}}</marquee></a>*@
-                                        <div class="c-bot" style="text-align:right;">
-
-                                            <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title" style="height:42px; line-height:21px;">
-                                                {{item.Title}}
-                                            </a>
-                                            <div class="c-bot" style="text-align:right; width:133px;">
-
-                                                <div>
-                                                    <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                                </div>
-                                                <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
-                                                    {{formatPrice(item.Discount) }} VNĐ
-                                                </div>
-                                                <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:80%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
-                                                </div>
-                                                <div>
-                                                    <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
-                                                </div>
+                                        <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title" style="height:42px; line-height:21px;">{{item.Title}}</a>
+                                        <div class="c-bot" style="text-align:right; width:133px;">
+                                            <div>
+                                                <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                            </div>
+                                            <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                                {{formatPrice(item.Discount) }} VNĐ
+                                            </div>
+                                            <div>
+                                                <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                                             </div>
                                         </div>
                                     </div>
@@ -231,9 +217,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 
     <div class="row">
         <div class="col-md-12 margin-b20">
@@ -262,51 +246,34 @@
     </div>
     <!-- Modal -->
 
-
     <div class="modal fade" id="DetailProduct" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
-            <div class="modal-content" style="position:absolute;top: 0; bottom: 0;">
+            <div class="modal-content h-100">
                 <div class="modal-header">
                     <h3 class="modal-title">{{detailProduct.Title}}</h3>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
-
                 <div class="modal-body">
                     <div class="container-fluid">
                         <div class="col-sm-9" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 10px; overflow: auto;">
                             @*<div class="form-group">
-                                <img name="thumbnail" />
-                            </div>*@
+                                    <img name="thumbnail" />
+                                </div>*@
                             <div class="form-group" name="Content" v-html="detailProduct.Content" style="text-align:justify">
                                 @*{{detailProduct.Content}}*@
                             </div>
                         </div>
                         <div class="col-sm-3" style="position:absolute; right: 0; top: 10px;">
-                            <div class="row col-sm-3 position-fixed p3" style="right:40px;">
-                                <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
-                                    <div class="form-group col-sm-12" id="price">
-                                        @*<div>
-                                            <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                        </div>*@
-
-                                        <div v-if="detailProduct.Discount!=''" class="price font-weight-bold text-danger ml-auto col-sm-12">
-                                            Giá khuyến mại: <span style="font-size:130%; text-align:right;">{{formatPrice(detailProduct.Discount)}} VNĐ</span>
-                                        </div>
-                                        <div>
-                                            <span v-if="detailProduct.Discount!=''" style="color: #999; text-decoration:line-through; font-size:90%;" class="mt-1 mb-1 col-sm-12">
-                                                Giá gốc: ({{formatPrice(detailProduct.Price)}} VNĐ)
-                                            </span>
-                                            <span v-else class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
-                                                Giá: {{formatPrice(detailProduct.Price)}} VNĐ
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-sm-12" style="text-align:center">
-                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
-                                    </div>
+                            <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
+                                <div class="form-group col-sm-12" id="price">
+                                    <span class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
+                                        Giá bán: {{formatPrice(detailProduct.Discount)}} <span v-if="detailProduct.Discount > 0" style="color: #999; text-decoration:line-through; font-size:90%;"> ({{formatPrice(detailProduct.Price)}}) VNĐ</span>
+                                    </span>
+                                </div>
+                                <div class="form-group col-sm-12" style="text-align:center">
+                                    <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
                                 </div>
                             </div>
                         </div>
@@ -315,7 +282,6 @@
             </div>
         </div>
     </div>
-
 </section>
 
 @section Scripts{
@@ -455,14 +421,18 @@
                 let val = (value / 1).toFixed(0).replace(',', '.')
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             },
-            @*BuyNow(classid) {
-                Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
+            BuyNow(classid) {
+                window.location.href = '@processUrl("Payment", "Home")/' + classid;
+                @*@if(student.Email == "kchidinh@gmail.com") {
+                    @:window.location.href = '@processUrl("Payment", "Home")/' + classid;
+                }
+                else
+                {
+                    @:Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
                 //debugger
-                //window.location.href = '@processUrl("Payment", "Home")/' + classid;
-            },*@
+                }*@
+            },
             DetailProduct(ID) {
-                //debugger
-                //$('#DetailProduct').modal('hide');
                 let _that = this
                 let _form = new FormData();
                 _form.append('ID', ID);
@@ -470,21 +440,13 @@
                 axios.post(_url, _form)
                     .then(response => {
                         _that.detailProduct = response.data;
+                        $("#DetailProduct").modal();
                     }).catch(e => { });
-
-                $("#DetailProduct").modal('show');
-            },
-            formatPrice(value) {
-                let val = (value / 1).toFixed(0)
-                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-            },
-
+            }
+            @*,
             BuyNow(id) {
-                //debugger
                 window.location.href = '@processUrl("Payment", "Home")/' + id;
-                //alert(id)
-            },
-
+            },*@
         }
 
     });

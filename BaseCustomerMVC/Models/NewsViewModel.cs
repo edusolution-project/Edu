@@ -16,7 +16,7 @@ namespace BaseCustomerMVC.Models
         public string ClassName { get; set; }
         [JsonProperty("TotalPrice")]
         public double TotalPrice { get; set; }
-        [JsonProperty("Students")]
-        public double Students { get; set; }
+        [JsonProperty("Transactions")]
+        public double Transactions { get; set; }
     }
 }

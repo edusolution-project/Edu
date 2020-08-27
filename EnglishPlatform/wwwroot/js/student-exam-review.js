@@ -179,9 +179,10 @@ var ExamReview = (function () {
 
     var renderItemNavigation = function (el, data, index) {
         var examDetails = config.exam.Details;
+        
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
-
+            console.log(item);
             var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
             if (examDetail) {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;
@@ -705,7 +706,10 @@ var ExamReview = (function () {
             html += '</fieldset>';
             var anwerMedia = item.MediasAnswer;
             var medias = item.Medias;//file học viên upload
+<<<<<<< HEAD
             //console.log(item);
+=======
+>>>>>>> VietPhung
             html += '<fieldset class="col-md-12">';
             if (medias != null && medias.length > 0) {
                 html += '<div class="attachment mt-3"><strong>File đính kèm:</strong> ';
@@ -722,7 +726,7 @@ var ExamReview = (function () {
             var point = item.PointEssay; // điểm giáo viên chấm
             console.log(item);
             if (config.isTeacher) {
-                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + data.ID + '" style="padding:10px; border:1px solid #ccc">';
+                html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
                 if (content != "" && content != null) {
                     html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
                 } else {
@@ -731,8 +735,13 @@ var ExamReview = (function () {
                 html += '<div> Điểm :<input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + item.MaxPoint + '</div>';
                 html += '<i>Bài chữa :</i>';
                 var realContent = content == null ? "" : content;
+<<<<<<< HEAD
                 html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + data.ID + '">' + realContent + '</textarea></div>';
 
+=======
+                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + item.ID +'">' + realContent + '</textarea></div>';
+                
+>>>>>>> VietPhung
                 //upload file
                 var type = "type='file'";
                 var strFile = "this.parentElement.querySelector('input[" + type + "]')";
@@ -751,7 +760,7 @@ var ExamReview = (function () {
                 html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
 
                 html += '</fieldset>';
-                html += "<script>if (CKEDITOR) {CKEDITOR.replace('TEXT_CKEDITOR_" + data.ID + "',{extraPlugins: '',image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],image2_disableResizer: true});}</script>";
+                html += "<script>if (CKEDITOR) {CKEDITOR.replace('TEXT_CKEDITOR_" + item.ID + "',{extraPlugins: '',image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],image2_disableResizer: true});}</script>";
             } else {
 
                 if (point == 0 && content == null) {
@@ -918,6 +927,9 @@ var ExamReview = (function () {
             _form.append("isLast", isLAst);
 
             var files = document.querySelector('[data-target="' + qID + '"]>input[type="file"]');
+            if (files == null) {
+                files = document.querySelector('[data-target="' + id + '"]>input[type="file"]');
+            }
             if (files != null) {
                 for (var x = 0; x < files.files.length; x++) {
                     _form.append("files", files.files[x]);

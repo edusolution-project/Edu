@@ -51,7 +51,8 @@ namespace BaseCustomerEntity.Database
         public long QuestionsDone { get; set; }
         [JsonProperty("QuestionsPass")]
         public long QuestionsPass { get; set; }
-
+        [JsonProperty("LastPoint")]
+        public double LastPoint { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -104,10 +105,10 @@ namespace BaseCustomerEntity.Database
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
-        public bool IsOverTime(string ID)
+        public bool IsOver(string ID)
         {
             var item = GetItemByID(ID);
-            if (item == null) return false;
+            if (item == null || item.Status) return true;//break if exam not found or completed
             if (item.Timer == 0) return false;
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             if (count <= 0)
@@ -116,6 +117,7 @@ namespace BaseCustomerEntity.Database
             }
             return count <= 0;
         }
+        
         public Task UpdateStatus(ExamEntity exam)
         {
             exam.Status = true;
@@ -213,10 +215,10 @@ namespace BaseCustomerEntity.Database
                                 foreach (var ans in answer.Content.Split('/'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
+                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));
                                 }
                         }
-                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim());
+                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.Trim());
 
                         if (quiz2answer.Contains(normalizeAns))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
@@ -272,8 +274,10 @@ namespace BaseCustomerEntity.Database
             return exam;
         }
 
+        //Hoàn thành bài tự luận
         public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
         {
+            var oldEx = GetItemByID(exam.ID);
             exam.Status = true;
             point = 0;
             var pass = 0;
@@ -282,11 +286,13 @@ namespace BaseCustomerEntity.Database
                 point += detail.Point;
 
             exam.Point = point;
+
             exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
 
-            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam, false).Result;
+            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+
             Save(exam);
             if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
             )

@@ -90,7 +90,7 @@
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}
+                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                             <i class="far fa-arrow-alt-circle-down ml-1"></i>
                         </a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -187,7 +187,7 @@
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
                         <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}
+                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                             <i class="far fa-arrow-alt-circle-down ml-1"></i>
                         </a>
                         <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
@@ -816,6 +816,7 @@
                                     Image: item.SkillImage,
                                     Teacher: item.TeacherName,
                                     TeacherID: item.TeacherID,
+                                    CourseName: item.CourseName,
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
