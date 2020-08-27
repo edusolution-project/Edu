@@ -592,11 +592,12 @@
                     let _form = new FormData()
                     //_form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
+                    //_form.append('', student.ID)
                     //debugger
                     let _url = '@processUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
-                            if (response.data.error != "") {
+                            if (!response.data.Status) {
                                 alert(response.data.error);
                                 return false;
                             }
@@ -631,11 +632,12 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 if (response.data.Status) {
+
                                     alert(response.data.Msg)
                                     this.getData()
                                     this.hideModal()
                                 }
-                                else alert(response.data.Error)
+                                else alert(response.data.Msg)
                             }).catch(e => {
                             
                             })
@@ -679,7 +681,7 @@
             </template>
         </b-modal>*@
 
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="xl" >
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="lg" >
         <b-col class="form-group">
 
             <div class="form-group row">
