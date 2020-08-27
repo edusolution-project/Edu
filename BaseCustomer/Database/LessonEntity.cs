@@ -94,5 +94,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.CountDocumentsAsync(t => t.ClassSubjectID == ClassSubjectID).Result;
         }
+
+        public void UpdateLessonPoint(string ID, double point)
+        {
+            CreateQuery().UpdateOne(t => t.ID == ID, Builders<LessonEntity>.Update.Set(t => t.Point, point));
+        }
     }
 }

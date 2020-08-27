@@ -23,6 +23,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using BaseCustomerEntity.Globals;
 
 namespace EnglishPlatform.Controllers
 {
@@ -45,7 +46,6 @@ namespace EnglishPlatform.Controllers
             ViewBag.newsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(5).ToList();
             ViewBag.newsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(2).ToList();
             return View();
-
         }
 
         public IActionResult Category(DefaultModel model, string catcode)
@@ -77,11 +77,31 @@ namespace EnglishPlatform.Controllers
             }
         }
 
+        //lay chi tiet tin
         public IActionResult Detail(string catcode, string newscode)
         {
             var cat = _newsCategoryService.GetItemByCode(catcode);
             ViewBag.Category = cat;
-            var news = _newsService.GetItemByCode(newscode);
+            var filter = new List<FilterDefinition<NewsEntity>>();
+
+            if (!string.IsNullOrEmpty(newscode))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Code == newscode));
+            }
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type == null));
+
+            var listnews = _newsService.CreateQuery().Find(x => x.Type == "news" || x.Type==null).ToList();
+            foreach(var item in listnews)
+            {
+                if (item.Code == null)
+                {
+                    item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                }
+            }
+
+            //var news = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).FirstOrDefault();
+            var news = listnews.Find(x=>x.Code==newscode);
+            
             ViewBag.News = news;
             if (news == null || !news.IsActive)
             {
@@ -113,10 +133,18 @@ namespace EnglishPlatform.Controllers
             }
             filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsActive == true));
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type==null));
 
             var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
                 .SortByDescending(t => t.PublishDate);
             model.TotalRecord = data.CountDocuments();
+            foreach(var item in data.ToList())
+            {
+                if (item.Code == null)
+                {
+                    item.Code = item.Title.ConvertUnicodeToCode("-", true);
+                }
+            }
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
                 ? data.ToList()
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
@@ -127,6 +155,13 @@ namespace EnglishPlatform.Controllers
                 { "Model", model }
             };
             return new JsonResult(response);
+        }
+
+        public IActionResult DetailProduct(string code)
+        {
+            var detail = _newsService.CreateQuery().Find(o => o.Code.Equals(code) && o.Type == "san-pham").FirstOrDefault();
+            ViewBag.detail = detail;
+            return View();
         }
 
         //[Route("/login")]
@@ -417,7 +452,7 @@ namespace EnglishPlatform.Controllers
         //    };
         //    var headteacherRole = new RoleEntity()
         //    {
-        //        Name = "Trưởng bộ môn",
+        //        Name = "GV Quản lý",
         //        Code = "head-teacher",
         //        Type = ACCOUNT_TYPE.TEACHER,
         //        CreateDate = DateTime.Now,

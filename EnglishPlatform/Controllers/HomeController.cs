@@ -39,6 +39,7 @@ namespace EnglishPlatform.Controllers
         private readonly MailHelper _mailHelper;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
+        private readonly LessonScheduleService _scheduleService;
         private readonly CalendarHelper _calendarHelper;
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
@@ -59,6 +60,7 @@ namespace EnglishPlatform.Controllers
             , MailHelper mailHelper
             , UserAndRoleService userAndRoleService
             , CenterService centerService
+            , LessonScheduleService scheduleService
             , AuthorityService authorityService
             , ILog log
             , NewsService newsService
@@ -77,6 +79,7 @@ namespace EnglishPlatform.Controllers
             _studentHelper = new StudentHelper(studentService, accountService);
             _calendarHelper = calendarHelper;
             _log = log;
+            _scheduleService = scheduleService;
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
             _userAndRoleService = userAndRoleService;
@@ -154,13 +157,20 @@ namespace EnglishPlatform.Controllers
         [Route("/login")]
         public IActionResult Login()
         {
-            long limit = 0;
-            long count = _accountService.CreateQuery().CountDocuments(_ => true);
-            if (count <= limit)
-            {
-                startPage();
-            }
+            //long limit = 0;
+            //long count = _accountService.CreateQuery().CountDocuments(_ => true);
+            //if (count <= limit)
+            //{
+            //    startPage();
+            //}
             return View();
+        }
+
+        [Route("/logincp")]
+        public IActionResult LoginCP()
+        {
+            ViewBag.Adm = true;
+            return View("Login");
         }
 
         [HttpPost]
@@ -203,10 +213,10 @@ namespace EnglishPlatform.Controllers
                             string centerCode = center.Code;
                             string roleCode = "";
                             var tc = _teacherService.GetItemByID(user.UserID);
-                            var st = _studentService.GetItemByID(user.UserID);
-
-
-
+                            var st =
+                                user.Type == "teacher" ?
+                                _studentService.GetStudentByEmail(user.UserName) :
+                                _studentService.GetItemByID(user.UserID);
 
                             var defaultUser = new UserModel() { };
                             switch (Type)
@@ -471,7 +481,7 @@ namespace EnglishPlatform.Controllers
             };
             var headteacherRole = new RoleEntity()
             {
-                Name = "Trưởng bộ môn",
+                Name = "GV Quản lý",
                 Code = "head-teacher",
                 Type = ACCOUNT_TYPE.TEACHER,
                 CreateDate = DateTime.Now,
@@ -624,6 +634,7 @@ namespace EnglishPlatform.Controllers
         {
             var @event = _calendarHelper.GetByEventID(ID);
             var teacher = _teacherService.GetItemByID(@event.TeacherID);//check teacher of class
+
             if (teacher == null)
                 throw (new Exception("Teacher not found"));
             if (@event != null)
@@ -648,11 +659,26 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
-                    string zoomId = teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom.Replace("-", "");
+                    string zoomId = (teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom).Replace("-", "").Replace(" ", "");
                     //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = @event.UrlRoom.Replace("-", "") });
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = zoomId });
                 }
             }
+
+            var schedule = _scheduleService.GetItemByID(@event.ScheduleID);
+            if (schedule != null)
+            {
+                try
+                {
+                    var center = _centerService.GetItemByID(_classService.GetItemByID(schedule.ClassID).Center).Code;
+                    ViewBag.LessonUrl = $"/{center}/student/Lesson/Detail/{schedule.LessonID}/{schedule.ClassSubjectID}";
+                }
+                catch (Exception e)
+                {
+
+                }
+            }
+
             return View();
         }
 

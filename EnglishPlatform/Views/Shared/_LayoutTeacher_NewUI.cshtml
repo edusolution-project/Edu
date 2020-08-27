@@ -37,6 +37,19 @@
 
 </head>
 <style>
+    ::-webkit-scrollbar {
+        width: 5px; /* for vertical scrollbars */
+        height: 5px; /* for horizontal scrollbars */
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.5);
+    }
+
     [v-cloak], [cloak-holder] {
         display: none
     }
@@ -89,7 +102,8 @@
 </style>
 <body>
     <main id="main">
-        @await Html.PartialAsync("_sidebarTeacherNewUI")
+        @await Component.InvokeAsync("SidebarTeacher", new { centerCode = center })
+        @*@await Html.PartialAsync("_sidebarTeacherNewUI")*@
         @RenderBody()
         <aside class="sidebar" id="sidebar_right">
             <div class="box padding-15" id="plan_box">

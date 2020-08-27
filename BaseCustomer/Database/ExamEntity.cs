@@ -1,4 +1,5 @@
-﻿using Core_v2.Repositories;
+﻿using Core_v2.Globals;
+using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -50,7 +51,8 @@ namespace BaseCustomerEntity.Database
         public long QuestionsDone { get; set; }
         [JsonProperty("QuestionsPass")]
         public long QuestionsPass { get; set; }
-
+        [JsonProperty("LastPoint")]
+        public double LastPoint { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -103,10 +105,10 @@ namespace BaseCustomerEntity.Database
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
-        public bool IsOverTime(string ID)
+        public bool IsOver(string ID)
         {
             var item = GetItemByID(ID);
-            if (item == null) return false;
+            if (item == null || item.Status) return true;//break if exam not found or completed
             if (item.Timer == 0) return false;
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             if (count <= 0)
@@ -115,6 +117,7 @@ namespace BaseCustomerEntity.Database
             }
             return count <= 0;
         }
+        
         public Task UpdateStatus(ExamEntity exam)
         {
             exam.Status = true;
@@ -123,7 +126,7 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity Complete(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point)
         {
             exam.Status = true;
             point = 0;
@@ -135,8 +138,7 @@ namespace BaseCustomerEntity.Database
                 // check câu trả lời đúng
                 bool isTrue = false;
                 var examDetail = listDetails[i];
-                // câu trả lơi
-                var answerID = examDetail.AnswerID;
+
                 // giá trị câu trả lời 
                 //var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
 
@@ -149,48 +151,59 @@ namespace BaseCustomerEntity.Database
                 var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID);//prevent limit
+                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
                 //bài chọn hoặc nối đáp án
-                if (!string.IsNullOrEmpty(examDetail.AnswerID))
+                if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
                 {
-
-                    var _realAnswers = realAnswers?.FirstOrDefault();
-                    //var realanswer = _realAnswers.FirstOrDefault();
-                    if (_realAnswers != null)
+                    switch (part.Type)
                     {
-                        examDetail.RealAnswerID = _realAnswers.ID;
-                        examDetail.RealAnswerValue = _realAnswers.Content;
+                        case "QUIZ1":
+                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            if (_correctanswer == null) continue;
+                            examDetail.RealAnswerID = _correctanswer.ID;
+                            examDetail.RealAnswerValue = _correctanswer.Content;
+                            break;
+                        case "QUIZ3":
+                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+                            //ID not match => check value
+                            if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
+                                _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+                            if (_correctanswer == null) continue;
+                            examDetail.RealAnswerID = _correctanswer.ID;
+                            examDetail.RealAnswerValue = _correctanswer.Content;
+                            break;
+                        case "QUIZ4":
+                            var realIds = examDetail.AnswerID.Split(',');
+                            examDetail.RealAnswerID = string.Join(",", realAnswers.Select(t => t.ID));
+                            examDetail.RealAnswerValue = string.Join(",", realAnswers.Select(t => t.Content));
+                            if (realIds.Length != realAnswers.Count()) continue;//incorrect
+                            var isCorrect = true;
+                            foreach (var id in realIds)
+                            {
+                                if (realAnswers.FirstOrDefault(t => t.ID == id) == null)//incorrect
+                                {
+                                    isCorrect = false;
+                                    break;
+                                }
+                            }
+                            if (isCorrect)
+                            {
+                                _correctanswer = realAnswers.FirstOrDefault();
+                                if (_correctanswer == null) continue;
+                                _correctanswer.ID = examDetail.AnswerID;
+                                _correctanswer.Content = examDetail.AnswerValue;
+                            }
+                            break;
                     }
-
-                    var answer = _cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID);
-                    if (answer == null) continue;//Lưu lỗi => bỏ qua ko tính điểm
-                    //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
-                    isTrue =
-                        (!string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID) ||
-                        //(!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(answerValue) && regex.Replace(_realAnswers.Content, "").ToLower().Trim() == answerValue);
-                        (!string.IsNullOrEmpty(_realAnswers.Content) && !string.IsNullOrEmpty(examDetail.AnswerValue) && _realAnswers.Content == examDetail.AnswerValue);
-
-                    _correctanswer = isTrue
-                        ? _realAnswers
-                        : null;//chọn đúng đáp án
-
-                    //switch (part.Type)
-                    //{
-                    //    case "QUIZ1": //chọn đáp án
-                    //        _correctanswer = !string.IsNullOrEmpty(answerID) && _realAnswers.ID == answerID ? _realAnswers :null;//chọn đúng đáp án
-                    //        break;
-                    //    //_realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content))
-                    //    case "QUIZ3": //nối đáp án
-                    //        _correctanswer = _realAnswers.FirstOrDefault(t => t.ID == answer.ID || (!string.IsNullOrEmpty(t.Content) && t.Content == answer.Content)); //chọn đúng đáp án (check trường hợp sai ID nhưng cùng content (2 đáp án có hình ảnh, ID khác nhau nhưng cùng content (nội dung như nhau)))
-                    //        break;
-                    //}
                 }
                 else //bài điền từ
                 {
-                    if (examDetail.AnswerValue != null)
+                    if (examDetail.AnswerValue != null && part.Type == "QUIZ2")
                     {
                         var _realAnwserQuiz2 = realAnswers?.ToList();
 
@@ -202,10 +215,12 @@ namespace BaseCustomerEntity.Database
                                 foreach (var ans in answer.Content.Split('/'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim().ToLower()));
+                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));
                                 }
                         }
-                        if (quiz2answer.Contains(NormalizeSpecialApostrophe(examDetail.AnswerValue.ToLower().Trim())))
+                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.Trim());
+
+                        if (quiz2answer.Contains(normalizeAns))
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
 
@@ -254,6 +269,42 @@ namespace BaseCustomerEntity.Database
                 Task.WhenAll(cttask
                     //, cstask, ctask
                     );
+            }
+
+            return exam;
+        }
+
+        //Hoàn thành bài tự luận
+        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
+        {
+            var oldEx = GetItemByID(exam.ID);
+            exam.Status = true;
+            point = 0;
+            var pass = 0;
+            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+            foreach (var detail in listDetails)
+                point += detail.Point;
+
+            exam.Point = point;
+            exam.LastPoint = oldEx != null ? oldEx.Point : 0;
+            exam.Updated = DateTime.Now;
+            exam.MaxPoint = lesson.Point;
+            exam.QuestionsDone = listDetails.Count();
+
+            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+            Save(exam);
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
+            )
+            {
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                Task.WhenAll(cttask, cstask, ctask);
+            }
+            else
+            {
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+                Task.WhenAll(cttask);
             }
 
             return exam;
@@ -324,7 +375,8 @@ namespace BaseCustomerEntity.Database
                 .Replace("‘", "'")
                 .Replace("’", "'")
                 .Replace("“", "\"")
-                .Replace("”", "\"");
+                .Replace("”", "\"")
+                .Replace(" ", " ");
         }
     }
 }

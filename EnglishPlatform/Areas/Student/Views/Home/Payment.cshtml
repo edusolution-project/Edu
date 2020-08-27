@@ -1,0 +1,108 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
+
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var product = ViewBag.Product as BaseCustomerMVC.Models.NewsViewModel;
+    ViewData["Title"] = "Thông tin thanh toán: " + product?.Title;
+    var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
+    string processUrl(string act, string ctrl)
+    {
+        string url = Url.Action(act, ctrl);
+
+        return $"/{center}{url}";
+    }
+}
+
+<div id="dashboard_content">
+    <div class="card-header">
+        <div class="flex border-b justify-content-between align-items-start">
+            <div>
+                <h2 class="title">Thông tin đơn hàng</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+
+        @* Thong tin don hang *@
+        <div class="form-group">
+            <input type="hidden" id="ID" name="ID" value="@product.ID" />
+
+            <table class="table table-bordered" id="ed_table" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th class='text-center'>#</th>
+                        <th class='text-center'>Tên gói học</th>
+                        <th class='text-center'>Giá tiền</th>
+                        @*<th class='text-center'>Số lượng</th>
+                            <th class='text-center'>Thành tiền</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class='text-center'>1</td>
+                        <td class='text-center'><a href="javascript:;" class="text-dark">@product.Title</a></td>
+                        <td class='text-center'>@(product.Discount > 0 ? product.Discount.ToString("#,#"):"0") VND</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-header">
+        <div class="flex border-b justify-content-between align-items-start">
+            <div>
+                <h2 class="title">Thông tin đặt hàng</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row card-body">
+
+        <table class="table" id="dataTable" width="100%" cellspacing="0">
+            <tbody>
+                <tr>
+                    <th>Họ tên(*)</th>
+                    <td><input class="form-control" type="text" id="Name" name="Name" placeholder="Họ và tên" value="@student.FullName" required /></td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại(*)</th>
+                    <td><input type="text" class="form-control" id="Phone" name="Phone" placeholder="Số điện thoại" value="@student.Phone" required /></td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ(*)</th>
+                    <td><input type="text" class="form-control" id="Address" name="Address" placeholder="Địa chỉ" value="@student.Address" required /></td>
+                </tr>
+                <tr>
+                    <td colspan="2" onclick="Thanhtoan()"><button class="btn btn-primary">Thanh toán</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    @*</form>*@
+</div>
+    </div>
+
+<script>
+    var Thanhtoan= function () {
+        var ID = document.getElementById("ID").value;
+        var Name = document.getElementById("Name").value;
+        var Address = document.getElementById("Address").value;
+        var Phone = document.getElementById("Phone").value;
+        var Center = '@center';
+        //debugger
+        $.ajax({
+            type: "POST",
+            url: '@processUrl("PaymentStatus", "Home")',
+            data: { basis: Center, ID: ID, Phone: Phone, Name: Name },
+            dataType: "json",
+            success: function (data) {
+                if (data.Url != "") {
+                    window.location.href = data.Url
+                }
+                else {
+                    alert(data.Error)
+                }
+            }
+        });
+    }
+</script>

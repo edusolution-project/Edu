@@ -67,7 +67,7 @@
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
-                    <a href="#" class="thumb"><img :src="classImg" alt="" /></a>
+                    <a href="#" class="thumb"><img :src="cacheStatic(classImg,256)" alt="" /></a>
                     <div class="c-right">
                         <p><span class="label">Tên lớp: </span>{{domDecoder(className)}}</p>
                         <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
@@ -90,7 +90,7 @@
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
                         <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}
+                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                             <i class="far fa-arrow-alt-circle-down ml-1"></i>
                         </a>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -134,7 +134,7 @@
                 <div class="col-md-12" v-for="data in ref.data">
                     <div class="inner flex">
                         <a href="#" title="" class="thumb">
-                            <img src="/pictures/doc1.png" alt="">
+                            <img :src="cacheStatic('/pictures/doc1.png',256)" alt="">
                         </a>
                         <div class="entry">
                             <div>
@@ -187,7 +187,7 @@
                 <li v-for="(obj,i) in classSubjects">
                     <div class="inner">
                         <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + obj.Image + ')'"></i>{{obj.Title +' (GV: ' + obj.Teacher + ')'}}
+                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                             <i class="far fa-arrow-alt-circle-down ml-1"></i>
                         </a>
                         <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
@@ -377,8 +377,8 @@
                     <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
                 </div>
                 @*<div class="status" v-if="owner == '@currentuser'">
-                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                </div>*@
+                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                    </div>*@
             </div>
         </li>
     </script>
@@ -816,6 +816,7 @@
                                     Image: item.SkillImage,
                                     Teacher: item.TeacherName,
                                     TeacherID: item.TeacherID,
+                                    CourseName: item.CourseName,
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
@@ -1194,7 +1195,11 @@
                             }
                         }).catch(e => { })
                 },
-
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
@@ -1747,7 +1752,7 @@
                             <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
                             <td class="text-center">{{formatTime(item.LastTried)}}</td>
                             <td class="text-center">{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
-                            <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
+                            <td class="text-center">{{item.LastPoint.toFixed(2)}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1776,7 +1781,7 @@
                         <tr v-for="(item,k) in student_result.History">
                             <td class="text-center">{{k+1}}</td>
                             <td>{{formatTime(item.Created)}}</td>
-                            <td class="text-center">{{item.Point.toFixed(2)}}</td>
+                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
                             <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
                         </tr>

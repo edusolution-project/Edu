@@ -98,7 +98,8 @@ namespace BaseCustomerEntity.Database
             var currentProgress = GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
-                var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
+                //var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
+                var point = item.MaxPoint > 0 ? (item.Point * 100.0 / item.MaxPoint) : 0;
                 currentProgress = new LessonProgressEntity
                 {
                     ClassID = item.ClassID,
@@ -121,23 +122,25 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                var avg = currentProgress.AvgPoint * currentProgress.Tried;
-                if (currentProgress.Tried > item.Number)
-                    currentProgress.Tried++;
-                else
+                var total = currentProgress.AvgPoint * currentProgress.Tried;
+                var point = item.MaxPoint > 0 ? (item.Point * 100.0 / item.MaxPoint) : 0;
+
+                if (currentProgress.Tried <= item.Number) //update lastest try & point for lastest exam
+                {
                     currentProgress.Tried = item.Number;
+                    currentProgress.LastTry = item.Updated;
+                    currentProgress.PointChange = point - currentProgress.LastPoint;
+                    currentProgress.LastPoint = point;
+                }
+                else
+                {
+                    currentProgress.PointChange = 0;//use for update chapter progress
+                }
 
-
-                var point = item.QuestionsTotal > 0 ? (item.QuestionsPass * 100.0 / item.QuestionsTotal) : 0;
-                //convert point => percent
-                //var point = item.MaxPoint == 0 ? 0 : (item.Point * 100 / item.MaxPoint);
-                currentProgress.PointChange = point - currentProgress.LastPoint;
-                currentProgress.LastPoint = point;
-                currentProgress.LastTry = item.Updated;
                 if (point > currentProgress.MaxPoint) currentProgress.MaxPoint = point;
-                if (point < currentProgress.MinPoint) currentProgress.MinPoint = point;
-                avg = (avg + point) / currentProgress.Tried;
-                currentProgress.AvgPoint = avg;
+                if (point < currentProgress.MinPoint || currentProgress.MinPoint == 0) currentProgress.MinPoint = point;
+
+                currentProgress.AvgPoint = (total + (point - item.LastPoint)) / currentProgress.Tried;
                 await Collection.ReplaceOneAsync(t => t.ID == currentProgress.ID, currentProgress);
             }
             return currentProgress;

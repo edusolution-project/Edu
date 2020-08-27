@@ -20,6 +20,7 @@
     .item-access {
         padding: 10px;
     }
+
     .list-item-access {
         background: #ccc;
         padding: 20px;
@@ -63,7 +64,7 @@
                                             var rootItem = authorityAdmin.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "admin");
                                             <div class="group-access row">
                                                 <div class="root-access col-12">
-                                                    <input type="checkbox" name="admin_@rootItem.Module"  onclick="checkAll(this)"/>
+                                                    <input type="checkbox" name="admin_@rootItem.Module" onclick="checkAll(this)" />
                                                     <span onclick="openList(this)">@rootItem.Name</span>
                                                 </div>
                                                 <div class="list-item-access hide">
@@ -109,34 +110,37 @@
                                             var firstItem = group.FirstOrDefault();
                                             if (firstItem == null) { continue; }
                                             var rootItem = authorityTeacher.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "teacher");
-                                            <div class="group-access row">
-                                                <div class="root-access col-12">
-                                                    <input type="checkbox" name="teacher_@rootItem.Module"  onclick="checkAll(this)"/>
-                                                    <span onclick="openList(this)">@rootItem.Name</span>
-                                                </div>
-                                                <div class="list-item-access hide">
-                                                    @for (int x = 0; x < group.Count(); x++)
-                                                    {
-                                                        var item = group.ElementAt(x);
-                                                        if (!over.Contains(userRole))
+                                            if (rootItem != null)
+                                            {
+                                                <div class="group-access row">
+                                                    <div class="root-access col-12">
+                                                        <input type="checkbox" name="teacher_@rootItem.Module" onclick="checkAll(this)" />
+                                                        <span onclick="openList(this)">@rootItem.Name</span>
+                                                    </div>
+                                                    <div class="list-item-access hide">
+                                                        @for (int x = 0; x < group.Count(); x++)
                                                         {
-                                                            bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
-                                                            if (!isTrue)
+                                                            var item = group.ElementAt(x);
+                                                            if (!over.Contains(userRole))
                                                             {
-                                                                continue;
+                                                                bool isTrue = ParentAccess != null && ParentAccess.Where(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                                if (!isTrue)
+                                                                {
+                                                                    continue;
+                                                                }
                                                             }
+                                                            bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
+                                                            <div class="item-access row" data-authority="@item.ID">
+                                                                @if (isActive)
+                                                                {<input type="checkbox" name="@item.ID" checked />}
+                                                                else
+                                                                {<input type="checkbox" name="@item.ID" />}
+                                                                <div class="col">@item.Description</div>
+                                                            </div>
                                                         }
-                                                        bool isActive = Access != null && Access.Count > 0 && Access.FirstOrDefault(o => o.Authority == item.ID && o.RoleID == ViewBag.Data && o.IsActive == true) != null;
-                                                        <div class="item-access row" data-authority="@item.ID">
-                                                            @if (isActive)
-                                                            {<input type="checkbox" name="@item.ID" checked />}
-                                                            else
-                                                            {<input type="checkbox" name="@item.ID" />}
-                                                            <div class="col">@item.Description</div>
-                                                        </div>
-                                                    }
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            }
                                         }
                                     }
                                 }
@@ -158,7 +162,7 @@
                                             var rootItem = authorityStudent.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "student");
                                             <div class="group-access row">
                                                 <div class="root-access col-12">
-                                                    <input type="checkbox" name="student_@rootItem.Module" onclick="checkAll(this)"/>
+                                                    <input type="checkbox" name="student_@rootItem.Module" onclick="checkAll(this)" />
                                                     <span onclick="openList(this)">@rootItem.Name</span>
                                                 </div>
                                                 <div class="list-item-access hide">

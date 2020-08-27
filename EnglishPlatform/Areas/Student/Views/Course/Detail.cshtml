@@ -44,7 +44,7 @@
         <div class="box" v-if="tab[0]">
             <ul class="box list ls-overview mb-3">
                 <li class="flex margin-b20">
-                    <a href="#" class="thumb"><img :src="classImg" alt="" /></a>
+                    <a href="#" class="thumb"><img :src="cacheStatic(classImg,256)" alt="" /></a>
                     <div class="c-right">
                         <p><span class="label">Khóa học: </span>{{domDecoder(className)}}</p>
                         <p><span class="label">Chương trình: </span>{{domDecoder(subjectName)}}</p>
@@ -66,7 +66,7 @@
                 <div class="box">
                     <div class="inner text-center">
                         <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
-                            <span class="ic ic-headphone" :style="'background-image:url(' + item.Image + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
+                            <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
                             @*<div>
                                     <img :src="item.Image" style="max-width:150px; max-height:200px" />
                                 </div>*@
@@ -88,7 +88,7 @@
                 <div class="col-md-12" v-for="data in ref.data">
                     <div class="inner flex">
                         <a href="#" title="" class="thumb">
-                            <img src="/pictures/doc1.png" alt="">
+                            <img :src="cacheStatic('/pictures/doc1.png',256)" alt="">
                         </a>
                         <div class="entry">
                             <div>
@@ -321,6 +321,11 @@
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
