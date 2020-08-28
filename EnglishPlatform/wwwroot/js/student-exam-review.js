@@ -181,7 +181,7 @@ var ExamReview = (function () {
         var examDetails = config.exam.Details;
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
-            console.log(item);
+            //console.log(item);
             var examDetail = examDetails.filter(o => o.QuestionID == item.ID);
             if (examDetail) {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;
@@ -236,7 +236,8 @@ var ExamReview = (function () {
             var li = document.createElement("li");
             li.dataset.id = item.ID;
             li.dataset.part = data.ID;
-            li.dataset.maxpoint = item.MaxPoint;
+            //console.log(data);
+            li.dataset.maxpoint = data.Point;
             li.classList = "item-review-nav " + _class;
             li.innerHTML = '<a>' + index + '</a>';
             li.querySelector("a").addEventListener("click", _eventGotoSelection);
@@ -719,7 +720,8 @@ var ExamReview = (function () {
 
             var content = item.RealAnswerEssay;// cau tra loi cua giao vien
             var point = item.PointEssay; // điểm giáo viên chấm
-
+            //console.log(data);
+            //console.log(item);
             if (config.isTeacher) {
                 html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
                 if (content != "" && content != null) {
@@ -727,7 +729,7 @@ var ExamReview = (function () {
                 } else {
                     html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
                 }
-                html += '<div> Điểm :<input onkeyup="validate(this)" max="' + item.MaxPoint + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + item.MaxPoint + '</div>';
+                html += '<div> Điểm :<input onkeyup="validate(this)" max="' + data.Point + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + data.Point + '</div>';
                 html += '<i>Bài chữa :</i>';
                 var realContent = content == null ? "" : content;
                 html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + item.ID +'">' + realContent + '</textarea></div>';
@@ -744,7 +746,6 @@ var ExamReview = (function () {
                 }
                 html += '</div>'
                 var textBtn = ((content == null || content == '') && point == 0) ? "chấm điểm" : "chấm lại";
-
                 var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
 
                 html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';

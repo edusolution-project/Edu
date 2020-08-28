@@ -50,7 +50,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly IHostingEnvironment _env;
 
         private readonly ChapterProgressService _chapterProgressService;
-        
+
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
@@ -1855,7 +1855,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                                    MaxPoint = examview.MaxPoint
+                                    MaxPoint = z.Point
                                 }))?.ToList()
                         })).ToList()
                     });
