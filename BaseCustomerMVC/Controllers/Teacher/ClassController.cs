@@ -30,6 +30,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseService _courseService;
         private readonly CourseHelper _courseHelper;
         private readonly ClassHelper _classHelper;
+        private readonly LessonHelper _lessonHelper;
 
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
@@ -49,18 +50,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly IHostingEnvironment _env;
 
         private readonly ChapterProgressService _chapterProgressService;
-
-
-        //private readonly LessonPartService _lessonPartService;
-        //private readonly LessonPartAnswerService _lessonPartAnswerService;
-        //private readonly LessonPartQuestionService _lessonPartQuestionService;
+        
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
-        private readonly LessonHelper _lessonHelper;
         private readonly MailHelper _mailHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
@@ -903,21 +899,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            skill = skill
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
-            //var std = (from o in data.ToList()
-            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-            //           where _class != null
-            //           let skill = _skillService.GetItemByID(o.SkillID)
-            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-            //           select new
-            //           {
-            //               id = o.ID,
-            //               classID = _class.ID,
-            //               className = _class.Name,
-            //               endDate = o.EndDate,
-            //               students = _class.Students.Count,
-            //               skill = skill
-            //               //isLearnt = isLearnt
-            //           }).ToList();
+
             return Json(new { Data = std });
         }
         #endregion
@@ -1468,10 +1450,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var center = _centerService.GetItemByID(@class.Center);
 
                 _classSubjectService.Save(nSbj);
-                if (notify)
-                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
-                //Clone Course
-                _courseHelper.CloneForClassSubject(nSbj);
 
                 member = new ClassMemberEntity
                 {
@@ -1479,6 +1457,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     TeacherID = teacher.ID,
                     Type = ClassMemberType.TEACHER
                 };
+                //Clone Course
+                _courseHelper.CloneForClassSubject(nSbj);
+
+                if (notify)
+                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 return nSbj.ID;
             }
             catch (Exception e)
@@ -1845,7 +1828,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     var lesson = _lessonService.GetItemByID(data.LessonID);
 
-                    var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID && o.ClassID == data.ClassID && ExamTypes.Contains(o.Type)).ToList();
+                    var listParts = _cloneLessonPartService.GetByLessonID(data.LessonID).Where(o => ExamTypes.Contains(o.Type));
 
                     var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                     var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -1876,7 +1859,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 }))?.ToList()
                         })).ToList()
                     });
-
 
 
                     ViewBag.Lesson = lessonview;

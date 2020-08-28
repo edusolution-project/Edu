@@ -39,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             , RoleService roleService
             , AccountService accountService
             , StudentService studentService
+            , StudentHelper studentHelper
             , IHostingEnvironment evn
             )
         {
@@ -47,14 +48,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             _roleService = roleService;
             _accountService = accountService;
 
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _studentHelper = studentHelper;
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
         }
         // GET: Home
 
         public ActionResult Index(DefaultModel model)
         {
-            
+
             ViewBag.Model = model;
             return View();
         }

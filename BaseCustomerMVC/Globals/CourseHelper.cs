@@ -30,34 +30,24 @@ namespace BaseCustomerMVC.Globals
 
 
         public CourseHelper(
-            CourseService courseService
-            //GradeService gradeservice
-            //, SubjectService subjectService
-            //, TeacherService teacherService
-            //, ClassService classService
+            CourseService courseService,
+            CourseChapterService courseChapterService,
+            CourseLessonService courseLessonService,
 
-            , ChapterService chapterService
-            , LessonService lessonService
-            , LessonHelper lessonHelper
-            , LessonScheduleService lessonScheduleService
-            , CalendarHelper calendarHelper
-            , CourseChapterService courseChapterService
-            , CourseLessonService courseLessonService
+            LessonService lessonService,
+            ChapterService chapterService,
+
+            LessonHelper lessonHelper
         )
         {
-            //_gradeService = gradeservice;
-            //_subjectService = subjectService;
-            //_teacherService = teacherService;
             _courseService = courseService;
             _courseChapterService = courseChapterService;
             _courseLessonService = courseLessonService;
-            //_classService = classService;
-            _chapterService = chapterService;
+
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
-            //_studentService = studentService;
+            _chapterService = chapterService;
+
             _lessonHelper = lessonHelper;
-            _calendarHelper = calendarHelper;
         }
 
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
@@ -86,32 +76,20 @@ namespace BaseCustomerMVC.Globals
                 newID = newchapter.ID;
             }
 
-            var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == classSubject.CourseID && o.ChapterID == orgID).ToList();
-            if (lessons != null && lessons.Count > 0)
+            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID);
+            if (lessons != null && lessons.Count() > 0)
             {
                 foreach (var courselesson in lessons)
                 {
-                    LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity());
-                    lesson.ChapterID = newID;
-                    lesson.OriginID = courselesson.ID;
-                    lesson.ClassID = classSubject.ClassID;
-                    lesson.ClassSubjectID = classSubject.ID;
-                    lesson.ID = null;
-                    _lessonService.Save(lesson);
-
-                    var schedule = new LessonScheduleEntity
+                    await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
+                        ChapterID = newID,
+                        OriginID = courselesson.ID,
                         ClassID = classSubject.ClassID,
-                        ClassSubjectID = classSubject.ID,
-                        LessonID = lesson.ID,
-                        Type = lesson.TemplateType,
-                        IsActive = true
-                    };
-                    _lessonScheduleService.Save(schedule);
-                    _calendarHelper.ConvertCalendarFromSchedule(schedule, "");
-                    _lessonHelper.CloneLessonForClassSubject(lesson, classSubject);
+                        ClassSubjectID = classSubject.ID
+                    });
                 }
-                lessoncounter = lessons.Count;
+                lessoncounter = lessons.Count();
             }
 
             var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID).AsEnumerable();
@@ -122,12 +100,6 @@ namespace BaseCustomerMVC.Globals
                     lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
 
-            //if (newchapter != null)
-            //{
-            //    newchapter.TotalLessons = lessoncounter;
-            //    newchapter.PracticeCount = _chapterService.CountChapterPractice(newchapter.ID, newchapter.ClassSubjectID);
-            //    _chapterService.Save(newchapter);
-            //}
             return lessoncounter;
         }
 
