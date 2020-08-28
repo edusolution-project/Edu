@@ -130,6 +130,8 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
+                if (item.Tried == 1 || progress.PracticeCount == 0)//new
+                    progress.PracticeCount++;
                 progress.LastLessonID = item.ID;
                 progress.PracticePoint += change;
                 progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;

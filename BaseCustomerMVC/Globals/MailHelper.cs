@@ -152,11 +152,13 @@ namespace BaseCustomerMVC.Globals
             }
         }
 
-        public async Task SendPasswordChangeNotify(AccountEntity user)
+        public async Task SendPasswordChangeNotify(AccountEntity user,string newPW=null)
         {
+            var newpw = newPW == null ? "" : $"<p>Mật khẩu mới là: {newPW}.</p>";
             string subject = "Xác nhận đổi mật khẩu đăng nhập tại Eduso";
             string body = "Chào " + user.Name + "," +
                 "<p>Tài khoản đăng nhập của bạn vừa được thay đổi mật khẩu.</p>" +
+                newpw +
                 "<p>Vui lòng bỏ qua email này nếu bạn đã thực hiện thao tác trên.</p>" +
                 "<p>Nếu người thực hiện thao tác trên không phải là bạn, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
                 "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";

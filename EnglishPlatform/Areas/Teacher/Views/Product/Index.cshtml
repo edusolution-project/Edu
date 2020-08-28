@@ -30,6 +30,9 @@
                         <button><i class="ic ic-find"></i></button>
                         <input type="text" name="" v-model="searchTerm" placeholder="Tên gói học">
                     </div>
+                    <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                        <input type="checkbox" v-model="isShowAll" /><span>Hiển thị tất cả</span>
+                    </div>
                     @*@if (isHeadteacher)
         {
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
@@ -53,7 +56,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item,k) in items" v-if="parseInt(item.Transactions)>0">
+                        @*<tr v-for="(item,k) in items" v-if="parseInt(item.Transactions)>0">*@
+                        <tr v-for="(item,k) in items" v-if="parseInt(item.Transactions)>0 && isShowAll==false">
+                            <td class='text-center' scope="row">{{(page - 1) * view + (k+1)}}</td>
+                            <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.Title}}</a></td>
+                            <td class='text-center'>{{item.ClassName}}</td>
+                            <td class='text-center'>{{item.CenterName}}</td>
+                            <td class='text-center'>{{item.Transactions}}</td>
+                            <td class='text-center'>{{formatPrice(item.TotalPrice)}} VND</td>
+                            <td class='text-center'><a href="javascript:;" v-on:click="ViewDetail(item.ID)">Xem chi tiết >>></a></td>
+                        </tr>
+                        <tr v-for="(item,k) in items" v-if="isShowAll==true">
                             <td class='text-center' scope="row">{{(page - 1) * view + (k+1)}}</td>
                             <td class='text-center'><a href="javascript:;" v-on:click="ViewProduct(item.ID)">{{item.Title}}</a></td>
                             <td class='text-center'>{{item.ClassName}}</td>
@@ -145,7 +158,8 @@
             searchTerm: '',
             viewdetail: [],
             viewproduct: '',
-            title:'',
+            title: '',
+            isShowAll: false,
         },
         watch: {
             searchTerm: function () {

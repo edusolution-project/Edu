@@ -105,11 +105,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
-            //if (teacher != null && teacher.Subjects != null)
-            //{
-            //    subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-            //    grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-            //}
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                //grade = _gradeservice.createquery().find(t => teacher.subjects.contains(t.subjectid)).tolist();
+            }
 
             ViewBag.Roles = _roleService.CreateQuery().Find(r => r.Type == "teacher").ToList();
             //ViewBag.Grade = grade;
@@ -247,6 +247,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Name = center.Name,
                     RoleID = RoleID
                 });
+
+                //oldobj.Subjects = oldobj.Subjects[0].Substring(',');
                 _teacherService.Save(oldobj);
                 if (!exist)
                     _ = _mailHelper.SendTeacherJoinCenterNotify(tc.FullName, tc.Email, "", center.Name);
@@ -255,6 +257,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (ExistEmail(tc.Email))
                     return Json(new { error = "Email đã được sử dụng" });
+                var Subjects = new List<string>();
+                if(tc.Subjects[0]!=null)
+                foreach(var item in tc.Subjects[0].Split(','))
+                {
+                    Subjects.Add(item);
+                }
 
                 var teacher = new TeacherEntity
                 {
@@ -273,9 +281,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     },
                     Phone = tc.Phone,
                     IsActive = true,
-                    Subjects = currentTeacher.Subjects,//copy creator subjects
-                    UserCreate = currentUser
+                    //Subjects = currentTeacher.Subjects,//copy creator subjects
+                    UserCreate = currentUser,
+                    Subjects=Subjects
                 };
+                //teacher.Subjects.AddRange(Subjects);
                 _teacherService.CreateQuery().InsertOne(teacher);
                 var account = new AccountEntity()
                 {
@@ -366,6 +376,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new { error = "Thông tin không chính xác" });
             acc.PassWord = Core_v2.Globals.Security.Encrypt(Password);
             _accountService.Save(acc);
+            _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
             return Json(new { msg = "Đã đổi mật khẩu" });
         }
 

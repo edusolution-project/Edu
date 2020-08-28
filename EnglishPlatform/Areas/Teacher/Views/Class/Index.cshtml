@@ -9,7 +9,7 @@
     var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
+    //List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
 
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -694,7 +694,7 @@
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', $(modal).find('[id=Name]').val())
                     _form.append('CenterCode', '@center')
-
+                    _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false;
@@ -1280,42 +1280,42 @@
                     <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" >
+                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn chương trình</option>
                                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" >
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" >
+                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
                                 <option value="">Chọn môn học</option>
                                 <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control" >
+                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn bài giảng</option>
                                 <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control">
+                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
                         <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)"  title="Xóa môn học"><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-on:click="refreshSubject(k, $event)"  title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                         </div>
                     </li>
                 </ul>
@@ -1446,7 +1446,7 @@
         <input type="text" class="form-control" :value="class_info.Name" name="Name" id="Name" />
     </b-col>
     <template v-slot:modal-footer="{ ok, cancel}">
-        <template v-if="student_data.isLoading">
+        <template v-if="isLoading">
             <b-button>Đang gửi dữ liệu ...</b-button>
         </template>
         <template v-else>

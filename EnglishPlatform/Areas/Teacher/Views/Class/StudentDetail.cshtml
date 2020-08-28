@@ -400,6 +400,13 @@
                     if (a > 0)
                         result = a * 100 / b;
                     return result;
+                },
+                showSkillSummary(csid) {
+                    console.log(csid);
+                    this.search_subject = csid;
+                    console.log(this.search_subject);
+                    history.replaceState({ sbj: this.search_subject }, '', '#' + this.search_subject);
+                    this.loadData()
                 }
             }
         });

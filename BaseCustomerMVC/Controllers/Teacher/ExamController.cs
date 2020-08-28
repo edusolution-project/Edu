@@ -327,44 +327,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    //List<MediaResponseModel> listFileUpload = _roxyFilemanHandler.UploadFileWithGoogleDrive(basis, User.FindFirst("UserID").Value, HttpContext);
-                    //if (listFileUpload.Count > 0)
-                    //{
-                    //    var listMedia = new List<Media>();
-                    //    for (int i = 0; i < listFileUpload.Count; i++)
-                    //    {
-                    //        var media = new Media()
-                    //        {
-                    //            Created = DateTime.Now,
-                    //            Extension = listFileUpload[i].Extends,
-                    //            Name = listFileUpload[i].Path,
-                    //            OriginalName = listFileUpload[i].Path,
-                    //            Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFileUpload[i].Path)
-                    //        };
-                    //        listMedia.Add(media);
-                    //    }
-                    //    oldItem.MediasAnswers = listMedia;
-                    //}
-
                     Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
                     if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
-                        for (int i = 0; i < listFiles.Count; i++)
+                        for (int i = 0; i < listFileUpload.Count; i++)
                         {
                             var media = new Media()
                             {
                                 Created = DateTime.Now,
-                                Extension = listFiles[i].Extends,
-                                Name = listFiles[i].Path,
-                                OriginalName = listFiles[i].Path,
-                                Path = listFiles[i].Path
+                                Extension = listFileUpload[i].Extends,
+                                Name = listFileUpload[i].Path,
+                                OriginalName = listFileUpload[i].Path,
+                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFileUpload[i].Path)
                             };
                             listMedia.Add(media);
                         }
                         oldItem.MediasAnswers = listMedia;
                     }
-
 
                     oldItem.RealAnswerValue = RealAnswerValue;
                     oldItem.Point = Point;

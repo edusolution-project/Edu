@@ -192,7 +192,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         {"Data",null },
                         {"Error",student },
-                        {"Msg","Email đã được sử dụng" }
+                        {"Msg","Email đã được sử dụng" },
+                        {"Status",Status }
                     };
                 return new JsonResult(response);
             }
@@ -213,6 +214,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public async Task<JsonResult> RemoveStudent(string StudentID, string basis, string JoinedClasses = null, string ClassID = null)
         {
             var Error = "";
+            var Status = false;
             try
             {
                 //if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
@@ -220,8 +222,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     return Json(new
                     {
+                        Status = false,
                         error = "Thông tin không chính xác"
-                    });
+                    }) ;
                 }
                 //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
                 var student = _studentService.GetItemByID(StudentID);
@@ -239,8 +242,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
                 //_accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
-                student.Centers.Remove(center.ID);
-                _studentService.CreateOrUpdate(student);
+                if (student.Centers.Any(x => x == center.ID))
+                {
+                    student.Centers.Remove(center.ID);
+                    if (student.Centers.Count == 0)
+                    {
+                        student.IsActive = false;
+                    }
+                    _studentService.CreateOrUpdate(student);
+                    Status = true;
+                }
             }
             catch (Exception ex)
             {
@@ -249,7 +260,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var Datarespone = new Dictionary<string, object>
             {
                 { "msg","đã xóa học viên" },
-                { "error",Error}
+                { "error",Error},
+                {"Status",Status }
             };
             return Json(Datarespone);
         }
