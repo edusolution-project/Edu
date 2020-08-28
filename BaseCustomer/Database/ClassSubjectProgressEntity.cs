@@ -25,7 +25,6 @@ namespace BaseCustomerEntity.Database
         public DateTime LastDate { get; set; }
         [JsonProperty("ExamDone")]
         public long ExamDone { get; set; }
-
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
         [JsonProperty("ExamResult")]
@@ -40,21 +39,15 @@ namespace BaseCustomerEntity.Database
         public double PracticeAvgPoint { get; set; }
         [JsonProperty("PracticeResult")]
         public double PracticeResult { get; set; }
-
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>
     {
         private ClassSubjectService _classSubjectService;
-        private LessonService _lessonService;
 
         public ClassSubjectProgressService(IConfiguration config
-            //,ClassSubjectService classSubjectService, LessonService lessonService
             ) : base(config)
         {
-            //_lessonService = lessonService;
-            //_classSubjectService = classSubjectService;
-            _lessonService = new LessonService(config);
             _classSubjectService = new ClassSubjectService(config);
 
             var indexs = new List<CreateIndexModel<ClassSubjectProgressEntity>>
@@ -156,17 +149,6 @@ namespace BaseCustomerEntity.Database
             if (currentObj == null) return null;
             return CreateQuery().Find(t => t.ClassSubjectID == currentObj.ID).ToEnumerable();
         }
-
-        //public IEnumerable<StudentRanking> GetStudentResults(string ClassSubjectID)
-        //{
-        //    return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID).Project(t => new StudentRanking
-        //    {
-        //        StudentID = t.StudentID,
-        //        AvgPoint = t.AvgPoint,
-        //        ExamDone = t.ExamDone,
-        //        TotalPoint = t.TotalPoint
-        //    }).ToEnumerable();
-        //}
 
         public long DecreasePoint(LessonProgressEntity item)
         {

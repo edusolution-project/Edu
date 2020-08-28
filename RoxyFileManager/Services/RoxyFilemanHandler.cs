@@ -33,7 +33,7 @@ namespace FileManagerCore.Services
             _folderManagerService = folderManagerService;
             _fileManagerService = fileManagerService;
             _folderCenterService = folderCenterService;
-            _googleDriveService = Startup.GoogleDrive;
+            //_googleDriveService = Startup.GoogleDrive;
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {

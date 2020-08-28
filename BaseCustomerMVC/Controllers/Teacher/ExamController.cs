@@ -307,7 +307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast=false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast = false)
         {
             try
             {
@@ -331,15 +331,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
-                        for (int i = 0; i < listFileUpload.Count; i++)
+                        for (int i = 0; i < listFiles.Count; i++)
                         {
                             var media = new Media()
                             {
                                 Created = DateTime.Now,
-                                Extension = listFileUpload[i].Extends,
-                                Name = listFileUpload[i].Path,
-                                OriginalName = listFileUpload[i].Path,
-                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFileUpload[i].Path)
+                                Extension = listFiles[i].Extends,
+                                Name = listFiles[i].Path,
+                                OriginalName = listFiles[i].Path,
+                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFiles[i].Path)
                             };
                             listMedia.Add(media);
                         }
