@@ -37,7 +37,24 @@ namespace BaseCustomerEntity.Database
         public DateTime PublishDate { get; set; }
         [JsonProperty("IsActive")]
         public bool IsActive { get; set; }
-
+        [JsonProperty("CenterID")]
+        public string CenterID { get; set; }
+        [JsonProperty("ClassID")]
+        public string ClassID { get; set; }
+        [JsonProperty("Price")]
+        public double Price { get; set; }
+        [JsonProperty("Discount")]
+        public double Discount { get; set; }
+        [JsonProperty("Type")]
+        public string Type { get; set; }
+        [JsonProperty("IsPublic")]
+        public bool IsPublic { get; set; }
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
+        [JsonProperty("Targets")]
+        public List<string> Targets { get; set; }
+        [JsonProperty("Limit")]
+        public int Limit { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
@@ -78,6 +95,10 @@ namespace BaseCustomerEntity.Database
             if (check.Equals("IsActive"))
             {
                 CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsActive, status));
+            }
+            if (check.Equals("IsPublic"))
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsEntity>.Update.Set(t => t.IsPublic, status));
             }
         }
 

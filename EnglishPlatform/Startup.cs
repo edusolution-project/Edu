@@ -49,6 +49,10 @@ namespace EnglishPlatform
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            services.Configure<FormOptions>(options =>
+            {
+                options.ValueCountLimit = int.MaxValue;
+            });
             services.AddAuthentication(Cookies.DefaultLogin) // Sets the default scheme to cookies
                 .AddCookie(Cookies.DefaultLogin, options =>
                 {
@@ -126,7 +130,7 @@ namespace EnglishPlatform
                 var routingFeature = context.Features[typeof(IRoutingFeature)] as IRoutingFeature;
                 //context.Features[typeof(IEndpointFeature)];
                 RouteData routeValues = routingFeature?.RouteData;
-                if(routeValues != null)
+                if (routeValues != null)
                 {
                     if (routeValues.Values.Keys.Contains("basis"))
                     {
@@ -265,6 +269,11 @@ namespace EnglishPlatform
                     name: "news-detail",
                     template: "tin-tuc/{catcode}/{newscode}",
                     defaults: new { controller = "News", action = "Detail" }
+                );
+                routes.MapRoute(
+                    name: "product-detail",
+                    template: "chi-tiet-khoa-hoc/{code}",
+                    defaults: new { controller = "News", action = "DetailProduct" }
                 );
                 routes.MapRoute(
                  name: "default",

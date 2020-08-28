@@ -560,7 +560,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _lessonScheduleService.CreateOrUpdate(oldItem);
 
                 return new JsonResult(new Dictionary<string, object> {
-                        {"Data",oldItem },
+                        {"Data", oldItem },
                         {"Error", null }
                     });
             }
@@ -629,7 +629,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
             //if (oldcalendar != null)
-            _calendarHelper.Remove(entity.ID);
+            _calendarHelper.RemoveSchedule(entity.ID);
             if (entity.IsActive)
                 _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
         }
@@ -669,17 +669,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             foreach (var schedule in schedules)
             {
                 process++;
-                var lesson = _lessonService.GetItemByID(schedule.LessonID);
-                if (lesson == null)
+                if (schedule.StartDate == DateTime.MinValue && schedule.EndDate == DateTime.MinValue)
                 {
-                    _lessonScheduleService.Remove(schedule.ID);
+                    _calendarHelper.RemoveSchedule(schedule.ID);
                     deleted++;
                 }
-                else
-                {
-                    schedule.Type = lesson.TemplateType;
-                    _lessonScheduleService.Save(schedule);
-                }
+                //var lesson = _lessonService.GetItemByID(schedule.LessonID);
+                //if (lesson == null)
+                //{
+                //    _lessonScheduleService.Remove(schedule.ID);
+                //    deleted++;
+                //}
+                //else
+                //{
+                //    schedule.Type = lesson.TemplateType;
+                //    _lessonScheduleService.Save(schedule);
+                //}
             }
             return Json("ok: " + deleted + " deleted - " + process + " processed");
         }

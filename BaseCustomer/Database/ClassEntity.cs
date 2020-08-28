@@ -65,6 +65,8 @@ namespace BaseCustomerEntity.Database
         public long TotalExams { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
+        [JsonProperty("OriginID")]
+        public string OriginID { get; set; }
     }
 
     public class ClassService : ServiceBase<ClassEntity>

@@ -21,7 +21,8 @@
 <section class="module" id="dashboard_content">
     <div class="card-header">
         <div class="flex border-b justify-content-between align-items-start">
-            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/<span id="total-point-head"></span>)</span></h2>
+            @*<h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/<span id="total-point-head"></span>)</span></h2>*@
+            <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.MaxPoint)</span></h2>
             <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
             <button class="btn btn-sm btn-circle btn-primary" onclick="NextPart()">NextPart</button>
         </div>
@@ -37,7 +38,7 @@
 }
 @section Scripts{
     <script src="~/js/plugins/ck4/ckeditor.js"></script>
-    <script >
+    <script>
         var CKEDITOR_BASEPATH = '/Scripts/ckeditor/';
     </script>
     <script src="~/js/student-exam-review.js?20200525"></script>
@@ -84,6 +85,7 @@
                     height: 30px;
                     border-radius: 50%;
                     margin-left: 5px;
+                    position: relative;
                 }
 
                     div#review_navition > ul > li > a {
@@ -212,8 +214,27 @@
                 background-color: #28a745 !important;
             }
 
-        .QUIZ1 .answer-item {
+        .QUIZ1 .answer-item,
+        .QUIZ4 .answer-item {
             max-width: 25%;
+        }
+
+        .item-review-nav.essay::before {
+            content: attr(data-maxpoint);
+            pointer-events: none;
+            position: absolute;
+            top: -4px;
+            right: -7px;
+            font-size: 80%;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px green;
+            background: #FFF;
+            height: 16px;
+            width: 16px;
+            line-height: 12px;
+            text-align: center;
+            border-radius: 10px;
+            border: solid 1px #CCC;
         }
     </style>
     <style>

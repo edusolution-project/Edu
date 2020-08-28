@@ -137,9 +137,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-
-
-
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)
         {
@@ -277,7 +274,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             };
             return new JsonResult(response);
         }
-
 
         [Obsolete]
         [HttpPost]
@@ -422,7 +418,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-
         //public JsonResult FixChapterPracticeCount()
         //{
         //    var chapters = _chapterService.CreateQuery().Find(t=> t.ParentID == "0").ToList();
@@ -432,7 +427,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    }
         //    return new JsonResult("OK");
         //}
-
 
         [HttpPost]
         public JsonResult CreateOrUpdate(LessonEntity item)
@@ -787,6 +781,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 switch (part.Type)
                 {
                     case "QUIZ1":
+                    case "QUIZ4":
                     case "QUIZ3":
                     case "ESSAY":
                         convertedPart.Questions = _clonequestionService.CreateQuery()

@@ -1,6 +1,7 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
@@ -103,7 +104,7 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task UpdatePoint(LessonProgressEntity item)
+        public async Task UpdatePoint(LessonProgressEntity item, double pointchange = 0)
         {
             var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
             if (progress == null)
@@ -114,31 +115,33 @@ namespace BaseCustomerEntity.Database
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
                     progress.ExamDone++;
-                progress.TotalPoint += item.PointChange;
+                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);//%
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
 
-        public async Task UpdatePracticePoint(LessonProgressEntity item)
+        public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
         {
             var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            var change = (pointchange > 0 ? pointchange : item.PointChange);
             if (progress == null)
             {
                 progress = NewProgressEntity(_chapterService.GetItemByID(item.ChapterID), item.StudentID);
                 progress.LastLessonID = item.ID;
-                progress.PracticePoint += item.PointChange;
-                //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                progress.PracticePoint += change;
                 await Collection.InsertOneAsync(progress);
             }
             else
             {
-                var init = !(progress.PracticePoint > 0);
-                progress.PracticePoint += item.PointChange;
-                //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                if (item.Tried == 1 || progress.PracticeCount == 0)//new
+                    progress.PracticeCount++;
+                progress.LastLessonID = item.ID;
+                progress.PracticePoint += change;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
-            await UpdateParentChap_PracticePoint(progress, item.PointChange);
+            await UpdateParentChap_PracticePoint(progress, change);
         }
 
         public async Task UpdateParentChap_PracticePoint(ChapterProgressEntity item, double pointchange)
@@ -149,6 +152,7 @@ namespace BaseCustomerEntity.Database
                 var parentChap = _chapterService.GetItemByID(item.ParentID);
                 if (parentChap == null) return;
                 progress = NewProgressEntity(parentChap, item.StudentID);
+                progress.LastLessonID = item.ID;
                 progress.PracticePoint += pointchange;
                 //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
                 await Collection.InsertOneAsync(progress);
@@ -156,21 +160,8 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                //Practice Point = All Subchap Practice Point + All direct lesson practice Point
-                //var supchaps_count = _chapterService.GetSubChapters(item.ClassSubjectID, item.ID).Count;
-                //var supchaps_point = Collection.Aggregate()
-                //    .Match(t=> t.ParentID == item.ID)
-                //    .Group(
-                //        t => t.ParentID,
-                //        group => new
-                //        {
-                //            ParentID = group.Key,
-                //            Sum = group.Sum(t => t.PracticePoint)
-                //        }
-                //    ).Project(t=> t.Sum);
+                progress.LastLessonID = item.ID;
                 progress.PracticePoint += pointchange;
-                //progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
-
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
                 await UpdateParentChap_PracticePoint(progress, pointchange);
             }
@@ -195,14 +186,12 @@ namespace BaseCustomerEntity.Database
                 StudentID = StudentID,
                 Completed = 1,
                 TotalLessons = _lessonService.CountChapterLesson(chapter.ID),
-                //PracticeCount = CountChapterPractice(chapter.ID, chapter.ClassSubjectID),
                 PracticeCount = chapter.PracticeCount,
                 ClassID = chapter.ClassID,
                 ClassSubjectID = chapter.ClassSubjectID,
                 ChapterID = chapter.ID,
                 ParentID = chapter.ParentID,
                 LastDate = DateTime.Now,
-                //LastLessonID = lessonPrg.LessonID
             };
         }
 

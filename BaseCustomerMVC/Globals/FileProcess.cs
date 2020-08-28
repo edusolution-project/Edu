@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +23,7 @@ namespace BaseCustomerMVC.Globals
             _evn = evn;
             RootPath = _evn.WebRootPath + "/Files";
         }
-        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, double width = 600, double height = 800)
+        public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
         {
             string extension = Path.GetExtension(formFile.FileName);
             string type = extension.Replace(".", string.Empty).ToUpper();
@@ -39,10 +43,63 @@ namespace BaseCustomerMVC.Globals
             }
             //Resize from stream
             var fileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(string.IsNullOrEmpty(filename) ? formFile.FileName : filename);
-            using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
+            /***************************/
+            //Neu la anh thi resize
+            if (_imageType.Contains(type))
             {
-                await formFile.CopyToAsync(fileStream);
-                return "/Files/" + folder + "/" + fileName;
+                if (!Directory.Exists(uploads))
+                    Directory.CreateDirectory(uploads);
+                //if (stat_width == 0 || stat_height == 0)
+                //{
+                //    stat_width = 512;
+                //    stat_height = 384;
+                //}
+                var standardSize = new SixLabors.Primitives.Size(stat_width, stat_height);
+
+                using (Stream inputStream = formFile.OpenReadStream())
+                {
+                    using (var image = Image.Load<Rgba32>(inputStream))
+                    {
+                        var imageEncoder = new JpegEncoder()
+                        {
+                            Quality = 90,
+                            Subsample = JpegSubsample.Ratio444
+                        };
+
+                        int width = image.Width;
+                        int height = image.Height;
+                        if ((width > standardSize.Width) || (height > standardSize.Height))
+                        {
+                            ResizeOptions options = new ResizeOptions
+                            {
+                                Mode = ResizeMode.Max,
+                                Size = standardSize,
+                            };
+                            image.Mutate(x => x
+                             .Resize(options));
+
+                            //.Grayscale());
+                        }
+                        //image.Save($"/Files/{folder}/{fileName}"); // Automatic encoder selected based on extension.
+                        using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
+                        {
+                            image.Save(fileStream, imageEncoder);
+                            //await formFile.CopyToAsync(fileStream);
+                            //return "/Files/" + folder + "/" + fileName;
+                            return $"{"/Files/"}/{folder}/{fileName}";
+                        }
+                    }
+                }
+            }
+            /*********************************/
+            else
+            {
+                using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
+                {
+                    await formFile.CopyToAsync(fileStream);
+                    //return "/files/" + folder + "/" + filename;
+                    return $"{"/Files"}/{folder}/{fileName}";
+                }
             }
         }
 

@@ -786,21 +786,22 @@
             closeNoti(_this.parentElement);
         }
     }
-    var createNotification = function (data,state,isChatGroup) { //state = 1 bỏ qua , 0 ->  0 user to user , 1 user to group
+    var createNotification = function (data, state, isChatGroup) { //state = 1 bỏ qua , 0 ->  0 user to user , 1 user to group
         var div = document.createElement("div");
         var bottom = 9 * checklistNotificaiton();
         div.classList = "noti alert alert-success";
-        div.setAttribute("style", "width: 225px;height: 83px;position: absolute;z-index: 99999;top: " + bottom +"%;right: 10px;background: #b4e28acc;padding:0");
+        div.setAttribute("style", "width: 225px; max-height: 83px;position: fixed;z-index: 99999;top: " + bottom + "%;right: 10px;padding:0; border-radis");
         var body = document.createElement("div");
-        body.setAttribute("style", "position: relative; width:100%; height: 100%;padding : 30px");
+        body.setAttribute("style", "position: relative; width:100%; height: 100%; padding : 10px;");
         var close = document.createElement("button");
         close.innerHTML = "x";
         close.classList = "btn btn-close";
-        close.setAttribute("style", "position: absolute; top: 0; bottom: 0; right: 0; width : 30px; height : 30px");
-        close.setAttribute("onclick","closeNoti(this)")
+        close.setAttribute("style", "position: absolute; top: 0; bottom: 0; right: 0; width : 30px; height : 30px; line-height:1px;");
+        close.setAttribute("onclick", "closeNoti(this)")
         body.appendChild(close);
         div.appendChild(body);
-        body.innerHTML += data.userSend + " gửi tin nhắn cho bạn";
+        console.log(data);
+        body.innerHTML += data.userSend + ": <i>" + data.message.title  + "</i>";
 
         body.onclick = function (event) {
             closeNoti(event.target);
@@ -828,9 +829,10 @@
                     }
                 }
                 var itemActive = root.querySelector("[data-item-id='" + dataID + "'] > a");
-                if (!itemActive.parentElement.classList.contains("active")) {
-                    itemActive.click();
-                }
+                if (itemActive != null)
+                    if (!itemActive.parentElement.classList.contains("active")) {
+                        itemActive.click();
+                    }
             }
             //console.log(data);
         }
@@ -925,7 +927,7 @@
                 }
             }
             else {
-                createNotification(data, state,1);
+                createNotification(data, state, 1);
                 // chat group
                 if (state == 0) {
                     // new feed active
@@ -1008,7 +1010,7 @@
 
         }
 
-        
+
         //sender: {id: "5db11841b5433109d4533cae", email: "quynhdan1894@gmail.com", name: "Quynh Dan", isTeacher: true}
         //content: "này yêu nhau không ?"
         //medias: []
@@ -1051,6 +1053,8 @@
         var ulTab = rootElement.querySelector('ul[data-ul-id="ul-slider-bar-left"]');
         var liTopic = ulTab.children[0];
         var liChat = ulTab.children[1];
+        console.log("sender: " + sender.id);
+        console.log("current user: " + g_CurrentUser.id);
         if (sender.id != g_CurrentUser.id) {
             createNotification(data, state, 0);
         }
@@ -1921,7 +1925,7 @@
     var openImage = function () {
         var form = getFormRealTimeApp();
         var inputFile = form.querySelector("input[type='file']");
-        inputFile.setAttribute("accept", "image/*");
+        inputFile.setAttribute("accept", "image/jpeg,image/png,image/gif,image/bmp");
         inputFile.click();
     }
     var openAttach = function () {

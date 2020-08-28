@@ -3,6 +3,7 @@
     ViewData["Title"] = "Tin tức";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var newscategory = ViewBag.newscategory as List<BaseCustomerEntity.Database.NewsCategoryEntity>;
+    var listCenter = ViewBag.ListCenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
 </script>
@@ -23,8 +24,8 @@
                             @*<button type="button" class="btn btn-primary" onclick="window.location.href='/admin/News/NewsForm'" title="Thêm tin"> <i class="fas fa-plus"></i> </button>*@
                             <button type="button" class="btn btn-primary" data-placement="top" title="Thêm tin" onclick="Adds(this)" data-toggle="modal" data-target="#ModalNews"> <i class="fas fa-plus"></i> </button>
                             @*<button type="button" class="btn btn-primary" data-toggle="modal" data-placement="top" title="Nhập file dữ liệu" data-target="#importModal"> <i class="fas fa-upload"></i> </button>
-                                <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>
-                                <button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","News")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>*@
+                                <button type="button" class="btn btn-primary" data-placement="top" title="Xuất file dữ liệu" onclick="Export('FormControl','@Url.Action("Export", "teacher" )')"> <i class="fas fa-file-export"></i> </button>*@
+                            @*<button type="button" class="btn btn-danger" data-placement="top" title="Xóa" onclick="var result = confirm('bạn có chắc muốn xóa không ?'); if (result) Submit('FormControl','@Url.Action("Delete","News")','delete',LoadData);"> <i class="fas fa-trash"></i> </button>*@
                         </div>
                     </div>
                 </div>
@@ -87,7 +88,7 @@
 </div>
 
 <!-- Modal Create Form -->
-<div class="modal fade" id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true">
+<div class="modal fade " id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" role="document">
         @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
@@ -108,19 +109,39 @@
                             <div class="form-group col-md-4">
                                 <div class="form-row">
                                     <div class="col-sm-12">
-                                        <select id="CategoryID" name="CategoryID" class="form-control" required>
+                                        @*<select id="CategoryCode" name="CategoryCode" class="form-control" onchange="renderProduct()" required>*@
+                                        <select id="CategoryCode" name="CategoryCode" class="form-control" required>
                                             <option value="">--- Lựa chọn danh mục ---</option>
-                                            @{
-                                                for (int i = 0; newscategory != null && i < newscategory.Count; i++)
+                                            @{ for (int i = 0; newscategory != null && i < newscategory.Count; i++)
                                                 {
-                                                    <option value="@newscategory[i].ID">@newscategory[i].Name</option>
-                                                }
-                                            }
+                                                    <option value="@newscategory[i].Code">@newscategory[i].Name</option>
+                                                } }
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        @*<div class="form-row">
+                            <div class="form-group col-sm-12">
+                                <select id="CenterID" name="CenterID" class="form-control" onchange="renderProduct()" required>
+                                    <option value="">--- Lựa chọn cơ sở ---</option>
+                                    @{ for (int i = 0; listCenter != null && i < listCenter.Count; i++)
+                                        {
+                                            <option value="@listCenter[i].ID">@listCenter[i].Name</option>
+                                        } }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row hide" id="salePrice">
+                            <div class="form-group col-sm-6">
+                                <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm" />
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá(%)" />
+                            </div>
+                        </div>*@
 
                         <div class="form-row">
                             <div class="form-group col-sm-12">
@@ -132,11 +153,9 @@
                         <div class="form-row">
                             <div class="form-group col-sm-12">
                                 <textarea name="Content" id="Content" class="form-control" required></textarea>
-                                @*<script language="javascript">
-                                        CKEDITOR.replace("Content");
-                                    </script>*@
                             </div>
                         </div>
+
                         <div class="form-row">
                             <div class="form-group col-md-8">
                                 <div class="form-row">
@@ -193,7 +212,7 @@
                                     </div>*@
                             </div>
                             <div class="form-group col-md-4">
-                                <div class="form-row"><img id="img" style="max-height:112px;max-width:200px;margin:auto" /></div>
+                                <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
                                 <div class="form-row"><a class="hide" id="linkImage" href="" target="_blank" style="margin:auto">Link ảnh</a></div>
                             </div>
                         </div>
@@ -216,6 +235,17 @@
 </style>
 
 <script>
+    //$('.datepicker').each(function () {
+    //    var fieldID = $(this).next().attr("id");
+    //    $(this).datepicker({
+    //        changeMonth: true,
+    //        changeYear: true,
+    //        dateFormat: 'dd/mm/yy',
+    //        altField: '#' + fieldID,
+    //        altFormat: 'yy-mm-dd'
+    //    }).val("");
+    //})
+
     function LoadData() {
         var searchText = $('#searchText').val();
         var categoryID = $('#categoryID').val();
@@ -240,6 +270,7 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
+
                         var activeTop = "";
                         if (item.IsTop) {
                             activeTop = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","News")',LoadData,'IsTop')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='IsTop'> <div class='handle'></div> </button></td>";
@@ -390,84 +421,84 @@
     }
 
     function Edits(id, urlGetData, urlPostData, _this) {
-    var modal = document.querySelector(_this.getAttribute("data-target"));
-    var form = modal.querySelector('form');
-    var inputID = form.querySelector('input[name="ID"]');
-    if (inputID == null) {
-        inputID = "<input name='ID' type='hidden' value='" + id + "' />";
-        form.innerHTML += inputID;
-    }
-    else {
-        inputID.value = id;
-    }
-    $(form).find("input[locked]").attr("disabled", "disabled");
-    var data = new FormData();
-    data.append("ID", id);
-    data.delete("Content");
-    Ajax(urlGetData, "POST", data, true).then(function (res) {
-
-        var item = JSON.parse(res);
-        var listinput = $(form).find('input');
-
-        for (var i = 0; i < listinput.length; i++) {
-            if ($(listinput[i]).attr("type") == "file") continue;
-            if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == true) {
-                $(listinput[i]).prop('checked',true);
-            }
-            if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == false) {
-                $(listinput[i]).prop('checked', false);
-            }
-            listinput[i].value = item.Data[listinput[i].name];
+        Adds(_this);
+        while (parseInt($(".modal-body").find(".Class").length > 0)) {
+            $(".modal-body").find(".Class").remove();
+        }
+        var modal = document.querySelector(_this.getAttribute("data-target"));
+        var form = modal.querySelector('form');
+        var inputID = form.querySelector('input[name="ID"]');
+        if (inputID == null) {
+            inputID = "<input name='ID' type='hidden' value='" + id + "' />";
+            form.innerHTML += inputID;
+        }
+        else {
+            inputID.value = id;
         }
 
-        var listselect = $(form).find('select');
-        for (var i = 0; i < listselect.length; i++) {
+        $('#salePrice').attr('class', 'form-row hide');
 
-             $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
-        }
+        $(form).find("input[locked]").attr("disabled", "disabled");
+        var data = new FormData();
+        data.append("ID", id);
+        data.delete("Content");
+        var ClassID = "";
+        Ajax(urlGetData, "POST", data, true).then(function (res) {
 
-        var txtarea = $(form).find('textarea');
-        for (var i = 0; i < txtarea.length; i++) {
-            $(txtarea[i]).val(item.Data[$(txtarea[i]).attr("name")] + "");
-        }
-
-        $(form).find('#img').attr('src', '/Upload/News/' + item.Data.Thumbnail);
-        $(form).find('#linkImage').removeClass('hide');
-        $(form).find('#linkImage').attr('href', '/Upload/News/' + item.Data.Thumbnail);
-
-        var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
-        document.getElementById("PublishDate").value = time;
-
-        for(n in CKEDITOR.instances)
-        {
-            console.log(CKEDITOR.instances[n]);
-            CKEDITOR.instances[n].destroy();
-        }
-        if (CKEDITOR.instances.Content) CKEDITOR.instances.Content.destroy();
-        CKEDITOR.replace("Content");
-
-        $("#Thumbnail").change(function () {
-            document.getElementById("linkImage").setAttribute("class", "hide")
-            readURL(this);
-        });
-
-    });
-    }
-
-    function readURL(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                $('#img').attr('src', e.target.result);
-                //debugger
-            }
-
-            reader.readAsDataURL(input.files[0]); // convert to base64 string
+            var item = JSON.parse(res);
+            var listinput = $(form).find('input');
+            debugger
             //debugger
-        }
-    }
+            for (var i = 0; i < listinput.length; i++) {
+                if ($(listinput[i]).attr("type") == "file") continue;
+                if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == true) {
+                    $(listinput[i]).prop('checked', true);
+                }
+                if ($(listinput[i]).attr("type") == "checkbox" && item.Data[listinput[i].name] == false) {
+                    $(listinput[i]).prop('checked', false);
+                }
+                listinput[i].value = item.Data[listinput[i].name];
+            }
 
+            var listselect = $(form).find('select');
+            for (var i = 0; i < listselect.length; i++) {
+                if ($(listselect[i]).attr("id") == "CategoryCode") {
+                    $(listselect[i]).val(item.CategoryCode.Code + "");
+                }
+                else {
+                    $(listselect[i]).val(item.Data[$(listselect[i]).attr("name")] + "");
+                }
+                if (item.CategoryCode.Code == "san-pham" && item.Data.CenterID != null) {
+                    renderProduct(item.CategoryCode.Code, item.Data.CenterID);
+                    //$("#ClassID").val(item.Data.ClassID).find("option[value=" + item.Data.ClassID + "]").attr('selected', true);
+                }
+            }
+
+            for (name in CKEDITOR.instances) {
+                CKEDITOR.instances[name].destroy(true);
+            }
+            CKEDITOR.replace("Content");
+
+            var txtarea = $(form).find('textarea');
+            for (var i = 0; i < txtarea.length; i++) {
+                //$(txtarea[i]).val(item.Data[$(txtarea[i]).attr("name")] + "");
+                txtarea[i].value = "";
+                txtarea[i].value = item.Data[$(txtarea[i]).attr("name")]
+            }
+
+            $(form).find('#img').attr('src', '/Upload/News/' + item.Data.Thumbnail);
+            $(form).find('#linkImage').removeClass('hide');
+            $(form).find('#linkImage').attr('href', '/Upload/News/' + item.Data.Thumbnail);
+
+            var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
+            document.getElementById("PublishDate").value = time;
+            debugger
+        });
+        //if (ClassID != "") {
+        debugger
+        $("#ClassID").val(ClassID).find("option[value=" + ClassID + "]").attr('selected', true);
+            //}
+    }
 
     function Adds(_this) {
         var modal = document.querySelector(_this.getAttribute("data-target"));
@@ -486,6 +517,8 @@
         var listselect = form.querySelectorAll('select');
         for (var i = 0; i < listselect.length; i++) {
             listselect[i].value = $(listselect[i]).find('option:first').attr("value");
+            if (document.getElementById("Class") != null)
+                document.getElementById("Class").remove();
         }
 
         for (name in CKEDITOR.instances) {
@@ -497,14 +530,14 @@
         if (txtarea.value != null) {
             txtarea.value = "";
         }
+        //while (parseInt($(".modal-body").find(".Class").length > 0)) {
+        //    $(".modal-body").find(".Class").remove();
+        //}
+
+        $('#salePrice').attr('class', 'form-row hide');
 
         $(form).find('#linkImage').attr('class', 'hide');
         $(form).find('#img').removeAttr('src');
-
-        $("#Thumbnail").change(function () {
-            readURL(this);
-            //debugger;
-        });
 
         $(form).find("input:disabled").removeAttr("disabled");
     }
@@ -519,5 +552,55 @@
         //console.log(res);
         return false;
     })
-}
+    }
+
+    var renderProduct = function (CategoryCode = "", CenterID = "") {
+        //debugger
+        document.getElementById("salePrice").setAttribute("class","form-row hide")
+        if (CategoryCode == "" && CenterID == "") {
+            var CategoryCode = document.getElementById("CategoryCode").value;
+            var CenterID = document.getElementById("CenterID").value;
+        }
+        //document.getElementById("Class").remove();
+        if (CategoryCode.toLowerCase() == "san-pham" && document.getElementById("CenterID").value != "") {
+            //document.getElementById("Class").remove();
+            var container = $('.modal-body')[0];
+            var list = $(container).find(".form-row");
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("getAllCourse", "News", new { Area = "admin" })',
+                dataType: "json",
+                data: { CenterID: CenterID, CategoryCode: CategoryCode },
+                success: function (result) {
+                    //debugger
+                    var option = "";
+                    for (i = 0; i < result.Data.length; i++) {
+                        option += "<option value='" + result.Data[i].ID + "'>" + result.Data[i].Name + "</option>";
+                    }
+                    var html = "<div class='form-row Class' id='Class'>" +
+                        "<div class='form-group col-sm-12'>" +
+                        "<select id='ClassID' name='ClassID' class='form-control' required>" +
+                        "<option value=''>--- Lựa chọn sản phẩm ---</option>" +
+                        //
+                        option +
+                        "</select>" +
+                        "</div>" +
+                        "</div>";
+                    $(html).insertAfter(list[2]);
+                    $('#salePrice').attr('class', 'form-row');
+                }
+            });
+            if (document.getElementById("Class") != null) {
+                document.getElementById("Class").remove();
+            }
+            //debugger
+        }
+        else if (document.getElementById("Class") != null) {
+            document.getElementById("Class").remove();
+
+        }
+        else {
+            $('#salePrice').attr('class', 'form-row hide');
+        }
+    }
 </script>

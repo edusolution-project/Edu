@@ -523,7 +523,7 @@ var render = {
         wrapper.append($("<input>", { "type": "hidden", "name": prefix + "Media.Path", "for": "mediapath" }));
         switch (type) {
             case "IMG":
-                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "image/*" }));
+                wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "image/jpeg,image/png,image/gif,image/bmp" }));
                 break;
             case "VIDEO":
                 wrapper.append($("<input>", { "type": "file", "name": "file", "onchange": "changeMedia(this)", "class": "hide", "accept": "video/*" }));
@@ -653,7 +653,7 @@ var load = {
             file.attr("accept", "audio/*");
         }
         if (type == 'img') {
-            file.attr("accept", "image/*");
+            file.attr("accept", "image/jpeg,image/png,image/gif,image/bmp");
         }
         file.click();
     }

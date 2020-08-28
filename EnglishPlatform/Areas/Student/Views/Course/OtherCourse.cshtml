@@ -1,0 +1,293 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var list_courses= ViewBag.List_Courses as List<BaseCustomerEntity.Database.NewsEntity>;
+    ViewData["Title"] = "Các  khóa học khác";
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+
+
+<script>
+    setActiveMenu("class");
+</script>
+
+<script src="~/js/daterangepicker.min.js"></script>
+<link href="~/css/daterangepicker.css" rel="stylesheet" />
+
+<section class="module" id="dashboard_content">
+    <div class="card-header">
+
+        <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
+            <div class="box filter-box d-none">
+                <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                <span class="ic ic-picker inactive"></span>
+            </div>
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1">
+                <select v-model="subject" v-on:change="changeSubject()">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 ml-md-2">
+                <select name="" v-model="grade" v-on:change="changeGrade()">
+                    <option value="">Chọn cấp độ</option>
+                    <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" placeholder="Tên lớp cần tìm">
+            </div>
+            <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                <input type="checkbox" v-on:click="getMyCourse()"/>
+                <span>Lớp học đã tham gia</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="h4 m-3" v-cloak cloak-holder>
+        <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
+    </div>
+    <div class="card-body" v-cloak>
+        <div class="row row-list">
+            <div class="col-md-3 course-item" v-for="(item,k) in list_courses">
+                <div class="box radius">
+                    <div class="thumb" style="position:relative;">
+                        <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
+                        <img v-else :src="item.Thumbnail" alt="">
+                    </div>
+                    <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
+
+
+                        <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title"><marquee width="100%">{{item.Title}}</marquee></a>
+                        <div class="c-bot" style="text-align:right;">
+                            <div>
+                                <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                            </div>
+                            <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                {{formatPrice(item.Discount) }} VNĐ
+                            </div>
+                            <div>
+                                <span style="color: #999; text-decoration:line-through; font-size:80%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
+                            </div>
+                            <div>
+                                <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select name="" v-model="view" v-on:change="getCourse()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="inner">
+                    <button><i class="ti-angle-left"></i></button>
+                    <button><i class="ti-angle-double-left"></i></button>
+                    <input type="text" v-model="page" />
+                    <button><i class="ti-angle-double-right"></i></button>
+                    <button><i class="ti-angle-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <style>
+
+        .ic-picker {
+            cursor: pointer;
+        }
+
+            .ic-picker.inactive {
+                background-image: url('../images/pickerdate-1.png');
+            }
+
+        .course-item .thumb {
+            position: relative;
+            height: 0;
+            padding-top: 56%;
+        }
+
+            .course-item .thumb img {
+                position: absolute;
+                top: 0;
+                max-height: none;
+                height: auto;
+            }
+    </style>
+    <script>
+        var isSearchDate = false;
+        new Vue({
+            el: "#main",
+            mounted() {
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                //this.list_courses=@Html.Raw(Json.Serialize(list_courses));
+                console.log(this.list_grades_full);
+                this.changeSubject()
+                window.ChooseCalendar = this.chooseCalendar
+                window.GetCourse = this.getCourse
+                window.InitDate = this.initDate
+                window.DestroyDate = this.destroyDate
+                window.RepDate = this.repDate
+                $('input[name=dates]').siblings('.ic-picker').click(function () {
+                    if (isSearchDate) {
+                        DestroyDate(this)
+                    }
+                    else {
+                        InitDate();
+                    }
+                });
+            },
+            data: {
+                list_courses: @Html.Raw(Json.Serialize(list_courses)),
+                list_subject: [],
+                list_grades_full: [],
+                list_grades: [],
+                subject:'',
+                grade: '',
+                view: 10,
+                page: 1,
+                startdate: moment(new Date(1800,1,1)),
+                enddate: moment(new Date(1800,1,1)),
+            },
+            computed: {
+                sDate: {
+                    get() {
+                        return moment(this.startdate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.startdate = value;
+                    }
+                },
+                eDate: {
+                    get() {
+                        return moment(this.enddate).format("MM/DD/YYYY");
+                    },
+                    set(value) {
+                        this.enddate = value;
+                    }
+                }
+            },
+            watch: {
+            },
+            methods: {
+                getCourse() {
+                    @*let _that = this
+                    let _form = new FormData()
+                    _form.append('GradeID', _that.grade)
+                    _form.append('SubjectID', _that.subject)
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    _form.append('StartDate', _that.sDate)
+                    _form.append('EndDate', _that.eDate)
+                    let _url = '@processUrl("GetListProduct", "Course")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            console.log(response.data)
+                            debugger
+                            _that.list_courses = response.data.Data;
+                            //console.log(_that.active_course);
+                        }).catch(e => { })*@
+                },
+                changeSubject() {
+                    let _that = this
+                    //console.log(this.subject)
+                    //console.log(this.list_grades_full)
+                    _that.list_grades = [];
+
+                    for (i = 0; i < _that.list_grades_full.length; i++)
+                    {
+                        //console.log(_that.list_grades_full[i].SubjectID)
+                        if (_that.list_grades_full[i].SubjectID == _that.subject) {
+                            _that.list_grades.push(_that.list_grades_full[i])
+                        }
+                    }
+                    _that.grade = ""
+                    _that.changeGrade()
+                },
+                changeGrade() {
+                    let _that = this
+                    _that.getCourse()
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                chooseCalendar() {
+                    $('input[name=dates]').focus().click()
+                },
+                initDate() {
+                    if (isSearchDate) return;
+                    let _that = this
+                    var start = moment();
+                    var end = moment().add(29, 'days');
+                    $('input[name="dates"]').daterangepicker({
+                        startDate: start,
+                        endDate: end,
+                        locale: {
+                            format: "DD/MM/YYYY",
+                        }
+                    }, function (s, e, label) {
+                        RepDate(s, e);
+                        GetCourse();
+                    });
+                    $('input[name="dates"]').siblings().removeClass('inactive');
+                    isSearchDate = true;
+                    $('input[name="dates"]').focus().click();
+                    _that.startdate = start;
+                    _that.enddate = end;
+                    GetCourse()
+                },
+                destroyDate() {
+                    let _that = this
+                    console.log(isSearchDate);
+                    if (!isSearchDate) return false;
+                    //$('input[name="dates"]').daterangepicker().destroy()
+                    $('input[name="dates"]').data('daterangepicker').remove();
+                    $('input[name="dates"]').val('-- Chọn thời gian --');
+                    $('input[name="dates"]').siblings().addClass('inactive');
+                    isSearchDate = false;
+                    console.log(isSearchDate);
+                    _that.startdate = moment(new Date(1800,1,1)),
+                    _that.enddate = moment(new Date(1800,1,1)),
+                    GetCourse();
+                },
+                repDate(svalue, evalue) {
+                    this.eDate = evalue;
+                    this.sDate = svalue;
+                },
+                formatPrice(value) {
+                    let val = (value / 1).toFixed(0)
+                    return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                },
+                getMyCourse() {
+                    
+                }
+            }
+        });
+
+    </script>
+}

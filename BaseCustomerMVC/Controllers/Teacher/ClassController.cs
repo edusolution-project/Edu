@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly GroupService _groupService;
 
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public ClassController(
             AccountService accountService,
@@ -167,13 +168,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
-            var center = new CenterEntity();
-            if (!string.IsNullOrEmpty(basis))
-            {
-                center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
+
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
 
@@ -185,7 +180,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Subjects = subject;
                 ViewBag.Skills = _skillService.GetList();
             }
-
+            var center = new CenterEntity();
+            if (!string.IsNullOrEmpty(basis))
+            {
+                center = _centerService.GetItemByCode(basis);
+                if (center != null)
+                    ViewBag.Center = center;
+            }
             ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
 
             ViewBag.User = UserID;
@@ -198,14 +199,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult Detail(DefaultModel model, string basis)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
-                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
-            }
+            //if (!string.IsNullOrEmpty(basis))
+            //{
+            //    var center = _centerService.GetItemByCode(basis);
+            //    if (center != null)
+            //        ViewBag.Center = center;
+            //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //    ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
+            //}
+
             if (model == null) return null;
             var currentClass = _service.GetItemByID(model.ID);
             if (currentClass == null)
@@ -1134,6 +1136,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Subjects.Add(csubject.SubjectID);
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
+                        item.TotalLessons += lessoncount;
                         //var skill = _skillService.GetItemByID(csubject.SkillID);
                         //if (skill == null) continue;
                         //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
@@ -1287,6 +1290,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        [HttpPost]
+        [Obsolete]
+        public JsonResult CloneClass(string ID,string CenterCode,string Name)
+        {
+            var oldData = _service.GetItemByID(ID);
+            var center = _centerService.GetItemByCode(CenterCode);
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(userId);
+			//VERY BAD
+            //var teachersHead = _teacherService.GetAll();
+            //TeacherEntity _teacher = null;
+            //foreach(var t in teachersHead.ToList())
+            //{
+            //    if(t.Centers.Find(x=>x.CenterID.Equals(center.ID))!=null && _teacherHelper.HasRole(t.ID, center.ID, "head-teacher"))
+            //    {
+            //        _teacher = t;
+            //        break;
+            //    }
+            //}
+			//_teacher = t;
+
+            var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
+            newData.ID = null;
+            newData.OriginID = oldData.ID;
+            newData.Created = DateTime.Now;
+            newData.Center = center.ID;
+            if (!Name.Equals(oldData.Name))
+                newData.Name = Name;
+            newData.Skills = new List<string>();
+            newData.Subjects = new List<string>();
+            newData.TeacherID = teacher.ID;
+
+            _service.CreateQuery().InsertOne(newData);
+
+           var classSubjects = _classSubjectService.CreateQuery().Find(o => o.ClassID == oldData.ID).ToList();
+            if (classSubjects != null && classSubjects.Count > 0)
+            {
+                foreach (var csubject in classSubjects)
+                {
+                    var ncbj = new ClassSubjectEntity();
+                    ncbj.CourseID = csubject.CourseID;
+                    ncbj.GradeID = csubject.GradeID;
+                    ncbj.SubjectID = csubject.SubjectID;
+                    ncbj.TeacherID = teacher.ID;
+                    var newMember = new ClassMemberEntity();
+                    long lessoncount = 0;
+                    //csubject.TeacherID = teacher.ID;
+                    var nID = CreateNewClassSubject(ncbj, newData, out newMember, out lessoncount);
+                    if (!newData.Skills.Contains(csubject.SkillID))
+                        newData.Skills.Add(csubject.SkillID);
+                    if (!newData.Subjects.Contains(csubject.SubjectID))
+                        newData.Subjects.Add(csubject.SubjectID);
+                    if (!newData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
+                        newData.Members.Add(newMember);
+                    newData.TotalLessons += lessoncount;
+                    //var skill = _skillService.GetItemByID(csubject.SkillID);
+                    //if (skill == null) continue;
+                    //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                }
+                _service.Save(newData);
+            }
+            //if (mustUpdateName)
+            //{
+            //    var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
+            //}
+
+            //refresh class total lesson => no need
+            //_ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
+
+            Dictionary<string, object> response = new Dictionary<string, object>()
+                {
+                    {"Data",newData },
+                    {"Error",null },
+                    {"Msg","Success" }
+                };
+            return new JsonResult(response);
+        }
+
         private async Task RemoveClassSubject(ClassSubjectEntity cs)
         {
             ////remove old schedule
@@ -1305,7 +1386,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, bool notify = true)
         {
             member = new ClassMemberEntity();
             lessoncount = 0;
@@ -1709,7 +1790,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ExamEntity data = _examService.GetItemByID(model.ID);
                 if (data != null)
                 {
-                    List<string> ExamTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "ESSAY" };
+                    var ExamTypes = quizType;
 
                     var lesson = _lessonService.GetItemByID(data.LessonID);
 
@@ -1733,10 +1814,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
                                 {
                                     CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                                    AnswerEssay = o.Type == ExamTypes[3] ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                    AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == data.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
                                     Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
                                     TypeAnswer = o.Type,
-                                    RealAnswerEssay = o.Type == ExamTypes[3] ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                    RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
