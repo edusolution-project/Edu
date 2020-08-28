@@ -31,6 +31,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ExamDetailService _examDetailService;
 
         private readonly LearningHistoryService _learningHistoryService;
+        private readonly ProgressHelper _progressHelper;
 
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
@@ -52,6 +53,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
+            , ProgressHelper progressHelper
             , ChapterProgressService chapterProgressService
             , LessonScheduleService lessonScheduleService
             , LearningHistoryService learningHistoryService
@@ -450,7 +452,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
             //Create learning history
-            _ = _learningHistoryService.CreateHist(new LearningHistoryEntity()
+            _ = _progressHelper.CreateHist(new LearningHistoryEntity()
             {
                 ClassID = ClassID,
                 ClassSubjectID = ClassSubjectID,

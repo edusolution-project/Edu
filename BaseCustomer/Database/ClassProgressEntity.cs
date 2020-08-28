@@ -15,14 +15,8 @@ namespace BaseCustomerEntity.Database
         public string StudentID { get; set; }
         [JsonProperty("ClassID")]
         public string ClassID { get; set; }
-        //[JsonProperty("ClassSubjectID")]
-        //public string ClassSubjectID { get; set; }
-        //[JsonProperty("CompletedLessons")]
-        //public List<string> CompletedLessons { get; set; }
         [JsonProperty("Completed")]
         public int Completed { get; set; }
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
         [JsonProperty("LastLessonID")]
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
@@ -43,21 +37,9 @@ namespace BaseCustomerEntity.Database
 
     public class ClassProgressService : ServiceBase<ClassProgressEntity>
     {
-        private ClassService _classService;
-        private ClassSubjectService _classSubjectService;
-        private LessonService _lessonService;
-
         public ClassProgressService(IConfiguration config
-            //, ClassService classService, LessonService lessonService, ClassSubjectService classSubjectService
             ) : base(config)
         {
-            //_classService = classService;
-            //_lessonService = lessonService;
-            //_classSubjectService = classSubjectService;
-            _classService = new ClassService(config);
-            _lessonService = new LessonService(config);
-            _classSubjectService = new ClassSubjectService(config);
-
             var indexs = new List<CreateIndexModel<ClassProgressEntity>>
             {
                 //ClassID_1
@@ -71,37 +53,29 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdateLastLearn(LessonProgressEntity item)
         {
-            var currentObj = _classService.GetItemByID(item.ClassID);
-            if (currentObj == null) return;
             var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
             {
-                var totalLessons = _lessonService.CountClassLesson(item.ClassID);
-
                 progress = new ClassProgressEntity
                 {
                     StudentID = item.StudentID,
                     Completed = 1,
-                    //CompletedLessons = new List<string>() { item.ClassSubjectID }, //TODO: cập nhật khi số lượng môn học thay đổi
-                    TotalLessons = totalLessons,
-                    ClassID = currentObj.ID,
+                    ClassID = item.ClassID,
                     LastDate = DateTime.Now,
                     LastLessonID = item.LessonID
                 };
-
                 //create new progress
                 await Collection.InsertOneAsync(progress);
             }
             else
             {
                 var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
                      .Set(t => t.LastDate, DateTime.Now)
                      .Set(t => t.LastLessonID, item.LessonID);
                 if (item.TotalLearnt == 1) //new
                     update = update.Inc(t => t.Completed, 1);
 
-                await Collection.UpdateManyAsync(t => t.ClassID == currentObj.ID && t.StudentID == item.StudentID, update);
+                await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID, update);
             }
         }
 
@@ -137,18 +111,6 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task<long> RefreshTotalLessonForClass(string ClassID)
-        {
-            var totalLessons = _lessonService.CountClassLesson(ClassID);
-
-            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
-                     .Set(t => t.TotalLessons, totalLessons);
-
-            await Collection.UpdateManyAsync(t => t.ClassID == ClassID, update);
-            return totalLessons;
-        }
-
         //public async Task DecreaseCompleted(string ClassID, long decrease)
         //{
         //    var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
@@ -177,29 +139,24 @@ namespace BaseCustomerEntity.Database
                      .Inc(t => t.Completed, 0 - clssbj.Completed)
                      .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
                      .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
-                     .Inc(t => t.TotalLessons, 0 - clssbj.TotalLessons)
                      .Inc(t => t.PracticePoint, 0 - clssbj.PracticePoint)
                      .Inc(t => t.PracticeDone, 0 - clssbj.PracticeDone);
             await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
-        }
-
-        public IEnumerable<StudentRanking> GetClassResults(string ClassID)
-        {
-            return CreateQuery().Find(t => t.ClassID == ClassID).Project(t => new StudentRanking
-            {
-                StudentID = t.StudentID,
-                AvgPoint = t.AvgPoint,
-                ExamDone = t.ExamDone,
-                TotalPoint = t.TotalPoint,
-                PracticePoint = t.PracticePoint,
-                Count = t.Completed
-            }).ToEnumerable();
         }
 
         public long DecreasePoint(LessonProgressEntity item)
         {
             var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
             var update = Builders<ClassProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
+            return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
+                update
+                ).ModifiedCount;
+        }
+
+        public long DecreasePracticePoint(LessonProgressEntity item)
+        {
+            var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
+            var update = Builders<ClassProgressEntity>.Update.Inc(t => t.PracticePoint, 0 - item.LastPoint);
             return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
                 update
                 ).ModifiedCount;

@@ -25,8 +25,6 @@ namespace BaseCustomerEntity.Database
         public string ParentID { get; set; }
         [JsonProperty("Completed")]
         public int Completed { get; set; }
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
         [JsonProperty("LastLessonID")]
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
@@ -181,7 +179,6 @@ namespace BaseCustomerEntity.Database
             {
                 StudentID = StudentID,
                 Completed = 1,
-                TotalLessons = _lessonService.CountChapterLesson(chapter.ID),
                 PracticeCount = chapter.PracticeCount,
                 ClassID = chapter.ClassID,
                 ClassSubjectID = chapter.ClassSubjectID,

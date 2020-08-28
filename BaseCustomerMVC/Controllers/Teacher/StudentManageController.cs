@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
+        private readonly ProgressHelper _progressHelper;
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly ScoreStudentService _scoreStudentService;
@@ -65,6 +66,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             StudentService studentService,
             CenterService centerService,
+            ProgressHelper progressHelper,
+            StudentHelper studentHelper,
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
@@ -93,7 +96,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
 
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _studentHelper = studentHelper;
+            _progressHelper = progressHelper;
         }
 
         public IActionResult Index(DefaultModel model, string basis)
@@ -206,7 +210,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return false;
         }
 
-        public async Task<JsonResult> RemoveStudent(string StudentID,string basis, string JoinedClasses = null, string ClassID = null)
+        public async Task<JsonResult> RemoveStudent(string StudentID, string basis, string JoinedClasses = null, string ClassID = null)
         {
             var Error = "";
             try
@@ -230,7 +234,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (_studentService.LeaveClass(@class, StudentID) > 0)
                         {
                             //remove history, exam, exam detail, progress...
-                            await _learningHistoryService.RemoveClassStudentHistory(@class, StudentID);
+                            await _progressHelper.RemoveClassStudentHistory(@class, StudentID);
                             await _examService.RemoveClassStudentExam(@class, StudentID);
                         }
                     }

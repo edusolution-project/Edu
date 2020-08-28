@@ -67,6 +67,7 @@ namespace EnglishPlatform
             services.AddSingleton<MailHelper>();
             services.AddSingleton<CourseHelper>();
             services.AddSingleton<ClassHelper>();
+            services.AddSingleton<ProgressHelper>();
             services.AddSingleton<StudentHelper>();
             services.AddSingleton<LessonHelper>();
             services.AddSingleton<TeacherHelper>();

@@ -43,9 +43,9 @@
                     </select>
                 </div>
                 @*<div class="box filter-box w-250" v-if="search_subject != ''">
-                    <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
-                    <span class="ic ic-picker"></span>
-                </div>*@
+                        <input type="text" value="01/08/2019 - 30/09/2019" name="dates">
+                        <span class="ic ic-picker"></span>
+                    </div>*@
             </div>
             <div class="flex rate" v-if="tab[1] || search_subject == ''">
                 <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
@@ -117,8 +117,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in sumarryData">
-                            <td><a href="#" v-on:click="showSkillSummary('{{item.SubjectID}}')" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
                             <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                            <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
                             <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
                             <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                         </tr>
@@ -150,6 +151,7 @@
                 window.RepDate = this.repDate
                 window.tabChange = this.tabChange
                 window.loadData = this.loadData
+                window.showSkillSummary = this.showSkillSummary
                 this.tabChange()
             },
             components: {
@@ -171,7 +173,11 @@
                     },
                     {
                         key: 'score',
-                        label: 'Kết quả'
+                        label: 'Điểm luyện tập'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm kiểm tra'
                     },
                     {
                         key: 'rank',
@@ -290,7 +296,7 @@
                         .then(response => {
                             _that.resultData = response.data.Data;
                             _that.avgPoint = 0;
-                            
+
                             if (_that.resultData.length > 0) {
                                 _that.resultData.forEach(function (exam) {
                                     _that.avgPoint += exam.Result
@@ -380,6 +386,10 @@
                 formatFullDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY hh:mm A")
+                },
+                showSkillSummary(classsubjectid) {
+                    this.search_subject = classsubjectid;
+                    console.log(classsubjectid);
                 },
                 repDate(svalue, evalue) {
                     this.eDate = evalue;

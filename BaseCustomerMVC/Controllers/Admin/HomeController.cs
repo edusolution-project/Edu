@@ -111,8 +111,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             _courseChapterService.CreateQuery().UpdateMany(t => true, Builders<CourseChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
 
-
-
             //calculate lesson maxpoint
             var courselessons = _lessonService.GetAll().ToEnumerable();
             foreach (var cl in courselessons)

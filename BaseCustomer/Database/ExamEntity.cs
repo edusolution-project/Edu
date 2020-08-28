@@ -330,6 +330,8 @@ namespace BaseCustomerEntity.Database
                 else
                 {
                     _chapterProgressService.DecreasePracticePoint(lessonProgress);
+                    _classSubjectProgressService.DecreasePracticePoint(lessonProgress);
+                    _classProgressService.DecreasePracticePoint(lessonProgress);
                 }
                 _lessonProgressService.ResetPoint(lessonProgress);
             }
