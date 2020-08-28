@@ -1446,7 +1446,7 @@
         <input type="text" class="form-control" :value="class_info.Name" name="Name" id="Name" />
     </b-col>
     <template v-slot:modal-footer="{ ok, cancel}">
-        <template v-if="isLoading">
+        <template v-if="student_data.isLoading">
             <b-button>Đang gửi dữ liệu ...</b-button>
         </template>
         <template v-else>

@@ -1,6 +1,4 @@
-﻿using BaseCustomerEntity.Database;
-using FileManagerCore.Globals;
-using GoogleLib.Interfaces;
+﻿using FileManagerCore.Globals;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -16,24 +14,13 @@ namespace FileManagerCore.Services
 {
     public class RoxyFilemanHandler : Interfaces.IRoxyFilemanHandler
     {
-        private readonly FolderManagerService _folderManagerService;
-
-        private readonly FileManagerService _fileManagerService;
-
-        private readonly FolderCenterService _folderCenterService;
-        private readonly IGoogleDriveApiService _googleDriveService;
         private readonly GConfig _gConfig;
         private readonly IHostingEnvironment _environment;
         private Dictionary<string, string> _lang { get; set; }
-        public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig, 
-            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService)
+        public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig)
         {
             _gConfig = gConfig;
             _environment = environment;
-            _folderManagerService = folderManagerService;
-            _fileManagerService = fileManagerService;
-            _folderCenterService = folderCenterService;
-            //_googleDriveService = Startup.GoogleDrive;
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {
@@ -883,126 +870,5 @@ namespace FileManagerCore.Services
             }
             return ret;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="center"></param>
-        /// <param name="user"></param>
-        /// <param name="context"></param>
-        /// <returns>List fileId</returns>
-        public List<MediaResponseModel> UploadFileWithGoogleDrive(string center,string user,HttpContext context)
-        {
-            string folderId = GetFolder(center, user);
-            var listFile = context.Request.Form.Files;
-            var count = listFile == null ? 0 : listFile.Count;
-            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
-
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
-            List<MediaResponseModel> response = new List<MediaResponseModel>();
-            for (int i = 0; i < count; i++)
-            {
-                IFormFile file = listFile[i];
-                FileInfo f = new FileInfo(file.FileName);
-                string filename = MakeUniqueFilename(path, f.Name);
-                string dest = Path.Combine(path, filename);
-                string fileId = "";
-                using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
-                {
-                    file.CopyTo(stream);
-                    fileId = _googleDriveService.UploadFileStatic(filename, _googleDriveService.GetMimeType(dest), stream, folderId);
-                    stream.Close();
-                }
-                //using (var stream = new FileStream(dest, FileMode.Create))
-                //{
-                //    file.CopyTo(stream);
-
-                //    stream.Close();
-                //}
-                //DeleteFile(dest);
-
-                response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
-
-                _fileManagerService.Collection.InsertOne(new FileManagerEntity()
-                {
-                    Extends = f.Extension,
-                    FileID = fileId,
-                    FolderID = folderId,
-                    Name = file.Name,
-                    Center = center,
-                    UserID = user
-                });
-            }
-            return response;
-        }
-        public bool DeleteFileWithGoogleDrive(string fileId, string center, string user)
-        {
-            try
-            {
-                if (_fileManagerService.RemoveFile(center, user, fileId))
-                {
-                    _googleDriveService.Delete(fileId);
-                    return true;
-                }
-                return false;
-            }
-            catch(Exception)
-            {
-                return false;
-            }
-        }
-
-        private string GetFolder(string center, string user)
-        {
-            string centerFolder = _folderCenterService.GetFolderID(center);
-            if (string.IsNullOrEmpty(centerFolder))
-            {
-                centerFolder = CreateFolderCenter(center);
-            }
-            string folderId = _folderManagerService.GetFolderID(centerFolder, user);
-            if (string.IsNullOrEmpty(folderId))
-            {
-                folderId = CreateFolderUser(centerFolder, user);
-            }
-
-            return folderId;
-        }
-        private string GetRoot()
-        {
-            string root = _folderCenterService.GetRoot();
-            if (string.IsNullOrEmpty(root))
-            {
-                root = _googleDriveService.CreateDirectory("EDUSO_MANAGERFILE", "Quản lý file của hệ thống").Id;
-                _folderCenterService.CreateRoot(root);
-            }
-            return root;
-        }
-
-        private string CreateFolderUser(string centerFolder,string user)
-        {
-            string folderId = _googleDriveService.CreateDirectory(user, "User Folder " + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
-            _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
-            {
-                Center = centerFolder,
-                FolderID = folderId,
-                UserID = user
-            });
-
-            return folderId;
-        }
-
-        private string CreateFolderCenter(string center)
-        {
-            string root = GetRoot();
-            string folderId = _googleDriveService.CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
-            _folderCenterService.CreateQuery().InsertOne(new FolderCenterEntity()
-            {
-                Center = center,
-                FolderID = folderId
-            });
-            return folderId;
-        }
-
-        
     }
 }

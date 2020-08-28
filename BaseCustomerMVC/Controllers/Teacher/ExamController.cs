@@ -307,7 +307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast = false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast=false)
         {
             try
             {
@@ -339,7 +339,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Extension = listFiles[i].Extends,
                                 Name = listFiles[i].Path,
                                 OriginalName = listFiles[i].Path,
-                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFiles[i].Path)
+                                Path = listFiles[i].Path
                             };
                             listMedia.Add(media);
                         }

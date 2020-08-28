@@ -179,7 +179,6 @@ var ExamReview = (function () {
 
     var renderItemNavigation = function (el, data, index) {
         var examDetails = config.exam.Details;
-        
         for (var i = 0; i < data.Questions.length; i++) {
             var item = data.Questions[i];
             console.log(item);
@@ -706,8 +705,6 @@ var ExamReview = (function () {
             html += '</fieldset>';
             var anwerMedia = item.MediasAnswer;
             var medias = item.Medias;//file học viên upload
-=======
->>>>>>> VietPhung
             html += '<fieldset class="col-md-12">';
             if (medias != null && medias.length > 0) {
                 html += '<div class="attachment mt-3"><strong>File đính kèm:</strong> ';

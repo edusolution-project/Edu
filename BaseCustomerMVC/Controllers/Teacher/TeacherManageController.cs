@@ -247,8 +247,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Name = center.Name,
                     RoleID = RoleID
                 });
-
-                //oldobj.Subjects = oldobj.Subjects[0].Substring(',');
                 _teacherService.Save(oldobj);
                 if (!exist)
                     _ = _mailHelper.SendTeacherJoinCenterNotify(tc.FullName, tc.Email, "", center.Name);
@@ -257,12 +255,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (ExistEmail(tc.Email))
                     return Json(new { error = "Email đã được sử dụng" });
-                var Subjects = new List<string>();
-                if(tc.Subjects[0]!=null)
-                foreach(var item in tc.Subjects[0].Split(','))
-                {
-                    Subjects.Add(item);
-                }
 
                 var teacher = new TeacherEntity
                 {
@@ -281,11 +273,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     },
                     Phone = tc.Phone,
                     IsActive = true,
-                    //Subjects = currentTeacher.Subjects,//copy creator subjects
-                    UserCreate = currentUser,
-                    Subjects=Subjects
+                    Subjects = currentTeacher.Subjects,//copy creator subjects
+                    UserCreate = currentUser
                 };
-                //teacher.Subjects.AddRange(Subjects);
                 _teacherService.CreateQuery().InsertOne(teacher);
                 var account = new AccountEntity()
                 {

@@ -274,13 +274,11 @@
                 },
                 showAddModal(data) {
                     if (data != null) {
-                        //debugger
                         this.add_member.id = data.ID
                         this.add_member.email = data.Email
                         this.add_member.name = data.FullName
                         this.add_member.phone = data.Phone
                         this.add_member.role = data.RoleID
-                        debugger
                         if (data.Subjects != null) {
                             this.add_member.subjects = data.Subjects
                         }
@@ -294,7 +292,6 @@
                         this.add_member.name = ''
                         this.add_member.phone = ''
                         this.add_member.role = ''
-                        this.add_member.subjects=[]
                     }
 
                     this.$bvModal.show('modal_event')

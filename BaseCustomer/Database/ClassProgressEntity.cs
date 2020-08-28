@@ -83,9 +83,7 @@ namespace BaseCustomerEntity.Database
         {
             var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
-            {
                 return;
-            }
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new

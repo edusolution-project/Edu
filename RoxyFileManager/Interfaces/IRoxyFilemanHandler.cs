@@ -1,5 +1,4 @@
 ﻿using FileManagerCore.Globals;
-using GoogleLib.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -10,10 +9,6 @@ namespace FileManagerCore.Interfaces
 {
     public interface IRoxyFilemanHandler
     {
-
-        List<MediaResponseModel> UploadFileWithGoogleDrive(string center,string user,HttpContext context);
-        bool DeleteFileWithGoogleDrive(string fileId, string center, string user);
-
         List<DIRLIST> ListDirTree(string type);
         List<FILESLIST> ListFiles(string path, string type);
         object CopyDir(string path, string newPath);
