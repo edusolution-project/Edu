@@ -14,12 +14,14 @@ namespace FileManagerCore.Globals
 {
     public static class Startup
     {
-        public static IServiceCollection AddRoxyFileManger(this IServiceCollection service)
+        private static IGoogleDriveApiService _googleDriveApiService;
+        public static IGoogleDriveApiService GoogleDrive { get { return _googleDriveApiService; } }
+        public static IServiceCollection AddRoxyFileManger(this IServiceCollection service, IGoogleDriveApiService googleDriveApiService)
         {
+            _googleDriveApiService = googleDriveApiService;
             service.AddSingleton<FolderManagerService>();
             service.AddSingleton<FileManagerService>();
             service.AddSingleton<FolderCenterService>();
-            service.AddSingleton<IGoogleDriveApiService, GoogleDriveApiService>();
             service.AddSingleton<GConfig>();
             service.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
             return service;

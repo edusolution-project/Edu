@@ -1,6 +1,7 @@
 ﻿using BaseCustomerEntity.Database;
 using FileManagerCore.Globals;
 using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -22,26 +23,24 @@ namespace FileManagerCore.Services
         private readonly FileManagerService _fileManagerService;
 
         private readonly FolderCenterService _folderCenterService;
-        private readonly IGoogleDriveApiService _googleDriveService;
         private readonly GConfig _gConfig;
         private readonly IHostingEnvironment _environment;
         private Dictionary<string, string> _lang { get; set; }
         public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig, 
-            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService, IGoogleDriveApiService googleDriveApiService)
+            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService)
         {
             _gConfig = gConfig;
             _environment = environment;
             _folderManagerService = folderManagerService;
             _fileManagerService = fileManagerService;
             _folderCenterService = folderCenterService;
-            _googleDriveService = googleDriveApiService;
         }
 
         public IGoogleDriveApiService GoogleDriveApiService
         {
             get
             {
-                return _googleDriveService;
+                return Startup.GoogleDrive;
             }
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
@@ -919,7 +918,7 @@ namespace FileManagerCore.Services
                 using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
                 {
                     file.CopyTo(stream);
-                    fileId = _googleDriveService.UploadFileStatic(filename, _googleDriveService.GetMimeType(dest), stream, folderId);
+                    fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
                     stream.Close();
                 }
                 response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
@@ -942,7 +941,7 @@ namespace FileManagerCore.Services
             {
                 if (_fileManagerService.RemoveFile(center, user, fileId))
                 {
-                    _googleDriveService.Delete(fileId);
+                    GoogleDriveApiService.Delete(fileId);
                     return true;
                 }
                 return false;
@@ -973,7 +972,7 @@ namespace FileManagerCore.Services
             string root = _folderCenterService.GetRoot();
             if (string.IsNullOrEmpty(root))
             {
-                root = _googleDriveService.CreateDirectory(EDUSO_MANAGERFILE, "Quản lý file của hệ thống").Id;
+                root = Startup.GoogleDrive.CreateDirectory(EDUSO_MANAGERFILE, "Quản lý file của hệ thống").Id;
                 _folderCenterService.CreateRoot(root);
             }
             return root;
@@ -981,7 +980,7 @@ namespace FileManagerCore.Services
 
         private string CreateFolderUser(string centerFolder,string user)
         {
-            string folderId = _googleDriveService.CreateDirectory(user, "User Folder create" + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
+            string folderId = Startup.GoogleDrive.CreateDirectory(user, "User Folder create" + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
             _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
             {
                 Center = centerFolder,
@@ -995,7 +994,7 @@ namespace FileManagerCore.Services
         private string CreateFolderCenter(string center)
         {
             string root = GetRoot();
-            string folderId = _googleDriveService.CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
+            string folderId = Startup.GoogleDrive.CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
             _folderCenterService.CreateQuery().InsertOne(new FolderCenterEntity()
             {
                 Center = center,

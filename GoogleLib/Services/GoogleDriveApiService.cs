@@ -35,10 +35,8 @@ namespace GoogleLib.Services
         public string URL_THUMBNAIL { get => "https://drive.google.com/thumbnail?id={id}"; }
         private readonly DriveService _driveService;
         private readonly IConfiguration _configuration;
-        private readonly IHostingEnvironment _hostingEnvironment;
-        public GoogleDriveApiService(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public GoogleDriveApiService(IConfiguration configuration)
         {
-            _hostingEnvironment = hostingEnvironment;
             _configuration = configuration;
             _driveService = GetDriveService().Result;
         }
@@ -353,16 +351,14 @@ namespace GoogleLib.Services
                 user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
                 appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
                 fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
-                var fileStorePath = Path.Combine(_hostingEnvironment.WebRootPath, fileStorge);
 
                 if (string.IsNullOrEmpty(file))
                 {
-                    return await GetDriveService(clientId, clientSecret, user, appName, fileStorePath);
+                    return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
                 }
                 else
                 {
-                    var pathfile = Path.Combine(_hostingEnvironment.WebRootPath, file);
-                    return await GetDriveService(pathfile, user, appName, fileStorePath);
+                    return await GetDriveService(file, user, appName, fileStorge);
                 }
             }
             catch(Exception ex)

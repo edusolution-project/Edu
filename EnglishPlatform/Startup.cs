@@ -59,7 +59,6 @@ namespace EnglishPlatform
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
-            services.AddEasyRealTime();
             services.AddAccess();
             services.Configure<DefaultConfigs>(Configuration.GetSection("DefaultConfigs"));
             services.AddLogs();

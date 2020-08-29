@@ -10,9 +10,9 @@ namespace GoogleLib.Factory
 {
     public class GoogleFactory
     {
-        public static IGoogleDriveApiService GetGoogleDrive(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public static IGoogleDriveApiService GetGoogleDrive(IConfiguration configuration)
         {
-            return new GoogleDriveApiService(configuration, hostingEnvironment);
+            return new GoogleDriveApiService(configuration);
         }
     }
 }
