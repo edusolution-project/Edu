@@ -340,7 +340,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Extension = listFileUpload[i].Extends,
                                 Name = listFileUpload[i].Path,
                                 OriginalName = listFileUpload[i].Path,
-                                Path = FileManagerCore.Globals.Startup.GoogleDrive.CreateLinkViewFile(listFileUpload[i].Path)
+                                Path = _roxyFilemanHandler.GoogleDriveApiService.CreateLinkViewFile(listFileUpload[i].Path)
                             };
                             listMedia.Add(media);
                         }

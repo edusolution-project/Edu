@@ -27,14 +27,22 @@ namespace FileManagerCore.Services
         private readonly IHostingEnvironment _environment;
         private Dictionary<string, string> _lang { get; set; }
         public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig, 
-            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService)
+            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService, IGoogleDriveApiService googleDriveApiService)
         {
             _gConfig = gConfig;
             _environment = environment;
             _folderManagerService = folderManagerService;
             _fileManagerService = fileManagerService;
             _folderCenterService = folderCenterService;
-            _googleDriveService = Startup.GoogleDrive;
+            _googleDriveService = googleDriveApiService;
+        }
+
+        public IGoogleDriveApiService GoogleDriveApiService
+        {
+            get
+            {
+                return _googleDriveService;
+            }
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {

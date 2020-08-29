@@ -14,7 +14,6 @@ namespace FileManagerCore.Globals
 {
     public static class Startup
     {
-        public static IGoogleDriveApiService GoogleDrive = GoogleFactory.GetGoogleDrive();
         public static IServiceCollection AddRoxyFileManger(this IServiceCollection service)
         {
             service.AddSingleton<FolderManagerService>();
