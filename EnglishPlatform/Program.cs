@@ -33,7 +33,7 @@ namespace EnglishPlatform
             WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
                 var config = configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                if (_googleDriveApiService == null)
+                if (_googleDriveApiService == null && config != null)
                 {
                     _googleDriveApiService = new GoogleDriveApiService(config.Build());
                 }

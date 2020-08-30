@@ -7,14 +7,14 @@ using System.Collections.Generic;
 
 namespace BaseCustomerEntity.Database
 {
-    public class GrpupLastLifeEntity : EntityBase
+    public class GroupLastLifeEntity : EntityBase
     {
         [JsonProperty("GroupID")]
         public string GroupID { get; set; }
         [JsonProperty("TimeLife")]
         public long TimeLife { get; set; }
     }
-    public class GrpupLastLifeService : ServiceBase<GrpupLastLifeEntity>
+    public class GrpupLastLifeService : ServiceBase<GroupLastLifeEntity>
     {
         public GrpupLastLifeService(IConfiguration configuration) : base(configuration)
         {
