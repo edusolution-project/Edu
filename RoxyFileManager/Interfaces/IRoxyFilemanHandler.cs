@@ -10,7 +10,7 @@ namespace FileManagerCore.Interfaces
 {
     public interface IRoxyFilemanHandler
     {
-
+        IGoogleDriveApiService GoogleDriveApiService { get; }
         List<MediaResponseModel> UploadFileWithGoogleDrive(string center,string user,HttpContext context);
         bool DeleteFileWithGoogleDrive(string fileId, string center, string user);
 

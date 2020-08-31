@@ -6,6 +6,8 @@ using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Controllers.Student;
 using BaseCustomerMVC.Globals;
 using BaseEasyRealTime.Entities;
+using Core_v2.Interfaces;
+using Core_v2.Repositories;
 using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,22 +25,119 @@ namespace EnglishPlatform.Controllers
         protected readonly Dictionary<string, List<string>> _mapUsersConnectionId = new Dictionary<string, List<string>>();
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly IHubContext<ChatHub> _hubContent;
-
-        public EasyChatController(IHubContext<ChatHub> hubContent,IRoxyFilemanHandler roxyFilemanHandler)
+        private readonly StudentService _studentService;
+        private readonly ClassService _classService;
+        private readonly ILog _log;
+        public EasyChatController(IHubContext<ChatHub> hubContent,IRoxyFilemanHandler roxyFilemanHandler, StudentService studentService, ClassService classService, ILog log)
         {
             
             _hubContent = hubContent;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _studentService = studentService;
+            _classService = classService;
+            _log = log;
         }
 
         // danh sách group 
-        public List<object> GetClassList()
+        [HttpGet]
+        public List<MemberInfo> GetClassList()
         {
-            if(User != null && User.Identity.IsAuthenticated)
+            try
             {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    List<string> classIdList = _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
+                    if(classIdList != null && classIdList.Count >0)
+                    {
+                        var listClass = _classService.GetItemsByIDs(classIdList)?.Select(o => new MemberInfo()
+                        {
+                            ID = o.ID,
+                            Name = o.Name,
+                            Center = o.Center
+                        })?.ToList();
+
+                        return listClass;
+                    }
+                }
 
             }
+            catch(Exception ex)
+            {
+                _log.Error(this.GetType().Name, ex);
+            }
+            return null;
+        }
+        [HttpGet]
+        public List<MemberInfo> GetMembersInClass (string className)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    if (!string.IsNullOrEmpty(className))
+                    {
+                        List<StudentEntity> listStudentOnClass = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
+                        if (listStudentOnClass != null && listStudentOnClass.Count > 0)
+                        {
+                            var listClass = listStudentOnClass?.Select(o => new MemberInfo()
+                            {
+                                ID = o.ID,
+                                Name = o.FullName,
+                                Center = className
+                            })?.ToList();
 
+                            return listClass;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _log.Error(this.GetType().Name, ex);
+            }
+            return null;
+        }
+
+        [HttpPost]
+        public List<MemberInfo> GetMembers(List<string> classNames)
+        {
+            try
+            {
+                if (User != null && User.Identity.IsAuthenticated)
+                {
+                    List<StudentEntity> listStudentOnClass = new List<StudentEntity>();
+                    if (classNames != null && classNames.Count > 0)
+                    {
+                        for(int  i = 0; i < classNames.Count; i++)
+                        {
+                            string className = classNames[i];
+                            var listStudent = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
+                            if (listStudent != null && listStudent.Count > 0)
+                            {
+                                listStudentOnClass.AddRange(listStudent);
+                            }
+                        }
+                        
+                        if (listStudentOnClass != null && listStudentOnClass.Count > 0)
+                        {
+                            HashSet<StudentEntity> students = new HashSet<StudentEntity>(listStudentOnClass);
+                            var listClass = students?.Select(o => new MemberInfo()
+                            {
+                                ID = o.ID,
+                                Name = o.FullName
+                            })?.ToList();
+
+                            return listClass;
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _log.Error(this.GetType().Name, ex);
+            }
             return null;
         }
 
@@ -113,5 +212,12 @@ namespace EnglishPlatform.Controllers
         {
 
         }
+    }
+
+    public class MemberInfo
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public string Center { get; set; }
     }
 }

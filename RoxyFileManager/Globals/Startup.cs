@@ -1,39 +1,29 @@
 ﻿using BaseCustomerEntity.Database;
 using FileManagerCore.Interfaces;
 using FileManagerCore.Services;
+using GoogleLib.Factory;
 using GoogleLib.Interfaces;
 using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace FileManagerCore.Globals
 {
-    public static class Startup {
-        public static IConfiguration Configuration;
-    
-        private static IGoogleDriveApiService _driveApiService;
-        public static IGoogleDriveApiService GetGoogleApi()
+    public static class Startup
+    {
+        private static IGoogleDriveApiService _googleDriveApiService;
+        public static IGoogleDriveApiService GoogleDrive { get { return _googleDriveApiService; } }
+        public static IServiceCollection AddRoxyFileManger(this IServiceCollection service, IGoogleDriveApiService googleDriveApiService)
         {
-            if (_driveApiService == null)
-            {
-                _driveApiService = new GoogleDriveApiService(Configuration);
-            }
-            return _driveApiService;
-        }
-        public static IServiceCollection AddRoxyFileManger(this IServiceCollection service, IConfiguration configuration)
-        {
-            Configuration = configuration;
+            _googleDriveApiService = googleDriveApiService;
             service.AddSingleton<FolderManagerService>();
             service.AddSingleton<FileManagerService>();
             service.AddSingleton<FolderCenterService>();
-            service.AddSingleton<IGoogleDriveApiService, GoogleDriveApiService>();
             service.AddSingleton<GConfig>();
             service.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
-            if(_driveApiService == null)
-            {
-                _driveApiService = new GoogleDriveApiService(configuration);
-            }
             return service;
         }
         public static IApplicationBuilder UseRoxyFileManger(this IApplicationBuilder app)

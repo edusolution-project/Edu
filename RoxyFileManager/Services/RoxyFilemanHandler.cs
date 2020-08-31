@@ -1,6 +1,7 @@
 ﻿using BaseCustomerEntity.Database;
 using FileManagerCore.Globals;
 using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -16,6 +17,7 @@ namespace FileManagerCore.Services
 {
     public class RoxyFilemanHandler : Interfaces.IRoxyFilemanHandler
     {
+        const string EDUSO_MANAGERFILE = "EDUSO_MANAGERFILE";
         private readonly FolderManagerService _folderManagerService;
 
         private readonly FileManagerService _fileManagerService;
@@ -32,6 +34,14 @@ namespace FileManagerCore.Services
             _folderManagerService = folderManagerService;
             _fileManagerService = fileManagerService;
             _folderCenterService = folderCenterService;
+        }
+
+        public IGoogleDriveApiService GoogleDriveApiService
+        {
+            get
+            {
+                return Startup.GoogleDrive;
+            }
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {
@@ -908,17 +918,9 @@ namespace FileManagerCore.Services
                 using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
                 {
                     file.CopyTo(stream);
-                    fileId = Startup.GetGoogleApi().UploadFileStatic(filename, Startup.GetGoogleApi().GetMimeType(dest), stream, folderId);
+                    fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
                     stream.Close();
                 }
-                //using (var stream = new FileStream(dest, FileMode.Create))
-                //{
-                //    file.CopyTo(stream);
-
-                //    stream.Close();
-                //}
-                //DeleteFile(dest);
-
                 response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
 
                 _fileManagerService.Collection.InsertOne(new FileManagerEntity()
@@ -939,7 +941,7 @@ namespace FileManagerCore.Services
             {
                 if (_fileManagerService.RemoveFile(center, user, fileId))
                 {
-                    Startup.GetGoogleApi().Delete(fileId);
+                    GoogleDriveApiService.Delete(fileId);
                     return true;
                 }
                 return false;
@@ -970,7 +972,7 @@ namespace FileManagerCore.Services
             string root = _folderCenterService.GetRoot();
             if (string.IsNullOrEmpty(root))
             {
-                root = Startup.GetGoogleApi().CreateDirectory("EDUSO_MANAGERFILE", "Quản lý file của hệ thống").Id;
+                root = Startup.GoogleDrive.CreateDirectory(EDUSO_MANAGERFILE, "Quản lý file của hệ thống").Id;
                 _folderCenterService.CreateRoot(root);
             }
             return root;
@@ -978,7 +980,7 @@ namespace FileManagerCore.Services
 
         private string CreateFolderUser(string centerFolder,string user)
         {
-            string folderId = Startup.GetGoogleApi().CreateDirectory(user, "User Folder " + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
+            string folderId = Startup.GoogleDrive.CreateDirectory(user, "User Folder create" + DateTime.Now.ToString("yyyy-mm-dd"),centerFolder).Id;
             _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
             {
                 Center = centerFolder,
@@ -992,7 +994,7 @@ namespace FileManagerCore.Services
         private string CreateFolderCenter(string center)
         {
             string root = GetRoot();
-            string folderId = Startup.GetGoogleApi().CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
+            string folderId = Startup.GoogleDrive.CreateDirectory(center,"CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
             _folderCenterService.CreateQuery().InsertOne(new FolderCenterEntity()
             {
                 Center = center,

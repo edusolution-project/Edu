@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Startup = FileManagerCore.Globals.Startup;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -341,7 +340,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Extension = listFileUpload[i].Extends,
                                 Name = listFileUpload[i].Path,
                                 OriginalName = listFileUpload[i].Path,
-                                Path = Startup.GetGoogleApi().CreateLinkViewFile(listFileUpload[i].Path)
+                                Path = _roxyFilemanHandler.GoogleDriveApiService.CreateLinkViewFile(listFileUpload[i].Path)
                             };
                             listMedia.Add(media);
                         }
