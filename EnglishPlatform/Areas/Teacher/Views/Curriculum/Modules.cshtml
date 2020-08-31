@@ -98,6 +98,8 @@
             </div>
         </div>
     </div>
+
+    <button><i class="fas fa-angle-double-up" style="position:fixed;bottom:40px;right:30px;font-size:50px"></i></button>
 </div>
 
 
@@ -662,6 +664,8 @@
                     }
                 }
                 $('.row-action i').tooltip();
+
+                renderTableContents();
             },
             error: function() {
             }
@@ -744,7 +748,7 @@
             var result = $.parseJSON(res);
             //console.log(result);
             if (result.Error != null) {
-                debugger
+                
                 alert(result.Error);
                 return false;
             }
@@ -753,7 +757,7 @@
                 //console.log("chapter " + chapter.ID);
                 $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
                 var o = new Option(chapter.Name, chapter.ID);
-                debugger
+                
                 /// jquerify the DOM object 'o' so we can use the html method
                 $(o).html(chapter.Name);
                 $("#ParentID").append(o);
@@ -892,7 +896,7 @@
         var modal = $("#joinLessonModal");
         modal.find("[name=ID]").val(ID);
         var currentItem = $(obj).parent().parent();
-        debugger
+       
         modal.find("[name=rootItem]").text($(currentItem).find("[name=Title]").text());
         var lessonholder = modal.find("[name=JoinLesson]");
         $(lessonholder).empty();
@@ -1106,6 +1110,21 @@
         console.log(window.history);
     }
 
+    var renderTableContents = function () {
+        $("#tableContents").empty();
+        var modal = $('.modules-wrapper');
+        for (i = 1; i < $(modal).children().length; i++) {
+            var item = $(modal).children()[i];
+            var li = item.children[0].children[0].children[1].text;
+            var id = item.id;
+            $("#tableContents").append("<li class='list-group-item list-group-item-action'><a href='#" + id + "' style='text-decoration:none;'>" + li + "</a></li>");
+        }
+
+        var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
+        $('#title').text(title)
+        
+    }
+
     $(document).ready(function () {
         LoadData();
     });
@@ -1164,4 +1183,29 @@
     .sidebar .nav-item .collapse .collapse-inner {
         padding: 0;
     }
+
+    #tableContents{
+        overflow-y:auto;
+        max-height:570px;
+    }
+
+        #tableContents li{
+            border-left:2px solid white
+        }
+
+        #tableContents li a {
+            color: #4E6774;
+            font-weight: 600;
+            line-height: 20px
+        }
+
+        #tableContents li:hover a {
+            color: #D03239;
+            background-color: #D03239;
+            background: #F0F3F4
+        }
+
+        #tableContents li:hover {
+            border-left: 2px solid #D03239
+        }
 </style>
