@@ -414,25 +414,27 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 if (historyTransaction.Price > 0)
                 {
-                    string SECURE_SECRET = "6D0870CDE5F24F34F3915FB0045120DB";
+                    //string SECURE_SECRET = "6D0870CDE5F24F34F3915FB0045120DB";
+                    string SECURE_SECRET = "11135E3DBA3E3D658B589E68C3C092E3";
                     // Khoi tao lop thu vien va gan gia tri cac tham so gui sang cong thanh toan
-                    VPCRequest conn = new VPCRequest("https://mtf.onepay.vn/paygate/vpcpay.op");
+                    VPCRequest conn = new VPCRequest("https://onepay.vn/paygate/vpcpay.op");
                     conn.SetSecureSecret(SECURE_SECRET);
                     // Add the Digital Order Fields for the functionality you wish to use
                     // Core Transaction Fields
-                    conn.AddDigitalOrderField("AgainLink", "https://mtf.onepay.vn/paygate/vpcpay.op");
+                    conn.AddDigitalOrderField("AgainLink", "https://onepay.vn/paygate/vpcpay.op");
                     conn.AddDigitalOrderField("Title", "Thanh toán khóa học " + product.Title);
-                    conn.AddDigitalOrderField("vpc_Locale", "en");//Chon ngon ngu hien thi tren cong thanh toan (vn/en)
+                    conn.AddDigitalOrderField("vpc_Locale", "vn");//Chon ngon ngu hien thi tren cong thanh toan (vn/en)
                     conn.AddDigitalOrderField("vpc_Version", "2");
                     conn.AddDigitalOrderField("vpc_Command", "pay");
-                    conn.AddDigitalOrderField("vpc_Merchant", "TESTONEPAY");
-                    conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
+                    conn.AddDigitalOrderField("vpc_Merchant", "OP_EDUSO");
+                    //conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
+                    conn.AddDigitalOrderField("vpc_AccessCode", "66VKMV0J");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
                     conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                     //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
-                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID }));
+                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
                     // Thong tin them ve khach hang. De trong neu khong co thong tin
                     conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
                     conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);
@@ -526,29 +528,30 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var vpc_TransactionNo = Request.Query["vpc_TransactionNo"].ToString();
                 var historyTransaction = _transactionService.GetItemByID(transactionID);
-                if(historyTransaction != null)
+                if (historyTransaction != null)
                 {
                     historyTransaction.StatusPayment = true;
                     historyTransaction.DayPayment = DateTime.UtcNow;
                     historyTransaction.TradingID = vpc_TransactionNo;
+                    _transactionService.Save(historyTransaction);
                     JoinClass(idproduct, center);
                     //ViewBag.message = "Thanh toán thành công!";
                     var redirec = $"/{center}/student/Course";
                     return Redirect(redirec);
-                }   
+                }
                 else
                 {
                     ViewBag.message = "Giao dịch không hợp lệ không thành công!";
                     var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                     return Redirect(redirec);
-                }    
+                }
             }
             else
             {
                 //ViewBag.message = "Thanh toán không thành công!";
-                var redirec = "http://" + host + processUrl(basis, "Payment", "Home")+$"/{idproduct}";
+                var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                 return Redirect(redirec);
-            }        
+            }
             //return View();
         }
         #endregion
