@@ -55,7 +55,7 @@
 
                 @await Html.PartialAsync("_sideBarTeacher")
 
-                <div class="right-content">
+                <div class="right-content" style="margin-left:240px">
                     @RenderBody()
                 </div>
 
@@ -77,5 +77,6 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
+    
 </body>
 </html>
