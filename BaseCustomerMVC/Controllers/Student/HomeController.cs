@@ -541,15 +541,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    ViewBag.message = "Giao dịch không hợp lệ không thành công!";
-                    var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                    ViewBag.message = "Giao dịch không thành công!";
+                    var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                     return Redirect(redirec);
                 }
             }
             else
             {
                 //ViewBag.message = "Thanh toán không thành công!";
-                var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                 return Redirect(redirec);
             }
             //return View();
