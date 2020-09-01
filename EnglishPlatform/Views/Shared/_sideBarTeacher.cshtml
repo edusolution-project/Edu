@@ -13,129 +13,18 @@
     }
 }
 <!-- Sidebar -->
-<nav class="sidebar collapse position-fixed col p-0 m-0 show">
+<nav class="sidebar collapse position-fixed col p-0 m-0 show" style="width:240px">
 
     <div id="sidebar-content">
         <ul class="sidebar-holder p-0">
-            <li class="sidebar-item home">
+            <li class="sidebar-item home card-header">
                 <a class="nav-link p-0" href="@processUrl("Index" , "Home" )">
                     <i></i>
                 </a>
             </li>
-            <!---->
-            <li class="sidebar-item profile">
-                <a class="nav-link p-0 overflow-hidden position-relative" href="@processUrl("Profile","Home")" title="Thông tin cá nhân">
 
-                    @if (!string.IsNullOrEmpty(avatar))
-                    {
-                        <img style="opacity: 1; width:100%;min-height:100%; max-width:50px;" class="position-absolute"
-                             src='@avatar'
-                             id="leftMenuPhotoAcc" />
-                    }
-
-                    <span>Thông tin cá nhân</span>
-                </a>
-                @*<div class="extra">
-                        <div class="avatarHolder">
-                            @{
-                                var name = User.Identity.Name;
-                                var shortname = name[0].ToString();
-                                var hchar = name.Split(' ');
-                                if (hchar.Length > 1)
-                                {
-                                    shortname += hchar[1][0];
-                                }
-                            }
-
-                            <div aria-label="User profile picture" class="avatar">
-                                <div class="shortname position-relative">
-                                    @if (!string.IsNullOrEmpty(avatar))
-                                    {
-                                        <img class="position-absolute" style="top:0; left: 0; bottom: 0; right:0; border-radius: 50%; opacity: 1; width:100%;min-height:100%"
-                                             src='@avatar'
-                                             id="sidebarPhotoAcc" />
-                                    }
-                                    @shortname.ToUpper()
-                                </div>
-                            </div>
-
-                            <h2 class="fullname">@User.Identity.Name</h2>
-
-                            <form action="/logout" method="post">
-                                <button type="submit" class="btn my-btn btn-logout">
-                                    Sign out
-                                </button>
-                            </form>
-                            <hr role="presentation">
-                            <ul class="action-wrapper">
-                                <li>
-                                    <a href="@processUrl("Profile","Home")" class="btn my-btn action-link">Profile</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>*@
-            </li>
-
-            @*<li class="sidebar-item dashboard">
-                    <a class="nav-link p-0" href="@processUrl("Index" , "Home" )" title="Dashboard">
-                        <i></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>*@
-
-            <li class="sidebar-item curriculum">
-                <a class="nav-link p-0" href="@processUrl("Index", "Curriculum" )" title="Quản lý bài giảng">
-                    <i></i>
-                    <span>Soạn bài giảng</span>
-                </a>
-            </li>
-            <li class="sidebar-item course">
-                <a class="nav-link p-0" href="@processUrl("Index","Class")" title="Quản lý lớp học">
-                    <i></i>
-                    <span>Quản lý lớp học</span>
-                </a>
-            </li>
-            <li class="sidebar-item calendar">
-                <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="Lịch dạy">
-                    <i></i>
-                    <span>Lịch dạy</span>
-                </a>
-            </li>
-
-            <li class="sidebar-item students" style="background-image:none">
-                <a class="nav-link p-0" href="@processUrl("Index", "StudentManage" )" title="Quản lý học viên">
-                    <i class="fas fa-users"></i>
-                    <span>Quản lý học viên</span>
-                </a>
-            </li>
-            <li class="sidebar-item comments" style="background-image:none">
-                <a class="nav-link p-0" href="@processUrl("Index" , "Discuss" )" title="Thảo luận">
-                    <i class="fas fa-comments" aria-hidden="true"></i>
-                    <span>Thảo luận</span>
-                </a>
-            </li>
-            <li class="sidebar-item guide">
-                <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo">
-                    <i></i>
-                    <span>Tài liệu tham khảo</span>
-                </a>
-            </li>
-
-            @*<li class="sidebar-item accounts" style="background-image:none">
-                    <a class="nav-link p-0" href="#" title="Account Management">
-                        <i class="fas fa-users-cog"></i>
-                        <span>Accounts</span>
-                    </a>
-                </li>
-
-                <li class="sidebar-item settings" style="background-image:none">
-                    <a class="nav-link p-0" href="#" title="Settings">
-                        <i class="fas fa-cogs"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>*@
-
-
+            <li class="list-group-item" style="font-weight:bold;color:#0194e4 !important" id="title"></li>
+            <div id="tableContents" style="overflow-y: auto;max-height:570px"></div>
         </ul>
     </div>
     <div id="extra-sidebar" class="collapse">
@@ -180,6 +69,5 @@
         $('.sidebar-item.active').removeClass("active");
         $('.sidebar-item.' + tab).addClass("active");
     }
-
 
 </script>

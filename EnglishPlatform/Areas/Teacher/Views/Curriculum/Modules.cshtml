@@ -98,6 +98,8 @@
             </div>
         </div>
     </div>
+
+    <button><i class="fas fa-angle-double-up" onclick="fnbackToTop()" id="backToTop"></i></button>
 </div>
 
 
@@ -662,6 +664,8 @@
                     }
                 }
                 $('.row-action i').tooltip();
+
+                renderTableContents();
             },
             error: function() {
             }
@@ -744,7 +748,7 @@
             var result = $.parseJSON(res);
             //console.log(result);
             if (result.Error != null) {
-                debugger
+                
                 alert(result.Error);
                 return false;
             }
@@ -753,7 +757,7 @@
                 //console.log("chapter " + chapter.ID);
                 $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
                 var o = new Option(chapter.Name, chapter.ID);
-                debugger
+                
                 /// jquerify the DOM object 'o' so we can use the html method
                 $(o).html(chapter.Name);
                 $("#ParentID").append(o);
@@ -892,7 +896,7 @@
         var modal = $("#joinLessonModal");
         modal.find("[name=ID]").val(ID);
         var currentItem = $(obj).parent().parent();
-        debugger
+       
         modal.find("[name=rootItem]").text($(currentItem).find("[name=Title]").text());
         var lessonholder = modal.find("[name=JoinLesson]");
         $(lessonholder).empty();
@@ -1106,6 +1110,51 @@
         console.log(window.history);
     }
 
+    var renderTableContents = function () {
+        $("#tableContents").empty();
+        var modal = $('.modules-wrapper');
+        for (i = 1; i < $(modal).children().length; i++) {
+            var item = $(modal).children()[i];
+            var li = item.children[0].children[0].children[1].text;
+            var id = item.id;
+            $("#tableContents").append("<li class='list-group-item list-group-item-action'><a href='#" + id + "' style='text-decoration:none;'>" + li + "</a></li>");
+        }
+
+        var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
+        $('#title').text(title)
+        
+    }
+
+    //-------------------
+    //Get the button
+    var btnScroll = $("#backToTop");
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    $(document).ready(function () {
+        $(".left-col").scroll(function () {
+            scrollFunction();
+        });
+    });
+
+    var scrollFunction = function () {
+        var scroll = $('.left-col');
+        if ($(scroll).scrollTop() > 200) {
+            btnScroll.attr('style', 'display:block');
+        } else {
+            btnScroll.attr('style', 'display:none');
+        }
+    }
+
+// When the user clicks on the button, scroll to the top of the document
+
+    var fnbackToTop = function () {
+        var scroll = $('.left-col');
+        //$(scroll).scrollTop(0);
+        $(scroll).animate({ scrollTop: 0 }, 1000);
+    }
+
+    //----------------
+
     $(document).ready(function () {
         LoadData();
     });
@@ -1163,5 +1212,47 @@
 
     .sidebar .nav-item .collapse .collapse-inner {
         padding: 0;
+    }
+
+    #tableContents{
+        overflow-y:auto;
+        max-height:570px;
+    }
+
+        #tableContents li{
+            border-left:2px solid white
+        }
+
+        #tableContents li a {
+            color: #4E6774;
+            font-weight: 600;
+            line-height: 20px
+        }
+
+        #tableContents li:hover a {
+            color: #D03239;
+            background-color: #D03239;
+            background: #F0F3F4
+        }
+
+        #tableContents li:hover {
+            border-left: 2px solid #D03239
+        }
+
+    #backToTop {
+        display: none;
+        position: fixed;
+        bottom: 40px;
+        right: 30px;
+        z-index: 99;
+        font-size: 30px;
+        border: none;
+        outline: none;
+        background-color: red;
+        color: white;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 4px;
+        position: fixed;
     }
 </style>

@@ -51,9 +51,9 @@
         .sidebar .sidebar-item.home, .sidebar .sidebar-toggler-icon.home {
 /*            background-image: url(../img/logo.jpg);*/
             background-image: url(/images/Logo.png);
-            background-size: auto 52px;
+            background-size: auto 100px;
             background-color: #fff;
-            height: 60px;
+            height: 111px;
             filter: none;
             background-position: 0 3px;
         }
