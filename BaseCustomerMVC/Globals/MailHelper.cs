@@ -154,7 +154,7 @@ namespace BaseCustomerMVC.Globals
 
         public async Task SendPasswordChangeNotify(AccountEntity user, string newPW = null)
         {
-            var newpw = newPW == null ? "" : $"<p>Mật khẩu mới là: {newPW}.</p>";
+            var newpw = newPW == null ? "" : $"<p>Mật khẩu mới: {newPW}.</p>";
             string subject = "Xác nhận đổi mật khẩu đăng nhập tại Eduso";
             string body = "Chào " + user.Name + "," +
                 "<p>Mật khẩu của bạn vừa được thay đổi. </p>" +

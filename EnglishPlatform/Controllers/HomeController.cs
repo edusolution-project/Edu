@@ -563,7 +563,7 @@ namespace EnglishPlatform.Controllers
                         user.TimeOut = new DateTime(1990, 01, 01, 00, 00, 00);
                         user.VerificationCodes = "";
                         _accountService.CreateOrUpdate(user);
-                        _ = _mailHelper.SendPasswordChangeNotify(user);
+                        _ = _mailHelper.SendPasswordChangeNotify(user, NewPassword);
                         Message = "Thay đổi mật khẩu thành công! Đang điều hướng về trang đăng nhập...";
                         Url = $"https://{host}/login";
                         Status = true;
