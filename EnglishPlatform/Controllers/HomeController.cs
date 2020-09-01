@@ -565,7 +565,7 @@ namespace EnglishPlatform.Controllers
                         _accountService.CreateOrUpdate(user);
                         _ = _mailHelper.SendPasswordChangeNotify(user);
                         Message = "Thay đổi mật khẩu thành công! Đang điều hướng về trang đăng nhập...";
-                        Url = $"http://{host}/login";
+                        Url = $"https://{host}/login";
                         Status = true;
                     }
                 }

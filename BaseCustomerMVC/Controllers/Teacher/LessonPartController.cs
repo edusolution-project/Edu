@@ -436,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace(" ", "-"));
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.ToLower().Trim().Replace(" ", "-"));
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=
@@ -476,8 +476,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
                     //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
                     //}
-                    
-                    await RemoveLessonPart(ID);                   
+
+                    await RemoveLessonPart(ID);
 
                     return new JsonResult(new Dictionary<string, object>
                             {

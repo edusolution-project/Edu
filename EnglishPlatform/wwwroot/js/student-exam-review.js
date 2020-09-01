@@ -472,7 +472,7 @@ var ExamReview = (function () {
         var html = title + '<div class="media-wrapper col-md-10 d-inline-block align-top">';
 
         if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx")) {
-            html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=http://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px'></iframe></div>";
+            html += "<div class='media-holder " + data.Type + "'><iframe src='https://docs.google.com/gview?url=https://" + window.location.hostname + data.Media.Path + "&embedded=true' style='width:100%, height:800px'></iframe></div>";
         }
         else
             html += '<div class="media-holder ' + data.Type + '"><embed src="' + data.Media.Path + '#view=FitH" style="width: 100%; height: 800px; border:1px solid"></div>';
