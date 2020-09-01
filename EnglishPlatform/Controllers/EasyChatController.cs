@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Controllers.Student;
@@ -63,7 +64,7 @@ namespace EnglishPlatform.Controllers
             }
             catch(Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
         }
@@ -94,7 +95,7 @@ namespace EnglishPlatform.Controllers
             }
             catch (Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
         }
@@ -136,9 +137,30 @@ namespace EnglishPlatform.Controllers
             }
             catch (Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
+        }
+        [HttpPost]
+        public bool SendMessage(string message,string groupName, string userName)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(message))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch(Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
         }
 
         // add key connectid và key userId
