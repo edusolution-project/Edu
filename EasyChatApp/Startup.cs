@@ -26,6 +26,7 @@ namespace EasyChatApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
             services.AddSignalR();
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();
@@ -46,7 +47,7 @@ namespace EasyChatApp
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors();
             app.UseSignalR(routes =>
             {
                 routes.MapHub<EasyChatHub>("/chatHub");

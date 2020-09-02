@@ -9,6 +9,7 @@ namespace EasyChatApp
 {
     public class EasyChatHub : Hub
     {
+        private readonly static ConnectIdToCurrentUser _connectIdToCurrentUser = new ConnectIdToCurrentUser();
         private readonly static GroupMapping<string> _userMapping = new GroupMapping<string>();
         private readonly static ConnectIdToUser _connectIdToUser = new ConnectIdToUser();
         private readonly static GroupMapping<string> _groupToUsers = new GroupMapping<string>();
@@ -40,12 +41,16 @@ namespace EasyChatApp
             _connectIdToUser.Add(connectionId, user);
             await Clients.Others.SendAsync("Online", user, connectionId);
         }
-
+        public async Task UpdateInfoUser(string userId,string name,string email)
+        {
+            var current = new CurrentUser() { ID = userId, Name = name, Email = email };
+            _connectIdToCurrentUser.Add(userId, current);
+            await Clients.Caller.SendAsync("UpdateInfoUser", current);
+        }
         public override Task OnConnectedAsync()
         {
             return base.OnConnectedAsync();
         }
-
         public override Task OnDisconnectedAsync(Exception exception)
         {
             string connectionId = Context.ConnectionId;
@@ -176,5 +181,62 @@ namespace EasyChatApp
                 
             }
         }
+    }
+
+    public class ConnectIdToCurrentUser
+    {
+        private readonly Dictionary<string, CurrentUser> _connections = new Dictionary<string, CurrentUser>();
+
+        public int Count
+        {
+            get
+            {
+                return _connections.Count;
+            }
+        }
+
+        public CurrentUser Get(string connectiondId)
+        {
+            if (_connections.TryGetValue(connectiondId, out CurrentUser user))
+            {
+                return user;
+            }
+            return null;
+        }
+
+        public void Add(string connectionId, CurrentUser current)
+        {
+            lock (_connections)
+            {
+                if (!_connections.TryGetValue(connectionId, out CurrentUser user))
+                {
+                    _connections.Add(connectionId, user);
+                }
+                else
+                {
+                    _connections.Remove(connectionId);
+                    _connections.Add(connectionId, current);
+                }
+            }
+        }
+
+        public void Remove(string connectionId)
+        {
+            lock (_connections)
+            {
+                if (_connections.TryGetValue(connectionId, out CurrentUser user))
+                {
+                    _connections.Remove(connectionId);
+                }
+
+            }
+        }
+    }
+
+    public class CurrentUser
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
     }
 }
