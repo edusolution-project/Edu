@@ -14,9 +14,9 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TimeLife")]
         public long TimeLife { get; set; }
     }
-    public class GrpupLastLifeService : ServiceBase<GroupLastLifeEntity>
+    public class GroupLastLifeService : ServiceBase<GroupLastLifeEntity>
     {
-        public GrpupLastLifeService(IConfiguration configuration) : base(configuration)
+        public GroupLastLifeService(IConfiguration configuration) : base(configuration)
         {
 
         }

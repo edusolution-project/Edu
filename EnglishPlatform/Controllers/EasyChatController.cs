@@ -141,8 +141,73 @@ namespace EnglishPlatform.Controllers
             }
             return null;
         }
+
         [HttpPost]
-        public bool SendMessage(string message,string groupName, string userName)
+        public bool EditMessage(string id,string message)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(message))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        public bool GetMessages(string groupName, string user)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(groupName))
+                {
+
+                }
+                if (!string.IsNullOrEmpty(user))
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        [HttpPost]
+        public bool RemoveMessage(string id)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(id))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        [HttpPost]
+        public bool CreateMessage(string message,string groupName, string userName)
         {
             try
             {
