@@ -2072,6 +2072,8 @@ var Lesson = (function () {
                 //});
                 break;
             case "VOCAB":
+            case "QUIZ1":
+            case "QUIZ4":
                 break;
             default:
                 CKEDITOR.replace('editor', {
@@ -2082,7 +2084,6 @@ var Lesson = (function () {
                 });
                 break;
         }
-
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
@@ -2284,7 +2285,8 @@ var Lesson = (function () {
                 var quizHolder = $(obj).parent();
                 if (!$(obj).parent().hasClass("fieldQuestion"))
                     quizHolder = $(obj).parent().parent();
-                quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
+                if (id.toString().length > 20)//temp fix for non-valid id
+                    quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
                 quizHolder.remove();
             }
         })
@@ -3887,7 +3889,7 @@ var Lesson = (function () {
         });
 
         //cloneDescription
-
+        console.log(cloneQuestion.children);
         cloneQuestion.children[1].value = currentpos;
         cloneQuestion.setAttribute("order", currentpos);
         $(cloneQuestion).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(currentpos) + 1).toString());

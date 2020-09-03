@@ -434,7 +434,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                     //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
-                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
+                    conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
                     // Thong tin them ve khach hang. De trong neu khong co thong tin
                     conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
                     conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);
@@ -541,15 +541,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    ViewBag.message = "Giao dịch không hợp lệ không thành công!";
-                    var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                    ViewBag.message = "Giao dịch không thành công!";
+                    var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                     return Redirect(redirec);
                 }
             }
             else
             {
                 //ViewBag.message = "Thanh toán không thành công!";
-                var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                 return Redirect(redirec);
             }
             //return View();

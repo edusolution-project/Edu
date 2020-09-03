@@ -130,37 +130,36 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendResetPassConfirm(AccountEntity user, string resetLink="",string OTP="")
+        public async Task SendResetPassConfirm(AccountEntity user, string resetLink = "", string OTP = "")
         {
             try
             {
-                string subject = "Xác nhận yêu cầu đổi mật khẩu đăng nhập tại Eduso";
+                string subject = "Xác nhận yêu cầu đặt lại mật khẩu đăng nhập tại Eduso";
                 string body = "Chào " + user.Name + "," +
-                    "<p>Bạn hoặc ai đó đã yêu cầu thay đổi mật khẩu đăng nhập tại website Eduso.vn</p>" +
-                    "<p>Vui lòng click vào" +
-                    $"<a href={resetLink}> Link Xác Thực</a> " +
-                    "để tiến hành đổi mật khẩu</p>" +
-                    $"Hoặc bạn có thể nhập mã OTP để tiến hành thay đổi mật khẩu: {OTP} (OTP tồn tại trong 5 phút)" +
-                    "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                    "<p>Bạn hoặc ai đó đã yêu cầu đặt lại mật khẩu đăng nhập tại Eduso.vn</p>" +
+                    "<p>Vui lòng click vào " +
+                    $"<a href={resetLink}>link xác thực yêu cầu</a> hoặc dán đường dẫn: <b>" + resetLink + "</b> vào trình duyệt để tiến hành đặt lại mật khẩu.</p>" +
+                    $"<p>OTP của bạn là: <b>{OTP}</b></p>" +
+                    "<p>Mã OTP có hiệu lực trong vòng 5 phút.</p>" +
+                    "<p>Nếu bạn không thực hiện yêu cầu trên, vui lòng liên hệ với quản trị hệ thống để được hỗ trợ.<p>" +
                     "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
                 var toAddress = new List<string> { user.UserName };
                 _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //ex.Message;
             }
         }
 
-        public async Task SendPasswordChangeNotify(AccountEntity user,string newPW=null)
+        public async Task SendPasswordChangeNotify(AccountEntity user, string newPW = null)
         {
-            var newpw = newPW == null ? "" : $"<p>Mật khẩu mới là: {newPW}.</p>";
+            var newpw = newPW == null ? "" : $"<p>Mật khẩu mới: {newPW}.</p>";
             string subject = "Xác nhận đổi mật khẩu đăng nhập tại Eduso";
             string body = "Chào " + user.Name + "," +
-                "<p>Tài khoản đăng nhập của bạn vừa được thay đổi mật khẩu.</p>" +
+                "<p>Mật khẩu của bạn vừa được thay đổi. </p>" +
                 newpw +
-                "<p>Vui lòng bỏ qua email này nếu bạn đã thực hiện thao tác trên.</p>" +
-                "<p>Nếu người thực hiện thao tác trên không phải là bạn, vui lòng liên hệ với quản trị hệ thống để được trợ giúp.<p>" +
+                "<p>Nếu bạn không thực hiện thao tác trên, vui lòng liên hệ với quản trị hệ thống để được hỗ trợ.<p>" +
                 "<p><a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { user.UserName };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });

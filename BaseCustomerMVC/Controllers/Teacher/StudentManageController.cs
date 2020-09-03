@@ -150,7 +150,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public async Task<JsonResult> CreateNewStudent(StudentEntity student, string basis)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            var teacher = _teacherService.GetItemByID(UserID);
             var centerID = _centerService.GetItemByCode(basis).ID;
             var Status = false;
 
@@ -164,10 +164,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     student.IsActive = true;
                     student.UserCreate = teacher.ID;
                     student.Centers = new List<string>() { centerID };
-
-                    var listClass = student.JoinedClasses[0].Split(',');
-                    student.JoinedClasses = listClass.ToList();
-
+                    if (student.JoinedClasses != null && student.JoinedClasses[0] != null)
+                    {
+                        var listClass = student.JoinedClasses[0].Split(',');
+                        student.JoinedClasses = listClass.ToList();
+                    }
                     _studentService.CreateQuery().InsertOne(student);
                     Status = true;
                     Dictionary<string, object> response = new Dictionary<string, object>()
@@ -208,7 +209,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var listClass = student.JoinedClasses[0].Split(',');
                 student.JoinedClasses = listClass.ToList();
-                if (_studentService.CreateOrUpdate(student) != null)
+                if (_studentService.Save(student) != null)
                 {
                     Status = true;
                 }
@@ -223,15 +224,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        //[Obsolete]
         private bool ExistEmail(string email)
         {
-            var _currentData = _studentService.CreateQuery().Find(o => o.Email == email);
-            if (_currentData.Count() > 0)
-            {
-                return true;
-            }
-            return false;
+            return _studentService.CreateQuery().CountDocuments(o => o.Email == email) > 0;
         }
 
         public async Task<JsonResult> RemoveStudent(string StudentID, string basis, string JoinedClasses = null, string ClassID = null)
@@ -247,32 +242,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         Status = false,
                         error = "Thông tin không chính xác"
-                    }) ;
+                    });
                 }
                 //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
                 var student = _studentService.GetItemByID(StudentID);
                 var center = _centerService.GetItemByCode(basis);
-                var Classes = _studentService.GetItemByID(StudentID).JoinedClasses;
-                //Classed.
-                if (Classes != null)
-                    foreach (var @class in Classes)
-                    {
-                        if (_studentService.LeaveClass(@class, StudentID) > 0)
+                var classes = new List<ClassEntity>();
+                if (student.JoinedClasses != null)
+                {
+                    classes = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => t.Center == center.ID).ToList();//SELECT CENTER's CLASSES ONLY
+                    if (classes != null)
+                        foreach (var @class in classes)
                         {
-                            //remove history, exam, exam detail, progress...
-                            await _progressHelper.RemoveClassStudentHistory(@class, StudentID);
-                            await _examService.RemoveClassStudentExam(@class, StudentID);
+                            if (_studentService.LeaveClass(@class.ID, StudentID) > 0)
+                            {
+                                //remove history, exam, exam detail, progress...
+                                _ = _progressHelper.RemoveClassStudentHistory(@class.ID, StudentID);
+                                _ = _examService.RemoveClassStudentExam(@class.ID, StudentID);
+                            }
                         }
-                    }
-                //_accountService.CreateQuery().DeleteMany(x => x.UserID == StudentID);
-                student.JoinedClasses = new List<string>();
-                if (student.Centers.Any(x => x == center.ID))
+                    student = _studentService.GetItemByID(StudentID);
+                }
+                else
+                    student.JoinedClasses = new List<string>();
+                if (student.Centers != null)
                 {
                     student.Centers.Remove(center.ID);
                     if (student.Centers.Count == 0)
-                    {
                         student.IsActive = false;
-                    }
                     _studentService.Save(student);
                     Status = true;
                 }
@@ -283,9 +280,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             var Datarespone = new Dictionary<string, object>
             {
-                { "msg","đã xóa học viên" },
-                { "error",Error},
-                {"Status",Status }
+                { "msg", "Đã xóa học viên" },
+                { "error", Error},
+                { "Status", Status }
             };
             return Json(Datarespone);
         }

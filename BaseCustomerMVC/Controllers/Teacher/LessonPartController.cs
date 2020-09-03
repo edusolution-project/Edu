@@ -436,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace(" ", "-"));
+                var vocabularies = _vocabularyService.GetItemByCode(vocab.ToLower().Trim().Replace(" ", "-"));
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=
@@ -476,8 +476,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //    _fileProcess.DeleteFiles(media.Select(o => o.OriginalFile).ToList());
                     //    await _LessonExtendService.RemoveRangeAsync(media.Select(o => o.ID));
                     //}
-                    
-                    await RemoveLessonPart(ID);                   
+
+                    await RemoveLessonPart(ID);
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -919,8 +919,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         || (oldquiz.Media == null && quiz.Media != null))//Media change
                     {
 
-                        if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
-                            _fileProcess.DeleteFile(oldquiz.Media.Path);
+                        //if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
+                        //    _fileProcess.DeleteFile(oldquiz.Media.Path);
 
                         if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
                             quiz.Media = null;

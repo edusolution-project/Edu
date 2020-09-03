@@ -478,10 +478,10 @@ namespace EnglishPlatform.Controllers
                     user.TimeOut = DateTime.Now; //Thời gian tồn tại mã xác nhận, max 300s
                     _accountService.CreateOrUpdate(user);
 
-                    var resetLink = $"http://{host}/forgot-password?code={OTP}";
-                    _ = _mailHelper.SendResetPassConfirm(user, resetLink,OTP);
+                    var resetLink = $"https://{host}/forgot-password?code={OTP}";
+                    _ = _mailHelper.SendResetPassConfirm(user, resetLink, OTP);
                     Status = true;
-                    Url = $"http://{host}/forgot-password";
+                    Url = $"https://{host}/forgot-password";
                 }
             }
             catch (Exception ex)
@@ -500,7 +500,7 @@ namespace EnglishPlatform.Controllers
         }
 
         [Route("/forgot-password")]
-        public IActionResult ForgotPassword(string code="0")
+        public IActionResult ForgotPassword(string code = "0")
         {
             if (code != "0")
                 ViewBag.VerificationCodes = code;
@@ -563,9 +563,9 @@ namespace EnglishPlatform.Controllers
                         user.TimeOut = new DateTime(1990, 01, 01, 00, 00, 00);
                         user.VerificationCodes = "";
                         _accountService.CreateOrUpdate(user);
-                        _ = _mailHelper.SendPasswordChangeNotify(user);
-                        Message = "Thay đổi mật khẩu thành công!Quay lại trang đăng nhập";
-                        Url = $"http://{host}/login";
+                        _ = _mailHelper.SendPasswordChangeNotify(user, NewPassword);
+                        Message = "Thay đổi mật khẩu thành công! Đang điều hướng về trang đăng nhập...";
+                        Url = $"https://{host}/login";
                         Status = true;
                     }
                 }
