@@ -919,8 +919,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         || (oldquiz.Media == null && quiz.Media != null))//Media change
                     {
 
-                        if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
-                            _fileProcess.DeleteFile(oldquiz.Media.Path);
+                        //if (oldquiz.Media != null && !string.IsNullOrEmpty(oldquiz.Media.Path))//Delete old file
+                        //    _fileProcess.DeleteFile(oldquiz.Media.Path);
 
                         if (files == null || !files.Any(f => f.Name == quiz.Media.Name))
                             quiz.Media = null;

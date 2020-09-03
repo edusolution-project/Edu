@@ -43,8 +43,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ExamDetailService _examDetailService;
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
-
-
         public HomeController(
                 CourseLessonService lessonService,
                 LessonPartService lessonPartService,
