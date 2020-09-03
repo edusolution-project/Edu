@@ -424,15 +424,7 @@
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             },
             BuyNow(classid) {
-                @if(student.Email == "kchidinh@gmail.com") {
-                    @:window.location.href = '@processUrl("Payment", "Home")/' + classid;
-                }
-                else
-                {
-                    @:Swal.fire("Thông báo","Đang chờ kết nối cổng thanh toán, vui lòng quay lại sau. Xin cảm ơn!","warning")
-                //debugger
-                }
-
+                window.location.href = '@processUrl("Payment", "Home")/' + classid;
             },
             DetailProduct(ID) {
                 let _that = this
@@ -444,7 +436,7 @@
                         _that.detailProduct = response.data;
                         $("#DetailProduct").modal();
                     }).catch(e => { });
-            }            
+            }
         }
     });
     </script>

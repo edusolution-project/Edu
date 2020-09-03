@@ -93,6 +93,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _vocabularyService = vocabularyService;
+            _progressHelper = progressHelper;
         }
 
         public IActionResult Index()

@@ -22,8 +22,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
-
+    <div class="card-body">        
         @* Thong tin don hang *@
         <div class="form-group">
             <input type="hidden" id="ID" name="ID" value="@product.ID" />
@@ -35,7 +34,7 @@
                         <th class='text-center'>Tên gói học</th>
                         <th class='text-center'>Giá tiền</th>
                         @*<th class='text-center'>Số lượng</th>
-                            <th class='text-center'>Thành tiền</th>*@
+                        <th class='text-center'>Thành tiền</th>*@
                     </tr>
                 </thead>
                 <tbody>
@@ -85,8 +84,8 @@
                     </td>
                     <td class="form-group col-sm-5">
                         <div class="col-sm-12">
-                            <h5 class="col-sm-12">Bạn cần đọc kĩ các điều khoản sau: </h5>
-                            <div class="col-sm-12" style="height:150px;overflow-y:auto;border:solid darkgray">
+                            <h5>Điều khoản thanh toán: </h5>
+                            <div style="height:150px; overflow-y:auto; border:solid 1px darkgray; padding: 7px;">
                                 <span style="font-weight:bold">1. Điều khoản thanh toán</span><br />
                                 Phương thức thanh toán sẽ được các bên lựa chọn dựa vào mức độ tin cậy giữa các bên, khả năng thanh toán, hoặc phụ thuộc đối tượng hàng hóa.
 
@@ -104,16 +103,16 @@
 
                                 Các bên cần thỏa thuận rõ ràng phương thức thanh toán. Phương thức thanh toán thường có sự liên hệ với thời điểm giao hàng, nhận các chứng từ.
                             </div>
-                        </div>
-                        <div class="form-check col-sm-12">
-                            <input class="form-check-input" type="checkbox" id="status" name="status">
-                            <label class="form-check-label" for="status">
-                                Tôi đã đọc và chấp nhận các điều khoản trên
-                            </label>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="status" name="status">
+                                <label class="form-check-label" for="status">
+                                    Tôi đã đọc và chấp nhận các điều khoản trên
+                                </label>
+                            </div>
                         </div>
                     </td>
                 </tr>
-                
+
                 <tr>
                     <td colspan="2" onclick="Thanhtoan()"><button class="btn btn-primary">Thanh toán</button></td>
                 </tr>
@@ -165,7 +164,7 @@
             });
         }
         else {
-            alert("Bạn cần đọc các điều khoản và chấp nhận với các điều khoản đã nêu!");
+            alert("Vui lòng chấp nhận điều khoản thanh toán!");
         }
     }
 </script>

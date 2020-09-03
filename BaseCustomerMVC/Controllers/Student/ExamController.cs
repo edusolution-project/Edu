@@ -6,6 +6,7 @@ using Core_v2.Interfaces;
 using FileManagerCore.Globals;
 using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
@@ -374,7 +375,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             var media = new Media()
                             {
                                 Created = DateTime.Now,
-                                Extension = listFiles[i].Extends,
+                                Extension = GetContentType(listFiles[i].Path),
                                 Name = listFiles[i].Path,
                                 OriginalName = listFiles[i].Path,
                                 Path = listFiles[i].Path
@@ -532,6 +533,17 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
+        private string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
 
     }
 }
