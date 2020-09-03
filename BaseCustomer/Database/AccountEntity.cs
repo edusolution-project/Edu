@@ -66,13 +66,13 @@ namespace BaseCustomerEntity.Database
         public AccountEntity GetAccount(string type, string userName, string passWord)
         {
             var pass = passWord;
-            return Collection.Find(o => o.Type == type && o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
+            return Collection.Find(o => o.Type == type && o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.FirstOrDefault();
         }
 
         public AccountEntity GetAccount(string userName, string passWord)
         {
             var pass = passWord;
-            return Collection.Find(o => o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.SingleOrDefault();
+            return Collection.Find(o => o.UserName == userName && (o.PassWord == pass || o.PassTemp == pass))?.FirstOrDefault();
         }
 
         public bool IsAvailable(string userName)

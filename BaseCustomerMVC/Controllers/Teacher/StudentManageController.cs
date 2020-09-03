@@ -207,17 +207,63 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
+                var oldStudent = _studentService.GetItemByID(student.ID);
+                oldStudent.FullName = student.FullName;
+
+
                 var listClass = student.JoinedClasses[0].Split(',');
-                student.JoinedClasses = listClass.ToList();
-                if (_studentService.Save(student) != null)
+                oldStudent.JoinedClasses = listClass.ToList();
+                var infochange = false;
+
+                if (oldStudent.DateBorn != student.DateBorn)
                 {
+                    oldStudent.DateBorn = student.DateBorn;
+                    infochange = true;
+                }
+
+                if (oldStudent.Phone != student.Phone)
+                {
+                    oldStudent.Phone = student.Phone;
+                    infochange = true;
+                }
+
+                if (oldStudent.FullName != student.FullName)
+                {
+                    oldStudent.FullName = student.FullName;
+                    infochange = true;
+                }
+
+
+
+                if (_studentService.Save(oldStudent) != null)
+                {
+                    if (infochange)
+                    {
+                        var acc = _accountService.GetAccountByEmail(oldStudent.Email);
+                        if (acc != null)
+                        {
+                            acc.Name = oldStudent.FullName;
+                            acc.Phone = oldStudent.Phone;
+                            _accountService.Save(acc);
+                        }
+                        //check teacher account
+                        //var tc = _teacherService.GetItemByEmail(oldStudent.Email);
+                        //if (tc != null)
+                        //{
+                        //    tc.FullName = oldStudent.FullName;
+                        //    tc.Phone = oldStudent.Phone;
+                        //    tc.DateBorn = oldStudent.DateBorn;
+                        //    _teacherService.Save(tc);
+                        //}
+                    }
                     Status = true;
+
                 }
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",student },
                         {"Error",null },
-                        {"Msg","Sửa thành công" },
+                        {"Msg","Cập nhật thành công" },
                         {"Status",Status }
                     };
                 return new JsonResult(response);
