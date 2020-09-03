@@ -209,7 +209,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var listClass = student.JoinedClasses[0].Split(',');
                 student.JoinedClasses = listClass.ToList();
-                if (_studentService.Save(student) != null)
+                if (_studentService.CreateOrUpdate(student) != null)
                 {
                     Status = true;
                 }
@@ -270,7 +270,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     student.Centers.Remove(center.ID);
                     if (student.Centers.Count == 0)
                         student.IsActive = false;
-                    _studentService.Save(student);
+                    _studentService.CreateOrUpdate(student);
                     Status = true;
                 }
             }
