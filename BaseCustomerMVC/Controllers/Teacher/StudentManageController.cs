@@ -211,15 +211,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldStudent.FullName = student.FullName;
 
 
-                var listClass = student.JoinedClasses[0].Split(',');
+                var listClass = new List<string>();
+                if (student.JoinedClasses[0] != null)
+                    listClass = student.JoinedClasses[0].Split(',').ToList();
                 oldStudent.JoinedClasses = listClass.ToList();
                 var infochange = false;
 
                 if (oldStudent.DateBorn != student.DateBorn)
-                {
                     oldStudent.DateBorn = student.DateBorn;
-                    infochange = true;
-                }
 
                 if (oldStudent.Phone != student.Phone)
                 {
@@ -232,8 +231,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     oldStudent.FullName = student.FullName;
                     infochange = true;
                 }
-
-
 
                 if (_studentService.Save(oldStudent) != null)
                 {
