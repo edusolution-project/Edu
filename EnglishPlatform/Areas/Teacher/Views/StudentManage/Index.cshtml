@@ -354,7 +354,8 @@
                 phoneStudent: '',
                 birthdayStudent: '',
                 idStudent: '',
-                listClass:[],
+                listClass: [],
+                listNameClass:'',
             },
             watch: {
                 search_subject_id: function () {
@@ -378,6 +379,16 @@
                         fn = null
                     }, 500)
                 },
+                listClass: function () {
+                    this.listNameClass=''
+                    for (i = 0; i < this.listClass.length; i++) {
+                        for (j = 0; j < this.list_active_class.length; j++) {
+                            if (this.list_active_class[j].ID == this.listClass[i]) {
+                                this.listNameClass += this.list_active_class[j].Name+' ;'
+                            }
+                        }
+                    }
+                }
             },
             methods: {
                 getData() {
@@ -471,7 +482,8 @@
                         this.nameStudent = ''
                         this.phoneStudent = ''
                         this.birthdayStudent = ''
-                        this.listClass=[]
+                        this.listClass = []
+                        this.listNameClass=''
                     }
                     this.$bvModal.show('modal_event')
                 },
@@ -729,9 +741,8 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="lg">
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="lg" style="height:280px">
         <b-col class="form-group">
-
             <div class="form-group row">
                 <label for="Name" class="col-sm-2 col-form-label">Họ tên</label>
                 <div class="col-sm-10">
@@ -769,9 +780,12 @@
                             Chọn <span class="caret"></span>
                         </button>
                     </div>
-                    <div class="col-sm-7" style="position:absolute;right:170px">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control " v-model="listNameClass" disabled />
+                    </div>
+                    <div class="col-sm-7" style="position:absolute;right:160px;top:40px">
                         <div id="selectClass" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none">
                                 <li v-for="(item,k) in list_active_class">
                                     <a>
                                         <input type="checkbox" :value="item.ID" v-model="listClass" /><span class="lbl"> {{item.Name}} </span>
