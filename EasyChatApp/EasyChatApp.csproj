@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseCustomer\BaseCustomerEntity.csproj" />
+    <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
+    <ProjectReference Include="..\RoxyFileManager\FileManagerCore.csproj" />
   </ItemGroup>
 
 </Project>

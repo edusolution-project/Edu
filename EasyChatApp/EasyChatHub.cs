@@ -9,10 +9,12 @@ namespace EasyChatApp
 {
     public class EasyChatHub : Hub
     {
+        #region local memory
         private readonly static ConnectIdToCurrentUser _connectIdToCurrentUser = new ConnectIdToCurrentUser();
         private readonly static GroupMapping<string> _userMapping = new GroupMapping<string>();
         private readonly static ConnectIdToUser _connectIdToUser = new ConnectIdToUser();
         private readonly static GroupMapping<string> _groupToUsers = new GroupMapping<string>();
+        #endregion
         private readonly GroupAndUserService _groupAndUserService;
         public EasyChatHub(GroupAndUserService groupAndUserService)
         {
