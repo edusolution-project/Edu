@@ -20,7 +20,6 @@ namespace EasyChatApp
         {
             _groupAndUserService = groupAndUserService;
         }
-
         [Obsolete]
         public async Task Online(string user, List<string> groupNames)
         {

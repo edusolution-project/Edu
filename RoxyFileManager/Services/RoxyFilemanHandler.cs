@@ -921,7 +921,7 @@ namespace FileManagerCore.Services
                     fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
                     stream.Close();
                 }
-                response.Add(new MediaResponseModel() { Path = fileId,Extends = f.Extension });
+                response.Add(new MediaResponseModel() {FileId = fileId , Path = fileId,Extends = f.Extension });
 
                 _fileManagerService.Collection.InsertOne(new FileManagerEntity()
                 {
