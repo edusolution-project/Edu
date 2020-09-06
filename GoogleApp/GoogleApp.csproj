@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BaseCustomer\BaseCustomerEntity.csproj" />
     <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
   </ItemGroup>
 
