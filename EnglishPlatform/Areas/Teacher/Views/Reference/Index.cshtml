@@ -60,7 +60,8 @@
             <div class="col-md-12" v-for="data in tableData">
                 <div class="inner flex">
                     <a href="#" title="" class="thumb">
-                        <img :src="data.Image" alt="">
+                        <img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
+                        <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">
                     </a>
                     <div class="entry">
                         <div>
@@ -76,9 +77,9 @@
                             <p>{{domDecoder(data.Description)}}</p>
                         </div>
                         <div>
-                            <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                            <a href="#" title="Xem trước" class="btn-view btn-success" v-on:click="showPreview(data.Media.Path)" v-if="data.Media.Extension != null">Xem trước file</a>
-                            <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                            <a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
+                            <a href="#" title="Xem trước file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
+                            @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
                             <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
                             <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
                         </div>
@@ -143,9 +144,21 @@
                             FileName: '',
                             file: null,
                             coverName:'',
-                            cover:null,
+                            cover: null,
+                            Image:'',
                 },
-                linkFile:'',
+                linkFile: '',
+                typeFile:[
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/pdf",
+                    "application/vnd.ms-powerpoint",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                ],
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                title: '',
             },
             watch : {
                 searchTerm: function(){
@@ -206,6 +219,7 @@
                         _that.addItem.Link = obj.Link;
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Target = obj.Target;
+                        _that.addItem.Image = obj.Image;
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
                         }
@@ -229,7 +243,6 @@
                 updateData() {
                     let _that = this
                     let _form = new FormData()
-
 
                     if (_that.addItem.Title == '') {
                         swal.fire({
@@ -321,8 +334,14 @@
                     var listFiles = $('#modal_event input[type=file]')
                     
                     if (listFiles[1].files[0] != null) { //file dinh kem
-                        this.addItem.FileName = listFiles[1].files[0].name
-                        this.addItem.file = listFiles[1].files[0]
+                        if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
+                            this.addItem.FileName = listFiles[1].files[0].name
+                            this.addItem.file = listFiles[1].files[0]
+                        }
+                        else {
+                            alert("File không đúng định dạng, chọn lại!")
+                            return false;
+                        }
                     }
                     if (listFiles[0].files[0] != null) { //anh dai dien
                         this.addItem.coverName = listFiles[0].files[0].name
@@ -343,11 +362,22 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showPreview(link) {
+                showPreview(link, title) {
+                    debugger
                     let _that = this;
                     _that.linkFile = link;
+                    _that.title = title;
                     this.linkFile = _that.linkFile;
+                    this.title = _that.title;
                     _that.$bvModal.show('modal_preview')
+                },
+                isDocType(path) {
+                    if (path == null || path == "") return false;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
                 }
             }
         });
@@ -361,13 +391,13 @@
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
         </b-col>
 
-        <b-col class="form-group">
+        <b-col class="form-group row">
             <div class="col-sm-4">
                 <label for="">Ảnh bìa</label>
                 <input type="file" name="CoverImage" id="CoverImage" value="" class="" v-on:change="changeFile()">
             </div>
             <div class="col-sm-8">
-                <img src="" />
+                <img :src="addItem.Image" style="max-width:200px;max-height:150px"/>
             </div>
         </b-col>
 
@@ -422,7 +452,7 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem" size="xl">
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
         <b-col class="form-group">
             <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
         </b-col>

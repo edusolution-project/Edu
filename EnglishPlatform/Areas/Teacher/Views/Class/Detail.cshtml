@@ -152,7 +152,8 @@
                 <div class="col-md-12" v-for="data in ref.data">
                     <div class="inner flex">
                         <a href="#" title="" class="thumb">
-                            <img :src="cacheStatic('/pictures/doc1.png',256)" alt="">
+                            <img :src="data.Image" v-if="data.Image!=null" alt="">
+                            <img src="/pictures/doc1.png?w=256" v-else alt="">
                         </a>
                         <div class="entry">
                             <div>
@@ -169,7 +170,8 @@
                             </div>
                             <div>
                                 <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                <a href="#" title="Xem trước" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
+                                @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
                                 <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
                                 <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
                             </div>
@@ -743,6 +745,9 @@
                     Description: '',
                     FileName: '',
                     file: null,
+                    coverName: '',
+                    cover: null,
+                    Image:'',
                 },
                 checkpoint: {
                     ID: '',
@@ -757,7 +762,18 @@
                     ID: '',
                     Name: '',
                     History: []
-                }
+                },
+                linkFile: '',
+                typeFile: [
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/pdf",
+                    "application/vnd.ms-powerpoint",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                ],
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"]
             },
             watch: {
             },
@@ -1309,6 +1325,8 @@
                         _that.addRef.Target = '@currentClass.ID';
                         _that.addRef.Description = '';
                         _that.addRef.FileName = '';
+                        _that.addRef.coverName = '';
+                        _that.addRef.Image = null;
                     }
                     else {
                         _that.addRef.ID = obj.ID;
@@ -1317,10 +1335,15 @@
                         _that.addRef.Link = obj.Link;
                         _that.addRef.Description = obj.Description;
                         _that.addRef.Target = obj.Target;
+                        _that.addRef.Image = obj.Image;
                         if (obj.Media != null)
                             _that.addRef.FileName = obj.Media.Name;
                         else
                             _that.addRef.FileName = '';
+
+                        if (obj.Image != null) {
+                            _that.addRef.Image = obj.Image;
+                        }
                     }
                     _that.addRef.file = {};
                     _that.$bvModal.show('modal_event')
@@ -1438,12 +1461,14 @@
                     _form.append('Name', _that.addRef.Title)
                     _form.append('Description', _that.addRef.Description)
                     _form.append('Range', _that.addRef.Range)
-
+                    _form.append('Image', _that.addRef.Image)
                     if (_that.addRef.file) {
                         _form.append('fileUpload', this.addRef.file)
                     }
-
-
+                    if (_that.addRef.cover) {
+                        _form.append('coverImage', this.addRef.cover)
+                    }
+                    debugger
                     let _url = '@processUrl("Save", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -1504,9 +1529,22 @@
                     })
                 },
                 changeFile() {
-
-                    this.addRef.FileName = event.target.files[0].name
-                    this.addRef.file = event.target.files[0]
+                    debugger
+                    var listFiles = $('#modal_event input[type=file]')
+                    if (listFiles[1].files[0] != null) { //file dinh kem
+                        if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
+                            this.addRef.FileName = listFiles[1].files[0].name
+                            this.addRef.file = listFiles[1].files[0]
+                        }
+                        else {
+                            alert("File không đúng định dạng, chọn lại!")
+                            return false;
+                        }
+                    }
+                    if (listFiles[0].files[0] != null) { //anh dai dien
+                        this.addRef.coverName = listFiles[0].files[0].name
+                        this.addRef.cover = listFiles[0].files[0]
+                    }
                 },
 
                 openLessonResult(obj) {
@@ -1603,6 +1641,21 @@
                     if (a > 0)
                         result = a * 100 / b;
                     return result;
+                },
+                showPreview(link) {
+                    let _that = this;
+                    _that.linkFile = link;
+                    this.linkFile = _that.linkFile;
+                    _that.$bvModal.show('modal_preview')
+                    debugger
+                },
+                isDocType(path) {
+                    if (path == null || path == "") return false;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
                 }
 
             }
@@ -1650,10 +1703,19 @@
     </script>
 }
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo">
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo" size="xl">
         <b-col class="form-group">
             <label for="">Tên tài liệu</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
+        </b-col>
+        <b-col class="form-group row">
+            <div class="col-sm-4">
+                <label for="">Ảnh bìa</label>
+                <input type="file" name="CoverImage" id="CoverImage" v-on:change="changeFile()">
+            </div>
+            <div class="col-sm-8">
+                <img :src="addRef.Image" style="max-width:200px;max-height:150px"/>
+            </div>
         </b-col>
         <b-col class="form-group">
             <label for="">Mô tả</label>
@@ -1811,6 +1873,22 @@
 
         <template v-slot:modal-footer>
             <b-button variant="danger" v-on:click="hideModal('modal_history')">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem tài liệu tham khảo" size="xl">
+        <b-col class="form-group">
+            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
+        </b-col>
+
+        <template v-slot:modal-footer="{ ok, cancel}">
+            @*<template v-if="isLoading">
+                    <b-button>Đang thực hiện...</b-button>
+                </template>*@
+            <template v-else>
+                @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
         </template>
     </b-modal>
 }

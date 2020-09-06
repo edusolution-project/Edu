@@ -26,7 +26,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly IHostingEnvironment _env;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
-        //private readonly HashSet<string> _textType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
+        private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX","PDF"};
         private string host;
 
         public ReferenceController(
@@ -264,12 +264,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             else
                             {
-                                entity.Media = new Media();
-                                entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                                entity.Media.Created = DateTime.Now;
-                                entity.Media.Size = file.Length;
-                                entity.Media.Extension = extension;
-                                entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                //if (_fileType.Contains(type))
+                                //{
+                                    entity.Media = new Media();
+                                    entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                                    entity.Media.Created = DateTime.Now;
+                                    entity.Media.Size = file.Length;
+                                    entity.Media.Extension = extension;
+                                    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                //}
                             }
                         }
                     }

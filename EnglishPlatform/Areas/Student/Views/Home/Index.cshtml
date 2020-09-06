@@ -18,6 +18,7 @@
     <link href="~/css/calendar/daygrid.css" rel="stylesheet" />
     <link href="~/css/calendar/list.css" rel="stylesheet" />
     <link href="~/css/calendar/timegrid.css" rel="stylesheet" />*@
+
 <script>
     setActiveMenu("home");
 </script>
@@ -180,7 +181,7 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        @*<a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
@@ -189,14 +190,14 @@
                                     <div class="box radius" style="height:240px">
                                         <div class="thumb" style="position:relative;">
                                             <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
-                                            <img v-else :src="item.Thumbnail" alt="">
+                                            @*<img v-else :src="item.Thumbnail" alt="">*@
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
                                             <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title" style="height:42px; line-height:21px;">
                                                 {{item.Title}}
                                             </a>
                                             <div class="c-bot" style="text-align:right; width:133px;">
-                                                <div>
+                                                @*<div>
                                                     <div class="c-right" style="font-size:13px; font-weight:bold"></div>
                                                 </div>
                                                 <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
@@ -204,8 +205,8 @@
                                                 </div>
                                                 <div>
                                                     <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
-                                                </div>
+                                                    <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
+                                                </div>*@
                                                 <div>
                                                     <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                                                 </div>
