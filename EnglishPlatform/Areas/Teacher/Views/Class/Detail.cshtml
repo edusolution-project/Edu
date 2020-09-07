@@ -54,6 +54,23 @@
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Học viên</a></li>
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
                     <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
+                    <li v-if="tab[3]">
+                        <div class="form-row">
+                            <div class="box filter-box m-1 col-12 col-md-4">
+                                <select v-model="ref.subjectID">
+                                    <option value="">Chương trình</option>
+                                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            <div class="box filter-box m-1 col-12 col-md-4">
+                                <select v-model="ref.gradeID">
+                                    <option value="" v-if="ref.subjectID==''">Cấp độ</option>
+                                    <option value="" v-else>Cấp độ</option>
+                                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==ref.subjectID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </li>
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
@@ -171,11 +188,16 @@
                                 <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
                             </div>
                             <div>
-                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                <a href="#" title="Xem trước" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
-                                @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
+                                @*<a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
+         <a href="#" title="Xem trước" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
+        <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
                                 <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
-                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
+                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>*@
+                                <a href="#" title="Mở link liên kết" class="btn" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="ti-link"></i></a>
+                                <a href="#" title="Mở file" class="btn" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="ti-files"></i></a>
+                                <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn"><i class="ti-download"></i></a>
+                                <a href="#" title="Xóa" class="btn" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt"></i></a>
+                                <a href="#" title="Sửa" class="btn" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-edit"></i></a>
                             </div>
                         </div>
                     </div>
@@ -738,7 +760,9 @@
                     searchTerm: '',
                     data: [],
                     view: 10,
-                    page: 1
+                    page: 1,
+                    gradeID: '',
+                    subjectID:'',
                 },
                 addRef: {
                     ID: '',
@@ -785,8 +809,24 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 list_subject: [],
                 list_grades_full: [],
+                //subjectID: '',
+                //gradeID:''
             },
             watch: {
+                //ref: {
+                //    gradeID: function () {
+                //        this.loadPreference()
+                //    },
+                //    subjectID: function () {
+                //        this.loadPreference()
+                //    },
+                //}
+                "ref.subjectID": function () {
+                        this.loadPreference()
+                },
+                "ref.gradeID": function () {
+                    this.loadPreference()
+                },
             },
             methods: {
                 tabChange(a = 0) {
@@ -1038,7 +1078,13 @@
                     _form.append('Target', _that.ref.target)
                     _form.append('PageSize', _that.ref.view)
                     _form.append('PageIndex', _that.ref.page)
-
+                    _form.append('SubjectID', _that.ref.subjectID)
+                    if (_that.ref.subjectID != '') {
+                        _form.append('GradeID', _that.ref.gradeID)
+                    }
+                    else {
+                        _form.append('GradeID', '')
+                    }
                     let _url = '@processUrl("GetClassList", "Reference")'
 
                     axios.post(_url, _form)

@@ -31,7 +31,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b flex-wrap align-items-center">
-            <div class="box filter-box m-1 col-12 col-md-3">
+            <div class="box filter-box m-1 col-12 col-md-1">
                 <select v-model="range">
                     <option value="">-- Chọn phạm vi chia sẻ --</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
@@ -39,7 +39,7 @@
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
                 </select>
             </div>
-            <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+            <div class="box filter-box m-1 col-12 col-md-2" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
                     @if (myClasses != null && myClasses.Count > 0)
@@ -51,11 +51,25 @@
                     }
                 </select>
             </div>
-            <div class="search-box m-1 col-12 col-md-3">
+            <div class="search-box m-1 col-12 col-md-2">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
+            <div class="box filter-box m-1 col-12 col-md-2" >
+                <select v-model="subjectID">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box m-1 col-12 col-md-2" >
+                <select v-model="gradeID">
+                    <option value="" v-if="subjectID==''">Cấp độ</option>
+                    <option value="" v-else>Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==subjectID">{{item.Name}}</option>
+                </select>
+            </div>
             <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
+
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -80,11 +94,17 @@
                             <p>{{domDecoder(data.Description)}}</p>
                         </div>
                         <div>
-                            <a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
-                            <a href="#" title="Xem trước file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
-                            @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
-                            <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
-                            <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
+                            @*<a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
+                                <a href="#" title="Mở file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Mở file</a>
+                                <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
+                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>*@
+
+                            <a href="#" title="Mở link liên kết" class="btn" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="ti-link"></i></a>
+                            <a href="#" title="Mở file" class="btn" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="ti-files"></i></a>
+                            <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn"><i class="ti-download"></i></a>
+                            <a href="#" title="Xóa" class="btn" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt"></i></a>
+                            <a href="#" title="Sửa" class="btn" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-edit"></i></a>
                         </div>
                     </div>
                 </div>
@@ -172,6 +192,8 @@
                 title: '',
                 list_subject: [],
                 list_grades_full: [],
+                subjectID: '',
+                gradeID: '',
             },
             watch : {
                 searchTerm: function(){
@@ -187,7 +209,13 @@
                 },
                 target: function(){
                     this.getData()
-                }
+                },
+                gradeID: function () {
+                    this.getData()
+                },
+                subjectID: function () {
+                    this.getData()
+                },
             },
             methods: {
                 getData() {
@@ -198,7 +226,13 @@
                     _form.append('Target', _that.target)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
-
+                    _form.append('SubjectID', _that.subjectID)
+                    if (_that.subjectID != '') {
+                        _form.append('GradeID', _that.gradeID)
+                    }
+                    else {
+                        _form.append('GradeID', '')
+                    }
                     let _url = '@processUrl("GetList", "Reference")'
 
                     axios.post(_url, _form)
@@ -415,7 +449,7 @@
                 },
                 changeAddSubject(obj) {
                     let _that = this;
-                    //debugger
+                    debugger
                     if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
                         _that.list_grades_full.forEach(function (sbj) {
                             //console.log(obj.UID)
