@@ -30,6 +30,10 @@ namespace BaseCustomerEntity.Database
         public int Downloaded { get; set; }
         [JsonProperty("LastDownload")]
         public DateTime LastDownload { get; set; }
+        [JsonProperty("Linked")]
+        public int Linked { get; set; }
+        [JsonProperty("LastLinked")]
+        public DateTime LastLinked { get; set; }
         [JsonProperty("Viewed")]
         public int Viewed { get; set; }
         [JsonProperty("LastView")]
@@ -94,14 +98,21 @@ namespace BaseCustomerEntity.Database
         public async Task IncDownload(string ID, int increment)
         {
             await Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
-                .Inc(t => t.Downloaded, 1)
+                .Inc(t => t.Downloaded, increment)
                 .Set(t => t.LastDownload, DateTime.Now));
+        }
+
+        public async Task IncLink(string ID, int increment)
+        {
+            await Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
+                .Inc(t => t.Linked, increment)
+                .Set(t => t.LastLinked, DateTime.Now));
         }
 
         public async Task IncView(string ID, int increment)
         {
             await Collection.UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ReferenceEntity>()
-                .Inc(t => t.Viewed, 1)
+                .Inc(t => t.Viewed, increment)
                 .Set(t => t.LastView, DateTime.Now));
         }
     }

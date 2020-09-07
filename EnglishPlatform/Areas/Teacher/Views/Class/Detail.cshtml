@@ -151,13 +151,13 @@
         </div>
         <div class="box" v-if="tab[3]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
-                <div class="col-md-12" v-for="data in ref.data">
-                    <div class="inner flex">
-                        <a href="#" title="" class="thumb">
-                            <img :src="data.Image" v-if="data.Image!=null" alt="">
-                            <img src="/pictures/doc1.png?w=256" v-else alt="">
+                <div class="col-md-6" v-for="data in ref.data">
+                    <div class="flex p-2 mb-2 inner" style="border: dotted 1px #DDD">
+                        <a href="#" title="" class="thumb col-md-2">
+                            <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
-                        <div class="entry">
+                        <div class="entry col-md-10 p-0">
                             <div>
                                 <div>
                                     <a href="#" title="" class="title">{{data.Title}}</a>
@@ -168,19 +168,18 @@
                                 </div>
                             </div>
                             <div class="pt-2 pb-2">
-                                <p>{{domDecoder(replaceBrkLine(data.Description))}}</p>
+                                <p>{{domDecoder(data.Description)}}</p>
                             </div>
                             <div>
-                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                <a href="#" title="Xem trước" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
-                                @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
-                                <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'">Xóa</a>
-                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'">Sửa</a>
+                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Viewed}})</a>
+                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i></a>
+                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
             <div class="row ls-doc text-center d-block" v-else>
                 Không có tài liệu

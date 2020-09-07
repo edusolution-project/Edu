@@ -60,13 +60,13 @@
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
-            <div class="col-md-12" v-for="data in tableData">
-                <div class="inner flex">
-                    <a href="#" title="" class="thumb">
-                        <img :src="data.Image" alt="" v-if="data.Image != null">
-                        <img src="/pictures/doc1.png" alt="" v-else>
+            <div class="col-md-6" v-for="data in tableData">
+                <div class="flex p-2 mb-2 inner" style="border: dotted 1px #DDD">
+                    <a href="#" title="" class="thumb col-md-2">
+                        <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
-                    <div class="entry">
+                    <div class="entry col-md-10 p-0">
                         <div>
                             <div>
                                 <a href="#" title="" class="title">{{data.Title}}</a>
@@ -80,11 +80,11 @@
                             <p>{{domDecoder(data.Description)}}</p>
                         </div>
                         <div>
-                            <a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
-                            <a href="#" title="Xem trước file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
-                            @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
-                            <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
-                            <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
+                            <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                            <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                            <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                            <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                            <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="fas fa-edit font-weight-bold"></i></a>
                         </div>
                     </div>
                 </div>
@@ -224,7 +224,7 @@
                         _that.addItem.Description = '';
                         _that.addItem.FileName = '';
                         _that.addItem.coverName = '';
-                        _that.addItem.subjectID = '';
+                        _that.addItem.subjectID = "";
                         _that.addItem.gradeID = '';
                         _that.addItem.Image = '';
                         _that.addItem.isDownload = false;
@@ -243,7 +243,6 @@
                         _that.addItem.gradeID = obj.GradeID;
                         _that.addItem.isDownload = obj.isDownload;
                         _that.addItem.tags = obj.Tags;
-                        debugger
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
                             _that.addItem.isCheckDownload = true;
@@ -256,13 +255,13 @@
                             _that.addItem.Image = obj.Image;
                             _that.addItem.cover = null;
                         }
-                        
+
                     }
                     _that.addItem.file = {};
                     _that.$bvModal.show('modal_event')
                 },
                 openLink(obj) {
-                    obj.Viewed = obj.Viewed + 1;
+                    obj.Linked = obj.Linked + 1;
                     window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
@@ -396,8 +395,16 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showPreview(link, title) {
-                    debugger
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var link = obj.Media.Path;
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
                     let _that = this;
                     _that.linkFile = link;
                     _that.title = title;
@@ -441,15 +448,15 @@
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
         </b-col>
 
-        <b-col class="form-group">
+        <b-col class="form-group flex">
             <label for="">Chuyên mục: </label>
-            <select class="col-sm-4" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
-                <option value="">Chọn chương trình</option>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
+                <option value="">----</option>
                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>
                 <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
             </select>
-            <select class="col-sm-4" v-model="addItem.gradeID">
-                <option value="">Cấp độ</option>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.gradeID">
+                <option value="">----</option>
                 <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addItem.subjectID">{{item.Name}}</option>
             </select>
         </b-col>

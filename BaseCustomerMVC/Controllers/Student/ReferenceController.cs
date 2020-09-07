@@ -190,7 +190,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var item = _referenceService.GetItemByID(ID);
                 if (item == null)
                     return BadRequest();
-                _ = _referenceService.IncView(ID, 1);
+                _ = _referenceService.IncLink(ID, 1);
                 //TODO: create view log
                 var url = item.Link;
                 if (!string.IsNullOrEmpty(url))
@@ -201,6 +201,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
             return BadRequest();
+        }
+
+        public JsonResult View(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+                _ = _referenceService.IncView(ID, 1);
+            return Json("OK");
         }
     }
 }

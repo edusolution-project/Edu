@@ -12,6 +12,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -26,9 +27,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly IHostingEnvironment _env;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
-        private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX","PDF"};
+        private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
         private string host;
 
         public ReferenceController(
@@ -41,7 +43,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             SubjectService subjectService,
             GradeService gradeService,
-        IConfiguration iConfig
+            IConfiguration iConfig,
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _teacherService = teacherService;
@@ -53,6 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _gradeService = gradeService;
             _env = env;
+            _roxyFilemanHandler = roxyFilemanHandler;
             host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
@@ -175,7 +179,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
         }
 
-        public async Task<JsonResult> Save(ReferenceEntity entity, string basis,IFormFile formFile)
+        public async Task<JsonResult> Save(ReferenceEntity entity, string basis, IFormFile formFile)
         {
             try
             {
@@ -210,13 +214,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //    entity.Image= await _fileProcess.SaveMediaAsync(cover, cover.FileName, "", basis);
                         //}
 
-                        foreach(var file in files)
+                        foreach (var file in files)
                         {
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
+
+                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                //entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -225,7 +233,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path =$"https://{host}//"+ await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path = mediarsp.Path;
+                                //$"https://{host}//" + await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                             }
                         }
                     }
@@ -275,20 +284,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
+
+                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+
+                                //entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                entity.Image = mediarsp.Path;
                             }
                             else
                             {
                                 //if (_fileType.Contains(type))
                                 //{
-                                    entity.Media = new Media();
-                                    entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                                    entity.Media.Created = DateTime.Now;
-                                    entity.Media.Size = file.Length;
-                                    entity.Media.Extension = extension;
-                                    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media = new Media();
+                                entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                                entity.Media.Created = DateTime.Now;
+                                entity.Media.Size = file.Length;
+                                entity.Media.Extension = extension;
+                                entity.Media.Path = mediarsp.Path;
+                                //await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                                 //}
                             }
                         }
@@ -367,9 +382,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     try
                     {
-                        var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
-                        var stream = System.IO.File.OpenRead(filePath);
-                        return File(stream, "application/octet-stream", item.Media.Name);
+                        if (!item.Media.Path.StartsWith("http"))
+                        {
+                            var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                            var stream = System.IO.File.OpenRead(filePath);
+                            return File(stream, "application/octet-stream", item.Media.Name);
+                        }
+                        return Redirect(item.Media.Path);
                     }
                     catch
                     {
@@ -387,7 +406,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var item = _referenceService.GetItemByID(ID);
                 if (item == null)
                     return BadRequest();
-                _ = _referenceService.IncView(ID, 1);
+                _ = _referenceService.IncLink(ID, 1);
                 //TODO: create view log
                 var url = item.Link;
                 if (!string.IsNullOrEmpty(url))
@@ -398,6 +417,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
             return BadRequest();
+        }
+
+        public JsonResult View(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+                _ = _referenceService.IncView(ID, 1);
+            return Json("OK");
         }
     }
 }
