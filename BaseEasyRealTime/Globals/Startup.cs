@@ -1,6 +1,5 @@
 ﻿using BaseEasyRealTime.Entities;
 using FileManagerCore.Globals;
-using GoogleLib.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BaseEasyRealTime.Globals
@@ -12,9 +11,9 @@ namespace BaseEasyRealTime.Globals
         /// </summary>
         /// <param name="service"></param>
         /// <returns></returns>
-        public static IServiceCollection AddEasyRealTime(this IServiceCollection service, IGoogleDriveApiService googleDriveApiService)
+        public static IServiceCollection AddEasyRealTime(this IServiceCollection service)
         {
-            service.AddRoxyFileManger(googleDriveApiService);
+            service.AddRoxyFileManger();
             service.AddSingleton<GroupService>();
             service.AddSingleton<MessageService>();
             service.AddSingleton<NewFeedService>();

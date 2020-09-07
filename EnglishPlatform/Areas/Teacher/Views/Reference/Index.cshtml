@@ -62,11 +62,11 @@
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border: dotted 1px #DDD">
-                    <a href="#" title="" class="thumb col-md-2">
+                    <a href="#" title="" class="thumb col-md-3">
                         <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
                         <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
-                    <div class="entry col-md-10 p-0">
+                    <div class="entry col-md-9 p-0">
                         <div>
                             <div>
                                 <a href="#" title="" class="title">{{data.Title}}</a>
@@ -406,6 +406,7 @@
                             obj.Viewed = obj.Viewed + 1;
                         }).catch(e => { })
                     let _that = this;
+                    console.log(obj);
                     _that.linkFile = link;
                     _that.title = title;
                     this.linkFile = _that.linkFile;
@@ -529,7 +530,8 @@
 
     <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
         <b-col class="form-group">
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
+            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
+            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile" v-else style="min-height:500px;"></iframe>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">

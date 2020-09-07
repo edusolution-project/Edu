@@ -219,12 +219,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
 
-                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                            //var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
 
                             if (_imageType.Contains(type))//anh bia
                             {
-                                //entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
-                                entity.Image = mediarsp.Path;
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                //entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -233,8 +233,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path = mediarsp.Path;
-                                //$"https://{host}//" + await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path =
+                                //mediarsp.Path;
+                                $"https://{host}//" + await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                             }
                         }
                     }
@@ -285,13 +286,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
 
-                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                            //var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
 
                             if (_imageType.Contains(type))//anh bia
                             {
 
-                                //entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
-                                entity.Image = mediarsp.Path;
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                //entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -302,8 +303,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path = mediarsp.Path;
-                                //await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path =
+                                //mediarsp.Path;
+                                await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                                 //}
                             }
                         }
