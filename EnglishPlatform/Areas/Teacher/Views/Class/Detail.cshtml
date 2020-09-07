@@ -196,8 +196,8 @@
                                 <a href="#" title="Mở link liên kết" class="btn" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="ti-link"></i></a>
                                 <a href="#" title="Mở file" class="btn" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="ti-files"></i></a>
                                 <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn"><i class="ti-download"></i></a>
-                                <a href="#" title="Xóa" class="btn" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt"></i></a>
-                                <a href="#" title="Sửa" class="btn" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-edit"></i></a>
+                                <a href="#" title="Xóa" class="btn" v-on:click="deleteRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt"></i></a>
+                                <a href="#" title="Sửa" class="btn" v-on:click="showRefModal(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-edit"></i></a>
                             </div>
                         </div>
                     </div>
