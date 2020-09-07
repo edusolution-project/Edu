@@ -277,21 +277,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     UserCreate = currentUser
                 };
                 _teacherService.CreateQuery().InsertOne(teacher);
-                var account = new AccountEntity()
+                var acc = _accountService.GetAccountByEmail(teacher.Email);
                 {
-                    CreateDate = DateTime.Now,
-                    IsActive = true,
-                    PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                    PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                    UserCreate = teacher.UserCreate,
-                    Type = ACCOUNT_TYPE.TEACHER,
-                    UserID = teacher.ID,
-                    UserName = teacher.Email,
-                    Name = teacher.FullName,
-                    RoleID = teacher.ID
-                };
-                _accountService.CreateQuery().InsertOne(account);
-                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                    if (acc == null)
+                    {
+                        var account = new AccountEntity()
+                        {
+                            CreateDate = DateTime.Now,
+                            IsActive = true,
+                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            UserCreate = teacher.UserCreate,
+                            Type = ACCOUNT_TYPE.TEACHER,
+                            UserID = teacher.ID,
+                            UserName = teacher.Email,
+                            Name = teacher.FullName,
+                            RoleID = teacher.ID
+                        };
+                        _accountService.CreateQuery().InsertOne(account);
+                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                    }
+                }
             }
             return Json(new { msg = "Giáo viên đã được cập nhật" });
         }

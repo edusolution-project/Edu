@@ -5,12 +5,14 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Upload;
 using Google.Apis.Util.Store;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,22 +34,7 @@ namespace GoogleLib.Services
         /// </summary>
         public string URL_THUMBNAIL { get => "https://drive.google.com/thumbnail?id={id}"; }
         private readonly DriveService _driveService;
-        public GoogleDriveApiService(string file, string user, string appName, string fileStorge)
-        {
-            if (string.IsNullOrEmpty(fileStorge)) { fileStorge = "Drive.Storge"; }
-            _driveService = GetDriveService(file, user, appName, fileStorge).Result;
-        }
         private readonly IConfiguration _configuration;
-        /// <summary>
-        /// dung file / khong
-        /// </summary>
-        /// <param name="isWithFile"></param>
-        /// <param name="fileSetting"></param>
-        public GoogleDriveApiService(string fileSetting = "appsettings.json")
-        {
-            _configuration = new ConfigurationBuilder().AddJsonFile(fileSetting, optional: true, reloadOnChange: true).Build();
-            _driveService = GetDriveService().Result;
-        }
         public GoogleDriveApiService(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -356,19 +343,27 @@ namespace GoogleLib.Services
 
         private async Task<DriveService> GetDriveService()
         {
-            string file = _configuration.GetSection("GOOGLE:DRIVE:FILE")?.Value,
+            try
+            {
+                string file = _configuration.GetSection("GOOGLE:DRIVE:FILE")?.Value,
                 clientId = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_ID")?.Value,
                 clientSecret = _configuration.GetSection("GOOGLE:DRIVE:CLIENT_SECRET")?.Value,
                 user = _configuration.GetSection("GOOGLE:DRIVE:USER")?.Value,
                 appName = _configuration.GetSection("GOOGLE:DRIVE:APP")?.Value,
                 fileStorge = _configuration.GetSection("GOOGLE:DRIVE:STORGE")?.Value;
-            if (string.IsNullOrEmpty(file))
-            {
-                return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
+
+                if (string.IsNullOrEmpty(file))
+                {
+                    return await GetDriveService(clientId, clientSecret, user, appName, fileStorge);
+                }
+                else
+                {
+                    return await GetDriveService(file, user, appName, fileStorge);
+                }
             }
-            else
+            catch(Exception ex)
             {
-                return await GetDriveService(file, user, appName, fileStorge);
+                throw ex;
             }
         }
         

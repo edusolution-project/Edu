@@ -42,6 +42,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
+        private readonly IndexService _indexService;
+
         private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
         private IConfiguration _configuration;
@@ -68,6 +70,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             ProgressHelper progressHelper,
             StudentHelper studentHelper,
+            IndexService indexService,
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
@@ -95,7 +98,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mailHelper = mailHelper;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
-
+            _indexService = indexService;
             _studentHelper = studentHelper;
             _progressHelper = progressHelper;
         }
@@ -207,17 +210,60 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
-                var listClass = student.JoinedClasses[0].Split(',');
-                student.JoinedClasses = listClass.ToList();
-                if (_studentService.CreateOrUpdate(student) != null)
+                var oldStudent = _studentService.GetItemByID(student.ID);
+                oldStudent.FullName = student.FullName;
+
+
+                var listClass = new List<string>();
+                if (student.JoinedClasses[0] != null)
+                    listClass = student.JoinedClasses[0].Split(',').ToList();
+                oldStudent.JoinedClasses = listClass.ToList();
+                var infochange = false;
+
+                if (oldStudent.DateBorn != student.DateBorn)
+                    oldStudent.DateBorn = student.DateBorn;
+
+                if (oldStudent.Phone != student.Phone)
                 {
+                    oldStudent.Phone = student.Phone;
+                    infochange = true;
+                }
+
+                if (oldStudent.FullName != student.FullName)
+                {
+                    oldStudent.FullName = student.FullName;
+                    infochange = true;
+                }
+
+                if (_studentService.Save(oldStudent) != null)
+                {
+                    if (infochange)
+                    {
+                        var acc = _accountService.GetAccountByEmail(oldStudent.Email);
+                        if (acc != null)
+                        {
+                            acc.Name = oldStudent.FullName;
+                            acc.Phone = oldStudent.Phone;
+                            _accountService.Save(acc);
+                        }
+                        //check teacher account
+                        //var tc = _teacherService.GetItemByEmail(oldStudent.Email);
+                        //if (tc != null)
+                        //{
+                        //    tc.FullName = oldStudent.FullName;
+                        //    tc.Phone = oldStudent.Phone;
+                        //    tc.DateBorn = oldStudent.DateBorn;
+                        //    _teacherService.Save(tc);
+                        //}
+                    }
                     Status = true;
+
                 }
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",student },
                         {"Error",null },
-                        {"Msg","Sửa thành công" },
+                        {"Msg","Cập nhật thành công" },
                         {"Status",Status }
                     };
                 return new JsonResult(response);
@@ -270,7 +316,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     student.Centers.Remove(center.ID);
                     if (student.Centers.Count == 0)
                         student.IsActive = false;
-                    _studentService.CreateOrUpdate(student);
+                    _studentService.Save(student);
                     Status = true;
                 }
             }
@@ -450,6 +496,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     left = long.MaxValue;
             }
 
+            if (center == null || left <= 0)
+            {
+                return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
+            }
+
+            var abbr = "st." + (string.IsNullOrEmpty(center.Abbr) ? "eduso" : center.Abbr);
+
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
@@ -474,7 +527,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
                                 var email = (workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString()).ToLower().Trim();
-                                if (string.IsNullOrEmpty(email)) continue;
+                                if (string.IsNullOrEmpty(email))
+                                //    continue; skip => create auto mail
+                                {
+                                    email = abbr + "_" + _indexService.GetNewIndex(abbr) + "@eduso.vn";
+                                }
+
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                                 var birthdate = new DateTime();

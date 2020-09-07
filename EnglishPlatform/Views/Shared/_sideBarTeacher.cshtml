@@ -4,7 +4,7 @@
     var avatar = HttpContextAccessor.HttpContext.Session.GetString("userAvatar");
     var TeacherMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByTeacher();
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
-
+    var _center = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity ?? new BaseCustomerEntity.Database.CenterEntity();
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -12,24 +12,54 @@
         return $"/{center}{url}";
     }
 }
+<style>
+    #sidebar-content .card-header {
+        border: none;
+        padding: 5px;
+        margin-bottom: 7px;
+        background: #FFF;
+        border-bottom: solid 1px #EEE;
+    }
+
+    #sidebar-content .logo {
+        max-width: 100%;
+    }
+
+        #sidebar-content .logo img {
+            max-height: 100px;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+        }
+
+    #sidebar-content {
+        background: #FFF;
+        left: 0;
+        border-right: 2px solid #F0F3F4;
+    }
+
+    .list-group-item {
+        border: solid 1px #EEE;
+        padding: 7px 15px;
+        color: #333;
+        font-weight: 500;
+    }
+</style>
 <!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0 show" style="width:240px">
 
     <div id="sidebar-content">
         <ul class="sidebar-holder p-0">
-            <li class="sidebar-item home card-header">
-                <a class="nav-link p-0" href="@processUrl("Index" , "Home" )">
-                    <i></i>
-                </a>
-            </li>
-            <li class="list-group-item" style="font-weight:500;color:#0194e4 !important" id="title"></li>
-            <div id="tableContents" style="overflow-y: auto;max-height:570px"></div>
+            <div class="card-header">
+                <a href="/@center/teacher" class="logo" title="@_center.Name" style="max-height:100px;"><img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" /></a>
+            </div>
+            <li class="list-group-item" style="font-weight: 500;color: #0194e4 !important;border: none;border-bottom: solid 1px #CCC;" id="title"></li>
+            <div id="tableContents" style="overflow-y:auto; max-height:570px"></div>
         </ul>
     </div>
     <div id="extra-sidebar" class="collapse">
         <button type="button" class="btn btn-close my-btn" onclick="closeExtra()">X</button>
         <div class="content">
-
         </div>
     </div>
     <button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">

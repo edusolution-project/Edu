@@ -214,7 +214,7 @@ namespace EnglishPlatform.Controllers
                             var center = _centerService.GetDefault();
                             string centerCode = center.Code;
                             string roleCode = "";
-                            var tc = _teacherService.GetItemByID(user.UserID);
+                            var tc = _teacherService.GetItemByID(user.UserID) ?? _teacherService.GetItemByEmail(user.UserName);
                             var st =
                                 user.Type == "teacher" ?
                                 _studentService.GetStudentByEmail(user.UserName) :

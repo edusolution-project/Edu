@@ -245,7 +245,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path =$"https://{host}//"+ await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                             }
                         }
                     }

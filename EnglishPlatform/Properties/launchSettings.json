@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "http://localhost/EnglishPlatform",
+      "applicationUrl": "https://longht.eduso.vn/",
       "sslPort": 0
     },
     "iisExpress": {

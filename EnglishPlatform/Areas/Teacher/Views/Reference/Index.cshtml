@@ -554,15 +554,16 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
-        <b-col class="form-group">
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem trước file (vui lòng chờ nếu tốc độ mạng chậm)" size="xl">
+        <b-col class="form-group p-0 m-0">
+            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
+            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src=https://eduso.vn'+linkFile" style="min-height:500px;" v-else></iframe>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
             @*<template v-if="isLoading">
-                <b-button>Đang thực hiện...</b-button>
-            </template>*@
+                    <b-button>Đang thực hiện...</b-button>
+                </template>*@
             <template v-else>
                 @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
