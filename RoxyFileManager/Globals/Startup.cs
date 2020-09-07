@@ -1,7 +1,9 @@
 ﻿using BaseCustomerEntity.Database;
 using FileManagerCore.Interfaces;
 using FileManagerCore.Services;
+using GoogleLib.Factory;
 using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -26,6 +28,7 @@ namespace FileManagerCore.Globals
         }
         public static IApplicationBuilder UseRoxyFileManger(this IApplicationBuilder app)
         {
+
             return app;
         }
     }
