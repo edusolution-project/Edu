@@ -4,6 +4,9 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -77,9 +80,9 @@
                             <p>{{domDecoder(data.Description)}}</p>
                         </div>
                         <div>
-                            <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                            <a href="#" title="Xem trước" class="btn-view btn-success" v-on:click="showPreview(data.Media.Path)" v-if="data.Media != null && isDocType(data.Media.Path) != null">Xem trước file</a>
-                            <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                            <a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
+                            <a href="#" title="Xem trước file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Xem trước file</a>
+                            @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
                             <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
                             <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
                         </div>
@@ -117,7 +120,10 @@
         new Vue({
             el: "#main",
             mounted() {
-                this.getData()
+                this.getData();
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                window.changeAddSubject = this.changeAddSubject;
             },
             components: {
           	    LocalQuillEditor: VueQuillEditor.quillEditor
@@ -135,21 +141,37 @@
                 totalRec: 0,
                 page: 1,
                 addItem: {
-                            ID: '',
-                            Title: '',
-                            Range: '',
-                            Link: '',
-                            Target: '',
-                            Description: '',
-                            FileName: '',
-                            file: null,
-                            coverName:'',
-                            cover:null,
+                    ID: '',
+                    Title: '',
+                    Range: '',
+                    Link: '',
+                    Target: '',
+                    Description: '',
+                    FileName: '',
+                    file: null,
+                    coverName: '',
+                    cover: null,
+                    Image: '',
+                    subjectID: '',
+                    gradeID: '',
+                    isDownload: false,
+                    tags: '',
+                    isCheckDownload: false,
                 },
-                allow_doc_ext: [
-                    ".doc", ".docx", ".ppt",".pptx",".pdf",".xls", ".xlsx"
+                linkFile: '',
+                typeFile:[
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/pdf",
+                    "application/vnd.ms-powerpoint",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 ],
-                linkFile:'',
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                title: '',
+                list_subject: [],
+                list_grades_full: [],
             },
             watch : {
                 searchTerm: function(){
@@ -202,6 +224,13 @@
                         _that.addItem.Description = '';
                         _that.addItem.FileName = '';
                         _that.addItem.coverName = '';
+                        _that.addItem.subjectID = '';
+                        _that.addItem.gradeID = '';
+                        _that.addItem.Image = '';
+                        _that.addItem.isDownload = false;
+                        _that.addItem.Tags = '';
+                        _that.addItem.cover = null;
+                        _that.addItem.isCheckDownload = false;
                     }
                     else {
                         _that.addItem.ID = obj.ID;
@@ -210,12 +239,24 @@
                         _that.addItem.Link = obj.Link;
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Target = obj.Target;
+                        _that.addItem.subjectID = obj.SubjectID;
+                        _that.addItem.gradeID = obj.GradeID;
+                        _that.addItem.isDownload = obj.isDownload;
+                        _that.addItem.tags = obj.Tags;
+                        debugger
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
+                            _that.addItem.isCheckDownload = true;
                         }
                         else {
                             _that.addItem.FileName = '';
+                            _that.addItem.isCheckDownload = false;
                         }
+                        if (obj.Image != null) {
+                            _that.addItem.Image = obj.Image;
+                            _that.addItem.cover = null;
+                        }
+                        
                     }
                     _that.addItem.file = {};
                     _that.$bvModal.show('modal_event')
@@ -234,7 +275,6 @@
                     let _that = this
                     let _form = new FormData()
 
-
                     if (_that.addItem.Title == '') {
                         swal.fire({
                             title: "Có lỗi",
@@ -251,6 +291,10 @@
                     _form.append('Name', _that.addItem.Title)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('Range', _that.addItem.Range)
+                    _form.append('subjectID', _that.addItem.subjectID)
+                    _form.append('gradeID', _that.addItem.gradeID)
+                    _form.append('isDownload', _that.addItem.isDownload)
+                    _form.append('Tags', _that.addItem.tags)
 
                     if (_that.addItem.file) {
                         _form.append('fileUpload', this.addItem.file)
@@ -258,9 +302,6 @@
                     if (_that.addItem.cover) {
                         _form.append('coverImage', this.addItem.cover)
                     }
-
-                    //debugger
-
 
                     let _url = '@processUrl("Save", "Reference")'
                     axios.post(_url, _form)
@@ -325,8 +366,16 @@
                     var listFiles = $('#modal_event input[type=file]')
 
                     if (listFiles[1].files[0] != null) { //file dinh kem
-                        this.addItem.FileName = listFiles[1].files[0].name
-                        this.addItem.file = listFiles[1].files[0]
+                        if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
+                            this.addItem.FileName = listFiles[1].files[0].name
+                            this.addItem.file = listFiles[1].files[0]
+                            this.addItem.isCheckDownload = true;
+                        }
+                        else {
+                            alert("File không đúng định dạng, chọn lại!")
+                            this.addItem.isCheckDownload = false;
+                            return false;
+                        }
                     }
                     if (listFiles[0].files[0] != null) { //anh dai dien
                         this.addItem.coverName = listFiles[0].files[0].name
@@ -347,19 +396,39 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showPreview(link) {
+                showPreview(link, title) {
+                    debugger
                     let _that = this;
                     _that.linkFile = link;
+                    _that.title = title;
                     this.linkFile = _that.linkFile;
+                    this.title = _that.title;
                     _that.$bvModal.show('modal_preview')
                 },
                 isDocType(path) {
                     if (path == null || path == "") return false;
-                    var idx = path.toString().lastIndexOf(".");
-                    if (idx <= 0) return false;
-                    var ext = path.substring(idx, path.length - idx);
-                    return this.allow_doc_ext.findIndex(t => t == ext) >= 0;
-                }
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                },
+                changeAddSubject(obj) {
+                    let _that = this;
+                    //debugger
+                    if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
+                        _that.list_grades_full.forEach(function (sbj) {
+                            //console.log(obj.UID)
+                            if (sbj.ID == obj.UI) {
+                                sbj.GradeID = ''
+                                sbj.CourseID = ''
+                                sbj.TeacherID = ''
+                                sbj.SkillID = ''
+                                return
+                            }
+                        });
+                    }
+                },
             }
         });
     </script>
@@ -373,12 +442,25 @@
         </b-col>
 
         <b-col class="form-group">
+            <label for="">Chuyên mục: </label>
+            <select class="col-sm-4" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
+                <option value="">Chọn chương trình</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
+            </select>
+            <select class="col-sm-4" v-model="addItem.gradeID">
+                <option value="">Cấp độ</option>
+                <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addItem.subjectID">{{item.Name}}</option>
+            </select>
+        </b-col>
+
+        <b-col class="form-group row">
             <div class="col-sm-4">
                 <label for="">Ảnh bìa</label>
-                <input type="file" name="CoverImage" id="CoverImage" value="" class="" v-on:change="changeFile()">
+                <input type="file" v-on:change="changeFile()">
             </div>
             <div class="col-sm-8">
-                <img src="" />
+                <img :src="addItem.Image" style="max-width:200px;max-height:150px" />
             </div>
         </b-col>
 
@@ -398,6 +480,11 @@
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
             <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
         </b-col>
+        <b-col class="form-group" v-if="addItem.isCheckDownload">
+            <label class="col-form-label">Download:</label>
+            <input type="checkbox" name="isDownload" id="isDownload" v-model="addItem.isDownload">
+        </b-col>
+
         <b-col class="form-group">
             <label class="col-form-label">Phạm vi chia sẻ:</label>
             <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addItem.Range">
@@ -419,7 +506,7 @@
 
         <b-col class="form-group">
             <label for="">Tag</label>
-            <input type="text" name="" value="" class="form-control" placeholder="Tag">
+            <input type="text" name="" value="" class="form-control" placeholder="Tag" v-model="addItem.tags">
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -433,10 +520,9 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem trước file (vui lòng chờ nếu tốc độ mạng chậm)" size="xl">
-        <b-col class="form-group p-0 m-0">
-            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src=https://eduso.vn'+linkFile" style="min-height:500px;" v-else></iframe>
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
+        <b-col class="form-group">
+            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">

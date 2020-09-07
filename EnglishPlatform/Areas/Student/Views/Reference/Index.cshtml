@@ -53,7 +53,8 @@
             <div class="col-md-12" v-for="data in tableData">
                 <div class="inner flex">
                     <a href="#" title="" class="thumb">
-                        <img src="/pictures/doc1.png" alt="">
+                        <img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
+                        <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">
                     </a>
                     <div class="entry">
                         <div>
@@ -70,7 +71,8 @@
                         </div>
                         <div>
                             <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                            <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                            <a href="#" title="Mở tài liệu" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Mở tài liệu</a>
+                            @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
                         </div>
                     </div>
                 </div>
@@ -94,6 +96,24 @@
                                   :total-rows="totalRec"
                                   :per-page="view"
                                   v-on:input="getData()"></b-pagination>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal_preview" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
+                <div class="modal-content h-100">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Tài liệu {{title}}</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <iframe class="embed-frame col-sm-12 modal-body" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -125,7 +145,10 @@
                             Description: '',
                             FileName: '',
                             file: null,
-                        }
+                },
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                linkFile: '',
+                title:'',
             },
             watch : {
                 searchTerm: function(){
@@ -189,7 +212,25 @@
                 hideModal() {
                     $('.close').click();
                 },
+                showPreview(link, title) {
+                    let _that = this;
+                    _that.linkFile = link;
+                    _that.title = title;
+                    this.linkFile = _that.linkFile;
+                    this.title = _that.title;
+                    debugger
+                    $("#modal_preview").modal();
+                },
+                isDocType(path) {
+                    if (path == null || path == "") return false;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                }
             }
         });
     </script>
 }
+

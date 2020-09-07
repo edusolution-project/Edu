@@ -59,6 +59,7 @@
                                 <th class='text-center'>Giá</th>
                                 <th class='text-center'>Khuyến mại</th>
                                 <th class='text-center'>Hoạt động</th>
+                                <th class='text-center'>Mới</th>
                                 @*<th class='text-center'>Public</th>*@
                                 <th class='text-center'></th>
                                 @*<th class='text-center'></th>*@
@@ -369,6 +370,14 @@
                             isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "Product", new { Area = "admin" })',loadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
                         }
 
+                        var isNew = "";
+                        if (item.IsHot) {
+                            isNew = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish","Product", new { Area = "admin" })',loadData,'IsHot')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isHot'> <div class='handle'></div> </button></td>";
+                        }
+                        else {
+                            isNew = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "Product", new { Area = "admin" })',loadData,'IsHot')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isHot'> <div class='handle'></div> </button></td>";
+                        }
+
                         @*var public = "";
                         if (item.IsPublic) {
                             public = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("unpublish", "Product", new { Area = "admin" })',loadData,'IsPublic')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success' name='isActive'> <div class='handle'></div> </button></td>";
@@ -387,12 +396,13 @@
                             "<td class='text-center'>"+item.Price+"</td>" +
                             "<td class='text-center'>" + item.Discount + "</td>" +
                             isActive +
+                            isNew +
                             //public +
                             "<td class='text-center' style='width: 130px;'>" +
                             "<button onclick =\"Preview('" + item.ID + "')\" type='button' class='btn btn-primary' data-placement='top' title='Xem trước' > <i class='fas fa-eye'></i> </button>" +
                             "<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +
                             "<button onclick =\"Edits('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-edit'></i> </button>" +
-                            @*"<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +*@
+                            "<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
                             "</tr>"
                         );

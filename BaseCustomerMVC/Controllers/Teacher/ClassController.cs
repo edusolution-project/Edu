@@ -227,6 +227,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Class = vm;
             ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
             ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (teacher != null && teacher.Subjects != null)
+            {
+                var listsubjects = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var listgrades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = listgrades;
+                ViewBag.Subjects = listsubjects;
+                //ViewBag.Skills = _skillService.GetList();
+            }
             return View();
         }
 
