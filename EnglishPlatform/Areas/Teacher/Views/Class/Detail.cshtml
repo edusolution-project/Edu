@@ -171,11 +171,11 @@
                                 <p>{{domDecoder(data.Description)}}</p>
                             </div>
                             <div>
-                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Viewed}})</a>
-                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i></a>
+                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
                                 <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
                                 <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
+                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1576,6 +1576,47 @@
                     if (listFiles[0].files[0] != null) { //anh dai dien
                         this.addRef.coverName = listFiles[0].files[0].name
                         this.addRef.cover = listFiles[0].files[0]
+                    }
+                },
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var link = obj.Media.Path;
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
+                    let _that = this;
+                    _that.linkFile = link;
+                    _that.title = title;
+                    this.linkFile = _that.linkFile;
+                    this.title = _that.title;
+                    _that.$bvModal.show('modal_preview')
+                },
+                isDocType(path) {
+                    if (path == null || path == "") return false;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                },
+                changeAddSubject(obj) {
+                    let _that = this;
+                    //debugger
+                    if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
+                        _that.list_grades_full.forEach(function (sbj) {
+                            //console.log(obj.UID)
+                            if (sbj.ID == obj.UI) {
+                                sbj.GradeID = ''
+                                sbj.CourseID = ''
+                                sbj.TeacherID = ''
+                                sbj.SkillID = ''
+                                return
+                            }
+                        });
                     }
                 },
 
