@@ -9,20 +9,12 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using FileManagerCore.Globals;
 
-namespace EasyChatApp
+namespace GoogleApp
 {
     public class Program
     {
-        private static IGoogleDriveApiService _googleDriveApiService;
-        public static IGoogleDriveApiService GoogleDriveApiService
-        {
-            get
-            {
-                return _googleDriveApiService;
-            }
-        }
+        public static IGoogleDriveApiService GoogleDriveApiService { get; private set; }
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
@@ -32,13 +24,10 @@ namespace EasyChatApp
             WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration((hostingContext, configBuilder) =>
             {
                 var config = configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                if (_googleDriveApiService == null && config != null)
+                if (GoogleDriveApiService == null && config != null)
                 {
-                    _googleDriveApiService = new GoogleDriveApiService(config.Build());
+                    GoogleDriveApiService = new GoogleDriveApiService(config.Build());
                 }
-            }).ConfigureServices(services =>
-            {
-                services.AddRoxyFileManger(GoogleDriveApiService);
             }).UseStartup<Startup>();
     }
 }

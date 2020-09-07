@@ -1,16 +1,12 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BaseEasyRealTime.Entities
+namespace EasyChatApp.DataBase
 {
     public class GroupUserEntity : EntityBase
     {
@@ -25,10 +21,10 @@ namespace BaseEasyRealTime.Entities
     public class MessagerEntity : EntityBase
     {
         public string Content { get; set; } // noi dung
-        public MetaData Data { get; set; } // url, 
+        public List<MetaData> Data { get; set; } // url, 
         public string Sender { get; set; } // nguoi gui
         public string GroupId { get; set; } // ten group
-        public double Time { get; set; } // gio gui
+        public double Time { get; set; } = new UnixTime().Now(); // gio gui
         public bool IsDel { get; set; } = false;
     }
     public class MetaData
@@ -59,16 +55,16 @@ namespace BaseEasyRealTime.Entities
         private readonly UnixTime _unixTime;
         public GroupUserService(IConfiguration config) : base(config)
         {
-            if(_unixTime == null)
+            if (_unixTime == null)
             {
                 _unixTime = new UnixTime();
             }
         }
 
-        public string CreatePrivate(string displayName, string sender, string member)
+        public GroupUserEntity CreatePrivate(string displayName, string sender, string member)
         {
             var oldItem = CreateQuery().Find(o => o.IsPrivate == true && o.Members.Any(x => x == sender || x == member))?.SingleOrDefault();
-            if(oldItem == null)
+            if (oldItem == null)
             {
                 var item = new GroupUserEntity()
                 {
@@ -80,23 +76,29 @@ namespace BaseEasyRealTime.Entities
                     Members = new List<string>() { sender, member }
                 };
                 CreateQuery().InsertOne(item);
-                return item.ID;
+                return item;
             }
             else
             {
                 oldItem.DisplayName = displayName;
                 CreateQuery().ReplaceOne(o => o.ID == oldItem.ID, oldItem);
-                return oldItem.ID;
+                return oldItem;
             }
         }
         public GroupUserEntity GetGroupPrivate(string member1, string member2)
         {
             string strName1 = $"{member1}_{member2}";
             string strName2 = $"{member2}_{member1}";
-            var oldItem = CreateQuery().Find(o => o.IsPrivate == true && (o.Name == strName1 || o.Name== strName2))?.SingleOrDefault();
-            return oldItem ?? new GroupUserEntity
+            var oldItem = CreateQuery().Find(o => o.IsPrivate == true && (o.Name == strName1 || o.Name == strName2))?.SingleOrDefault();
+            if(oldItem == null)
+            {
+                oldItem = CreatePrivate(strName1, member1, member2);
+            }
+
+            return new GroupUserEntity
             {
                 ID = oldItem.ID,
+                Name = oldItem.Name,
                 Members = oldItem.Members,
                 DisplayName = oldItem.DisplayName
             };
