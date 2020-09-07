@@ -23,6 +23,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly ReferenceService _referenceService;
         private readonly CenterService _centerService;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
         private readonly IHostingEnvironment _env;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
@@ -37,7 +39,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             IHostingEnvironment env,
             ReferenceService referenceService,
             CenterService centerService,
-            IConfiguration iConfig
+            SubjectService subjectService,
+            GradeService gradeService,
+        IConfiguration iConfig
             )
         {
             _teacherService = teacherService;
@@ -46,6 +50,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
             _centerService = centerService;
             _teacherHelper = teacherHelper;
+            _subjectService = subjectService;
+            _gradeService = gradeService;
             _env = env;
             host = iConfig.GetValue<string>("SysConfig:Domain");
         }
@@ -66,6 +72,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
                 ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
+
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (teacher != null && teacher.Subjects != null)
+            {
+                var subjects = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var grades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = grades;
+                ViewBag.Subjects = subjects;
+                //ViewBag.Skills = _skillService.GetList();
+            }
+
             var myClasses = _classService.CreateQuery()
                 .Find(t => t.Members.Any(o => o.TeacherID == UserID)
                 //&& t.IsActive
@@ -275,6 +292,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //}
                             }
                         }
+                    }
+                    else
+                    {
+                        entity.Image = oldObj.Image;
                     }
                 }
                 if (entity.Link == null)

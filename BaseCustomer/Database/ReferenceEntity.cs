@@ -40,6 +40,14 @@ namespace BaseCustomerEntity.Database
         public string Target { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
+        [JsonProperty("isDownload")]
+        public bool isDownload { get; set; }
+        [JsonProperty("SubjectID")]
+        public string SubjectID { get; set; }
+        [JsonProperty("GradeID")]
+        public string GradeID { get; set; }
+        [JsonProperty("Tags")]
+        public string Tags { get; set; }
     }
 
     public class REF_RANGE

@@ -5,6 +5,8 @@
     ViewData["Title"] = currentClass.Name;
     var currentuser = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var listsubjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var listgrades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -614,6 +616,8 @@
             el: "#main",
             mounted() {
                 this.loadClassDetail()
+                this.list_subject = @Html.Raw(Json.Serialize(listsubjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(listgrades));
                 window.loadContent = this.loadContent
                 window.loadResult = this.loadResult
                 window.updateSchedule = this.updateSchedule
@@ -747,7 +751,12 @@
                     file: null,
                     coverName: '',
                     cover: null,
-                    Image:'',
+                    Image: '',
+                    subjectID: '',
+                    gradeID: '',
+                    isDownload: false,
+                    tags: '',
+                    isCheckDownload: false,
                 },
                 checkpoint: {
                     ID: '',
@@ -773,7 +782,9 @@
                     "application/vnd.ms-powerpoint",
                     "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 ],
-                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"]
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                list_subject: [],
+                list_grades_full: [],
             },
             watch: {
             },
@@ -1326,7 +1337,13 @@
                         _that.addRef.Description = '';
                         _that.addRef.FileName = '';
                         _that.addRef.coverName = '';
-                        _that.addRef.Image = null;
+                        _that.addRef.Image = '';
+                        _that.addRef.subjectID = '';
+                        _that.addRef.gradeID = '';
+                        _that.addRef.isDownload = false;
+                        _that.addRef.Tags = '';
+                        _that.addRef.isCheckDownload = false;
+                        _that.addRef.cover = null;
                     }
                     else {
                         _that.addRef.ID = obj.ID;
@@ -1336,13 +1353,23 @@
                         _that.addRef.Description = obj.Description;
                         _that.addRef.Target = obj.Target;
                         _that.addRef.Image = obj.Image;
-                        if (obj.Media != null)
+                        _that.addRef.subject = obj.SubjectID;
+                        _that.addRef.gradeID = obj.GradeID;
+                        _that.addRef.isDownload = obj.isDownload;
+                        _that.addRef.tags = obj.Tags;
+                        _that.addRef.cover = null;
+                        if (obj.Media != null) {
                             _that.addRef.FileName = obj.Media.Name;
-                        else
+                            _that.addRef.isCheckDownload = true;
+                        }
+                        else {
                             _that.addRef.FileName = '';
+                            _that.addRef.isCheckDownload = false;
+                        }
 
                         if (obj.Image != null) {
                             _that.addRef.Image = obj.Image;
+                            _that.cover = null;
                         }
                     }
                     _that.addRef.file = {};
@@ -1462,13 +1489,17 @@
                     _form.append('Description', _that.addRef.Description)
                     _form.append('Range', _that.addRef.Range)
                     _form.append('Image', _that.addRef.Image)
+                    _form.append('subjectID', _that.addRef.subjectID)
+                    _form.append('gradeID', _that.addRef.gradeID)
+                    _form.append('isDownload', _that.addRef.isDownload)
+                    _form.append('Tags', _that.addRef.tags)
                     if (_that.addRef.file) {
                         _form.append('fileUpload', this.addRef.file)
                     }
+                    debugger
                     if (_that.addRef.cover) {
                         _form.append('coverImage', this.addRef.cover)
                     }
-                    debugger
                     let _url = '@processUrl("Save", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -1535,9 +1566,11 @@
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
                             this.addRef.FileName = listFiles[1].files[0].name
                             this.addRef.file = listFiles[1].files[0]
+                            this.addRef.isCheckDownload = true;
                         }
                         else {
                             alert("File không đúng định dạng, chọn lại!")
+                            this.addRef.isCheckDownload = false;
                             return false;
                         }
                     }
@@ -1708,13 +1741,27 @@
             <label for="">Tên tài liệu</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addRef.Title">
         </b-col>
+
+        <b-col class="form-group">
+            <label for="">Chuyên mục: </label>
+            <select class="col-sm-4" v-model="addRef.subjectID">
+                <option value="">Chọn chương trình</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addRef.subjectID==item.ID">{{item.Name}}</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
+            </select>
+            <select class="col-sm-4" v-model="addRef.gradeID">
+                <option value="">Cấp độ</option>
+                <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addRef.subjectID">{{item.Name}}</option>
+            </select>
+        </b-col>
+
         <b-col class="form-group row">
             <div class="col-sm-4">
                 <label for="">Ảnh bìa</label>
                 <input type="file" name="CoverImage" id="CoverImage" v-on:change="changeFile()">
             </div>
             <div class="col-sm-8">
-                <img :src="addRef.Image" style="max-width:200px;max-height:150px"/>
+                <img :src="addRef.Image" style="max-width:200px;max-height:150px" />
             </div>
         </b-col>
         <b-col class="form-group">
@@ -1728,11 +1775,17 @@
             <label for="">Link liên kết</label>
             <input type="text" name="" value="" class="form-control" placeholder="Link liên kết" v-model="addRef.Link">
         </b-col>
+
         <b-col class="form-group">
             <label class="col-form-label">File đính kèm:</label>
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addRef.FileName)}} - (Click để chọn)</label>
             <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
         </b-col>
+        <b-col class="form-group" v-if="addRef.isCheckDownload">
+            <label class="col-form-label">Download:</label>
+            <input type="checkbox" name="isDownload" id="isDownload" v-model="addRef.isDownload">
+        </b-col>
+
         <b-col class="form-group">
             <label class="col-form-label">Phạm vi chia sẻ:</label>
             <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addRef.Range">
@@ -1743,6 +1796,11 @@
             <select name="target" id="refTarget" v-model="addRef.Target" class="form-control d-inline w-25" v-if="addRef.Range == '@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <option value="@currentClass.ID">@currentClass.Name</option>
             </select>
+        </b-col>
+
+        <b-col class="form-group">
+            <label for="">Tag</label>
+            <input type="text" name="" value="" class="form-control" placeholder="Tag" v-model="addRef.tags">
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">

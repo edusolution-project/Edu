@@ -4,6 +4,9 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -60,8 +63,8 @@
             <div class="col-md-12" v-for="data in tableData">
                 <div class="inner flex">
                     <a href="#" title="" class="thumb">
-                        <img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
-                        <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">
+                        <img :src="data.Image" v-if="data.Image!=null" alt="">
+                        <img src="/pictures/doc1.png?w=256" v-else alt="">
                     </a>
                     <div class="entry">
                         <div>
@@ -117,7 +120,10 @@
         new Vue({
             el: "#main",
             mounted() {
-                this.getData()
+                this.getData();
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                window.changeAddSubject = this.changeAddSubject;
             },
             components: {
           	    LocalQuillEditor: VueQuillEditor.quillEditor
@@ -135,17 +141,22 @@
                 totalRec: 0,
                 page: 1,
                 addItem: {
-                            ID: '',
-                            Title: '',
-                            Range: '',
-                            Link: '',
-                            Target: '',
-                            Description: '',
-                            FileName: '',
-                            file: null,
-                            coverName:'',
-                            cover: null,
-                            Image:'',
+                    ID: '',
+                    Title: '',
+                    Range: '',
+                    Link: '',
+                    Target: '',
+                    Description: '',
+                    FileName: '',
+                    file: null,
+                    coverName: '',
+                    cover: null,
+                    Image: '',
+                    subjectID: '',
+                    gradeID: '',
+                    isDownload: false,
+                    tags: '',
+                    isCheckDownload: false,
                 },
                 linkFile: '',
                 typeFile:[
@@ -159,6 +170,8 @@
                 ],
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 title: '',
+                list_subject: [],
+                list_grades_full: [],
             },
             watch : {
                 searchTerm: function(){
@@ -211,6 +224,13 @@
                         _that.addItem.Description = '';
                         _that.addItem.FileName = '';
                         _that.addItem.coverName = '';
+                        _that.addItem.subjectID = '';
+                        _that.addItem.gradeID = '';
+                        _that.addItem.Image = '';
+                        _that.addItem.isDownload = false;
+                        _that.addItem.Tags = '';
+                        _that.addItem.cover = null;
+                        _that.addItem.isCheckDownload = false;
                     }
                     else {
                         _that.addItem.ID = obj.ID;
@@ -219,13 +239,24 @@
                         _that.addItem.Link = obj.Link;
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Target = obj.Target;
-                        _that.addItem.Image = obj.Image;
+                        _that.addItem.subjectID = obj.SubjectID;
+                        _that.addItem.gradeID = obj.GradeID;
+                        _that.addItem.isDownload = obj.isDownload;
+                        _that.addItem.tags = obj.Tags;
+                        debugger
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
+                            _that.addItem.isCheckDownload = true;
                         }
                         else {
                             _that.addItem.FileName = '';
+                            _that.addItem.isCheckDownload = false;
                         }
+                        if (obj.Image != null) {
+                            _that.addItem.Image = obj.Image;
+                            _that.addItem.cover = null;
+                        }
+                        
                     }
                     _that.addItem.file = {};
                     _that.$bvModal.show('modal_event')
@@ -260,6 +291,10 @@
                     _form.append('Name', _that.addItem.Title)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('Range', _that.addItem.Range)
+                    _form.append('subjectID', _that.addItem.subjectID)
+                    _form.append('gradeID', _that.addItem.gradeID)
+                    _form.append('isDownload', _that.addItem.isDownload)
+                    _form.append('Tags', _that.addItem.tags)
 
                     if (_that.addItem.file) {
                         _form.append('fileUpload', this.addItem.file)
@@ -267,9 +302,6 @@
                     if (_that.addItem.cover) {
                         _form.append('coverImage', this.addItem.cover)
                     }
-
-                    //debugger
-
 
                     let _url = '@processUrl("Save", "Reference")'
                     axios.post(_url, _form)
@@ -332,14 +364,16 @@
                 },
                 changeFile() {
                     var listFiles = $('#modal_event input[type=file]')
-                    
+
                     if (listFiles[1].files[0] != null) { //file dinh kem
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
                             this.addItem.FileName = listFiles[1].files[0].name
                             this.addItem.file = listFiles[1].files[0]
+                            this.addItem.isCheckDownload = true;
                         }
                         else {
                             alert("File không đúng định dạng, chọn lại!")
+                            this.addItem.isCheckDownload = false;
                             return false;
                         }
                     }
@@ -378,7 +412,23 @@
                         var ext = path.substring(idx, path.length - idx);
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
-                }
+                },
+                changeAddSubject(obj) {
+                    let _that = this;
+                    //debugger
+                    if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
+                        _that.list_grades_full.forEach(function (sbj) {
+                            //console.log(obj.UID)
+                            if (sbj.ID == obj.UI) {
+                                sbj.GradeID = ''
+                                sbj.CourseID = ''
+                                sbj.TeacherID = ''
+                                sbj.SkillID = ''
+                                return
+                            }
+                        });
+                    }
+                },
             }
         });
     </script>
@@ -391,13 +441,26 @@
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
         </b-col>
 
+        <b-col class="form-group">
+            <label for="">Chuyên mục: </label>
+            <select class="col-sm-4" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
+                <option value="">Chọn chương trình</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>
+                <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
+            </select>
+            <select class="col-sm-4" v-model="addItem.gradeID">
+                <option value="">Cấp độ</option>
+                <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addItem.subjectID">{{item.Name}}</option>
+            </select>
+        </b-col>
+
         <b-col class="form-group row">
             <div class="col-sm-4">
                 <label for="">Ảnh bìa</label>
-                <input type="file" name="CoverImage" id="CoverImage" value="" class="" v-on:change="changeFile()">
+                <input type="file" v-on:change="changeFile()">
             </div>
             <div class="col-sm-8">
-                <img :src="addItem.Image" style="max-width:200px;max-height:150px"/>
+                <img :src="addItem.Image" style="max-width:200px;max-height:150px" />
             </div>
         </b-col>
 
@@ -417,6 +480,11 @@
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
             <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
         </b-col>
+        <b-col class="form-group" v-if="addItem.isCheckDownload">
+            <label class="col-form-label">Download:</label>
+            <input type="checkbox" name="isDownload" id="isDownload" v-model="addItem.isDownload">
+        </b-col>
+
         <b-col class="form-group">
             <label class="col-form-label">Phạm vi chia sẻ:</label>
             <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addItem.Range">
@@ -438,7 +506,7 @@
 
         <b-col class="form-group">
             <label for="">Tag</label>
-            <input type="text" name="" value="" class="form-control" placeholder="Tag">
+            <input type="text" name="" value="" class="form-control" placeholder="Tag" v-model="addItem.tags">
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
