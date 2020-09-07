@@ -117,7 +117,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         [Obsolete]
         public JsonResult Create(CenterEntity item, IFormFile upload)
         {
-
+            var checkAbbr = true;
+            var newabbr = item.Abbr.ToLower().Trim();
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.Code = item.Name.ConvertUnicodeToCode("-", true);//.Replace(@" ","-");
@@ -132,10 +133,20 @@ namespace BaseCustomerMVC.Controllers.Admin
                         {"Error", "Không tìm thấy cơ sở" },
                     });
                 }
+
+                if (newabbr == oldItem.Abbr)
+                    checkAbbr = false;
+
                 item.Code = oldItem.Code;
                 item.IsDefault = oldItem.IsDefault;
                 item.Image = oldItem.Image;
             }
+
+            if (checkAbbr && _service.CreateQuery().Count(t => t.Abbr == newabbr) > 0)
+                return new JsonResult(new Dictionary<string, object>()
+                    {
+                        {"Error", "Tên viết tắt đã tồn tại" }
+                    });
 
             if (upload != null && upload.Length > 0)
             {
@@ -187,7 +198,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                         {"Msg","Cập nhật thành công" }
                     };
             return new JsonResult(response);
-
         }
 
         [HttpPost]

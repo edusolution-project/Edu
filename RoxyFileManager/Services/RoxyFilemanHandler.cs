@@ -899,6 +899,7 @@ namespace FileManagerCore.Services
         /// <param name="user"></param>
         /// <param name="context"></param>
         /// <returns>List fileId</returns>
+
         public List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context)
         {
             string folderId = GetFolder(center, user);
@@ -936,6 +937,41 @@ namespace FileManagerCore.Services
             }
             return response;
         }
+
+        public MediaResponseModel UploadSingleFileWithGoogleDrive(string center, string user, IFormFile file)
+        {
+            string folderId = GetFolder(center, user);
+            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            List<MediaResponseModel> response = new List<MediaResponseModel>();
+
+            FileInfo f = new FileInfo(file.FileName);
+            string filename = MakeUniqueFilename(path, f.Name);
+            string dest = Path.Combine(path, filename);
+            string fileId = "";
+            using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+            {
+                file.CopyTo(stream);
+                fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
+                stream.Close();
+            }
+
+
+            _fileManagerService.Collection.InsertOne(new FileManagerEntity()
+            {
+                Extends = f.Extension,
+                FileID = fileId,
+                FolderID = folderId,
+                Name = file.Name,
+                Center = center,
+                UserID = user
+            });
+            return new MediaResponseModel() { FileId = fileId, Path = GoogleDriveApiService.CreateLinkViewFile(fileId), Extends = f.Extension };
+        }
+
+
         public bool DeleteFileWithGoogleDrive(string fileId, string center, string user)
         {
             try

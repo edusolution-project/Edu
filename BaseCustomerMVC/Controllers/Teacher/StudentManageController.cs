@@ -42,6 +42,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
+        private readonly IndexService _indexService;
+
         private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
         private IConfiguration _configuration;
@@ -68,6 +70,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             ProgressHelper progressHelper,
             StudentHelper studentHelper,
+            IndexService indexService,
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
@@ -95,7 +98,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mailHelper = mailHelper;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
-
+            _indexService = indexService;
             _studentHelper = studentHelper;
             _progressHelper = progressHelper;
         }
@@ -493,6 +496,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     left = long.MaxValue;
             }
 
+            if (center == null || left <= 0)
+            {
+                return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
+            }
+
+            var abbr = "st." + (string.IsNullOrEmpty(center.Abbr) ? "eduso" : center.Abbr);
+
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
@@ -517,7 +527,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
                                 var email = (workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString()).ToLower().Trim();
-                                if (string.IsNullOrEmpty(email)) continue;
+                                if (string.IsNullOrEmpty(email))
+                                //    continue; skip => create auto mail
+                                {
+                                    email = abbr + "_" + _indexService.GetNewIndex(abbr) + "@eduso.vn";
+                                }
+
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                                 var birthdate = new DateTime();
