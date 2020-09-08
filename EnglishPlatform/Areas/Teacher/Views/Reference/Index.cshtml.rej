@@ -1,9 +1,0 @@
-diff a/EnglishPlatform/Areas/Teacher/Views/Reference/Index.cshtml b/EnglishPlatform/Areas/Teacher/Views/Reference/Index.cshtml	(rejected hunks)
-@@ -78,6 +78,7 @@
-                         </div>
-                         <div>
-                             <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-+                            <a href="#" title="Xem trước" class="btn-view btn-success" v-on:click="showPreview(data.Media.Path)" v-if="data.Media != null && isDocType(data.Media.Path) != null">Xem trước file</a>
-                             <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
-                             <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
-                             <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>

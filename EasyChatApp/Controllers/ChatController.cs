@@ -51,51 +51,51 @@ namespace EasyChatApp.Controllers
             //await Task.Delay(100);
             try
             {
-                MessagerEntity item = string.IsNullOrEmpty(messageId) ? new MessagerEntity {Sender = user} : _messagerService.GetItemByID(messageId);
-                #region group or user
-                if (!string.IsNullOrEmpty(groupId))
-                {
-                    item.GroupId = groupId;
-                }
-                if (!string.IsNullOrEmpty(receiver))
-                {
-                    var group = _groupUserService.GetGroupPrivate(user, receiver);
-                    item.GroupId = group.ID;
-                }
-                #endregion
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
-                if (medias == null || medias.Count == 0)
-                {
-                    item.Content = message;
-                }
-                else
-                {
-                    List<MetaData> metaDatas = new List<MetaData>();
-                    for (int i = 0; i < medias.Count; i++)
-                    {
-                        var media = medias[i];
-                        metaDatas.Add(new MetaData()
-                        {
-                            Id = media.FileId,
-                            Type = media.Extends,
-                            Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
-                        });
-                    }
-                    item.Data = metaDatas;
-                }
-                _messagerService.CreateOrUpdate(item);
-                if (!string.IsNullOrEmpty(groupId))
-                {
-                    await _hubContext.Clients.Group(groupId).SendAsync("ReceiverMessage", item);
-                }
-                else
-                {
-                    await _hubContext.Clients.User(connectionId).SendAsync("ReceiverMessage", item);
-                }
+                //MessagerEntity item = string.IsNullOrEmpty(messageId) ? new MessagerEntity {Sender = user} : _messagerService.GetItemByID(messageId);
+                //#region group or user
+                //if (!string.IsNullOrEmpty(groupId))
+                //{
+                //    item.GroupId = groupId;
+                //}
+                //if (!string.IsNullOrEmpty(receiver))
+                //{
+                //    var group = _groupUserService.GetGroupPrivate(user, receiver);
+                //    item.GroupId = group.ID;
+                //}
+                //#endregion
+                //var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
+                //if (medias == null || medias.Count == 0)
+                //{
+                //    item.Content = message;
+                //}
+                //else
+                //{
+                //    List<MetaData> metaDatas = new List<MetaData>();
+                //    for (int i = 0; i < medias.Count; i++)
+                //    {
+                //        var media = medias[i];
+                //        metaDatas.Add(new MetaData()
+                //        {
+                //            Id = media.FileId,
+                //            Type = media.Extends,
+                //            Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
+                //        });
+                //    }
+                //    item.Data = metaDatas;
+                //}
+                //_messagerService.CreateOrUpdate(item);
+                //if (!string.IsNullOrEmpty(groupId))
+                //{
+                //    await _hubContext.Clients.Group(groupId).SendAsync("ReceiverMessage", item);
+                //}
+                //else
+                //{
+                //    await _hubContext.Clients.User(connectionId).SendAsync("ReceiverMessage", item);
+                //}
 
-                response.Code = 200;
-                response.Data = item;
-                response.Message = "SUCCESS";
+                //response.Code = 200;
+                //response.Data = item;
+                //response.Message = "SUCCESS";
 
             }
             catch(Exception ex)
@@ -115,7 +115,7 @@ namespace EasyChatApp.Controllers
             Response response = new Response();
             try
             {
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
+                //var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
 
 
             }
@@ -138,7 +138,7 @@ namespace EasyChatApp.Controllers
             await Task.Delay(100);
             try
             {
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
+                //var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
 
 
             }

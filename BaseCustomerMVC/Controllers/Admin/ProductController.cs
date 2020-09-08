@@ -61,21 +61,14 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public async Task<JsonResult> CreateOrUpdate(NewsEntity item, IFormFile Thumbnail)
         {
-            if(item.Targets != null && item.Targets.Count > 0 && item.Targets[0]!=null)
+            if(item.Targets != null && item.Targets.Count > 0)
             {
                 foreach (var target in item.Targets[0].ToString().Split(','))
                 {
-                    if (target != "")
+                    if (target != null || target != "")
                         item.Targets.Add(target);
                 }
-                item.Targets.RemoveAt(0);
             }
-            else
-            {
-                item.Targets = new List<string>();
-            }
-            
-            //item.Targets.RemoveAt(item.Targets.Count);
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {

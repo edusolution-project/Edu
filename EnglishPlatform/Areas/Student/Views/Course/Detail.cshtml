@@ -34,7 +34,7 @@
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
-                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>
+                    @*<li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>*@
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(3)">Thảo luận</a></li>
                 </ul>
             </div>
@@ -68,8 +68,8 @@
                         <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
                             <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
                             @*<div>
-                                <img :src="item.Image" style="max-width:150px; max-height:200px" />
-                            </div>*@
+                                    <img :src="item.Image" style="max-width:150px; max-height:200px" />
+                                </div>*@
                             <div>
                                 {{item.Title}}
                             </div>
@@ -95,7 +95,8 @@
                     </div>
                     <div class="modal-body">
                         <div class="container-fluid">
-                            <iframe class="embed-frame col-sm-12 modal-body" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile"></iframe>
+                            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
+                            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile" v-else style="min-height:500px;"></iframe>
                         </div>
                     </div>
                 </div>
@@ -104,6 +105,7 @@
 
         <div class="box" v-if="tab[2]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
+<<<<<<< HEAD
                 <div class="col-md-12" v-for="data in ref.data">
                     <div class="inner flex">
                         <a href="#" title="" class="thumb">
@@ -111,24 +113,27 @@
                             <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">*@
                             <img :src="data.Image" v-if="data.Image!=null" alt="">
                             <img src="/pictures/doc1.png?w=256" v-else alt="">
+=======
+                <div class="col-md-6" v-for="data in ref.data">
+                    <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                        <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+>>>>>>> origin/Running_NoGoogleDrive
                         </a>
-                        <div class="entry">
+                        <div class="entry p-0">
                             <div>
                                 <div>
                                     <a href="#" title="" class="title">{{data.Title}}</a>
                                 </div>
-                                <div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>
                             </div>
-                            <div class="pt-2 pb-2">
-                                <p>{{domDecoder(data.Description)}}</p>
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                             </div>
                             <div>
-                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem <span class="badge badge-light">{{data.Viewed}}</span></a>
-                                <a href="#" title="Mở tài liệu" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Mở tài liệu</a>
-                                @*<a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>*@
+                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
                             </div>
                         </div>
                     </div>
@@ -341,9 +346,32 @@
                     obj.Downloaded = obj.Downloaded + 1;
                     window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var link = obj.Media.Path;
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
+                    let _that = this;
+                    console.log(obj);
+                    if (!link.startsWith("http"))
+                        link = "https://eduso.vn" + link;
+                    _that.linkFile = link;
+                    _that.title = title;
+                    this.linkFile = _that.linkFile;
+                    this.title = _that.title;
+                    $("#modal_preview").modal();
+                },
 
                 //SUPPORT
                 domDecoder(str) {
+                    if (str == null || str == 'null')
+                        return "";
+                    //console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -356,15 +384,6 @@
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
-                },
-                showPreview(link,title) {
-                    let _that = this;
-                    _that.linkFile = link;
-                    _that.title = title;
-                    this.linkFile = _that.linkFile;
-                    this.title = _that.title;
-                    debugger
-                    $("#modal_preview").modal();
                 },
                 isDocType(path) {
                     if (path == null || path == "") return false;

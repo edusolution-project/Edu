@@ -21,7 +21,6 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly FileProcess _fileProcess;
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
-
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
 
@@ -30,10 +29,10 @@ namespace BaseCustomerMVC.Controllers.Student
             TeacherService teacherService,
             ClassService classService,
             FileProcess fileProcess,
-            IHostingEnvironment env,
-            ReferenceService referenceService,
             SubjectService subjectService,
-            GradeService gradeService
+            GradeService gradeService,
+            IHostingEnvironment env,
+            ReferenceService referenceService
             )
         {
             _studentService = studentService;
@@ -41,9 +40,9 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = classService;
             _referenceService = referenceService;
             _fileProcess = fileProcess;
-            _env = env;
             _subjectService = subjectService;
             _gradeService = gradeService;
+            _env = env;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -58,15 +57,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 .SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate)
                 .ToList();
             }
-            var student = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
-            if (student != null && student.Subjects != null)
-            {
-                var subjects = _subjectService.CreateQuery().Find(t => student.Subjects.Contains(t.ID)).ToList();
-                var grades = _gradeService.CreateQuery().Find(t => student.Subjects.Contains(t.SubjectID)).ToList();
-                ViewBag.Grades = grades;
-                ViewBag.Subjects = subjects;
-                //ViewBag.Skills = _skillService.GetList();
-            }
+            var subjects = _subjectService.GetAll().ToList();
+            var grades = _gradeService.GetAll().ToList();
+            ViewBag.Grades = grades;
+            ViewBag.Subjects = subjects;
             ViewBag.AllClass = myClasses;
             ViewBag.User = UserID;
             if (old == 1)
@@ -74,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID, string SubjectID, string GradeID)
         {
             if (entity != null)
             {
@@ -118,10 +112,19 @@ namespace BaseCustomerMVC.Controllers.Student
                         ));
                         break;
                 }
+                if (!string.IsNullOrEmpty(SubjectID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
+                }
+                if (!string.IsNullOrEmpty(GradeID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
+                }
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
+
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
@@ -205,7 +208,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var item = _referenceService.GetItemByID(ID);
                 if (item == null)
                     return BadRequest();
-                _ = _referenceService.IncView(ID, 1);
+                _ = _referenceService.IncLink(ID, 1);
                 //TODO: create view log
                 var url = item.Link;
                 if (!string.IsNullOrEmpty(url))
@@ -216,6 +219,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
             return BadRequest();
+        }
+
+        public JsonResult View(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+                _ = _referenceService.IncView(ID, 1);
+            return Json("OK");
         }
     }
 }

@@ -327,20 +327,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    //Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
-                    List<MediaResponseModel> listFileUpload = _roxyFilemanHandler.UploadFileWithGoogleDrive(basis, User.FindFirst("UserID").Value, HttpContext);
-                    if (listFileUpload.Count > 0)
+                    Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
+                    if (listFilesUpload.TryGetValue("success", out List<MediaResponseModel> listFiles) && listFiles.Count > 0)
                     {
                         var listMedia = new List<Media>();
-                        for (int i = 0; i < listFileUpload.Count; i++)
+                        for (int i = 0; i < listFiles.Count; i++)
                         {
                             var media = new Media()
                             {
                                 Created = DateTime.Now,
-                                Extension = listFileUpload[i].Extends,
-                                Name = listFileUpload[i].Path,
-                                OriginalName = listFileUpload[i].Path,
-                                Path = _roxyFilemanHandler.GoogleDriveApiService.CreateLinkViewFile(listFileUpload[i].Path)
+                                Extension = listFiles[i].Extends,
+                                Name = listFiles[i].Path,
+                                OriginalName = listFiles[i].Path,
+                                Path = listFiles[i].Path
                             };
                             listMedia.Add(media);
                         }

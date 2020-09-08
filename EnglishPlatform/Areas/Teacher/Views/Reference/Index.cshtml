@@ -31,6 +31,18 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b flex-wrap align-items-center">
+            <div class="box filter-box col-12 col-md-2 m-1">
+                <select v-model="subject">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box col-12 col-md-2 m-1">
+                <select v-model="grade">
+                    <option value="">Chọn cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                </select>
+            </div>
             <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="range">
                     <option value="">-- Chọn phạm vi chia sẻ --</option>
@@ -39,7 +51,8 @@
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
                 </select>
             </div>
-            <div class="box filter-box m-1 col-12 col-md-2" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+
+            <div class="box filter-box m-1 col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
                     @if (myClasses != null && myClasses.Count > 0)
@@ -51,22 +64,9 @@
                     }
                 </select>
             </div>
-            <div class="search-box m-1 col-12 col-md-2">
+            <div class="search-box m-1 col-12 col-md-2 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
-            </div>
-            <div class="box filter-box m-1 col-12 col-md-2" >
-                <select v-model="subjectID">
-                    <option value="">Chương trình</option>
-                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                </select>
-            </div>
-            <div class="box filter-box m-1 col-12 col-md-2" >
-                <select v-model="gradeID">
-                    <option value="" v-if="subjectID==''">Cấp độ</option>
-                    <option value="" v-else>Cấp độ</option>
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==subjectID">{{item.Name}}</option>
-                </select>
             </div>
             <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
 
@@ -74,37 +74,31 @@
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
-            <div class="col-md-12" v-for="data in tableData">
-                <div class="inner flex">
-                    <a href="#" title="" class="thumb">
-                        <img :src="data.Image" v-if="data.Image!=null" alt="">
-                        <img src="/pictures/doc1.png?w=256" v-else alt="">
+            <div class="col-md-6" v-for="data in tableData">
+                <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                    <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
+                        <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
-                    <div class="entry">
+                    <div class="entry p-0">
                         <div>
                             <div>
                                 <a href="#" title="" class="title">{{data.Title}}</a>
                             </div>
-                            <div>
-                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                            </div>
+                            @*<div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                </div>*@
                         </div>
-                        <div class="pt-2 pb-2">
-                            <p>{{domDecoder(data.Description)}}</p>
+                        <div class="pt-0 pb-2">
+                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                         </div>
                         <div>
-                            @*<a href="#" title="Mở link liên kết" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Mở link liên kết ({{data.Viewed}})</a>
-                                <a href="#" title="Mở file" class="btn-view btn btn-info" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)">Mở file</a>
-                                <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
-                                <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
-                                <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>*@
-
-                            <a href="#" title="Mở link liên kết" class="btn" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="ti-link"></i></a>
-                            <a href="#" title="Mở file" class="btn" v-on:click="showPreview(data.Media.Path,data.Title)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="ti-files"></i></a>
-                            <a href="#" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name" class="btn"><i class="ti-download"></i></a>
-                            <a href="#" title="Xóa" class="btn" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt"></i></a>
-                            <a href="#" title="Sửa" class="btn" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-edit"></i></a>
+                            <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                            <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                            <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                            <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                            <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="fas fa-edit font-weight-bold"></i></a>
                         </div>
                     </div>
                 </div>
@@ -190,10 +184,12 @@
                 ],
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 title: '',
+                subject: '',
+                grade: '',
                 list_subject: [],
                 list_grades_full: [],
                 subjectID: '',
-                gradeID: '',
+                gradeID:'',
             },
             watch : {
                 searchTerm: function(){
@@ -203,6 +199,12 @@
                     this.searchTimeout = setTimeout(function(){
                         fn()
                     }, 500)
+                },
+                subject: function () {
+                    this.getData()
+                },
+                grade: function () {
+                    this.getData()
                 },
                 range: function(){
                     this.getData()
@@ -219,6 +221,7 @@
             },
             methods: {
                 getData() {
+                    console.log(this.list_grades_full);
                     let _that = this
                     let _form = new FormData()
                     _form.append('SearchText', _that.searchTerm)
@@ -258,7 +261,7 @@
                         _that.addItem.Description = '';
                         _that.addItem.FileName = '';
                         _that.addItem.coverName = '';
-                        _that.addItem.subjectID = '';
+                        _that.addItem.subjectID = "";
                         _that.addItem.gradeID = '';
                         _that.addItem.Image = '';
                         _that.addItem.isDownload = false;
@@ -277,7 +280,6 @@
                         _that.addItem.gradeID = obj.GradeID;
                         _that.addItem.isDownload = obj.isDownload;
                         _that.addItem.tags = obj.Tags;
-                        debugger
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
                             _that.addItem.isCheckDownload = true;
@@ -290,13 +292,13 @@
                             _that.addItem.Image = obj.Image;
                             _that.addItem.cover = null;
                         }
-                        
+
                     }
                     _that.addItem.file = {};
                     _that.$bvModal.show('modal_event')
                 },
                 openLink(obj) {
-                    obj.Viewed = obj.Viewed + 1;
+                    obj.Linked = obj.Linked + 1;
                     window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
@@ -338,6 +340,7 @@
                     }
 
                     let _url = '@processUrl("Save", "Reference")'
+                    this.isLoading = true;
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.Error == null) {
@@ -350,6 +353,7 @@
                                 this.hideModal()
                             }
                             else {
+                                _that.isLoading = false;
                                 Swal.fire(
                                     'Có lỗi!',
                                     response.Error,
@@ -418,6 +422,9 @@
                     //debugger
                 },
                 domDecoder(str) {
+                    if (str == null)
+                        return "";
+                    //console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -430,9 +437,18 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showPreview(link, title) {
-                    debugger
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var link = obj.Media.Path;
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
                     let _that = this;
+                    //console.log(obj);
                     _that.linkFile = link;
                     _that.title = title;
                     this.linkFile = _that.linkFile;
@@ -475,15 +491,15 @@
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
         </b-col>
 
-        <b-col class="form-group">
+        <b-col class="form-group flex">
             <label for="">Chuyên mục: </label>
-            <select class="col-sm-4" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
-                <option value="">Chọn chương trình</option>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
+                <option value="">----</option>
                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>
                 <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
             </select>
-            <select class="col-sm-4" v-model="addItem.gradeID">
-                <option value="">Cấp độ</option>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.gradeID">
+                <option value="">----</option>
                 <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addItem.subjectID">{{item.Name}}</option>
             </select>
         </b-col>
@@ -512,7 +528,7 @@
         <b-col class="form-group">
             <label class="col-form-label">File đính kèm:</label>
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
-            <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+            <input type="file" ref="file" class="d-none" v-on:change="changeFile()" accept=".doc, .docx, .xlsx, .xls, .ptt, pttx, .pdf">
         </b-col>
         <b-col class="form-group" v-if="addItem.isCheckDownload">
             <label class="col-form-label">Download:</label>
@@ -554,19 +570,18 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem trước file (vui lòng chờ nếu tốc độ mạng chậm)" size="xl">
-        <b-col class="form-group p-0 m-0">
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
+        <b-col class="form-group">
             <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src=https://eduso.vn'+linkFile" style="min-height:500px;" v-else></iframe>
+            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile" v-else style="min-height:500px;"></iframe>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
-            @*<template v-if="isLoading">
+            <template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
-                </template>*@
-            <template v-else>
-                @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
-                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+                </template>
+            <template>
+                <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
         </template>
     </b-modal>

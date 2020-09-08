@@ -12,6 +12,7 @@
         return $"/{center}{url}";
     }
 }
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
 <script>
     setActiveMenu("home");
 </script>
@@ -148,15 +149,15 @@
                                             </a>
                                             <div class="c-bot" style="text-align:right; width:133px;">
                                                 @*<div>
-                                                    <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                                </div>
-                                                <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
-                                                    {{formatPrice(item.Discount) }} VNĐ
-                                                </div>
-                                                <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
-                                                </div>*@
+                                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                                    </div>
+                                                    <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                                        {{formatPrice(item.Discount) }} VNĐ
+                                                    </div>
+                                                    <div>
+                                                        <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                        <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
+                                                    </div>*@
                                                 <div>
                                                     <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                                                 </div>
@@ -177,12 +178,31 @@
             <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
                 <div class="modal-content h-100">
                     <div class="modal-header">
-                        @*<h3 class="modal-title">Tài liệu {{title}}</h3>*@
+                        <h3 class="modal-title">{{detailProduct.Title}}</h3>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
+                        <div class="container-fluid">
+                            <div class="col-sm-9" style="position: absolute; top: 10px; left: 0; right: 0; bottom: 10px; overflow: auto;">
+                                <div class="form-group" name="Content" v-html="detailProduct.Content" style="text-align:justify">
+                                    @*{{detailProduct.Content}}*@
+                                </div>
+                            </div>
+                            <div class="col-sm-3" style="position:absolute; right: 0; top: 10px;">
+                                <div style=" border: solid 1px #CCC; border-radius:10px;" class="pt-4 pb-3">
+                                    <div class="form-group col-sm-12" id="price">
+                                        <span class="price font-weight-bold text-danger ml-auto col-sm-12" style="font-size:130%; text-align:right;">
+                                            Giá bán: {{formatPrice(detailProduct.Discount)}} <span v-if="detailProduct.Discount > 0" style="color: #999; text-decoration:line-through; font-size:90%;"> ({{formatPrice(detailProduct.Price)}}) VNĐ</span>
+                                        </span>
+                                    </div>
+                                    <div class="form-group col-sm-12" style="text-align:center">
+                                        <button type="button" class="btn btn-danger disabled w-100 pt-3 pb-3" title="Mua ngay">Mua ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -336,7 +356,6 @@
                 let _form = new FormData();
                 _form.append('ID', ID);
                 let _url = '@processUrl("DetailProduct", "Home")';
-                debugger
                 axios.post(_url, _form)
                     .then(response => {
                         _that.detailProduct = response.data;
