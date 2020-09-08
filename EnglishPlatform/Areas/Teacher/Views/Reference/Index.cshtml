@@ -31,7 +31,19 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b flex-wrap align-items-center">
-            <div class="box filter-box m-1 col-12 col-md-3">
+            <div class="box filter-box col-12 col-md-2 m-1">
+                <select v-model="subject">
+                    <option value="">Chọn chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box col-12 col-md-2 m-1">
+                <select v-model="grade">
+                    <option value="">Chọn cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="range">
                     <option value="">-- Chọn phạm vi chia sẻ --</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
@@ -39,7 +51,8 @@
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
                 </select>
             </div>
-            <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+
+            <div class="box filter-box m-1 col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
                     @if (myClasses != null && myClasses.Count > 0)
@@ -51,7 +64,7 @@
                     }
                 </select>
             </div>
-            <div class="search-box m-1 col-12 col-md-3">
+            <div class="search-box m-1 col-12 col-md-2 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
@@ -61,23 +74,23 @@
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
-                <div class="flex p-2 mb-2 inner" style="border: dotted 1px #DDD">
-                    <a href="#" title="" class="thumb col-md-3">
+                <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                    <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
                         <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
                         <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
-                    <div class="entry col-md-9 p-0">
+                    <div class="entry p-0">
                         <div>
                             <div>
                                 <a href="#" title="" class="title">{{data.Title}}</a>
                             </div>
-                            <div>
-                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                            </div>
+                            @*<div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                </div>*@
                         </div>
-                        <div class="pt-2 pb-2">
-                            <p>{{domDecoder(data.Description)}}</p>
+                        <div class="pt-0 pb-2">
+                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                         </div>
                         <div>
                             <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
@@ -170,6 +183,8 @@
                 ],
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 title: '',
+                subject: '',
+                grade: '',
                 list_subject: [],
                 list_grades_full: [],
             },
@@ -182,6 +197,12 @@
                         fn()
                     }, 500)
                 },
+                subject: function () {
+                    this.getData()
+                },
+                grade: function () {
+                    this.getData()
+                },
                 range: function(){
                     this.getData()
                 },
@@ -191,6 +212,7 @@
             },
             methods: {
                 getData() {
+                    console.log(this.list_grades_full);
                     let _that = this
                     let _form = new FormData()
                     _form.append('SearchText', _that.searchTerm)
@@ -198,7 +220,8 @@
                     _form.append('Target', _that.target)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
-
+                    _form.append('SubjectID', _that.subject)
+                    _form.append('GradeID', _that.grade)
                     let _url = '@processUrl("GetList", "Reference")'
 
                     axios.post(_url, _form)
@@ -383,6 +406,9 @@
                     //debugger
                 },
                 domDecoder(str) {
+                    if (str == null)
+                        return "";
+                    //console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -406,7 +432,7 @@
                             obj.Viewed = obj.Viewed + 1;
                         }).catch(e => { })
                     let _that = this;
-                    console.log(obj);
+                    //console.log(obj);
                     _that.linkFile = link;
                     _that.title = title;
                     this.linkFile = _that.linkFile;
@@ -486,7 +512,7 @@
         <b-col class="form-group">
             <label class="col-form-label">File đính kèm:</label>
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
-            <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+            <input type="file" ref="file" class="d-none" v-on:change="changeFile()" accept=".doc, .docx, .xlsx, .xls, .ptt, pttx, .pdf">
         </b-col>
         <b-col class="form-group" v-if="addItem.isCheckDownload">
             <label class="col-form-label">Download:</label>
@@ -538,9 +564,8 @@
             @*<template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
                 </template>*@
-            <template v-else>
-                @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
-                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            <template>
+                <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
         </template>
     </b-modal>

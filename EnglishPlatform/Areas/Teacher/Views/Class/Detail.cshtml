@@ -152,22 +152,22 @@
         <div class="box" v-if="tab[3]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
                 <div class="col-md-6" v-for="data in ref.data">
-                    <div class="flex p-2 mb-2 inner" style="border: dotted 1px #DDD">
-                        <a href="#" title="" class="thumb col-md-2">
+                    <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                        <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
                             <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
-                        <div class="entry col-md-10 p-0">
+                        <div class="entry p-0">
                             <div>
                                 <div>
                                     <a href="#" title="" class="title">{{data.Title}}</a>
                                 </div>
-                                <div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>
+                                @*<div>
+                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                    </div>*@
                             </div>
-                            <div class="pt-2 pb-2">
+                            <div class="pt-0 pb-2">
                                 <p>{{domDecoder(data.Description)}}</p>
                             </div>
                             <div>
@@ -1689,6 +1689,9 @@
                     return _time.format("DD/MM/YYYY HH:mm")
                 },
                 domDecoder(str) {
+                    if (str == null)
+                        return "";
+                    console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -1977,9 +1980,8 @@
             @*<template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
                 </template>*@
-            <template v-else>
-                @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
-                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            <template>
+                <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
         </template>
     </b-modal>

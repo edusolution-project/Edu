@@ -27,7 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly IHostingEnvironment _env;
-        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+        //private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
         private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
@@ -43,8 +43,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             SubjectService subjectService,
             GradeService gradeService,
-            IConfiguration iConfig,
-            IRoxyFilemanHandler roxyFilemanHandler
+            IConfiguration iConfig
+            //IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _teacherService = teacherService;
@@ -56,7 +56,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _gradeService = gradeService;
             _env = env;
-            _roxyFilemanHandler = roxyFilemanHandler;
+            //_roxyFilemanHandler = roxyFilemanHandler;
             host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
@@ -101,7 +101,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string SubjectID, string GradeID)
         {
             if (entity != null)
             {
@@ -126,6 +126,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     default:
                         filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
                         break;
+                }
+                if (!string.IsNullOrEmpty(SubjectID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
+                }
+                if (!string.IsNullOrEmpty(GradeID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
                 }
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
@@ -235,7 +243,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Extension = extension;
                                 entity.Media.Path =
                                 //mediarsp.Path;
-                                $"https://{host}//" + await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
                             }
                         }
                     }

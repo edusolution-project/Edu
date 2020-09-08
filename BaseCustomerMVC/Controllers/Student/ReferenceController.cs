@@ -19,7 +19,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
-
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
 
@@ -28,6 +29,8 @@ namespace BaseCustomerMVC.Controllers.Student
             TeacherService teacherService,
             ClassService classService,
             FileProcess fileProcess,
+            SubjectService subjectService,
+            GradeService gradeService,
             IHostingEnvironment env,
             ReferenceService referenceService
             )
@@ -37,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = classService;
             _referenceService = referenceService;
             _fileProcess = fileProcess;
+            _subjectService = subjectService;
+            _gradeService = gradeService;
             _env = env;
         }
 
@@ -52,6 +57,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 .SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate)
                 .ToList();
             }
+            var subjects = _subjectService.GetAll().ToList();
+            var grades = _gradeService.GetAll().ToList();
+            ViewBag.Grades = grades;
+            ViewBag.Subjects = subjects;
             ViewBag.AllClass = myClasses;
             ViewBag.User = UserID;
             if (old == 1)
@@ -59,7 +68,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID, string SubjectID, string GradeID)
         {
             if (entity != null)
             {
@@ -103,10 +112,19 @@ namespace BaseCustomerMVC.Controllers.Student
                         ));
                         break;
                 }
+                if (!string.IsNullOrEmpty(SubjectID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
+                }
+                if (!string.IsNullOrEmpty(GradeID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
+                }
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
+
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
