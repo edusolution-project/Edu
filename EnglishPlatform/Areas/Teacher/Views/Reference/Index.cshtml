@@ -131,7 +131,7 @@
     <script>
         Vue.use(VueQuillEditor)
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.getData();
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
@@ -431,13 +431,11 @@
                         .then(response => {
                             obj.Viewed = obj.Viewed + 1;
                         }).catch(e => { })
-                    let _that = this;
                     //console.log(obj);
-                    _that.linkFile = link;
-                    _that.title = title;
-                    this.linkFile = _that.linkFile;
-                    this.title = _that.title;
-                    _that.$bvModal.show('modal_preview')
+                    if (!link.startsWith("http")) link = "https://eduso.vn" + link;
+                    this.linkFile = link;
+                    this.title = title;
+                    this.$bvModal.show('modal_preview')
                 },
                 isDocType(path) {
                     if (path == null || path == "") return false;
@@ -463,6 +461,19 @@
                         });
                     }
                 },
+                renderContent(linkFile) {
+                    var html = "";
+                    if (linkFile.toLowerCase().endsWith('.pdf'))
+                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
+                    else {
+                        if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
+                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
+                    }
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
+                    return dom.body.innerHTML;
+
+                }
             }
         });
     </script>

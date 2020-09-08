@@ -324,13 +324,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 Error = ex.Message;
             }
-            var Datarespone = new Dictionary<string, object>
+            var Dataresponse = new Dictionary<string, object>
             {
                 { "msg", "Đã xóa học viên" },
                 { "error", Error},
                 { "Status", Status }
             };
-            return Json(Datarespone);
+            return Json(Dataresponse);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -663,6 +663,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
             return true;
         }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetBestStudents(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không có dữ liệu" });
+
+            var list = new List<StudentRankingViewModel>();
+
+            var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+            var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            {
+                StudentID = g.Key,
+                TotalPoint = g.Sum(t => t.TotalPoint),
+                PracticePoint = g.Sum(t => t.PracticePoint),
+            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+
+            var rtn = new List<StudentRankingViewModel>();
+            foreach (var result in results)
+            {
+                var st = _studentService.GetItemByID(result.StudentID);
+                if (st != null)
+                {
+                    result.StudentName = st.FullName;
+                    rtn.Add(result);
+                }
+            }
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", rtn }
+            };
+            return new JsonResult(response);
+        }
+
 
         //public async Task<JsonResult> ConvertStudent()
         //{

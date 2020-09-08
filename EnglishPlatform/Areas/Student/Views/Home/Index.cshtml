@@ -187,7 +187,7 @@
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_courses">
                                 <a v-on:click="DetailProduct(item.ID)" :title="item.Title">
-                                    <div class="box radius" style="height:240px">
+                                    <div class="box radius">
                                         <div class="thumb" style="position:relative;">
                                             <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
                                             @*<img v-else :src="item.Thumbnail" alt="">*@
