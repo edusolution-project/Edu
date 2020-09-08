@@ -1118,8 +1118,16 @@
             var li = item.children[0].children[0].children[1].text;
             var id = item.id;
             $("#tableContents").append("<a href='#" + id + "' style='text-decoration:none;'><li class='list-group-item list-group-item-action' style='border-radius:unset'>" + li + "</li></a>");
+            if ($(item).find('[class=modules]').length > 0) {
+                for (j = 0; j < $(item).find('[class=modules]').length; j++) {
+                    var chilItem = $(item).find('[class=modules]')[j];
+                    var chilLi = chilItem.children[0].children[0].children[1].text;
+                    ChilID = chilItem.id;
+                    $("#tableContents").append("<ul id='chil" + id + "'></ul>");
+                    $("#chil" + id + "").append("<a href='#" + ChilID + "' style='text-decoration:none;'><li class='list-group-item list-group-item-action' style='border-radius:unset'>" + chilLi + "</li></a>");
+                }
+            }
         }
-
         //var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
         $('#title').text('@Html.Raw(ViewData["Title"])')
     }
