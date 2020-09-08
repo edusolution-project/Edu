@@ -341,13 +341,13 @@ namespace BaseCustomerMVC.Controllers.Student
 
         //    var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
 
-        //    var Dataresponse = new Dictionary<string, object>()
+        //    var DataResponse = new Dictionary<string, object>()
         //    {
         //        {"Product",inforProduct },
         //        {"Student",student},
         //        {"Success","OK" }
         //    };
-        //    return Json(Dataresponse);
+        //    return Json(DataResponse);
         //}
 
 

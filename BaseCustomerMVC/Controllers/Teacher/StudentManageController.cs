@@ -324,13 +324,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 Error = ex.Message;
             }
-            var Dataresponse = new Dictionary<string, object>
+            var DataResponse = new Dictionary<string, object>
             {
                 { "msg", "Đã xóa học viên" },
                 { "error", Error},
                 { "Status", Status }
             };
-            return Json(Dataresponse);
+            return Json(DataResponse);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
