@@ -4,6 +4,8 @@
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -22,7 +24,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b flex-wrap align-items-center">
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 w-100">
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 w-100">
                 <select v-model="range">
                     <option value="">-- Tất cả tài liệu --</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
@@ -30,7 +32,22 @@
                     @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
                 </select>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 w-100" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+
+            <div class="box filter-box m-1 col-12 col-md-2">
+                <select v-model="subjectID">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box m-1 col-12 col-md-2">
+                <select v-model="gradeID">
+                    <option value="" v-if="subjectID==''">Cấp độ</option>
+                    <option value="" v-else>Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==subjectID">{{item.Name}}</option>
+                </select>
+            </div>
+
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 w-100" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
                     @if (myClasses != null && myClasses.Count > 0)
@@ -42,7 +59,7 @@
                     }
                 </select>
             </div>
-            <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2 w-100">
+            <div class="search-box col-12 col-md-2 mb-1 ml-0 ml-md-2 w-100">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
@@ -53,8 +70,8 @@
             <div class="col-md-12" v-for="data in tableData">
                 <div class="inner flex">
                     <a href="#" title="" class="thumb">
-                        <img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
-                        <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">
+                        <img :src="data.Image" v-if="data.Image!=null" alt="">
+                        <img src="/pictures/doc1.png?w=256" v-else alt="">
                     </a>
                     <div class="entry">
                         <div>
@@ -126,6 +143,8 @@
             el: "#main",
             mounted() {
                 this.getData()
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
             },
             data: {
                 isLoading: false,
@@ -148,7 +167,9 @@
                 },
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 linkFile: '',
-                title:'',
+                title: '',
+                subjectID: '',
+                gradeID:'',
             },
             watch : {
                 searchTerm: function(){

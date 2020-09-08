@@ -107,8 +107,10 @@
                 <div class="col-md-12" v-for="data in ref.data">
                     <div class="inner flex">
                         <a href="#" title="" class="thumb">
-                            <img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
-                            <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">
+                            @*<img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
+                            <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">*@
+                            <img :src="data.Image" v-if="data.Image!=null" alt="">
+                            <img src="/pictures/doc1.png?w=256" v-else alt="">
                         </a>
                         <div class="entry">
                             <div>

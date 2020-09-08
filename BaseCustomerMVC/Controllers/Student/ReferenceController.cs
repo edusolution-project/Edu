@@ -19,6 +19,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly FileProcess _fileProcess;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
 
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
@@ -29,7 +31,9 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService classService,
             FileProcess fileProcess,
             IHostingEnvironment env,
-            ReferenceService referenceService
+            ReferenceService referenceService,
+            SubjectService subjectService,
+            GradeService gradeService
             )
         {
             _studentService = studentService;
@@ -38,6 +42,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _referenceService = referenceService;
             _fileProcess = fileProcess;
             _env = env;
+            _subjectService = subjectService;
+            _gradeService = gradeService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -51,6 +57,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 .Find(t => classIds.Contains(t.ID))
                 .SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate)
                 .ToList();
+            }
+            var student = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (student != null && student.Subjects != null)
+            {
+                var subjects = _subjectService.CreateQuery().Find(t => student.Subjects.Contains(t.ID)).ToList();
+                var grades = _gradeService.CreateQuery().Find(t => student.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = grades;
+                ViewBag.Subjects = subjects;
+                //ViewBag.Skills = _skillService.GetList();
             }
             ViewBag.AllClass = myClasses;
             ViewBag.User = UserID;
