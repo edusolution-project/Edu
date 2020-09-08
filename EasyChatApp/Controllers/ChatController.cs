@@ -11,6 +11,7 @@ using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
 namespace EasyChatApp.Controllers
@@ -24,8 +25,8 @@ namespace EasyChatApp.Controllers
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly GroupUserService _groupUserService;
         private readonly MessagerService _messagerService;
-
-        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext
+        private readonly IConfiguration _configuration;
+        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext , IConfiguration configuration
             , GroupUserService  groupUserService
             , MessagerService messagerService)
         {
@@ -34,6 +35,7 @@ namespace EasyChatApp.Controllers
             _hubContext = hubContext;
             _groupUserService = groupUserService;
             _messagerService = messagerService;
+            _configuration = configuration;
         }
         /// <summary>
         /// 
@@ -201,6 +203,15 @@ namespace EasyChatApp.Controllers
             return response;
         }
 
+        public string ScriptEasyChat()
+        {
+            string host = _configuration.GetSection("EasyChat:Host").Value;
+            string urlSend = host + "/Chat/SendMessage";
+            string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
+            string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&endDate={endDate}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "'}";
+            return value;
+        }
     }
 
     public class Response

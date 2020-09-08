@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using FileManagerCore.Globals;
+using Core_v2.Globals;
 
 namespace EasyChatApp
 {
@@ -38,6 +39,7 @@ namespace EasyChatApp
                 }
             }).ConfigureServices(services =>
             {
+                services.AddLogs();
                 services.AddRoxyFileManger(GoogleDriveApiService);
             }).UseStartup<Startup>();
     }

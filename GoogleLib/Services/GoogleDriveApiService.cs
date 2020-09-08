@@ -361,9 +361,9 @@ namespace GoogleLib.Services
                     return await GetDriveService(file, user, appName, fileStorge);
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                throw ex;
+                return null;
             }
         }
         
