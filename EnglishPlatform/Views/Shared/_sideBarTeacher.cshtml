@@ -12,6 +12,7 @@
         return $"/{center}{url}";
     }
 }
+
 <style>
     #sidebar-content .card-header {
         border: none;
@@ -36,7 +37,12 @@
         background: #FFF;
         left: 0;
         border-right: 2px solid #F0F3F4;
+        margin-top:10px
     }
+
+        #sidebar-content ul li a {
+            text-decoration: none
+        }
 
     .list-group-item {
         border: solid 1px #EEE;
@@ -44,27 +50,116 @@
         color: #333;
         font-weight: 500;
     }
+
+    .sidenav {
+        height: 100%;
+        width: 0;
+        position: absolute;
+        z-index: 1;
+        top: 170px;
+        left: 0;
+        background-color: white;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+    }
+
+    .sidebar span{
+        margin-left:10px;
+        margin-bottom:10px;
+        margin-top:10px
+    }
+
+    .sidenav a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+    }
+
+            .sidenav a:hover {
+                color: #f1f1f1;
+            }
+
+        .sidenav .closebtn {
+            position: absolute;
+            top: 0;
+            right: 25px;
+            font-size: 36px;
+            margin-left: 50px;
+            color:red
+        }
+
+    @@media screen and (max-height: 450px) {
+        .sidenav {
+            padding-top: 15px;
+        }
+
+            .sidenav a {
+                font-size: 18px;
+            }
+    }
 </style>
 <!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0 show" style="width:240px">
 
+    <div class="card-header">
+        <a href="/@center/teacher" class="logo" title="@_center.Name" style="max-height:100px;">
+            <img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" style="max-height:100px;" />
+        </a>
+    </div>
+    <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+        <a class="nav-link p-0" href="@processUrl("Index", "Curriculum" )" title="Quản lý bài giảng">
+            <i class="ic ic-book"></i>
+            <span>Soạn bài giảng</span>
+        </a>
+
+        <a class="nav-link p-0" href="@processUrl("Index","Class")" title="Quản lý lớp học">
+            <i class="ic ic-book-pen"></i>
+            <span>Quản lý lớp học</span>
+        </a>
+
+        <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="Lịch dạy">
+            <i class="ic ic-celendar"></i>
+            <span>Lịch dạy</span>
+        </a>
+
+        <a class="nav-link p-0" href="@processUrl("Index", "StudentManage" )" title="Quản lý học viên">
+            <i class="ic ic-book-pen"></i>
+            <span>Quản lý học viên</span>
+        </a>
+
+        <a class="nav-link p-0" href="@processUrl("Index" , "Discuss" )" title="Thảo luận">
+            <i class="ic ic-discussion" aria-hidden="true"></i>
+            <span>Thảo luận</span>
+        </a>
+
+        <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo">
+            <i class="ic ic-file"></i>
+            <span>Tài liệu tham khảo</span>
+        </a>
+
+    </div>
+
     <div id="sidebar-content">
         <ul class="sidebar-holder p-0">
-            <div class="card-header">
-                <a href="/@center/teacher" class="logo" title="@_center.Name" style="max-height:100px;"><img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" /></a>
-            </div>
             <li class="list-group-item" style="font-weight: 500;color: #0194e4 !important;border: none;border-bottom: solid 1px #CCC;" id="title"></li>
             <div id="tableContents" style="overflow-y:auto; max-height:570px"></div>
         </ul>
     </div>
-    <div id="extra-sidebar" class="collapse">
-        <button type="button" class="btn btn-close my-btn" onclick="closeExtra()">X</button>
-        <div class="content">
-        </div>
-    </div>
-    <button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
-        <i class="sidebar-toggler-icon"></i>
-    </button>
+    @*<div id="extra-sidebar" class="collapse">
+            <button type="button" class="btn btn-close my-btn" onclick="closeExtra()">X</button>
+            <div class="content">
+            </div>
+        </div>*@
+    @*<button class="sidebar-toggler" type="button" data-toggle="collapse" data-target=".sidebar" aria-controls="sidebar-content" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="sidebar-toggler-icon"></i>
+        </button>*@
 </nav>
 <!-- End of Sidebar -->
 <script>
@@ -97,6 +192,14 @@
     function setActiveSidebar(tab) {
         $('.sidebar-item.active').removeClass("active");
         $('.sidebar-item.' + tab).addClass("active");
+    }
+
+    function openNav() {
+        document.getElementById("mySidenav").style.width = "240px";
+    }
+
+    function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
     }
 
 </script>
