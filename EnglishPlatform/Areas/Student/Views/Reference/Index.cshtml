@@ -24,9 +24,6 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b flex-wrap align-items-center">
-<<<<<<< HEAD
-            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 w-100">
-=======
             <div class="box filter-box col-12 col-md-2 m-1">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
@@ -40,7 +37,6 @@
                 </select>
             </div>
             <div class="box filter-box col-12 col-md-2 m-1">
->>>>>>> origin/Running_NoGoogleDrive
                 <select v-model="range">
                     <option value="">-- Tất cả tài liệu --</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
@@ -48,7 +44,7 @@
                     @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
                 </select>
             </div>
-<<<<<<< HEAD
+@*<<<<<<< HEAD
 
             <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="subjectID">
@@ -65,9 +61,8 @@
             </div>
 
             <div class="box filter-box col-12 col-md-2 ml-0 mb-1 w-100" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-=======
+=======*@
             <div class="box filter-box col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
->>>>>>> origin/Running_NoGoogleDrive
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
                     @if (myClasses != null && myClasses.Count > 0)
@@ -79,11 +74,7 @@
                     }
                 </select>
             </div>
-<<<<<<< HEAD
-            <div class="search-box col-12 col-md-2 mb-1 ml-0 ml-md-2 w-100">
-=======
             <div class="search-box col-12 col-md-2 m-1">
->>>>>>> origin/Running_NoGoogleDrive
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
@@ -91,19 +82,11 @@
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
-<<<<<<< HEAD
-            <div class="col-md-12" v-for="data in tableData">
-                <div class="inner flex">
-                    <a href="#" title="" class="thumb">
-                        <img :src="data.Image" v-if="data.Image!=null" alt="">
-                        <img src="/pictures/doc1.png?w=256" v-else alt="">
-=======
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                     <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
                         <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
                         <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
->>>>>>> origin/Running_NoGoogleDrive
                     </a>
                     <div class="entry p-0">
                         <div>
@@ -205,13 +188,13 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 linkFile: '',
                 title: '',
-<<<<<<< HEAD
+
                 subjectID: '',
                 gradeID:'',
-=======
+
                 list_subject: [],
                 list_grades_full: [],
->>>>>>> origin/Running_NoGoogleDrive
+
             },
             watch : {
                 searchTerm: function(){
