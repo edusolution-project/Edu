@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
+using EasyChatApp.DataBase;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,6 +29,8 @@ namespace EasyChatApp
         {
             services.AddCors();
             services.AddSignalR();
+            services.AddSingleton<GroupUserService>();
+            services.AddSingleton<MessagerService>();
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
