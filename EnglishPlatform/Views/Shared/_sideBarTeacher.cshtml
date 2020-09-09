@@ -61,13 +61,17 @@
         background-color: white;
         overflow-x: hidden;
         transition: 0.5s;
-        padding-top: 60px;
+       /* padding-top: 60px;*/
     }
 
     .sidebar span{
         margin-left:10px;
         margin-bottom:10px;
         margin-top:10px
+    }
+
+    .sidebar{
+        z-index:0 !important
     }
 
     .sidenav a {
@@ -83,14 +87,22 @@
                 color: #f1f1f1;
             }
 
-        .sidenav .closebtn {
+        /*.sidenav .closebtn {
             position: absolute;
             top: 0;
             right: 25px;
             font-size: 36px;
             margin-left: 50px;
             color:red
-        }
+        }*/
+
+    #closebtn {
+        font-size: 30px;
+        color: #4e6774;
+        position:absolute;
+        right:0px;
+        top:10px
+    }
 
     @@media screen and (max-height: 450px) {
         .sidenav {
@@ -101,6 +113,89 @@
                 font-size: 18px;
             }
     }
+
+    #mySidenav ul{
+        list-style:none;
+        margin:0px;
+        padding:0px
+    }
+
+        #mySidenav ul li {
+            border-radius: unset;
+            display: block;
+            padding: 15px 24px;
+            border-left: 1px solid white;
+        }
+
+            #mySidenav ul li a {
+                color: #4e6774;
+                font: 14px Archivo, sans-serif;
+                font-weight: 600;
+                border-left: 2px solid transparent;
+                line-height: 20px;
+                white-space: nowrap;
+            }
+
+            #mySidenav ul li:hover {
+                color: #D03239;
+                background: #F0F3F4;
+                border-color: #D03239;
+            }
+
+            #mySidenav ul li:hover a{
+                color: #D03239;
+                text-decoration: none;  
+            }
+
+    #tableContents list-group-item.active {
+        background: #F0F3F4 !important
+    }
+
+    #tableContents ul{
+        list-style:none
+    }
+
+    #tableContents li{
+        padding:15px 24px
+    }
+
+        #tableContents li a {
+            color: #4e6774;
+            font: 14px Archivo, sans-serif;
+            font-weight: 600 !important;
+            border-left: 2px solid transparent;
+            line-height: 20px;
+        }
+
+        #tableContents li:hover{
+            background:#f0f3f4
+        }
+
+        #tableContents ul li a {
+            color: #4e6774;
+            font: 14px Archivo, sans-serif;
+            font-weight: 600;
+            border-left: 2px solid transparent;
+            line-height: 20px;
+            white-space: nowrap;
+        }
+
+    /*#tableContents .list-group-item.list-group-item-action a {
+        color: #4e6774;
+        font: 14px Archivo, sans-serif;
+        font-weight: 600;
+        border-left: 2px solid transparent;
+        line-height: 20px;*/
+/*        white-space: nowrap;*/
+    /*}*/
+
+    #title {
+        color: #D03239;
+        font: 14px Archivo, sans-serif;
+        font-weight: bold;
+        border-left: 2px solid transparent;
+        font-size: 20px
+    }
 </style>
 <!-- Sidebar -->
 <nav class="sidebar collapse position-fixed col p-0 m-0 show" style="width:240px">
@@ -110,45 +205,58 @@
             <img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" style="max-height:100px;" />
         </a>
     </div>
-    <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+    <div style="font-size:30px;cursor:pointer;width:240px;position:relative;padding-left:5px"><span onclick="openNav()">&#9776;</span>
+        <a href="javascript:void(0)" id="closebtn" class="hide" onclick="closeNav()">&times;</a>
+    </div>
     <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <ul>
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index", "Curriculum" )" title="Quản lý bài giảng">
+                    <i class="ic ic-book"></i>
+                    Soạn bài giảng
+                </a>
+            </li>
 
-        <a class="nav-link p-0" href="@processUrl("Index", "Curriculum" )" title="Quản lý bài giảng">
-            <i class="ic ic-book"></i>
-            <span>Soạn bài giảng</span>
-        </a>
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index","Class")" title="Quản lý lớp học">
+                    <i class="ic ic-book-pen"></i>
+                    Quản lý lớp học
+                </a>
+            </li>
 
-        <a class="nav-link p-0" href="@processUrl("Index","Class")" title="Quản lý lớp học">
-            <i class="ic ic-book-pen"></i>
-            <span>Quản lý lớp học</span>
-        </a>
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="Lịch dạy">
+                    <i class="ic ic-celendar"></i>
+                    Lịch dạy
+                </a>
+            </li>
 
-        <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="Lịch dạy">
-            <i class="ic ic-celendar"></i>
-            <span>Lịch dạy</span>
-        </a>
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index", "StudentManage" )" title="Quản lý học viên">
+                    <i class="ic ic-book-pen"></i>
+                    Quản lý học viên
+                </a>
+            </li>
 
-        <a class="nav-link p-0" href="@processUrl("Index", "StudentManage" )" title="Quản lý học viên">
-            <i class="ic ic-book-pen"></i>
-            <span>Quản lý học viên</span>
-        </a>
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index" , "Discuss" )" title="Thảo luận">
+                    <i class="ic ic-discussion" aria-hidden="true"></i>
+                    Thảo luận
+                </a>
+            </li>
 
-        <a class="nav-link p-0" href="@processUrl("Index" , "Discuss" )" title="Thảo luận">
-            <i class="ic ic-discussion" aria-hidden="true"></i>
-            <span>Thảo luận</span>
-        </a>
-
-        <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo">
-            <i class="ic ic-file"></i>
-            <span>Tài liệu tham khảo</span>
-        </a>
-
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo">
+                    <i class="ic ic-file"></i>
+                    Tài liệu tham khảo
+                </a>
+            </li>
+        </ul>
     </div>
 
     <div id="sidebar-content">
         <ul class="sidebar-holder p-0">
-            <li class="list-group-item" style="font-weight: 500;color: #0194e4 !important;border: none;border-bottom: solid 1px #CCC;" id="title"></li>
+            <li class="list-group-item" id="title"></li>
             <div id="tableContents" style="overflow-y:auto; max-height:570px"></div>
         </ul>
     </div>
@@ -196,10 +304,13 @@
 
     function openNav() {
         document.getElementById("mySidenav").style.width = "240px";
+        document.getElementById("closebtn").classList.remove("hide");
     }
 
     function closeNav() {
+        //alert(1)
         document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("closebtn").classList.add("hide");
     }
 
 </script>
