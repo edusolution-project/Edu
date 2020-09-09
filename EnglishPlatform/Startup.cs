@@ -120,7 +120,7 @@ namespace EnglishPlatform
             {
                 if(content.Request.Query.ContainsKey("googletest"))
                 {
-                    string str = Program.GoogleDriveApiService != null ? "ok" : "null";
+                    string str = Program.GoogleDriveApiService != null ? $"ok {Program.GoogleDriveApiService.URL_VIEW_FILE}" : "null";
                     await content.Response.WriteAsync(str);
                 }
                 await next.Invoke();
