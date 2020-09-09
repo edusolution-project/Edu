@@ -31,8 +31,8 @@
     "inputFiles": [
       "wwwroot/js/vue@2.6.0.js",
       "wwwroot/js/axios.min.js",
-      "wwwroot/js/bootstrap-vue.min.js",
       "wwwroot/js/jquery.min.js",
+      "wwwroot/js/bootstrap-vue.min.js",
       "wwwroot/js/moment.min.js",
       "wwwroot/js/moment-with-locales.min.js"
     ],

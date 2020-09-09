@@ -50,6 +50,7 @@
                     <td><a href="#" :title="item.FullName">{{item.FullName}}</a></td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
+                    @*<td><span v-for="k in item.SubjectList">{{k.Name}} </span></td>*@
                     <td>{{item.RoleName}}</td>
                     <td>
                         <template v-if="item.ID != '@user'">
@@ -161,7 +162,8 @@
                     email: "",
                     phone: "",
                     role: "",
-                    pass: ""
+                    pass: "",
+                    subjects: [],
                 },
                 fields: [
                     {
@@ -180,6 +182,10 @@
                         key: 'phone',
                         label: 'SĐT'
                     },
+                    //{
+                    //    key: 'subjects',
+                    //    label: 'Chuyên môn'
+                    //},
                     {
                         key: 'pos',
                         label: 'Chức danh'
@@ -273,6 +279,12 @@
                         this.add_member.name = data.FullName
                         this.add_member.phone = data.Phone
                         this.add_member.role = data.RoleID
+                        if (data.Subjects != null) {
+                            this.add_member.subjects = data.Subjects
+                        }
+                        else {
+                            this.add_member.subjects = []
+                        }
                     }
                     else {
                         this.add_member.id = ''
@@ -314,6 +326,7 @@
                     _form.append('Email', _that.add_member.email)
                     _form.append('Phone', _that.add_member.phone)
                     _form.append('RoleID', _that.add_member.role)
+                    _form.append('Subjects', _that.add_member.subjects)
                     _that.isLoading = true
                     let _url = '@processUrl("AddMember", "TeacherManage")'
                     axios.post(_url, _form)
@@ -434,30 +447,90 @@
             }
         });
 
+        var check = false;
+        function showSelect() {
+            
+            if (check == false) {
+                $('#selectSub').attr('style', 'display:block');
+                check = true;
+            }
+            else {
+                $('#selectSub').attr('style', 'display:none');
+                check = false;
+            }
+        }
+
     </script>
 }
 
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm giáo viên">
-        <b-col class="form-group">
-            <label for="">Họ tên</label>
-            <input class="form-control" v-model="add_member.name" />
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm giáo viên" size="xl">
+        <b-col class="form-group row">
+            <div class="col-sm-6">
+                <label for="">Họ tên</label>
+                <input class="form-control" v-model="add_member.name" />
+            </div>
+            <div class="col-sm-6">
+                <label for="">Email</label>
+                <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
+                <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
+            </div>
         </b-col>
-        <b-col class="form-group">
+        @*<b-col class="form-group">
             <label for="">Email</label>
             <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
             <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
+        </b-col>*@
+        <b-col class="form-group row">
+            <div class="col-sm-6">
+                <label for="">Điện thoại</label>
+                <input class="form-control" v-model="add_member.phone" />
+            </div>
+
+            <div class="col-sm-6">
+                <label for="">Chọn chức danh</label>
+                <select v-model="add_member.role" class="form-control">
+                    <option value="">Chọn chức danh</option>
+                    <option v-for="(item,k) in list_roles" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
         </b-col>
-        <b-col class="form-group">
-            <label for="">Điện thoại</label>
-            <input class="form-control" v-model="add_member.phone" />
-        </b-col>
-        <b-col class="form-group">
-            <label for="">Chọn chức danh</label>
-            <select v-model="add_member.role" class="form-control">
-                <option value="">Chọn chức danh</option>
-                <option v-for="(item,k) in list_roles" :value="item.ID">{{item.Name}}</option>
-            </select>
+        <b-col class="form-group row">
+            <!--
+        <div class="col-sm-6" style="position:relative">
+            <label for="">Chọn chuyên môn</label>
+            <div class="row col-md-4 ">
+                @*<div class="input-group">
+                    <div class="input-group-btn row">*@
+                        <div class="col-sm-4">
+                            <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
+                                Chọn <span class="caret"></span>
+                            </button>
+                        </div>
+                    @*</div>
+                    <div class="subject_wrapper d-none">
+                    </div>
+
+                </div>*@
+            </div>
+            <div class="col-sm-8">
+                <div id="selectSub" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                    <ul class="subjectSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
+                        @{
+                            for (int i = 0; ViewBag.Subject != null && i < ViewBag.Subject.Count; i++)
+                            {
+                                <li>
+                                    <a>
+                                        <input type="checkbox" id="@ViewBag.Subject[i].ID" value="@ViewBag.Subject[i].ID" v-model="add_member.subjects"><span class="lbl"> @ViewBag.Subject[i].Name </span>
+                                        @*<input type="checkbox" id="@ViewBag.Subject[i].ID" v-model="add_member.subjects" /><span class="lbl"> @ViewBag.Subject[i].Name </span>*@
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>-->
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">

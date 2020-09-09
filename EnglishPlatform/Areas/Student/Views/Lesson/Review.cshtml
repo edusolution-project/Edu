@@ -228,6 +228,8 @@
             exam: @Html.Raw(Json.Serialize(exam))
         }
         var widget = new ExamReview();
+        //console.log(config.exam);
+        //console.log(config.lesson);
         widget.onReady(config);
     </script>
     <style>

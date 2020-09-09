@@ -43,6 +43,8 @@ namespace BaseCustomerEntity.Database
         public long TotalLessons { get; set; }
         [JsonProperty("TotalExams")]
         public long TotalExams { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>

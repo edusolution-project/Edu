@@ -16,6 +16,8 @@ namespace BaseCustomerEntity.Database
         public string Code { get; set; }
         [JsonProperty("Description")]
         public string Description { get; set; }
+        [JsonProperty("Abbr")]//Abbreviation
+        public string Abbr { get; set; }
         [JsonProperty("Image")]
         public string Image { get; set; }
         [JsonProperty("Status")]

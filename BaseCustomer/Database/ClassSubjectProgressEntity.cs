@@ -19,8 +19,6 @@ namespace BaseCustomerEntity.Database
         public string ClassSubjectID { get; set; }
         [JsonProperty("Completed")]
         public int Completed { get; set; }
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
         [JsonProperty("LastLessonID")]
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
@@ -29,22 +27,27 @@ namespace BaseCustomerEntity.Database
         public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("ExamResult")]
+        public double ExamResult { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
+        [JsonProperty("PracticePoint")]
+        public double PracticePoint { get; set; }
+        [JsonProperty("PracticeDone")]
+        public long PracticeDone { get; set; }
+        [JsonProperty("PracticeAvgPoint")]
+        public double PracticeAvgPoint { get; set; }
+        [JsonProperty("PracticeResult")]
+        public double PracticeResult { get; set; }
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>
     {
         private ClassSubjectService _classSubjectService;
-        private LessonService _lessonService;
 
         public ClassSubjectProgressService(IConfiguration config
-            //,ClassSubjectService classSubjectService, LessonService lessonService
             ) : base(config)
         {
-            //_lessonService = lessonService;
-            //_classSubjectService = classSubjectService;
-            _lessonService = new LessonService(config);
             _classSubjectService = new ClassSubjectService(config);
 
             var indexs = new List<CreateIndexModel<ClassSubjectProgressEntity>>
@@ -67,14 +70,14 @@ namespace BaseCustomerEntity.Database
             if (progress == null)
             {
 
-                var totalLessons = _lessonService.CountClassSubjectLesson(item.ClassSubjectID);
+                //var totalLessons = _lessonService.CountClassSubjectLesson(item.ClassSubjectID);
 
                 //create new progress
                 await Collection.InsertOneAsync(new ClassSubjectProgressEntity
                 {
                     StudentID = item.StudentID,
                     Completed = 1,
-                    TotalLessons = totalLessons,
+                    //TotalLessons = totalLessons,
                     ClassID = currentObj.ClassID,
                     ClassSubjectID = currentObj.ID,
                     LastDate = DateTime.Now,
@@ -110,6 +113,24 @@ namespace BaseCustomerEntity.Database
             }
         }
 
+        public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
+        {
+            var progress = GetItemByClassSubjectID(item.ClassSubjectID, item.StudentID);
+            var change = (pointchange > 0 ? pointchange : item.PointChange);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    progress.PracticeDone++;
+                progress.PracticePoint += change;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+            }
+        }
+
         public ClassSubjectProgressEntity GetItemByClassSubjectID(string ClassSubjectID, string StudentID)
         {
             return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
@@ -129,21 +150,19 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassSubjectID == currentObj.ID).ToEnumerable();
         }
 
-        public IEnumerable<StudentRanking> GetStudentResults(string ClassSubjectID)
-        {
-            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID).Project(t => new StudentRanking
-            {
-                StudentID = t.StudentID,
-                AvgPoint = t.AvgPoint,
-                ExamDone = t.ExamDone,
-                TotalPoint = t.TotalPoint
-            }).ToEnumerable();
-        }
-
         public long DecreasePoint(LessonProgressEntity item)
         {
             var filter = Builders<ClassSubjectProgressEntity>.Filter.Where(t => t.ClassSubjectID == item.ClassSubjectID && t.StudentID == item.StudentID);
             var update = Builders<ClassSubjectProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
+            return Collection.UpdateMany(Builders<ClassSubjectProgressEntity>.Filter.And(filter),
+                update
+                ).ModifiedCount;
+        }
+
+        public long DecreasePracticePoint(LessonProgressEntity item)
+        {
+            var filter = Builders<ClassSubjectProgressEntity>.Filter.Where(t => t.ClassSubjectID == item.ClassSubjectID && t.StudentID == item.StudentID);
+            var update = Builders<ClassSubjectProgressEntity>.Update.Inc(t => t.PracticePoint, 0 - item.LastPoint);
             return Collection.UpdateMany(Builders<ClassSubjectProgressEntity>.Filter.And(filter),
                 update
                 ).ModifiedCount;

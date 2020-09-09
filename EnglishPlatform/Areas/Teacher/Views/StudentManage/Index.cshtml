@@ -77,7 +77,11 @@
                     <td>{{item.ClassName}}</td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
-                    @*<td><button class="btn-act btn-trash" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button></td>*@
+                    <td style="width:150px">
+                        <button class="btn-act btn-trash" title="Sửa thông tin" v-on:click="showStudentModal(item)"><i class="ti-pencil-alt"></i></button>
+                        @*<button class="btn-act btn-trash" title="Thêm vào lớp" v-on:click="showModalAddClass(item)"><i class="ti-plus"></i></button>*@
+                        <button class="btn-act btn-trash" title="Xoá học viên" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -318,10 +322,10 @@
                     //    key: 'score',
                     //    label: 'Kết quả'
                     //},
-                    //{
-                    //    key: 'actions',
-                    //    label: 'Tác vụ'
-                    //}
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
                 ],
                 tableData: [
                 ],
@@ -345,6 +349,13 @@
                 uploadfile: {
                     file: null,
                 },
+                nameStudent: '',
+                emailStudent: '',
+                phoneStudent: '',
+                birthdayStudent: '',
+                idStudent: '',
+                listClass: [],
+                listNameClass:'',
             },
             watch: {
                 search_subject_id: function () {
@@ -359,15 +370,25 @@
                 search_class_id: function () {
                     this.getData()
                 },
-                searchTerm: function(){
-                    if(this.searchTimeout != null)
+                searchTerm: function () {
+                    if (this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
-                    this.searchTimeout = setTimeout(function(){
+                    this.searchTimeout = setTimeout(function () {
                         fn()
                         fn = null
                     }, 500)
                 },
+                listClass: function () {
+                    this.listNameClass = ''
+                    for (i = 0; i < this.listClass.length; i++) {
+                        for (j = 0; j < this.list_active_class.length; j++) {
+                            if (this.list_active_class[j].ID == this.listClass[i]) {
+                                this.listNameClass += this.list_active_class[j].Name + '; '
+                            }
+                        }
+                    }
+                }
             },
             methods: {
                 getData() {
@@ -442,10 +463,28 @@
                     return item.SubjectID == this.search_subject_id
                 },
                 hideModal() {
+                    this.isLoading = false
                     $('.close').click();
                 },
-                showStudentModal() {
+                showStudentModal(data) {
                     this.add_student.class_id = this.search_class_id
+                    if (data != null) {
+                        this.idStudent = data.ID
+                        this.emailStudent = data.Email
+                        this.nameStudent = data.FullName
+                        this.phoneStudent = data.Phone
+                        this.birthdayStudent = this.formatDate(data.DateBorn)
+                        this.listClass = data.JoinedClasses
+                    }
+                    else {
+                        this.idStudent = ''
+                        this.emailStudent = ''
+                        this.nameStudent = ''
+                        this.phoneStudent = ''
+                        this.birthdayStudent = ''
+                        this.listClass = []
+                        this.listNameClass=''
+                    }
                     this.$bvModal.show('modal_event')
                 },
                 autocompleteStudent(term, callback) {
@@ -503,22 +542,22 @@
                     this.add_student.email = student.Email
                     this.add_student.id = student.ID
                 },
-                chooseClass(_class){
+                chooseClass(_class) {
                     this.search_class_id = _class.ID;
                 },
                 createStudent() {
                     let _that = this
                     let _form = new FormData()
                     if (_that.add_student.class_id == '') {
-                        Swal.fire('Chưa chọn lớp học','','warning');
+                        Swal.fire('Chưa chọn lớp học', '', 'warning');
                         return false;
                     }
-                    if (_that.add_student.id == '') {
+                    if (_that.idStudent == '') {
                         alert('Vui lòng chọn lại học viên')
                         return false;
                     }
                     _form.append('ClassID', _that.add_student.class_id)
-                    _form.append('StudentID', _that.add_student.id)
+                    _form.append('StudentID', _that.idStudent)
                     _that.isLoading = true
                     let _url = '@processUrl("AddStudent", "StudentManage")'
                     axios.post(_url, _form)
@@ -550,7 +589,7 @@
                         return false;
                     }
                     if (!_that.uploadfile.file) {
-                         alert('Chưa chọn danh sách học viên');
+                        alert('Chưa chọn danh sách học viên');
                         return false;
                     }
                     _form.append('ClassID', _that.add_student.class_id)
@@ -588,10 +627,12 @@
                     let _form = new FormData()
                     //_form.append('ClassID', student.ClassID)
                     _form.append('StudentID', student.ID)
+                    //_form.append('', student.ID)
+                    //debugger
                     let _url = '@processUrl("RemoveStudent", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
-                            if (response.data.error != null) {
+                            if (!response.data.Status) {
                                 alert(response.data.error);
                                 return false;
                             }
@@ -610,16 +651,75 @@
                 },
                 downloadTemplate() {
                     window.open("@processUrl("ExportTemplate", "StudentManage")");
+                },
+                createNewStudent() {
+                    let _that = this
+                    //if (!_that.checkNull()) {
+                        let _url = '@processUrl("CreateNewStudent", "StudentManage")'
+                        let _form = new FormData()
+                        _form.append('ID', _that.idStudent)
+                        _form.append('FullName', _that.nameStudent)
+                        _form.append('Email', _that.emailStudent)
+                        _form.append('Phone', _that.phoneStudent)
+                        _form.append('DateBorn', _that.birthdayStudent)
+                        _form.append('JoinedClasses', _that.listClass)
+                        //debugger
+                        _that.isLoading = true
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.isLoading = false
+                                if (response.data.Status) {
+                                    this.hideModal()
+                                    alert(response.data.Msg)
+                                    this.getData()
+                                }
+                                else alert(response.data.Msg)
+                            }).catch(e => {
+
+                            })
+                    //}
+                },
+                checkNull() {
+                    let _that = this
+                    //debugger
+                    if (_that.nameStudent == "" || _that.emailStudent == "" || _that.phoneStudent == "" || _that.birthdayStudent == "") {
+                        alert("Không được để trống")
+                        return true;
+                    }
+                    else return false;
+                },
+                formatDate(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
+                showModalAddClass(student) {
+                    this.nameStudent = student.FullName
+                    this.idStudent = student.ID
+                    this.$bvModal.show('modal_addclass')
                 }
             }
         });
+
+        var check = false;
+        function showSelect() {
+
+            if (check == false) {
+                $('#selectClass').attr('style', 'display:block');
+                check = true;
+            }
+            else {
+                $('#selectClass').attr('style', 'display:none');
+                check = false;
+            }
+        }
     </script>
 }
 
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên">
+    <b-modal :no-close-on-backdrop="true" id="modal_addclass" centered title="Thêm học viên vào lớp">
         <b-col class="form-group">
-            <label for="">Lớp</label>
+            <label for="">Chọn lớp</label>
             <select v-model="add_student.class_id" class="form-control">
                 <option value="">Chọn lớp</option>
                 <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
@@ -627,14 +727,83 @@
         </b-col>
         <b-col class="form-group">
             <label for="">Học viên</label>
-            <autocomplete v-on:chooseitem="chooseStudent" :items="list_student" v-on:input="autocompleteStudent" />
+            <input type="text" class="form-control" id="Name" name="Name" placeholder="Họ và tên" v-model="nameStudent" disabled>
         </b-col>
+        <input style="display:none" type="text" v-modal="idStudent" />
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
                 <b-button>Đang thực hiện...</b-button>
             </template>
             <template v-else>
                 <b-button variant="success" v-on:click="createStudent()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Thêm học viên" size="lg" style="height:280px">
+        <b-col class="form-group">
+            <div class="form-group row">
+                <label for="Name" class="col-sm-2 col-form-label">Họ tên</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="Name" name="Name" placeholder="Họ và tên" v-model="nameStudent">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="Email" name="Email" placeholder="Email" v-model.lazy="emailStudent" v-if="idStudent==''">
+                    <input type="email" class="form-control" id="Email" name="Email" placeholder="Email" v-model="emailStudent" v-else disabled="disabled">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Phone" class="col-sm-2 col-form-label">Số điện thoại</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="Phone" name="Phone" placeholder="Số điện thoại" v-model="phoneStudent">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Birthday" class="col-sm-2 col-form-label">Ngày sinh</label>
+                <div class="col-sm-10">
+                    <input type="date" class="form-control" id="Birthday" name="Birthday" placeholder="Ngày sinh" v-model="birthdayStudent">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="Birthday" class="col-sm-2 col-form-label">Chọn lớp học</label>
+                <div class="col-sm-10 row" style="position:relative">
+                    <div class="col-sm-2">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
+                            Chọn <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control " v-model="listNameClass" disabled />
+                    </div>
+                    <div class="col-sm-7" style="position:absolute;right:160px;top:40px">
+                        <div id="selectClass" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none">
+                                <li v-for="(item,k) in list_active_class">
+                                    <a>
+                                        <input type="checkbox" :value="item.ID" v-model="listClass" /><span class="lbl"> {{item.Name}} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="createNewStudent()">Lưu</b-button>
+                @*<b-button variant="success" v-on:click="editStudent(idStudent)" v-else>Sửa thông tin</b-button>*@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>

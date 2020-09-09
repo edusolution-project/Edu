@@ -139,14 +139,4 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.Centers.Contains(CenterID)).CountDocuments();
         }
     }
-
-    public class StudentRanking
-    {
-        public int Rank { get; set; }
-        public string StudentID { get; set; }
-        public double AvgPoint { get; set; }
-        public double TotalPoint { get; set; }
-        public long ExamDone { get; set; }
-        public int Count { get; set; }
-    }
 }

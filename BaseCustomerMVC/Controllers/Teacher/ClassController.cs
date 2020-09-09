@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
 using System.Drawing;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -28,8 +29,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly CourseHelper _courseHelper;
+        private readonly ClassHelper _classHelper;
+        private readonly LessonHelper _lessonHelper;
+
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
+        private readonly ProgressHelper _progressHelper;
 
         private readonly ChapterService _chapterService;
         private readonly ChapterExtendService _chapterExtendService;
@@ -46,17 +51,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly ChapterProgressService _chapterProgressService;
 
-
-        //private readonly LessonPartService _lessonPartService;
-        //private readonly LessonPartAnswerService _lessonPartAnswerService;
-        //private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
         private readonly FileProcess _fileProcess;
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
-        private readonly LessonHelper _lessonHelper;
         private readonly MailHelper _mailHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly GroupService _groupService;
 
+
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public ClassController(
@@ -84,8 +85,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SkillService skillService,
             CourseService courseService,
             CourseHelper courseHelper,
+            ClassHelper classHelper,
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
+            ProgressHelper progressHelper,
 
             ChapterService chapterService,
             ChapterExtendService chapterExtendService,
@@ -123,12 +126,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherService = teacherService;
             _courseService = courseService;
             _courseHelper = courseHelper;
+            _classHelper = classHelper;
             _service = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
             //_classStudentService = classStudentService;
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
+            _progressHelper = progressHelper;
 
             _chapterService = chapterService;
             _chapterExtendService = chapterExtendService;
@@ -643,28 +648,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = new List<StudentSummaryViewModel>();
 
             var total_students = _studentService.CountByClass(@class.ID);
-            var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
-            var total_lessons = _lessonService.CountClassLesson(@class.ID);
-            var results = _classProgressService.GetClassResults(@class.ID).OrderByDescending(t => t.TotalPoint).ToList();
+
+            var results = _progressHelper.GetClassResults(@class.ID)
+                .OrderByDescending(t => t.RankPoint).ToList();
+
             foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
             {
                 var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
-                    .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity
+                    .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity()
                     {
                         ClassID = @class.ID,
-                        StudentID = student.ID,
-                        TotalLessons = total_lessons,
+                        StudentID = student.ID
                     }, new StudentSummaryViewModel()
                     {
-                        ClassName = @class.Name,
                         Rank = -1,
                         TotalStudents = (int)total_students
                     });
 
+                summary.ClassName = @class.Name;
                 summary.FullName = student.FullName;
-                if (results != null && (results.FindIndex(t => t.StudentID == student.ID) >= 0))
-                    summary.Rank = results.FindIndex(t => t.TotalPoint == summary.TotalPoint) + 1;
-                summary.AvgPoint = examCount > 0 ? summary.TotalPoint / examCount : 0;
+                summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+
+                summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+                summary.ExamResult = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+                summary.PracticeResult = @class.TotalPractices > 0 ? summary.PracticePoint / @class.TotalPractices : 0;
+
+                summary.TotalExams = @class.TotalExams;
+                summary.TotalLessons = @class.TotalLessons;
+                summary.TotalPractices = @class.TotalPractices;
 
                 data.Add(summary);
             }
@@ -827,6 +838,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetThisWeekLesson(DateTime today, string Center)
         {
             today = today.ToUniversalTime();
+            if (today < new DateTime(1900, 1, 1))
+                return Json(new { });
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
@@ -886,21 +899,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            skill = skill
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
-            //var std = (from o in data.ToList()
-            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-            //           where _class != null
-            //           let skill = _skillService.GetItemByID(o.SkillID)
-            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-            //           select new
-            //           {
-            //               id = o.ID,
-            //               classID = _class.ID,
-            //               className = _class.Name,
-            //               endDate = o.EndDate,
-            //               students = _class.Students.Count,
-            //               skill = skill
-            //               //isLearnt = isLearnt
-            //           }).ToList();
+
             return Json(new { Data = std });
         }
         #endregion
@@ -1059,7 +1058,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return returndata.ToList();
         }
 
-
         [HttpPost]
         [Obsolete]
         public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
@@ -1108,6 +1106,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Subjects = new List<string>();
                 item.Members = new List<ClassMemberEntity> { new ClassMemberEntity { TeacherID = userId, Type = ClassMemberType.OWNER, Name = cm.FullName } };
                 item.TotalLessons = 0;
+                item.TotalPractices = 0;
+                item.TotalExams = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
                 item.EndDate = item.EndDate.ToUniversalTime();
@@ -1129,7 +1129,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var teacher = _teacherService.GetItemByID(csubject.TeacherID);
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount);
+                        long examcount = 0;
+                        long practicecount = 0;
+                        var nID = CreateNewClassSubject(csubject, item, out newMember, out lessoncount, out examcount, out practicecount);
                         if (!item.Skills.Contains(csubject.SkillID))
                             item.Skills.Add(csubject.SkillID);
                         if (!item.Subjects.Contains(csubject.SubjectID))
@@ -1137,9 +1139,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (!item.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             item.Members.Add(newMember);
                         item.TotalLessons += lessoncount;
-                        //var skill = _skillService.GetItemByID(csubject.SkillID);
-                        //if (skill == null) continue;
-                        //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                        item.TotalExams += examcount;
+                        item.TotalPractices += practicecount;
+                        var skill = _skillService.GetItemByID(csubject.SkillID);
+                        if (skill == null) continue;
+                        //Send email for each teacher
+                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                     }
                     _service.Save(item);
                 }
@@ -1180,6 +1185,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (creator != null)
                     oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
+                oldData.TotalExams = 0;
+                oldData.TotalPractices = 0;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1200,9 +1207,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var newMember = new ClassMemberEntity();
                             long lessoncount = 0;
+                            long examcount = 0;
+                            long practicecount = 0;
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
-                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
+                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
                             }
@@ -1214,7 +1223,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
 
-                                if (oSbj.TeacherID != nSbj.TeacherID) //chage teacher
+                                if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
                                 {
                                     oSbj.TeacherID = nSbj.TeacherID;
                                     var skill = _skillService.GetItemByID(oSbj.SkillID);
@@ -1222,6 +1231,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                                 }
                                 _classSubjectService.Save(oSbj);
+                                examcount = oSbj.TotalExams;
+                                lessoncount = oSbj.TotalLessons;
+                                practicecount = oSbj.TotalPractices;
                                 newMember = new ClassMemberEntity
                                 {
                                     TeacherID = teacher.ID,
@@ -1236,7 +1248,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 oldData.Subjects.Add(nSbj.SubjectID);
                             if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                                 oldData.Members.Add(newMember);
+                            //add counter
+
                             oldData.TotalLessons += lessoncount;
+                            oldData.TotalExams += examcount;
+                            oldData.TotalPractices += practicecount;
                         }
                     }
                 }
@@ -1250,7 +1266,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //create new subject
                         var newMember = new ClassMemberEntity();
                         long lessoncount = 0;
-                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount);
+                        long examcount = 0;
+                        long practicecount = 0;
+                        var nID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
                         if (string.IsNullOrEmpty(nSbj.ID))//Error
                             continue;
 
@@ -1261,6 +1279,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                             oldData.Members.Add(newMember);
                         oldData.TotalLessons += lessoncount;
+                        oldData.TotalExams += examcount;
+                        oldData.TotalPractices += practicecount;
                     }
                 }
 
@@ -1278,7 +1298,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 //refresh class total lesson => no need
-                _ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
+                //_ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1292,24 +1312,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult CloneClass(string ID,string CenterCode,string Name)
+        public JsonResult CloneClass(string ID, string CenterCode, string Name, bool updateCourse = false)
         {
             var oldData = _service.GetItemByID(ID);
             var center = _centerService.GetItemByCode(CenterCode);
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(userId);
-			//VERY BAD
-            //var teachersHead = _teacherService.GetAll();
-            //TeacherEntity _teacher = null;
-            //foreach(var t in teachersHead.ToList())
-            //{
-            //    if(t.Centers.Find(x=>x.CenterID.Equals(center.ID))!=null && _teacherHelper.HasRole(t.ID, center.ID, "head-teacher"))
-            //    {
-            //        _teacher = t;
-            //        break;
-            //    }
-            //}
-			//_teacher = t;
 
             var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
             newData.ID = null;
@@ -1324,40 +1332,53 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _service.CreateQuery().InsertOne(newData);
 
-           var classSubjects = _classSubjectService.CreateQuery().Find(o => o.ClassID == oldData.ID).ToList();
+            var classSubjects = _classSubjectService.GetByClassID(oldData.ID);
             if (classSubjects != null && classSubjects.Count > 0)
             {
                 foreach (var csubject in classSubjects)
                 {
-                    var ncbj = new ClassSubjectEntity();
-                    ncbj.CourseID = csubject.CourseID;
-                    ncbj.GradeID = csubject.GradeID;
-                    ncbj.SubjectID = csubject.SubjectID;
-                    ncbj.TeacherID = teacher.ID;
-                    var newMember = new ClassMemberEntity();
                     long lessoncount = 0;
-                    //csubject.TeacherID = teacher.ID;
-                    var nID = CreateNewClassSubject(ncbj, newData, out newMember, out lessoncount);
+                    long examcount = 0;
+                    long practicecount = 0;
+
+                    var ncbj = new ClassSubjectEntity();
+                    var newMember = new ClassMemberEntity();
+                    if (updateCourse)//Create new subject from course
+                    {
+                        ncbj.CourseID = csubject.CourseID;
+                        ncbj.GradeID = csubject.GradeID;
+                        ncbj.SubjectID = csubject.SubjectID;
+                        ncbj.TeacherID = teacher.ID;
+                        //Counter coud be changed in case base course change
+                        var nID = CreateNewClassSubject(ncbj, newData, out newMember, out lessoncount, out examcount, out practicecount, false);
+                    }
+                    else //Clone subject from root class's subjects
+                    {
+                        ncbj = new MappingEntity<ClassSubjectEntity, ClassSubjectEntity>().Clone(csubject, ncbj);
+                        ncbj.CourseID = csubject.CourseID;
+                        ncbj.GradeID = csubject.GradeID;
+                        ncbj.SubjectID = csubject.SubjectID;
+                        ncbj.TeacherID = teacher.ID;
+                        ncbj.ClassID = newData.ID;
+                        lessoncount = csubject.TotalLessons;
+                        examcount = csubject.TotalExams;
+                        practicecount = csubject.TotalPractices;
+                        _ = _classHelper.CloneClassSubject(ncbj, teacher.ID, csubject.ID);
+                    }
+
                     if (!newData.Skills.Contains(csubject.SkillID))
                         newData.Skills.Add(csubject.SkillID);
                     if (!newData.Subjects.Contains(csubject.SubjectID))
                         newData.Subjects.Add(csubject.SubjectID);
                     if (!newData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
                         newData.Members.Add(newMember);
+
                     newData.TotalLessons += lessoncount;
-                    //var skill = _skillService.GetItemByID(csubject.SkillID);
-                    //if (skill == null) continue;
-                    //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                    newData.TotalExams += examcount;
+                    newData.TotalPractices += practicecount;
                 }
                 _service.Save(newData);
             }
-            //if (mustUpdateName)
-            //{
-            //    var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
-            //}
-
-            //refresh class total lesson => no need
-            //_ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
             Dictionary<string, object> response = new Dictionary<string, object>()
                 {
@@ -1377,19 +1398,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //remove clone lesson
             var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
             //remove progress: learning history => class progress, chapter progress, lesson progress
-            var LhTask = _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
+            var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
             //remove exam
             var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
             //remove classSubject
-            //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask);
+            //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
             await _classSubjectService.RemoveAsync(cs.ID);
         }
 
-
-        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, bool notify = true)
+        private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, out ClassMemberEntity member, out long lessoncount, out long examcount, out long practicecount, bool notify = true)
         {
             member = new ClassMemberEntity();
             lessoncount = 0;
+            examcount = 0;
+            practicecount = 0;
             try
             {
                 var subject = _subjectService.GetItemByID(nSbj.SubjectID);
@@ -1404,6 +1426,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 lessoncount = course.TotalLessons;
+                examcount = course.TotalExams;
+                practicecount = course.TotalPractices;
 
                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                 if (teacher == null || !teacher.IsActive || !teacher.Subjects.Contains(nSbj.SubjectID))
@@ -1414,20 +1438,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.ClassID = @class.ID;
                 nSbj.StartDate = @class.StartDate;
                 nSbj.EndDate = @class.EndDate;
-
                 nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
                 nSbj.TotalLessons = course.TotalLessons;
+                nSbj.TotalPractices = course.TotalPractices;
+                nSbj.TotalExams = course.TotalExams;
 
                 var skill = _skillService.GetItemByID(nSbj.SkillID);
 
                 var center = _centerService.GetItemByID(@class.Center);
 
                 _classSubjectService.Save(nSbj);
-                _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
-                //Clone Course
-                _courseHelper.CloneForClassSubject(nSbj);
 
                 member = new ClassMemberEntity
                 {
@@ -1435,6 +1457,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     TeacherID = teacher.ID,
                     Type = ClassMemberType.TEACHER
                 };
+                //Clone Course
+                _courseHelper.CloneForClassSubject(nSbj);
+
+                if (notify)
+                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
                 return nSbj.ID;
             }
             catch (Exception e)
@@ -1471,7 +1498,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //remove Schedule
                     _ = _lessonScheduleService.RemoveManyClass(ids);
                     //remove History
-                    _ = _learningHistoryService.RemoveClassHistory(ids);
+                    _ = _progressHelper.RemoveClassHistory(ids);
                     //remove Exam
                     _ = _examService.RemoveManyClassExam(ids);
                     //.Collection.DeleteMany(o => ids.Contains(o.ClassID));
@@ -1663,7 +1690,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var total_students = _studentService.CountByClass(currentClass.ID);
             var rank = -1;
-            var results = _classProgressService.GetClassResults(ClassID).OrderByDescending(t => t.TotalPoint).ToList();
+            var results = _progressHelper.GetClassResults(ClassID).OrderByDescending(t => t.RankPoint).ToList();
             var avgpoint = 0.0;
             var studentresult = _classProgressService.GetStudentResult(ClassID, StudentID);
 
@@ -1701,24 +1728,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var @class = _service.GetItemByID(ClassID);
                     if (@class == null) continue;
                     var total_students = _studentService.CountByClass(@class.ID);
-                    var examCount = _lessonScheduleService.CountClassExam(@class.ID, null);
                     var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
                         .AutoOrtherType(_classProgressService.GetStudentResult(ClassID, StudentID) ?? new ClassProgressEntity
                         {
                             ClassID = ClassID,
                             StudentID = StudentID,
-                            TotalLessons = _lessonService.CountClassLesson(ClassID),
                         }, new StudentSummaryViewModel()
                         {
                             ClassName = @class.Name,
                             Rank = -1,
-                            TotalStudents = (int)total_students
+                            TotalStudents = (int)total_students,
+                            TotalLessons = @class.TotalLessons,
+                            TotalExams = @class.TotalExams,
+                            TotalPractices = @class.TotalPractices
                         });
 
-                    var results = _classProgressService.GetClassResults(ClassID).OrderByDescending(t => t.TotalPoint).ToList();
-                    if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
-                        summary.Rank = results.FindIndex(t => t.TotalPoint == summary.TotalPoint) + 1;
-                    summary.AvgPoint = examCount > 0 ? summary.TotalPoint / examCount : 0;
+                    var results = _progressHelper.GetClassResults(ClassID).OrderByDescending(t => t.RankPoint).ToList();
+
+                    summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+                    summary.AvgPoint = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+
+                    if (results != null && (results.FindIndex(t => t.StudentID == summary.StudentID) >= 0))
+                        summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
 
                     data.Add(summary);
                     data.AddRange(GetClassSubjectSummary(@class, StudentID, total_students));
@@ -1740,27 +1771,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             foreach (var sbj in subjects)
             {
-                var examCount = _lessonScheduleService.CountClassSubjectExam(new List<string> { sbj.ID }, null);
-                var prg = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
+                var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
                     .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
                     {
                         ClassID = @class.ID,
                         StudentID = StudentID,
-                        ClassSubjectID = sbj.ID,
-                        TotalLessons = _lessonService.CountClassSubjectLesson(sbj.ID)
+                        ClassSubjectID = sbj.ID
                     }, new StudentSummaryViewModel()
                     {
                         SkillName = _skillService.GetItemByID(sbj.SkillID).Name,
                         Rank = -1,
-                        TotalStudents = (int)total_students
+                        TotalStudents = (int)total_students,
+                        TotalLessons = sbj.TotalLessons,
+                        TotalExams = sbj.TotalExams,
+                        TotalPractices = sbj.TotalPractices
                     });
 
-                var results = _classSubjectProgressService.GetStudentResults(sbj.ID).OrderByDescending(t => t.TotalPoint).ToList();
-                if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
-                    prg.Rank = results.FindIndex(t => t.TotalPoint == prg.TotalPoint) + 1;
-                prg.AvgPoint = examCount > 0 ? prg.TotalPoint / examCount : 0;
+                summary.AvgPoint = summary.TotalExams > 0 ? summary.TotalPoint / summary.TotalExams : 0;
+                summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
 
-                data.Add(prg);
+                var results = _progressHelper.GetClassSubjectResults(sbj.ID).OrderByDescending(t => t.RankPoint).ToList();
+                if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
+                    summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+
+                data.Add(summary);
             }
             return data;
         }
@@ -1794,7 +1828,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     var lesson = _lessonService.GetItemByID(data.LessonID);
 
-                    var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == data.LessonID && o.ClassID == data.ClassID && ExamTypes.Contains(o.Type)).ToList();
+                    var listParts = _cloneLessonPartService.GetByLessonID(data.LessonID).Where(o => ExamTypes.Contains(o.Type));
 
                     var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                     var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -1821,11 +1855,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                                    MaxPoint = examview.MaxPoint
+                                    MaxPoint = z.Point
                                 }))?.ToList()
                         })).ToList()
                     });
-
 
 
                     ViewBag.Lesson = lessonview;

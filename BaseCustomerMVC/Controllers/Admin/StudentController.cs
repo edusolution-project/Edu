@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             , AccountService accountService
             , StudentService studentService
             , CenterService centerService
+            , StudentHelper studentHelper
             , IHostingEnvironment evn
             , IConfiguration iConfig
             )
@@ -45,8 +46,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
+            _studentHelper = studentHelper;
 
-            _studentHelper = new StudentHelper(studentService, accountService);
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");

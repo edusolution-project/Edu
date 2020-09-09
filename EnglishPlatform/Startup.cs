@@ -13,9 +13,6 @@ using BaseHub;
 using Core_v2.Globals;
 using EasyZoom;
 using EnglishPlatform.Controllers;
-using GoogleLib.Factory;
-using GoogleLib.Interfaces;
-using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -68,6 +65,8 @@ namespace EnglishPlatform
             services.AddSingleton<CalendarHelper>();
             services.AddSingleton<MailHelper>();
             services.AddSingleton<CourseHelper>();
+            services.AddSingleton<ClassHelper>();
+            services.AddSingleton<ProgressHelper>();
             services.AddSingleton<StudentHelper>();
             services.AddSingleton<LessonHelper>();
             services.AddSingleton<TeacherHelper>();

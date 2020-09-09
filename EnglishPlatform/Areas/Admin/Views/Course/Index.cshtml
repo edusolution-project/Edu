@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Quản lý Khóa học";
+    ViewData["Title"] = "Quản lý Lớp";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var listCourse = ViewBag.Course as List<BaseCustomerEntity.Database.CourseEntity>
     ;
@@ -83,9 +83,9 @@
                                 </th>
                                 <th class='text-center'>STT</th>
                                 <th class='text-center'>Tên khóa học</th>
-                                <th class='text-center'>Mã khóa học</th>
-                                <th class='text-center'>Tên giáo viên</th>
-                                <th class='text-center'>Số HV</th>
+                                @*<th class='text-center'>Mã khóa học</th>*@
+                                <th class='text-center'>Người tạo</th>
+                                <th class='text-center'>Số học viên</th>
                                 <th class='text-center'>Ngày bắt đầu</th>
                                 <th class='text-center'>Ngày kết thúc</th>
                                 <th class='text-center'>Trạng thái</th>
@@ -376,9 +376,9 @@
                             "<td><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             "<td>" + item.Name + "</td>" +
-                            "<td>" + (item.Code == null ? "" : item.Code) + "</td>" +
-                            "<td>" + item.TeacherName + "</td>" +
-                            "<td class='text-center'>" + item.Students.length + "</td>" +
+                            //"<td>" + (item.Code == null ? "" : item.Code) + "</td>" +
+                            "<td>" + item.CreatorName + "</td>" +
+                            "<td class='text-center'>" + item.Students + "</td>" +
                             "<td class='text-center'>" + startdate + "</td>" +
                             "<td class='text-center'>" + enddate + "</td>" +
                             active +

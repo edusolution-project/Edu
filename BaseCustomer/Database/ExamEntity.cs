@@ -117,7 +117,7 @@ namespace BaseCustomerEntity.Database
             }
             return count <= 0;
         }
-        
+
         public Task UpdateStatus(ExamEntity exam)
         {
             exam.Status = true;
@@ -126,7 +126,7 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         {
             exam.Status = true;
             point = 0;
@@ -234,14 +234,15 @@ namespace BaseCustomerEntity.Database
                     examDetail.RealAnswerID = _correctanswer.ID;
                     examDetail.RealAnswerValue = _correctanswer.Content;
                 }
-
-                examDetail.Updated = DateTime.Now;
+                if (updateTime)
+                    examDetail.Updated = DateTime.Now;
                 _examDetailService.CreateOrUpdate(examDetail);
             }
 
             exam.QuestionsPass = pass;
             exam.Point = point;
-            exam.Updated = DateTime.Now;
+            if (updateTime)
+                exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
@@ -264,8 +265,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
-                //var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                //var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
+                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress);
                 Task.WhenAll(cttask
                     //, cstask, ctask
                     );
@@ -275,7 +276,7 @@ namespace BaseCustomerEntity.Database
         }
 
         //Hoàn thành bài tự luận
-        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point)
+        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         {
             var oldEx = GetItemByID(exam.ID);
             exam.Status = true;
@@ -287,23 +288,27 @@ namespace BaseCustomerEntity.Database
 
             exam.Point = point;
             exam.LastPoint = oldEx != null ? oldEx.Point : 0;
-            exam.Updated = DateTime.Now;
+            if (updateTime)
+                exam.Updated = DateTime.Now;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
 
+            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
+
             var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
             Save(exam);
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
-            )
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
             {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePoint(lessonProgress, pointchange);
+                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress, pointchange);
+                var ctask = _classProgressService.UpdatePoint(lessonProgress, pointchange);
                 Task.WhenAll(cttask, cstask, ctask);
             }
             else
             {
-                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress, pointchange);
                 Task.WhenAll(cttask);
             }
 
@@ -325,6 +330,8 @@ namespace BaseCustomerEntity.Database
                 else
                 {
                     _chapterProgressService.DecreasePracticePoint(lessonProgress);
+                    _classSubjectProgressService.DecreasePracticePoint(lessonProgress);
+                    _classProgressService.DecreasePracticePoint(lessonProgress);
                 }
                 _lessonProgressService.ResetPoint(lessonProgress);
             }

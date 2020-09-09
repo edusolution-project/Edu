@@ -66,7 +66,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
         }
 
-        public IActionResult Index(string basis)
+        public IActionResult Index(DefaultModel model, string basis)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -74,9 +74,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var center = _centerService.GetItemByCode(basis);
             //var list_products = _newsService.CreateQuery().Find(o => o.CenterID == center.ID || o.Targets!=null && o.Targets.Where(x => x == center.ID) != null).ToList();
 
-            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID).Limit(10);
-            var _data = _newsService.CreateQuery().Find(o => o.Type == "san-pham").Limit(10);
-            var list_products = _teacherHelper.HasRole(UserID, center.ID, "head-teacher") == true ? _data.ToList() : data.ToList();
+            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID);
+            var list_products = data.ToList();
 
             var DataResponse =
                 from t in list_products
@@ -88,6 +87,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Transactions = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).CountDocuments()
                 });
             ViewBag.ListHistory = DataResponse.ToList();
+            ViewBag.Model = model;
             //var a=DataResponse.ToList();
             return View();
         }
@@ -99,7 +99,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacher = _teacherService.GetItemByID(_teacherid);
             var center = _centerService.GetItemByCode(Center);
 
-            var list_products = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            var list = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID);
+            model.TotalRecord = list.CountDocuments();
+
+            var list_products=list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+
+            //var list_products = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var DataResponse =
                from t in list_products
                select _mapping.AutoOrtherType(t, new NewsViewModel()
@@ -109,15 +114,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                    TotalPrice = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).Project(o => o.Price).ToList().Sum(o => o),
                    Transactions = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).CountDocuments()
                });
-            ViewBag.ListHistory = DataResponse.ToList();
-            return null;
+            //ViewBag.ListHistory = DataResponse.ToList();
+            var response = new Dictionary<string, object>
+            {
+                { "Data", DataResponse.ToList() },
+                { "Model", model }
+            };
+            return new JsonResult(response);
         }
 
         [HttpPost]
         public JsonResult GetDetail(string ID, string Center)
         {
             var center = _centerService.GetItemByCode(Center);
-            var data = _transactionService.CreateQuery().Find(o => o.NewsID == ID && o.CenterID == center.ID).ToList();
+            //var data = _transactionService.CreateQuery().Find(o => o.NewsID == ID && o.CenterID == center.ID).ToList();
+            var data = _transactionService.CreateQuery().Find(o => o.NewsID == ID).ToList();
 
             //var data = _teacherHelper.HasRole(UserID, center.ID, "head-teacher") == true ? _historyTransactionService.CreateQuery().Find(o => o.NewsID == ID).ToList() : _historyTransactionService.CreateQuery().Find(o => o.NewsID == ID && o.CenterID == center.ID).ToList();
             var ViewDetail =
