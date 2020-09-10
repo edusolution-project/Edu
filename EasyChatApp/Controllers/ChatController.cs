@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Core_v2.Globals;
 using Core_v2.Interfaces;
 using EasyChatApp.DataBase;
 using FileManagerCore.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 
 namespace EasyChatApp.Controllers
 {
@@ -22,8 +25,8 @@ namespace EasyChatApp.Controllers
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly GroupUserService _groupUserService;
         private readonly MessagerService _messagerService;
-
-        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext
+        private readonly IConfiguration _configuration;
+        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext , IConfiguration configuration
             , GroupUserService  groupUserService
             , MessagerService messagerService)
         {
@@ -32,6 +35,7 @@ namespace EasyChatApp.Controllers
             _hubContext = hubContext;
             _groupUserService = groupUserService;
             _messagerService = messagerService;
+            _configuration = configuration;
         }
         /// <summary>
         /// 
@@ -110,14 +114,41 @@ namespace EasyChatApp.Controllers
             return response;
         } 
         [HttpPost]
-        public async Task<Response> RemoveMessage(string center, string user, string messageId)
+        public async Task<Response> RemoveMessage(string user, string messageId, string connectionId)
         {
             Response response = new Response();
             try
             {
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
+                var message = _messagerService.GetItemByID(messageId);
+                if(message != null)
+                {
+                    if(message.Sender == user)
+                    {
+                        message.IsDel = true;
+                        _messagerService.CreateOrUpdate(message);
+                        response.Code = 200;
+                        response.Message = "SUCCESS";
+                        response.Data = message;
+                        if (!string.IsNullOrEmpty(connectionId))
+                        {
+                            await _hubContext.Clients.Client(connectionId).SendAsync("RemoveMessage", message.ID);
+                        }
+                        else
+                        {
+                            await _hubContext.Clients.Group(message.GroupId).SendAsync("RemoveMessage", message.ID);
+                        }
+                        return response;
+                    }
+                    else
+                    {
+                        response.Code = 405;
+                        response.Message = "bạn không đủ quyền";
+                        return response;
+                    }
+                }
 
-
+                response.Code = 404;
+                response.Message = "Data not found";
             }
             catch (Exception ex)
             {
@@ -132,14 +163,32 @@ namespace EasyChatApp.Controllers
         }
 
         [HttpPost]
-        public async Task<Response> GetMessages(string center, string user, string messageId)
+        public async Task<Response> GetMessages(string user, string receiver, string groupId, string messageId, double startDate, double endDate)
         {
             Response response = new Response();
-            await Task.Delay(100);
             try
             {
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
+                string groupName = groupId;
+                if (!string.IsNullOrEmpty(receiver))
+                {
+                    groupName = _groupUserService.GetGroupPrivate(user, receiver).ID;
+                }
+                if (string.IsNullOrEmpty(messageId))
+                {
+                    var data = _messagerService.CreateQuery().Find(o => (o.Time >= startDate && o.Time <= endDate) && o.GroupId == groupName)?.ToList();
+                    response.Code = 200;
+                    response.Data = data;
+                    response.Message = "SUCCESS";
+                }
+                else
+                {
+                    var data = _messagerService.GetItemByID(messageId);
+                    response.Code = 200;
+                    response.Data = data;
+                    response.Message = "SUCCESS";
+                }
 
+                return response;
 
             }
             catch (Exception ex)
@@ -154,9 +203,14 @@ namespace EasyChatApp.Controllers
             return response;
         }
 
-        public string GetUser()
+        public string ScriptEasyChat()
         {
-            return User.Identity.IsAuthenticated ? User.FindFirst("UserID").Value : "no login";
+            string host = _configuration.GetSection("EasyChat:Host").Value;
+            string urlSend = host + "/Chat/SendMessage";
+            string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
+            string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&endDate={endDate}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "'}";
+            return value;
         }
     }
 
