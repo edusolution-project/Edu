@@ -124,7 +124,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
-
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();

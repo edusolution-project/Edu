@@ -593,7 +593,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 };
                 return new JsonResult(response);
             }
-
         }
 
         [Obsolete]

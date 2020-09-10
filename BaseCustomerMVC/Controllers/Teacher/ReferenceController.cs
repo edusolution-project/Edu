@@ -27,7 +27,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly IHostingEnvironment _env;
-        //private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
         private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
@@ -43,8 +43,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             SubjectService subjectService,
             GradeService gradeService,
-            IConfiguration iConfig
-            //IRoxyFilemanHandler roxyFilemanHandler
+            IConfiguration iConfig,
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _teacherService = teacherService;
@@ -56,18 +56,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _subjectService = subjectService;
             _gradeService = gradeService;
             _env = env;
-            //_roxyFilemanHandler = roxyFilemanHandler;
+            _roxyFilemanHandler = roxyFilemanHandler;
             host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (!string.IsNullOrEmpty(basis))
             {
@@ -84,7 +78,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var grades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 ViewBag.Grades = grades;
                 ViewBag.Subjects = subjects;
-                //ViewBag.Skills = _skillService.GetList();
             }
 
             var myClasses = _classService.CreateQuery()
@@ -101,7 +94,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string SubjectID, string GradeID)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel)
         {
             if (entity != null)
             {
@@ -127,14 +120,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
                         break;
                 }
-                if (!string.IsNullOrEmpty(SubjectID))
+                if (!string.IsNullOrEmpty(entity.SubjectID))
                 {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, entity.SubjectID));
                 }
-                if (!string.IsNullOrEmpty(GradeID))
+                if (!string.IsNullOrEmpty(entity.GradeID))
                 {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, entity.GradeID));
                 }
+			
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
@@ -174,11 +168,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 if (!string.IsNullOrEmpty(entity.SubjectID))
                 {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.SubjectID == entity.SubjectID);
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.SubjectID, entity.SubjectID));
                 }
                 if (!string.IsNullOrEmpty(entity.GradeID))
                 {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.GradeID == entity.GradeID));
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.GradeID, entity.GradeID));
                 }
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
@@ -212,35 +206,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (files != null)
                     {
-                        //var file = files[0];
-                        //    //.Where(f => f.Name == entity.Media.Name).SingleOrDefault();
-                        //    //.FirstOrDefault();
-                        //if (file != null) //file dinh kem
-                        //{
-                        //    entity.Media = new Media();
-                        //    entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                        //    entity.Media.Created = DateTime.Now;
-                        //    entity.Media.Size = file.Length;
-                        //    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
-                        //}
-
-                        //var cover = files[1];
-                        //if (cover != null)//anh bia
-                        //{
-                        //    entity.Image= await _fileProcess.SaveMediaAsync(cover, cover.FileName, "", basis);
-                        //}
-
                         foreach (var file in files)
                         {
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
 
-                            //var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
 
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
-                                //entity.Image = mediarsp.Path;
+                                entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -249,9 +224,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path =
-                                //mediarsp.Path;
-                                await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path = mediarsp.Path;
                             }
                         }
                     }
@@ -302,28 +275,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
 
-                            //var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
 
                             if (_imageType.Contains(type))//anh bia
                             {
-
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
-                                //entity.Image = mediarsp.Path;
+                               	entity.Image = mediarsp.Path;
                             }
                             else
                             {
-                                //if (_fileType.Contains(type))
-                                //{
                                 entity.Media = new Media();
                                 entity.Media.Name = entity.Media.OriginalName = file.FileName;
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path =
-                                //mediarsp.Path;
-                                await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
-                                //}
-                            }
+                                entity.Media.Path = mediarsp.Path;                             
+                           }
                         }
                     }
                     else

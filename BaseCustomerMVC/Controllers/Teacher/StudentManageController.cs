@@ -215,7 +215,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
                 var listClass = new List<string>();
-                if (!string.IsNullOrEmpty(student.JoinedClasses[0]))
+                if (!String.IsNullOrEmpty(student.JoinedClasses[0]))
                     listClass = student.JoinedClasses[0].Split(',').ToList();
                 oldStudent.JoinedClasses = listClass.ToList();
                 var infochange = false;

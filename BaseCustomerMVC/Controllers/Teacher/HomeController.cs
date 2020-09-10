@@ -22,7 +22,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherHelper _teacherHelper;
         private readonly AccountService _accountService;
         private readonly CenterService _centerService;
-        NewsService _newsService;
+        private readonly NewsService _newsService;
         private readonly ISession _session;
 
         public DefaultConfigs _default { get; }
@@ -58,11 +58,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
-
                 var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == center.ID)).Limit(6);
-
                 ViewBag.List_Courses = data.ToList();
-
             }
             catch (Exception e)
             {
