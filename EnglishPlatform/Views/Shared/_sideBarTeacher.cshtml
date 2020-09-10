@@ -155,8 +155,9 @@
         list-style:none
     }
 
-    #tableContents li{
-        padding:15px 24px
+    #tableContents li {
+        border-left: 2px solid white;
+            padding: 15px 24px;
     }
 
         #tableContents li a {
@@ -165,6 +166,7 @@
             font-weight: 600 !important;
             border-left: 2px solid transparent;
             line-height: 20px;
+/*            padding: 15px 24px;*/
         }
 
         #tableContents li:hover{
@@ -178,6 +180,16 @@
             border-left: 2px solid transparent;
             line-height: 20px;
             white-space: nowrap;
+        }
+
+        #tableContents li:hover a {
+            color: #D03239;
+            background-color: #D03239;
+            background: #F0F3F4
+        }
+
+        #tableContents li:hover {
+            border-left: 2px solid #D03239
         }
 
     /*#tableContents .list-group-item.list-group-item-action a {
@@ -257,7 +269,7 @@
     <div id="sidebar-content">
         <ul class="sidebar-holder p-0">
             <li class="list-group-item" id="title"></li>
-            <div id="tableContents" style="overflow-y:auto; max-height:570px"></div>
+            <div id="tableContents" style="overflow-y:auto"></div>
         </ul>
     </div>
     @*<div id="extra-sidebar" class="collapse">
@@ -312,5 +324,20 @@
         document.getElementById("mySidenav").style.width = "0";
         document.getElementById("closebtn").classList.add("hide");
     }
+
+    function heightSideBar() {
+        var height = $(window).height() - 284;
+        //$('tableContents').css("max-height", height+"px");
+        document.getElementById("tableContents").style.maxHeight = height+"px";
+    }
+
+    $(window).resize(function () {
+        //đoạn mã sẽ được thực thi khi sự kiện resize() xảy ra
+        heightSideBar();
+    })
+
+    $(document).ready(function () {
+        heightSideBar();
+    });
 
 </script>

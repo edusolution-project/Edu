@@ -1117,15 +1117,19 @@
             var item = $(modal).children()[i];
             var li = item.children[0].children[0].children[1].text;
             var id = item.id;
-            $("#tableContents").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' style='text-decoration:none;'>" + li + "</a></li>");
+            var child = $(item).find('[class=modules]');
             if ($(item).find('[class=modules]').length > 0) {
+                $("#tableContents").append("<li style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' onclick='test(this,&#39;" + id + "&#39;)' style='text-decoration:none;'>" + li + "<i class='fas fa-caret-down' onclick='showDropDown(this,&#39;" + id + "&#39;)'></i></a></li>");
                 for (j = 0; j < $(item).find('[class=modules]').length; j++) {
                     var chilItem = $(item).find('[class=modules]')[j];
                     var chilLi = chilItem.children[0].children[0].children[1].text;
                     ChilID = chilItem.id;
-                    $("#tableContents").append("<ul id='chil" + id + "' style='padding-left: 10px;'></ul>");
+                    $("#tableContents").append("<ul id='chil" + id + "' style='padding-left: 10px;display:none'></ul>");
                     $("#chil" + id + "").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + ChilID + "' style='text-decoration:none;'>" + chilLi + "</a></li>");
                 }
+            }
+            else {
+                $("#tableContents").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' style='text-decoration:none;'>" + li + "</a></li>");
             }
         }
         //var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
@@ -1186,6 +1190,18 @@
         }
     });
 
+    var showDropDown = function (obj, id) {
+        if (document.getElementById("chil" + id).getAttribute('style').includes('display'))
+            document.getElementById("chil" + id).style.display = "";
+        else
+            document.getElementById("chil" + id).style.display = "none";
+    }
+
+    //var test = function (obj, id) {
+    //    //debugger
+    //    $(obj).parent().attr('class', 'active')
+    //}
+
 </script>
 
 <style>
@@ -1220,31 +1236,6 @@
     .sidebar .nav-item .collapse .collapse-inner {
         padding: 0;
     }
-
-    #tableContents {
-        overflow-y: auto;
-        max-height: 570px;
-    }
-
-        #tableContents li {
-            border-left: 2px solid white
-        }
-
-            #tableContents li a {
-                color: #4E6774;
-                font-weight: 500;
-                line-height: 20px
-            }
-
-            #tableContents li:hover a {
-                color: #D03239;
-                background-color: #D03239;
-                background: #F0F3F4
-            }
-
-            #tableContents li:hover {
-                border-left: 2px solid #D03239
-            }
 
     #backToTop {
         display: none;
