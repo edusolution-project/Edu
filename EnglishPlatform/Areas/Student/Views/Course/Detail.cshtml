@@ -105,21 +105,11 @@
 
         <div class="box" v-if="tab[2]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
-<<<<<<< HEAD
-                <div class="col-md-12" v-for="data in ref.data">
-                    <div class="inner flex">
-                        <a href="#" title="" class="thumb">
-                            @*<img :src="cacheStatic(data.Image)" v-if="data.Image!=null" alt="">
-                            <img src="cacheStatic(/pictures/doc1.png?w=256)" v-else alt="">*@
-                            <img :src="data.Image" v-if="data.Image!=null" alt="">
-                            <img src="/pictures/doc1.png?w=256" v-else alt="">
-=======
                 <div class="col-md-6" v-for="data in ref.data">
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                         <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
-                            <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                            <img :src="cacheStatic(data.Image)" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
->>>>>>> origin/Running_NoGoogleDrive
                         </a>
                         <div class="entry p-0">
                             <div>

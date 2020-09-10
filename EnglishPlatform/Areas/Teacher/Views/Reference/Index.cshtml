@@ -69,7 +69,6 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
             <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
-
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -463,7 +462,7 @@
                 },
                 changeAddSubject(obj) {
                     let _that = this;
-                    debugger
+                    //debugger
                     if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
                         _that.list_grades_full.forEach(function (sbj) {
                             //console.log(obj.UID)
@@ -588,9 +587,9 @@
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
-            <template v-if="isLoading">
+            @*<template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
-                </template>
+                </template>*@
             <template>
                 <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>

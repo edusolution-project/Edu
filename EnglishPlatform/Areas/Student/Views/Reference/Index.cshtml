@@ -140,7 +140,7 @@
 @section Scripts{
     <script>
         new Vue({
-            el: "#main_content",
+            el: "#dashboard_content",
             mounted() {
                 this.getData()
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
@@ -170,10 +170,8 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 linkFile: '',
                 title: '',
-
                 subjectID: '',
                 gradeID:'',
-
                 list_subject: [],
                 list_grades_full: [],
                 HTMLContent: ''
@@ -279,7 +277,6 @@
                     else if (obj.Media != null && obj.isDownload) {
                         this.download(obj)
                     }
-                         
                 },
                 isMobile() {
                     var isMobile = false; //initiate as false
