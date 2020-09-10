@@ -101,12 +101,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 StudentName = _studentService.GetItemByID(o.StudentID).FullName
             })).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", std},
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
 
@@ -126,7 +126,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
                 var mapping = new MappingEntity<ExamDetailEntity, ExamDetailViewModel>();
 
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", DataResponse.Select(
                         o=> mapping.AutoOrtherType(o,new ExamDetailViewModel(){
@@ -138,16 +138,16 @@ namespace BaseCustomerMVC.Controllers.Student
                         )
                     }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", null },
                     {"Error",ex }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
 
         }

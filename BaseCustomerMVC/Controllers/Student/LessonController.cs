@@ -528,8 +528,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (lastexam == null)
             {
-                var respone = new Dictionary<string, object> { { "Data", dataResponse } };
-                return new JsonResult(respone);
+                var response = new Dictionary<string, object> { { "Data", dataResponse } };
+                return new JsonResult(response);
             }
             else //TODO: Double check here
             {

@@ -216,9 +216,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var listClass = new List<string>();
                 if (student.JoinedClasses[0] != null)
+                {
                     listClass = student.JoinedClasses[0].Split(',').ToList();
-                oldStudent.JoinedClasses = listClass.ToList();
-                var infochange = false;
+                    oldStudent.JoinedClasses = listClass.ToList();
+                    if (oldStudent.JoinedClasses[0] == "")
+                        oldStudent.JoinedClasses.RemoveAt(0);
+                }
+                else
+                {
+                    oldStudent.JoinedClasses = student.JoinedClasses;
+                }
+               var infochange = false;
 
                 if (oldStudent.DateBorn != student.DateBorn)
                     oldStudent.DateBorn = student.DateBorn;
@@ -324,13 +332,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 Error = ex.Message;
             }
-            var Datarespone = new Dictionary<string, object>
+            var DataResponse = new Dictionary<string, object>
             {
                 { "msg", "Đã xóa học viên" },
                 { "error", Error},
                 { "Status", Status }
             };
-            return Json(Datarespone);
+            return Json(DataResponse);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -466,6 +474,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.Text("\"" + term + "\""));
             return Json(_studentService.CreateQuery().Find(Builders<StudentEntity>.Filter.And(stfilter)).Limit(100).ToEnumerable());
             //return Json(_studentService.Search(term, 100));
+        }
+
+        public async Task<JsonResult> ChangePass(string basis, string ID, string Password)
+        {
+
+            if (string.IsNullOrEmpty(basis))
+                return Json(new { error = "Bạn không được quyền thực hiện chức năng này" });
+
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { error = "Bạn không được quyền thực hiện chức năng này" });
+
+            var currentUser = User.Claims.GetClaimByType("UserID").Value;
+            var currentTeacher = _teacherService.GetItemByID(currentUser);
+
+            //if (!(currentTeacher.Centers.Any(t => t.CenterID == center.ID && _teacherHelper.HasRole(currentUser, center.ID, "head-teacher"))))
+            //{
+            //    return Json(new { error = "Bạn không được quyền thực hiện chức năng này" });
+            //}
+
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { error = "Thông tin không chính xác" });
+
+            var updateStudent = _studentService.GetItemByID(ID);
+            if (updateStudent == null)
+                return Json(new { error = "Thông tin không chính xác" });
+
+            if (String.IsNullOrEmpty(Password) || Password.Length < 6)
+                return Json(new { error = "Độ dài mật khẩu tối thiểu 6 ký tự" });
+
+            var acc = _accountService.GetAccountByEmail(updateStudent.Email);
+            if (acc == null)
+                return Json(new { error = "Thông tin không chính xác" });
+            acc.PassWord = Core_v2.Globals.Security.Encrypt(Password);
+            _accountService.Save(acc);
+            _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
+            return Json(new { msg = "Đã đổi mật khẩu" });
         }
 
         #region Batch Import
@@ -663,6 +708,43 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
             return true;
         }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetBestStudents(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không có dữ liệu" });
+
+            var list = new List<StudentRankingViewModel>();
+
+            var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+            var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            {
+                StudentID = g.Key,
+                TotalPoint = g.Sum(t => t.TotalPoint),
+                PracticePoint = g.Sum(t => t.PracticePoint),
+            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+
+            var rtn = new List<StudentRankingViewModel>();
+            foreach (var result in results)
+            {
+                var st = _studentService.GetItemByID(result.StudentID);
+                if (st != null)
+                {
+                    result.StudentName = st.FullName;
+                    rtn.Add(result);
+                }
+            }
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", rtn }
+            };
+            return new JsonResult(response);
+        }
+
 
         //public async Task<JsonResult> ConvertStudent()
         //{

@@ -329,7 +329,7 @@
     <script>
         var isSearchDate = false;
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
@@ -572,7 +572,8 @@
                     }
                     var _startdate = '';
                     try {
-                        _startdate = moment(_that.class_info.StartDate).format("MM/DD/YYYY")
+                        //_startdate = moment(_that.class_info.StartDate).format("MM/DD/YYYY")
+                        _startdate = this.formatDate(_that.class_info.StartDate)
                     }
                     catch(e){
                         alert("Vui lòng nhập ngày mở lớp");
@@ -588,7 +589,8 @@
 
                     var _enddate = '';
                     try {
-                        _enddate = moment(_that.class_info.EndDate).format("MM/DD/YYYY")
+                        //_enddate = moment(_that.class_info.EndDate).format("MM/DD/YYYY")
+                        _enddate = this.formatDate(_that.class_info.EndDate)
                     }
                     catch(e){
                         alert("Vui lòng nhập ngày kết thúc lớp");
@@ -600,8 +602,8 @@
                     if(_that.class_info.ID != null)
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', _that.class_info.Name)
-                    _form.append('StartDate', _startdate)
-                    _form.append('EndDate', _enddate)
+                    _form.append('startdate', _startdate)
+                    _form.append('enddate', _enddate)
                     _form.append('CenterCode', '@center')
 
                     if(_that.class_info.Description != null)
@@ -754,10 +756,9 @@
                             height: 90,
                             width: 160
                         }
-                        _that.class_info.StartDate = obj.StartDate;
-                        _that.class_info.EndDate = obj.EndDate;
+                        _that.class_info.StartDate = this.formatDate(obj.StartDate);
+                        _that.class_info.EndDate = this.formatDate(obj.EndDate);
                         _that.class_info.subject = [];
-
                         let _form = new FormData()
                         _form.append('ClassID', obj.ID)
                         let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
@@ -1236,7 +1237,12 @@
                 matchCourse(obj, item) {
                     //console.log(this.courseSource)
                     return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
-                }
+                },
+                formatDate(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
             }
         });
 
@@ -1250,16 +1256,18 @@
                     <label class="label">Tên lớp học*</label>
                     <input type="text" v-model="class_info.Name" class="form-control" ref="addName">
                 </b-col>
-                <div class="d-flex">
-                    <b-col class="form-group mr-2">
+                <b-col class="form-row row">
+                    <b-col class="col-sm-6">
                         <label class="label">Ngày bắt đầu*</label>
-                        <vuejs-datepicker v-model="class_info.StartDate" format="dd/MM/yyyy" class="form-control" ref="addStartDate"></vuejs-datepicker>
+                        @*<vuejs-datepicker v-model="class_info.StartDate" format="dd/MM/yyyy" class="form-control" ref="addStartDate"></vuejs-datepicker>*@
+                        <input type="date" v-model="class_info.StartDate" class="form-control" ref="addEndDate">
                     </b-col>
-                    <b-col class="form-group">
+                    <b-col class="col-sm-6">
                         <label class="label">Ngày kết thúc*</label>
-                        <vuejs-datepicker v-model="class_info.EndDate" format="dd/MM/yyyy" class="form-control" ref="addEndDate"></vuejs-datepicker>
+                        @*<vuejs-datepicker v-model="class_info.EndDate" format="dd/MM/yyyy" class="form-control" ref="addEndDate"></vuejs-datepicker>*@
+                        <input type="date" v-model="class_info.EndDate" class="form-control" ref="addEndDate">
                     </b-col>
-                </div>
+                </b-col>
                 <b-col class="form-group">
                     <label class="label">Mô tả</label>
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription"></textarea>

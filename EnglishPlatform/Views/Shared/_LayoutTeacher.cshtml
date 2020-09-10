@@ -37,6 +37,11 @@
     <script src="~/js/moment.min.js"></script>
 
     <script type="text/javascript" src="~/js/lib/sweetalert2@9.js"></script>
+
+    <!--Hoà thêm-->
+    <link href="~/css/minify/minify.min.css" rel="stylesheet" />
+    <link href="~/css/stylesheet.min.css" rel="stylesheet" />
+    
 </head>
 <body>
     <script>
@@ -49,7 +54,7 @@
         <div id="content-wrapper">
 
             <!-- Main Content -->
-            <div id="content">
+            <div id="content" style="position:relative" data-spy="scroll" data-target="#tableContents" data-offset="20">
 
                 @await Html.PartialAsync("_sideBarTeacher")
 
