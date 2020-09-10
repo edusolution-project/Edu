@@ -1,4 +1,7 @@
-﻿using FileManagerCore.Globals;
+﻿using BaseCustomerEntity.Database;
+using FileManagerCore.Globals;
+using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -14,13 +17,31 @@ namespace FileManagerCore.Services
 {
     public class RoxyFilemanHandler : Interfaces.IRoxyFilemanHandler
     {
+        const string EDUSO_MANAGERFILE = "EDUSO_MANAGERFILE";
+        private readonly FolderManagerService _folderManagerService;
+
+        private readonly FileManagerService _fileManagerService;
+
+        private readonly FolderCenterService _folderCenterService;
         private readonly GConfig _gConfig;
         private readonly IHostingEnvironment _environment;
         private Dictionary<string, string> _lang { get; set; }
-        public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig)
+        public RoxyFilemanHandler(IHostingEnvironment environment, GConfig gConfig,
+            FolderManagerService folderManagerService, FileManagerService fileManagerService, FolderCenterService folderCenterService)
         {
             _gConfig = gConfig;
             _environment = environment;
+            _folderManagerService = folderManagerService;
+            _fileManagerService = fileManagerService;
+            _folderCenterService = folderCenterService;
+        }
+
+        public IGoogleDriveApiService GoogleDriveApiService
+        {
+            get
+            {
+                return Startup.GoogleDrive;
+            }
         }
         public List<Dictionary<string, string>> UploadDynamic(string nameFolder, HttpContext httpContext)
         {
@@ -91,7 +112,7 @@ namespace FileManagerCore.Services
                     if (CanHandleFile(file.FileName))
                     {
                         FileInfo f = new FileInfo(file.FileName);
-                        string filename = MakeUniqueFilename(path, DateTime.Now.Ticks.ToString()+f.Extension);
+                        string filename = MakeUniqueFilename(path, DateTime.Now.Ticks.ToString() + f.Extension);
                         string dest = Path.Combine(path, filename);
                         item.Extends = GetFileType(f.Extension);
                         using (var stream = new FileStream(dest, FileMode.Create))
@@ -126,6 +147,7 @@ namespace FileManagerCore.Services
 
             return listUrl;
         }
+
         public Dictionary<string, List<MediaResponseModel>> UploadNewFeed(string nameFolder, HttpContext httpContext)
         {
             var listUrl = new Dictionary<string, List<MediaResponseModel>>();
@@ -180,14 +202,14 @@ namespace FileManagerCore.Services
 
             return listUrl;
         }
-        public object UploadEasyImage(string nameFolder,HttpContext httpContext)
+        public object UploadEasyImage(string nameFolder, HttpContext httpContext)
         {
-            string path = Path.Combine(GetFilesRoot(),$"EasyImage/{nameFolder}");
+            string path = Path.Combine(GetFilesRoot(), $"EasyImage/{nameFolder}");
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
-            IDictionary<string, string> Res = new Dictionary<string, string>(); 
+            IDictionary<string, string> Res = new Dictionary<string, string>();
             try
             {
                 for (int i = 0; i < httpContext.Request.Form.Files.Count; i++)
@@ -231,7 +253,7 @@ namespace FileManagerCore.Services
                         {
                             Res.Add("error_" + i.ToString(), LangRes("E_UploadNotAll"));
                         }
-                        
+
                     }
                 }
             }
@@ -256,7 +278,7 @@ namespace FileManagerCore.Services
 
             if (File.Exists(tmpZip)) File.Delete(tmpZip);
             ZipFile.CreateFromDirectory(path, tmpZip, CompressionLevel.Fastest, true);
-            return tmpZip.Replace(_environment.WebRootPath,"");
+            return tmpZip.Replace(_environment.WebRootPath, "");
         }
         public byte[] DownloadFile(string path)
         {
@@ -408,14 +430,14 @@ namespace FileManagerCore.Services
         {
             CheckPath(path);
             FileStream fs = new FileStream(FixPath(path), FileMode.Open, FileAccess.Read);
-            Bitmap img = new Bitmap(Bitmap.FromStream(fs),new Size(width,height));
+            Bitmap img = new Bitmap(Bitmap.FromStream(fs), new Size(width, height));
             fs.Close();
             fs.Dispose();
             byte[] imageBytes;
 
             using (MemoryStream ms2 = new MemoryStream())
             {
-                img.Save(ms2,ImageFormat.Png);
+                img.Save(ms2, ImageFormat.Png);
                 imageBytes = ms2.ToArray();
                 img.Clone();
                 img.Dispose();
@@ -466,7 +488,7 @@ namespace FileManagerCore.Services
             return ajax == "ajax";
 
         }
-        public object Upload(string path,string method,string action , HttpContext httpContext)
+        public object Upload(string path, string method, string action, HttpContext httpContext)
         {
             CheckPath(path);
             path = FixPath(path);
@@ -482,7 +504,7 @@ namespace FileManagerCore.Services
                         FileInfo f = new FileInfo(file.FileName);
                         string filename = MakeUniqueFilename(path, f.Name);
                         string dest = Path.Combine(path, filename);
-                        using(var stream = new FileStream(dest, FileMode.Create))
+                        using (var stream = new FileStream(dest, FileMode.Create))
                         {
                             file.CopyTo(stream);
                             stream.Close();
@@ -626,7 +648,7 @@ namespace FileManagerCore.Services
                 }
             }
         }
-        
+
         public object CopyDir(string path, string newPath)
         {
             CheckPath(path);
@@ -648,7 +670,7 @@ namespace FileManagerCore.Services
             }
             return new { res = "ok", msg = "" };
         }
-        
+
         public List<FILESLIST> ListFiles(string path, string type)
         {
             List<FILESLIST> response = new List<FILESLIST>();
@@ -685,7 +707,7 @@ namespace FileManagerCore.Services
                     response.Add(item);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -716,14 +738,14 @@ namespace FileManagerCore.Services
                     string dir = (string)dirs[i];
                     var item = new DIRLIST()
                     {
-                        p= dir.Replace(_environment.WebRootPath, "").Replace("\\", "/"),
+                        p = dir.Replace(_environment.WebRootPath, "").Replace("\\", "/"),
                         f = GetFiles(dir, type).Count.ToString(),
                         d = Directory.GetDirectories(dir).Length.ToString()
                     };
                     response.Add(item);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
@@ -763,7 +785,7 @@ namespace FileManagerCore.Services
                     path = path.Replace($"{strCheck}", "");
                 }
             }
-            return Path.Combine(GetFilesRoot(),path);
+            return Path.Combine(GetFilesRoot(), path);
         }
         protected bool CheckPath(string path)
         {
@@ -774,7 +796,7 @@ namespace FileManagerCore.Services
         {
             string ret = "file";
             ext = ext.ToLower();
-            if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext== ".ico")
+            if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext == ".ico")
                 ret = "image";
             else if (ext == ".swf" || ext == ".flv")
                 ret = "flash";
@@ -870,5 +892,154 @@ namespace FileManagerCore.Services
             }
             return ret;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="user"></param>
+        /// <param name="context"></param>
+        /// <returns>List fileId</returns>
+
+        public List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context)
+        {
+            string folderId = GetFolder(center, user);
+            var listFile = context.Request.Form.Files;
+            var count = listFile == null ? 0 : listFile.Count;
+            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            List<MediaResponseModel> response = new List<MediaResponseModel>();
+            for (int i = 0; i < count; i++)
+            {
+                IFormFile file = listFile[i];
+                FileInfo f = new FileInfo(file.FileName);
+                string filename = MakeUniqueFilename(path, f.Name);
+                string dest = Path.Combine(path, filename);
+                string fileId = "";
+                using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+                {
+                    file.CopyTo(stream);
+                    fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
+                    stream.Close();
+                }
+                response.Add(new MediaResponseModel() { FileId = fileId, Path = fileId, Extends = f.Extension });
+
+                _fileManagerService.Collection.InsertOne(new FileManagerEntity()
+                {
+                    Extends = f.Extension,
+                    FileID = fileId,
+                    FolderID = folderId,
+                    Name = file.Name,
+                    Center = center,
+                    UserID = user
+                });
+            }
+            return response;
+        }
+
+        public MediaResponseModel UploadSingleFileWithGoogleDrive(string center, string user, IFormFile file)
+        {
+            string folderId = GetFolder(center, user);
+            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            List<MediaResponseModel> response = new List<MediaResponseModel>();
+
+            FileInfo f = new FileInfo(file.FileName);
+            string filename = MakeUniqueFilename(path, f.Name);
+            string dest = Path.Combine(path, filename);
+            string fileId = "";
+            using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+            {
+                file.CopyTo(stream);
+                fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
+                stream.Close();
+            }
+
+
+            _fileManagerService.Collection.InsertOne(new FileManagerEntity()
+            {
+                Extends = f.Extension,
+                FileID = fileId,
+                FolderID = folderId,
+                Name = file.Name,
+                Center = center,
+                UserID = user
+            });
+            return new MediaResponseModel() { FileId = fileId, Path = GoogleDriveApiService.CreateLinkViewFile(fileId), Extends = f.Extension };
+        }
+
+
+        public bool DeleteFileWithGoogleDrive(string fileId, string center, string user)
+        {
+            try
+            {
+                if (_fileManagerService.RemoveFile(center, user, fileId))
+                {
+                    GoogleDriveApiService.Delete(fileId);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private string GetFolder(string center, string user)
+        {
+            string centerFolder = _folderCenterService.GetFolderID(center);
+            if (string.IsNullOrEmpty(centerFolder))
+            {
+                centerFolder = CreateFolderCenter(center);
+            }
+            string folderId = _folderManagerService.GetFolderID(centerFolder, user);
+            if (string.IsNullOrEmpty(folderId))
+            {
+                folderId = CreateFolderUser(centerFolder, user);
+            }
+
+            return folderId;
+        }
+        private string GetRoot()
+        {
+            string root = _folderCenterService.GetRoot();
+            if (string.IsNullOrEmpty(root))
+            {
+                root = Startup.GoogleDrive.CreateDirectory(EDUSO_MANAGERFILE, "Quản lý file của hệ thống").Id;
+                _folderCenterService.CreateRoot(root);
+            }
+            return root;
+        }
+
+        private string CreateFolderUser(string centerFolder, string user)
+        {
+            string folderId = Startup.GoogleDrive.CreateDirectory(user, "User Folder create" + DateTime.Now.ToString("yyyy-mm-dd"), centerFolder).Id;
+            _folderManagerService.CreateQuery().InsertOne(new FolderManagerEntity()
+            {
+                Center = centerFolder,
+                FolderID = folderId,
+                UserID = user
+            });
+
+            return folderId;
+        }
+
+        private string CreateFolderCenter(string center)
+        {
+            string root = GetRoot();
+            string folderId = Startup.GoogleDrive.CreateDirectory(center, "CenterFolder " + DateTime.Now.ToString("yyyy-mm-dd"), root).Id;
+            _folderCenterService.CreateQuery().InsertOne(new FolderCenterEntity()
+            {
+                Center = center,
+                FolderID = folderId
+            });
+            return folderId;
+        }
+
+
     }
 }

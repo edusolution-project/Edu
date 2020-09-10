@@ -215,18 +215,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
                 var listClass = new List<string>();
-                if (student.JoinedClasses[0] != null)
-                {
+                if (!String.IsNullOrEmpty(student.JoinedClasses[0]))
                     listClass = student.JoinedClasses[0].Split(',').ToList();
-                    oldStudent.JoinedClasses = listClass.ToList();
-                    if (oldStudent.JoinedClasses[0] == "")
-                        oldStudent.JoinedClasses.RemoveAt(0);
-                }
-                else
-                {
-                    oldStudent.JoinedClasses = student.JoinedClasses;
-                }
-               var infochange = false;
+                oldStudent.JoinedClasses = listClass.ToList();
+                var infochange = false;
 
                 if (oldStudent.DateBorn != student.DateBorn)
                     oldStudent.DateBorn = student.DateBorn;
@@ -508,6 +500,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (acc == null)
                 return Json(new { error = "Thông tin không chính xác" });
             acc.PassWord = Core_v2.Globals.Security.Encrypt(Password);
+			acc.TempPass = acc.PassWord;
             _accountService.Save(acc);
             _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
             return Json(new { msg = "Đã đổi mật khẩu" });
