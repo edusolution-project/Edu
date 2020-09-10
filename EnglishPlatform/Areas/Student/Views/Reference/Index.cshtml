@@ -44,6 +44,24 @@
                     @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
                 </select>
             </div>
+@*<<<<<<< HEAD
+
+            <div class="box filter-box m-1 col-12 col-md-2">
+                <select v-model="subjectID">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box m-1 col-12 col-md-2">
+                <select v-model="gradeID">
+                    <option value="" v-if="subjectID==''">Cấp độ</option>
+                    <option value="" v-else>Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==subjectID">{{item.Name}}</option>
+                </select>
+            </div>
+
+            <div class="box filter-box col-12 col-md-2 ml-0 mb-1 w-100" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+=======*@
             <div class="box filter-box col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
                 <select v-model="target">
                     <option value="">-- Chọn lớp --</option>
@@ -170,6 +188,10 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 linkFile: '',
                 title: '',
+
+                subjectID: '',
+                gradeID:'',
+
                 list_subject: [],
                 list_grades_full: [],
                 HTMLContent: ''

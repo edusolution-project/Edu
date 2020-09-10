@@ -139,6 +139,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
+                if (!string.IsNullOrEmpty(entity.SubjectID))
+                {
+                    if (string.IsNullOrEmpty(entity.Target))
+                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID));
+                    else filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID && o.Target == entity.Target));
+                }
+                if (!string.IsNullOrEmpty(entity.GradeID))
+                {
+                    if (string.IsNullOrEmpty(entity.Target))
+                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.GradeID == entity.GradeID));
+                    else filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.GradeID == entity.GradeID && o.Target == entity.Target));
+                }
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
 
@@ -171,6 +183,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                }
+                if (!string.IsNullOrEmpty(entity.SubjectID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.SubjectID == entity.SubjectID && o.Target == entity.Target));
+                }
+                if (!string.IsNullOrEmpty(entity.GradeID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.GradeID == entity.GradeID && o.Target == entity.Target));
                 }
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();

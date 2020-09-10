@@ -108,9 +108,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\2.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Areas\Admin\Views\Account\Index.cshtml" />
     <None Include="Areas\Admin\Views\Course\Index.cshtml" />
     <None Include="Areas\Admin\Views\Grade\Index.cshtml" />
@@ -2222,6 +2219,8 @@
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
     <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+    <ProjectReference Include="..\GoogleApp\GoogleApp.csproj" />
+    <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
   </ItemGroup>
 
 
