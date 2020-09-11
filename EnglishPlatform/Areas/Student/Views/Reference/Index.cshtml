@@ -67,7 +67,7 @@
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                     <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
-                        <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                        <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
                         <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
                     <div class="entry p-0">
@@ -294,6 +294,11 @@
                         var ext = path.substring(idx, path.length - idx);
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width;
                 },
                 renderContent(linkFile) {
                     var html = "";

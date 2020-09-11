@@ -14,6 +14,7 @@ using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
 using System.Drawing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -1097,6 +1098,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Cơ sở không đúng" }
                         });
             }
+            var tc_sj = new List<TeacherSubjectsViewModel>();
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
@@ -1131,6 +1134,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _service.Save(item);
 
+                
+
                 //Create class subjects
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
@@ -1153,9 +1158,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.TotalPractices += practicecount;
                         var skill = _skillService.GetItemByID(csubject.SkillID);
                         if (skill == null) continue;
-                        //Send email for each teacher
-                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                        var course = _courseService.GetItemByID(csubject.CourseID);
+                        var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                        if (tc == null)
+                            tc_sj.Add(new TeacherSubjectsViewModel
+                            {
+                                TeacherId = teacher.ID,
+                                FullName = teacher.FullName,
+                                Email = teacher.Email,
+                                SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                            });
+                        else
+                            tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
                     }
+
+                    //Send email for each teacher
+                    if(tc_sj.Count > 0)
+                        foreach(var tc in tc_sj)
+                            _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+                    
+
                     _service.Save(item);
                 }
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -1238,8 +1260,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     oSbj.TeacherID = nSbj.TeacherID;
                                     var skill = _skillService.GetItemByID(oSbj.SkillID);
                                     if (skill == null) continue;
-                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                    var course = _courseService.GetItemByID(nSbj.CourseID);
+                                    var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                                    if (tc == null)
+                                        tc_sj.Add(new TeacherSubjectsViewModel
+                                        {
+                                            TeacherId = teacher.ID,
+                                            FullName = teacher.FullName,
+                                            Email = teacher.Email,
+                                            SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                                        });
+                                    else
+                                        tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
+                                    
                                 }
+                                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+
                                 _classSubjectService.Save(oSbj);
                                 examcount = oSbj.TotalExams;
                                 lessoncount = oSbj.TotalLessons;
@@ -1251,6 +1287,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     Type = ClassMemberType.TEACHER
                                 };
                             }
+                            
+
                             processCS.Add(nSbj.ID);
                             if (!oldData.Skills.Contains(nSbj.SkillID))
                                 oldData.Skills.Add(nSbj.SkillID);
@@ -1302,6 +1340,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //update data
                 _service.Save(oldData);
+
+                if (tc_sj.Count > 0)
+                    foreach (var tc in tc_sj)
+                        _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+
                 if (mustUpdateName)
                 {
                     var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);

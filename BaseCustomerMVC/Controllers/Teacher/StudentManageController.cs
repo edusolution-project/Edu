@@ -574,7 +574,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //    continue; skip => create auto mail
                                 {
                                     isValidMail = false;
-                                    email = abbr + "_" + _indexService.GetNewIndex(abbr) + "@eduso.vn";
+                                    email = abbr + "." + _indexService.GetNewIndex(abbr) + "@eduso.vn";
                                 }
 
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();

@@ -1,4 +1,5 @@
 ﻿using BaseCustomerEntity.Database;
+using BaseCustomerMVC.Models;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
@@ -226,6 +227,28 @@ namespace BaseCustomerMVC.Globals
 
             //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { Email };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
+        }
+
+        public async Task SendTeacherJoinClassNotify(TeacherSubjectsViewModel TC, ClassEntity @class, string CenterName)
+        {
+            string subject = "Thông báo phân công giảng dạy - " + CenterName;
+            string body = "Chào " + TC.FullName + ",";
+
+            body += "<p>Bạn vừa được phân công dạy lớp <b>" + @class.Name + "</b> tại <b>" + CenterName + "</b><p>";
+            body += "<p>Thời gian mở lớp từ: <b>" + @class.StartDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + @class.EndDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b><p>";
+            body += "<p>Các môn được phân công: <br/>";
+
+            if (TC.SubjectList == null || TC.SubjectList.Count == 0) return;
+
+            foreach (var item in TC.SubjectList)
+            {
+                body += (". " + item.SkillName + " (" + item.BookName + ")<br/>");
+            }
+
+            body += "</p>";
+            body += "<p>Quản lý lớp tại <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { TC.Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
