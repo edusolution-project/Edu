@@ -386,11 +386,11 @@
                         fn = null
                     }, 500)
                 },
-                listClass: function () {
+                "createStudent.listClass": function () {
                     this.createStudent.listNameClass = ''
-                    for (i = 0; i < this.listClass.length; i++) {
+                    for (i = 0; i < this.createStudent.listClass.length; i++) {
                         for (j = 0; j < this.list_active_class.length; j++) {
-                            if (this.list_active_class[j].ID == this.listClass[i]) {
+                            if (this.list_active_class[j].ID == this.createStudent.listClass[i]) {
                                 this.createStudent.listNameClass += this.list_active_class[j].Name + '; '
                             }
                         }
@@ -555,10 +555,10 @@
                 createStudent() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        Swal.fire('Chưa chọn lớp học', '', 'warning');
-                        return false;
-                    }
+                    //if (_that.add_student.class_id == '') {
+                    //    Swal.fire('Chưa chọn lớp học', '', 'warning');
+                    //    return false;
+                    //}
                     if (_that.createStudent.idStudent == '') {
                         alert('Vui lòng chọn lại học viên')
                         return false;
@@ -591,10 +591,10 @@
                 uploadStudent() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        alert('Chưa chọn lớp học');
-                        return false;
-                    }
+                    //if (_that.add_student.class_id == '') {
+                    //    alert('Chưa chọn lớp học');
+                    //    return false;
+                    //}
                     if (!_that.uploadfile.file) {
                         alert('Chưa chọn danh sách học viên');
                         return false;

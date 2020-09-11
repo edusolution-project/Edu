@@ -75,14 +75,14 @@
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
-                    <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
+                    <a href="#" v-on:click="doMainAct(data)" title="{{data.Title}}" class="thumb" style="max-width:130px; min-width:130px;">
                         <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
                         <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
                     <div class="entry p-0">
                         <div>
                             <div>
-                                <a href="#" title="" class="title">{{data.Title}}</a>
+                                <a href="#" v-on:click="doMainAct(data)" title="{{data.Title}}" class="title">{{data.Title}}</a>
                             </div>
                             @*<div>
                                     <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>

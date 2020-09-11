@@ -515,11 +515,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(UserID))
                 return null;
             var form = HttpContext.Request.Form;
-            if (string.IsNullOrEmpty(ClassID))
-                return Json(new { error = "Không có thông tin lớp" });
-            var @class = _classService.GetItemByID(ClassID);
-            if (@class == null)
-                return Json(new { error = "Không có thông tin lớp" });
+            //if (string.IsNullOrEmpty(ClassID))
+            //    return Json(new { error = "Không có thông tin lớp" });
+            var @class = new ClassEntity();
+            if (!string.IsNullOrEmpty(ClassID))
+            {
+                @class = _classService.GetItemByID(ClassID);
+                if (@class == null)
+                    return Json(new { error = "Thông tin lớp không đúng" });
+            }
             var center = new CenterEntity();
             long left = 0;
             if (!string.IsNullOrEmpty(basis))
@@ -558,16 +562,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             ExcelWorksheet workSheet = package.Workbook.Worksheets[1];
                             int totalRows = workSheet.Dimension.Rows;
-                            var classStudents = _studentService.GetStudentIdsByClassId(ClassID);
+                            var classStudents = string.IsNullOrEmpty(ClassID) ? new List<string>() : _studentService.GetStudentIdsByClassId(ClassID).ToList();
                             var keyCol = 4;
                             for (int i = 1; i <= totalRows; i++)
                             {
+                                var isValidMail = true;
                                 if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
                                 var email = (workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString()).ToLower().Trim();
                                 if (string.IsNullOrEmpty(email))
                                 //    continue; skip => create auto mail
                                 {
+                                    isValidMail = false;
                                     email = abbr + "_" + _indexService.GetNewIndex(abbr) + "@eduso.vn";
                                 }
 
@@ -597,8 +603,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         UserCreate = UserID,
                                         IsActive = true,
                                         Centers = new List<string> { center.ID },
-                                        JoinedClasses = new List<string> { @class.ID }
+                                        JoinedClasses = new List<string> { }
                                     };
+                                    if (@class != null && !string.IsNullOrEmpty(@class.ID))
+                                        student.JoinedClasses.Add(@class.ID);
                                     if (acc == null)
                                     {
                                         await _studentService.CreateQuery().InsertOneAsync(student);
@@ -618,33 +626,51 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             RoleID = _roleService.GetItemByCode("student").ID
                                         };
                                         _accountService.CreateQuery().InsertOne(account);
-                                        _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                        if (isValidMail)
+                                            if (@class != null && !string.IsNullOrEmpty(@class.ID))
+                                                _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                            else
+                                                _ = _mailHelper.SendStudentJoinCenterNotify(student.FullName, student.Email, visiblePass, center.Name);
                                     }
                                     else
                                     {
                                         if (acc.Type != ACCOUNT_TYPE.STUDENT)
                                         {
                                             await _studentService.CreateQuery().InsertOneAsync(student);
-                                            _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                            if (@class != null && !string.IsNullOrEmpty(@class.ID))
+                                                _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                            else
+                                                _ = _mailHelper.SendStudentJoinCenterNotify(student.FullName, student.Email, visiblePass, center.Name);
                                             //counter++;
                                         }
                                         else //acc = student & student not found ????
                                         {
+                                            continue;
                                             //unknown Err;                                            
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    if (student.Centers == null) student.Centers = new List<string> { center.ID };
-                                    else if (!student.Centers.Contains(center.ID))
+                                    if (student.Centers == null) student.Centers = new List<string> { };
+                                    if (student.JoinedClasses == null) student.JoinedClasses = new List<string> { };
+
+                                    if (student.Centers.Contains(center.ID) && (string.IsNullOrEmpty(ClassID) || classStudents.Any(t => t == student.ID))) continue; //student in class
+
+                                    if (!student.Centers.Contains(center.ID))
                                         student.Centers.Add(center.ID);
 
-                                    if (student.JoinedClasses == null) student.JoinedClasses = new List<string> { };
                                     _studentService.Save(student);
-                                    if (classStudents.Any(t => t == student.ID)) continue;
-                                    _studentService.JoinClass(ClassID, student.ID, @class.Center);
-                                    _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                    if (!string.IsNullOrEmpty(ClassID))
+                                    {
+                                        if (classStudents.Any(t => t == student.ID)) continue;
+                                        _studentService.JoinClass(ClassID, student.ID, @class.Center);
+                                        _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                                    }
+                                    else
+                                    {
+                                        _ = _mailHelper.SendStudentJoinCenterNotify(student.FullName, student.Email, "", center.Name);
+                                    }
                                 }
                                 counter++;
                             }

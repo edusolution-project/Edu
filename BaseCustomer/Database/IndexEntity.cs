@@ -21,13 +21,13 @@ namespace BaseCustomerEntity.Database
         }
         public double GetNewIndex(string name)
         {
-            var option = new FindOneAndUpdateOptions<IndexEntity, IndexEntity> { IsUpsert = true };
+            var option = new FindOneAndUpdateOptions<IndexEntity, IndexEntity> { IsUpsert = false };
             var result = Collection.FindOneAndUpdate<IndexEntity>(o => o.key == name,
                                                Builders<IndexEntity>.Update.Inc("index", 1),
                                                option);
             if (result == null)
             {
-                Collection.InsertOne(new IndexEntity { key = name, index = 1 });
+                Collection.InsertOne(new IndexEntity { key = name, index = 1.0 });
                 return 1;
             }
             return result.index;
