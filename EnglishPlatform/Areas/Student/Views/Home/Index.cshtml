@@ -279,7 +279,8 @@
                                         </span>
                                     </div>
                                     <div class="form-group col-sm-12" style="text-align:center">
-                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
+                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" v-if="detailProduct.SttPayment" disabled title="Mua ngay">Mua ngay</button>
+                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" v-else title="Mua ngay">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -438,6 +439,7 @@
                 let _url = '@processUrl("DetailProduct", "Home")';
                 axios.post(_url, _form)
                     .then(response => {
+                        debugger
                         _that.detailProduct = response.data;
                         $("#DetailProduct").modal();
                     }).catch(e => { });

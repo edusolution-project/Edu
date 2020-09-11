@@ -1119,12 +1119,12 @@
             var id = item.id;
             var child = $(item).find('[class=modules]');
             if ($(item).find('[class=modules]').length > 0) {
-                $("#tableContents").append("<li style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' onclick='test(this,&#39;" + id + "&#39;)' style='text-decoration:none;'>" + li + "<i class='fas fa-caret-down' onclick='showDropDown(this,&#39;" + id + "&#39;)'></i></a></li>");
+                $("#tableContents").append("<li style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' style='text-decoration:none;'>" + li + "<i class='fas fa-caret-down' onclick='showDropDown(this,&#39;" + id + "&#39;)'></i></a></li>");
                 for (j = 0; j < $(item).find('[class=modules]').length; j++) {
                     var chilItem = $(item).find('[class=modules]')[j];
                     var chilLi = chilItem.children[0].children[0].children[1].text;
                     ChilID = chilItem.id;
-                    $("#tableContents").append("<ul id='chil" + id + "' style='padding-left: 10px;display:none'></ul>");
+                    $("#tableContents").append("<ul id='chil" + id + "' style='padding-left: 10px;display:none;'></ul>");
                     $("#chil" + id + "").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + ChilID + "' style='text-decoration:none;'>" + chilLi + "</a></li>");
                 }
             }

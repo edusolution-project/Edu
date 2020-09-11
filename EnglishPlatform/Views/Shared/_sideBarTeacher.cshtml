@@ -114,6 +114,10 @@
             }
     }
 
+    #mySidenav{
+        width:0px
+    }
+
     #mySidenav ul{
         list-style:none;
         margin:0px;
@@ -218,7 +222,7 @@
         </a>
     </div>
     <div style="font-size:30px;cursor:pointer;width:240px;position:relative;padding-left:5px"><span onclick="openNav()">&#9776;</span>
-        <a href="javascript:void(0)" id="closebtn" class="hide" onclick="closeNav()">&times;</a>
+        @*<a href="javascript:void(0)" id="closebtn" class="hide" onclick="closeNav()">&times;</a>*@
     </div>
     <div id="mySidenav" class="sidenav">
         <ul>
@@ -315,19 +319,22 @@
     }
 
     function openNav() {
-        document.getElementById("mySidenav").style.width = "240px";
-        document.getElementById("closebtn").classList.remove("hide");
+        //debugger
+        if (document.getElementById("mySidenav").style.width == "") {
+            document.getElementById("mySidenav").style.width = "240px";
+            //document.getElementById("closebtn").classList.remove("hide");
+        }
+        else
+            closeNav();
     }
 
     function closeNav() {
-        //alert(1)
-        document.getElementById("mySidenav").style.width = "0";
-        document.getElementById("closebtn").classList.add("hide");
+        document.getElementById("mySidenav").style.width = "";
+        //document.getElementById("closebtn").classList.add("hide");
     }
 
     function heightSideBar() {
         var height = $(window).height() - 284;
-        //$('tableContents').css("max-height", height+"px");
         document.getElementById("tableContents").style.maxHeight = height+"px";
     }
 
