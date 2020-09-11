@@ -268,7 +268,7 @@
                         $("#modal_preview").modal();
                 },
                 doMainAct(obj) {
-                    if (obj.Media != null && isDocType(obj.Media.Extension)) {
+                    if (obj.Media != null && this.isDocType(obj.Media.Extension)) {
                         this.showPreview(obj)
                     }
                     else if (obj.Link != null && obj.Link.length > 0) {
