@@ -276,7 +276,7 @@
 
     <script>
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.getData()
                 this.getActiveClass()
@@ -293,7 +293,7 @@
                     id: "",
                     name: "",
                     email: "",
-                    class_id: "",
+                    class_id: ""
                 },
                 list_student: [
                 ],
@@ -561,10 +561,10 @@
                 createStudent() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        Swal.fire('Chưa chọn lớp học', '', 'warning');
-                        return false;
-                    }
+                    //if (_that.add_student.class_id == '') {
+                    //    Swal.fire('Chưa chọn lớp học', '', 'warning');
+                    //    return false;
+                    //}
                     if (_that.createStudent.idStudent == '') {
                         alert('Vui lòng chọn lại học viên')
                         return false;
@@ -597,10 +597,10 @@
                 uploadStudent() {
                     let _that = this
                     let _form = new FormData()
-                    if (_that.add_student.class_id == '') {
-                        alert('Chưa chọn lớp học');
-                        return false;
-                    }
+                    //if (_that.add_student.class_id == '') {
+                    //    alert('Chưa chọn lớp học');
+                    //    return false;
+                    //}
                     if (!_that.uploadfile.file) {
                         alert('Chưa chọn danh sách học viên');
                         return false;

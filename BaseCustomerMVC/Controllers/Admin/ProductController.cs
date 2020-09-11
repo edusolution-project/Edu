@@ -144,19 +144,19 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 //var listclass = _serviceClass.CreateQuery().Find(o => o.Center == centerID && o.IsActive==true);
                 var listclass = _serviceClass.CreateQuery().Find(o => o.Center == centerID);
-                var Dataresponse = new Dictionary<string, object>{
+                var DataResponse = new Dictionary<string, object>{
                 { "Data",listclass.ToList()}
             };
-                return Json(Dataresponse);
+                return Json(DataResponse);
             }
             else
             {
                 //var listclass = _serviceClass.CreateQuery().Find(o=>o.IsActive==true);
                 var listclass = _serviceClass.GetAll();
-                var Dataresponse = new Dictionary<string, object>{
+                var DataResponse = new Dictionary<string, object>{
                 { "Data",listclass.ToList()}
             };
-                return Json(Dataresponse);
+                return Json(DataResponse);
             }
         }
 
@@ -172,7 +172,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
 
             //var list_product = _serviceNews.GetAll();
-            //var Dataresponse = new Dictionary<string, object>{
+            //var DataResponse = new Dictionary<string, object>{
             //    { "Data",DataResponse},
             //    { "Model", model }
             //};
@@ -249,11 +249,11 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             await _serviceNews.CreateQuery().InsertOneAsync(new_product);
 
-            Dictionary<string, object> Dataresponse = new Dictionary<string, object>()
+            Dictionary<string, object> DataResponse = new Dictionary<string, object>()
             {
                 {"Data",new_product}
             };
-            return new JsonResult(Dataresponse);
+            return new JsonResult(DataResponse);
         }
 
         [HttpPost]

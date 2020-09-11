@@ -56,7 +56,6 @@ namespace EnglishPlatform
                     options.AccessDeniedPath = "/denied";
                     options.LoginPath = "/login";
                 });
-            services.AddEasyRealTime();
             services.AddAccess();
             services.Configure<DefaultConfigs>(Configuration.GetSection("DefaultConfigs"));
             services.AddLogs();
@@ -117,7 +116,15 @@ namespace EnglishPlatform
             //app.UseAuthention(Configuration);
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.Use(async (content, next) =>
+            {
+                if (content.Request.Query.ContainsKey("googletest"))
+                {
+                    string str = Program.GoogleDriveApiService != null ? $"ok {Program.GoogleDriveApiService.URL_VIEW_FILE}" : "null";
+                    await content.Response.WriteAsync(str);
+                }
+                await next.Invoke();
+            });
             app.Use(async (context, next) =>
             {
                 if (CacheExtends.GetDataFromCache<List<AuthorityEntity>>(CacheExtends.DefaultPermission) == null)

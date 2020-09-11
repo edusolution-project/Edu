@@ -5,6 +5,7 @@ using Core_v2.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,6 +134,44 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
         }
 
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetBestStudents(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không có dữ liệu" });
+
+            var list = new List<StudentRankingViewModel>();
+
+            var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+            var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            {
+                StudentID = g.Key,
+                TotalPoint = g.Sum(t => t.TotalPoint),
+                PracticePoint = g.Sum(t => t.PracticePoint),
+            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+
+            var rtn = new List<StudentRankingViewModel>();
+            foreach (var result in results)
+            {
+                var st = _studentService.GetItemByID(result.StudentID);
+                if (st != null)
+                {
+                    result.StudentName = st.FullName;
+                    rtn.Add(result);
+                }
+
+            }
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", rtn }
+            };
+            return new JsonResult(response);
+        }
+
         [Obsolete]
         [HttpPost]
         public JsonResult GetList(DefaultModel model, ClassEntity entity, string basis)
@@ -221,12 +260,12 @@ namespace BaseCustomerMVC.Controllers.Student
                      CompletePercent = complete > 100 ? 100 : complete
                  })).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", std },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         public JsonResult GetActiveList(DateTime today)
@@ -501,12 +540,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", data },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [System.Obsolete]
@@ -530,7 +569,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter));
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
 
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data",
                         DataResponse.Select(
@@ -543,18 +582,17 @@ namespace BaseCustomerMVC.Controllers.Student
                         )
                     }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", null },
                     {"Error",ex }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
-
         }
 
         [Obsolete]

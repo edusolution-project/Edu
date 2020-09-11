@@ -142,13 +142,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 );
             var ViewProduct = _newsService.CreateQuery().Find(o => o.ID == ID).FirstOrDefault();
 
-            var DataRespone = new Dictionary<string, object>()
+            var DataResponse = new Dictionary<string, object>()
             {
                 {"ViewDetail",ViewDetail },
                 {"Error","" },
                 {"ViewProduct", ViewProduct}
             };
-            return Json(DataRespone);
+            return Json(DataResponse);
         }
     }
 }

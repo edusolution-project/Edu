@@ -329,7 +329,7 @@
     <script>
         var isSearchDate = false;
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
@@ -602,8 +602,8 @@
                     if(_that.class_info.ID != null)
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', _that.class_info.Name)
-                    _form.append('startdate', _startdate)
-                    _form.append('enddate', _enddate)
+                    _form.append('StartDate', _startdate)
+                    _form.append('EndDate', _enddate)
                     _form.append('CenterCode', '@center')
 
                     if(_that.class_info.Description != null)

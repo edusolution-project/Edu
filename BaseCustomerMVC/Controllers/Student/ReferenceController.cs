@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -23,6 +24,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly GradeService _gradeService;
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
+        private string host;
 
         public ReferenceController(
             StudentService studentService,
@@ -32,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
             SubjectService subjectService,
             GradeService gradeService,
             IHostingEnvironment env,
+            IConfiguration iConfig,
             ReferenceService referenceService
             )
         {
@@ -43,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _subjectService = subjectService;
             _gradeService = gradeService;
             _env = env;
+            host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -124,7 +128,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
-
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
@@ -214,7 +217,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 if (!string.IsNullOrEmpty(url))
                 {
                     if (!url.ToLower().StartsWith("http://") && !url.ToLower().StartsWith("https://"))
-                        url = "http://" + url;
+                        url = "http://" + host + url;
                     return Redirect(url);
                 }
             }

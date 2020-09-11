@@ -108,7 +108,7 @@
                 <div class="col-md-6" v-for="data in ref.data">
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                         <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
-                            <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
+                            <img :src="cacheStatic(data.Image)" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">

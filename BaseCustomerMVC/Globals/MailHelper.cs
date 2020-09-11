@@ -130,6 +130,29 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
+        public async Task SendStudentJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)
+        {
+            string subject = "";
+            string body = "Chào " + Name + ",";
+            if (!String.IsNullOrEmpty(VisiblePassword))//register
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành học viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm học viên của <b>" + centerName + "</b>!</p>" +
+                "<p>Thông tin đăng nhập như sau</p>" +
+                "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
+                "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            else
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            var toAddress = new List<string> { Email };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.STUDENT_JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
+        }
+
         public async Task SendResetPassConfirm(AccountEntity user, string resetLink = "", string OTP = "")
         {
             try

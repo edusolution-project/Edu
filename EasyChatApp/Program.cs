@@ -39,9 +39,8 @@ namespace EasyChatApp
                 }
             }).ConfigureServices(services =>
             {
-
-                services.AddLogs();
-                //services.AddRoxyFileManger(GoogleDriveApiService);
+				services.AddLogs();
+                services.AddRoxyFileManger(GoogleDriveApiService);
             }).UseStartup<Startup>();
     }
 }

@@ -236,7 +236,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var listgrades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 ViewBag.Grades = listgrades;
                 ViewBag.Subjects = listsubjects;
-                //ViewBag.Skills = _skillService.GetList();
             }
             return View();
         }

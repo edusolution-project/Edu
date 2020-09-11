@@ -191,10 +191,7 @@
 
                                         <div class="thumb">
                                             <img src="~/pictures/1797093_orig.gif" id="isNew" v-if="item.IsHot" style=" position: absolute; top: 0px; right: 0px; width: 40px;" />
-                                            @*<img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">*@
                                             <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; max-width:initial">
-
-                                            @*<img v-else :src="item.Thumbnail" alt="">*@
                                         </div>
                                         <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 20px;">
                                             <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title" style="height:42px; line-height:21px;">
