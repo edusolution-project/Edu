@@ -128,7 +128,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, entity.GradeID));
                 }
-			
+
                 if (!string.IsNullOrEmpty(defaultModel.SearchText))
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
@@ -279,7 +279,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                             if (_imageType.Contains(type))//anh bia
                             {
-                               	entity.Image = mediarsp.Path;
+                                entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -288,8 +288,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path = mediarsp.Path;                             
-                           }
+                                entity.Media.Path = mediarsp.Path;
+                            }
                         }
                     }
                     else
@@ -301,7 +301,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     entity.Link = "";
                 if (!string.IsNullOrEmpty(entity.Link))
                     if (!(entity.Link.ToLower().StartsWith("http://") || entity.Link.ToLower().StartsWith("https://")))
-                        entity.Link = "http://" + entity.Link;
+                        entity.Link = "http://" + host + "/" + entity.Link;
                 entity.UpdateTime = DateTime.Now;
                 _referenceService.Save(entity);
                 return new JsonResult(new Dictionary<string, object>
@@ -396,7 +396,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (!string.IsNullOrEmpty(url))
                 {
                     if (!url.ToLower().StartsWith("http://") && !url.ToLower().StartsWith("https://"))
-                        url = "http://" + url;
+                        url = "http://" + host + "/" + url;
                     return Redirect(url);
                 }
             }

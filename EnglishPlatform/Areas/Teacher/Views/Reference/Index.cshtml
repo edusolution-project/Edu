@@ -342,6 +342,7 @@
                     this.isLoading = true;
                     axios.post(_url, _form)
                         .then(response => {
+                            _that.isLoading = false;
                             if (response.Error == null) {
                                 Swal.fire(
                                     'Đã cập nhât!',
@@ -352,7 +353,6 @@
                                 this.hideModal()
                             }
                             else {
-                                _that.isLoading = false;
                                 Swal.fire(
                                     'Có lỗi!',
                                     response.Error,
