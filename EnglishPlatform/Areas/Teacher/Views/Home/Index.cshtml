@@ -310,9 +310,7 @@
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log("Week")
-                        //console.log(response.data)
                         _that.lesson_week = response.data.data;
-                        console.log(_that.lesson_week.length);
                     }).catch(e => { })
             },
             getNewFeed() {
@@ -325,9 +323,7 @@
                 axios.get(_url, _form)
                     .then(response => {
                         //console.log("Week")
-                        //console.log(response.data)
                         _that.discussion = response.data.data.messages;
-                        //console.log(_that.discussion);
                     }).catch(e => { })
             },
             formatTime(time) {
