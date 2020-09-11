@@ -464,8 +464,8 @@ namespace BaseCustomerMVC.Controllers.Student
                     conn.AddDigitalOrderField("vpc_OrderInfo",historyTransaction.ID); //THong tin don hang
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
-                    //conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
-                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
+                    conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
+                    //conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
                     // Thong tin them ve khach hang. De trong neu khong co thong tin
                     conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
                     conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);

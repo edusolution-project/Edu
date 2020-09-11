@@ -721,15 +721,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult ExportStudent(string basic, string ClassID)
         {
             var center = _centerService.GetItemByCode(basic);
-            var Data4Export = ClassID==null? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)) : _studentService.CreateQuery().Find(x=>x.Centers.Contains(center.ID)&&x.JoinedClasses.Contains(ClassID));
-            var @class = ClassID==null?"": _classService.GetItemByID(ClassID).Name;
+            var Data4Export = ClassID == null ? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)) : _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(ClassID));
+            var @class = ClassID == null ? "" : _classService.GetItemByID(ClassID).Name;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
             var stream = new MemoryStream();
 
             //xuat file excel
-            try {
-            
+            try
+            {
+
                 using (ExcelPackage p = new ExcelPackage(stream))
                 {
                     // đặt tên người tạo file
@@ -745,7 +746,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ExcelWorksheet ws = p.Workbook.Worksheets[1];
 
                     // đặt tên cho sheet
-                    ws.Name = $"{@class} sheet";
+                    ws.Name = $"DSHV {@class}";
                     // fontsize mặc định cho cả sheet
                     ws.Cells.Style.Font.Size = 11;
                     // font family mặc định cho cả sheet
@@ -755,12 +756,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     string[] arrColumnHeader = new string[] { };
                     //if (ClassID != null)
                     //{
-                        arrColumnHeader = new string[]{
-                            "STT",
+                    arrColumnHeader = new string[]{
+                        "STT",
                         "Họ tên",
+                        "Ngày sinh",
                         "Email",
-                        "Số điện thoại",
-                        "Năm sinh"
+                        "Số điện thoại"
                     };
                     //}
                     //else
@@ -780,7 +781,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     // merge các column lại từ column 1 đến số column header
                     // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
-                    ws.Cells[1, 1].Value = ClassID==null? $"Thống kê danh sách học viên cơ sở {center.Name}": $"Thống kê danh sách học viên lớp {@class}";
+                    ws.Cells[1, 1].Value = ClassID == null ? $"Thống kê danh sách học viên {center.Name}" : $"Thống kê danh sách học viên lớp {@class}";
                     ws.Cells[1, 1, 1, countColHeader].Merge = true;
                     // in đậm
                     ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
@@ -829,6 +830,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //gán giá trị cho từng cell                      
                         ws.Cells[rowIndex, colIndex++].Value = index;
                         ws.Cells[rowIndex, colIndex++].Value = item.FullName;
+
+                        // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
+                        ws.Cells[rowIndex, colIndex++].Value = (item.DateBorn > new DateTime(1900, 1, 1)) ? item.DateBorn.ToLocalTime().ToString("dd/MM/yyyy") : "";
+
                         //if (ClassID != null)
                         //{
                         //    ws.Cells[rowIndex, colIndex++].Value = _classService.CreateQuery().Find(x=>item.JoinedClasses.Contains(x.ID)).FirstOrDefault().Name;
@@ -836,8 +841,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ws.Cells[rowIndex, colIndex++].Value = item.Email;
                         ws.Cells[rowIndex, colIndex++].Value = item.Phone;
 
-                        // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
-                        ws.Cells[rowIndex, colIndex++].Value = item.DateBorn.ToShortDateString();
                         index++;
                     }
 
@@ -857,7 +860,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    workSheet.Cells.LoadFromCollection(Data4Export, true);
             //    package.Save();
             //}
-            string excelName = ClassID==null? $"Danh sách học viên cơ sở {center.Name}.xlsx": $"Danh sách học viên lớp {@class}.xlsx";
+            string excelName = ClassID == null ? $"Danh sách học viên {center.Name}.xlsx" : $"Danh sách học viên lớp {@class}.xlsx";
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
         #endregion
