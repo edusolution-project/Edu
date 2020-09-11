@@ -97,8 +97,15 @@ namespace BaseCustomerMVC.Controllers.Student
         public JsonResult DetailProduct(string ID)
         {
             var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type == "san-pham").FirstOrDefault();
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            var dataResponse = _mapping.AutoOrtherType(detail_product, new NewsViewModel
+            {
+                SttPayment = _transactionService.CreateQuery().Find(x => x.StudentID == student.ID && x.NewsID == ID).FirstOrDefault() == null ? false : true
+            });
             ViewBag.Title = detail_product?.Title;
-            return Json(detail_product);
+            //return Json(detail_product);
+            return Json(dataResponse);
         }
 
         public IActionResult Profile(string basis)
@@ -304,6 +311,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             //var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter));
             var data = _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter));
+
             Dictionary<string, object> response = new Dictionary<string, object>()
             {
                 {"Data",data.ToList() },
@@ -312,44 +320,66 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-        public IActionResult Payment(string ID)
+        public IActionResult Payment(string ID, Boolean check = false)
         {
-            string _studentid = User.Claims.GetClaimByType("UserID").Value;
-            var student = _studentService.GetItemByID(_studentid);
+            if (check == false)
+            {
+                string _studentid = User.Claims.GetClaimByType("UserID").Value;
+                var student = _studentService.GetItemByID(_studentid);
 
-            var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
+                var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
 
-            if (inforProduct == null) return Redirect("/");
-            NewsViewModel DataResponse =
-               _mapping.AutoOrtherType(inforProduct, new NewsViewModel()
-               {
-                   //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
-                   ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
-                   CenterName = inforProduct.CenterID == null || inforProduct.CenterID == "0" || inforProduct.CenterID == "" ? null : _centerService.GetItemByID(inforProduct.CenterID).Name
-               });
+                if (inforProduct == null) return Redirect("/");
+                NewsViewModel DataResponse =
+                   _mapping.AutoOrtherType(inforProduct, new NewsViewModel()
+                   {
+                       //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
+                       ClassName = inforProduct.ClassID == null || inforProduct.ClassID == "0" || inforProduct.ClassID == "" ? null : _classService.GetItemByID(inforProduct.ClassID).Name,
+                       CenterName = inforProduct.CenterID == null || inforProduct.CenterID == "0" || inforProduct.CenterID == "" ? null : _centerService.GetItemByID(inforProduct.CenterID).Name
+                   });
 
-            ViewBag.Product = DataResponse;
-            ViewBag.Student = student;
-            return View();
+                ViewBag.Product = DataResponse;
+                ViewBag.Student = student;
+                return View();
+            }
+            else
+            {
+                string _studentid = User.Claims.GetClaimByType("UserID").Value;
+                var student = _studentService.GetItemByID(_studentid);
+                var transaction = _transactionService.CreateQuery().Find(x => x.StudentID == student.ID && x.NewsID == ID).FirstOrDefault();
+                if (transaction != null && transaction.StatusPayment)
+                {
+                    var dataResponse = new Dictionary<string, object>()
+                    {
+                        {"msg","Gói học đã thanh toán thành công!" },
+                        {"stt",true }
+                    };
+                    return Json(dataResponse);
+                }
+                else if (transaction != null && !transaction.StatusPayment)
+                {
+                    var dataResponse = new Dictionary<string, object>()
+                    {
+                        {"msg",$"Gói học thanh toán không thành công! </br> {transaction.MsgPayment}" },
+                        {"stt",false }
+                    };
+                    return Json(dataResponse);
+                }
+                //else if (transaction != null)
+                //{
+                //    var dataResponse = new Dictionary<string, object>()
+                //    {
+                //        {"msg","Bạn đã mua khoá học này rồi!" },
+                //        {"stt",false }
+                //    };
+                //    return Json(dataResponse);
+                //}
+                else
+                {
+                    return null;
+                }
+            }
         }
-
-        //[HttpPost]
-        //public async Task<JsonResult> Payment(string ID)
-        //{
-        //    string _studentid = User.Claims.GetClaimByType("UserID").Value;
-        //    var student = _studentService.GetItemByID(_studentid);
-
-        //    var inforProduct = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type.Equals("san-pham")).FirstOrDefault();
-
-        //    var DataResponse = new Dictionary<string, object>()
-        //    {
-        //        {"Product",inforProduct },
-        //        {"Student",student},
-        //        {"Success","OK" }
-        //    };
-        //    return Json(DataResponse);
-        //}
-
 
         //get ip client
         public string GetIPAddress()
@@ -427,14 +457,15 @@ namespace BaseCustomerMVC.Controllers.Student
                     conn.AddDigitalOrderField("vpc_Version", "2");
                     conn.AddDigitalOrderField("vpc_Command", "pay");
                     conn.AddDigitalOrderField("vpc_Merchant", "OP_EDUSO");
+                    //conn.AddDigitalOrderField("vpc_Merchant", "TESTONEPAY");
                     //conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                     conn.AddDigitalOrderField("vpc_AccessCode", "66VKMV0J");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
-                    conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
+                    conn.AddDigitalOrderField("vpc_OrderInfo",historyTransaction.ID); //THong tin don hang
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
-                    //conn.AddDigitalOrderField("vpc_ReturnURL", HttpContext.Request.Host+ "/eduso/student/Home/Transaction?ID="+ID+"&center="+basis);
-                    conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
+                    //conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
+                    conn.AddDigitalOrderField("vpc_ReturnURL", "http://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
                     // Thong tin them ve khach hang. De trong neu khong co thong tin
                     conn.AddDigitalOrderField("vpc_Customer_Phone", Phone);
                     conn.AddDigitalOrderField("vpc_Customer_Id", student.ID);
@@ -456,7 +487,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 else //price = 0 => auto complete
                 {
                     //TODO: Check here
-                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID });
+                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID , center = basis });
                     var dataresponse = new Dictionary<string, object>()
                     {
                         {"Url", url },
@@ -517,11 +548,12 @@ namespace BaseCustomerMVC.Controllers.Student
             return "Có lỗi, vui lòng thực hiện lại";
         }
 
+        [HttpGet]
         public IActionResult Transaction()
         {
             var vpc_TxnResponseCode = Request.Query["vpc_TxnResponseCode"].ToString();
             var idproduct = Request.Query["ID"].ToString();
-            var basis = Request.Query["basis"].ToString();
+            var basis = Request.Query["center"].ToString();
             var center = _centerService.GetItemByID(_newsService.GetItemByID(idproduct).CenterID)?.Code;
             var transactionID = Request.Query["vpc_MerchTxnRef"].ToString();
             if (vpc_TxnResponseCode.Equals("0"))
@@ -533,23 +565,31 @@ namespace BaseCustomerMVC.Controllers.Student
                     historyTransaction.StatusPayment = true;
                     historyTransaction.DayPayment = DateTime.UtcNow;
                     historyTransaction.TradingID = vpc_TransactionNo;
+                    historyTransaction.MsgPayment = ResponseCode(vpc_TransactionNo);
                     _transactionService.Save(historyTransaction);
                     JoinClass(idproduct, center);
                     //ViewBag.message = "Thanh toán thành công!";
-                    var redirec = $"/{center}/student/Course";
+                    //var redirec = $"/{center}/student/Course";
+                    var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                     return Redirect(redirec);
                 }
                 else
                 {
-                    ViewBag.message = "Giao dịch không thành công!";
-                    var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                    historyTransaction.StatusPayment = false;
+                    historyTransaction.DayPayment = DateTime.UtcNow;
+                    historyTransaction.TradingID = vpc_TransactionNo;
+                    historyTransaction.MsgPayment = ResponseCode(vpc_TransactionNo);
+                    _transactionService.Save(historyTransaction);
+                    //var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                    var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                     return Redirect(redirec);
                 }
             }
             else
             {
                 //ViewBag.message = "Thanh toán không thành công!";
-                var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                //var redirec = "https://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
+                var redirec = "http://" + host + processUrl(basis, "Payment", "Home") + $"/{idproduct}";
                 return Redirect(redirec);
             }
             //return View();
@@ -561,6 +601,161 @@ namespace BaseCustomerMVC.Controllers.Student
             string url = Url.Action(act, ctrl, param);
 
             return $"/{center}{url}";
+        }
+
+        private string ResponseCode(string code)
+        {
+            var msg = "";
+            switch (code)
+            {
+                case "0":
+                    msg = "Giao dịch thành công";
+                    break;
+                case "1":
+                    msg = "Giao dịch không thành công, " +
+                        "Ngân hàng phát hành thẻ không cấp phép cho " +
+                        "giao dịch hoặc thẻ chưa được kích hoạt dịch vụ " +
+                        "thanh toán trên Internet.Vui lòng liên hệ ngân " +
+                        "hàng theo số điện thoại sau mặt thẻ được hỗ " +
+                        "trợ chi tiết.";
+                    break;
+                case "2":
+                    msg = "Giao dịch không thành công, " +
+                    "Ngân hàng phát hành thẻ từ chối cấp phép cho " +
+                    "giao dịch. Vui lòng liên hệ ngân hàng theo số " +
+                    "điện thoại sau mặt thẻ để biết chính xác nguyên " +
+                    "nhân Ngân hàng từ chối.";
+                    break;
+                case "3":
+                    msg = "Giao dịch không thành công, " +
+                    "Cổng thanh toán không nhận được kết quả trả " +
+                    "về từ ngân hàng phát hành thẻ. Vui lòng liên hệ " +
+                    "với ngân hàng theo số điện thoại sau mặt thẻ " +
+                    "để biết chính xác trạng thái giao dịch và thực " +
+                    "hiện thanh toán lại";
+                    break;
+                case "4":
+                    msg = "Giao dịch không thành công do thẻ hết hạn sử " +
+                    "dụng hoặc nhập sai thông tin tháng / năm hết " +
+                    "hạn của thẻ. Vui lòng kiểm tra lại thông tin và " +
+                    "thanh toán lại";
+                    break;
+                case "5":
+                    msg = "Giao dịch không thành công, " +
+                    "Thẻ không đủ hạn mức hoặc tài khoản không " +
+                    "đủ số dư để thanh toán.Vui lòng kiểm tra lại " +
+                    "thông tin và thanh toán lạ";
+                    break;
+                case "6":
+                    msg = "Giao dịch không thành công, " +
+                    "Quá trình xử lý giao dịch phát sinh lỗi từ ngân " +
+                    "hàng phát hành thẻ. Vui lòng liên hệ ngân hàng " +
+                    "theo số điện thoại sau mặt thẻ được hỗ trợ chi " +
+                    "tiết.";
+                    break;
+                case "7":
+                    msg = "Giao dịch không thành công, " +
+                    "Đã có lỗi phát sinh trong quá trình xử lý giao " +
+                    "dịch.Vui lòng thực hiện thanh toán lại.";
+                    break;
+                case "8":
+                    msg = "Giao dịch không thành công. Số thẻ không " +
+                    "đúng.Vui lòng kiểm tra và thực hiện thanh toán " +
+                    "lại";
+                    break;
+                case "9":
+                    msg = "Giao dịch không thành công. Tên chủ thẻ " +
+                    "không đúng. Vui lòng kiểm tra và thực hiện " +
+                    "thanh toán lại";
+                    break;
+                case "10":
+                    msg = "Giao dịch không thành công. Thẻ hết hạn/Thẻ " +
+                    "bị khóa. Vui lòng kiểm tra và thực hiện thanh " +
+                    "toán lại";
+                    break;
+                case "11":
+                    msg = "Giao dịch không thành công. Thẻ chưa đăng ký " +
+                    "sử dụng dịch vụ thanh toán trên Internet. Vui " +
+                    "lòng liên hê ngân hàng theo số điện thoại sau " +
+                    "mặt thẻ để được hỗ trợ.";
+                    break;
+                case "12":
+                    msg = "Giao dịch không thành công. Ngày phát " +
+                    "hành / Hết hạn không đúng.Vui lòng kiểm tra và " +
+                    "thực hiện thanh toán lại";
+                    break;
+                case "13":
+                    msg = "Giao dịch không thành công. thẻ/ tài khoản đã " +
+                    "vượt quá hạn mức thanh toán. Vui lòng kiểm " +
+                    "tra và thực hiện thanh toán lạ";
+                    break;
+                case "21":
+                    msg = "Giao dịch không thành công. Số tiền không đủ " +
+                    "để thanh toán.Vui lòng kiểm tra và thực hiện " +
+                    "thanh toán lại";
+                    break;
+                case "22":
+                    msg = "Giao dịch không thành công. Thông tin tài " +
+                    "khoản không đúng.Vui lòng kiểm tra và thực " +
+                    "hiện thanh toán lại ";
+                    break;
+                case "23":
+                    msg = "Giao dịch không thành công. Tài khoản bị khóa. " +
+                    "Vui lòng liên hê ngân hàng theo số điện thoại " +
+                    "sau mặt thẻ để được hỗ trợ";
+                    break;
+                case "24":
+                    msg = "Giao dịch không thành công. Thông tin thẻ " +
+                    "không đúng. Vui lòng kiểm tra và thực hiện " +
+                    "thanh toán lại";
+                    break;
+                case "25":
+                    msg = "Giao dịch không thành công. OTP không đúng. " +
+                    "Vui lòng kiểm tra và thực hiện thanh toán lại ";
+                    break;
+                case "253":
+                    msg = "Giao dịch không thành công. Quá thời gian " +
+                    "thanh toán. Vui lòng thực hiện thanh toán lại";
+                    break;
+                case "99":
+                    msg = "Giao dịch không thành công. Người sử dụng " +
+                    "hủy giao dịch";
+                    break;
+                case "B":
+                case "b":
+                    msg = "Giao dịch không thành công do không xác thực " +
+                    "được 3D - Secure.Vui lòng liên hệ ngân hàng " +
+                    "theo số điện thoại sau mặt thẻ được hỗ trợ chi " +
+                    "tiết.";
+                    break;
+                case "E":
+                case "e":
+                    msg = "Giao dịch không thành công do nhập sai CSC " +
+                    "(Card Security Card) hoặc ngân hàng từ chối " +
+                    "cấp phép cho giao dịch. Vui lòng liên hệ ngân " +
+                    "hàng theo số điện thoại sau mặt thẻ được hỗ " +
+                    "trợ chi tiết.";
+                    break;
+                case "F":
+                case "f":
+                    msg = "Giao dịch không thành công do không xác thực " +
+                    "được 3D - Secure.Vui lòng liên hệ ngân hàng " +
+                    "theo số điện thoại sau mặt thẻ được hỗ trợ chi " +
+                    "tiết.";
+                    break;
+                case "Z":
+                case "z":
+                    msg = "Giao dịch không thành công do vi phạm quy " +
+                    "định của hệ thống. Vui lòng liên hệ với OnePAY " +
+                    "để được hỗ trợ(Hotline: 1900 633 927)";
+                    break;
+                default:
+                    msg = "Giao dịch không thành công. Vui lòng liên hệ " +
+                        "với OnePAY để được hỗ trợ(Hotline: 1900 633 " +
+                        "927).";
+                    break;
+            }
+            return msg;
         }
     }
 }

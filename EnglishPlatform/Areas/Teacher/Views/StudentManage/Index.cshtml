@@ -30,7 +30,11 @@
         <div class="flex flex-row border-b flex-wrap align-items-center">
             @*<div class="flex flex-grow-1 mb-2">*@
             <div class="box filter-box w-152 m-1">
-                <autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />
+                @*<autocomplete v-on:chooseitem="chooseClass" :items="list_ac_class" v-on:input="autocompleteClass" :plhd="'Nhập để tìm lớp'" />*@
+                <select name="" v-model="search_class_id">
+                    <option value="">Lớp</option>
+                    <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
+                </select>
             </div>
             <div class="box filter-box w-152 m-1 ">
                 <select name="" v-model="search_subject_id">
@@ -57,8 +61,9 @@
             @*</div>
                 <div class="flex mb-2">*@
 
-            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" v-on:click="showStudentModal()"><i class="ti-plus" title="Thêm học viên"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-import" title="Thêm file"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="exportExcel($event.target.value)"><i class="ti-export" title="Xuất file"></i></b-button>
             @*</div>*@
         </div>
     </div>
@@ -362,7 +367,7 @@
                     listNameClass: '',
                     passStudent: '',
                 },
-                isHeadTeacher:@Html.Raw(Json.Serialize(IsHeadTeacher)),
+                isHeadTeacher:@Html.Raw(Json.Serialize(IsHeadTeacher))
             },
             watch: {
                 search_subject_id: function () {
@@ -415,6 +420,7 @@
                         .then(response => {
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
+                            //debugger
                             this.totalRec = response.data.Model.totalRecord
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
@@ -668,7 +674,7 @@
                     _form.append('FullName', _that.createStudent.nameStudent)
                     _form.append('Email', _that.createStudent.emailStudent)
                     _form.append('Phone', _that.createStudent.phoneStudent)
-                    _form.append('DateBorn', _that.createStudent.birthdayStudent)
+                    _form.append('DateBorn', this.formatDate(_that.createStudent.birthdayStudent))
                     _form.append('JoinedClasses', _that.createStudent.listClass)
                         //debugger
                         _that.isLoading = true
@@ -680,7 +686,10 @@
                                     alert(response.data.Msg)
                                     this.getData()
                                 }
-                                else alert(response.data.Msg)
+                                else {
+                                    alert(response.data.Msg)
+                                    _that.isLoading = false
+                                }
                             }).catch(e => {
 
                             })
@@ -723,6 +732,7 @@
                     _form.append('Password', _that.createStudent.passStudent)
                     _that.isLoading = true
                     let _url = '@processUrl("ChangePass", "StudentManage")'
+                    //debugger
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false
@@ -740,6 +750,11 @@
                             console.log(e)
                         })
                 },
+                exportExcel() {
+                    var classID = this.search_class_id;
+                    var url = '@processUrl("ExportStudent", "StudentManage")/?ClassID=' + classID +'&&basic=@center';
+                    window.open(url);
+                }
             }
         });
 
@@ -810,7 +825,7 @@
             <div class="form-group row">
                 <label for="Birthday" class="col-sm-2 col-form-label">Ngày sinh</label>
                 <div class="col-sm-10">
-                    <input type="date" class="form-control" id="Birthday" name="Birthday" placeholder="Ngày sinh" v-model="createStudent.birthdayStudent">
+                    <input type="date" class="form-control" id="Birthday" name="Birthday" data-date-format="MM-DD-YYYY" placeholder="Ngày sinh" v-model="createStudent.birthdayStudent">
                 </div>
             </div>
 

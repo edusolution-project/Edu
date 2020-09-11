@@ -74,10 +74,10 @@
                     </thead>
                     <tbody>
                         <tr v-if="progressData == null || progressData.length <= 0">
-                            <td colspan="4">Chưa có lịch sử học tập</a></td>
+                            <td colspan="4">Chưa có lịch sử học tập</td>
                         </tr>
                         <tr v-for="(item,k) in progressData" v-else>
-                            <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
+                            <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                             <td>{{formatFullDate(item.LearnLast)}}</td>
                             <td>{{item.LearnCount}}</td>
