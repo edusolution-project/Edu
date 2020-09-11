@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Microsoft.AspNetCore.Razor.Language;
 using OfficeOpenXml.ConditionalFormatting;
+using OfficeOpenXml.Style;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -453,7 +454,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var response = new Dictionary<string, object>
             {
                 { "Data", retStudents },
-                { "Model", model }
+                { "Model", model },
             };
             return new JsonResult(response);
         }
@@ -697,6 +698,149 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
         }
+
+        public IActionResult ExportStudent(string basic, string ClassID)
+        {
+            var center = _centerService.GetItemByCode(basic);
+            var Data4Export = ClassID==null? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)) : _studentService.CreateQuery().Find(x=>x.Centers.Contains(center.ID)&&x.JoinedClasses.Contains(ClassID));
+            var @class = ClassID==null?"": _classService.GetItemByID(ClassID).Name;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            var stream = new MemoryStream();
+
+            //xuat file excel
+            try {
+            
+                using (ExcelPackage p = new ExcelPackage(stream))
+                {
+                    // đặt tên người tạo file
+                    p.Workbook.Properties.Author = teacher.FullName;
+
+                    // đặt tiêu đề cho file
+                    p.Workbook.Properties.Title = "Danh sách học viên";
+
+                    //Tạo một sheet để làm việc trên đó
+                    p.Workbook.Worksheets.Add($"Lớp {@class}");
+
+                    // lấy sheet vừa add ra để thao tác
+                    ExcelWorksheet ws = p.Workbook.Worksheets[1];
+
+                    // đặt tên cho sheet
+                    ws.Name = $"{@class} sheet";
+                    // fontsize mặc định cho cả sheet
+                    ws.Cells.Style.Font.Size = 11;
+                    // font family mặc định cho cả sheet
+                    ws.Cells.Style.Font.Name = "Calibri";
+
+                    // Tạo danh sách các column header
+                    string[] arrColumnHeader = new string[] { };
+                    //if (ClassID != null)
+                    //{
+                        arrColumnHeader = new string[]{
+                            "STT",
+                        "Họ tên",
+                        "Email",
+                        "Số điện thoại",
+                        "Năm sinh"
+                    };
+                    //}
+                    //else
+                    //{
+                    //    arrColumnHeader = new string[]{
+                    //        "STT",
+                    //    "Họ tên",
+                    //    "Lớp",
+                    //    "Email",
+                    //    "Số điện thoại",
+                    //    "Năm sinh"
+                    //};
+                    //}
+
+                    // lấy ra số lượng cột cần dùng dựa vào số lượng header
+                    var countColHeader = arrColumnHeader.Count();
+
+                    // merge các column lại từ column 1 đến số column header
+                    // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
+                    ws.Cells[1, 1].Value = ClassID==null? $"Thống kê danh sách học viên cơ sở {center.Name}": $"Thống kê danh sách học viên lớp {@class}";
+                    ws.Cells[1, 1, 1, countColHeader].Merge = true;
+                    // in đậm
+                    ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
+                    // căn giữa
+                    ws.Cells[1, 1, 1, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                    int colIndex = 1;
+                    int rowIndex = 2;
+
+                    //tạo các header từ column header đã tạo từ bên trên
+                    foreach (var item in arrColumnHeader)
+                    {
+                        var cell = ws.Cells[rowIndex, colIndex];
+
+                        //set màu thành gray
+                        var fill = cell.Style.Fill;
+                        fill.PatternType = ExcelFillStyle.Solid;
+                        fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+
+                        //căn chỉnh các border
+                        var border = cell.Style.Border;
+                        border.Bottom.Style =
+                            border.Top.Style =
+                            border.Left.Style =
+                            border.Right.Style = ExcelBorderStyle.Thin;
+
+                        //gán giá trị
+                        cell.Value = item;
+
+                        colIndex++;
+                    }
+
+                    // lấy ra danh sách UserInfo từ ItemSource của DataGrid
+                    //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
+
+                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
+                    int index = 1;
+                    foreach (var item in Data4Export.ToList())
+                    {
+                        // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
+                        colIndex = 1;
+
+                        // rowIndex tương ứng từng dòng dữ liệu
+                        rowIndex++;
+
+                        //gán giá trị cho từng cell                      
+                        ws.Cells[rowIndex, colIndex++].Value = index;
+                        ws.Cells[rowIndex, colIndex++].Value = item.FullName;
+                        //if (ClassID != null)
+                        //{
+                        //    ws.Cells[rowIndex, colIndex++].Value = _classService.CreateQuery().Find(x=>item.JoinedClasses.Contains(x.ID)).FirstOrDefault().Name;
+                        //}
+                        ws.Cells[rowIndex, colIndex++].Value = item.Email;
+                        ws.Cells[rowIndex, colIndex++].Value = item.Phone;
+
+                        // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
+                        ws.Cells[rowIndex, colIndex++].Value = item.DateBorn.ToShortDateString();
+                        index++;
+                    }
+
+                    //Lưu file lại
+                    //Byte[] bin = p.GetAsByteArray();
+                    p.Save();
+                }
+                stream.Position = 0;
+            }
+            catch (Exception EE)
+            {
+            }
+
+            //using (var package = new ExcelPackage(stream))
+            //{
+            //    var workSheet = package.Workbook.Worksheets.Add("DS_HV");
+            //    workSheet.Cells.LoadFromCollection(Data4Export, true);
+            //    package.Save();
+            //}
+            string excelName = ClassID==null? $"Danh sách học viên cơ sở {center.Name}.xlsx": $"Danh sách học viên lớp {@class}.xlsx";
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+        }
         #endregion
 
         private bool HasRole(string userid, string center, string role)
@@ -734,6 +878,5 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    }
         //    return new JsonResult("OK " + str);
         //}
-
     }
 }

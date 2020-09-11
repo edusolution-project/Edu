@@ -699,12 +699,13 @@
                     _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.isLoading = false;
                             console.log(response.data);
                             if (response.data.Error != null)
+                            {
                                 alert(response.data.Error)
+                                _that.isLoading = false;
+                            }
                             else {
-
                                 this.getData();
                                 _that.$bvModal.hide('CloneModal');
                                 console.log(_that.class_info.ID);
