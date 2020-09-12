@@ -1,0 +1,445 @@
+.small-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+/* Track */
+.small-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Handle */
+.small-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+/* Handle on hover */
+.small-scroll::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+.easy-chat__content {
+    position: fixed;
+    bottom: 15px;
+    left: 65px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #cccc;
+    /* box-shadow: 0 0 10px #ccc; */
+    width: 350px;
+    height: 500px;
+    max-width: 100%;
+    max-height: 90vh;
+    display: none;
+}
+.easy-chat__content.open{
+    display: block;
+}
+.easy-chat__content textarea {
+    resize: none;
+}
+.content--left__header .box-text {
+    width: 100%;
+    height: 40px;
+    position: relative;
+    background: oldlace;
+}
+.content--left__header .box-text:focus{
+    outline: none;
+}
+
+.content--left__header .box-text>.icon-search {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: url(../Icon/Outline/search.svg) no-repeat center center;
+    cursor: pointer;
+}
+
+.box-text .input-text-search {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 10px;
+    padding-left: 40px;
+}
+
+.item-contact {
+    position: relative;
+    margin: 10px 0;
+    box-shadow: 0px 8px 10px #cccc;
+    width: 100%;
+    padding: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+.item-contact.active {
+    background: #f1e2a7;
+}
+
+.contact-info {
+    width: 100%;
+}
+
+.contact-info .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    display: inline-block;
+    box-shadow: 0 0 10px #ccc;
+    position: relative;
+    background-color: #cccc;
+}
+
+.contact-info .avatar>img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.contact-info .user-info {
+    width: 50%;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+}
+.contact-info .user-info {
+    width: 50%;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+.contact-info .user-info .name {
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.contact-info .user-info .status-text {
+    color: #33aaff;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+.item-contact .time-online {
+    font-size: 0.65em;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #3a0808;
+}
+div[data-status="online"],div[data-status="offline"]{
+    position: relative;
+}
+div[data-status="online"]::before,div[data-status="offline"]::before{
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    top: 0;
+    left: 0;
+    border:1px solid #cccc;
+}
+div[data-status="online"]::before{
+    background-color: greenyellow;
+}
+div[data-status="offline"]::before{
+    background-color: red;
+}
+.content--left__body {
+    height: 470px;
+    overflow: hidden;
+}
+.content--left__body .list-contact {
+    height: 90%;
+    overflow: auto;
+    padding-bottom: 100px;
+    padding-right: 2px;
+}
+.item-contact .noti {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: #fff;
+    background: #ce0d0d;
+    border-radius: 50%;
+    padding: 0 5px;
+    font-size: 0.65em;
+    font-weight: bold;
+}
+.easy-chat__ball {
+    position: fixed;
+    bottom: 20px;
+    left: 66px;
+    z-index: 99999999;
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.easy-chat__ball .icon-ball {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.easy-chat__ball img{
+    width: 100%;
+    height: 100%;
+}
+.easy-chat__ball .box-noti{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: none;
+    box-shadow: 0 0 10px #ccc;
+    border-radius: 50%;
+}
+.easy-chat__ball .box-noti.open{
+    display: block;
+}
+.easy-chat__ball .box-noti .noti {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #fff;
+    font-size: 0.75em;
+    background: #ce0d0d;
+    border-radius: 50%;
+    font-weight: 600;
+    width: 20px;
+    text-align: center;
+    height: 20px;
+}
+.easy-chat__content--right {
+    background: #fff;
+    position: fixed;
+    left: 420px;
+    bottom: 15px;
+    height: 500px;
+    width: 450px;
+    border: 1px solid #ccc;
+    display: none;
+}
+.easy-chat__content--right.open{
+    display: block;
+}
+.content--right__body {
+    width: 100%;
+    height: 350px;
+    overflow: hidden;
+    background: aliceblue;
+}
+
+.content--right__header {
+    position: relative;
+    border-bottom: 1px solid #ccc;
+}
+
+.content--right__header .extends {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+    text-align: center;
+}
+
+.content--right__header .contact-info {
+    padding: 5px;
+}
+
+.content--right__header .contact-info .user-info {
+    padding-bottom: 0;
+}
+
+.content--right__header .contact-info .user-info .time-online {
+    font-size: 0.75em;
+    color: #ccc;
+}
+.list-messages {
+    height: 100%;
+    overflow: auto;
+    width: 100%;
+    padding: 10px;
+    padding-bottom: 100px;
+}
+.list-messages img{
+    max-width: 100%;
+}
+
+.message .user-info {
+    white-space: nowrap;
+}
+
+.message .user-info .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ccc;
+    text-align: center;
+    display: inline-block;
+}
+
+.message .user-info .avatar img {
+    width: 100%;
+}
+
+.message .user-info .name {
+    display: inline;
+    padding-left: 10px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.group-message .data {
+    padding: 10px;
+    font-size: 13px;
+    position: relative;
+}
+
+.group-message .data .content {
+    background: #fff;
+    border: 1px solid #cccc;
+    padding: 10px;
+    border-radius: 0 30px 0 30px;
+    text-align: justify;
+    width: 90%;
+}
+.group-message .data .button-extends {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    bottom: 0;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    margin: auto;
+    
+    
+}
+.group-message .data .button-extends .btn-extends,
+.group-message .data .button-extends .btn-edit,
+.group-message .data .button-extends .btn-delete{
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+}
+.group-message .data .button-extends .item-extends{
+    display: none;
+}
+.group-message .data .button-extends .btn-edit:hover,
+.group-message .data .button-extends .btn-delete:hover{
+    border: 1px solid #ccc;
+}
+.group-message .data .button-extends  .dropdown-list{
+    position: relative;
+}
+.group-message .data .button-extends .btn-extends:focus{
+    border:none;
+    outline: none;
+}
+.group-message .data .button-extends .btn-extends:hover{
+    color:#f1e2a7;
+}
+.message {
+    margin-top: 30px;
+}
+
+.message-receiver .user-info {text-align: right;width: 100%;}
+
+.message.message-receiver .user-info .avatar {
+    float: right;
+}
+
+.message.message-receiver .user-info .name {
+    padding-right: 10px;
+}
+
+.message-receiver .group-message .data .content {
+    margin-left: auto;
+    border-radius: 30px 0 30px 0;
+    background: #33aaff;
+    color: #fff;
+}
+.message .time-send {
+    color: #ccc;
+    font-size: 12px;
+    text-align: center;
+}
+
+.content--right__header .extends .btn-close {
+    font-size: 10px;
+    background: no-repeat;
+}
+.content--right__footer {
+    height: 80px;
+    box-shadow: 0 0 10px #ccc;
+}
+
+.form-chat {
+    display: flex;
+}
+
+.form-chat .extends {
+    position: relative;
+    top: -28px;
+    left: 3px;
+    width: 35px;
+}
+.form-chat .extends .btn {
+    margin: 2px;
+    background: #3af;
+    padding: 2px;
+}
+
+.form-chat .box-text {
+    width: 350px;
+    margin-left: 5px;
+    background: #ffff;
+    height: 75px;
+    padding: 10px;
+    font-size: 13px;
+    border: none;
+    border-bottom:1px solid #ccc;
+}
+.form-chat .box-text:focus{
+    outline: none;
+}
+.form-chat .send .btn-send {
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: #33aaff;
+    padding:0;
+    margin:auto;
+    margin-left: 10px;
+}
+
+.form-chat .send {
+    height: 80px;
+    line-height: 70px;
+}
+.item-contact:hover {
+    box-shadow: 0px 8px 10px #33aaff6e;
+}
+.content--left__header .form-search {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #cccc;
+}
