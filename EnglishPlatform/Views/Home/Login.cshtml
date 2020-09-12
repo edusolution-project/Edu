@@ -184,13 +184,15 @@
                 _that.disable = true
                 let _form = new FormData()
                 _form.append('UserName', _that.email)
-
                 axios.post(_that.action, _form)
                     .then(response => {
-                        if(response.data.StatusCode){
-                            window.location.href= response.data.Location
-                        }else{
-                            alert(response.data.StatusDesc)
+                        debugger
+                        if (response.data.Status) {
+                            alert("Vui lòng kiểm tra email để xác nhận thay đổi mật khẩu!")
+                            window.location.href= response.data.Url
+                        }
+                        else {
+                            alert(response.data.Error)
                             _that.disable = false
                         }
                      }).catch(e=>{

@@ -105,11 +105,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var subject = new List<SubjectEntity>();
             var grade = new List<GradeEntity>();
-            //if (teacher != null && teacher.Subjects != null)
-            //{
-            //    subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
-            //    grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
-            //}
+            if (teacher != null && teacher.Subjects != null)
+            {
+                subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                //grade = _gradeservice.createquery().find(t => teacher.subjects.contains(t.subjectid)).tolist();
+            }
 
             ViewBag.Roles = _roleService.CreateQuery().Find(r => r.Type == "teacher").ToList();
             //ViewBag.Grade = grade;
@@ -172,7 +172,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     SubjectList = t.Subjects == null ? null : _subjectService.CreateQuery().Find(o => t.Subjects.Contains(o.ID)).ToList(),
                     RoleID = role.ID,
-                    RoleName = role.Name,
+                    RoleName = role.Name
                     //AccountID = account.ID
                 });
 
@@ -277,21 +277,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     UserCreate = currentUser
                 };
                 _teacherService.CreateQuery().InsertOne(teacher);
-                var account = new AccountEntity()
+                var acc = _accountService.GetAccountByEmail(teacher.Email);
                 {
-                    CreateDate = DateTime.Now,
-                    IsActive = true,
-                    PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                    PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                    UserCreate = teacher.UserCreate,
-                    Type = ACCOUNT_TYPE.TEACHER,
-                    UserID = teacher.ID,
-                    UserName = teacher.Email,
-                    Name = teacher.FullName,
-                    RoleID = teacher.ID
-                };
-                _accountService.CreateQuery().InsertOne(account);
-                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                    if (acc == null)
+                    {
+                        var account = new AccountEntity()
+                        {
+                            CreateDate = DateTime.Now,
+                            IsActive = true,
+                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                            UserCreate = teacher.UserCreate,
+                            Type = ACCOUNT_TYPE.TEACHER,
+                            UserID = teacher.ID,
+                            UserName = teacher.Email,
+                            Name = teacher.FullName,
+                            RoleID = teacher.ID
+                        };
+                        _accountService.CreateQuery().InsertOne(account);
+                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                    }
+                }
             }
             return Json(new { msg = "Giáo viên đã được cập nhật" });
         }
@@ -366,6 +372,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new { error = "Thông tin không chính xác" });
             acc.PassWord = Core_v2.Globals.Security.Encrypt(Password);
             _accountService.Save(acc);
+            _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
             return Json(new { msg = "Đã đổi mật khẩu" });
         }
 

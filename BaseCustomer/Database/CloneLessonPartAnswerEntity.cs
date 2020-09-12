@@ -46,5 +46,10 @@ namespace BaseCustomerEntity.Database
         {
             await Collection.DeleteManyAsync(t => IDs.Contains(t.ID));
         }
+
+        public IEnumerable<CloneLessonPartAnswerEntity> GetByQuestionID(string ID)
+        {
+            return CreateQuery().Find(o => o.ParentID == ID).ToEnumerable();
+        }
     }
 }

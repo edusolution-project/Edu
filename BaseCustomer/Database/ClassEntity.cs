@@ -63,6 +63,8 @@ namespace BaseCustomerEntity.Database
         public long TotalLessons { get; set; }
         [JsonProperty("TotalExams")]
         public long TotalExams { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
         [JsonProperty("OriginID")]
@@ -119,9 +121,11 @@ namespace BaseCustomerEntity.Database
                 Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
         }
 
-        public IEnumerable<string> GetMultipleClassName(List<string> IDs)
+        public IEnumerable<string> GetMultipleClassName(List<string> IDs, string CenterID = "")
         {
-            return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
+            if (string.IsNullOrEmpty(CenterID))
+                return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
+            return Collection.Find(t => IDs.Contains(t.ID) && t.Center == CenterID).Project(t => t.Name).ToEnumerable();
         }
 
         public IEnumerable<ClassEntity> GetItemsByIDs(List<string> ClassIDs)

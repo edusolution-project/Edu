@@ -25,8 +25,6 @@ namespace BaseCustomerEntity.Database
         public string ParentID { get; set; }
         [JsonProperty("Completed")]
         public int Completed { get; set; }
-        [JsonProperty("TotalLessons")]
-        public long TotalLessons { get; set; }
         [JsonProperty("LastLessonID")]
         public string LastLessonID { get; set; }
         [JsonProperty("LastDate")]
@@ -51,7 +49,6 @@ namespace BaseCustomerEntity.Database
     {
         private ChapterService _chapterService;
         private LessonService _lessonService;
-        private CloneLessonPartService _lessonPartService;
 
         public ChapterProgressService(IConfiguration config
             //, ChapterService chapterService, LessonService lessonService
@@ -61,7 +58,6 @@ namespace BaseCustomerEntity.Database
             //_lessonService = lessonService;
             _chapterService = new ChapterService(config);
             _lessonService = new LessonService(config);
-            _lessonPartService = new CloneLessonPartService(config);
 
             var indexs = new List<CreateIndexModel<ChapterProgressEntity>>
             {
@@ -185,7 +181,6 @@ namespace BaseCustomerEntity.Database
             {
                 StudentID = StudentID,
                 Completed = 1,
-                TotalLessons = _lessonService.CountChapterLesson(chapter.ID),
                 PracticeCount = chapter.PracticeCount,
                 ClassID = chapter.ClassID,
                 ClassSubjectID = chapter.ClassSubjectID,
@@ -235,27 +230,5 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        //private int CountChapterPractice(string chapterID, string classSubjectID)
-        //{
-        //    var result = 0;
-        //    var lessonids = _lessonService.CreateQuery().Find(t => t.TemplateType == LESSON_TEMPLATE.LECTURE && t.ChapterID == chapterID).Project(t => t.ID).ToEnumerable();
-        //    if (lessonids != null && lessonids.Count() > 0)
-        //    {
-        //        var quizList = new List<string> { "QUIZ1", "QUIZ2", "QUZI3", "ESSAY" };
-        //        foreach (var id in lessonids)
-        //        {
-        //            if (_lessonPartService.CreateQuery().Find(t => t.ParentID == id && quizList.Contains(t.Type)).CountDocuments() > 0)
-        //                result++;
-        //        }
-        //    }
-        //    var subchaps = _chapterService.GetSubChapters(classSubjectID, chapterID);
-        //    if (subchaps != null && subchaps.Count > 0)
-        //    {
-        //        foreach (var chap in subchaps)
-        //            result += CountChapterPractice(chap.ID, chap.ClassSubjectID);
-        //    }
-        //    return result;
-
-        //}
     }
 }

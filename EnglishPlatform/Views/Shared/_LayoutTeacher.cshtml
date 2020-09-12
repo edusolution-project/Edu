@@ -24,8 +24,6 @@
 
     </script>
 
-
-
     <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="~/js/custom.js"></script>
@@ -55,7 +53,7 @@
 
                 @await Html.PartialAsync("_sideBarTeacher")
 
-                <div class="right-content">
+                <div class="right-content" style="margin-left:240px">
                     @RenderBody()
                 </div>
 
@@ -77,5 +75,6 @@
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
+    
 </body>
 </html>

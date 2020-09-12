@@ -3,6 +3,7 @@ using Core_v2.Globals;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,34 +30,24 @@ namespace BaseCustomerMVC.Globals
 
 
         public CourseHelper(
-            CourseService courseService
-            //GradeService gradeservice
-            //, SubjectService subjectService
-            //, TeacherService teacherService
-            //, ClassService classService
+            CourseService courseService,
+            CourseChapterService courseChapterService,
+            CourseLessonService courseLessonService,
 
-            , ChapterService chapterService
-            , LessonService lessonService
-            , LessonHelper lessonHelper
-            , LessonScheduleService lessonScheduleService
-            , CalendarHelper calendarHelper
-            , CourseChapterService courseChapterService
-            , CourseLessonService courseLessonService
+            LessonService lessonService,
+            ChapterService chapterService,
+
+            LessonHelper lessonHelper
         )
         {
-            //_gradeService = gradeservice;
-            //_subjectService = subjectService;
-            //_teacherService = teacherService;
             _courseService = courseService;
             _courseChapterService = courseChapterService;
             _courseLessonService = courseLessonService;
-            //_classService = classService;
-            _chapterService = chapterService;
+
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
-            //_studentService = studentService;
+            _chapterService = chapterService;
+
             _lessonHelper = lessonHelper;
-            _calendarHelper = calendarHelper;
         }
 
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
@@ -79,52 +70,79 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassID = classSubject.ClassID;
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
+
                 _chapterService.Save(newchapter);
+
                 newID = newchapter.ID;
             }
 
-            var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == classSubject.CourseID && o.ChapterID == orgID).ToList();
-            if (lessons != null && lessons.Count > 0)
+            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID);
+            if (lessons != null && lessons.Count() > 0)
             {
                 foreach (var courselesson in lessons)
                 {
-                    LessonEntity lesson = _lessonMapping.AutoOrtherType(courselesson, new LessonEntity());
-                    lesson.ChapterID = newID;
-                    lesson.OriginID = courselesson.ID;
-                    lesson.ClassID = classSubject.ClassID;
-                    lesson.ClassSubjectID = classSubject.ID;
-                    lesson.ID = null;
-                    _lessonService.Save(lesson);
-
-                    var schedule = new LessonScheduleEntity
+                    await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
+                        ChapterID = newID,
+                        OriginID = courselesson.ID,
                         ClassID = classSubject.ClassID,
-                        ClassSubjectID = classSubject.ID,
-                        LessonID = lesson.ID,
-                        Type = lesson.TemplateType,
-                        IsActive = true
-                    };
-                    _lessonScheduleService.Save(schedule);
-                    _calendarHelper.ConvertCalendarFromSchedule(schedule, "");
-                    _lessonHelper.CloneLessonForClassSubject(lesson, classSubject);
+                        ClassSubjectID = classSubject.ID
+                    });
                 }
-                lessoncounter = lessons.Count;
+                lessoncounter = lessons.Count();
             }
 
-            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
-            if (subchaps.Count > 0)
+            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID).AsEnumerable();
+            if (subchaps.Count() > 0)
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
                     lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
-            if (newchapter != null)
-            {
-                newchapter.TotalLessons = lessoncounter;
-                newchapter.PracticeCount = _chapterService.CountChapterPractice(newchapter.ID, newchapter.ClassSubjectID);
-                _chapterService.Save(newchapter);
-            }
+
             return lessoncounter;
+        }
+
+        public async Task IncreaseCourseChapterCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
+        {
+            var r = await _courseChapterService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseChapterEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
+            if (r.ModifiedCount > 0)
+            {
+                if (listid == null)
+                    listid = new List<string> { ID };
+                else
+                    listid.Add(ID);
+                var current = _courseChapterService.GetItemByID(ID);
+                if (current != null)
+                {
+                    if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
+                    {
+                        if (listid.IndexOf(current.ParentID) < 0)//prevent circular
+                            _ = IncreaseCourseChapterCounter(current.ParentID, lesInc, examInc, pracInc, listid);
+                    }
+                    else
+                        _ = IncreaseCourseCounter(current.CourseID, lesInc, examInc, pracInc);
+                }
+            }
+        }
+
+        public async Task IncreaseCourseCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
+        {
+            var r = await _courseService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
+                .Inc(t => t.TotalLessons, lesInc)
+                .Inc(t => t.TotalExams, examInc)
+                .Inc(t => t.TotalPractices, pracInc));
+        }
+
+        internal async Task ChangeLessonPracticeState(CourseLessonEntity lesson)
+        {
+            if (lesson.ChapterID != "0")
+                await IncreaseCourseChapterCounter(lesson.ChapterID, 0, 0, lesson.IsPractice ? 1 : -1);
+            else
+                await IncreaseCourseCounter(lesson.CourseID, 0, 0, lesson.IsPractice ? 1 : -1);
         }
     }
 }

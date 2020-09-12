@@ -159,11 +159,6 @@ namespace BaseCustomerMVC.Controllers.Student
             if (classIds == null || classIds.Count() == 0)
                 return Json(new { Data = new List<StudentClassViewModel>() });
 
-
-
-
-
-
             //classSubject filter
             var csFilter = new List<FilterDefinition<ClassSubjectEntity>>();
             if (!string.IsNullOrEmpty(entity.GradeID))
@@ -189,12 +184,12 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Name.ToLower().Contains(model.SearchText.ToLower())));
             }
-            
+
             if (model.StartDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate >= new DateTime(model.StartDate.Year, model.StartDate.Month, model.StartDate.Day, 0, 0, 0)));
             }
-            
+
             if (model.EndDate > new DateTime(2000, 1, 1))
             {
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.StartDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
@@ -213,10 +208,10 @@ namespace BaseCustomerMVC.Controllers.Student
                  let subject = _subjectService.GetItemByID(o.SubjectID)
                  let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = progress != null && progress.TotalLessons > 0 ? progress.Completed * 100 / progress.TotalLessons : 0
+                 let complete = subject != null && o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
-                     CourseName = _courseService.GetItemByID(o.CourseID) == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
+                     CourseName = course == null ? "" : course.Name,
                      StudentNumber = o.Students.Count,
                      SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                      GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,

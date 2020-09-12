@@ -34,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
         private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
+        private readonly ProgressHelper _progressHelper;
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly ScoreStudentService _scoreStudentService;
@@ -41,11 +42,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
+        private readonly IndexService _indexService;
+
         private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
         private IConfiguration _configuration;
         private readonly string _defaultPass;
-
 
         public StudentManageController(
             AccountService accountService,
@@ -66,6 +68,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             StudentService studentService,
             CenterService centerService,
+            ProgressHelper progressHelper,
+            StudentHelper studentHelper,
+            IndexService indexService,
             MailHelper mailHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
@@ -93,8 +98,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mailHelper = mailHelper;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
-
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _indexService = indexService;
+            _studentHelper = studentHelper;
+            _progressHelper = progressHelper;
         }
 
         public IActionResult Index(DefaultModel model, string basis)
@@ -144,23 +150,187 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public async Task<JsonResult> RemoveStudent(string ClassID, string StudentID)
+        public async Task<JsonResult> CreateNewStudent(StudentEntity student, string basis)
         {
-            if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(UserID);
+            var centerID = _centerService.GetItemByCode(basis).ID;
+            var Status = false;
+
+            if (string.IsNullOrEmpty(student.ID) || student.ID == "0")
             {
-                return Json(new
+                if (student.FullName == "" || student.Email == "") return null;
+
+                if (!ExistEmail(student.Email))
                 {
-                    error = "Thông tin không chính xác"
-                });
+                    student.CreateDate = DateTime.Now;
+                    student.IsActive = true;
+                    student.UserCreate = teacher.ID;
+                    student.Centers = new List<string>() { centerID };
+                    if (student.JoinedClasses != null && student.JoinedClasses[0] != null)
+                    {
+                        var listClass = student.JoinedClasses[0].Split(',');
+                        student.JoinedClasses = listClass.ToList();
+                    }
+                    _studentService.CreateQuery().InsertOne(student);
+                    Status = true;
+                    Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",student },
+                        {"Error",null },
+                        {"Msg","Thêm thành công" },
+                        {"Status",Status }
+                    };
+                    var account = new AccountEntity()
+                    {
+                        CreateDate = DateTime.Now,
+                        IsActive = true,
+                        PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                        PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                        UserCreate = student.UserCreate,
+                        Type = ACCOUNT_TYPE.STUDENT,
+                        UserID = student.ID,
+                        UserName = student.Email.ToLower().Trim(),
+                        RoleID = _roleService.GetItemByCode("student").ID
+                    };
+                    _accountService.CreateQuery().InsertOne(account);
+                    return new JsonResult(response);
+                }
+                else
+                {
+                    Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",student },
+                        {"Msg","Email đã được sử dụng" },
+                        {"Status",Status }
+                    };
+                    return new JsonResult(response);
+                }
             }
-            //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
-            if (_studentService.LeaveClass(ClassID, StudentID) > 0)
+            else
             {
-                //remove history, exam, exam detail, progress...
-                await _learningHistoryService.RemoveClassStudentHistory(ClassID, StudentID);
-                await _examService.RemoveClassStudentExam(ClassID, StudentID);
+                var oldStudent = _studentService.GetItemByID(student.ID);
+                oldStudent.FullName = student.FullName;
+
+
+                var listClass = new List<string>();
+                if (student.JoinedClasses[0] != null)
+                    listClass = student.JoinedClasses[0].Split(',').ToList();
+                oldStudent.JoinedClasses = listClass.ToList();
+                var infochange = false;
+
+                if (oldStudent.DateBorn != student.DateBorn)
+                    oldStudent.DateBorn = student.DateBorn;
+
+                if (oldStudent.Phone != student.Phone)
+                {
+                    oldStudent.Phone = student.Phone;
+                    infochange = true;
+                }
+
+                if (oldStudent.FullName != student.FullName)
+                {
+                    oldStudent.FullName = student.FullName;
+                    infochange = true;
+                }
+
+                if (_studentService.Save(oldStudent) != null)
+                {
+                    if (infochange)
+                    {
+                        var acc = _accountService.GetAccountByEmail(oldStudent.Email);
+                        if (acc != null)
+                        {
+                            acc.Name = oldStudent.FullName;
+                            acc.Phone = oldStudent.Phone;
+                            _accountService.Save(acc);
+                        }
+                        //check teacher account
+                        //var tc = _teacherService.GetItemByEmail(oldStudent.Email);
+                        //if (tc != null)
+                        //{
+                        //    tc.FullName = oldStudent.FullName;
+                        //    tc.Phone = oldStudent.Phone;
+                        //    tc.DateBorn = oldStudent.DateBorn;
+                        //    _teacherService.Save(tc);
+                        //}
+                    }
+                    Status = true;
+
+                }
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",student },
+                        {"Error",null },
+                        {"Msg","Cập nhật thành công" },
+                        {"Status",Status }
+                    };
+                return new JsonResult(response);
             }
-            return Json(new { msg = "đã xóa học viên" });
+        }
+
+        private bool ExistEmail(string email)
+        {
+            return _studentService.CreateQuery().CountDocuments(o => o.Email == email) > 0;
+        }
+
+        public async Task<JsonResult> RemoveStudent(string StudentID, string basis, string JoinedClasses = null, string ClassID = null)
+        {
+            var Error = "";
+            var Status = false;
+            try
+            {
+                //if (string.IsNullOrEmpty(ClassID) || string.IsNullOrEmpty(StudentID))
+                if (string.IsNullOrEmpty(StudentID))
+                {
+                    return Json(new
+                    {
+                        Status = false,
+                        error = "Thông tin không chính xác"
+                    });
+                }
+                //var deleted = _classStudentService.RemoveClassStudent(ClassID, StudentID);
+                var student = _studentService.GetItemByID(StudentID);
+                var center = _centerService.GetItemByCode(basis);
+                var classes = new List<ClassEntity>();
+                if (student.JoinedClasses != null)
+                {
+                    classes = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => t.Center == center.ID).ToList();//SELECT CENTER's CLASSES ONLY
+                    if (classes != null)
+                        foreach (var @class in classes)
+                        {
+                            if (_studentService.LeaveClass(@class.ID, StudentID) > 0)
+                            {
+                                //remove history, exam, exam detail, progress...
+                                _ = _progressHelper.RemoveClassStudentHistory(@class.ID, StudentID);
+                                _ = _examService.RemoveClassStudentExam(@class.ID, StudentID);
+                            }
+                        }
+                    student = _studentService.GetItemByID(StudentID);
+                }
+                else
+                    student.JoinedClasses = new List<string>();
+                if (student.Centers != null)
+                {
+                    student.Centers.Remove(center.ID);
+                    if (student.Centers.Count == 0)
+                        student.IsActive = false;
+                    _studentService.Save(student);
+                    Status = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+            }
+            var Datarespone = new Dictionary<string, object>
+            {
+                { "msg", "Đã xóa học viên" },
+                { "error", Error},
+                { "Status", Status }
+            };
+            return Json(Datarespone);
         }
 
         public JsonResult AddStudent(string ClassID, string StudentID)
@@ -200,26 +370,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
             var classids = new List<string>();
+            var checkClass = false;
             if (!string.IsNullOrEmpty(ClassID))
             {
+                checkClass = true;
                 classids.Add(ClassID);
             }
             else
             {
                 if (!string.IsNullOrEmpty(SubjectID))
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                { filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID)); checkClass = true; }
+
                 if (!string.IsNullOrEmpty(TeacherID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(SkillID))
+                {
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                    checkClass = true;
+                }
                 if (!string.IsNullOrEmpty(GradeID))
+                {
+
                     filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                    checkClass = true;
+                }
                 classids =
                     filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
                 : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
             }
 
-            if (classids == null || classids.Count() == 0)
+            if (checkClass && classids == null || classids.Count() == 0)
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Model", model }
@@ -237,13 +420,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
             }
 
-            if (string.IsNullOrEmpty(model.SearchText))
+            if (checkClass)
                 stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
-            else
+            if (!string.IsNullOrEmpty(model.SearchText))
+
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
-                        Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids),
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
             var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+            //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
 
@@ -254,8 +438,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                        string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses)) :
-                        _classService.GetItemByID(ClassID).Name
+                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                        _classService.GetItemByID(ClassID).Name,
                 }));
 
             var response = new Dictionary<string, object>
@@ -312,6 +496,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     left = long.MaxValue;
             }
 
+            if (center == null || left <= 0)
+            {
+                return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
+            }
+
+            var abbr = "st." + (string.IsNullOrEmpty(center.Abbr) ? "eduso" : center.Abbr);
+
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
@@ -336,7 +527,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (left <= 0) continue;
                                 if (workSheet.Cells[i, 1].Value == null || workSheet.Cells[i, 1].Value.ToString() == "STT") continue;
                                 var email = (workSheet.Cells[i, keyCol].Value == null ? "" : workSheet.Cells[i, keyCol].Value.ToString()).ToLower().Trim();
-                                if (string.IsNullOrEmpty(email)) continue;
+                                if (string.IsNullOrEmpty(email))
+                                //    continue; skip => create auto mail
+                                {
+                                    email = abbr + "_" + _indexService.GetNewIndex(abbr) + "@eduso.vn";
+                                }
+
                                 string name = workSheet.Cells[i, 2].Value == null ? "" : workSheet.Cells[i, 2].Value.ToString();
                                 string dateStr = workSheet.Cells[i, 3].Value == null ? "" : workSheet.Cells[i, 3].Value.ToString();
                                 var birthdate = new DateTime();
@@ -413,7 +609,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, visiblePass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
                                 }
                                 counter++;
-
                             }
                         }
                     }

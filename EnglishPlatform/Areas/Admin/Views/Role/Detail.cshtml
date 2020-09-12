@@ -20,7 +20,6 @@
     .item-access {
         padding: 10px;
     }
-
     .list-item-access {
         background: #ccc;
         padding: 20px;
@@ -64,7 +63,7 @@
                                             var rootItem = authorityAdmin.FirstOrDefault(o => o.Module == firstItem.CtrlName && o.Type == "admin");
                                             <div class="group-access row">
                                                 <div class="root-access col-12">
-                                                    <input type="checkbox" name="admin_@rootItem.Module" onclick="checkAll(this)" />
+                                                    <input type="checkbox" name="admin_@rootItem.Module"  onclick="checkAll(this)"/>
                                                     <span onclick="openList(this)">@rootItem.Name</span>
                                                 </div>
                                                 <div class="list-item-access hide">

@@ -89,8 +89,9 @@
                             @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
 
                             <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
+
                             <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
@@ -693,7 +694,7 @@
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', $(modal).find('[id=Name]').val())
                     _form.append('CenterCode', '@center')
-
+                    _that.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false;

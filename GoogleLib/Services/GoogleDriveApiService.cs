@@ -38,7 +38,7 @@ namespace GoogleLib.Services
         public GoogleDriveApiService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _driveService = GetDriveService().Result;
+            _driveService = GetDriveService() == null ? null : GetDriveService().Result;
         }
 
         public async Task<string> Delete(string fileId)
@@ -361,9 +361,9 @@ namespace GoogleLib.Services
                     return await GetDriveService(file, user, appName, fileStorge);
                 }
             }
-            catch(Exception ex)
+            catch(Exception)
             {
-                throw ex;
+                return null;
             }
         }
         

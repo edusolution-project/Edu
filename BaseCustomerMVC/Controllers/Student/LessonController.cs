@@ -31,6 +31,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ExamDetailService _examDetailService;
 
         private readonly LearningHistoryService _learningHistoryService;
+        private readonly ProgressHelper _progressHelper;
 
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
@@ -52,6 +53,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , StudentService studentService
             , ClassSubjectService classSubjectService
             , ChapterService chapterService
+            , ProgressHelper progressHelper
             , ChapterProgressService chapterProgressService
             , LessonScheduleService lessonScheduleService
             , LearningHistoryService learningHistoryService
@@ -91,6 +93,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _vocabularyService = vocabularyService;
+            _progressHelper = progressHelper;
         }
 
         public IActionResult Index()
@@ -324,15 +327,19 @@ namespace BaseCustomerMVC.Controllers.Student
             if (exam == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
-            if (!exam.Status)
+            var lesson = _lessonService.GetItemByID(exam.LessonID);
+            if (lesson == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
             if (exam.StudentID != UserID && exam.TeacherID != UserID)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
 
-            var lesson = _lessonService.GetItemByID(exam.LessonID);
-            if (lesson == null)
-                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+            if (!exam.Status)//Check review khi chưa kết thúc bài kiểm tra => hoàn thành bài
+            {
+                _examService.CompleteNoEssay(exam, _lessonService.GetItemByID(exam.LessonID), out _);
+                //return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+                exam = _examService.GetItemByID(exam.ID);
+            }
 
             var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
 
@@ -446,7 +453,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
             //Create learning history
-            _ = _learningHistoryService.CreateHist(new LearningHistoryEntity()
+            _ = _progressHelper.CreateHist(new LearningHistoryEntity()
             {
                 ClassID = ClassID,
                 ClassSubjectID = ClassSubjectID,
