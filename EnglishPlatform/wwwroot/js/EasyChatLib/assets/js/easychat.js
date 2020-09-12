@@ -177,8 +177,8 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     }
     var ConnectHub = function(){
         try{
-            __SIGNALR.start().then(function(){
-                serverCall("Online",__CURRENTUSER.id);
+            __SIGNALR.start().then(function () {
+                __SIGNALR.invoke("Online", __CURRENTUSER.id, "a,b,c,d");
             });
         }
         catch (ex) {

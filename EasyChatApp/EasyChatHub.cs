@@ -21,10 +21,11 @@ namespace EasyChatApp
             _groupAndUserService = groupAndUserService;
         }
         [Obsolete]
-        public async Task Online(string user, List<string> groupNames)
+        public async Task Online(string user, string groups)
         {
             var connectionId = Context.ConnectionId;
-            for(int  i =  0; groupNames != null && i < groupNames.Count; i++)
+            List<string> groupNames = groups.Split(',')?.ToList();
+            for (int  i =  0; groupNames != null && i < groupNames.Count; i++)
             {
                 var groupName = groupNames[i];
                 // neu chua ton tai thi add join group
