@@ -48,6 +48,48 @@ namespace EasyChatApp.Controllers
             return response;
         }
 
+        [HttpPost]
+        public async Task<Response> EditMessage(string id, List<string> fileIds)
+        {
+            Response response = new Response();
+            await Task.Delay(100);
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                StackTrace stackTrace = new StackTrace();
+                MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
+                await _log.Error(methodBase.Name, ex);
+                response.Code = 500;
+                response.Message = ex.Message;
+                response.Data = null;
+            }
+            return response;
+        }
+
+        [HttpPost]
+        public async Task<Response> DeleteMessage(string id, List<string> fileIds)
+        {
+            Response response = new Response();
+            await Task.Delay(100);
+            try
+            {
+                
+            }
+            catch (Exception ex)
+            {
+                StackTrace stackTrace = new StackTrace();
+                MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
+                await _log.Error(methodBase.Name, ex);
+                response.Code = 500;
+                response.Message = ex.Message;
+                response.Data = null;
+            }
+            return response;
+        }
+
         public string GetUser()
         {
             return User.Identity.IsAuthenticated ? User.FindFirst("UserID").Value : "no login";
