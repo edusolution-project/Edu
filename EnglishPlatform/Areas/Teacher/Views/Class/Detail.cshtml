@@ -53,7 +53,7 @@
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Bảng điểm</a></li>
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
                     <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
-                    <li v-if="tab[3]">
+                    @*<li v-if="tab[3]">
                         <div class="form-row">
                             <div class="box filter-box m-1 col-12 col-md-4">
                                 <select v-model="ref.subjectID">
@@ -69,7 +69,7 @@
                                 </select>
                             </div>
                         </div>
-                    </li>
+                    </li>*@
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
@@ -186,92 +186,84 @@
                             <div class="pt-0 pb-2">
                                 <p>{{domDecoder(data.Description)}}</p>
                             </div>
-                            <<<<<<< HEAD
                             <div>
-                                =======
-                                <div>
-                                    >>>>>>> origin/VietPhung
-                                    <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
-                                    <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                                    <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
-                                    <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                                    <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
-                                    <<<<<<< HEAD
-
-                                    =======
-                                    >>>>>>> origin/VietPhung
-                                </div>
+                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row ls-doc text-center d-block" v-else>
-                    Không có tài liệu
-                </div>
             </div>
-            <div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
-                <div class="paging-view">
-                    Hiển thị:
-                    <select v-model="ref.view" v-on:change="loadPreference()">
-                        <option value="10">10 kết quả</option>
-                        <option value="20">20 kết quả</option>
-                        <option value="30">30 kết quả</option>
-                    </select>
-                </div>
-                <div class="page-control">
-                    <div class="right">
-                        <b-pagination v-model="ref.page"
-                                      :total-rows="ref.totalRec"
-                                      :per-page="ref.view"
-                                      v-on:input="loadPreference()"></b-pagination>
-                    </div>
-                </div>
-            </div>
-            <div class="box" v-show="tab[4]">
-                <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects">
-                        <div class="inner">
-                            <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                            </a>
-                            <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
-                                <ul class="list">
-                                    <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                                 v-bind:data="item"
-                                                 v-bind:classbj="obj.ID"
-                                                 v-bind:pos="k"
-                                                 v-bind:owner="obj.TeacherID"
-                                                 v-bind:listchaps="list_chapters_result"></chap-result>
-                                    <lesson-result v-for="lesson in filterResult({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-result>
-                                </ul>
-                            </b-collapse>
-
-                        </div>
-                    </li>
-                </ul>
-
-
-                @*<div class="row ls-doc" v-if="ref.data.length > 0">
-                        <div class="col-md-12" v-for="data in ref.data">
-                            <div class="list-item">
-                                <div class="item">
-                                    <div class="item-title" onclick="this.parentElement.classList.toggle('open');">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
-                                    <div class="item-body" v-for="item in data">
-                                        <div>{{item.StudentName}} - {{item.Point}}</div>
-                                        <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
-                                        <button v-else type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm lại</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="row ls-doc text-center d-block" v-else>
-                        Không có exam để chấm
-                    </div>*@
+            <div class="row ls-doc text-center d-block" v-else>
+                Không có tài liệu
             </div>
         </div>
+        <div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="ref.view" v-on:change="loadPreference()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="ref.page"
+                                  :total-rows="ref.totalRec"
+                                  :per-page="ref.view"
+                                  v-on:input="loadPreference()"></b-pagination>
+                </div>
+            </div>
+        </div>
+        <div class="box" v-show="tab[4]">
+            <ul class="list ls-practice">
+                <li v-for="(obj,i) in classSubjects">
+                    <div class="inner">
+                        <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
+                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                            <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                        </a>
+                        <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
+                            <ul class="list">
+                                <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                             v-bind:data="item"
+                                             v-bind:classbj="obj.ID"
+                                             v-bind:pos="k"
+                                             v-bind:owner="obj.TeacherID"
+                                             v-bind:listchaps="list_chapters_result"></chap-result>
+                                <lesson-result v-for="lesson in filterResult({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-result>
+                            </ul>
+                        </b-collapse>
+
+                    </div>
+                </li>
+            </ul>
+
+
+            @*<div class="row ls-doc" v-if="ref.data.length > 0">
+                    <div class="col-md-12" v-for="data in ref.data">
+                        <div class="list-item">
+                            <div class="item">
+                                <div class="item-title" onclick="this.parentElement.classList.toggle('open');">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
+                                <div class="item-body" v-for="item in data">
+                                    <div>{{item.StudentName}} - {{item.Point}}</div>
+                                    <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
+                                    <button v-else type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm lại</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row ls-doc text-center d-block" v-else>
+                    Không có exam để chấm
+                </div>*@
+        </div>
+    </div>
 
 </section>
 @section Scripts{

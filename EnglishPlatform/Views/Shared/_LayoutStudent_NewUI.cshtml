@@ -101,23 +101,27 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
-            <div id="top_star" class="box p-3" style="margin: 10px;border-radius: 10px; background: #D0DFE8;">
-                <div class="heading flex">
-                    <h4 class="box-head text-danger" style="font-size:110%">Ngôi sao đang lên</h4>
+            <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
+                <i class="fas fa-star" style="font-size:150%"></i>
+                <i class="fas fa-star" style="font-size:250%"></i>
+                <i class="fas fa-star" style="font-size:150%"></i>
+            </div>
+            <div id="top_star" class="box p-3">
+                <div class="heading flex pb-2">
+                    <h4 class="box-head text-center" style="font-size:110%;">Ngôi sao đang lên</h4>
                 </div>
-                <ul>
+                <ul style="border: solid 1px #CCC; border-radius:10px;" class="p-2">
                     <template v-for="(item,k) in list_star">
-                        <li v-if="k < 10" class="p-2 list-unstyled" style="border-bottom: dashed 1px #CCC">
-                            <i class="fas fa-trophy text-warning" v-if="k==0"></i>
-                            <i class="fas fa-trophy text-success" v-else-if="k==1"></i>
-                            <i class="fas fa-trophy text-secondary" v-else-if="k==2"></i>
-                            <i class="fas fa-certificate text-warning" v-else></i>
+                        <li v-if="k < 10" class="p-2 list-unstyled">
+                            <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
+                            <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
+                            <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
+                            <i class="fas fa-star" style="color:orange" v-else></i>
                             <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span>
                         </li>
                     </template>
                 </ul>
             </div>
-
             @*<div class="box padding-15" id="plan_box">
                     <div class="select-date flex">
                         <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
