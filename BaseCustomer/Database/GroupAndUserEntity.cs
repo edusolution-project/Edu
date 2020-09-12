@@ -56,9 +56,11 @@ namespace BaseCustomerEntity.Database
             for (int i = 0; listData != null && i < listData.Count; i++)
             {
                 var item = listData[i];
-                var filter = Builders<GroupAndUserEntity>.Filter.Eq(s => s.ID, item.ID);
-                var update = Builders<GroupAndUserEntity>.Update.AddToSet("TimeLife", unixTimestamp);
-                await CreateQuery().UpdateOneAsync(filter, update);
+                item.TimeLife = unixTimestamp;
+                await CreateQuery().ReplaceOneAsync(Builders<GroupAndUserEntity>.Filter.Eq(s => s.ID, item.ID), item);
+                //var filter = Builders<GroupAndUserEntity>.Filter.Eq(s => s.ID, item.ID);
+                //var update = Builders<GroupAndUserEntity>.Update.AddToSet("TimeLife", unixTimestamp);
+                //await CreateQuery().UpdateOneAsync(filter, update);
             }
         }
     }

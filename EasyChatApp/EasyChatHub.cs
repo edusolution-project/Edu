@@ -162,7 +162,7 @@ namespace EasyChatApp
             {
                 if (!_connections.TryGetValue(connectionId, out string user))
                 {
-                    _connections.Add(connectionId, user);
+                    _connections.Add(connectionId, userId);
                 }
                 else
                 {
