@@ -50,13 +50,30 @@ namespace EasyChatApp
             }
 
             app.UseHttpsRedirection();
-            app.UseCors();
+            //app.UseCors();
+            app.UseCors(builder =>
+            {
+                builder
+                .SetIsOriginAllowed(IsOriginAllowed)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+            });
             app.UseSignalR(routes =>
             {
                 routes.MapHub<EasyChatHub>("/chatHub");
             });
 
             app.UseMvc();
+        }
+        private bool IsOriginAllowed(string host)
+        {
+            if (host.Contains("localhost")) return true;
+            if (host.Contains("eduso.vn")) return true;
+            return false;
+            //var originConfig = Configuration.GetSection("AllowOrigin").Value;
+            //var corsOriginAllowed = new[] { originConfig };
+            //return corsOriginAllowed.Any(origin =>Regex.IsMatch(host, $@"^http(s)?://.*{origin}(:[0-9]+)?$", RegexOptions.IgnoreCase));
         }
     }
 }

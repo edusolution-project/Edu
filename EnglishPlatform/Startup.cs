@@ -229,7 +229,14 @@ namespace EnglishPlatform
                 await next.Invoke();
                 // Do logging or other work that doesn't write to the Response.
             });
-
+            app.UseCors(builder =>
+            {
+                builder
+                .SetIsOriginAllowed(IsOriginAllowed)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+            });
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ChatHub>("/chatHub");
@@ -310,6 +317,15 @@ namespace EnglishPlatform
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
             });
+        }
+        private bool IsOriginAllowed(string host)
+        {
+            if (host.Contains("localhost")) return true;
+            if (host.Contains("eduso.vn")) return true;
+            return false;
+            //var originConfig = Configuration.GetSection("AllowOrigin").Value;
+            //var corsOriginAllowed = new[] { originConfig };
+            //return corsOriginAllowed.Any(origin =>Regex.IsMatch(host, $@"^http(s)?://.*{origin}(:[0-9]+)?$", RegexOptions.IgnoreCase));
         }
     }
     public class MyCustomerRoute : IRouteConstraint

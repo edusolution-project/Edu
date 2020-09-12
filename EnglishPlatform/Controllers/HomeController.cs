@@ -953,6 +953,27 @@ namespace EnglishPlatform.Controllers
             return Json("OK " + count + " - " + countdelete + " _ " + str);
         }
         #endregion
+        [HttpGet]
+        public string CurrentUser()
+        {
+            try
+            {
+                string strScript = "var g_UserOnline={id:'',name:'',email:''}";
+                if(User.Identity.IsAuthenticated)
+                {
+                    string userId = User.FindFirst("UserID").Value;
+                    string name = User.Identity.Name;
+                    string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value;
+                    strScript = "var g_UserOnline={id:'" + userId + "',name:'"+name+"',email:'"+email+"'}";
+                }
+
+                return strScript;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
     }
 
     public class UserModel
