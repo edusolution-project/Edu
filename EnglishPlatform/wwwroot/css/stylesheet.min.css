@@ -342,7 +342,7 @@ button, input, a {
 
 .card-header {
     background: transparent;
-    border: none
+    min-height: 70px;
 }
 
 #box_login {
@@ -902,7 +902,8 @@ button, input, a {
 }
 
     #dashboard_content .card-header {
-        padding: 20px 20px 0 20px
+        margin: 0 20px;
+        padding: 20px 0 0;
     }
 
 .list-lesson li {

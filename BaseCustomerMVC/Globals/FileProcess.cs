@@ -21,7 +21,8 @@ namespace BaseCustomerMVC.Globals
         public FileProcess(IHostingEnvironment evn)
         {
             _evn = evn;
-            RootPath = _evn.WebRootPath + "/Files";
+            RootPath = "C:\\Website\\EdusoEnglish\\wwwroot\\Files";
+            //_evn.WebRootPath + "/Files";
         }
         public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
         {

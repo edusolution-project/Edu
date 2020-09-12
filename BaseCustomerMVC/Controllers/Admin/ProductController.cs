@@ -61,14 +61,16 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public async Task<JsonResult> CreateOrUpdate(NewsEntity item, IFormFile Thumbnail)
         {
-            if(item.Targets != null && item.Targets.Count > 0)
+            if (item.Targets != null && item.Targets.Count > 0 && item.Targets[0] != null)
             {
                 foreach (var target in item.Targets[0].ToString().Split(','))
                 {
                     if (target != null || target != "")
                         item.Targets.Add(target);
                 }
+                item.Targets.RemoveAt(0);
             }
+            else item.Targets = new List<string>();
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
@@ -89,8 +91,9 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if (Thumbnail != null)
                 {
-                    item.Thumbnail = await _fileProcess.SaveMediaAsync(Thumbnail,"","Image_Product");
+                    item.Thumbnail = await _fileProcess.SaveMediaAsync(Thumbnail, "", "Image_Product");
                 }
+
                 _serviceNews.CreateQuery().InsertOne(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -203,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         [HttpPost]
         public JsonResult GetDetail(string id)
         {
-            var data = _serviceNews.CreateQuery().Find(o=>o.ID==id && o.Type.ToLower()=="san-pham").FirstOrDefault();
+            var data = _serviceNews.CreateQuery().Find(o => o.ID == id && o.Type.ToLower() == "san-pham").FirstOrDefault();
 
             var response = new Dictionary<string, object>
             {
@@ -223,7 +226,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             else
             {
                 _fileProcess.DeleteFile(_serviceNews.GetItemByID(model.ArrID).Thumbnail);
-                var delete = _serviceNews.Collection.DeleteMany(o => o.ID==model.ArrID);
+                var delete = _serviceNews.Collection.DeleteMany(o => o.ID == model.ArrID);
                 return new JsonResult(delete);
             }
         }
@@ -239,7 +242,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //newItem.OriginID = item.ID;
             //newItem.ID = null;
 
-            var new_product= new MappingEntity<NewsEntity, NewsEntity>().Clone(itemClone, new NewsEntity());
+            var new_product = new MappingEntity<NewsEntity, NewsEntity>().Clone(itemClone, new NewsEntity());
             new_product.OriginID = itemClone.ID;
             new_product.CreateDate = DateTime.Now;
             new_product.Thumbnail = itemClone.Thumbnail;

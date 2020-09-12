@@ -106,91 +106,33 @@
         @*@await Html.PartialAsync("_sidebarTeacherNewUI")*@
         <div id="main_content">
             @RenderBody()
-
             <div v-cloak>
                 @RenderSection("Modals", false)
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
-            <div id="top_star" class="box p-3" style="margin: 10px;border-radius: 10px; background: #D0DFE8;">
-                <div class="heading flex">
-                    <h4 class="box-head text-danger" style="font-size:110%">Ngôi sao đang lên</h4>
+            <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
+                <i class="fas fa-star" style="font-size:150%"></i>
+                <i class="fas fa-star" style="font-size:250%"></i>
+                <i class="fas fa-star" style="font-size:150%"></i>
+            </div>
+            <div id="top_star" class="box p-3">
+                <div class="heading flex pb-2">
+                    <h4 class="box-head text-center" style="font-size:110%;">Ngôi sao đang lên</h4>
                 </div>
-                <ul>
+                <ul style="border: solid 1px #CCC; border-radius:10px;" class="p-2">
                     <template v-for="(item,k) in list_star">
-                        <li v-if="k < 10" class="p-2 list-unstyled" style="border-bottom: dashed 1px #CCC">
-                            <i class="fas fa-trophy text-warning" v-if="k==0"></i>
-                            <i class="fas fa-trophy text-success" v-else-if="k==1"></i>
-                            <i class="fas fa-trophy text-secondary" v-else-if="k==2"></i>
-                            <i class="fas fa-certificate text-warning" v-else></i>
+                        <li v-if="k < 10" class="p-2 list-unstyled">
+                            <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
+                            <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
+                            <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
+                            <i class="fas fa-star" style="color:orange" v-else></i>
                             <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span></a>
                         </li>
                     </template>
                 </ul>
             </div>
-            @*<div class="box padding-15" id="plan_box">
-                <div class="select-date flex">
-                    <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
-                    <div class="week">
-                        02/12/2019 - 09/12/2019
-                    </div>
-                    <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
-                </div>
-                <div class="table-detail">
-                    <div class="tr">
-                        <div class="c-d td">T2</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T3</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T4</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T5</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T6</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T7</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">CN</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                </div>
-            </div>*@
-            <div class="box p-3" style="margin: 10px;border-radius: 15px; background: #D0DFE8;">
+            <div class="box p-3" style="margin:0 10px;border-radius: 15px; background: #D0DFE8;">
                 <div class="heading flex">
                     <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL"><h4 class="box-head text-danger" style="font-size:110%">Hướng dẫn sử dụng</h4></a>
                 </div>
@@ -207,10 +149,79 @@
                     </li>
                 </ul>
             </div>
+            <style>
+                #top_star li:hover {
+                    background-color: #EEE;
+                    cursor: pointer;
+                }
+            </style>
+            @*<div class="box padding-15" id="plan_box">
+                    <div class="select-date flex">
+                        <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
+                        <div class="week">
+                            02/12/2019 - 09/12/2019
+                        </div>
+                        <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
+                    </div>
+                    <div class="table-detail">
+                        <div class="tr">
+                            <div class="c-d td">T2</div>
+                            <div class="c-cl td">
+                                <div class="flex">
+                                    <span class="time">08:30</span>
+                                    <span class="title">IEL</span>
+                                </div>
+                                <div class="flex">
+                                    <span class="time">08:30</span>
+                                    <span class="title">IEL</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">T3</div>
+                            <div class="c-cl td">
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">T4</div>
+                            <div class="c-cl td">
+                                <div class="flex">
+                                    <span class="time">08:30</span>
+                                    <span class="title">IEL</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">T5</div>
+                            <div class="c-cl td">
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">T6</div>
+                            <div class="c-cl td">
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">T7</div>
+                            <div class="c-cl td">
+                                <div class="flex">
+                                    <span class="time">08:30</span>
+                                    <span class="title">IEL</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tr">
+                            <div class="c-d td">CN</div>
+                            <div class="c-cl td">
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+
 
             @*<div class="adv">
-                <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
-            </div>*@
+                    <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
+                </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -236,18 +247,6 @@
             },
             data: {
                 list_news: [
-                    //{
-                    //    href: 'https://www.facebook.com/utcelearning/?hc_ref=ARQzn875E9EnzJl0pDOIsk-T6UjYmWEn8oE0bsjwjNISY5FfbD6PgeCUIPWrnvXcc9o&ref=nf_target&__tn__=kC-R',
-                    //    title: 'Hướng dẫn đào tạo trực tuyến',
-                    //    description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
-                    //    thumbnail: 'https://scontent.fhan2-4.fna.fbcdn.net/v/t1.0-1/p200x200/71767146_116313109773262_2458809184288768000_n.jpg?_nc_cat=104&_nc_sid=dbb9e7&_nc_ohc=HtGhdLTf2WYAX_NwoRT&_nc_ht=scontent.fhan2-4.fna&_nc_tp=6&oh=1b66286b43372fa674c031fa25b5d11c&oe=5F1AAE01'
-                    //},
-                    //{
-                    //    href: 'http://educoo.vn',
-                    //    title: 'Khóa học tiếng Anh 1 - 1',
-                    //    description: 'Tổng hợp tài liệu & video hướng dẫn đào tạo trực tuyến cập nhật các tính năng mới',
-                    //    thumbnail: 'http://educoo.vn/Content/v-637088577654292784/img/banner.png'
-                    //},
                 ]
             }
         });
