@@ -28,6 +28,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
+        private readonly LessonPartAnswerService _answerService;
 
         private readonly LessonService _clonelessonService;
         private readonly CloneLessonPartService _clonelessonPartService;
@@ -47,6 +48,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 CourseLessonService lessonService,
                 LessonPartService lessonPartService,
                 LessonPartQuestionService questionService,
+                LessonPartAnswerService answerService,
 
                 LessonService clonelessonService,
                 CloneLessonPartService clonelessonPartService,
@@ -72,6 +74,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
             _questionService = questionService;
+            _answerService = answerService;
 
             _clonelessonService = clonelessonService;
             _clonelessonPartService = clonelessonPartService;
@@ -203,6 +206,62 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
 
             return Json("OK");
+        }
+
+        public JsonResult FixFillquiz()
+        {
+            var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs)
+            {
+                var qids = _questionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _answerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _answerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var partIDs2 = _clonelessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs2)
+            {
+                var qids = _clonequestionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _cloneanswerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _cloneanswerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json("OK");
+        }
+
+        private string validateFill(string org)
+        {
+            if (string.IsNullOrEmpty(org)) return org;
+            org = org.Trim();
+            while (org.IndexOf("  ") >= 0)
+                org = org.Replace("  ", "");
+            return org;
         }
 
         private double calculateLessonPoint(CourseLessonEntity lesson)

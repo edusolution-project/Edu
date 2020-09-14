@@ -180,6 +180,16 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
+                //COMPLETE ALL INCOMPLETE EXAMS
+                var incompleted_exs = _examService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.StudentID == userid && o.Status == false).SortBy(t => t.Number).ToEnumerable();
+                if (incompleted_exs != null && incompleted_exs.Count() > 0)
+                {
+                    foreach (var ex in incompleted_exs)
+                    {
+                        _examService.CompleteNoEssay(ex, _lesson, out _, false);
+                    }
+                }
+
                 var marked = _examService.CreateQuery().Find(o => o.LessonScheduleID == _schedule.ID && o.StudentID == userid && o.Marked).FirstOrDefault();
                 if (marked != null)
                 {
