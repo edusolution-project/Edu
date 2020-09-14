@@ -9,7 +9,7 @@
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
     var defTeacher = ViewBag.User;
-    var listCenters= ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
+    var listCenters = ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -199,7 +199,7 @@
                     Image: '',
                     TeacherID: '',
                     IsPublic: false,
-                    TagetCenters: [],
+                    TargetCenters: [],
                     NameCenters:''
                 },
                 cloneItem: {
@@ -276,11 +276,11 @@
                         fn()
                     }, 500)
                 },
-                "addItem.TagetCenters": function () {
+                "addItem.TargetCenters": function () {
                     this.addItem.NameCenters = ''
                     for (i = 0; i < this.list_Acenters.length; i++) {
-                        for (j = 0; j < this.addItem.TagetCenters.length; j++) {
-                            if (this.list_Acenters[i].ID == this.addItem.TagetCenters[j]) {
+                        for (j = 0; j < this.addItem.TargetCenters.length; j++) {
+                            if (this.list_Acenters[i].ID == this.addItem.TargetCenters[j]) {
                                 this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
                             }
                         }
@@ -350,8 +350,8 @@
                     })
                 },
                 showEditItem(obj) {
-                    //console.log(obj);
-                    debugger
+                    console.log(obj);
+                    //debugger
                     let _that = this;
                     if (obj == null) {
                         _that.addItem.ID = '';
@@ -363,10 +363,9 @@
                         _that.addItem.Image = '';
                         _that.addItem.TeacherID = _that.def_teacher;
                         _that.addItem.IsPublic = false;
-                        _that.addItem.TagetCenters = [];
+                        _that.addItem.TargetCenters = [];
                     }
                     else {
-                        console.log(obj);
                         _that.addItem.ID = obj.ID;
                         _that.addItem.SubjectID = obj.SubjectID;
                         _that.$nextTick(() => {
@@ -378,10 +377,10 @@
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
                         _that.addItem.TeacherID = obj.TeacherID;
                         _that.addItem.IsPublic = obj.IsPublic;
-                        if (obj.TagetCenters != null)
-                            _that.addItem.TagetCenters = obj.TagetCenters;
-                        else _that.addItem.TagetCenters = [];
-                        debugger
+                        if (obj.TargetCenters != null)
+                            _that.addItem.TargetCenters = obj.TargetCenters;
+                        else _that.addItem.TargetCenters = [];
+                        //debugger
                     }
                     _that.$bvModal.show('modal_event')
                 },
@@ -460,7 +459,17 @@
                     _form.append('Description', _that.addItem.Description)
                     _form.append('TeacherID', _that.addItem.TeacherID)
                     _form.append('IsPublic', _that.addItem.IsPublic)
-                    _form.append('TagetCenters', _that.addItem.TagetCenters)
+
+                    var targetStr = _that.addItem.TargetCenters;
+                    if (targetStr != null) {
+                        var targets = targetStr.toString().split(',');
+                        if (targets.length > 0)
+                            targets.forEach(function (item, pos) {
+                                _form.append('TargetCenters', item)
+                            });
+                    }
+
+                    debugger;
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -736,7 +745,7 @@
                 <div class="col-sm-10 row" style="position:relative">
                     <div class="col-md-3 col-sm-12">
                         <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="showSelect()">
-                            Chọn cơ sở <span class="caret"></span>
+                            Chọn <span class="caret"></span>
                         </button>
                     </div>
                     <div class="col-md-9 col-sm-12">
@@ -744,10 +753,10 @@
                     </div>
                     <div class="col-sm-7" style="position:absolute;right:105px;top:40px;z-index:2">
                         <div id="selectCenters" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
                                 <li v-for="(item,k) in list_Acenters">
                                     <a>
-                                        <input type="checkbox" :value="item.ID" v-model="addItem.TagetCenters" /><span class="lbl"> {{item.Name}} </span>
+                                        <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
                                     </a>
                                 </li>
                             </ul>
@@ -771,7 +780,7 @@
                 <div>
                     <button class="btn btn-info" onclick="chooseFile(this)">Chọn file</button>
                     <input type="file" name="cover" class="d-none" onchange="updateFile(this)" accept="image/jpeg,image/png,image/gif,image/bmp">
-                    <img :src="addItem.Image" />
+                    <img :src="cacheStatic(addItem.Image,100)" v-if="addItem.Image != null" />
                 </div>
             </b-col>
         </div>

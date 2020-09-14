@@ -102,58 +102,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel,string basis,Boolean typeDocs=false) //mặc định typeDocs=false -> tài liệu thường
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string basis, Boolean isInteractive = false) //mặc định typeDocs=false -> tài liệu thường
         {
             if (entity != null)
             {
+
                 var center = _centerService.GetItemByCode(basis);
 
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var filter = new List<FilterDefinition<ReferenceEntity>>();
 
-                var tc = (string.IsNullOrEmpty(entity.Target) || entity.Range != REF_RANGE.CLASS) ? UserID : entity.Target;
-                var filterTeacher = Builders<ReferenceEntity>.Filter.Where(o => o.Range == REF_RANGE.CLASS && o.OwnerID == tc);
-                var filterAll = Builders<ReferenceEntity>.Filter.Eq(o => o.Range, REF_RANGE.ALL);
-
-                switch (entity.Range)
+                if (isInteractive)
                 {
-                    case REF_RANGE.TEACHER:
-                        filter.Add(filterTeacher);
-                        break;
-                    case REF_RANGE.CLASS:
-                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.Range == entity.Range && o.Target == entity.Target));
-                        break;
-                    case REF_RANGE.ALL:
-                        filter.Add(filterAll);
-                        break;
-                    default:
-                        filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
-                        break;
-                }
-                if (!string.IsNullOrEmpty(entity.SubjectID))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, entity.SubjectID));
-                }
-                if (!string.IsNullOrEmpty(entity.GradeID))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, entity.GradeID));
-                }
-
-                if (!string.IsNullOrEmpty(defaultModel.SearchText))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
-                }
-
-                if (typeDocs)
-                {
-                    var result = _courseService.CreateQuery().Find(x=>x.IsPublic==true && x.TagetCenters.Contains(center.ID) && x.IsActive==true);
+                    var filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+                    var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(filter));
                     defaultModel.TotalRecord = result.CountDocuments();
 
                     //var result = _referenceService.GetAll();
                     //defaultModel.TotalRecord = result.CountDocuments();
                     var returnData = from r in result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList()
-                                     select _mapping.Auto(r,new CourseViewModel() { 
-                                        TeacherName=r.CreateUser==""?"":_teacherService.GetItemByID(r.CreateUser).FullName
+                                     select _mapping.Auto(r, new CourseViewModel()
+                                     {
+                                         TeacherName = r.CreateUser == "" ? "" : _teacherService.GetItemByID(r.CreateUser).FullName
                                      });
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -163,6 +136,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+                    var filter = new List<FilterDefinition<ReferenceEntity>>();
+
+                    var tc = (string.IsNullOrEmpty(entity.Target) || entity.Range != REF_RANGE.CLASS) ? UserID : entity.Target;
+                    var filterTeacher = Builders<ReferenceEntity>.Filter.Where(o => o.Range == REF_RANGE.CLASS && o.OwnerID == tc);
+                    var filterAll = Builders<ReferenceEntity>.Filter.Eq(o => o.Range, REF_RANGE.ALL);
+
+                    switch (entity.Range)
+                    {
+                        case REF_RANGE.TEACHER:
+                            filter.Add(filterTeacher);
+                            break;
+                        case REF_RANGE.CLASS:
+                            filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.Range == entity.Range && o.Target == entity.Target));
+                            break;
+                        case REF_RANGE.ALL:
+                            filter.Add(filterAll);
+                            break;
+                        default:
+                            filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
+                            break;
+                    }
+                    if (!string.IsNullOrEmpty(entity.SubjectID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, entity.SubjectID));
+                    }
+                    if (!string.IsNullOrEmpty(entity.GradeID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, entity.GradeID));
+                    }
+
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+
                     var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                     defaultModel.TotalRecord = result.CountDocuments();
 
@@ -175,7 +183,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Model", defaultModel }
                     });
                 }
-
             }
             return new JsonResult(new Dictionary<string, object>
                 {

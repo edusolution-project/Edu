@@ -466,7 +466,7 @@
                             SkillID: '',
                             TeacherID: '',
                             CourseID: '',
-                            TypeClass: 0,//mặc định 0=chính khoá
+                            TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                         }
                     ]
                 },
@@ -557,9 +557,7 @@
                     //})
                 },
                 createClass() {
-
                     let _that = this
-
                     if (_that.class_info.Name == '' || _that.class_info.Name == null) {
                         alert("Vui lòng nhập tên lớp");
                         _that.$refs["addName"].focus();
@@ -702,10 +700,10 @@
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data);
+                            _that.isLoading = false;
                             if (response.data.Error != null)
                             {
                                 alert(response.data.Error)
-                                _that.isLoading = false;
                             }
                             else {
                                 this.getData();
@@ -726,7 +724,7 @@
                         })
                 },
                 //Modal Event
-                showClassModal(obj) {                    
+                showClassModal(obj) {
                     let _that = this;
                     if (obj == null) {
                         _that.class_info =
@@ -745,7 +743,7 @@
                                     GradeID: '',
                                     TeacherID: '',
                                     CourseID: '',
-                                    TypeClass:0
+                                    TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                                 }
                             ]
                         }
@@ -1253,7 +1251,7 @@
     </script>
 }
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%" >
+    <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%">
         <div class="row">
             <div class="col-md-4">
                 <b-col class="form-group">
@@ -1319,19 +1317,20 @@
                             </select>
                         </div>
                         <div class="width-100 mr-2">
+                            <label for="">Loại học liệu</label>
+                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
+                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
                             <label for="">Giáo viên</label>
                             <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Loại học liệu</label>
-                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
-                                <option value="0">Học liệu chính quy</option>
-                                <option value="1">Học liệu chuyên đề</option>
-                            </select>
-                        </div>
+
                         <div class="btn-group mt-4">
                             <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
                             <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
@@ -1453,27 +1452,27 @@
     </b-modal>
 
 
-@* Modal Clone *@
-<b-modal :no-close-on-backdrop="true" id="CloneModal" centered title="Nhân bản">
-    <b-col class="form-group">
-        <label  >Lớp:</label>
-        <input type="text" class="form-control" :value="class_info.Name" readonly/>
-        <input type="hidden" value="{{class_info.ID}}" name="ID" id="ID" />
-    </b-col>
-    <b-col class="form-group">
-        <label class="label">Tên lớp mới: </label>
-        <input type="text" class="form-control" :value="class_info.Name" name="Name" id="Name" />
-    </b-col>
-    <template v-slot:modal-footer="{ ok, cancel}">
-        <template v-if="student_data.isLoading">
-            <b-button>Đang gửi dữ liệu ...</b-button>
+    @* Modal Clone *@
+    <b-modal :no-close-on-backdrop="true" id="CloneModal" centered title="Nhân bản">
+        <b-col class="form-group">
+            <label>Lớp:</label>
+            <input type="text" class="form-control" :value="class_info.Name" readonly />
+            <input type="hidden" value="{{class_info.ID}}" name="ID" id="ID" />
+        </b-col>
+        <b-col class="form-group">
+            <label class="label">Tên lớp mới: </label>
+            <input type="text" class="form-control" :value="class_info.Name" name="Name" id="Name" />
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="student_data.isLoading">
+                <b-button>Đang gửi dữ liệu ...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="CloneClass()">Nhân bản</b-button>
+                <b-button variant="danger" v-on:click="hideModal('CloneModal')">Huỷ</b-button>
+            </template>
         </template>
-        <template v-else>
-            <b-button variant="success" v-on:click="CloneClass()">Nhân bản</b-button>
-            <b-button variant="danger" v-on:click="hideModal('CloneModal')">Huỷ</b-button>
-        </template>
-    </template>
-</b-modal>
+    </b-modal>
 
 
 }

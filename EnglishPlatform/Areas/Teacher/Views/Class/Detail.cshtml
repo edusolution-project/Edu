@@ -54,22 +54,22 @@
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
                     <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
                     @*<li v-if="tab[3]">
-                        <div class="form-row">
-                            <div class="box filter-box m-1 col-12 col-md-4">
-                                <select v-model="ref.subjectID">
-                                    <option value="">Chương trình</option>
-                                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="box filter-box m-1 col-12 col-md-4">
+                                    <select v-model="ref.subjectID">
+                                        <option value="">Chương trình</option>
+                                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                                    </select>
+                                </div>
+                                <div class="box filter-box m-1 col-12 col-md-4">
+                                    <select v-model="ref.gradeID">
+                                        <option value="" v-if="ref.subjectID==''">Cấp độ</option>
+                                        <option value="" v-else>Cấp độ</option>
+                                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==ref.subjectID">{{item.Name}}</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="box filter-box m-1 col-12 col-md-4">
-                                <select v-model="ref.gradeID">
-                                    <option value="" v-if="ref.subjectID==''">Cấp độ</option>
-                                    <option value="" v-else>Cấp độ</option>
-                                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==ref.subjectID">{{item.Name}}</option>
-                                </select>
-                            </div>
-                        </div>
-                    </li>*@
+                        </li>*@
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(4)">Thảo luận</a></li>*@
                 </ul>
             </div>
@@ -105,9 +105,9 @@
         </div>
         <div class="box" v-show="tab[1]">
             <div class="form-group">
-                <h3>Học liệu chính quy</h3>
+                <h3 style="font-size:16px;" class="font-weight-bold">Học liệu chính quy</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass==''||obj.TypeClass==null||obj.TypeClass==0">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
                         <div class="inner">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
@@ -130,10 +130,10 @@
                 </ul>
             </div>
             <div class="form-group">
-                <h3>Học liệu chuyên đề</h3>
+                <h3 style="font-size:16px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects">
-                        <div class="inner" v-if="obj.TypeClass=='1'">
+                        <div class="inner" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                                 <i class="far fa-arrow-alt-circle-down ml-1"></i>

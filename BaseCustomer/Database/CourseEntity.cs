@@ -55,8 +55,8 @@ namespace BaseCustomerEntity.Database
         public long TotalPractices { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
-        [JsonProperty("TagetCenters")]
-        public List<string> TagetCenters { get; set; }
+        [JsonProperty("TargetCenters")]
+        public List<string> TargetCenters { get; set; }
         [JsonProperty("IsPublic")]
         public Boolean IsPublic { get; set; }
     }

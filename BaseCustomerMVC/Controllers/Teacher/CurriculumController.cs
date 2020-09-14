@@ -568,11 +568,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.TotalLessons = 0;
                     item.TotalExams = 0;
                     //item.IsPublic = false;
-                    if(item.TagetCenters!=null && item.TagetCenters[0] != null)
-                    {
-                        var listCenters = item.TagetCenters[0].Split(',');
-                        item.TagetCenters = listCenters.ToList();
-                    }
+                    //if (item.TargetCenters != null && item.TargetCenters[0] != null)
+                    //{
+                    //    var listCenters = item.TargetCenters[0].Split(',');
+                    //    item.TargetCenters = listCenters.ToList();
+                    //}
 
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
@@ -596,12 +596,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
                     olditem.IsPublic = item.IsPublic;
-                    if (item.TagetCenters != null && item.TagetCenters[0] != null)
-                    {
-                        var listCenters = item.TagetCenters[0].Split(',');
-                        item.TagetCenters = listCenters.ToList();
-                    }
-                    olditem.TagetCenters = item.TagetCenters;
+                    //if (item.TargetCenters != null && item.TargetCenters[0] != null)
+                    //{
+                    //    var listCenters = item.TargetCenters[0].Split(',');
+                    //    item.TargetCenters = listCenters.ToList();
+                    //}
+                    olditem.TargetCenters = item.TargetCenters;
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
                     {
@@ -911,9 +911,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new_course.ID;
         }
 
-#endregion Course
+        #endregion Course
 
-#region Chapter
+        #region Chapter
         /*--- API ---*/
         [HttpPost]
         public JsonResult CreateOrUpdateChapter(CourseChapterEntity item)
@@ -1275,9 +1275,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return pos;
         }
 
-#endregion Chapter
+        #endregion Chapter
 
-#region Lesson
+        #region Lesson
         /*--- API ---*/
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)
@@ -1662,9 +1662,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 throw ex;
             }
         }
-#endregion
+        #endregion
 
-#region PUBLISHER
+        #region PUBLISHER
 
         [HttpPost]
         //CLONE MOD COURSE
@@ -1920,7 +1920,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 await CloneLessonAnswer(_item);
             }
         }
-#endregion
+        #endregion
 
 
         public IActionResult ExportQuestionTemplate(DefaultModel model)
@@ -2132,7 +2132,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return contentType;
         }
 
-#region FIX RESOURCES
+        #region FIX RESOURCES
 
         [HttpGet]
         public JsonResult FixResourcesV2()
@@ -2538,7 +2538,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //}
 
         //#endregion
-#endregion
+        #endregion
     }
 
     public class Counter

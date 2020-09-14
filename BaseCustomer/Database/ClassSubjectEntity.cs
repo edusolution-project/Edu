@@ -46,7 +46,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TotalPractices")]
         public long TotalPractices { get; set; }
         [JsonProperty("TypeClass")]
-        public string TypeClass { get; set; }
+        public int TypeClass { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>
@@ -89,7 +89,7 @@ namespace BaseCustomerEntity.Database
 
         public Task RemoveClassSubjects(string[] ClassIDs)
         {
-            _ = Collection.DeleteManyAsync(t=> ClassIDs.Contains(t.ClassID));
+            _ = Collection.DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
             return Task.CompletedTask;
         }
 
@@ -110,6 +110,12 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
+    }
+
+    public class CLASS_TYPE
+    {
+        public const int STANDARD = 0, //chính khóa
+            EXTEND = 1; //bổ trợ
     }
 
 }

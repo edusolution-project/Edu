@@ -281,7 +281,6 @@ namespace BaseCustomerMVC.Globals
                         ClassID = item.ClassID,
                         ClassSubjectID = item.ClassSubjectID,
                     });
-
                 }
             }
         }

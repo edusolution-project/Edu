@@ -29,8 +29,8 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-header" v-cloak>
-        <div class="flex border-b flex-wrap align-items-center">
+    <div class="card-header border-b" v-cloak>
+        <div class="flex flex-wrap align-items-center">
             @*<div class="box filter-box col-12 col-md-2 m-1">
                     <select v-model="subject">
                         <option value="">Chọn chương trình</option>
@@ -45,73 +45,93 @@
                 </div>*@
             <div class="tab bg-none col-md-12 m-1">
                 <ul class="flex flex-row">
-                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" v-model="typeDocs" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
-                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" v-model="typeDocs" title="Học liệu tương tác" v-on:click="tabChange(1)">Học liệu tương tác</a></li>
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Học liệu tương tác" v-on:click="tabChange(1)">Học liệu tương tác</a></li>
                 </ul>
             </div>
         </div>
-        <div v-if="tab[0]" class="col-md-12 form-row">
-            <div class="box filter-box m-1 col-12 col-md-3">
-                <select v-model="range">
-                    <option value="">-- Chọn phạm vi chia sẻ --</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                </select>
-            </div>
-
-            <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-                <select v-model="target">
-                    <option value="">-- Chọn lớp --</option>
-                    @if (myClasses != null && myClasses.Count > 0)
-                    {
-                        foreach (var _class in myClasses)
-                        {
-                            <option value="@_class.ID">@_class.Name</option>
-                        }
-                    }
-                </select>
-            </div>
+        <div class="col-md-12 form-row pb-2">
             <div class="search-box m-1 col-12 col-md-3 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
-            <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()" style="float:right"><i class="ti-plus"></i></b-button>
+            <template v-if="tab[0]">
+                <div class="box filter-box m-1 col-12 col-md-3">
+                    <select v-model="range">
+                        <option value="">-- Chọn phạm vi chia sẻ --</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                    </select>
+                </div>
+
+                <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                    <select v-model="target">
+                        <option value="">-- Chọn lớp --</option>
+                        @if (myClasses != null && myClasses.Count > 0)
+                        {
+                            foreach (var _class in myClasses)
+                            {
+                                <option value="@_class.ID">@_class.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()" style="float:right"><i class="ti-plus"></i></b-button>
+            </template>
         </div>
     </div>
-    <div class="card-body" v-cloak style="padding-top:0px">
+    <div class="card-body pt-2" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
-                    <a href="#" v-on:click="doMainAct(data)" :title="(tab[0]==true)?data.Title:data.Name" class="thumb" style="max-width:130px; min-width:130px;">
-                        <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
-                    </a>
-                    <div class="entry p-0">
-                        <div>
+
+                    <template v-if="tab[0]">
+                        <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                        </a>
+                        <div class="entry p-0">
                             <div>
-                                <a href="#" v-on:click="doMainAct(data)" :title="data.Title" v-if="tab[0]" class="title">{{data.Title}}</a>
-                                <a href="#" v-on:click="doMainAct(data)" :title="data.Name" v-if="tab[1]" class="title">{{data.Name}}</a>
+                                <div>
+                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="title">{{data.Title}}</a>
+                                </div>
                             </div>
-                            @*<div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>*@
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                            </div>
+                            <div>
+                                <a href="#docsnormal" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#docsnormal" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                <a href="#docsnormal" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                <a href="#docsnormal" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                <a href="#docsnormal" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="fas fa-edit font-weight-bold"></i></a>
+                            </div>
                         </div>
-                        <div class="pt-0 pb-2">
-                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                    </template>
+
+                    <template v-else>
+                        <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                        </a>
+                        <div class="entry p-0">
+                            <div>
+                                <div>
+                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="title">{{data.Name}}</a>
+                                </div>
+                            </div>
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                            </div>
+                            <div>
+                                <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="fas fa-cloud-download-alt"></i> Xem chi tiết</a>
+                            </div>
                         </div>
-                        <div v-if="tab[0]">
-                            <a href="#docsnormal" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
-                            <a href="#docsnormal" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                            <a href="#docsnormal" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
-                            <a href="#docsnormal" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                            <a href="#docsnormal" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="fas fa-edit font-weight-bold"></i></a>
-                        </div>
-                        <div v-if="tab[1]">
-                            <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="far fa-eye"></i></a>
-                        </div>
-                    </div>
+
+                    </template>
+
+
                 </div>
             </div>
             <div class="row ls-doc text-center d-block" v-else>
@@ -219,7 +239,7 @@
                 subjectID: '',
                 gradeID: '',
                 tab: [true, false],
-                typeDocs: false,//mặc định là false=tài liệu thường,
+                isInteractive: false,//mặc định là false=tài liệu thường,
                 docsInteractive: {
                     Name: '',
                     ListChapters: [],
@@ -234,6 +254,8 @@
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
+                    if (tab[1])
+                        fn = this.getMyClass
                     this.searchTimeout = setTimeout(function(){
                         fn()
                     }, 500)
@@ -268,7 +290,7 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
                     _form.append('SubjectID', _that.subjectID)
-                    _form.append('typeDocs', _that.typeDocs)
+                    _form.append('isInteractive', _that.isInteractive)
                     _form.append('basis', '@center')
                     if (_that.subjectID != '') {
                         _form.append('GradeID', _that.gradeID)
@@ -577,12 +599,12 @@
                     switch (a) {
                         case 0:
                             history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
-                            this.typeDocs = false;
+                            this.isInteractive = false;
                             this.loadDocsNormal();
                             break;
                         case 1:
                             history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
-                            this.typeDocs = true;
+                            this.isInteractive = true;
                             this.loadDocsInteractive();
                             break;
                     }
@@ -619,10 +641,10 @@
                             _that.docsInteractive.ListClasses = response.data.Data
                         }).catch(e => { })
                 },
-                addMyAccount() {
+                AddToMyCourse() {
                     let _that = this;
                     let _form = new FormData();
-                    let _url = '@processUrl("AddMyAccount", "Class")';
+                    let _url = '@processUrl("AddToMyCourse", "Class")';
                     _form.append('ID', _that.docsInteractive.ID);
                     _form.append('Center', '@center');
                     _form.append('CourseName', _that.docsInteractive.Name);
@@ -651,6 +673,10 @@
                             .then(response => {
                                 this.isLoading = false;
                                 this.hideModal();
+                                if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "")
+                                    alert("Tài liệu đã được thêm vào danh mục bài giảng của bạn!");
+                                else
+                                    alert("Tài liệu đã được thêm vào lớp của bạn!");
                             }).catch(e => {
                                 this.isLoading = false;
                                 alert(e)
@@ -766,19 +792,18 @@
 
     <b-modal :no-close-on-backdrop="true" id="modal_docsinteractive" centered :title="'Học liệu ' + docsInteractive.Name" size="xl" hide-footer="true">
         <div class="col-md-12 form-row" style=" max-height: 500px; height: 500px;">
-            <div class="form-row col-md-9 col-sm-12">
+            <div class="form-row col-md-9 col-sm-12 h-100">
                 <b-col class="form-group col-sm-4" style="text-align:center">
                     <div class="col-sm-12">
-                        @*<img :src="cacheStatic(docsInteractive.Image,200)" />*@
-                        <img :src="docsInteractive" />
+                        <img :src="cacheStatic(docsInteractive.Image,200)" v-if="docsInteractive.Image != null" />
+                        <img src="~/pictures/book.jpg" v-else />
                     </div>
                     <b-col class="form-group col-sm-12" style="padding:10px">
                         <label for="">Người tạo: {{docsInteractive.Creator}}</label>
-                        @*<input type="text" name="" value="" class="form-control" v-model="docsInteractive.Creator" placeholder="Người tạo">*@
                     </b-col>
                 </b-col>
-                <b-col class="form-group col-sm-8" style="overflow-y:auto">
-                    <ul class="list-group">
+                <b-col class="form-group col-sm-8 h-100">
+                    <ul class="list-group h-100 overflow-auto">
                         <li class="list-group-item active">Mục lục</li>
                         <li v-for="item in docsInteractive.ListChapters" class="list-group-item">{{item.Name}}</li>
                     </ul>
@@ -792,13 +817,13 @@
                     </b-col>
                     <b-col class="form-group col-sm-12">
                         <select class="form-control" v-model="docsInteractive.ClassID">
-                            <option value="">Chọn lớp muốn tải về</option>
+                            <option value="">Chọn lớp muốn tải về (nếu cần)</option>
                             <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
                         </select>
                     </b-col>
                     <b-col class="form-group col-sm-12">
                         <b-button type="submit" v-if="isLoading" class="btn btn-secondary">Đang thực hiện...</b-button>
-                        <button type="submit" v-if="!isLoading" class="btn btn-primary" v-on:click="addMyAccount()">Thêm vào tài khoản</button>
+                        <button type="submit" v-if="!isLoading" class="btn btn-primary" v-on:click="AddToMyCourse()">Thêm vào tài khoản</button>
                     </b-col>
                 </div>
             </div>

@@ -1145,8 +1145,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _service.Save(item);
 
-                
-
                 //Create class subjects
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
@@ -1184,10 +1182,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
 
                     //Send email for each teacher
-                    if(tc_sj.Count > 0)
-                        foreach(var tc in tc_sj)
+                    if (tc_sj.Count > 0)
+                        foreach (var tc in tc_sj)
                             _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
-                    
 
                     _service.Save(item);
                 }
@@ -1252,6 +1249,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             long lessoncount = 0;
                             long examcount = 0;
                             long practicecount = 0;
+
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
                                 nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
@@ -1263,6 +1261,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //update period
                                 oSbj.StartDate = item.StartDate.ToUniversalTime();
                                 oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                oSbj.TypeClass = nSbj.TypeClass;
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
 
@@ -1283,7 +1282,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         });
                                     else
                                         tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
-                                    
                                 }
                                 //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
 
@@ -1298,7 +1296,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     Type = ClassMemberType.TEACHER
                                 };
                             }
-                            
 
                             processCS.Add(nSbj.ID);
                             if (!oldData.Skills.Contains(nSbj.SkillID))
@@ -1642,8 +1639,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        #region Add My Accout
-        public async Task<JsonResult> AddMyAccount(string ID,string Center,string CourseName = "",string ClassID=null)
+        #region Add To My Course
+        public async Task<JsonResult> AddToMyCourse(string ID, string Center, string CourseName = "", string ClassID = null)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
 
@@ -1695,14 +1692,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Course.TotalPractices = 0;
                 Course.TotalLessons = 0;
                 Course.TotalExams = 0;
-                Course.TagetCenters = new List<string>();
+                Course.TargetCenters = new List<string>();
                 Course.Name = CourseName == "" ? Course.Name : CourseName;
 
                 Course.ID = null;
 
                 //_courseService.Save(Course);
 
-               var newID= await CloneCourse(_courseService.GetItemByID(ID), Course);
+                var newID = await CloneCourse(_courseService.GetItemByID(ID), Course);
 
                 var SkillID = Course.SkillID;//Môn học
                 var GradeID = Course.GradeID;//Cấp độ
@@ -1716,7 +1713,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 classSubject.GradeID = GradeID;
                 classSubject.SubjectID = SubjectID;
                 classSubject.TeacherID = teacher.ID;
-                classSubject.TypeClass = "1";
+                classSubject.TypeClass = CLASS_TYPE.EXTEND;
+
                 oldSubjects.Add(classSubject);
                 Create(Class, center.Code, oldSubjects, null);
 
@@ -1748,7 +1746,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Course.TotalPractices = 0;
                 Course.TotalLessons = 0;
                 Course.TotalExams = 0;
-                Course.TagetCenters = new List<string>();
+                Course.TargetCenters = new List<string>();
                 Course.Name = CourseName == "" ? Course.Name : CourseName;
 
                 Course.ID = null;
@@ -1769,12 +1767,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //{
                 //    return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
                 //}
-
-                var newID= await CopyCourse(oldcourse, newcourse, _userCreate);//?????
+                var newID = await CopyCourse(oldcourse, newcourse, _userCreate);//?????
                 return newID;
                 //return Json("OK");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
@@ -1803,16 +1800,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 new_course.IsPublic = false;
                 _courseService.Collection.InsertOne(new_course);
 
-                var a = _courseChapterService.CreateQuery().Find(o => o.CourseID == org_course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
-                foreach (var item in a)
+                //var a = _courseChapterService.CreateQuery().Find(o => o.CourseID == org_course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+                //foreach (var item in a)
+                //{
+                await CloneChapter(new CourseChapterEntity
                 {
-                    await CloneChapter(new CourseChapterEntity
-                    {
-                        OriginID = item.ID,
-                        CourseID = new_course.ID,
-                        Name = item.Name,
-                    }, _userCreate, org_course.ID);
-                }
+                    OriginID = "0",
+                    CourseID = new_course.ID,
+                }, _userCreate, org_course.ID);
+                //}
 
                 return new_course.ID;
             }
@@ -1833,8 +1829,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.ID = "0";
                 }
 
-                //var lessons = _lessonService.GetChapterLesson(orgCourseID, item.OriginID);
-                var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == orgCourseID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+                var lessons = _courseLessonService.GetChapterLesson(orgCourseID, item.OriginID);
+                //var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == orgCourseID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
 
                 if (lessons != null && lessons.Count() > 0)
                 {
@@ -1853,7 +1849,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
 
-                var subChapters = _chapterService.GetSubChapters(orgCourseID, item.OriginID);
+                var subChapters = _courseChapterService.GetSubChapters(orgCourseID, item.OriginID);
                 foreach (var o in subChapters)
                 {
                     var new_chapter = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
@@ -1866,7 +1862,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 return item;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
@@ -1901,7 +1897,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     await CloneLessonPart(_item, _userCreate);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
@@ -1981,8 +1977,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             else
             {
                 var clone_chap = _cloneCourseChapterMapping.Clone(orgChapter, new CourseChapterEntity()
-                { 
-                    CourseID=NewCourseID
+                {
+                    CourseID = NewCourseID
                 });
                 clone_chap.OriginID = orgChapter.ID;
                 clone_chap.Order = (int)_chapterService.GetSubChapters(orgChapter.CourseID, orgChapter.ParentID).Count();
