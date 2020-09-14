@@ -188,7 +188,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-
         #region PAGE
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
@@ -233,6 +232,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
+            ViewBag.ListCenters = _centerService.GetAll().ToList();
             if (old == 1)
                 return View("Index_o");
             return View();
@@ -473,6 +473,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetCourseDetail(DefaultModel model)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(UserID);
+
             var filter = new List<FilterDefinition<ClassEntity>>();
 
             var course = _service.GetItemByID(model.ID);
@@ -489,7 +492,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var courseDetail = new Dictionary<string, object>
             {
                 { "Chapters", _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
-                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
+                {"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
             };
 
             var response = new Dictionary<string, object>
@@ -563,6 +567,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.TotalPractices = 0;
                     item.TotalLessons = 0;
                     item.TotalExams = 0;
+                    //item.IsPublic = false;
+                    if(item.TagetCenters!=null && item.TagetCenters[0] != null)
+                    {
+                        var listCenters = item.TagetCenters[0].Split(',');
+                        item.TagetCenters = listCenters.ToList();
+                    }
 
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
@@ -585,6 +595,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
+                    olditem.IsPublic = item.IsPublic;
+                    if (item.TagetCenters != null && item.TagetCenters[0] != null)
+                    {
+                        var listCenters = item.TagetCenters[0].Split(',');
+                        item.TagetCenters = listCenters.ToList();
+                    }
+                    olditem.TagetCenters = item.TagetCenters;
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
                     {
@@ -894,9 +911,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new_course.ID;
         }
 
-        #endregion Course
+#endregion Course
 
-        #region Chapter
+#region Chapter
         /*--- API ---*/
         [HttpPost]
         public JsonResult CreateOrUpdateChapter(CourseChapterEntity item)
@@ -1258,9 +1275,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return pos;
         }
 
-        #endregion Chapter
+#endregion Chapter
 
-        #region Lesson
+#region Lesson
         /*--- API ---*/
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)
@@ -1645,9 +1662,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 throw ex;
             }
         }
-        #endregion
+#endregion
 
-        #region PUBLISHER
+#region PUBLISHER
 
         [HttpPost]
         //CLONE MOD COURSE
@@ -1903,7 +1920,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 await CloneLessonAnswer(_item);
             }
         }
-        #endregion
+#endregion
 
 
         public IActionResult ExportQuestionTemplate(DefaultModel model)
@@ -2115,7 +2132,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return contentType;
         }
 
-        #region FIX RESOURCES
+#region FIX RESOURCES
 
         [HttpGet]
         public JsonResult FixResourcesV2()
@@ -2521,7 +2538,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //}
 
         //#endregion
-        #endregion
+#endregion
     }
 
     public class Counter

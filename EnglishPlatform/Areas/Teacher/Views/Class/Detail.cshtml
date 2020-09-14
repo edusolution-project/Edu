@@ -104,28 +104,56 @@
             </div>
         </div>
         <div class="box" v-show="tab[1]">
-            <ul class="list ls-practice">
-                <li v-for="(obj,i) in classSubjects">
-                    <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                            <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                        </a>
-                        <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
-                            <ul class="list">
-                                <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                              v-bind:data="item"
-                                              v-bind:classbj="obj.ID"
-                                              v-bind:pos="k"
-                                              v-bind:owner="obj.TeacherID"
-                                              v-bind:listchaps="list_chapters"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
-                            </ul>
-                        </b-collapse>
+            <div class="form-group">
+                <h3>Học liệu chính quy</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass==''||obj.TypeClass==null||obj.TypeClass==0">
+                        <div class="inner">
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
+                                <ul class="list">
+                                    <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                  v-bind:data="item"
+                                                  v-bind:classbj="obj.ID"
+                                                  v-bind:pos="k"
+                                                  v-bind:owner="obj.TeacherID"
+                                                  v-bind:listchaps="list_chapters"></chap-content>
+                                    <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                </ul>
+                            </b-collapse>
 
-                    </div>
-                </li>
-            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <h3>Học liệu chuyên đề</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects">
+                        <div class="inner" v-if="obj.TypeClass=='1'">
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
+                                <ul class="list">
+                                    <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                  v-bind:data="item"
+                                                  v-bind:classbj="obj.ID"
+                                                  v-bind:pos="k"
+                                                  v-bind:owner="obj.TeacherID"
+                                                  v-bind:listchaps="list_chapters"></chap-content>
+                                    <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                </ul>
+                            </b-collapse>
+
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="box" v-if="tab[2]">
             <table id="ed_table" class="table">
@@ -878,6 +906,7 @@
                             var _data = response.data.Data;
                             _that.classSubjects = [];
                             _data.forEach(function (item, k) {
+                                //debugger
                                 _that.classSubjects.push({
                                     ID: item.ID,
                                     Title: item.SkillName,
@@ -888,6 +917,7 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
+                                    TypeClass:item.TypeClass
                                 });
                                 //loadContent(item.ID);
                                 //_that.changeAddSubject(item)

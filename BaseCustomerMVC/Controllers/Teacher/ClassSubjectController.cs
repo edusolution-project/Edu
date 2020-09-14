@@ -105,7 +105,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseID = r.CourseID,
                               CourseName = course.Name,
                               TeacherID = r.TeacherID,
-                              TeacherName = teacher.FullName
+                              TeacherName = teacher.FullName,
+                              TypeClass=r.TypeClass
                           }).ToList()
                 },
             };

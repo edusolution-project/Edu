@@ -44,5 +44,7 @@ namespace BaseCustomerMVC.Models
         public long CompletedLesssons { get; set; }
         [JsonProperty("TotalLessons")]
         public long TotalLessons { get; set; }
+        [JsonProperty("TypeClass")]
+        public string TypeClass { get; set; }
     }
 }

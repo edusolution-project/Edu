@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using FileManagerCore.Interfaces;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -26,6 +27,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CenterService _centerService;
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
+        private readonly CourseService _courseService;
+        private readonly MappingEntity<CourseEntity, CourseViewModel> _mapping;
         private readonly IHostingEnvironment _env;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
@@ -44,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             SubjectService subjectService,
             GradeService gradeService,
+            CourseService courseService,
             IConfiguration iConfig,
             IRoxyFilemanHandler roxyFilemanHandler
             )
@@ -58,6 +62,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _gradeService = gradeService;
             _env = env;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _courseService = courseService;
+            _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
         }
@@ -96,10 +102,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel,string basis,Boolean typeDocs=false) //mặc định typeDocs=false -> tài liệu thường
         {
             if (entity != null)
             {
+                var center = _centerService.GetItemByCode(basis);
+
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var filter = new List<FilterDefinition<ReferenceEntity>>();
 
@@ -135,17 +143,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
-                var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
-                defaultModel.TotalRecord = result.CountDocuments();
 
-                //var result = _referenceService.GetAll();
-                //defaultModel.TotalRecord = result.CountDocuments();
-                var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
-                return new JsonResult(new Dictionary<string, object>
+                if (typeDocs)
                 {
-                    { "Data", returnData },
-                    { "Model", defaultModel }
-                });
+                    var result = _courseService.CreateQuery().Find(x=>x.IsPublic==true && x.TagetCenters.Contains(center.ID) && x.IsActive==true);
+                    defaultModel.TotalRecord = result.CountDocuments();
+
+                    //var result = _referenceService.GetAll();
+                    //defaultModel.TotalRecord = result.CountDocuments();
+                    var returnData = from r in result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList()
+                                     select _mapping.Auto(r,new CourseViewModel() { 
+                                        TeacherName=r.CreateUser==""?"":_teacherService.GetItemByID(r.CreateUser).FullName
+                                     });
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
+                }
+                else
+                {
+                    var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
+                    defaultModel.TotalRecord = result.CountDocuments();
+
+                    //var result = _referenceService.GetAll();
+                    //defaultModel.TotalRecord = result.CountDocuments();
+                    var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
+                }
+
             }
             return new JsonResult(new Dictionary<string, object>
                 {

@@ -843,6 +843,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         index++;
                     }
+                    var cells=ws.Cells[1,countColHeader,(int)Data4Export.CountDocuments()+2,countColHeader];
+                    cells.AutoFitColumns();
+                    cells.Style.Border.Top.Style=
+                    cells.Style.Border.Left.Style=
+                    cells.Style.Border.Right.Style=
+                    cells.Style.Border.Bottom.Style= ExcelBorderStyle.Thin;
 
                     //Lưu file lại
                     //Byte[] bin = p.GetAsByteArray();
