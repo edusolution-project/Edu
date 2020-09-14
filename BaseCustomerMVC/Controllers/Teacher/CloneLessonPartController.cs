@@ -736,14 +736,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var ansArr = ans.Split('|');
                 foreach (var answer in ansArr)
                 {
-                    if (!string.IsNullOrEmpty(answer.Trim()))
+                    var validAns = validateFill(answer);
+                    if (!string.IsNullOrEmpty(validAns))
                     {
                         Question.Answers.Add(new CloneLessonPartAnswerEntity
                         {
                             CourseID = item.CourseID,
                             CreateUser = creator,
                             IsCorrect = true,
-                            Content = answer.Trim()
+                            Content = validAns
                         });
                     }
                 }
@@ -984,6 +985,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         //TODO: Need update later
+        private string validateFill(string org)
+        {
+            if (string.IsNullOrEmpty(org)) return org;
+            org = org.Trim();
+            while (org.IndexOf("  ") >= 0)
+                org = org.Replace("  ", "");
+            return org;
+        }
         private double calculateLessonPoint(string lessonId)
         {
             var point = 0.0;
