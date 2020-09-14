@@ -188,6 +188,7 @@ namespace BaseCustomerMVC.Globals
             item.ClassSubjectID = cloneItem.ClassSubjectID;
             item.Created = DateTime.Now;
             item.Updated = DateTime.Now;
+            item.ID = null;
 
             _cloneAnswerService.Collection.InsertOne(item);
         }

@@ -166,7 +166,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
             _env = evn;
-            _fileProcess = new FileProcess(evn);
+            _fileProcess = new FileProcess(evn, config);
             _publisherHost = config.GetValue<string>("SysConfig:PublisherDomain");
 
             //fix

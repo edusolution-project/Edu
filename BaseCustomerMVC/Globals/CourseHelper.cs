@@ -56,7 +56,7 @@ namespace BaseCustomerMVC.Globals
             _courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
-        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
+        internal long CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
         {
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
@@ -81,7 +81,7 @@ namespace BaseCustomerMVC.Globals
             {
                 foreach (var courselesson in lessons)
                 {
-                    await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
+                    _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
                         ChapterID = newID,
                         OriginID = courselesson.ID,
@@ -92,12 +92,12 @@ namespace BaseCustomerMVC.Globals
                 lessoncounter = lessons.Count();
             }
 
-            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID).AsEnumerable();
+            var subchaps = _courseChapterService.GetSubChapters(classSubject.CourseID, orgID);
             if (subchaps.Count() > 0)
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
-                    lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
+                    lessoncounter += CloneChapterForClassSubject(classSubject, chap);
                 }
 
             return lessoncounter;

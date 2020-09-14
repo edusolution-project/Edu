@@ -32,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
         private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
         private string host;
+        private string staticPath;
 
         public ReferenceController(
             TeacherService teacherService,
@@ -58,6 +59,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _env = env;
             _roxyFilemanHandler = roxyFilemanHandler;
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -368,7 +370,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         if (!item.Media.Path.StartsWith("http"))
                         {
-                            var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                            //Hard code:
+                            var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
                             var stream = System.IO.File.OpenRead(filePath);
                             return File(stream, "application/octet-stream", item.Media.Name);
                         }

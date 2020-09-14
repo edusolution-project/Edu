@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using System.Drawing;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -25,6 +26,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ReferenceService _referenceService;
         private readonly IHostingEnvironment _env;
         private string host;
+        private string staticPath;
 
         public ReferenceController(
             StudentService studentService,
@@ -47,6 +49,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _gradeService = gradeService;
             _env = env;
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -191,7 +194,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     try
                     {
-                        var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                        var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
                         var stream = System.IO.File.OpenRead(filePath);
                         return File(stream, "application/octet-stream", item.Media.Name);
                     }
