@@ -9,6 +9,7 @@
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
     var defTeacher = ViewBag.User;
+    var listCenters= ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -121,6 +122,7 @@
                 //debugger
                 this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses =@Html.Raw(Json.Serialize(courses));
+                this.list_Acenters =@Html.Raw(Json.Serialize(listCenters));
                 //this.changeSubject()
                 this.getData();
                 window.chooseFile = this.chooseFile
@@ -195,7 +197,10 @@
                     Description: '',
                     Init: false,
                     Image: '',
-                    TeacherID: ''
+                    TeacherID: '',
+                    IsPublic: false,
+                    TagetCenters: [],
+                    NameCenters:''
                 },
                 cloneItem: {
                     OriginID: '',
@@ -223,9 +228,11 @@
                 view: 10,
                 hPage: 1,
                 totalRec: 0,
-                componentKey: 0
+                componentKey: 0,
+                checkShowSelect: false,
+                list_Acenters:[]
             },
-             computed: {
+            computed: {
                 page: {
                     get() {
                         return parseInt(this.hPage);
@@ -269,6 +276,17 @@
                         fn()
                     }, 500)
                 },
+                "addItem.TagetCenters": function () {
+                    this.addItem.NameCenters = ''
+                    for (i = 0; i < this.list_Acenters.length; i++) {
+                        for (j = 0; j < this.addItem.TagetCenters.length; j++) {
+                            if (this.list_Acenters[i].ID == this.addItem.TagetCenters[j]) {
+                                this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
+                            }
+                        }
+                    }
+                    //debugger
+                }
             },
             methods: {
                 getData() {
@@ -333,6 +351,7 @@
                 },
                 showEditItem(obj) {
                     //console.log(obj);
+                    debugger
                     let _that = this;
                     if (obj == null) {
                         _that.addItem.ID = '';
@@ -343,6 +362,8 @@
                         _that.addItem.SkillID = '';
                         _that.addItem.Image = '';
                         _that.addItem.TeacherID = _that.def_teacher;
+                        _that.addItem.IsPublic = false;
+                        _that.addItem.TagetCenters = [];
                     }
                     else {
                         console.log(obj);
@@ -356,6 +377,11 @@
                         _that.addItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
                         _that.addItem.TeacherID = obj.TeacherID;
+                        _that.addItem.IsPublic = obj.IsPublic;
+                        if (obj.TagetCenters != null)
+                            _that.addItem.TagetCenters = obj.TagetCenters;
+                        else _that.addItem.TagetCenters = [];
+                        debugger
                     }
                     _that.$bvModal.show('modal_event')
                 },
@@ -433,6 +459,8 @@
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('TeacherID', _that.addItem.TeacherID)
+                    _form.append('IsPublic', _that.addItem.IsPublic)
+                    _form.append('TagetCenters', _that.addItem.TagetCenters)
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -654,14 +682,23 @@
                         }
                         reader.readAsDataURL(input.files[0]); // convert to base64 string
                     }
+                },
+                showSelect() {
+                    if (this.checkShowSelect == false) {
+                        $('#selectCenters').attr('style', 'display:block');
+                        this.checkShowSelect = true;
+                    }
+                    else {
+                        $('#selectCenters').attr('style', 'display:none');
+                        this.checkShowSelect = false;
+                    }
                 }
-
             }
         });
     </script>
 }
 @section Modals{
-    <b-modal id="modal_event" centered v-bind:title="getEditTitle()">
+    <b-modal id="modal_event" centered v-bind:title="getEditTitle()" size="xl">
         <b-col class="form-group">
             <label for="">Tên bài giảng *</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name" ref="addName">
@@ -689,10 +726,40 @@
                 </select>
             </b-col>
         </div>
+        <div class="d-flex">
+            <b-col class="form-group col-md-4 col-sm-12" style="padding-left:0px">
+                <label for="" class="col-sm-4">Chia sẻ</label>
+                <input type="checkbox" style="margin:auto" v-model="addItem.IsPublic" />
+            </b-col>
+            <b-col class="form-group col-md-8 col-sm-12" v-if="addItem.IsPublic">
+                @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
+                <div class="col-sm-10 row" style="position:relative">
+                    <div class="col-md-3 col-sm-12">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="showSelect()">
+                            Chọn cơ sở <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="col-md-9 col-sm-12">
+                        <input type="text" class="form-control " v-model="addItem.NameCenters" disabled />
+                    </div>
+                    <div class="col-sm-7" style="position:absolute;right:105px;top:40px;z-index:2">
+                        <div id="selectCenters" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none">
+                                <li v-for="(item,k) in list_Acenters">
+                                    <a>
+                                        <input type="checkbox" :value="item.ID" v-model="addItem.TagetCenters" /><span class="lbl"> {{item.Name}} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </b-col>
+        </div>
         <div>
             <b-col class="form-group">
                 <label for="">Giáo viên soạn thảo</label>
-                <select class="form-control" v-model="addItem.TeacherID">
+                <select class="form-control" v-model="addItem.TeacherID" style="z-index:1">
                     <option value="">Chọn giáo viên</option>
                     <option v-for="(item,k) in list_teacher" :value="item.ID">{{item.Name}}</option>
                 </select>

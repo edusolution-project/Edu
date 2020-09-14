@@ -465,7 +465,8 @@
                             GradeID: '',
                             SkillID: '',
                             TeacherID: '',
-                            CourseID: ''
+                            CourseID: '',
+                            TypeClass: 0,//mặc định 0=chính khoá
                         }
                     ]
                 },
@@ -629,6 +630,7 @@
                             _form.append('ClassSubjects[' + k + '].GradeID', item.GradeID)
                             _form.append('ClassSubjects[' + k + '].CourseID', item.CourseID)
                             _form.append('ClassSubjects[' + k + '].TeacherID', item.TeacherID)
+                            _form.append('ClassSubjects[' + k + '].TypeClass', item.TypeClass)
                         })
                     }
 
@@ -638,7 +640,7 @@
                         if (!confirm("Lưu ý: thay đổi thông tin môn học / cập nhật phiên bản sẽ khởi tạo lại toàn bộ thông tin liên quan đến học tập của môn học. Tiếp tục?"))
                             return false;
                     }
-                     _that.isLoading = true
+                    _that.isLoading = true
                     let _url = '@processUrl("Create","Class")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -742,7 +744,8 @@
                                     SubjectID: '',
                                     GradeID: '',
                                     TeacherID: '',
-                                    CourseID: ''
+                                    CourseID: '',
+                                    TypeClass:0
                                 }
                             ]
                         }
@@ -789,7 +792,6 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
-
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -798,7 +800,8 @@
                                         GradeID: item.GradeID,
                                         TeacherID: item.TeacherID,
                                         CourseID: item.CourseID,
-                                        IsLock: lock
+                                        IsLock: lock,
+                                        TypeClass: item.TypeClass
                                     })
 
 
@@ -1250,9 +1253,9 @@
     </script>
 }
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()">
+    <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%" >
         <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <b-col class="form-group">
                     <label class="label">Tên lớp học*</label>
                     <input type="text" v-model="class_info.Name" class="form-control" ref="addName">
@@ -1284,7 +1287,7 @@
                     </label>
                 </b-col>
             </div>
-            <div class="col-md-7">
+            <div class="col-md-8">
                 <ul class="list list-subject">
                     <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
@@ -1320,6 +1323,13 @@
                             <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
                                 <option value="">Chọn giáo viên</option>
                                 <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Loại học liệu</label>
+                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
+                                <option value="0">Học liệu chính quy</option>
+                                <option value="1">Học liệu chuyên đề</option>
                             </select>
                         </div>
                         <div class="btn-group mt-4">

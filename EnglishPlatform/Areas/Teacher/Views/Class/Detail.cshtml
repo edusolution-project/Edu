@@ -105,28 +105,56 @@
             </div>
         </div>
         <div class="box" v-show="tab[1]">
-            <ul class="list ls-practice">
-                <li v-for="(obj,i) in classSubjects">
-                    <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                            <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                        </a>
-                        <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
-                            <ul class="list">
-                                <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                              v-bind:data="item"
-                                              v-bind:classbj="obj.ID"
-                                              v-bind:pos="k"
-                                              v-bind:owner="obj.TeacherID"
-                                              v-bind:listchaps="list_chapters"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
-                            </ul>
-                        </b-collapse>
+            <div class="form-group">
+                <h3>Học liệu chính quy</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass==''||obj.TypeClass==null||obj.TypeClass==0">
+                        <div class="inner">
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
+                                <ul class="list">
+                                    <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                  v-bind:data="item"
+                                                  v-bind:classbj="obj.ID"
+                                                  v-bind:pos="k"
+                                                  v-bind:owner="obj.TeacherID"
+                                                  v-bind:listchaps="list_chapters"></chap-content>
+                                    <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                </ul>
+                            </b-collapse>
 
-                    </div>
-                </li>
-            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <h3>Học liệu chuyên đề</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects">
+                        <div class="inner" v-if="obj.TypeClass=='1'">
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
+                                <ul class="list">
+                                    <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                  v-bind:data="item"
+                                                  v-bind:classbj="obj.ID"
+                                                  v-bind:pos="k"
+                                                  v-bind:owner="obj.TeacherID"
+                                                  v-bind:listchaps="list_chapters"></chap-content>
+                                    <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                </ul>
+                            </b-collapse>
+
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="box" v-if="tab[2]">
             <table id="ed_table" class="table">
@@ -187,20 +215,12 @@
                             <div class="pt-0 pb-2">
                                 <p>{{domDecoder(data.Description)}}</p>
                             </div>
-<<<<<<< HEAD
-                            <div>                                
-=======
                             <div>
->>>>>>> origin/VietPhung
                                 <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
                                 <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
                                 <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
                                 <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
                                 <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
-<<<<<<< HEAD
-                                
-=======
->>>>>>> origin/VietPhung
                             </div>
                         </div>
                     </div>
@@ -887,6 +907,7 @@
                             var _data = response.data.Data;
                             _that.classSubjects = [];
                             _data.forEach(function (item, k) {
+                                //debugger
                                 _that.classSubjects.push({
                                     ID: item.ID,
                                     Title: item.SkillName,
@@ -897,6 +918,7 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
+                                    TypeClass:item.TypeClass
                                 });
                                 //loadContent(item.ID);
                                 //_that.changeAddSubject(item)
