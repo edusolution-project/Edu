@@ -40,14 +40,15 @@
     var  createBodyRightFooter = function(){
         return  '<div class="content--right__footer">'+
                 '<div class="form-chat">'+
+                '<input type="file" style="display:none" multiple/>'+
                 '<div class="extends">'+
-                '<button class="btn btn-sm btn-img">'+
+                '<button id="ec-add-image" class="btn btn-sm btn-img">'+
                 '<img src="'+_config.image+'" alt="hình ảnh">'+
                 '</button>'+
-                '<button class="btn btn-sm btn-video">'+
+                '<button id="ec-add-video" class="btn btn-sm btn-video">'+
                 '<img src="'+_config.video+'" alt="video">'+
                 '</button>'+
-                '<button class="btn btn-sm btn-file">'+
+                '<button id="ec-add-file" class="btn btn-sm btn-file">'+
                 '<img src="'+_config.file+'" alt="tệp tin">'+
                 '</button>'+
                 '</div>'+
@@ -79,9 +80,9 @@
 
     var createItemContact = function(data,isGroup,callBack){
         if(!data.avatar){
-            data.avatar = _config.avatar;
+            data.avatar = isGroup ? _config.image : _config.avatar;
         }
-        return '<div class="item-contact" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div></div>';
+        return '<div class="item-contact" title="'+data.name+'" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div></div>';
     }
     var renderListItemContact = function(data,isGroup,callBack){
         var html = '';

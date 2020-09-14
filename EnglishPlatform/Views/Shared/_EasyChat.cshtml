@@ -13,6 +13,26 @@
 <script src="~/js/EasyChatLib/assets/js/UI.js"></script>
 <script src="~/js/EasyChatLib/assets/js/easychat.js"></script>
 <script>
-        var easyChat = new EasyChat();
-        easyChat.Create({currentUser:g_CurrentUser});
+    $.ajax({
+        method: "GET",
+        url: "/api/EasyChat/GetClassList",
+        success: function (data) {
+            console.log(data);
+        }
+    });
+</script>
+<script>
+    var easyChat = new EasyChat();
+    var opts = {
+        currentUser: g_CurrentUser,
+        url: {
+            group: {
+                getlist: "/api/EasyChat/GetClassList"
+            },
+            member: {
+                getlist:"/api/EasyChat/GetMembers"
+            }
+        }
+    };
+    easyChat.Create(opts);
 </script>

@@ -16,10 +16,52 @@
 .small-scroll::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+.marquee {
+    height: 20px; 
+    overflow: hidden;
+    position: relative;
+}
+.marquee p {
+position: absolute;
+width: 100%;
+height: 100%;
+margin: 0;
+line-height: 20px;
+text-align: center;
+/* Starting position */
+-moz-transform:translateX(100%);
+-webkit-transform:translateX(100%); 
+transform:translateX(100%);
+/* Apply animation to this element */ 
+-moz-animation: scroll-left 25s linear infinite;
+-webkit-animation: scroll-left 25s linear infinite;
+animation: scroll-left 25s linear infinite;
+}
+/* Move it (define the animation) */
+@-moz-keyframes scroll-left {
+0%   { -moz-transform: translateX(100%); }
+100% { -moz-transform: translateX(-100%); }
+}
+@-webkit-keyframes scroll-left {
+0%   { -webkit-transform: translateX(100%); }
+100% { -webkit-transform: translateX(-100%); }
+}
+@keyframes scroll-left {
+0%   { 
+-moz-transform: translateX(100%); /* Browser bug fix */
+-webkit-transform: translateX(100%); /* Browser bug fix */
+transform: translateX(100%);   
+}
+100% { 
+-moz-transform: translateX(-100%); /* Browser bug fix */
+-webkit-transform: translateX(-100%); /* Browser bug fix */
+transform: translateX(-100%); 
+}
+}
 .easy-chat__content {
     position: fixed;
     bottom: 15px;
-    left: 65px;
+    left: 80px;
     background: #fff;
     padding: 10px;
     border: 1px solid #cccc;
@@ -29,6 +71,7 @@
     max-width: 100%;
     max-height: 90vh;
     display: none;
+    z-index:99999;
 }
 .easy-chat__content.open{
     display: block;
@@ -121,6 +164,7 @@
 .contact-info .user-info .name {
     font-weight: 600;
     font-size: 1em;
+    white-space: nowrap;
 }
 
 .contact-info .user-info .status-text {
@@ -179,7 +223,7 @@ div[data-status="offline"]::before{
 .easy-chat__ball {
     position: fixed;
     bottom: 20px;
-    left: 66px;
+    left: 80px;
     z-index: 99999999;
     width: 50px;
     height: 50px;

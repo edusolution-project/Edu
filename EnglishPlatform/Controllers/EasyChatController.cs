@@ -24,16 +24,11 @@ namespace EnglishPlatform.Controllers
         protected readonly Dictionary<string, List<string>> _mapUserOffline = new Dictionary<string, List<string>>();
         protected readonly Dictionary<string, string> _mapConnectId = new Dictionary<string,string>();
         protected readonly Dictionary<string, List<string>> _mapUsersConnectionId = new Dictionary<string, List<string>>();
-        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
-        private readonly IHubContext<ChatHub> _hubContent;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly ILog _log;
-        public EasyChatController(IHubContext<ChatHub> hubContent,IRoxyFilemanHandler roxyFilemanHandler, StudentService studentService, ClassService classService, ILog log)
+        public EasyChatController(StudentService studentService, ClassService classService, ILog log)
         {
-            
-            _hubContent = hubContent;
-            _roxyFilemanHandler = roxyFilemanHandler;
             _studentService = studentService;
             _classService = classService;
             _log = log;
@@ -47,7 +42,14 @@ namespace EnglishPlatform.Controllers
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
+                    
                     List<string> classIdList = _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
+
+                    if(classIdList == null || classIdList.Count == 0)
+                    {
+                        classIdList = _classService.GetTeacherClassList(User.FindFirst("UserID").Value)?.ToList();
+                    }
+
                     if(classIdList != null && classIdList.Count >0)
                     {
                         var listClass = _classService.GetItemsByIDs(classIdList)?.Select(o => new MemberInfo()
@@ -100,8 +102,8 @@ namespace EnglishPlatform.Controllers
             return null;
         }
 
-        [HttpPost]
-        public List<MemberInfo> GetMembers(List<string> classNames)
+        [HttpGet]
+        public List<MemberInfo> GetMembers([FromHeader]List<string> classNames)
         {
             try
             {

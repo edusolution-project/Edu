@@ -46,7 +46,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             boxMessage.querySelector('.contact-info .avatar>img').src = self.querySelector(".contact-info .avatar>img").src;
             boxMessage.querySelector('.contact-info .user-info .name').innerHTML = self.querySelector(".contact-info .user-info .name").innerHTML;
 
-            console.log(self.dataset);
+            //console.log(self.dataset);
             if(self.dataset.group == "true"){
                 loadMessage(__defaulConfig.currentUser.center,__defaulConfig.currentUser.id,self.dataset.id,"");
             }
@@ -97,10 +97,21 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     EasyChat.prototype.Create = function(obj){
         _mergeConfig(obj);
         __CURRENTUSER = __defaulConfig.currentUser;
-        __MEMBER.Update(__defaulConfig.members);
-        __GROUP.Update(__defaulConfig.groups);
-        renderHTML();
-        ConnectHub();
+        __GROUP.Create(__defaulConfig.url.group.getlist).then(function(){
+
+            var array = __GROUP.GetAll();
+            var listString = [];
+            for(var i = 0; i < array.length ; i++){
+                var item = array[i];
+                if(item){
+                    listString.push(item.id);
+                }
+            }
+            __MEMBER.Create(__defaulConfig.url.member.getlist,listString).then(function(){
+                renderHTML();
+                ConnectHub();
+            });
+        });
     }
     EasyChat.prototype.Destroy = function(){
 
@@ -170,15 +181,93 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     }
                 });
             }
+            //search
+            var SearchInput = root.querySelector('.input-text-search');
+            if(SearchInput){
+                SearchInput.addEventListener('keyup',function(){
+                    var listContact = root.querySelector('.list-contact');
+                    if(listContact){
+                        var listItemContact = listContact.querySelectorAll('.item-contact');
+                        if(listItemContact){
+                            var textExtends = new Text();
+                            var value = SearchInput.value;
+                            for(var i = 0; i < listItemContact.length ; i++){
+                                var contact = listItemContact[i];
+                                var name = contact.querySelector('.name');
+                                if(textExtends.ClearUnicode(name.innerHTML,true).indexOf(textExtends.ClearUnicode(value,true))<=-1 && value != ""){
+                                    contact.style.display='none';
+                                }
+                                else{
+                                    contact.style.display='block';
+                                }
+                            }
+
+                        }
+                    }
+                });
+            }
+            //send message 
+            var formChat= root.querySelector('.form-chat');
+            if(formChat){
+                var textArea = formChat.querySelector('textarea');
+                if(textArea){
+                    var keyHove = "",valueMessage = "";
+                    textArea.addEventListener('keydown',function(e){
+                        valueMessage = textArea.value;
+                        if(keyHove == "") keyHove = e.key;
+                        //console.log("keydow",e.key);
+                    });
+                    textArea.addEventListener('keyup',function(e){
+                        if(keyHove == 'Shift' && e.key == "Enter"){
+                            // xong dong
+                            console.log('xuong dong');
+                        }
+                        if(keyHove == e.key){
+                            keyHove = "";
+                        }
+                        if(keyHove == "" && e.key == "Enter"){
+                            textArea.value = valueMessage;
+                            //console.log('send');
+                            SendMessage();
+                        }
+                    });
+                }
+                var inputFiles = formChat.querySelector('input[type="file"]');
+                var btnImage = formChat.querySelector('[id="ec-add-image"]');
+                var btnVideo = formChat.querySelector('[id="ec-add-video"]');
+                var btnFile = formChat.querySelector('[id="ec-add-file"]');
+                btnImage.addEventListener('click',function(){
+                    inputFiles.setAttribute('accept',"image/*");
+                    inputFiles.click();
+                });
+                btnVideo.addEventListener('click',function(){
+                    inputFiles.setAttribute('accept',"video/*");
+                    inputFiles.click();
+                });
+                btnFile.addEventListener('click',function(){
+                    inputFiles.setAttribute('accept',"application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document*");
+                    inputFiles.click();
+                });
+            }
         }
     }
-    var serverCall = function(methodName,data){
-        __SIGNALR.invoke(methodName,data);
+    var SendMessage = function(){
+        var messageText = getRoot().querySelector('.form-chat textarea').value;
+        var files = getRoot().querySelector('.form-chat input[type="file"]').files;
+        //var 
+        console.log(messageText);
     }
     var ConnectHub = function(){
         try{
             __SIGNALR.start().then(function () {
-                __SIGNALR.invoke("Online", __CURRENTUSER.id, "a,b,c,d");
+                var listGroup = __GROUP.GetAll();
+                var strGroupNames = "";
+                for(var i = 0; i< listGroup.length;i++){
+                    var group = listGroup[i];
+                    strGroupNames+= strGroupNames == ""? group.id : ","+group.id;
+                }
+                //add vao group
+                __SIGNALR.invoke("Online", __CURRENTUSER.id, strGroupNames);
             });
         }
         catch (ex) {

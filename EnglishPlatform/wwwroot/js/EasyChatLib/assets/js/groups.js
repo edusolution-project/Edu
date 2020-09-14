@@ -28,6 +28,17 @@
             }
         });
     }
+    var createAjax = function(){
+        return new Ajax();
+    }
+    Group.prototype.Create = function(url){
+        var ajax = createAjax();
+        return ajax.proccess("GET", url, null, false).then(function(data){
+            //console.log(data);
+            __GROUPS = typeof(data) == "string" ? JSON.parse(data) : data;
+        });
+        //console.log("abc");
+    }
     Group.prototype.GetAll = function(){
         return __GROUPS;
     }

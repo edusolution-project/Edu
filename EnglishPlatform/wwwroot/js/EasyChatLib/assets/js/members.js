@@ -11,6 +11,9 @@
         if(__MEMBERS.length == 0) return false;
         return __MEMBERS.filter(function(v){if(v.id == member.id) return v;}).length > 0;
     }
+    var createAjax = function(){
+        return new Ajax();
+    }
     var search = function(textSearch){
         return __MEMBERS.filter(function(v){
             var keys = Object.keys(v);
@@ -26,6 +29,13 @@
                     }
                 }
             }
+        });
+    }
+    Member.prototype.Create = function(url,listClass){
+        var ajax = createAjax();
+        return ajax.proccessWithDataHeader("GET", url, {classNames:listClass} , false).then(function(data){
+            //console.log(data);
+            __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
         });
     }
     Member.prototype.GetAll = function(){
