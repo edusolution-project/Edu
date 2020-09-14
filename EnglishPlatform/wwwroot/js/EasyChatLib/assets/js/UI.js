@@ -77,7 +77,6 @@
             '</button>'+
         '</div>';
     }
-
     var createItemContact = function(data,isGroup,callBack){
         if(!data.avatar){
             data.avatar = isGroup ? _config.image : _config.avatar;
@@ -90,6 +89,19 @@
             var item = data[i];
             html += createItemContact(item,isGroup,callBack);
         }
+        return html;
+    }
+    var renderMessage = function(data,userInfo,receiverInfo,groupInfo){
+        var classSender= "message-sender";
+        var html =
+            '<div class="message ">'+
+                '<div class="user-info">'+
+                    '<div class="avatar"><img src="" alt=""></div>'+
+                    '<div class="name">Hoang Thai Long</div>'+
+                '</div>'+
+                '<div class="group-message"></div>'+
+                '<div class="time-send">1 phut truoc</div>'+
+            '</div>';
         return html;
     }
     return UI;

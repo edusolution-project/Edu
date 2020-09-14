@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
@@ -8,8 +9,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,6 +32,8 @@ namespace EasyChatApp
         {
             services.AddCors();
             services.AddSignalR();
+            services.AddSingleton<EasyChatHub>();
+            //services.AddSingleton<IHubContext<EasyChatHub>>();
             services.AddSingleton<GroupUserService>();
             services.AddSingleton<MessagerService>();
             services.AddSingleton<GroupAndUserService>();
@@ -48,7 +53,13 @@ namespace EasyChatApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(env.ContentRootPath, "GoogleDrive")),
+                RequestPath = "/GoogleDrive"
+            });
             app.UseHttpsRedirection();
             //app.UseCors();
             app.UseCors(builder =>

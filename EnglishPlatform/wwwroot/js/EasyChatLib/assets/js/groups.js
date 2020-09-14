@@ -42,6 +42,13 @@
     Group.prototype.GetAll = function(){
         return __GROUPS;
     }
+
+    Group.prototype.GetItemByID = function(id){
+        return __GROUPS.filter(function(v){
+            if(v.id == id) return v;
+        });
+    }
+
     Group.prototype.Search = function(textSearch){
         return search(textSearch);
     }

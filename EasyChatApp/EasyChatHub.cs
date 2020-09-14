@@ -11,9 +11,24 @@ namespace EasyChatApp
     {
         #region local memory
         private readonly static ConnectIdToCurrentUser _connectIdToCurrentUser = new ConnectIdToCurrentUser();
-        private readonly static GroupMapping<string> _userMapping = new GroupMapping<string>();
+        private static readonly GroupMapping<string> _userMapping = new GroupMapping<string>();
         private readonly static ConnectIdToUser _connectIdToUser = new ConnectIdToUser();
         private readonly static GroupMapping<string> _groupToUsers = new GroupMapping<string>();
+
+        internal static GroupMapping<string> UserMap
+        {
+            get
+            {
+                return _userMapping;
+            }
+        }
+        internal static GroupMapping<string> GroupMapping
+        {
+            get
+            {
+                return _groupToUsers;
+            }
+        }
         #endregion
         private readonly GroupAndUserService _groupAndUserService;
         public EasyChatHub(GroupAndUserService groupAndUserService)
@@ -37,7 +52,7 @@ namespace EasyChatApp
                     await _groupAndUserService.CreateTimeJoin(groupName, user);
                 }
                 _groupToUsers.Add(user, groupName);
-                await Clients.OthersInGroup(groupName).SendAsync("OnlineToGroup",groupName, user);
+                await Clients.Group(groupName).SendAsync("OnlineToGroup",groupName, user);
             }
             _userMapping.Add(user, connectionId);
             _connectIdToUser.Add(connectionId, user);

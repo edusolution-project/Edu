@@ -905,6 +905,7 @@ namespace FileManagerCore.Services
             string folderId = GetFolder(center, user);
             var listFile = context.Request.Form.Files;
             var count = listFile == null ? 0 : listFile.Count;
+            if (count == 0) return null;
             string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);

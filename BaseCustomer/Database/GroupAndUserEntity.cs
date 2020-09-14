@@ -37,7 +37,7 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                double unixTimestamp = (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                double unixTimestamp = (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
                 oldItem = new GroupAndUserEntity()
                 {
                     GroupID = groupName,
@@ -52,7 +52,7 @@ namespace BaseCustomerEntity.Database
         public async Task UpdateTimeLife(string user)
         {
             var listData = CreateQuery().Find(o => o.UserID == user)?.ToList();
-            double unixTimestamp = (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            double unixTimestamp = (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
             for (int i = 0; listData != null && i < listData.Count; i++)
             {
                 var item = listData[i];

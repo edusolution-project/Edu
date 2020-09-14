@@ -7,11 +7,12 @@ var ui = new UI({power : urlBase+"assets/Icon/Outline/power.svg",
     file: urlBase +"assets/Icon/Outline/file-2.svg",
     navigation: urlBase +"assets/Icon/Fill/navigation-2.svg"});
 var connectionHubChat = new signalR.HubConnectionBuilder()
-    .withUrl("https://easychat.eduso.vn/chathub")
+    .withUrl("https://localhost:44374/chathub")
     .build();
 (function(message,member,group,signalR,UI){
     "use strict";
     var __defaulConfig = {
+        center:"eduso",
         id:"easy-chat",
         currentUser :{id:"test",name:"Hoàng Thái Long",email:"longthaihoang94@gmail.com",center:""},
         members : [{id:"test2",name:"member"}],
@@ -35,31 +36,95 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     }
     EasyChat.OpenMessageBox = function(self){
         var parent = self.parentElement;
-        var active = parent.querySelector('.active');
-        if(active){
-            active.classList.remove("active");
-        }
-        self.classList.add("active");
         var root = getRoot();
-        var boxMessage = root.querySelector('.easy-chat__content--right');
-        if(boxMessage){
-            boxMessage.querySelector('.contact-info .avatar>img').src = self.querySelector(".contact-info .avatar>img").src;
-            boxMessage.querySelector('.contact-info .user-info .name').innerHTML = self.querySelector(".contact-info .user-info .name").innerHTML;
-
-            //console.log(self.dataset);
-            if(self.dataset.group == "true"){
-                loadMessage(__defaulConfig.currentUser.center,__defaulConfig.currentUser.id,self.dataset.id,"");
+        if(!self.classList.contains('active'))
+        {
+            var active = parent.querySelector('.active');
+            if(active){
+                active.classList.remove("active");
             }
-            else{
-                loadMessage(__defaulConfig.currentUser.center,__defaulConfig.currentUser.id,"",self.dataset.id);
+            self.classList.add("active");
+            var listmessage = root.querySelector('.list-messages');
+            if(listmessage){
+                listmessage.innerHTML ="";
             }
+            var boxMessage = root.querySelector('.easy-chat__content--right');
+            if(boxMessage){
+                boxMessage.querySelector('.contact-info .avatar>img').src = self.querySelector(".contact-info .avatar>img").src;
+                boxMessage.querySelector('.contact-info .user-info .name').innerHTML = self.querySelector(".contact-info .user-info .name").innerHTML;
 
-            boxMessage.classList.add('open');
+                //console.log(self.dataset);
+                if(self.dataset.group == "true"){
+                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,self.dataset.id,"");
+                }
+                else{
+                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,"",self.dataset.id);
+                }
+
+                boxMessage.classList.add('open');
+            }
+        }
+        else{
+            updateTimeLife();
+            gotoBottom();
         }
     }
-    var time = 0;
+    var time = 0,pageIndex=0,pageSize=10;
     var loadMessage = function(center,user,groupId,receiver){
-        console.log(center,user,groupId,receiver);
+        //{pageIndex}&pageSize={pageSize}
+        var ajax = new Ajax();
+        var listMessage = getRoot().querySelector(".list-messages");
+        var startDate = new Date().getTime();
+        if(listMessage.children.length > 0){
+            startDate = parseFloat(listMessage.children[0].querySelector("time").dataset.time);
+        }
+        var url = __defaulConfig.extendsUrl.GetMessage
+            .replace("{user}",user)
+            .replace("{receiver}",receiver)
+            .replace("{groupId}",groupId)
+            .replace("{messageId}","")
+            .replace("{startDate}",startDate)
+            .replace("{pageIndex}",pageIndex)
+            .replace("{pageSize}",pageSize);
+
+        ajax.proccessData("POST",url,null).then(function(res){
+            var dataJson = typeof(res) == "string" ? JSON.parse(res) : res;
+            if(dataJson != null && dataJson.code == 200){
+                var data = dataJson.data;
+                if(data != null && data.length > 0){
+                    //console.log(data);
+                    renderMessage(data,groupId,receiver,user);
+                }
+            }
+        });  
+        
+    }
+    var renderMessage = function(data){
+        // ID: "5f5f955706ff552e60156389"
+        // content: "jshdgfdjfgfdghsdjhgfsfskdfjdghsfhsfsdf"
+        // data: Array(1)
+            // 0:
+            // id: "1TcnEukHFMzQgJEGQCHIVHgIfdzKRARRz"
+            // type: ".jpg"
+            // url: "https://drive.google.com/uc?export=view&id=1TcnEukHFMzQgJEGQC
+        // groupId: "5e607346da0567281cf85917"
+        // isDel: false
+        // sender: "5db11841b5433109d4533cae"
+        // time: 1600099668.5038116
+        var groupMessages = [];
+        for(var i = 0; data != null && i < data.length ; i++){
+            var message = data[i];
+            var nextMessage = data[i+1];
+            var id = message.ID;
+            var medias = message.data;
+            var sender = message.sender;
+            var groupId = message.groupId;
+            var isMaster = sender == __defaulConfig.currentUser.id;
+            var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
+            console.log(message.id,isMaster,isPrivate);
+        }
+
+
     }
     EasyChat.CloseMessageBox = function(){
         var root = getRoot();
@@ -248,14 +313,65 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     inputFiles.setAttribute('accept',"application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document*");
                     inputFiles.click();
                 });
+
+                inputFiles.addEventListener('change',function(){
+                    var files = inputFiles.files;
+                    if(files.length > 0){SendMessage();}
+                });
             }
         }
     }
     var SendMessage = function(){
         var messageText = getRoot().querySelector('.form-chat textarea').value;
         var files = getRoot().querySelector('.form-chat input[type="file"]').files;
-        //var 
-        console.log(messageText);
+        var msg = "";
+        if(messageText.replace(/\s/g, '') != ""){
+            msg = messageText;
+        }
+        PostMessage(msg,files);
+    }
+    var PostMessage = function(message,files){
+        var ajax = new Ajax();
+        //(string messageId ,string center, string user, string groupId, string receiver, string message, string connectionId)
+        var root = getRoot();
+        var active = root.querySelector('.item-contact.active');
+        if(active){
+            var obj = {
+                center : __defaulConfig.center,
+                user : __defaulConfig.currentUser.id,
+                groupId : active.dataset.group =="true" ? active.dataset.id : null,
+                receiver : active.dataset.group =="false" ? active.dataset.id : null,
+                message : typeof(message) == "string" ? message : null,
+            }
+            var frm = document.createElement('form');
+            frm.setAttribute("enctype","multipart/form-data");
+            var formData = new FormData(frm);
+            var keys = Object.keys(obj);
+            var url = __defaulConfig.extendsUrl.SendMessage,query="";
+            //var object = {};
+            for(var i = 0; i < keys.length ; i++){
+                var key = keys[i];
+                if(obj[key]){ 
+                    //object[key] = obj[key];
+                    //formData.append(key,obj[key]);
+                    query+= query == ""? "?"+key+"="+obj[key] : "&"+key+"="+obj[key];
+                }
+            }
+            if(files){
+                if(files.length > 0){
+                    for(var i = 0; i < files.length; i++){
+                        var file = files[i];
+                        formData.append("Files",file);
+                    }
+                }
+            }
+            ajax.proccessData("POST", url+query, formData).then(function(res){
+                console.log(res);
+            });
+        }
+        else{
+            console.log("Không tìm thấy địa chỉ cần gửi");
+        }
     }
     var ConnectHub = function(){
         try{

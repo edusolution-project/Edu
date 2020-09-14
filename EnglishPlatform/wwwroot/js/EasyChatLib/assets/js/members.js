@@ -38,6 +38,9 @@
             __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
         });
     }
+    Member.prototype.GetItemByID = function(id){
+        return __MEMBERS.filter(function(v){if(v.id == id) return v;});
+    }
     Member.prototype.GetAll = function(){
         return __MEMBERS;
     }

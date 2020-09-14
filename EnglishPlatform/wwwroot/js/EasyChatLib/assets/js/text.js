@@ -84,11 +84,13 @@
             }
             request.open(method || 'POST', url, async || true);
 
-            var keys = Object.keys(dataheader);
-            if(keys != null && keys.length > 0){
-                for(var i = 0; i < keys.length ; i++){
-                    if(dataheader[keys[i]]){
-                        request.setRequestHeader(keys[i],dataheader[keys[i]]);
+            if(dataheader){
+                var keys = Object.keys(dataheader);
+                if(keys != null && keys.length > 0){
+                    for(var i = 0; i < keys.length ; i++){
+                        if(dataheader[keys[i]]){
+                            request.setRequestHeader(keys[i],dataheader[keys[i]]);
+                        }
                     }
                 }
             }
@@ -100,6 +102,38 @@
                 request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
                 request.send(data);
             }
+        });
+    }
+
+    Ajax.prototype.proccessData = function (method, url, data ,dataheader, async) {
+        var request = this._request;
+        return new Promise(function (resolve, reject) {
+            request.onreadystatechange = function () {
+                if (request.readyState == 4) {
+                    // Process the response
+                    if (request.status >= 200 && request.status < 300) {
+                        // If successful
+                        resolve(request.response);
+                    } else {
+                        reject({
+                            status: request.status,
+                            statusText: request.statusText
+                        });
+                    }
+                }
+            }
+            request.open(method || 'POST', url, async || true);
+            if(dataheader){
+                var keys = Object.keys(dataheader);
+                if(keys != null && keys.length > 0){
+                    for(var i = 0; i < keys.length ; i++){
+                        if(dataheader[keys[i]]){
+                            request.setRequestHeader(keys[i],dataheader[keys[i]]);
+                        }
+                    }
+                }
+            }
+            request.send(data);
         });
     }
     Ajax.prototype.creatFormData = function (obj, frm) {
@@ -310,5 +344,7 @@
       };
       
     var spaceDescription = '(Space character)';
+
+    
       
 }());

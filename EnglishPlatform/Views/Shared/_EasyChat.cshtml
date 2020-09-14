@@ -12,15 +12,7 @@
 <script src="~/js/EasyChatLib/assets/js/message.js"></script>
 <script src="~/js/EasyChatLib/assets/js/UI.js"></script>
 <script src="~/js/EasyChatLib/assets/js/easychat.js"></script>
-<script>
-    $.ajax({
-        method: "GET",
-        url: "/api/EasyChat/GetClassList",
-        success: function (data) {
-            console.log(data);
-        }
-    });
-</script>
+<script src="https://localhost:44374/chat/ScriptEasyChat"></script>
 <script>
     var easyChat = new EasyChat();
     var opts = {
@@ -32,7 +24,8 @@
             member: {
                 getlist:"/api/EasyChat/GetMembers"
             }
-        }
+        },
+        extendsUrl: g_EasyChatURL,
     };
     easyChat.Create(opts);
 </script>
