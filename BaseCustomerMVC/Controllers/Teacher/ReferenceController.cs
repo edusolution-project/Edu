@@ -124,9 +124,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //var result = _referenceService.GetAll();
                     //defaultModel.TotalRecord = result.CountDocuments();
                     var returnData = from r in result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList()
+                                     let teacher = string.IsNullOrEmpty(r.CreateUser) ? new TeacherEntity() : (_teacherService.GetItemByID(r.CreateUser) ?? new TeacherEntity())
                                      select _mapping.Auto(r, new CourseViewModel()
                                      {
-                                         TeacherName = r.CreateUser == "" ? "" : _teacherService.GetItemByID(r.CreateUser).FullName
+                                         TeacherName = teacher.FullName
                                      });
                     return new JsonResult(new Dictionary<string, object>
                     {

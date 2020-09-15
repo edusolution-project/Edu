@@ -656,7 +656,7 @@
         Vue.component('datepicker', datepickerComponent);
 
         var mainInstance = new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.loadClassDetail()
                 this.list_subject = @Html.Raw(Json.Serialize(listsubjects));
