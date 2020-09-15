@@ -61,28 +61,19 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<LessonEntity>>
             {
-                //CourseID_1_ChapterID_1_Order_1_ID_1
+                //ClassSubjectID_1_ChapterID_1_Order_1_ID_1
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
-                    .Ascending(t => t.CourseID)
-                    .Ascending(t=> t.ChapterID)),
-                //ChapterID_1_Order_1
+                    .Ascending(t => t.ClassSubjectID)
+                    .Ascending(t=> t.ChapterID)
+                    .Ascending(t=> t.Order)),
+                //ClassID_1
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
-                    .Ascending(t=> t.ChapterID).Ascending(t=> t.Order))
+                    .Ascending(t => t.ClassID))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
-        }
-
-        public long CountChapterLesson(string ChapterID)
-        {
-            return Collection.CountDocumentsAsync(t => t.ChapterID == ChapterID).Result;
-        }
-
-        public long CountCourseLesson(string CourseID)
-        {
-            return Collection.CountDocumentsAsync(t => t.CourseID == CourseID).Result;
         }
 
         public long CountClassLesson(string ClassID)
@@ -98,6 +89,11 @@ namespace BaseCustomerEntity.Database
         public void UpdateLessonPoint(string ID, double point)
         {
             CreateQuery().UpdateOne(t => t.ID == ID, Builders<LessonEntity>.Update.Set(t => t.Point, point));
+        }
+
+        public IEnumerable<LessonEntity> GetChapterLesson(string ClassSubjectID, string ChapterID)
+        {
+            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
     }
 }

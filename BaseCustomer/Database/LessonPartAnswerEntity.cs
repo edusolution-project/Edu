@@ -52,5 +52,10 @@ namespace BaseCustomerEntity.Database
 
             Collection.Indexes.CreateManyAsync(indexs);
         }
+
+        public IEnumerable<LessonPartAnswerEntity> GetByQuestionID(string ID)
+        {
+            return CreateQuery().Find(o => o.ParentID == ID).ToEnumerable();
+        }
     }
 }

@@ -31,7 +31,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly LessonService _lessonService;
         private readonly LearningHistoryService _learningHistoryService;
-        
+        private readonly ProgressHelper _progressHelper;
+
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -83,6 +84,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             LessonPartQuestionService lessonPartQuestionService,
             LessonPartAnswerService lessonPartAnswerService,
             LearningHistoryService learningHistoryService,
+            ProgressHelper progressHelper,
 
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
@@ -94,6 +96,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             MailHelper mailHelper,
             ChapterService chapterService,
             CourseHelper courseHelper,
+            LessonHelper lessonHelper,
             ClassProgressService classProgressService,
             GroupService groupService,
             TeacherHelper teacherHelper,
@@ -117,15 +120,9 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _fileProcess = fileProcess;
 
-            _lessonHelper = new LessonHelper(
-               lessonService,
-               lessonPartService,
-               lessonPartQuestionService,
-               lessonPartAnswerService,
-               cloneLessonPartService,
-               cloneLessonPartAnswerService,
-               cloneLessonPartQuestionService
-               );
+            _lessonHelper = lessonHelper;
+
+            _progressHelper = progressHelper;
 
             _centerService = centerService;
             _accountService = accountService;
@@ -282,8 +279,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                              };
             return returndata.ToList();
         }
-
-
 
 
         [Obsolete]
@@ -712,7 +707,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //remove clone lesson
             var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
             //remove progress: learning history => class progress, chapter progress, lesson progress
-            var LhTask = _learningHistoryService.RemoveClassSubjectHistory(cs.ID);
+            var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
             //remove exam
             var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
             //remove classSubject
@@ -720,14 +715,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             await _classSubjectService.RemoveAsync(cs.ID);
         }
 
-        public JsonResult Clone(ClassEntity item, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload,string CenterCode)
+        public JsonResult Clone(ClassEntity item, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload, string CenterCode)
         {
             var center = _centerService.GetItemByCode(CenterCode);
             var teachers = _teacherService.GetAll();
             List<TeacherEntity> tearcherHead = new List<TeacherEntity>();
-            foreach(var teacher in teachers.ToList())
+            foreach (var teacher in teachers.ToList())
             {
-                if (teacher.Centers != null && teacher.Centers.Find(x => x.CenterID == center.ID) != null )
+                if (teacher.Centers != null && teacher.Centers.Find(x => x.CenterID == center.ID) != null)
                     tearcherHead.Add(teacher);
             }
 
@@ -741,7 +736,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             var processCS = new List<string>();
             var oldData = _service.GetItemByID(item.ID);
-            
+
             var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
             newData.ID = null;
             newData.OriginID = oldData.ID;
@@ -856,6 +851,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 _classSubjectService.Save(nSbj);
                 //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+
                 //Clone Course
                 _courseHelper.CloneForClassSubject(nSbj);
 

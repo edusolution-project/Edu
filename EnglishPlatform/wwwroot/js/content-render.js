@@ -151,17 +151,17 @@ var Lesson = (function () {
         window.getLocalData = getLocalData
         window.ShowFullScreen = showFullScreen;
         window.openPreview = openPreview;
-        var hash = window.location.hash;
-        if (hash.startsWith('#')) {
-            hash = hash.split('#')[1]
-            //console.log(hash)
-            switch (hash) {
-                case 'redo':
-                    redoExam();
-                    window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
-                    break;
-            }
-        }
+        //var hash = window.location.hash;
+        //if (hash.startsWith('#')) {
+        //    hash = hash.split('#')[1]
+        //    //console.log(hash)
+        //    switch (hash) {
+        //        case 'redo':
+        //            redoExam();
+        //            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
+        //            break;
+        //    }
+        //}
     }
 
     var reloadData = function () {
@@ -336,7 +336,7 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        //console.log(config.mod);
+        console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -504,7 +504,7 @@ var Lesson = (function () {
                     switchUIMode(UIMode.LECTURE_ONLY);
             }
         }
-        //console.log(_UImode);
+        console.log(_UImode);
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -576,93 +576,6 @@ var Lesson = (function () {
                 }
                 break;
             case mod.TEACHERPREVIEW:
-            //var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
-            //lessonBody.append(partMenu);
-            //var lessontabs = $("<div>", { "class": "lesson-tabs" });
-            //partMenu.append(lessontabs);
-            //var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
-            //lessontabs.append(tabs);
-            //for (var i = 0; data.Part != null && i < data.Part.length; i++) {
-            //    var item = data.Part[i];
-            //        renderStudentPart(item, false);
-            //}
-            //if (data.Part != null && data.Part.length == 1) {
-            //    $('.fas.fa-caret-down:first').click();
-            //}
-            //switch (_UImode) {
-            //    case UIMode.EXAM_ONLY:
-            //    case UIMode.BOTH:
-            //        var dataform = new FormData();
-            //        dataform.append("ClassID", config.class_id);
-            //        dataform.append("ClassSubjectID", config.class_subject_id);
-            //        dataform.append("LessonID", config.lesson_id);
-            //        if ($('#' + config.container).find("#ExamID").length == 0) {
-            //            $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", id: "ExamID" }));
-            //        }
-            //        if (!checkExam()) {
-            //            localStorage.clear();
-            //        }
-            //        var continue_exam = false;
-
-            //        //get lastest exam data from server
-            //        Ajax(config.url.current, dataform, "POST", true).then(function (res) {
-            //            var exam;
-            //            try {
-            //                var data = JSON.parse(res);
-            //                exam = data.exam
-            //            } catch (e) {
-            //                console.log(e)
-            //            }
-            //            //console.log(exam);
-            //            //console.log(getLocalData("CurrentExam"));
-            //            //if no data is found => new attempt => clear all local storage
-            //            if (exam == null) {
-            //                localStorage.clear();
-            //                console.log("New Fresh Exam");
-            //                renderLectureExam(exam, false);
-            //            }
-            //            else {
-            //                //
-            //                if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
-            //                {
-            //                    //console.log(data);
-            //                    localStorage.clear();
-            //                    console.log("New Exam");
-            //                    //console.log(getLocalData("CurrentExam"))                                    
-            //                    renderLectureExam(exam, false);
-            //                }
-            //                else {
-            //                    console.log("Exam Continue")
-            //                    setLocalData("CurrentExam", exam.ID);
-            //                    $('#ExamID').val(exam.ID);
-
-            //                    var current = exam.CurrentDoTime;
-            //                    var start = exam.Created;
-            //                    var timer = moment(current) - moment(start);
-
-            //                    console.log(timer);
-            //                    if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
-            //                    {
-            //                        console.log("Exam Timeout")
-            //                        setLocalData("Timer", "00:00");
-            //                        CompleteLectureExam(true);
-            //                    }
-            //                    else {
-            //                        setLocalData("CurrentExam", exam.ID);
-            //                        $('#ExamID').val(exam.ID);
-            //                        //render Exam
-            //                        var _sec = 59 - moment(timer).second();
-            //                        var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-            //                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-            //                        setLocalData("Timer", _timer);
-            //                        console.log(_timer);
-            //                        renderLectureExam(exam, true);
-            //                        countdown(false);
-            //                    }
-            //                }
-            //            }
-            //        });
-            //        break;
             case mod.STUDENT_LECTURE:
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
@@ -680,6 +593,24 @@ var Lesson = (function () {
                 switch (_UImode) {
                     case UIMode.EXAM_ONLY:
                     case UIMode.BOTH:
+                        if (_UImode == UIMode.EXAM_ONLY) {
+                            $('#rightCol .tab-pane').each(function () {
+                                var media = null;
+                                var html = null;
+                                if ($(this).find(".QUIZ3").length > 0) {
+                                    $(this).addClass("h-100");
+                                    media = $(this).find(".Q3_absrow > .media-holder:first");
+                                }
+                                else {
+                                    media = $(this).find(".quiz-wrapper > .media-holder");
+                                }
+                                html = $(this).find(".part-description");
+                                $(this).addClass("m-0");
+                                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                                    .empty().append($(this).find('.part-box-header')).append(html).append(media)
+                                    .appendTo('#leftCol')
+                            });
+                        }
                         var dataform = new FormData();
                         dataform.append("ClassID", config.class_id);
                         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -753,25 +684,6 @@ var Lesson = (function () {
                             }
                         });
                         break;
-                    //case UIMode.EXAM_ONLY:
-                    //$('#rightCol .tab-pane').each(function () {
-                    //    var media = null;
-                    //    var html = null;
-                    //    if ($(this).find(".QUIZ3").length > 0) {
-                    //        $(this).addClass("h-100");
-                    //        media = $(this).find(".Q3_absrow > .media-holder:first");
-                    //    }
-                    //    else {
-                    //        media = $(this).find(".quiz-wrapper > .media-holder");
-                    //    }
-                    //    html = $(this).find(".part-description");
-                    //    $(this).addClass("m-0");
-                    //    $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                    //        .empty().append($(this).find('.part-box-header')).append(media).append(html)
-                    //        .appendTo('#leftCol')
-                    //})
-
-                    //break;
                 }
 
                 break;
@@ -817,13 +729,9 @@ var Lesson = (function () {
                 else {
                     lessonFooter.hide();
                 }
-
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
-
-                //if (_UImode == UIMode.EXAM_ONLY) {
-                //var nav_bottom = $('<div>', { "class": "d-flex justify-content-between" });
                 var nav_bottom = lesson_action_holder
                 nav_bottom.empty();
 
@@ -839,12 +747,6 @@ var Lesson = (function () {
 
                 if (_totalPart <= 1)
                     nexttab.prop("disabled", true);
-
-                //var _footerLeft = $('<div>', { "class": "text-left" });
-                //_footerLeft.append(prevtab);
-                //var _footerRight = $('<div>', { "class": "text-right" });
-                //_footerRight.append(nexttab);
-                //var _footerCenter = $('<div>', { "class": "text-center" });
 
                 nav_bottom.append(prevtab);
 
@@ -867,7 +769,6 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
-                //}
                 break;
             case mod.REVIEW:
                 var nav_bottom = lesson_action_holder
@@ -885,12 +786,6 @@ var Lesson = (function () {
 
                 if (_totalPart <= 1)
                     nexttab.prop("disabled", true);
-
-                //var _footerLeft = $('<div>', { "class": "text-left" });
-                //_footerLeft.append(prevtab);
-                //var _footerRight = $('<div>', { "class": "text-right" });
-                //_footerRight.append(nexttab);
-                //var _footerCenter = $('<div>', { "class": "text-center" });
 
                 nav_bottom.append(prevtab);
 
@@ -917,6 +812,44 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
+                if (_UImode == UIMode.EXAM_ONLY) {
+                    var nav_bottom = lesson_action_holder
+                    nav_bottom.empty();
+
+                    var prevtab = $("<button>", { "class": "prevtab btn btn-primary m-2", "title": "Câu trước", "onclick": "PrevPart()" });
+                    var iconprev = $("<i>", { "class": "fas fa-arrow-circle-left mr-2" });
+                    var nexttab = $("<button>", { "class": "nexttab btn btn-primary m-2", "title": "Câu tiếp", "onclick": "NextPart()" });
+                    var iconnext = $("<i>", { "class": "fas fa-arrow-circle-right mr-2" });
+                    prevtab.append(iconprev).append("Câu trước");;
+                    nexttab.append(iconnext).append("Câu sau");;
+
+
+                    prevtab.prop("disabled", true);
+
+                    if (_totalPart <= 1)
+                        nexttab.prop("disabled", true);
+
+                    nav_bottom.append(prevtab);
+
+                    lessonFooter.append($('<div>', { id: 'quizIdx_holder' }));
+                    lessonFooter.addClass('expand');
+
+                    var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "text-white font-weight-bold align-middle" });
+                    nav_bottom.append(quiz_counter);
+
+                    var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
+                    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
+                        .append($("<span>", { class: "time-counter " }));
+
+
+                    nav_bottom.prepend(timer).append(complete_btn);
+
+                    renderQuizCounter();
+                    $(".time-counter").html(getLocalData("Timer"));
+                    countdown();
+                    nav_bottom.append(nexttab);
+                }
                 if (data.Timer > 0) {
                     var nav_bottom = lesson_action_holder
                     nav_bottom.empty();
@@ -1033,7 +966,9 @@ var Lesson = (function () {
             tabsitem = $('#pills-part-' + data.ID).empty();
         }
         else
+            //Temp fix 20200823
             tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+        //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane  w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
 
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
@@ -1934,7 +1869,7 @@ var Lesson = (function () {
                 questionTemplate.append($("<input>", { "type": "hidden", "name": "Questions.Order", "value": 0 }));
                 questionTemplate.append($("<label>", { "class": "fieldset_title", "text": "" }));
                 questionTemplate.append($("<input>", { "type": "button", "class": "quiz-remove", "value": "X", "tabindex": -1, "onclick": "RemoveQuestion(this)", "title": "Xóa câu hỏi" }));
-                questionTemplate.append($("<div>", { "class": "quiz-remove clone", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px;width: 26px;height: 26px;", "title": "Nhân bản câu hỏi" }).append($("<i>", {'class':'ti-layers', style: 'top:5px; left:5px; position:absolute'})));
+                questionTemplate.append($("<div>", { "class": "quiz-remove clone", "tabindex": -1, "onclick": "CloneQuestion(this)", "style": "right:40px;width: 26px;height: 26px;", "title": "Nhân bản câu hỏi" }).append($("<i>", { 'class': 'ti-layers', style: 'top:5px; left:5px; position:absolute' })));
 
                 questionTemplate.append($("<textarea>", { "rows": "3", "name": "Questions.Content", "class": "input-text quiz-text form-control", "placeholder": "Câu hỏi" }));
 
@@ -2104,11 +2039,11 @@ var Lesson = (function () {
                 }
                 else
                     addNewQuestion();
-                        $('.editorck').each(function (idx, obj) {
-            CKEDITOR.replace($(obj)[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
-            });
-        });
+                $('.editorck').each(function (idx, obj) {
+                    CKEDITOR.replace($(obj)[0], {
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                    });
+                });
                 break;
             default:
 
@@ -2137,11 +2072,18 @@ var Lesson = (function () {
                 //});
                 break;
             case "VOCAB":
+            case "QUIZ1":
+            case "QUIZ4":
                 break;
             default:
+                CKEDITOR.replace('editor', {
+                    allowedContent: true,
+                    extraPlugins: 'uploadimage,youtube',
+                    removeDialogTabs: 'textfield',
+                    removePlugins: 'forms'
+                });
                 break;
         }
-
         if (data != null && data.Media != null)
             renderMediaContent(data, contentholder.find(".media_preview:first"), type);
     }
@@ -2343,7 +2285,8 @@ var Lesson = (function () {
                 var quizHolder = $(obj).parent();
                 if (!$(obj).parent().hasClass("fieldQuestion"))
                     quizHolder = $(obj).parent().parent();
-                quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
+                if (id.toString().length > 20)//temp fix for non-valid id
+                    quizHolder.parent().append($("<input>", { "type": "hidden", "name": "RemovedQuestions", "value": id }));
                 quizHolder.remove();
             }
         })
@@ -2640,7 +2583,7 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2884,7 +2827,7 @@ var Lesson = (function () {
             lessonitem = $("<li>", { "class": "nav-item" });
             listPartContainer.append(lessonitem);
         }
-        console.log(data);
+        //console.log(data);
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
         lessonitem.append(itemtitle);
 
@@ -2894,9 +2837,11 @@ var Lesson = (function () {
             //clear old-tab
             tabsitem = $('#pills-part-' + data.ID).empty();
         }
-        else
+        else {
+            //temp fix 20200823
             tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+        }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
@@ -2912,7 +2857,6 @@ var Lesson = (function () {
         itembox.append(boxHeader);
 
         var collapseSwitch = $("<i>", { class: "fas fa-caret-down pl-2 pr-2 pt-1 pb-1", part: data.ID, style: "cursor:pointer", onclick: "toggleExpand(this)" });
-
         //itembox.append(ItemRow);
         switch (data.Type) {
             default:
@@ -3426,7 +3370,6 @@ var Lesson = (function () {
 
             var limit = lastExam.limit;
             var tried = lastExam.number;
-            console.log(lastExam);
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }));
@@ -3440,7 +3383,7 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.questionsPass == null ? 0 : lastExam.questionsPass) + "/" + lastExam.questionsTotal }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -3946,7 +3889,7 @@ var Lesson = (function () {
         });
 
         //cloneDescription
-
+        console.log(cloneQuestion.children);
         cloneQuestion.children[1].value = currentpos;
         cloneQuestion.setAttribute("order", currentpos);
         $(cloneQuestion).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(currentpos) + 1).toString());
@@ -3966,6 +3909,7 @@ var Lesson = (function () {
             });
             $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(i) + 1));
         }
+        $(cloneQuestion).find("[name^='" + question + "ID']").val("");
     }
 
     window.LessonInstance = {} || Lesson;
@@ -4078,7 +4022,7 @@ var submitForm = function (event, modalId, callback) {
     $('div.editorck').each(function (idx, obj) {
         if ($(this).siblings("[id^=cke_]").length > 0) {
             var name = $(obj).attr('name');
-            ckeid = $(this).siblings("[id^=cke_]").attr('id').replace('cke_','');
+            ckeid = $(this).siblings("[id^=cke_]").attr('id').replace('cke_', '');
             formdata.append(name, CKEDITOR.instances[ckeid].getData());
         }
     });

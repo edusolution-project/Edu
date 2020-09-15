@@ -56,7 +56,7 @@
 
 <div class="left-col">
     <div class="page-title">
-        <h1><a href="@processUrl("Index","Curriculum")">Bài giảng</a> / @ViewData["Title"]</h1>
+        <h1><a href="@processUrl("Index","Curriculum")" class="blue-color">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
     <div class="main-container">
         @*<div class="sub-sidebar">
@@ -91,13 +91,15 @@
                     </div>
                 </div>
             </div>
-            <div class="modules-wrapper">
+            <div class="modules-wrapper mb-5">
                 <div class="p-3">
                     <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                 </div>
             </div>
         </div>
     </div>
+
+    <i class="fas fa-angle-double-up" onclick="fnbackToTop()" id="backToTop"></i>
 </div>
 
 
@@ -241,92 +243,92 @@
     </div>
 
     <!--    Hòa thêm 8/7/2020    -->
-<div class="modal fade" role="dialog" id="copyLessonModel">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="titleClone">Nhân bản </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="@processUrl("CopyLesson","Curriculum")" name="copyLessonForm" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="LessonID" value="" />
-                    <input type="hidden" name="CourseID" value="@Data.ID" />
-                    <input type="hidden" name="ChapterID" value="" />
+    <div class="modal fade" role="dialog" id="copyLessonModel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="titleClone">Nhân bản </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="@processUrl("CopyLesson","Curriculum")" name="copyLessonForm" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="LessonID" value="" />
+                        <input type="hidden" name="CourseID" value="@Data.ID" />
+                        <input type="hidden" name="ChapterID" value="" />
 
-                    <div class="row">
-                        <div class="form-group col-md-12">
-                            <label class="col-form-label">Tiêu đề:</label>
-                            <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
-                                   }>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="form-group col-md-12">
-                            <label class="col-form-label">Chương:</label>
-                            <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
-                                    }>
-                                <option value="0">------</option>
-                                @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
-                                    {
-                    		<option value="@listChapter[i].ID">@listChapter[i].Name</option>
-				    } 
-			        }
-                            </select>
-                        </div>
-                    </div>
-
-                    @*<div class="row chooseOrder">
+                        <div class="row">
                             <div class="form-group col-md-12">
-                                <label class="col-form-label">Thứ tự:</label>
-                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                                <label class="col-form-label">Tiêu đề:</label>
+                                <input type="text" class="form-control" name="Title" required @if (isLock) { @: readonly="true"
+                                       }>
                             </div>
-                        </div>*@
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return CloneLesson()">Lưu thay đổi</button>
-            </div>
-        </div>
-    </div>
-</div>
+                        </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinChapterModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form action="#" name="joinChapterModal" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="ID" />
-                    <input type="hidden" name="ChapterID" value="" />
-                    <div class="form-group">
-                        <label class="col-form-label">Ghép Chương: </label><br />
-                        <label name="rootItem"></label><br />
-                        <label class="col-form-label"> với: </label>
-                        <select name="JoinChapter" class="form-control" required></select> <br />
-                        <label class="col-form-label">Tạo chương mới</label>
-                        <input type="checkbox" name="CreateNewChapter" id="CreateNewChapter" onchange="IsCreateNewChapter(this)" /> <br />
-                        <label class="col-form-label hide" id="NewLable"> Tên chương mới: </label>
-                        <input type="text" class="form-control hide" name="newName" id="newName" placeholder="Tên chương mới" />
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","Curriculum")','join' , AddChapterCallback)">Lưu</button>
+                        <div class="row">
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label">Chương:</label>
+                                <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
+                                        }>
+                                    <option value="0">------</option>
+                                    @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                        {
+                                            <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        @*<div class="row chooseOrder">
+                                <div class="form-group col-md-12">
+                                    <label class="col-form-label">Thứ tự:</label>
+                                    <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                                </div>
+                            </div>*@
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return CloneLesson()">Lưu thay đổi</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinChapterModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Ghép nội dung</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" name="joinChapterModal" enctype="multipart/form-data" method="post">
+                        <input type="hidden" name="ID" />
+                        <input type="hidden" name="ChapterID" value="" />
+                        <div class="form-group">
+                            <label class="col-form-label">Ghép Chương: </label><br />
+                            <label name="rootItem"></label><br />
+                            <label class="col-form-label"> với: </label>
+                            <select name="JoinChapter" class="form-control" required></select> <br />
+                            <label class="col-form-label">Tạo chương mới</label>
+                            <input type="checkbox" name="CreateNewChapter" id="CreateNewChapter" onchange="IsCreateNewChapter(this)" /> <br />
+                            <label class="col-form-label hide" id="NewLable"> Tên chương mới: </label>
+                            <input type="text" class="form-control hide" name="newName" id="newName" placeholder="Tên chương mới" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","Curriculum")','join' , AddChapterCallback)">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!--    End     -->
 
     <div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="joinLessonModal">
@@ -435,10 +437,9 @@
         }));
         @if(!isLock)
         {
-        @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
-        @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-//@:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "tooltip", "data-placement": "top", "title": "Nhân bản", "onclick": "CloneLesson('" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
         rowData.append(leftPart);
         rowData.append(rightPart);
@@ -505,7 +506,7 @@
         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
         @if (!isLock)
         {
-            @:title_ePart.append($("<i>", { "class": "fas fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
+            @:title_ePart.append($("<i>", { "class": "far fa-clone", "title": "Nhân bản chương", "onclick": "CloneChapter('" + chapter.ID + "',this); return false;" }));
             @:title_ePart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinChapterModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinChapter(this,'" + chapter.ID + "'); return false;" }));
             @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
         }
@@ -663,6 +664,8 @@
                     }
                 }
                 $('.row-action i').tooltip();
+
+                renderTableContents();
             },
             error: function() {
             }
@@ -745,7 +748,7 @@
             var result = $.parseJSON(res);
             //console.log(result);
             if (result.Error != null) {
-                debugger
+
                 alert(result.Error);
                 return false;
             }
@@ -754,7 +757,7 @@
                 //console.log("chapter " + chapter.ID);
                 $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
                 var o = new Option(chapter.Name, chapter.ID);
-                debugger
+
                 /// jquerify the DOM object 'o' so we can use the html method
                 $(o).html(chapter.Name);
                 $("#ParentID").append(o);
@@ -893,7 +896,7 @@
         var modal = $("#joinLessonModal");
         modal.find("[name=ID]").val(ID);
         var currentItem = $(obj).parent().parent();
-        debugger
+
         modal.find("[name=rootItem]").text($(currentItem).find("[name=Title]").text());
         var lessonholder = modal.find("[name=JoinLesson]");
         $(lessonholder).empty();
@@ -1107,6 +1110,50 @@
         console.log(window.history);
     }
 
+    var renderTableContents = function () {
+        $("#tableContents").empty();
+        var modal = $('.modules-wrapper');
+        for (i = 1; i < $(modal).children().length; i++) {
+            var item = $(modal).children()[i];
+            var li = item.children[0].children[0].children[1].text;
+            var id = item.id;
+            $("#tableContents").append("<a href='#" + id + "' style='text-decoration:none;'><li class='list-group-item list-group-item-action' style='border-radius:unset'>" + li + "</li></a>");
+        }
+
+        //var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
+        $('#title').text('@Html.Raw(ViewData["Title"])')
+    }
+
+    //-------------------
+    //Get the button
+    var btnScroll = $("#backToTop");
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    $(document).ready(function () {
+        $(".left-col").scroll(function () {
+            scrollFunction();
+        });
+    });
+
+    var scrollFunction = function () {
+        var scroll = $('.left-col');
+        if ($(scroll).scrollTop() > 200) {
+            btnScroll.attr('style', 'display:block');
+        } else {
+            btnScroll.attr('style', 'display:none');
+        }
+    }
+
+// When the user clicks on the button, scroll to the top of the document
+
+    var fnbackToTop = function () {
+        var scroll = $('.left-col');
+        //$(scroll).scrollTop(0);
+        $(scroll).animate({ scrollTop: 0 }, 1000);
+    }
+
+    //----------------
+
     $(document).ready(function () {
         LoadData();
     });
@@ -1164,5 +1211,48 @@
 
     .sidebar .nav-item .collapse .collapse-inner {
         padding: 0;
+    }
+
+    #tableContents {
+        overflow-y: auto;
+        max-height: 570px;
+    }
+
+        #tableContents li {
+            border-left: 2px solid white
+        }
+
+            #tableContents li a {
+                color: #4E6774;
+                font-weight: 500;
+                line-height: 20px
+            }
+
+            #tableContents li:hover a {
+                color: #D03239;
+                background-color: #D03239;
+                background: #F0F3F4
+            }
+
+            #tableContents li:hover {
+                border-left: 2px solid #D03239
+            }
+
+    #backToTop {
+        display: none;
+        position: fixed;
+        bottom: 40px;
+        right: 30px;
+        z-index: 99;
+        font-size: 30px;
+        border: none;
+        outline: none;
+        background-color: #CCC;
+        color: white;
+        cursor: pointer;
+        padding: 7px 15px;
+        border-radius: 4px;
+        position: fixed;
+        opacity: 0.8;
     }
 </style>

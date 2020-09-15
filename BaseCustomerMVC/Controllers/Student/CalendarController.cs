@@ -25,8 +25,6 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly LessonScheduleService _scheduleService;
-        private readonly CenterService _centerService;
-
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
@@ -36,8 +34,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService classService,
             TeacherService teacherService,
             StudentService studentService,
-            LessonScheduleService scheduleService,
-            CenterService centerService
+            LessonScheduleService scheduleService
             )
         {
             this._calendarService = calendarService;
@@ -48,23 +45,13 @@ namespace BaseCustomerMVC.Controllers.Student
             _teacherService = teacherService;
             _studentService = studentService;
             _scheduleService = scheduleService;
-            _centerService = centerService;
             //_classStudentService = classStudentService;
         }
 
-        public IActionResult Index(DefaultModel model, string basis)
+        public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                {
-                    ViewBag.Center = center;
-                }
-            }
             return View();
-
         }
         [Obsolete]
         public Task<JsonResult> GetList(DefaultModel model)

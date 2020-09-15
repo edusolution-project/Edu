@@ -96,6 +96,7 @@
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
     <Content Remove="Views\Shared\_sideBarTeacher_o.cshtml" />
+    <Content Remove="wwwroot\js\minify\detail.min.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -107,6 +108,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Areas\Admin\Views\Account\Index.cshtml" />
     <None Include="Areas\Admin\Views\Course\Index.cshtml" />
     <None Include="Areas\Admin\Views\Grade\Index.cshtml" />
@@ -160,6 +164,38 @@
     <None Include="wwwroot\js\custom.js" />
     <None Include="wwwroot\js\daterangepicker.min.js" />
     <None Include="wwwroot\js\demo\datatables-demo.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Fill\message-circle.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Fill\navigation-2.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\all-done.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\attach-2.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\bell.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\checkmark.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\file-1.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\file-2.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\file-text.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\file.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\film-1.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\film.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\grid.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\image-1.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\image.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\mic.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\more-horizontal.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\more-vertical.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\person.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\plus-1.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\plus.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\power.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\search.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\Icon\Outline\settings-2.svg" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\easychat.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\groups.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\Lib\signalr.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\Lib\signalr.min.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\members.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\message.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\text.js" />
+    <None Include="wwwroot\js\EasyChatLib\assets\js\UI.js" />
     <None Include="wwwroot\js\fullcalendar.min.js" />
     <None Include="wwwroot\js\hub-student.js" />
     <None Include="wwwroot\js\hubs\connection.js" />
@@ -186,6 +222,7 @@
     <None Include="wwwroot\js\lib\teacher.config.url.base.js" />
     <None Include="wwwroot\js\lib\xhr.js" />
     <None Include="wwwroot\js\masonry.pkgd.min.js" />
+    <None Include="wwwroot\js\minify\detail.min.js" />
     <None Include="wwwroot\js\moment-with-locales.min.js" />
     <None Include="wwwroot\js\moment.js" />
     <None Include="wwwroot\js\moment.min.js" />
@@ -2203,7 +2240,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="BuildBundlerMinifier" Version="3.2.435" />
+    <PackageReference Include="BundlerMinifier.Core" Version="3.2.449" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />

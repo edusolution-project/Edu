@@ -68,9 +68,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (target != null || target != "")
                         item.Targets.Add(target);
                 }
-                //item.Targets.Remove(item.CenterID);
-                item.Targets.RemoveAt(0);
-                item.Targets.RemoveAt(item.Targets.Count - 1);
             }
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")

@@ -11,7 +11,9 @@ namespace FileManagerCore.Interfaces
     public interface IRoxyFilemanHandler
     {
         IGoogleDriveApiService GoogleDriveApiService { get; }
-        List<MediaResponseModel> UploadFileWithGoogleDrive(string center,string user,HttpContext context);
+        List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context);
+        MediaResponseModel UploadSingleFileWithGoogleDrive(string center, string user, IFormFile file);
+
         bool DeleteFileWithGoogleDrive(string fileId, string center, string user);
 
         List<DIRLIST> ListDirTree(string type);
@@ -21,8 +23,8 @@ namespace FileManagerCore.Interfaces
         object CreateDir(string path, string name);
         object DeleteDir(string path);
         object DeleteFile(string path);
-        object Upload(string path,string method,string action, HttpContext httpContext);
-        object UploadEasyImage(string folderName,HttpContext httpContext);
+        object Upload(string path, string method, string action, HttpContext httpContext);
+        object UploadEasyImage(string folderName, HttpContext httpContext);
         object MoveDir(string path, string newPath);
         object MoveFile(string path, string newPath);
         object RenameDir(string path, string name);

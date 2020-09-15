@@ -32,6 +32,7 @@
                             <tr>
                                 <th class='text-center'>STT</th>
                                 <th class='text-center'>Tên cơ sở</th>
+                                <th class='text-center'>Viết tắt</th>
                                 <th class='text-center'>Ảnh đại diện</th>
                                 <th class='text-center'>Giới thiệu</th>
                                 <th class='text-center'>Ngày bắt đầu</th>
@@ -79,6 +80,11 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-12">
+                                <input type="text" class="form-control" name="Abbr" placeholder="Tên viết tắt (viết liền không dấu)" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
                                 <input type="text" class="form-control" name="Description" placeholder="Giới thiệu">
                             </div>
                         </div>
@@ -87,7 +93,7 @@
                         </div>
                         <div class="form-row mb-2 ml-2 mr-2">
                             <div style="height: 150px;" class="mb-1">
-                                <img name="Image" class="thumbnail" src="~/images/Logo.png" style="max-height:100%; max-width:100%; border: double 2px #CCC;"/>
+                                <img name="Image" class="thumbnail" src="~/images/Logo.png" style="max-height:100%; max-width:100%; border: double 2px #CCC;" />
                             </div>
                             <input type="file" name="upload" class="w-100" />
                         </div>
@@ -173,6 +179,7 @@
                             "<td class='text-center'>" + (i + 1) + "</td>" +
                             //"<td class='text-center'>" + (item.StudentId == null? "":item.StudentId) +"</td>" +
                             "<td>" + item.Name + "</td>" +
+                            "<td>" + (item.Abbr == null ? '' : item.Abbr) + "</td>" +
                             "<td><img src='" + (item.Image == null ? "/images/logo.png": item.Image) + "' style='max-width:100px; max-height: 100px' /></td>" +
                             "<td>" + (item.Description == null ? "": item.Description) + "</td>" +
                             "<td class='text-center'>" + fdate + "</td>" +

@@ -38,7 +38,7 @@ namespace GoogleLib.Services
         public GoogleDriveApiService(IConfiguration configuration)
         {
             _configuration = configuration;
-            _driveService = GetDriveService().Result;
+            _driveService = GetDriveService() == null ? null : GetDriveService().Result;
         }
 
         public async Task<string> Delete(string fileId)
@@ -225,19 +225,26 @@ namespace GoogleLib.Services
         /// <returns></returns>
         public Google.Apis.Drive.v3.Data.File CreateDirectory(string title, string des, string parent = "")
         {
-            Google.Apis.Drive.v3.Data.File folder = new Google.Apis.Drive.v3.Data.File()
+            try
             {
-                Name = title,
-                Description = des,
-                MimeType = "application/vnd.google-apps.folder",
-            };
-            if (!string.IsNullOrEmpty(parent))
-            {
-                folder.Parents = new List<string> { parent };
+                Google.Apis.Drive.v3.Data.File folder = new Google.Apis.Drive.v3.Data.File()
+                {
+                    Name = title,
+                    Description = des,
+                    MimeType = "application/vnd.google-apps.folder",
+                };
+                if (!string.IsNullOrEmpty(parent))
+                {
+                    folder.Parents = new List<string> { parent };
+                }
+                FilesResource.CreateRequest request = _driveService.Files.Create(folder);
+                request.Fields = "id";
+                return request.Execute();
             }
-            FilesResource.CreateRequest request = _driveService.Files.Create(folder);
-            request.Fields = "id";
-            return request.Execute();
+            catch(Exception)
+            {
+                return null;
+            }
         }
         /// <summary>
         /// dung nhieu nhat
@@ -319,7 +326,9 @@ namespace GoogleLib.Services
 
         private async Task<DriveService> GetDriveService(string clientId, string clientSecret, string user, string appName, string fileStorge)
         {
-            UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+            try
+            {
+                UserCredential credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     new ClientSecrets() { ClientId = clientId, ClientSecret = clientSecret },
                     new[] {
                             DriveService.Scope.Drive,
@@ -332,13 +341,18 @@ namespace GoogleLib.Services
                             DriveService.Scope.DriveFile
                     },
                     user, CancellationToken.None, new FileDataStore(fileStorge));
-            // Create the service.
-            var service = new DriveService(new BaseClientService.Initializer()
+                // Create the service.
+                var service = new DriveService(new BaseClientService.Initializer()
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = appName,
+                });
+                return service;
+            }
+            catch(Exception ex)
             {
-                HttpClientInitializer = credential,
-                ApplicationName = appName,
-            });
-            return service;
+                return null;
+            }
         }
 
         private async Task<DriveService> GetDriveService()
@@ -363,7 +377,7 @@ namespace GoogleLib.Services
             }
             catch(Exception ex)
             {
-                throw ex;
+                return null;
             }
         }
         

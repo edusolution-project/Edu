@@ -10,6 +10,8 @@ using MongoDB.Driver;
 using System.Threading.Tasks;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,6 +25,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CenterService _centerService;
         private readonly IHostingEnvironment _env;
 
+        private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
+        //private readonly HashSet<string> _textType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
+        private string host;
+
         public ReferenceController(
             TeacherService teacherService,
             TeacherHelper teacherHelper,
@@ -30,7 +36,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FileProcess fileProcess,
             IHostingEnvironment env,
             ReferenceService referenceService,
-            CenterService centerService
+            CenterService centerService,
+            IConfiguration iConfig
             )
         {
             _teacherService = teacherService;
@@ -40,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _centerService = centerService;
             _teacherHelper = teacherHelper;
             _env = env;
+            host = iConfig.GetValue<string>("SysConfig:Domain");
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -104,6 +112,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
+
+                //var result = _referenceService.GetAll();
+                //defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
                 return new JsonResult(new Dictionary<string, object>
                 {
@@ -147,7 +158,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
         }
 
-        public async Task<JsonResult> Save(ReferenceEntity entity, string basis)
+        public async Task<JsonResult> Save(ReferenceEntity entity, string basis,IFormFile formFile)
         {
             try
             {
@@ -164,18 +175,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (files != null)
                     {
-                        var file = files
-                            //.Where(f => f.Name == entity.Media.Name).SingleOrDefault();
-                            .FirstOrDefault();
-                        if (file != null)
+                        //var file = files[0];
+                        //    //.Where(f => f.Name == entity.Media.Name).SingleOrDefault();
+                        //    //.FirstOrDefault();
+                        //if (file != null) //file dinh kem
+                        //{
+                        //    entity.Media = new Media();
+                        //    entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                        //    entity.Media.Created = DateTime.Now;
+                        //    entity.Media.Size = file.Length;
+                        //    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                        //}
+
+                        //var cover = files[1];
+                        //if (cover != null)//anh bia
+                        //{
+                        //    entity.Image= await _fileProcess.SaveMediaAsync(cover, cover.FileName, "", basis);
+                        //}
+
+                        foreach(var file in files)
                         {
-                            entity.Media = new Media();
-                            entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                            entity.Media.Created = DateTime.Now;
-                            entity.Media.Size = file.Length;
-                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
+                            string extension = Path.GetExtension(file.FileName);
+                            string type = extension.Replace(".", string.Empty).ToUpper();
+                            if (_imageType.Contains(type))//anh bia
+                            {
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                            }
+                            else
+                            {
+                                entity.Media = new Media();
+                                entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                                entity.Media.Created = DateTime.Now;
+                                entity.Media.Size = file.Length;
+                                entity.Media.Extension = extension;
+                                entity.Media.Path =$"https://{host}//"+ await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                            }
                         }
                     }
+
+                    entity.UpdateTime = DateTime.Now;
+                    _referenceService.Save(entity);
                 }
                 else
                 {
@@ -198,15 +237,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null)
                     {
-                        var file = files
-                            //.Where(f => f.Name == entity.Media.Name)
-                            .FirstOrDefault();
-                        if (file != null)
+                        //var file = files[0];//file dinh kem
+                        ////.Where(f => f.Name == entity.Media.Name).SingleOrDefault();
+                        ////.FirstOrDefault();
+                        //if (file != null)
+                        //{
+                        //    entity.Media = new Media();
+                        //    entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                        //    entity.Media.Created = DateTime.Now;
+                        //    entity.Media.Size = file.Length;
+                        //    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
+                        //}
+
+                        //var cover = files[1]; //anh bia
+                        //if (cover != null)
+                        //{
+                        //    entity.Image = await _fileProcess.SaveMediaAsync(cover, entity.Media.OriginalName, "", basis);
+                        //}
+                        foreach (var file in files)
                         {
-                            entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                            entity.Media.Created = DateTime.Now;
-                            entity.Media.Size = file.Length;
-                            entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
+                            string extension = Path.GetExtension(file.FileName);
+                            string type = extension.Replace(".", string.Empty).ToUpper();
+                            if (_imageType.Contains(type))//anh bia
+                            {
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                            }
+                            else
+                            {
+                                entity.Media = new Media();
+                                entity.Media.Name = entity.Media.OriginalName = file.FileName;
+                                entity.Media.Created = DateTime.Now;
+                                entity.Media.Size = file.Length;
+                                entity.Media.Extension = extension;
+                                entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                            }
                         }
                     }
                 }

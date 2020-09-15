@@ -249,7 +249,7 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @await Html.PartialAsync("_EasyRealtime")
+    @*@await Html.PartialAsync("_EasyRealtime")*@
     <script>
         var clLoadMore = "cl-load-more";
         var currentDateCalendar;
@@ -365,7 +365,7 @@
             loadCalendar(startTimePre);
         }
     </script>
-
+    @await Html.PartialAsync("_EasyChat")
 </body>
 </html>
 

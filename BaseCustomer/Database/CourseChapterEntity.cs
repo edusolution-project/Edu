@@ -4,33 +4,32 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BaseCustomerEntity.Database
 {
     public class CourseChapterEntity : EntityBase
     {
-        
-        public CourseChapterEntity() { }
 
-        public CourseChapterEntity(CourseChapterEntity o)
-        {
-            this.OriginID = o.ID;
-            this.Name = o.Name;
-            this.Code = o.Code;
-            this.CourseID = o.CourseID;
-            this.ParentID = o.ParentID;
-            this.ParentType = o.ParentType;
-            this.Created = DateTime.Now;
-            this.Updated = DateTime.Now;
-            this.CreateUser = o.CreateUser;
-            this.IsAdmin = o.IsAdmin;
-            this.IsActive = o.IsActive;
-            this.Order = o.Order;
-            this.Description = o.Description;
-            this.TotalLessons = o.TotalLessons;
-            this.TotalExams = o.TotalExams;
-        }
+        //public CourseChapterEntity() { }
+
+        //public CourseChapterEntity(CourseChapterEntity o)
+        //{
+        //    Type oldType = this.GetType();
+        //    IList<PropertyInfo> props = new List<PropertyInfo>(oldType.GetProperties());
+
+        //    for (int i = 0; props != null && i < props.Count - 1; i++)
+        //    {
+        //        var item = props[i];
+        //        if (item.Name == "ID" || item.Name == "id" || item.Name == "_id") continue;
+        //        var value = item.GetValue(o);
+        //        this[item.Name] = value;
+        //    }
+        //    this.Created = DateTime.Now;
+        //    this.Updated = DateTime.Now;
+        //}
 
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
@@ -64,6 +63,8 @@ namespace BaseCustomerEntity.Database
         public long TotalLessons { get; set; }
         [JsonProperty("TotalExams")]
         public long TotalExams { get; set; }
+        [JsonProperty("TotalPractices")]
+        public long TotalPractices { get; set; }
     }
     public class CourseChapterService : ServiceBase<CourseChapterEntity>
     {
@@ -90,33 +91,12 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task IncreaseLessonCount(string ID, long increment, List<string> listid = null)//prevent circular ref
-        {
-            var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseChapterEntity>().Inc(t => t.TotalLessons, increment));
-            if (r.ModifiedCount > 0)
-            {
-                if (listid == null)
-                    listid = new List<string> { ID };
-                else
-                    listid.Add(ID);
-                var current = GetItemByID(ID);
-                if (current != null)
-                {
-                    if (!string.IsNullOrEmpty(current.ParentID) && (current.ParentID != "0"))
-                    {
-                        if (listid.IndexOf(current.ParentID) < 0)
-                            _ = IncreaseLessonCount(current.ParentID, increment, listid);
-                    }
-                    else
-                        _ = _courseService.IncreaseLessonCount(current.CourseID, increment);
-                }
 
-            }
-        }
-
-        public List<CourseChapterEntity> GetSubChapters(string CourseID, string ParentID)
+        public IEnumerable<CourseChapterEntity> GetSubChapters(string CourseID, string ParentID)
         {
-            return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+            if (string.IsNullOrEmpty(ParentID) || ParentID == "0")
+                return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == "0").SortBy(t => t.Order).ToEnumerable();
+            return CreateQuery().Find(c => c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
     }
 }

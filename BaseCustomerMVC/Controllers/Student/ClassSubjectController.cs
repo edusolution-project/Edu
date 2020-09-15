@@ -85,16 +85,11 @@ namespace BaseCustomerMVC.Controllers.Student
             LearningHistoryService learningHistoryService,
 
             ScoreStudentService scoreStudentService,
-            LessonPartService lessonPartService,
-            LessonPartQuestionService lessonPartQuestionService,
-            LessonPartAnswerService lessonPartAnswerService,
             LessonProgressService lessonProgressService,
-
-            CloneLessonPartService cloneLessonPartService,
-            CloneLessonPartAnswerService cloneLessonPartAnswerService,
-            CloneLessonPartQuestionService cloneLessonPartQuestionService,
-
+            
             StudentService studentService, IHostingEnvironment evn,
+            LessonHelper lessonHelper,
+            StudentHelper studentHelper,
 
             FileProcess fileProcess)
         {
@@ -125,16 +120,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _env = evn;
             _fileProcess = fileProcess;
 
-            _studentHelper = new StudentHelper(studentService, accountService);
-            _lessonHelper = new LessonHelper(
-                lessonService,
-                lessonPartService,
-                lessonPartQuestionService,
-                lessonPartAnswerService,
-                cloneLessonPartService,
-                cloneLessonPartAnswerService,
-                cloneLessonPartQuestionService
-                );
+            _studentHelper = studentHelper;
+            _lessonHelper = lessonHelper;
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();

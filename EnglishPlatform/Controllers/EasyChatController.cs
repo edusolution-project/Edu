@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Controllers.Student;
@@ -23,16 +24,11 @@ namespace EnglishPlatform.Controllers
         protected readonly Dictionary<string, List<string>> _mapUserOffline = new Dictionary<string, List<string>>();
         protected readonly Dictionary<string, string> _mapConnectId = new Dictionary<string,string>();
         protected readonly Dictionary<string, List<string>> _mapUsersConnectionId = new Dictionary<string, List<string>>();
-        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
-        private readonly IHubContext<ChatHub> _hubContent;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         private readonly ILog _log;
-        public EasyChatController(IHubContext<ChatHub> hubContent,IRoxyFilemanHandler roxyFilemanHandler, StudentService studentService, ClassService classService, ILog log)
+        public EasyChatController(StudentService studentService, ClassService classService, ILog log)
         {
-            
-            _hubContent = hubContent;
-            _roxyFilemanHandler = roxyFilemanHandler;
             _studentService = studentService;
             _classService = classService;
             _log = log;
@@ -46,7 +42,14 @@ namespace EnglishPlatform.Controllers
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
+                    
                     List<string> classIdList = _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
+
+                    if(classIdList == null || classIdList.Count == 0)
+                    {
+                        classIdList = _classService.GetTeacherClassList(User.FindFirst("UserID").Value)?.ToList();
+                    }
+
                     if(classIdList != null && classIdList.Count >0)
                     {
                         var listClass = _classService.GetItemsByIDs(classIdList)?.Select(o => new MemberInfo()
@@ -63,7 +66,7 @@ namespace EnglishPlatform.Controllers
             }
             catch(Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
         }
@@ -94,13 +97,13 @@ namespace EnglishPlatform.Controllers
             }
             catch (Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
         }
 
-        [HttpPost]
-        public List<MemberInfo> GetMembers(List<string> classNames)
+        [HttpGet]
+        public List<MemberInfo> GetMembers([FromHeader]List<string> classNames)
         {
             try
             {
@@ -136,9 +139,95 @@ namespace EnglishPlatform.Controllers
             }
             catch (Exception ex)
             {
-                _log.Error(this.GetType().Name, ex);
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
+        }
+
+        [HttpPost]
+        public bool EditMessage(string id,string message)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(message))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        public bool GetMessages(string groupName, string user)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(groupName))
+                {
+
+                }
+                if (!string.IsNullOrEmpty(user))
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        [HttpPost]
+        public bool RemoveMessage(string id)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(id))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
+        }
+
+        [HttpPost]
+        public bool CreateMessage(string message,string groupName, string userName)
+        {
+            try
+            {
+                var files = HttpContext.Request.Form.Files;
+                if (!string.IsNullOrEmpty(message))
+                {
+
+                }
+                if (files != null && files.Count > 0)
+                {
+
+                }
+            }
+            catch(Exception ex)
+            {
+                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+            }
+            return false;
         }
 
         // add key connectid và key userId
