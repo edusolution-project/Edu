@@ -8,7 +8,8 @@
         image: urlBase +"assets/Icon/Outline/image.svg",
         video: urlBase +"assets/Icon/Outline/film.svg",
         file: urlBase +"assets/Icon/Outline/file-2.svg",
-        navigation: urlBase +"assets/Icon/Fill/navigation-2.svg"
+        navigation: urlBase +"assets/Icon/Fill/navigation-2.svg",
+        edit : urlBase +"assets/Icon/Outline/image-1.svg"
     };
     function UI(config){
         _config = config;
@@ -91,18 +92,110 @@
         }
         return html;
     }
-    var renderMessage = function(data,userInfo,receiverInfo,groupInfo){
-        var classSender= "message-sender";
+    UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages){
+        var classSender= isSender ? "message-sender":"message-receiver";
+        var _avatar = !avatar ? _config.avatar : avatar;
+        var msgs = renderMessages(messages,isSender);
         var html =
-            '<div class="message ">'+
+            '<div class="message '+classSender+'">'+
                 '<div class="user-info">'+
-                    '<div class="avatar"><img src="" alt=""></div>'+
-                    '<div class="name">Hoang Thai Long</div>'+
+                    '<div class="avatar"><img src="'+_avatar+'" alt="'+name+'"></div>'+
+                    '<div class="name">'+name+'</div>'+
                 '</div>'+
-                '<div class="group-message"></div>'+
-                '<div class="time-send">1 phut truoc</div>'+
+                '<div class="group-message">'+msgs[0]+'</div>'+
+                '<div data-time="'+msgs[1]+'" class="time-send">'+ConveterTime(msgs[1])+'</div>'+
             '</div>';
         return html;
+    }
+    var renderMessages = function(messages,isSender){
+        var html = "";
+        var time = 0;
+        if(messages){
+            for(var i =0; i < messages.length; i++){
+                var msg = renderMesssage(messages[i],isSender);
+                html += msg[0];
+                if(i==0){
+                    time = msg[1];
+                }
+            }
+        }
+        return [html,time];
+    }
+    var Extensions = {
+        IMAGE :["jpg","jpeg","png","gif","tiff"],
+        VIDEO :["mp4","3gp","flv","wmv","avi","mpeg","wav","ogg"],
+        AUDIO :["mp3","audio"],
+        DOC:["pdf","doc","docx","ppt","pptx","txt"]
+    }
+    var Type ={
+        IMAGE:0,AUDIO:1,VIDEO:2,DOC:3,ORTHER:4
+    }
+    var getExtensionType = function(extension){
+        if(Extensions.IMAGE.indexOf(extension)>-1) return Type.IMAGE;
+        if(Extensions.AUDIO.indexOf(extension)>-1) return Type.AUDIO;
+        if(Extensions.VIDEO.indexOf(extension)>-1) return Type.VIDEO;
+        if(Extensions.DOC.indexOf(extension)>-1) return Type.DOC;
+        return Type.ORTHER;
+    }
+    var renderMesssage = function(message,isSender){
+        var medias = message.data;
+        var text = message.content;
+        var html = "";
+        if(text){
+            html += createDataText(message.id,text,isSender);
+        }
+        if(medias){
+            for(var i = 0; i < medias.length; i++){
+                if(medias[i]){
+                    html += createMetaData(medias[i],isSender);
+                }
+            }
+        }
+        return [html,message.time];
+    }
+    var ConveterTime = function(time){
+        return time;
+    }
+    var createExtendsSettings = function(){
+        var eventOpen = "javascript:this.parentElement.childNodes[1].classList.toggle('open')";
+        return '<div class="button-extends">'+
+            '<div class="dropdown-list">'+
+                '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="assets/Icon/Outline/more-vertical.svg" alt=""></button>'+
+                '<div class="item-extends">'+
+                    '<button class="btn btn-delete"><img src="'+_config.image+'" alt="Xóa"></button>'+
+                    '<button class="btn btn-edit"><img src="'+_config.edit+'" alt=""></button>'+
+                '</div>'+
+            '</div>'+
+        '</div>';
+    }
+    var createDataText = function(id,message,isSender){
+        var exts = isSender ? createExtendsSettings() : "";
+         return '<div data=id="'+id+'" class="data data-text"><div class="content">'+message+'</div>'+exts+'</div>';
+    }
+    var createMetaData = function(data,isSender){
+        var type = getExtensionType(data.type.toLowerCase().replace(".",""));
+        var html = '<div class="content">'+'<div data-id="'+data.id+'" class="meta-data">';
+        var exts = isSender ? createExtendsSettings():"";
+        switch(type){
+            case Type.IMAGE:
+                html += '<img src="'+data.url+'" alt="'+data.id+data.type+'">';
+                break;
+            case Type.AUDIO:
+                html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
+                break;
+            case Type.VIDEO:
+                html += '<video src="'+data.url+'" controls>Your browser does not support the video tag.</video>';
+                break;
+            case Type.DOC:
+                html+='<div class="data-'+data.type.replace(".","")+'"><a href="'+data.url+'">'+data.id+data.type+'</a></div>';
+                break;
+            default:
+                html+='<div class="data-file"><a href="'+data.url+'">'+data.id+data.type+'</a></div>';
+                break;
+        }
+        html += '</div></div>'+exts;
+        return '<div class="data">'+html+'</div>'
+
     }
     return UI;
 }());

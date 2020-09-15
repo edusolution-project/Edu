@@ -113,11 +113,11 @@ namespace EasyChatApp.DataBase
 
         public double Now()
         {
-            return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            return (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
         }
         public double Date(DateTime dateTime)
         {
-            return (dateTime.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            return (dateTime.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
         }
     }
 }

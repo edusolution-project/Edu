@@ -718,7 +718,7 @@ namespace FileManagerCore.Services
         {
             DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0).ToLocalTime();
             TimeSpan timeSpan = (d.ToLocalTime() - epoch);
-            return timeSpan.TotalSeconds;
+            return timeSpan.TotalMilliseconds;
 
         }
         public List<DIRLIST> ListDirTree(string type)
@@ -906,9 +906,9 @@ namespace FileManagerCore.Services
             var listFile = context.Request.Form.Files;
             var count = listFile == null ? 0 : listFile.Count;
             if (count == 0) return null;
-            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+            string path = Path.Combine("", $"{center}/{user}");
 
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            //if (!Directory.Exists(path)) Directory.CreateDirectory(path);
 
             List<MediaResponseModel> response = new List<MediaResponseModel>();
             for (int i = 0; i < count; i++)

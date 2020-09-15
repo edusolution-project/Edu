@@ -112,18 +112,33 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         // sender: "5db11841b5433109d4533cae"
         // time: 1600099668.5038116
         var groupMessages = [];
+        var html = "";
+        var senderCurrent = "";
         for(var i = 0; data != null && i < data.length ; i++){
             var message = data[i];
-            var nextMessage = data[i+1];
-            var id = message.ID;
-            var medias = message.data;
             var sender = message.sender;
-            var groupId = message.groupId;
+            //var groupId = message.groupId;
             var isMaster = sender == __defaulConfig.currentUser.id;
-            var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
-            console.log(message.id,isMaster,isPrivate);
+            //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
+            var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
+            if(senderCurrent == "" || senderCurrent == sender){
+                senderCurrent = sender;
+                groupMessages.push(message);
+                if(i == data.length-1){
+                    html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
+                    groupMessages =[];
+                }
+            }
+            else{
+                html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
+                groupMessages =[];
+            }
+            //console.log(senderInfo);
+            //console.log(message.id,isMaster,isPrivate);
         }
-
+        
+        var listmessage = getRoot().querySelector('.list-messages');
+        listmessage.innerHTML = html;
 
     }
     EasyChat.CloseMessageBox = function(){

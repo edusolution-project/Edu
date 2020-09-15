@@ -241,7 +241,7 @@ namespace GoogleLib.Services
                 request.Fields = "id";
                 return request.Execute();
             }
-            catch(Exception)
+            catch(Exception ex)
             {
                 return null;
             }

@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://longht.eduso.vn/",
+      "applicationUrl": "https://test.eduso.vn/",
       "sslPort": 0
     },
     "iisExpress": {

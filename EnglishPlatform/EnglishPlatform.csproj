@@ -108,9 +108,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\2.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Areas\Admin\Views\Account\Index.cshtml" />
     <None Include="Areas\Admin\Views\Course\Index.cshtml" />
     <None Include="Areas\Admin\Views\Grade\Index.cshtml" />
@@ -2291,6 +2288,9 @@
     <Content Update="Areas\Teacher\Views\Reference\Index.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
