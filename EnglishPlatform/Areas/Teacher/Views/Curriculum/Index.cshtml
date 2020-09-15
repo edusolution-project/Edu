@@ -200,7 +200,8 @@
                     TeacherID: '',
                     IsPublic: false,
                     TargetCenters: [],
-                    NameCenters:''
+                    NameCenters: '',
+                    SelectAll: false
                 },
                 cloneItem: {
                     OriginID: '',
@@ -277,15 +278,22 @@
                     }, 500)
                 },
                 "addItem.TargetCenters": function () {
-                    this.addItem.NameCenters = ''
-                    for (i = 0; i < this.list_Acenters.length; i++) {
-                        for (j = 0; j < this.addItem.TargetCenters.length; j++) {
-                            if (this.list_Acenters[i].ID == this.addItem.TargetCenters[j]) {
-                                this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
-                            }
-                        }
-                    }
+                    this.a()
                     //debugger
+                },
+                "addItem.SelectAll": function () {
+                    if (this.addItem.SelectAll) {
+                        for (i in this.list_Acenters) {
+                            this.addItem.TargetCenters += this.list_Acenters[i].ID+","
+                        }
+                        var targets = this.addItem.TargetCenters.toString().split(',');
+                        this.addItem.TargetCenters = []
+                        this.addItem.TargetCenters = targets
+                        this.a()
+                    }
+                    else {
+                        this.addItem.TargetCenters=[]
+                    }
                 }
             },
             methods: {
@@ -465,11 +473,9 @@
                         var targets = targetStr.toString().split(',');
                         if (targets.length > 0)
                             targets.forEach(function (item, pos) {
-                                _form.append('TargetCenters', item)
+                                if (item != "") { _form.append('TargetCenters', item)}
                             });
                     }
-
-                    debugger;
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -701,6 +707,16 @@
                         $('#selectCenters').attr('style', 'display:none');
                         this.checkShowSelect = false;
                     }
+                },
+                a() {
+                    this.addItem.NameCenters = ''
+                    for (i = 0; i < this.list_Acenters.length; i++) {
+                        for (j = 0; j < this.addItem.TargetCenters.length; j++) {
+                            if (this.list_Acenters[i].ID == this.addItem.TargetCenters[j]) {
+                                this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -753,7 +769,12 @@
                     </div>
                     <div class="col-sm-7" style="position:absolute;right:105px;top:40px;z-index:2">
                         <div id="selectCenters" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:100px;width:415px;list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                <li>
+                                    <a>
+                                        <input type="checkbox" v-model="addItem.SelectAll" /><span class="lbl"> Chọn tất cả </span>
+                                    </a>
+                                </li>
                                 <li v-for="(item,k) in list_Acenters">
                                     <a>
                                         <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
