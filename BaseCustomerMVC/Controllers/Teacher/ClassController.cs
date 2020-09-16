@@ -1054,7 +1054,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var returndata = from o in classData
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                             //let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
+                             let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
                              select new Dictionary<string, object>
                                 {
@@ -1075,7 +1075,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Description", o.Description },
                                  { "SkillName", sname },
                                  { "Creator", o.TeacherID },
-                                 { "CreatorName", o.CreatorName }
+                                 { "CreatorName", creator.FullName }
                              };
             return returndata.ToList();
         }
@@ -1496,6 +1496,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     throw new Exception("Teacher " + nSbj.TeacherID + " is not avaiable");
                 }
 
+                nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
                 nSbj.StartDate = @class.StartDate;
                 nSbj.EndDate = @class.EndDate;

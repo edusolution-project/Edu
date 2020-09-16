@@ -48,8 +48,8 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TeacherID")]//CreatorID
         public string TeacherID { get; set; }
 
-        [JsonProperty("CreatorName")]//CreatorID
-        public string CreatorName { get; set; }
+        //[JsonProperty("CreatorName")]//CreatorID
+        //public string CreatorName { get; set; }
 
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
