@@ -1075,7 +1075,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Description", o.Description },
                                  { "SkillName", sname },
                                  { "Creator", o.TeacherID },
-                                 { "CreatorName", creator.FullName }
+                                 { "CreatorName", creator==null?"":creator.FullName },
+                                 {"ClassMechanism",o.ClassMechanism }
                              };
             return returndata.ToList();
         }
@@ -1227,6 +1228,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;
+                oldData.ClassMechanism = item.ClassMechanism;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1640,7 +1642,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region Add To My Course
-        public async Task<JsonResult> AddToMyCourse(string CourseID, string CenterCode, string CourseName = "", string ClassID = null, ClassEntity item=null,Boolean isCreateNewClass=false)
+        public async Task<JsonResult> AddToMyCourse(string CourseID, string CenterCode, string CourseName = "", string ClassID = null, ClassEntity item = null, Boolean isCreateNewClass = false)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
 
@@ -1680,26 +1682,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var Course = _courseService.GetItemByID(CourseID);//Bài giảng
-                Course.OriginID = Course.ID;
-                Course.Center = center.ID;
-                Course.Created = DateTime.Now;
-                Course.CreateUser = teacher.ID;
-                Course.IsAdmin = true;
-                Course.IsPublic = false;
-                Course.IsActive = true;
-                Course.Updated = DateTime.Now;
-                Course.TeacherID = teacher.ID;
-                Course.TotalPractices = 0;
-                Course.TotalLessons = 0;
-                Course.TotalExams = 0;
-                Course.TargetCenters = new List<string>();
-                Course.Name = CourseName == "" ? Course.Name : CourseName;
+                //Course.OriginID = Course.ID;
+                //Course.Center = center.ID;
+                //Course.Created = DateTime.Now;
+                //Course.CreateUser = teacher.ID;
+                //Course.IsAdmin = true;
+                //Course.IsPublic = false;
+                //Course.IsActive = true;
+                //Course.Updated = DateTime.Now;
+                //Course.TeacherID = teacher.ID;
+                //Course.TotalPractices = 0;
+                //Course.TotalLessons = 0;
+                //Course.TotalExams = 0;
+                //Course.TargetCenters = new List<string>();
+                //Course.Name = CourseName == "" ? Course.Name : CourseName;
 
-                Course.ID = null;
+                //Course.ID = null;
 
-                //_courseService.Save(Course);
+                ////_courseService.Save(Course);
 
-                var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
+                //var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
 
                 var SkillID = Course.SkillID;//Môn học
                 var GradeID = Course.GradeID;//Cấp độ
@@ -1708,7 +1710,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Class.Updated = DateTime.Now;
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
-                classSubject.CourseID = newID;
+                classSubject.CourseID = Course.ID;
                 classSubject.SkillID = SkillID;
                 classSubject.GradeID = GradeID;
                 classSubject.SubjectID = SubjectID;
@@ -1765,7 +1767,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     //_courseService.Save(Course);
                     await CloneCourse(_courseService.GetItemByID(CourseID), Course);
-                } 
+                }
             }
             return new JsonResult("Thêm thành công");
         }

@@ -452,6 +452,7 @@
                     StartDate: '',
                     EndDate: '',
                     Description: '',
+                    ClassMechanism:'@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN',//mặc định là lớp mở
                     thumbnail: {
                         src: '',
                         file: null,
@@ -604,6 +605,7 @@
                     _form.append('StartDate', _startdate)
                     _form.append('EndDate', _enddate)
                     _form.append('CenterCode', '@center')
+                    _form.append('ClassMechanism', _that.class_info.ClassMechanism)
 
                     if(_that.class_info.Description != null)
                         _form.append('Description', _that.class_info.Description)
@@ -729,6 +731,7 @@
                     if (obj == null) {
                         _that.class_info =
                         {
+                            ClassMechanism:'@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN',
                             thumbnail: {
                                 src: '',
                                 file: null,
@@ -752,6 +755,7 @@
                         _that.class_info.ID = obj.ID;
                         _that.class_info.Description = obj.Description;
                         _that.class_info.Name = obj.Name;
+                        _that.class_info.ClassMechanism = obj.ClassMechanism == null ? '@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN' : obj.ClassMechanism
                         _that.class_info.thumbnail = {
                             src: obj.Image,
                             file: null,
@@ -1273,6 +1277,13 @@
                 <b-col class="form-group">
                     <label class="label">Mô tả</label>
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription"></textarea>
+                </b-col>
+                <b-col class="form-group">
+                    <label class="label">Cơ chế lớp:</label>
+                    <select v-model="class_info.ClassMechanism" class="form-control">
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Lớp mở</option>
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Lớp đóng</option>
+                    </select>
                 </b-col>
                 <b-col class="form-group">
                     <label class="label">Chọn ảnh lớp học</label>
