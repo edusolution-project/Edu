@@ -218,7 +218,7 @@
                     gradeID: '',
                     isDownload: false,
                     tags: '',
-                    isCheckDownload: false,
+                    isCheckDownload: false
                 },
                 linkFile: '',
                 typeFile:[
@@ -246,7 +246,14 @@
                     ListClasses: [],
                     Image: '',
                     Creator: '',
-                    ClassID:''
+                    ClassID: ''
+                },
+                isCreateNewClass: false,
+                newClass: {
+                    Name: '',
+                    StartDate: '',
+                    EndDate: '',
+                    Description:''
                 }
             },
             watch : {
@@ -277,6 +284,16 @@
                 },
                 subjectID: function () {
                     this.getData()
+                },
+                "docsInteractive.ClassID": function () {
+                    debugger
+                    if (this.docsInteractive.ClassID=="true") {
+                        this.isCreateNewClass = true
+                        //alert(this.docsInteractive.NewClass)
+                    } else {
+                        this.isCreateNewClass = false
+                    }
+                    //debugger
                 }
             },
             methods: {
@@ -627,7 +644,7 @@
                                 //_that.docsInteractive.ListClasses = response.data.Data.Classes;
                                 //debugger
                             }).catch(e => { })
-                        }
+                    }
                     _that.$bvModal.show('modal_docsinteractive')
                 },
                 getMyClass() {
@@ -645,9 +662,16 @@
                     let _that = this;
                     let _form = new FormData();
                     let _url = '@processUrl("AddToMyCourse", "Class")';
-                    _form.append('ID', _that.docsInteractive.ID);
-                    _form.append('Center', '@center');
+                    _form.append('CourseID', _that.docsInteractive.ID);
+                    _form.append('CenterCode', '@center');
                     _form.append('CourseName', _that.docsInteractive.Name);
+                    if (_that.isCreateNewClass) {
+                        _form.append('Name', _that.newClass.Name);
+                        _form.append('StartDate', this.formatDate(_that.newClass.StartDate));
+                        _form.append('EndDate', this.formatDate(_that.newClass.EndDate));
+                        _form.append('Description', _that.newClass.Description);
+                        _form.append('isCreateNewClass', _that.isCreateNewClass);
+                    }
                     //debugger
                     if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "") {
                         var result = window.confirm("Bạn chưa chọn lớp để thêm học liệu, học liệu sẽ được thêm vào mục TẠO BÀI GIẢNG trong tài khoản của bạn");
@@ -667,7 +691,9 @@
                         }
                     }
                     else {
-                        _form.append('ClassID', _that.docsInteractive.ClassID);
+                        if (!_that.isCreateNewClass) {
+                            _form.append('ClassID', _that.docsInteractive.ClassID);
+                        }
                         this.isLoading = true
                         axios.post(_url, _form)
                             .then(response => {
@@ -675,12 +701,21 @@
                                 this.hideModal();
                                 if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "")
                                     alert("Tài liệu đã được thêm vào danh mục bài giảng của bạn!");
+                                else if (_that.isCreateNewClass) {
+                                    alert("Lớp " + _that.newClass.Name + " đã được tạo, tài liệu đã được thêm vào lớp " + _that.newClass.Name + ".");
+                                }
                                 else
                                     alert("Tài liệu đã được thêm vào lớp của bạn!");
                             }).catch(e => {
                                 this.isLoading = false;
                                 alert(e)
                             })
+                    }
+                },
+                formatDate(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+
                     }
                 }
             }
@@ -818,9 +853,34 @@
                     <b-col class="form-group col-sm-12">
                         <select class="form-control" v-model="docsInteractive.ClassID">
                             <option value="">Chọn lớp muốn tải về (nếu cần)</option>
+                            <option value="true">Tạo lớp mới</option>
                             <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
                         </select>
                     </b-col>
+
+                    <!--Create New Class-->
+                    <b-col class="form-group col-sm-12" v-if="isCreateNewClass">
+                        <fieldset>
+                            <legend>Tạo lớp học</legend>
+                            <div class="col-sm-12">
+                                <label class="label">Tên lớp học</label>
+                                <input type="text" class="form-control" placeholder="Tên lớp học" v-model="newClass.Name" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="label">Ngày bắt đầu</label>
+                                <input type="date" class="form-control" v-model="newClass.StartDate" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="label">Ngày kết thúc</label>
+                                <input type="date" class="form-control" v-model="newClass.EndDate" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="label">Mô tả</label>
+                                <textarea rows="2" class="form-control" placeholder="Mô tả" v-model="newClass.Description"></textarea>
+                            </div>
+                        </fieldset>
+                    </b-col>
+
                     <b-col class="form-group col-sm-12">
                         <b-button type="submit" v-if="isLoading" class="btn btn-secondary">Đang thực hiện...</b-button>
                         <button type="submit" v-if="!isLoading" class="btn btn-primary" v-on:click="AddToMyCourse()">Thêm vào tài khoản</button>

@@ -73,6 +73,8 @@ namespace BaseCustomerEntity.Database
         public string Center { get; set; }
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
+        [JsonProperty("ClassMechanism")]
+        public int ClassMechanism { get; set; } //cơ chế lớp
     }
 
     public class ClassService : ServiceBase<ClassEntity>
@@ -143,5 +145,23 @@ namespace BaseCustomerEntity.Database
             else
                 return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ClassMechanism"></param>
+        /// <param name="StudentID"></param>
+        /// <returns></returns>
+        public ClassEntity GetClassByMechanism(int ClassMechanism, string StudentID)
+        {
+            return Collection.Find(c => c.ClassMechanism == ClassMechanism && c.TeacherID==StudentID).FirstOrDefault();
+        }
+    }
+
+    public class CLASS_MECHANISM //cơ chế lớp
+    {
+        public const int CLOSE = 0, //Lop dong
+            OPEN = 1, //Lop mo
+            PERSONAL = 2;//Lop ca nhan
     }
 }

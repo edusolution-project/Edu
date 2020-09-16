@@ -24,6 +24,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly SubjectService _subjectService;
         private readonly GradeService _gradeService;
         private readonly ReferenceService _referenceService;
+        private readonly CenterService _centerService;
+        private readonly CourseService _courseService;
         private readonly IHostingEnvironment _env;
         private string host;
         private string staticPath;
@@ -37,7 +39,9 @@ namespace BaseCustomerMVC.Controllers.Student
             GradeService gradeService,
             IHostingEnvironment env,
             IConfiguration iConfig,
-            ReferenceService referenceService
+            ReferenceService referenceService,
+            CenterService centerService,
+            CourseService courseService
             )
         {
             _studentService = studentService;
@@ -50,6 +54,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _env = env;
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
+            _centerService = centerService;
+            _courseService = courseService;
         }
 
         public IActionResult Index(DefaultModel model, int old = 0)
@@ -75,71 +81,98 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID, string SubjectID, string GradeID)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string TeacherID, string SubjectID, string GradeID, string basis, Boolean isInteractive = false)
         {
+            if (string.IsNullOrEmpty(basis))
+            {
+                return Json("Không tìm thấy cơ sở");
+            }
+
             if (entity != null)
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var center = _centerService.GetItemByCode(basis);
                 var filter = new List<FilterDefinition<ReferenceEntity>>();
-                switch (entity.Range)
+                if (isInteractive)
                 {
-                    //case REF_RANGE.TEACHER:
-                    //    filter.Add(filterTeacher);
-                    //    break;
-                    case REF_RANGE.CLASS:
-                        if (string.IsNullOrEmpty(entity.Target))
-                            return new JsonResult(new Dictionary<string, object>
+                    var _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        _filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+
+                    var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(_filter));
+                    defaultModel.TotalRecord = result.CountDocuments();
+
+                    var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
+                }
+                else
+                {
+                    switch (entity.Range)
+                    {
+                        //case REF_RANGE.TEACHER:
+                        //    filter.Add(filterTeacher);
+                        //    break;
+                        case REF_RANGE.CLASS:
+                            if (string.IsNullOrEmpty(entity.Target))
+                                return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", new List<ReferenceEntity>() },
                                 { "Model", defaultModel }
                             });
-                        var tIDs = _classService.GetItemByID(entity.Target).Members.Select(t => t.TeacherID);
-                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o =>
-                            (o.Range == REF_RANGE.CLASS && o.Target == entity.Target) ||
-                            (o.Range == REF_RANGE.TEACHER && tIDs.Contains(o.Target))
-                        ));
-                        break;
-                    case REF_RANGE.ALL:
-                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => (o.Range == REF_RANGE.ALL)));
-                        break;
-                    default:
-                        var classIds = _studentService.GetItemByID(UserID).JoinedClasses;
-                        var teacherIDs = new List<string>();
-                        if (classIds != null && classIds.Count > 0)
-                        {
-                            foreach (var classid in classIds)
-                                teacherIDs.AddRange(_classService.GetItemByID(classid).Members.Select(t => t.TeacherID));
-                            teacherIDs = teacherIDs.Distinct().ToList();
-                        }
-                        filter.Add(
-                            Builders<ReferenceEntity>.Filter.Where(o =>
-                            (o.Range == REF_RANGE.CLASS && classIds.Contains(o.Target)) ||
-                            (o.Range == REF_RANGE.TEACHER && teacherIDs.Contains(o.Target)) ||
-                            (o.Range == REF_RANGE.ALL)
-                        ));
-                        break;
-                }
-                if (!string.IsNullOrEmpty(SubjectID))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
-                }
-                if (!string.IsNullOrEmpty(GradeID))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
-                }
-                if (!string.IsNullOrEmpty(defaultModel.SearchText))
-                {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
-                }
-                var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
-                defaultModel.TotalRecord = result.CountDocuments();
-                var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", returnData },
-                    { "Model", defaultModel }
-                });
+                            var tIDs = _classService.GetItemByID(entity.Target).Members.Select(t => t.TeacherID);
+                            filter.Add(Builders<ReferenceEntity>.Filter.Where(o =>
+                                (o.Range == REF_RANGE.CLASS && o.Target == entity.Target) ||
+                                (o.Range == REF_RANGE.TEACHER && tIDs.Contains(o.Target))
+                            ));
+                            break;
+                        case REF_RANGE.ALL:
+                            filter.Add(Builders<ReferenceEntity>.Filter.Where(o => (o.Range == REF_RANGE.ALL)));
+                            break;
+                        default:
+                            var classIds = _studentService.GetItemByID(UserID).JoinedClasses;
+                            var teacherIDs = new List<string>();
+                            if (classIds != null && classIds.Count > 0)
+                            {
+                                foreach (var classid in classIds)
+                                    teacherIDs.AddRange(_classService.GetItemByID(classid).Members.Select(t => t.TeacherID));
+                                teacherIDs = teacherIDs.Distinct().ToList();
+                            }
+                            filter.Add(
+                                Builders<ReferenceEntity>.Filter.Where(o =>
+                                (o.Range == REF_RANGE.CLASS && classIds.Contains(o.Target)) ||
+                                (o.Range == REF_RANGE.TEACHER && teacherIDs.Contains(o.Target)) ||
+                                (o.Range == REF_RANGE.ALL)
+                            ));
+                            break;
+                    }
+                    if (!string.IsNullOrEmpty(SubjectID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, SubjectID));
+                    }
+                    if (!string.IsNullOrEmpty(GradeID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, GradeID));
+                    }
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+                    var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
+                    defaultModel.TotalRecord = result.CountDocuments();
+                    var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
 
+                }
             }
             return null;
         }

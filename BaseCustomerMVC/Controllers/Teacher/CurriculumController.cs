@@ -402,9 +402,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         })).ToList();
                 foreach (var t in rsp)
                 {
-                    var tcid = t.TeacherID;
-                    t.TeacherID = tcid;
-                    t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                    if (t.TeacherID == null || t.TeacherID== "null") continue;
+                    else
+                    {
+                        var tcid = t.TeacherID;
+                        t.TeacherID = tcid;
+                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                    }
                 }
 
                 response = new Dictionary<string, object>

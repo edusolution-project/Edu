@@ -153,7 +153,7 @@ namespace BaseCustomerMVC.Controllers.Student
                               CourseID = r.CourseID,
                               CourseName = course.Name,
                               TeacherID = r.TeacherID,
-                              TeacherName = teacher.FullName
+                              TeacherName = teacher==null?"Lớp cá nhân":teacher.FullName
                           }).ToList()
                 },
             };

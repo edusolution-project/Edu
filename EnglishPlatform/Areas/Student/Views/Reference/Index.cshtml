@@ -23,7 +23,28 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header" v-cloak>
-        <div class="flex border-b flex-wrap align-items-center">
+        <div class="flex flex-wrap align-items-center">
+            @*<div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="subject">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="grade">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                    </select>
+                </div>*@
+            <div class="tab bg-none col-md-12 m-1">
+                <ul class="flex flex-row">
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Học liệu tương tác" v-on:click="tabChange(1)">Học liệu tương tác</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="flex border-b flex-wrap align-items-center" v-if="tab[0]">
             <div class="box filter-box col-12 col-md-2 m-1">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
@@ -61,10 +82,11 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
         </div>
+           
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
-            <div class="col-md-6" v-for="data in tableData">
+            <div class="col-md-6" v-for="data in tableData" v-if="tab[0]">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                     <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
                         <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
@@ -86,7 +108,33 @@
                         <div>
                             <a href="#" title="Mở link" class="text-success font-weight-bold mr-2 act" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
                             <a href="#" title="Mở file" class="text-success font-weight-bold mr-2 act" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                            <a href="#" title="Tải file" class="text-success font-weight-bold mr-2 act" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" ><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                            <a href="#" title="Tải file" class="text-success font-weight-bold mr-2 act" v-if="data.Media != null && data.isDownload" v-on:click="download(data)"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6" v-for="data in tableData" v-if="tab[1]">
+                <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                    <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
+                        <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                    </a>
+                    <div class="entry p-0">
+                        <div>
+                            <div>
+                                <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="title">{{data.Name}}</a>
+                            </div>
+                            @*<div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                </div>*@
+                        </div>
+                        <div class="pt-0 pb-2">
+                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                        </div>
+                        <div>
+                            <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="fas fa-cloud-download-alt"></i> Xem chi tiết</a>
                         </div>
                     </div>
                 </div>
@@ -135,6 +183,41 @@
             </div>
         </div>
     </div>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_docsinteractive" centered :title="'Học liệu ' + docsInteractive.Name" size="xl" hide-footer="true">
+        <div class="col-md-12 form-row" style=" max-height: 500px; height: 500px;">
+            <div class="form-row col-md-9 col-sm-12 h-100">
+                <b-col class="form-group col-sm-4" style="text-align:center">
+                    <div class="col-sm-12">
+                        <img :src="cacheStatic(docsInteractive.Image,200)" v-if="docsInteractive.Image != null" />
+                        <img src="~/pictures/book.jpg" v-else />
+                    </div>
+                    <b-col class="form-group col-sm-12" style="padding:10px">
+                        <label for="">Người tạo: {{docsInteractive.Creator}}</label>
+                    </b-col>
+                </b-col>
+                <b-col class="form-group col-sm-8 h-100">
+                    <ul class="list-group h-100 overflow-auto">
+                        <li class="list-group-item active">Mục lục</li>
+                        <li v-for="item in docsInteractive.ListChapters" class="list-group-item">{{item.Name}}</li>
+                    </ul>
+                </b-col>
+            </div>
+            <div class="form-row col-md-3 col-sm-12" style="position:relative">
+                <div style="position:absolute;width:100%">
+                    <b-col class="form-group col-sm-12">
+                        <label for="">Tên tài liệu</label>
+                        <input type="text" name="" value="" class="form-control" v-model="docsInteractive.Name" placeholder="Tên tài liệu" disabled>
+                    </b-col>
+
+                    <b-col class="form-group col-sm-12">
+                        <b-button type="submit" v-if="isLoading" class="btn btn-secondary">Đang thực hiện...</b-button>
+                        <button type="submit" v-if="!isLoading" class="btn btn-primary" v-on:click="AddToMyClass()">Thêm vào tài khoản</button>
+                    </b-col>
+                </div>
+            </div>
+        </div>
+    </b-modal>
 </section>
 
 @section Scripts{
@@ -145,6 +228,22 @@
                 this.getData()
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'docsnormal':
+                            this.tabChange(0);
+                            break;
+                        case 'docsinteractive':
+                            this.tabChange(1);
+                            break;
+                    }
+                }
+                else {
+                    this.tabChange(0);
+                }
             },
             data: {
                 isLoading: false,
@@ -174,7 +273,16 @@
                 gradeID:'',
                 list_subject: [],
                 list_grades_full: [],
-                HTMLContent: ''
+                HTMLContent: '',
+                tab: [true, false],
+                isInteractive: false,//mặc định là false=tài liệu thường,
+                docsInteractive: {
+                    Name: '',
+                    Image: '',
+                    Creator: '',
+                    ID: '',
+                    ListChapters:[]
+                }
             },
             watch : {
                 searchTerm: function(){
@@ -209,6 +317,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SubjectID', _that.subject)
                     _form.append('GradeID', _that.grade)
+                    _form.append('isInteractive', _that.isInteractive)
 
                     let _url = '@processUrl("GetList", "Reference")'
 
@@ -216,6 +325,7 @@
                         .then(response => {
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
+                            //debugger
                             this.totalRec = response.data.Model.totalRecord
                             console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
@@ -312,6 +422,83 @@
                     let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
                     return dom.body.innerHTML;
 
+                },
+                tabChange(a = 0) {
+                    // có thể load data theo từng tab để tối ưu hiệu năng
+                    // this.getData()
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
+                            this.isInteractive = false;
+                            this.loadDocsNormal();
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
+                            this.isInteractive = true;
+                            this.loadDocsInteractive();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                loadDocsNormal() {
+                    this.getData();
+                    //alert("tai lieu thuong")
+                },
+                loadDocsInteractive() {
+                    this.getData();
+                    //alert("tai lieu tuong tac")
+                },
+                showDocsInteractive(obj) {
+                    let _that = this;
+                    let _form = new FormData();
+                    let _url = '@processUrl("GetCourseDetail", "Curriculum")';
+                    if (obj != null) {
+                        _that.docsInteractive.Name = obj.Name;
+                        _that.docsInteractive.Image = obj.Image;
+                        _that.docsInteractive.Creator = obj.TeacherName;
+                        _that.docsInteractive.ID = obj.ID;
+                        //debugger
+                        _form.append('ID', obj.ID)
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.docsInteractive.ListChapters = response.data.Data.Chapters;
+                                //_that.docsInteractive.ListClasses = response.data.Data.Classes;
+                                //debugger
+                            }).catch(e => { })
+                    }
+                    _that.$bvModal.show('modal_docsinteractive')
+                },
+                AddToMyClass() {
+                    //alert(1)
+                    let _that = this
+                    let _form = new FormData();
+                    _form.append('CourseID', _that.docsInteractive.ID);
+                    let _url = '@processUrl("AddToPersonalClass", "Class")';
+                    this.isLoading = true;
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //debugger
+                            if (!response.data.Status) {
+                                alert(response.data.Msg);
+                                this.isLoading = false;
+                                this.hideModal();
+                            }
+                            else {
+                                alert(response.data.Msg);
+                                this.isLoading = false;
+                                this.hideModal();
+                            }
+                        }).catch(e => {
+                            alert(e);
+                            this.isLoading = false;
+                            this.hideModal();
+                        })
                 }
             }
         });

@@ -1075,7 +1075,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Description", o.Description },
                                  { "SkillName", sname },
                                  { "Creator", o.TeacherID },
-                                 { "CreatorName", creator.FullName }
+                                 { "CreatorName", creator==null?"":creator.FullName },
+                                 {"ClassMechanism",o.ClassMechanism }
                              };
             return returndata.ToList();
         }
@@ -1227,6 +1228,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;
+                oldData.ClassMechanism = item.ClassMechanism;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1641,7 +1643,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region Add To My Course
-        public async Task<JsonResult> AddToMyCourse(string ID, string Center, string CourseName = "", string ClassID = null)
+        public async Task<JsonResult> AddToMyCourse(string CourseID, string CenterCode, string CourseName = "", string ClassID = null, ClassEntity item = null, Boolean isCreateNewClass = false)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
 
@@ -1660,8 +1662,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Vui lòng đăng nhập lại" }
                         });
             }
-            var center = _centerService.GetItemByCode(Center);
-            if (center == null || teacher.Centers.Count(t => t.Code == Center) == 0)
+            var center = _centerService.GetItemByCode(CenterCode);
+            if (center == null || teacher.Centers.Count(t => t.Code == CenterCode) == 0)
             {
                 return new JsonResult(new Dictionary<string, object>()
                         {
@@ -1680,62 +1682,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         });
                 }
 
-                var Course = _courseService.GetItemByID(ID);//Bài giảng
-                //Course.OriginID = Course.ID;
-                //Course.Center = center.ID;
-                //Course.Created = DateTime.Now;
-                //Course.CreateUser = teacher.ID;
-                //Course.IsAdmin = true;
-                //Course.IsPublic = false;
-                //Course.IsActive = true;
-                //Course.Updated = DateTime.Now;
-                //Course.TeacherID = teacher.ID;
-                //Course.TotalPractices = 0;
-                //Course.TotalLessons = 0;
-                //Course.TotalExams = 0;
-                //Course.TargetCenters = new List<string>();
-                //Course.Name = CourseName == "" ? Course.Name : CourseName;
-
-                //Course.ID = null;
-
-                //_courseService.Save(Course);
-
-                //var newID = await CloneCourse(_courseService.GetItemByID(ID), Course);
-
-                var SkillID = Course.SkillID;//Môn học
-                var GradeID = Course.GradeID;//Cấp độ
-                var SubjectID = Course.SubjectID;//Chương trình
+                var Course = _courseService.GetItemByID(CourseID);//Bài giảng
 
                 Class.Updated = DateTime.Now;
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
                 classSubject.CourseID = Course.ID;
                 //classSubject.CourseName = CourseName;
-                classSubject.SkillID = SkillID;
-                classSubject.GradeID = GradeID;
-                classSubject.SubjectID = SubjectID;
+                classSubject.SkillID = Course.SkillID;
+                classSubject.GradeID = Course.GradeID;
+                classSubject.SubjectID = Course.SubjectID;
                 classSubject.TeacherID = teacher.ID;
                 classSubject.TypeClass = CLASS_TYPE.EXTEND;
 
                 oldSubjects.Add(classSubject);
-                Create(Class, center.Code, oldSubjects, null);
 
-                //var chapters = _courseChapterService.CreateQuery().Find(x => x.CourseID == ID).ToList();
-                //var a = _courseChapterService.CreateQuery().Find(o => o.CourseID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
-                //var b = _courseLessonService.CreateQuery().Find(o => o.CourseID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
-                ////foreach (var item in a)
-                //{
-                //    item.CourseID = Course.ID;
-                //    await CopyChapter(item.ID, ID);
-                //}
-                //foreach(var item in a)
-                //{
-                //    await CopyChapter(item.ID, Course.ID);
-                //}
+                Create(Class, center.Code, oldSubjects, null);
             }
             else
             {
-                var Course = _courseService.GetItemByID(ID);//Bài giảng
+                var Course = _courseService.GetItemByID(CourseID);//Bài giảng
                 Course.OriginID = Course.ID;
                 Course.Center = center.ID;
                 Course.Created = DateTime.Now;
@@ -1753,8 +1719,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 Course.ID = null;
 
-                //_courseService.Save(Course);
-                await CloneCourse(_courseService.GetItemByID(ID), Course);
+                var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
+
+                if (isCreateNewClass)
+                {
+                    var listclassSubject = new List<ClassSubjectEntity>();
+                    var classSubject = new ClassSubjectEntity();
+                    classSubject.CourseID = newID;                    
+                    classSubject.SkillID = Course.SkillID;
+                    classSubject.GradeID = Course.GradeID;
+                    classSubject.SubjectID = Course.SubjectID;
+                    classSubject.TeacherID = teacher.ID;
+                    classSubject.TypeClass = CLASS_TYPE.EXTEND;
+
+                    listclassSubject.Add(classSubject);
+
+                    item.CourseID = null;
+                    Create(item, center.Code, listclassSubject, null);
+                }
             }
             return new JsonResult("Thêm thành công");
         }
