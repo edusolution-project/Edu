@@ -1681,26 +1681,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var Course = _courseService.GetItemByID(ID);//Bài giảng
-                Course.OriginID = Course.ID;
-                Course.Center = center.ID;
-                Course.Created = DateTime.Now;
-                Course.CreateUser = teacher.ID;
-                Course.IsAdmin = true;
-                Course.IsPublic = false;
-                Course.IsActive = true;
-                Course.Updated = DateTime.Now;
-                Course.TeacherID = teacher.ID;
-                Course.TotalPractices = 0;
-                Course.TotalLessons = 0;
-                Course.TotalExams = 0;
-                Course.TargetCenters = new List<string>();
-                Course.Name = CourseName == "" ? Course.Name : CourseName;
+                //Course.OriginID = Course.ID;
+                //Course.Center = center.ID;
+                //Course.Created = DateTime.Now;
+                //Course.CreateUser = teacher.ID;
+                //Course.IsAdmin = true;
+                //Course.IsPublic = false;
+                //Course.IsActive = true;
+                //Course.Updated = DateTime.Now;
+                //Course.TeacherID = teacher.ID;
+                //Course.TotalPractices = 0;
+                //Course.TotalLessons = 0;
+                //Course.TotalExams = 0;
+                //Course.TargetCenters = new List<string>();
+                //Course.Name = CourseName == "" ? Course.Name : CourseName;
 
-                Course.ID = null;
+                //Course.ID = null;
 
                 //_courseService.Save(Course);
 
-                var newID = await CloneCourse(_courseService.GetItemByID(ID), Course);
+                //var newID = await CloneCourse(_courseService.GetItemByID(ID), Course);
 
                 var SkillID = Course.SkillID;//Môn học
                 var GradeID = Course.GradeID;//Cấp độ
@@ -1709,7 +1709,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Class.Updated = DateTime.Now;
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
-                classSubject.CourseID = newID;
+                classSubject.CourseID = Course.ID;
+                //classSubject.CourseName = CourseName;
                 classSubject.SkillID = SkillID;
                 classSubject.GradeID = GradeID;
                 classSubject.SubjectID = SubjectID;
