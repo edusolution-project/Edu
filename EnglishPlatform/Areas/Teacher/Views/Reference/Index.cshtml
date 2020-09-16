@@ -261,7 +261,7 @@
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
-                    if (tab[1])
+                    if (this.tab[1])
                         fn = this.getMyClass
                     this.searchTimeout = setTimeout(function(){
                         fn()

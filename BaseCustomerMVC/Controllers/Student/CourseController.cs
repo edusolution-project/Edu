@@ -943,7 +943,6 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
-
         //TODO: FIX DATA ONLY
         //public JsonResult FixProgress()
         //{

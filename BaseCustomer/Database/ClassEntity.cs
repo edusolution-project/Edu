@@ -37,14 +37,6 @@ namespace BaseCustomerEntity.Database
         public List<string> Subjects { get; set; }
         [JsonProperty("Skills")]
         public List<string> Skills { get; set; }
-
-        //Multiple
-        //[JsonProperty("GradeID")]
-        //public string GradeID { get; set; }
-        //[JsonProperty("SubjectID")]
-        //public string SubjectID { get; set; }
-        //[JsonProperty("CourseID")]
-        //public string CourseID { get; set; }
         [JsonProperty("TeacherID")]//CreatorID
         public string TeacherID { get; set; }
 
@@ -83,7 +75,6 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ClassEntity>>
             {
-                //SubjectID_1_GradeID_1_TeacherID_1
                 new CreateIndexModel<ClassEntity>(
                     new IndexKeysDefinitionBuilder<ClassEntity>()
                     .Text(t=> t.Name))

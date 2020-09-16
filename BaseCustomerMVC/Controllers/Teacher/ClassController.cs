@@ -1734,7 +1734,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     listclassSubject.Add(classSubject);
 
-                    item.CourseID = null;
                     Create(item, center.Code, listclassSubject, null);
                 }
             }
