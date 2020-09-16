@@ -3369,6 +3369,7 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
+            console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
 
             var limit = lastExam.limit;

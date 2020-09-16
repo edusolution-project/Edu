@@ -237,8 +237,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
             vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
             ViewBag.Class = vm;
-            ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
-            ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+            //ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
+            //ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -801,15 +801,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var std = (from o in data.ToList()
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
-                       let subject = _subjectService.GetItemByID(o.SubjectID)
+                       //let subject = _subjectService.GetItemByID(o.SubjectID)
                        let studentCount = //_classStudentService.GetClassStudents(o.ID).Count
                        _studentService.CountByClass(o.ID)
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            courseName = o.Name,
-                           subjectName = subject == null ? "" : subject.Name,
+                           //subjectName = subject == null ? "" : subject.Name,
                            thumb = o.Image ?? "",
                            endDate = o.EndDate,
                            //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
@@ -850,7 +850,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            title = o.Name,
                            endDate = o.EndDate,
                        }).ToList();
@@ -1054,7 +1054,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var returndata = from o in classData
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
-                             let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
+                             //let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
                              select new Dictionary<string, object>
                                 {
@@ -1075,7 +1075,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Description", o.Description },
                                  { "SkillName", sname },
                                  { "Creator", o.TeacherID },
-                                 { "CreatorName", creator.FullName }
+                                 { "CreatorName", o.CreatorName }
                              };
             return returndata.ToList();
         }
@@ -1223,7 +1223,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var creator = _teacherService.GetItemByID(oldData.TeacherID);
                 oldData.Members = new List<ClassMemberEntity> { };
                 if (creator != null)
-                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
+                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.OWNER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;

@@ -333,6 +333,7 @@
             mounted() {
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                console.log(this.list_subject);
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.list_skill = @Html.Raw(Json.Serialize(skills));
                 window.changeAddSubject = this.changeAddSubject
@@ -374,8 +375,8 @@
                         label: 'Môn học'
                     },
                     {
-                        key: 'creator_name',
-                        label: 'Giáo viên tạo'
+                        key: 'teacher_name',
+                        label: 'Giáo viên'
                     },
                     {
                         key: 'students',
@@ -764,12 +765,15 @@
                         let _form = new FormData()
                         _form.append('ClassID', obj.ID)
                         let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
+                        //console.log(_that.list_subject);
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
+                               
                                 _data.forEach(function (item, k) {
                                     var lock = false
                                     var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
+                                    //console.log(valid_subject);
                                     if (valid_subject.length == 0) {
                                         _that.list_subject.push({
                                             ID: item.SubjectID,
