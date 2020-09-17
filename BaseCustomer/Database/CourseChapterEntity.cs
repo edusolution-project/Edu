@@ -98,5 +98,10 @@ namespace BaseCustomerEntity.Database
                 return CreateQuery().Find(c => c.CourseID == CourseID && c.ParentID == "0").SortBy(t => t.Order).ToEnumerable();
             return CreateQuery().Find(c => c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
+
+        public List<CourseChapterEntity> GetCourseChapters(string CourseID)
+        {
+            return Collection.Find(x => x.CourseID == CourseID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+        }
     }
 }

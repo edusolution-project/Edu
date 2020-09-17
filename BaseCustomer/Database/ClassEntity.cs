@@ -107,8 +107,12 @@ namespace BaseCustomerEntity.Database
                 Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
         }
 
-        public IEnumerable<string> GetMultipleClassName(List<string> IDs, string CenterID = "")
+        public IEnumerable<string> GetMultipleClassName(List<string> IDs, string StudentID = "", string CenterID = "")
         {
+            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID)!=null)
+            {
+                IDs.RemoveAt(IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID));
+            }
             if (string.IsNullOrEmpty(CenterID))
                 return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
             return Collection.Find(t => IDs.Contains(t.ID) && t.Center == CenterID).Project(t => t.Name).ToEnumerable();
@@ -145,7 +149,7 @@ namespace BaseCustomerEntity.Database
         /// <returns></returns>
         public ClassEntity GetClassByMechanism(int ClassMechanism, string StudentID)
         {
-            return Collection.Find(c => c.ClassMechanism == ClassMechanism && c.TeacherID==StudentID).FirstOrDefault();
+            return Collection.Find(c => c.ClassMechanism == ClassMechanism && c.TeacherID == StudentID).FirstOrDefault();
         }
     }
 

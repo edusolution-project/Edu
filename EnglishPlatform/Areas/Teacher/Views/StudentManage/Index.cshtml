@@ -367,7 +367,7 @@
                     listNameClass: '',
                     passStudent: '',
                 },
-                isHeadTeacher:@Html.Raw(Json.Serialize(IsHeadTeacher))
+                isHeadTeacher:'@Html.Raw(Json.Serialize(IsHeadTeacher))'
             },
             watch: {
                 search_subject_id: function () {
@@ -675,7 +675,15 @@
                     _form.append('Email', _that.createStudent.emailStudent)
                     _form.append('Phone', _that.createStudent.phoneStudent)
                     _form.append('DateBorn', this.formatDate(_that.createStudent.birthdayStudent))
-                    _form.append('JoinedClasses', _that.createStudent.listClass)
+                    var classes = _that.createStudent.listClass;
+                    if (classes != null) {
+                        var joinedClasses = classes.toString().split(',');
+                        if (joinedClasses.length > 0)
+                            joinedClasses.forEach(function (item, pos) {
+                                if (item != "") { _form.append('JoinedClasses', item) }
+                            });
+                    }
+                    //_form.append('JoinedClasses', _that.createStudent.listClass)
                         //debugger
                         _that.isLoading = true
                         axios.post(_url, _form)

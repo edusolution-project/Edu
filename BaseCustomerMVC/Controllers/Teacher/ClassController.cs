@@ -79,6 +79,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
+        private readonly ClassService _classService;
 
         public ClassController(
             AccountService accountService,
@@ -126,7 +127,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             GroupService groupService,
             CourseChapterService courseChapterService,
             CourseLessonService courseLessonService,
-            LessonPartAnswerService lessonPartAnswerService
+            LessonPartAnswerService lessonPartAnswerService,
+            ClassService classService
             )
         {
             _accountService = accountService;
@@ -181,6 +183,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _courseChapterService = courseChapterService;
             _courseLessonService = courseLessonService;
             _lessonPartAnswerService = lessonPartAnswerService;
+            _classService = classService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -1017,6 +1020,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = dCursor.ToList();
             }
 
+            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism!=CLASS_MECHANISM.PERSONAL));
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -2122,13 +2126,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var StudentID = model.ID;
             var student = _studentService.GetItemByID(StudentID);
+            var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID);
             if (student == null)
                 return null;
 
             var data = new List<StudentSummaryViewModel>();
             if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
             {
-
+                if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
+                
                 foreach (var ClassID in student.JoinedClasses)
                 {
                     var @class = _service.GetItemByID(ClassID);
