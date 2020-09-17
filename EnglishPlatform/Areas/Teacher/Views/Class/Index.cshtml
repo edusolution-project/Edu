@@ -94,6 +94,9 @@
                             <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
                         </div>
+                        <div class="d-flex btn-group" v-if="isHeadteacher=='False' && item.Creator != '@userid'">
+                            <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -350,7 +353,6 @@
                     }
                 });
                 this.getData()
-
             },
             components: {
                 vuejsDatepicker
@@ -472,7 +474,8 @@
                         }
                     ]
                 },
-                curr: 0
+                curr: 0,
+                isHeadteacher:'@isHeadteacher'
             },
             computed: {
                 sDate: {
@@ -729,6 +732,7 @@
                 //Modal Event
                 showClassModal(obj) {
                     let _that = this;
+                    debugger
                     if (obj == null) {
                         _that.class_info =
                         {
@@ -810,7 +814,6 @@
                                         TypeClass: item.TypeClass
                                     })
 
-
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
 
@@ -828,6 +831,7 @@
                                 //_that.$forceUpdate()
                             }).catch(e => { })
                     }
+                    debugger
                     _that.$bvModal.show('modal_class')
                 },
                 showCloneModal(obj) {
@@ -1254,6 +1258,11 @@
                         return moment(String(value)).format('YYYY-MM-DD')
                     }
                 },
+                a(obj, userid) {
+                    //debugger
+                    //if (obj.TeacherID == userid) return true
+                    //else return false
+                }
             }
         });
 
@@ -1302,8 +1311,58 @@
                 </b-col>
             </div>
             <div class="col-md-8">
-                <ul class="list list-subject">
-                    <li v-for="(sub,k) in class_info.subject" class="flex" :id="sub.UID">
+                <ul class="list list-subject" v-for="(sub,k) in class_info.subject">
+                    <li class="flex" :id="sub.UID" v-if="sub.TeacherID == '@userid' && isHeadteacher=='False'" style="pointer-events: none;">
+                        <div class="width-100 mr-2">
+                            <label for="">Chương trình</label>
+                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
+                                <option value="">Chọn chương trình</option>
+                                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Cấp độ</label>
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
+                                <option value="">Chọn cấp độ</option>
+                                <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Môn học</label>
+                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                                <option value="">Chọn môn học</option>
+                                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Bài giảng</label>
+                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
+                                <option value="">Chọn bài giảng</option>
+                                <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Loại học liệu</label>
+                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
+                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                            </select>
+                        </div>
+                        <div class="width-100 mr-2">
+                            <label for="">Giáo viên</label>
+                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
+                                <option value="">Chọn giáo viên</option>
+                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group mt-4">
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học" v-if="sub.TypeClass=='@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND'" style="pointer-events: auto;"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học" v-else><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                        </div>
+                    </li>
+                    <li class="flex" :id="sub.UID" v-else>
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
                             <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
