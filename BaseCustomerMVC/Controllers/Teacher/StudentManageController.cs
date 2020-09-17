@@ -429,7 +429,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortByDescending(t => t.ID);
+            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortBy(t => t.ID);
             //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
@@ -441,7 +441,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses,t.ID))) :
+                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
 
