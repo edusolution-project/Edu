@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using System.Drawing;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Student
 {
@@ -90,6 +91,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (entity != null)
             {
+
+                var _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var center = _centerService.GetItemByCode(basis);
                 var filter = new List<FilterDefinition<ReferenceEntity>>();
@@ -104,7 +107,12 @@ namespace BaseCustomerMVC.Controllers.Student
                     var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(_filter));
                     defaultModel.TotalRecord = result.CountDocuments();
 
-                    var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    var returnData = from r in result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList()
+                                     let teacher = string.IsNullOrEmpty(r.CreateUser) ? new TeacherEntity() : (_teacherService.GetItemByID(r.CreateUser) ?? new TeacherEntity())
+                                     select _mapping.Auto(r, new CourseViewModel()
+                                     {
+                                         TeacherName = teacher.FullName
+                                     });
                     return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", returnData },

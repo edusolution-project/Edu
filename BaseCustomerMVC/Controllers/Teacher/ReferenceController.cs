@@ -251,14 +251,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
 
-                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
-
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = mediarsp.Path;
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis, true, 200, 300);
                             }
                             else
                             {
+                                var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                 entity.Media = new Media();
                                 entity.Media.Name = entity.Media.OriginalName = file.FileName;
                                 entity.Media.Created = DateTime.Now;

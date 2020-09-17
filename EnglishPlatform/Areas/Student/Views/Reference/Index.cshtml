@@ -225,7 +225,7 @@
         new Vue({
             el: "#dashboard_content",
             mounted() {
-                this.getData()
+                //this.getData()
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 var hash = window.location.hash;
@@ -464,7 +464,7 @@
                         _that.docsInteractive.Creator = obj.TeacherName;
                         _that.docsInteractive.ID = obj.ID;
                         //debugger
-                        _form.append('ID', obj.ID)
+                        _form.append('CourseID', obj.ID)
                         axios.post(_url, _form)
                             .then(response => {
                                 _that.docsInteractive.ListChapters = response.data.Data.Chapters;

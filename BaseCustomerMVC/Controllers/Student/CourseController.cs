@@ -185,7 +185,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.IsActive && o.Center == center.ID) || o.ClassMechanism == CLASS_MECHANISM.PERSONAL));
 
             //class filter
             var currentStudent = _studentService.GetItemByID(userId);
@@ -250,10 +250,7 @@ namespace BaseCustomerMVC.Controllers.Student
                  let complete = progress == null ? 0 : (o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0)
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
-                     //CourseName = course == null ? "" : course.Name,
                      StudentNumber = o.Students.Count,
-                     //SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
-                     //GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
                      TeacherName = teacher == null ? "" : teacher.FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,

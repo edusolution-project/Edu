@@ -82,7 +82,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (MyClass == null)
             {
                 var @class = new ClassEntity();
-                @class.Name = $"Lớp học của {student.FullName}";
+                @class.Name = $"Học liệu của {student.FullName}";
                 @class.Created = DateTime.Now;
                 @class.TeacherID = student.ID; // creator
                 @class.Skills = new List<string>();
@@ -204,7 +204,6 @@ namespace BaseCustomerMVC.Controllers.Student
                                 oldData.Skills.Add(nSbj.SkillID);
                             if (!oldData.Subjects.Contains(nSbj.SubjectID))
                                 oldData.Subjects.Add(nSbj.SubjectID);
-
 
                             oldData.TotalLessons += lessoncount;
                             oldData.TotalExams += examcount;
@@ -415,7 +414,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     await CreateClass(oldSubjects);
                     return new JsonResult(new Dictionary<string, object>()
                         {
-                            {"Msg", $"Thêm tài liệu vào Lớp của {student.FullName} thành công." },
+                            {"Msg", $"Thêm học liệu vào Học liệu của {student.FullName} thành công." },
                             {"Status",true }
                         });
                 }
