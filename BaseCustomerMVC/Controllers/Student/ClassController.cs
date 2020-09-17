@@ -24,6 +24,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
         private readonly ExamService _examService;
+        private readonly CourseLessonService _courseLessonService;
+        private readonly CourseChapterService _courseChapterService;
 
         public ClassController(
             ClassService classService,
@@ -38,7 +40,9 @@ namespace BaseCustomerMVC.Controllers.Student
             ChapterService chapterService,
             LessonHelper lessonHelper,
             ProgressHelper progressHelper,
-            ExamService examService
+            ExamService examService,
+            CourseLessonService courseLessonService,
+            CourseChapterService courseChapterService
         )
         {
             _classService = classService;
@@ -54,6 +58,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonHelper = lessonHelper;
             _progressHelper = progressHelper;
             _examService = examService;
+            _courseLessonService = courseLessonService;
+            _courseChapterService = courseChapterService;
         }
 
         #region add to my personal class
@@ -430,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var GradeID = course.GradeID;//Cấp độ
                 var SubjectID = course.SubjectID;//Chương trình
 
-                var oldSubjects = _classSubjectService.GetByClassID(MyClass.ID);
+                var oldSubjects = MyClass == null ? new List<ClassSubjectEntity>() : _classSubjectService.GetByClassID(MyClass.ID);
                 if (oldSubjects.Find(x => x.CourseID == CourseID) != null)
                 {
                     return new JsonResult(new Dictionary<string, object>()
@@ -439,6 +445,11 @@ namespace BaseCustomerMVC.Controllers.Student
                             {"Status",false }
                         });
                 }
+
+                //else if (MyClass == null)
+                //{
+                //    await CreateClass(oldSubjects);
+                //}
                 else
                 {
                     var classSubject = new ClassSubjectEntity();
@@ -454,11 +465,45 @@ namespace BaseCustomerMVC.Controllers.Student
                     await CreateClass(oldSubjects);
                     return new JsonResult(new Dictionary<string, object>()
                         {
-                            {"Msg", $"Thêm tài liệu vào {MyClass.Name} thành công." },
+                            {"Msg", $"Thêm tài liệu vào Lớp của {student.FullName} thành công." },
                             {"Status",true }
                         });
                 }
             }
+        }
+        #endregion
+
+        #region course
+        [HttpPost]
+        public JsonResult GetCourseDetail(string CourseID)
+        {
+            //var UserID = User.Claims.GetClaimByType("UserID").Value;
+            //var teacher = _teacherService.GetItemByID(UserID);
+
+            //var filter = new List<FilterDefinition<ClassEntity>>();
+
+            var course = _courseService.GetItemByID(CourseID);
+
+            if (course == null)
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Msg","Không có thông tin giáo trình" }
+                    });
+            }
+
+            var courseDetail = new Dictionary<string, object>
+            {
+                { "Chapters", _courseChapterService.GetCourseChapters(CourseID) } ,
+                //{ "Lessons", _courseLessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
+                //{"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
+            };
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", courseDetail },
+            };
+            return new JsonResult(response);
         }
         #endregion
     }

@@ -145,6 +145,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
             }
             var student = _studentService.GetItemByID(model.ID);
+            //var MyClassID = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID).ID;
+            //student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClassID));
             if (student == null)
                 return Redirect($"/{basis}{Url.Action("Index")}");
             ViewBag.Student = student;
@@ -439,7 +441,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     ClassID = ClassID,
                     ClassName = string.IsNullOrEmpty(ClassID) ?
-                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses))) :
+                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses,t.ID))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
 
