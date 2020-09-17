@@ -247,14 +247,14 @@ namespace BaseCustomerMVC.Controllers.Student
                  //let subject = _subjectService.GetItemByID(o.SubjectID)
                  //let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0
+                 let complete = progress == null ? 0 : (o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0)
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
                      //CourseName = course == null ? "" : course.Name,
                      StudentNumber = o.Students.Count,
                      //SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                      //GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
-                     TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
+                     TeacherName = teacher == null ? "" : teacher.FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                      CompletePercent = complete > 100 ? 100 : complete
