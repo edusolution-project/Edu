@@ -87,8 +87,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 @class.TotalExams = 0;
                 @class.IsActive = true;
                 @class.Center = center.ID;
-                @class.StartDate = new DateTime(2010, 01, 01);
-                @class.EndDate = new DateTime(2030, 01, 01);
+                @class.StartDate = DateTime.Now;
+                @class.EndDate = DateTime.Now.AddYears(99);
                 @class.ClassMechanism = CLASS_MECHANISM.PERSONAL;
 
                 _classService.Save(@class);
@@ -115,28 +115,10 @@ namespace BaseCustomerMVC.Controllers.Student
                         @class.TotalLessons += lessoncount;
                         @class.TotalExams += examcount;
                         @class.TotalPractices += practicecount;
-                        var skill = _skillService.GetItemByID(csubject.SkillID);
-                        if (skill == null) continue;
-                        var course = _courseService.GetItemByID(csubject.CourseID);
-                        //var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
-                        //if (tc == null)
-                        //    tc_sj.Add(new TeacherSubjectsViewModel
-                        //    {
-                        //        TeacherId = teacher.ID,
-                        //        FullName = teacher.FullName,
-                        //        Email = teacher.Email,
-                        //        SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
-                        //    });
-                        //else
-                        //    tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
+                        //var skill = _skillService.GetItemByID(csubject.SkillID);
+                        //if (skill == null) continue;
+                        //var course = _courseService.GetItemByID(csubject.CourseID);
                     }
-
-                    //Send email for each teacher
-                    //if (tc_sj.Count > 0)
-                    //    foreach (var tc in tc_sj)
-                    //        _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
-
-                    //_service.Save(item);
                 }
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -203,39 +185,12 @@ namespace BaseCustomerMVC.Controllers.Student
                                 oSbj.StartDate = MyClass.StartDate.ToUniversalTime();
                                 oSbj.EndDate = MyClass.EndDate.ToUniversalTime();
                                 oSbj.TypeClass = nSbj.TypeClass;
-                                //var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
-                                //if (teacher == null) continue;
-
-                                //if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
-                                //{
-                                //    oSbj.TeacherID = nSbj.TeacherID;
-                                //    var skill = _skillService.GetItemByID(oSbj.SkillID);
-                                //    if (skill == null) continue;
-                                //    var course = _courseService.GetItemByID(nSbj.CourseID);
-                                //    var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
-                                //    if (tc == null)
-                                //        tc_sj.Add(new TeacherSubjectsViewModel
-                                //        {
-                                //            TeacherId = teacher.ID,
-                                //            FullName = teacher.FullName,
-                                //            Email = teacher.Email,
-                                //            SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
-                                //        });
-                                //    else
-                                //        tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
-                                //}
-                                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
 
                                 _classSubjectService.Save(oSbj);
+
                                 examcount = oSbj.TotalExams;
                                 lessoncount = oSbj.TotalLessons;
                                 practicecount = oSbj.TotalPractices;
-                                //newMember = new ClassMemberEntity
-                                //{
-                                //    TeacherID = teacher.ID,
-                                //    Name = teacher.FullName,
-                                //    Type = ClassMemberType.TEACHER
-                                //};
                             }
 
                             processCS.Add(nSbj.ID);
@@ -243,9 +198,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 oldData.Skills.Add(nSbj.SkillID);
                             if (!oldData.Subjects.Contains(nSbj.SubjectID))
                                 oldData.Subjects.Add(nSbj.SubjectID);
-                            //if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
-                            //    oldData.Members.Add(newMember);
-                            //add counter
+
 
                             oldData.TotalLessons += lessoncount;
                             oldData.TotalExams += examcount;
@@ -283,9 +236,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 //update data
                 _classService.Save(oldData);
-
-                //refresh class total lesson => no need
-                //_ = _classProgressService.RefreshTotalLessonForClass(oldData.ID);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -426,9 +376,9 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                var SkillID = course.SkillID;//Môn học
-                var GradeID = course.GradeID;//Cấp độ
-                var SubjectID = course.SubjectID;//Chương trình
+                //var SkillID = course.SkillID;//Môn học
+                //var GradeID = course.GradeID;//Cấp độ
+                //var SubjectID = course.SubjectID;//Chương trình
 
                 var oldSubjects = _classSubjectService.GetByClassID(MyClass.ID);
                 if (oldSubjects.Find(x => x.CourseID == CourseID) != null)
@@ -443,9 +393,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     var classSubject = new ClassSubjectEntity();
                     classSubject.CourseID = CourseID;
-                    classSubject.SkillID = SkillID;
-                    classSubject.GradeID = GradeID;
-                    classSubject.SubjectID = SubjectID;
+                    classSubject.SkillID = course.SkillID;
+                    classSubject.GradeID = course.GradeID;
+                    classSubject.SubjectID = course.SubjectID;
                     classSubject.TeacherID = student.ID;
                     //classSubject.TypeClass = CLASS_TYPE.EXTEND;
 

@@ -116,7 +116,7 @@
                         if (item.IsActive) {
                             active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Sửa' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
                         } else {
-                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Xóa' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                            active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("publish","subject")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' title='Sửa' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
                         }
 
                         var date = $.datepicker.formatDate('dd/mm/yy', new Date(item.Created));

@@ -86,7 +86,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             ScoreStudentService scoreStudentService,
             LessonProgressService lessonProgressService,
-            
+
             StudentService studentService, IHostingEnvironment evn,
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
