@@ -74,7 +74,7 @@
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@processUrl("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
                     <td>{{item.SkillName}}</td>
-                    <td>{{item.CreatorName}}</td>
+                    <td>{{item.Teachers}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     @*<td> {{ item.IsActive? 'Hoạt động' : 'Tạm dừng'}} </td>*@
@@ -773,7 +773,7 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
-                               
+
                                 _data.forEach(function (item, k) {
                                     var lock = false
                                     var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
@@ -951,7 +951,8 @@
                         SubjectID: '',
                         GradeID: '',
                         TeacherID: '',
-                        CourseID: ''
+                        CourseID: '',
+                        TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                     }
                     this.class_info.subject.push(_subject)
                     this.$forceUpdate();

@@ -1020,7 +1020,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = dCursor.ToList();
             }
 
-            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism!=CLASS_MECHANISM.PERSONAL));
+            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -1060,6 +1060,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             let teachers = (o.Members == null || o.Members.Count == 0) ? "" : string.Join(", ", o.Members.Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
                              select new Dictionary<string, object>
                                 {
                                  { "ID", o.ID },
@@ -1078,9 +1079,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Members", o.Members },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
+                                 { "Teachers", teachers },
                                  { "Creator", o.TeacherID },
                                  { "CreatorName", creator==null?"":creator.FullName },
-                                 {"ClassMechanism",o.ClassMechanism }
+                                 { "ClassMechanism", o.ClassMechanism }
                              };
             return returndata.ToList();
         }
@@ -1729,7 +1731,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var listclassSubject = new List<ClassSubjectEntity>();
                     var classSubject = new ClassSubjectEntity();
-                    classSubject.CourseID = newID;                    
+                    classSubject.CourseID = newID;
                     classSubject.SkillID = Course.SkillID;
                     classSubject.GradeID = Course.GradeID;
                     classSubject.SubjectID = Course.SubjectID;
@@ -2134,7 +2136,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
             {
                 if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
-                
+
                 foreach (var ClassID in student.JoinedClasses)
                 {
                     var @class = _service.GetItemByID(ClassID);
