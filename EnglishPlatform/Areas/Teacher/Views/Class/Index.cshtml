@@ -6,7 +6,7 @@
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
-    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
+    var isHeadTeacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     //List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
@@ -45,12 +45,9 @@
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
             </div>
-            @if (isHeadteacher)
-            {
-                <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2">
-                    <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
-                </div>
-            }
+            <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
+                <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+            </div>
             <b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
         </div>
     </div>
@@ -79,24 +76,24 @@
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
                     @*<td> {{ item.IsActive? 'Hoạt động' : 'Tạm dừng'}} </td>*@
                     <td>
-                        <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
-                                         }>
+                        <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2" v-if="isHeadTeacher || item.IsOwner">
                         </b-form-checkbox>
                     </td>
                     <td>
-                        <div class="d-flex btn-group" @if (!isHeadteacher) { @: v-if="item.Creator == '@userid'"
-                             }>
-                            @*<b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)" class="mt-2"></b-form-checkbox>*@
+                        <template v-if="isHeadTeacher || item.IsOwner">
+                            <div class="d-flex btn-group">
+                                <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                                <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                                <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
+                                <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <div class="d-flex btn-group">
+                                <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
+                            </div>
+                        </template>
 
-                            <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-
-                            <a href="javascript:;" title="Quản lý học viên" v-on:click="manageStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
-                            <a class="btn-act btn-edit" title="Nhân bản" href="javascript:;" v-on:click="showCloneModal(item)"><i class="ti-layers"></i></a>
-                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeClass(item)"><i class="ti-trash"></i></button>
-                        </div>
-                        <div class="d-flex btn-group" v-if="isHeadteacher=='False' && item.Creator != '@userid'">
-                            <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="showClassModal(item)"><i class="ti-pencil-alt"></i></a>
-                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -336,7 +333,7 @@
             mounted() {
                 this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
-                console.log(this.list_subject);
+                //console.log(this.list_subject);
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.list_skill = @Html.Raw(Json.Serialize(skills));
                 window.changeAddSubject = this.changeAddSubject
@@ -475,7 +472,7 @@
                     ]
                 },
                 curr: 0,
-                isHeadteacher:'@isHeadteacher'
+                isHeadTeacher: @(isHeadTeacher?"true": "false")
             },
             computed: {
                 sDate: {
@@ -523,7 +520,7 @@
                     _form.append('EndDate', _that.eDate)
                     _form.append('SearchText', _that.searchTerm)
                     _form.append('Center', '@center')
-                    @if(!isHeadteacher)
+                    @if(!isHeadTeacher)
                     {
                     @:let _url = '@processUrl("GetClassList", "Class")'
                     }
@@ -732,7 +729,7 @@
                 //Modal Event
                 showClassModal(obj) {
                     let _that = this;
-                    debugger
+                    //debugger
                     if (obj == null) {
                         _that.class_info =
                         {
@@ -753,7 +750,8 @@
                                     CourseID: '',
                                     TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                                 }
-                            ]
+                            ],
+                            IsOwner: false
                         }
                     }
                     else {
@@ -802,6 +800,7 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
+                                    _that.class_info.IsOwner = item.Creator == '@userid';
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -811,6 +810,7 @@
                                         TeacherID: item.TeacherID,
                                         CourseID: item.CourseID,
                                         IsLock: lock,
+                                        IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND',
                                         TypeClass: item.TypeClass
                                     })
 
@@ -831,7 +831,7 @@
                                 //_that.$forceUpdate()
                             }).catch(e => { })
                     }
-                    debugger
+                    //debugger
                     _that.$bvModal.show('modal_class')
                 },
                 showCloneModal(obj) {
@@ -871,12 +871,13 @@
                         //console.log(_that.loaded_teacher);
                         if (_that.loaded_teacher.includes(obj.SubjectID)) return;
                         //_that.loaded_teacher.push(obj.SubjectID);
-                        @if(isHeadteacher)
+                        @if(isHeadTeacher)
                         {
                             @:let _form = new FormData()
                             @:  _form.append('SubjectID', obj.SubjectID)
                             @:  let _url = '@processUrl("GetListTeacher", "Class")'
                             @:  _form.append('Center', '@center')
+                            @:          _that.loaded_teacher.push(obj.SubjectID);
                             @:  axios.post(_url, _form)
                             @:      .then(response => {
                             @:          var _data = response.data.Data;
@@ -898,7 +899,7 @@
                         {
                             @: _that.teacherSource.push({
                             @:      ID: '@User.Claims.FirstOrDefault(t=> t.Type=="UserID").Value',
-                            @:      FullName: '@User.Identity.Name',
+                            @:      FullName:  this.domDecoder('@User.Identity.Name'),
                             @:      SubjectID: obj.SubjectID,
                             @:      IsActive: true
                             @: })
@@ -1246,12 +1247,22 @@
                     return item.SubjectID == obj.SubjectID && (item.IsActive || item.ID == obj.GradeID)
                 },
                 matchTeacher(obj, item) {
+                    //console.log(obj)
+                    //console.log(item);
                     return (item.SubjectID == obj.SubjectID)
                         && (item.IsActive || item.ID == obj.TeacherID)
                 },
                 matchCourse(obj, item) {
                     //console.log(this.courseSource)
                     return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
+                },
+                domDecoder(str) {
+                    if (str == null)
+                        return "";
+                    //console.log(str);
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
+                    return dom.body.textContent;
                 },
                 formatDate(value) {
                     if (value) {
@@ -1274,37 +1285,37 @@
             <div class="col-md-4">
                 <b-col class="form-group">
                     <label class="label">Tên lớp học*</label>
-                    <input type="text" v-model="class_info.Name" class="form-control" ref="addName">
+                    <input type="text" v-model="class_info.Name" class="form-control" ref="addName" :disabled="!(isHeadTeacher || class_info.IsOwner)">
                 </b-col>
-                <b-col class="form-row row">
+                <b-col class="form-group row col pr-0">
                     <b-col class="col-sm-6">
                         <label class="label">Ngày bắt đầu*</label>
                         @*<vuejs-datepicker v-model="class_info.StartDate" format="dd/MM/yyyy" class="form-control" ref="addStartDate"></vuejs-datepicker>*@
-                        <input type="date" v-model="class_info.StartDate" class="form-control" ref="addEndDate">
+                        <input type="date" v-model="class_info.StartDate" class="form-control" ref="addEndDate" :disabled="!(isHeadTeacher || class_info.IsOwner)">
                     </b-col>
                     <b-col class="col-sm-6">
                         <label class="label">Ngày kết thúc*</label>
                         @*<vuejs-datepicker v-model="class_info.EndDate" format="dd/MM/yyyy" class="form-control" ref="addEndDate"></vuejs-datepicker>*@
-                        <input type="date" v-model="class_info.EndDate" class="form-control" ref="addEndDate">
+                        <input type="date" v-model="class_info.EndDate" class="form-control" ref="addEndDate" :disabled="!(isHeadTeacher || class_info.IsOwner)">
                     </b-col>
                 </b-col>
                 <b-col class="form-group">
                     <label class="label">Mô tả</label>
-                    <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription"></textarea>
+                    <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription":disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
-                <b-col class="form-group">
-                    <label class="label">Cơ chế lớp:</label>
-                    <select v-model="class_info.ClassMechanism" class="form-control">
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Lớp mở</option>
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Lớp đóng</option>
+                <b-col class="form-group d-none">
+                    <label class="label">Cho phép học sinh tự động tham gia:</label>
+                    <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
                     </select>
                 </b-col>
                 <b-col class="form-group">
-                    <label class="label">Chọn ảnh lớp học</label>
+                    <label class="label">Ảnh lớp học</label>
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
                         <img v-on:error="errorImgUrl()" :src="class_info.thumbnail.src" alt="" />
                     </div>
-                    <label for="class_thumbnail" class="label frm-upload">
+                    <label for="class_thumbnail" class="label frm-upload" v-if="(isHeadTeacher || class_info.IsOwner)">
                         <i class="ic ic-paper-clip"></i>Tải ảnh lên
                         <input type="file" id="class_thumbnail" :ref="`thumbnail`" v-on:change="previewThumb()">
                     </label>
@@ -1312,54 +1323,57 @@
             </div>
             <div class="col-md-8">
                 <ul class="list list-subject" v-for="(sub,k) in class_info.subject">
-                    <li class="flex" :id="sub.UID" v-if="sub.TeacherID == '@userid' && isHeadteacher=='False'" style="pointer-events: none;">
+                    <li class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn chương trình</option>
                                 <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn môn học</option>
                                 <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
+                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn bài giảng</option>
                                 <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Loại học liệu</label>
-                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
+                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
                                 <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
+                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn giáo viên</option>
-                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
+                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}22</option>
                             </select>
                         </div>
 
                         <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học" v-if="sub.TypeClass=='@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND'" style="pointer-events: auto;"><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học" v-else><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+
+                            <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
+                            <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
+
+                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                            <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
                         </div>
                     </li>
                     <li class="flex" :id="sub.UID" v-else>
@@ -1412,7 +1426,7 @@
                         </div>
                     </li>
                 </ul>
-                <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub"><i class="ic ic-plus-c"></i> Thêm môn học</a>
+                <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>
             </div>
         </div>
 
