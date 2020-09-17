@@ -402,7 +402,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         })).ToList();
                 foreach (var t in rsp)
                 {
-                    if (t.TeacherID == null || t.TeacherID== "null") continue;
+                    if (t.TeacherID == null || t.TeacherID == "null") continue;
                     else
                     {
                         var tcid = t.TeacherID;
@@ -466,7 +466,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
                         GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
                         SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                        TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
+                        TeacherName = o.TeacherID == null ? "": _teacherService.GetItemByID(o.TeacherID)?.FullName
                     })).ToList()
                 },
                 { "Model", model }

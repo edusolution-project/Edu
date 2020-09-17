@@ -464,7 +464,7 @@
                         _that.docsInteractive.Creator = obj.TeacherName;
                         _that.docsInteractive.ID = obj.ID;
                         //debugger
-                        _form.append('ID', obj.ID)
+                        _form.append('CourseID', obj.ID)
                         axios.post(_url, _form)
                             .then(response => {
                                 _that.docsInteractive.ListChapters = response.data.Data.Chapters;
