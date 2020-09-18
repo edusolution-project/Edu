@@ -108,9 +108,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\2.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Areas\Admin\Views\Account\Index.cshtml" />
     <None Include="Areas\Admin\Views\Course\Index.cshtml" />
     <None Include="Areas\Admin\Views\Grade\Index.cshtml" />
