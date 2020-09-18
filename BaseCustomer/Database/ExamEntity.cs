@@ -71,13 +71,19 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ExamEntity>>
             {
-                //ClassID_1_LessonID_1_StudentID_1_ID_-1
+                //ClassSubjectID_1_LessonID_1_StudentID_1_ID_-1
                 new CreateIndexModel<ExamEntity>(
                     new IndexKeysDefinitionBuilder<ExamEntity>()
-                    .Ascending(t=> t.ClassID)
+                    .Ascending(t=> t.ClassSubjectID)
                     .Ascending(t=> t.LessonID)
                     .Ascending(t=> t.StudentID)
                     .Descending(t=> t.ID)),
+                //LessonID_1_StudentID_1_Status_-1
+                 new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.LessonID)
+                    .Ascending(t=> t.StudentID)
+                    .Descending(t=> t.Status)),
                 //LessonScheduleID_1_StudentID_1
                 new CreateIndexModel<ExamEntity>(
                     new IndexKeysDefinitionBuilder<ExamEntity>()
@@ -318,7 +324,7 @@ namespace BaseCustomerEntity.Database
         public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
         {
             var result = false;
-            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, studentID, lesson.ID);
+            var lessonProgress = _lessonProgressService.GetByStudentID_LessonID(studentID, lesson.ID);
             if (lessonProgress != null)
             {
                 if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)

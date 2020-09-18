@@ -24,7 +24,15 @@ namespace BaseCustomerEntity.Database
     {
         public AccessesService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<AccessEntity>>
+            {
+                //Authority_1_RoleID_1
+                new CreateIndexModel<AccessEntity>(
+                    new IndexKeysDefinitionBuilder<AccessEntity>()
+                    .Ascending(t => t.Authority).Ascending(t=> t.RoleID))
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
         public IEnumerable<AccessEntity> GetAccessByRole(string RoleID)
         {
