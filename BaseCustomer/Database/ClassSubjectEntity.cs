@@ -57,6 +57,10 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ClassSubjectEntity>>
             {
+                //ClassID_1
+                new CreateIndexModel<ClassSubjectEntity>(
+                    new IndexKeysDefinitionBuilder<ClassSubjectEntity>()
+                    .Ascending(t => t.ClassID))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

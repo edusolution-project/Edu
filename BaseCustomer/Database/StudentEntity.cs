@@ -52,6 +52,9 @@ namespace BaseCustomerEntity.Database
                     .Text(t => t.FullName).Text(t=> t.Email)),
                 new CreateIndexModel<StudentEntity>(
                     new IndexKeysDefinitionBuilder<StudentEntity>()
+                    .Ascending(t=> t.Email)),
+                new CreateIndexModel<StudentEntity>(
+                    new IndexKeysDefinitionBuilder<StudentEntity>()
                     .Descending(t=> t.Centers)),
                  new CreateIndexModel<StudentEntity>(
                     new IndexKeysDefinitionBuilder<StudentEntity>()

@@ -51,13 +51,25 @@ namespace BaseCustomerEntity.Database
 
             var indexs = new List<CreateIndexModel<LessonProgressEntity>>
             {
-                //ClassSubjectID_1_StudentID_1_LessonID_1
+                //ClassID_1_StudentID_1
                 new CreateIndexModel<LessonProgressEntity>(
                     new IndexKeysDefinitionBuilder<LessonProgressEntity>()
-                    .Ascending(t=> t.ClassSubjectID)
+                    .Ascending(t => t.ClassID)
+                    .Ascending(t=> t.StudentID)
+                    ),
+                //ClassSubjectID_1_StudentID_1
+                new CreateIndexModel<LessonProgressEntity>(
+                    new IndexKeysDefinitionBuilder<LessonProgressEntity>()
+                    .Ascending(t => t.ClassSubjectID)
+                    .Ascending(t=> t.StudentID)
+                    ),
+                //StudentID_1_LessonID_1
+                new CreateIndexModel<LessonProgressEntity>(
+                    new IndexKeysDefinitionBuilder<LessonProgressEntity>()
                     .Ascending(t => t.StudentID)
                     .Ascending(t=> t.LessonID)
                     )
+
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -65,7 +77,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)
         {
-            var currentProgress = GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
+            var currentProgress = GetByStudentID_LessonID( item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
                 currentProgress = new LessonProgressEntity
@@ -83,7 +95,7 @@ namespace BaseCustomerEntity.Database
             }
             else
             {
-                await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID && t.LessonID == item.LessonID,
+                await Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.LessonID == item.LessonID,
                      new UpdateDefinitionBuilder<LessonProgressEntity>()
                      .Inc(t => t.TotalLearnt, 1)
                      .Set(t => t.LastDate, DateTime.Now)
@@ -95,7 +107,7 @@ namespace BaseCustomerEntity.Database
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null) return null;
-            var currentProgress = GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
+            var currentProgress = GetByStudentID_LessonID(item.StudentID, item.LessonID);
             //New: use real point, not count question
             var point = item.MaxPoint > 0 ? (item.Point * 100.0 / item.MaxPoint) : 0;
             if (currentProgress == null)
@@ -154,9 +166,14 @@ namespace BaseCustomerEntity.Database
         }
 
 
-        public LessonProgressEntity GetByClassSubjectID_StudentID_LessonID(string ClassSubjectID, string StudentID, string LessonID)
+        //public LessonProgressEntity GetByClassSubjectID_StudentID_LessonID(string ClassSubjectID, string StudentID, string LessonID)
+        //{
+        //    return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
+        //}
+
+        public LessonProgressEntity GetByStudentID_LessonID(string StudentID, string LessonID)
         {
-            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
+            return CreateQuery().Find(t => t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
         }
 
 

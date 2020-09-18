@@ -40,7 +40,7 @@ namespace BaseCustomerMVC.Globals
             _learningHistoryService.CreateOrUpdate(item);
 
             await _lessonProgressService.UpdateLastLearn(item);
-            var lessonProgress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(item.ClassSubjectID, item.StudentID, item.LessonID);
+            var lessonProgress = _lessonProgressService.GetByStudentID_LessonID(item.StudentID, item.LessonID);
 
             await _chapterProgressService.UpdateLastLearn(lessonProgress);
             await _classSubjectProgressService.UpdateLastLearn(lessonProgress);

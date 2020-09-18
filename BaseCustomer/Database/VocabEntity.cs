@@ -37,7 +37,10 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<VocabularyEntity>>
             {
-
+                 //Code_1
+                new CreateIndexModel<VocabularyEntity>(
+                    new IndexKeysDefinitionBuilder<VocabularyEntity>()
+                    .Ascending(t=> t.Code)),
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

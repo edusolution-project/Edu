@@ -264,7 +264,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var student in listStudent)
                 {
                     var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
-                    var progress = _lessonProgressService.GetByClassSubjectID_StudentID_LessonID(lesson.ClassSubjectID, student.ID, lesson.ID);
+                    var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, lesson.ID);
                     var tried = examresult.Count();
                     var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
                     var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
