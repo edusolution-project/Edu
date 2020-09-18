@@ -180,7 +180,7 @@ namespace EasyChatApp.Controllers
                 if (string.IsNullOrEmpty(messageId))
                 {
                     //thoi diem hien tai ve sau
-                    var count = _messagerService.CreateQuery().Count(o => (o.Time <= startDate) && o.GroupId == groupName);
+                    var count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName);
                     response.Code = 200;
                     response.Message = "SUCCESS";
                     if (count == 0)
@@ -192,12 +192,22 @@ namespace EasyChatApp.Controllers
                         if (pageSize == 0) pageSize = 10;
                         if(count <= pageSize)
                         {
-                            var data = _messagerService.CreateQuery().Find(o => (o.Time <= startDate) && o.GroupId == groupName).SortByDescending(o=>o.Time).ToList();
+                            var data = _messagerService.CreateQuery().Find(o => o.GroupId == groupName).ToList();
                             response.Data = data;
                         }
                         else
                         {
-                            var data = _messagerService.CreateQuery().Find(o => (o.Time <= startDate) && o.GroupId == groupName)?.Skip(pageIndex* pageSize)?.Limit(pageSize)?.SortByDescending(o => o.Time)?.ToList();
+                            var data = startDate > 0
+                                ? // lấy thông tin mới nhất
+                                _messagerService.CreateQuery().Find(o => o.Time <= startDate && o.GroupId == groupName)?
+                                .Skip(pageIndex * pageSize)?
+                                .Limit(pageSize)?
+                                .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList()
+                                : // lấy thong tin cũ hơn
+                                _messagerService.CreateQuery().Find(o => o.GroupId == groupName)?
+                                .Skip(pageIndex * pageSize)?
+                                .Limit(pageSize)?
+                                .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList();
                             response.Data = data;
                         }
                     }

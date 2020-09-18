@@ -902,10 +902,10 @@ namespace FileManagerCore.Services
 
         public List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context)
         {
-            string folderId = GetFolder(center, user);
             var listFile = context.Request.Form.Files;
             var count = listFile == null ? 0 : listFile.Count;
             if (count == 0) return null;
+            string folderId = GetFolder(center, user);
             string path = Path.Combine("", $"{center}/{user}");
 
             //if (!Directory.Exists(path)) Directory.CreateDirectory(path);
@@ -942,11 +942,9 @@ namespace FileManagerCore.Services
         public MediaResponseModel UploadSingleFileWithGoogleDrive(string center, string user, IFormFile file)
         {
             string folderId = GetFolder(center, user);
-            string path = Path.Combine(GetFilesRoot(), $"{center}/{user}");
+            string path = Path.Combine("", $"{center}/{user}");
 
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
-            List<MediaResponseModel> response = new List<MediaResponseModel>();
 
             FileInfo f = new FileInfo(file.FileName);
             string filename = MakeUniqueFilename(path, f.Name);
@@ -969,7 +967,7 @@ namespace FileManagerCore.Services
                 Center = center,
                 UserID = user
             });
-            return new MediaResponseModel() { FileId = fileId, Path = GoogleDriveApiService.CreateLinkViewFile(fileId), Extends = f.Extension };
+            return new MediaResponseModel() { Name = f.Name, FileId = fileId, Path = GoogleDriveApiService.CreateLinkViewFile(fileId), Extends = f.Extension };
         }
 
 

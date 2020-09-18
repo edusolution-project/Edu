@@ -19,7 +19,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         groups:[{id:"test4",name:"group"}]
     };
     var __MESSAGE = message,__MEMBER = member, __GROUP = group,__CURRENTUSER={},__SIGNALR = signalR;
-    
+    var time = 0,pageIndex=0,pageSize=10;
     function EasyChat(){
     }
     window.EasyChat = EasyChat;
@@ -39,6 +39,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var root = getRoot();
         if(!self.classList.contains('active'))
         {
+            pageIndex= 0;
             var active = parent.querySelector('.active');
             if(active){
                 active.classList.remove("active");
@@ -69,21 +70,21 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             gotoBottom();
         }
     }
-    var time = 0,pageIndex=0,pageSize=10;
+    
     var loadMessage = function(center,user,groupId,receiver){
         //{pageIndex}&pageSize={pageSize}
         var ajax = new Ajax();
-        var listMessage = getRoot().querySelector(".list-messages");
-        var startDate = new Date().getTime();
-        if(listMessage.children.length > 0){
-            startDate = parseFloat(listMessage.children[0].querySelector("time").dataset.time);
-        }
+        //var listMessage = getRoot().querySelector(".list-messages");
+        // var startDate = new Date().getTime();
+        // if(listMessage.children.length > 0){
+        //     startDate = parseFloat(listMessage.children[0].querySelector("time").dataset.time);
+        // }
         var url = __defaulConfig.extendsUrl.GetMessage
             .replace("{user}",user)
             .replace("{receiver}",receiver)
             .replace("{groupId}",groupId)
             .replace("{messageId}","")
-            .replace("{startDate}",startDate)
+            .replace("{startDate}",0)
             .replace("{pageIndex}",pageIndex)
             .replace("{pageSize}",pageSize);
 
@@ -94,11 +95,15 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 if(data != null && data.length > 0){
                     //console.log(data);
                     renderMessage(data,groupId,receiver,user);
+                    pageIndex++;
                 }
             }
         });  
         
     }
+
+
+
     var renderMessage = function(data){
         // ID: "5f5f955706ff552e60156389"
         // content: "jshdgfdjfgfdghsdjhgfsfskdfjdghsfhsfsdf"
@@ -113,7 +118,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         // time: 1600099668.5038116
         var groupMessages = [];
         var html = "";
-        var senderCurrent = "";
+        var senderCurrent = "",time=0;
         for(var i = 0; data != null && i < data.length ; i++){
             var message = data[i];
             var sender = message.sender;
@@ -121,8 +126,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             var isMaster = sender == __defaulConfig.currentUser.id;
             //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
             var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            if(senderCurrent == "" || senderCurrent == sender){
+            if((senderCurrent == "" || senderCurrent == sender)||(time == 0 || (message.time - time)/(60*24*60*60)<=23)){
                 senderCurrent = sender;
+                time = message.time;
                 groupMessages.push(message);
                 if(i == data.length-1){
                     html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
@@ -138,7 +144,15 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
         
         var listmessage = getRoot().querySelector('.list-messages');
-        listmessage.innerHTML = html;
+        if(pageIndex == 0){
+            listmessage.innerHTML += html;
+            listmessage.scrollTo(0,listmessage.scrollHeight);
+        }
+        else{
+            listmessage.innerHTML = html + listmessage.innerHTML;
+        }
+        //console.log(listmessage.height,listmessage.outerHeight);
+        
 
     }
     EasyChat.CloseMessageBox = function(){
@@ -252,7 +266,14 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                             //set time out // remove element load
                             var active = parent.querySelector('.active');
                             if(active){
-                                __MESSAGE.Get(active.dataset.id);
+                                if(active.dataset.group == "true"){
+                                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,active.dataset.id,"");
+                                }
+                                else{
+                                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,"",active.dataset.id);
+                                }
+                                //loadMessage(__defaulConfig.center,)
+                                //__MESSAGE.Get(active.dataset.id);
                                 //then isDone = true;
                                 isDone = true;
                             }
@@ -292,25 +313,27 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 var textArea = formChat.querySelector('textarea');
                 if(textArea){
                     var keyHove = "",valueMessage = "";
-                    textArea.addEventListener('keydown',function(e){
+                    textArea.onkeydown =function(e){
                         valueMessage = textArea.value;
                         if(keyHove == "") keyHove = e.key;
                         //console.log("keydow",e.key);
-                    });
-                    textArea.addEventListener('keyup',function(e){
+                    };
+                    textArea.onkeyup = function(e){
                         if(keyHove == 'Shift' && e.key == "Enter"){
                             // xong dong
                             console.log('xuong dong');
                         }
-                        if(keyHove == e.key){
-                            keyHove = "";
+                        else{
+                            if(keyHove == e.key){
+                                keyHove = "";
+                            }
+                            if(e.key == "Enter"){
+                                textArea.value = valueMessage;
+                                //console.log('send');
+                                SendMessage();
+                            }
                         }
-                        if(keyHove == "" && e.key == "Enter"){
-                            textArea.value = valueMessage;
-                            //console.log('send');
-                            SendMessage();
-                        }
-                    });
+                    };
                 }
                 var inputFiles = formChat.querySelector('input[type="file"]');
                 var btnImage = formChat.querySelector('[id="ec-add-image"]');
@@ -381,7 +404,23 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 }
             }
             ajax.proccessData("POST", url+query, formData).then(function(res){
-                console.log(res);
+                //{"code":200,"message":"SUCCESS","data":{"content":"xin chao","data":null,"sender":"5d8389c2d5d1bf27e4410c04","groupId":"5e7206342ab6d6169c02b1f8","time":1600450346555.0994,"isDel":false,"ID":"5f64ef2ab7a41d3308cb5e52"}}
+                var jsonData = typeof(res) == "string" ? JSON.parse(res) : res;
+                if(jsonData.code == 200){
+                    var listmessage = getRoot().querySelector('.list-messages');
+                    var messageText = getRoot().querySelector('.form-chat textarea');
+                    var files = getRoot().querySelector('.form-chat input[type="file"]');
+                    messageText.value = "";
+                    files.value = "";
+                    var isMaster = __defaulConfig.currentUser.id == jsonData.data.sender;
+                    var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(jsonData.data.sender);
+                    //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
+                    //var lastItem = listmessage.querySelectorAll(".message");
+                    listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data]);
+
+                    listmessage.scrollTo(0,listmessage.scrollHeight);
+                }
+                //console.log(res);
             });
         }
         else{
@@ -415,6 +454,10 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     })
     __SIGNALR.onclose(function(){
         //ConnectHub();
+    });
+
+    __SIGNALR.on("ReceiverMessage",function(data){
+        console.log("ReceiverMessage",data);
     });
 
     return EasyChat;

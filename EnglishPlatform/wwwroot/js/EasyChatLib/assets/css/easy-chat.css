@@ -380,12 +380,16 @@ div[data-status="offline"]::before{
     box-shadow: none;
     background: transparent;
     cursor: pointer;
-    width: 30px;
-    height: 30px;
-    padding: 0;
+    width: 25px;
+    height: 25px;
+    padding: 0 4px;
+    z-index: 999;
 }
 .group-message .data .button-extends .item-extends{
     display: none;
+}
+.group-message .data .button-extends .item-extends.open{
+    display: block;
 }
 .group-message .data .button-extends .btn-edit:hover,
 .group-message .data .button-extends .btn-delete:hover{

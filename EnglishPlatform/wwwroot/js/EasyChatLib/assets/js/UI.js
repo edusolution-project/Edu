@@ -9,13 +9,28 @@
         video: urlBase +"assets/Icon/Outline/film.svg",
         file: urlBase +"assets/Icon/Outline/file-2.svg",
         navigation: urlBase +"assets/Icon/Fill/navigation-2.svg",
-        edit : urlBase +"assets/Icon/Outline/image-1.svg"
+        edit : urlBase +"assets/Icon/Outline/image-1.svg",
+        extends : urlBase +"assets/Icon/Outline/more-vertical.svg",
+        trash : urlBase +"assets/Icon/Outline/icon_trash_24.png",
     };
     function UI(config){
-        _config = config;
+        _mergeConfig(config);
         this.render = createRoot.bind(this);
         this.renderListItemContact = renderListItemContact.bind(this);
     }
+
+    var _mergeConfig = function(config){
+        if(config){
+            var keys = Object.keys(config);
+            for(var i = 0; i < keys.length; i++){
+                var key = keys[i];
+                if(config[key]){
+                    _config[key] = config[key];
+                }
+            }
+        }
+    }
+
     window.UI = UI;
     var createRoot = function(){
         return '<div class="easy-chat" id="easy-chat">'+createBall()+createBody()+'</div>';
@@ -114,9 +129,7 @@
             for(var i =0; i < messages.length; i++){
                 var msg = renderMesssage(messages[i],isSender);
                 html += msg[0];
-                if(i==0){
-                    time = msg[1];
-                }
+                time = time < msg[1] ? msg[1] : time;
             }
         }
         return [html,time];
@@ -142,7 +155,7 @@
         var text = message.content;
         var html = "";
         if(text){
-            html += createDataText(message.id,text,isSender);
+            html += createDataText(message.ID,text,isSender);
         }
         if(medias){
             for(var i = 0; i < medias.length; i++){
@@ -151,26 +164,41 @@
                 }
             }
         }
-        return [html,message.time];
+        var time = typeof(message.time) == "string" ? parseFloat(message.time) : message.time;
+        return [html,time];
     }
     var ConveterTime = function(time){
-        return time;
+        var min = 60*24*60;
+        var now = new Date().getTime();
+        var sub = (now - time)/min;
+        if(sub <= 0) return "vừa xong";
+        if(sub <= 59) return sub.toFixed(0)+" phút trước";
+        if(sub/60 <= 23) return (sub/60).toFixed(0)+ "giờ trước";
+        //getHours(), getMinutes(), getSeconds(), getMilliseconds()
+        var time = new Date(time);
+        var date = time.getDate() >= 10 ? time.getDate().toString() : "0"+time.getDate().toString();
+        var year = time.getFullYear();
+        var month = time.getMonth()+1>=10 ? (time.getMonth()+1).toString() : "0"+(time.getMonth()+1).toString();
+        var hour = time.getHours() >= 10 ? time.getHours().toString() : "0"+time.getHours().toString();
+        var minute = time.getMinutes()>=10 ? time.getMinutes().toString() : "0"+time.getMinutes().toString();
+        
+        return date+"-"+month+"-"+year+" "+hour+":"+minute;
+        //var date = new Date(time);
     }
     var createExtendsSettings = function(){
         var eventOpen = "javascript:this.parentElement.childNodes[1].classList.toggle('open')";
         return '<div class="button-extends">'+
             '<div class="dropdown-list">'+
-                '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="assets/Icon/Outline/more-vertical.svg" alt=""></button>'+
+                '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="'+_config.extends+'" alt="extends"></button>'+
                 '<div class="item-extends">'+
-                    '<button class="btn btn-delete"><img src="'+_config.image+'" alt="Xóa"></button>'+
-                    '<button class="btn btn-edit"><img src="'+_config.edit+'" alt=""></button>'+
+                    '<button class="btn btn-delete"><img src="'+_config.trash+'" alt="Xóa"></button>'+
                 '</div>'+
             '</div>'+
         '</div>';
     }
     var createDataText = function(id,message,isSender){
         var exts = isSender ? createExtendsSettings() : "";
-         return '<div data=id="'+id+'" class="data data-text"><div class="content">'+message+'</div>'+exts+'</div>';
+         return '<div data-id="'+id+'" class="data data-text"><div class="content" style="padding-left:25px">'+message+'</div>'+exts+'</div>';
     }
     var createMetaData = function(data,isSender){
         var type = getExtensionType(data.type.toLowerCase().replace(".",""));
