@@ -112,6 +112,9 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _studentService.GetItemByID(_studentid);
+            if (account == null)
+                return Redirect("/logout");
+
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
@@ -461,7 +464,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     //conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                     conn.AddDigitalOrderField("vpc_AccessCode", "66VKMV0J");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
-                    conn.AddDigitalOrderField("vpc_OrderInfo",historyTransaction.ID); //THong tin don hang
+                    conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                     conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
@@ -487,7 +490,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 else //price = 0 => auto complete
                 {
                     //TODO: Check here
-                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID , center = basis });
+                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID, center = basis });
                     var dataresponse = new Dictionary<string, object>()
                     {
                         {"Url", url },

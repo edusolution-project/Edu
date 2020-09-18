@@ -469,7 +469,8 @@
                             CourseID: '',
                             TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                         }
-                    ]
+                    ],
+                    IsOwner: false
                 },
                 curr: 0,
                 isHeadTeacher: @(isHeadTeacher?"true": "false")
@@ -751,7 +752,7 @@
                                     TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
                                 }
                             ],
-                            IsOwner: false
+                            IsOwner: true
                         }
                     }
                     else {
@@ -1301,7 +1302,7 @@
                 </b-col>
                 <b-col class="form-group">
                     <label class="label">Mô tả</label>
-                    <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription":disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
+                    <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription" :disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
                 <b-col class="form-group d-none">
                     <label class="label">Cho phép học sinh tự động tham gia:</label>
@@ -1363,7 +1364,7 @@
                             <label for="">Giáo viên</label>
                             <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn giáo viên</option>
-                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}22</option>
+                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                             </select>
                         </div>
 
