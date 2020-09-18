@@ -22,20 +22,9 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-header" v-cloak>
+    <div class="card-header border-b" v-cloak>
         <div class="flex flex-wrap align-items-center">
-            @*<div class="box filter-box col-12 col-md-2 m-1">
-                    <select v-model="subject">
-                        <option value="">Chọn chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box col-12 col-md-2 m-1">
-                    <select v-model="grade">
-                        <option value="">Chọn cấp độ</option>
-                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                    </select>
-                </div>*@
+
             <div class="tab bg-none col-md-12 m-1">
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
@@ -43,8 +32,7 @@
                 </ul>
             </div>
         </div>
-        
-        <div class="flex border-b flex-wrap align-items-center" v-if="tab[0]">
+        <div class="flex flex-wrap align-items-center" v-if="tab[0]">
             <div class="box filter-box col-12 col-md-2 m-1">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
@@ -62,7 +50,8 @@
                     <option value="">-- Tất cả tài liệu --</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
                     <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                    @*<option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
+                    @*
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
                 </select>
             </div>
             <div class="box filter-box col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
@@ -82,7 +71,6 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
         </div>
-           
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
@@ -269,8 +257,6 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 linkFile: '',
                 title: '',
-                subjectID: '',
-                gradeID:'',
                 list_subject: [],
                 list_grades_full: [],
                 HTMLContent: '',
@@ -362,14 +348,13 @@
                 showPreview(obj) {
                     let _form = new FormData()
                     _form.append('ID', obj.ID)
-                    var link = obj.Media.Path;
                     var title = obj.Title;
                     let _url = '@processUrl("View", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.Viewed = obj.Viewed + 1;
                         }).catch(e => { })
-                    this.HTMLContent = this.renderContent(link);
+                    this.HTMLContent = this.renderContent(obj);
                     this.title = title;
                     if (this.isMobile()) {
                         return this.download(obj);
@@ -410,9 +395,10 @@
                         return src;
                     return "https://static.eduso.vn/" + src + "?w=" + width;
                 },
-                renderContent(linkFile) {
+                renderContent(obj) {
+                    var linkFile = obj.Media.Path;
                     var html = "";
-                    if (linkFile.toLowerCase().endsWith('.pdf'))
+                    if (obj.Media.Extension.endsWith('.pdf') || linkFile.toLowerCase().endsWith('.pdf') ||  obj.Media.Name.toLowerCase().endsWith('.pdf'))
                         html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
                     else {
                         if(!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;

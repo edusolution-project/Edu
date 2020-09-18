@@ -34,7 +34,9 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mapping;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CourseService _courseService;
         public DefaultConfigs _default { get; }
+        private readonly ClassSubjectService _classSubjectService;
 
         private string host;
 
@@ -47,7 +49,9 @@ namespace BaseCustomerMVC.Controllers.Student
             NewsCategoryService newsCategoryService,
             ClassService classService,
             TransactionService historyTransactionService,
-            IConfiguration iConfig
+            IConfiguration iConfig,
+            CourseService courseService,
+            ClassSubjectService classSubjectService
             )
         {
             _studentService = studentService;
@@ -63,6 +67,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _transactionService = historyTransactionService;
             _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            _courseService = courseService;
+            _classSubjectService = classSubjectService;
         }
 
         public IActionResult Index(string basis)
@@ -89,6 +95,18 @@ namespace BaseCustomerMVC.Controllers.Student
             //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
             var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6);
 
+            //var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
+            //if (MyClass != null)
+            //{
+            //    var _mappingCourse = new MappingEntity<CourseEntity, CourseViewModel>();
+            //    var listMyCourse = from item in _classSubjectService.GetByClassID(MyClass.ID)
+            //                       let a = _courseService.GetItemByID(item.CourseID)
+            //                       select _mappingCourse.Clone(a, new CourseViewModel()
+            //                       {
+            //                           ClassID = MyClass.ID
+            //                       });
+            //    ViewBag.List_MyCourses = listMyCourse.ToList();
+            //}
             ViewBag.List_Courses = data.ToList();
 
             return View();
@@ -112,6 +130,9 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
             var account = _studentService.GetItemByID(_studentid);
+            if (account == null)
+                return Redirect("/logout");
+
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
@@ -461,7 +482,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     //conn.AddDigitalOrderField("vpc_AccessCode", "6BEB2546");
                     conn.AddDigitalOrderField("vpc_AccessCode", "66VKMV0J");
                     conn.AddDigitalOrderField("vpc_MerchTxnRef", historyTransaction.ID); //ma giao dich
-                    conn.AddDigitalOrderField("vpc_OrderInfo",historyTransaction.ID); //THong tin don hang
+                    conn.AddDigitalOrderField("vpc_OrderInfo", historyTransaction.ID); //THong tin don hang
                     var price = product.Discount;
                     conn.AddDigitalOrderField("vpc_Amount", price.ToString() + "00");
                     conn.AddDigitalOrderField("vpc_ReturnURL", "https://" + host + processUrl(basis, "Transaction", "Home", new { ID, center = basis }));
@@ -487,7 +508,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 else //price = 0 => auto complete
                 {
                     //TODO: Check here
-                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID , center = basis });
+                    var url = processUrl(basis, "Transaction", "Home", new { ID, vpc_TxnResponseCode = 0, vpc_MerchTxnRef = historyTransaction.ID, center = basis });
                     var dataresponse = new Dictionary<string, object>()
                     {
                         {"Url", url },

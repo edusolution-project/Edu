@@ -314,7 +314,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
-            today = today.ToUniversalTime();
+            //today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -329,9 +329,10 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var currentStudent = _studentService.GetItemByID(userId);
             if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
-                return Json(new { });
+                return Json(new { Data = 0 });
 
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism!=CLASS_MECHANISM.PERSONAL));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
@@ -352,7 +353,63 @@ namespace BaseCustomerMVC.Controllers.Student
                        let skill = _skillService.GetItemByID(o.SkillID)
                        select new
                        {
-                           id = o.ID,
+                           id = _class.ID,
+                           //courseID = o.CourseID,
+                           courseName = skill.Name + " (" + _class.Name + ")",
+                           endDate = _class.EndDate,
+                           percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
+                           thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+        public JsonResult GetMyCourse(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
+
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+
+            var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+            //var filter = new List<FilterDefinition<ClassEntity>>();
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism==CLASS_MECHANISM.PERSONAL && o.TeacherID== currentStudent.ID));
+
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+
+            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL,currentStudent.ID).ID;
+
+
+            var lstSbj = new List<ClassSubjectEntity>();
+            var lstClass = new List<ClassEntity>();
+            //foreach (var clID in clIDs)
+            //{
+                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+                lstClass.Add(_service.GetItemByID(clID));
+            //}
+
+            var std = (from o in lstSbj.ToList()
+                       let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
+                       let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let skill = _skillService.GetItemByID(o.SkillID)
+                       select new
+                       {
+                           id = clID,
                            //courseID = o.CourseID,
                            courseName = skill.Name + " (" + _class.Name + ")",
                            endDate = _class.EndDate,
@@ -361,6 +418,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            min = progress != null ? progress.Completed : 0,
                            score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
+                           image= o.CourseID!=null?_courseService.GetItemByID(o.CourseID).Image: "/pictures/english1.png"
                        }).ToList();
             return Json(new { Data = std });
         }

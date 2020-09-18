@@ -31,7 +31,7 @@
     </div>
     <div class="card-header border-b" v-cloak>
         <div class="flex flex-wrap align-items-center">
-            
+
             <div class="tab bg-none col-md-12 m-1">
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
@@ -204,6 +204,7 @@
                 view: 30,
                 totalRec: 0,
                 page: 1,
+                HTMLContent: '',
                 addItem: {
                     ID: '',
                     Title: '',
@@ -520,21 +521,31 @@
                 showPreview(obj) {
                     let _form = new FormData()
                     _form.append('ID', obj.ID)
-                    var link = obj.Media.Path;
                     var title = obj.Title;
                     let _url = '@processUrl("View", "Reference")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.Viewed = obj.Viewed + 1;
                         }).catch(e => { })
-                    //console.log(obj);
-                    if (!link.startsWith("http")) link = "https://eduso.vn" + link;
-                    this.linkFile = link;
+                    this.HTMLContent = this.renderContent(obj);
                     this.title = title;
                     if (this.isMobile())
                         return this.download(obj);
                     else
-                        this.$bvModal.show('modal_preview')
+                        this.$bvModal.show('modal_preview');
+                },
+                renderContent(obj) {
+                    var linkFile = obj.Media.Path;
+                    var html = "";
+                    if (obj.Media.Extension.endsWith('.pdf') || obj.Media.Path.toLowerCase().endsWith('.pdf') || obj.Media.Name.toLowerCase().endsWith('.pdf'))
+                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
+                    else {
+                        if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
+                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
+                    }
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
+                    return dom.body.innerHTML;
                 },
                 doMainAct(obj) {
                     if (obj.Media != null && this.isDocType(obj.Media.Extension)) {
@@ -584,19 +595,6 @@
                             }
                         });
                     }
-                },
-                renderContent(linkFile) {
-                    var html = "";
-                    if (linkFile.toLowerCase().endsWith('.pdf'))
-                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
-                    else {
-                        if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
-                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
-                    }
-                    let parser = new DOMParser();
-                    let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
-                    return dom.body.innerHTML;
-
                 },
                 loadDocsNormal() {
                     this.getData();
@@ -813,8 +811,8 @@
 
     <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
         <b-col class="form-group">
-            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile" v-else style="min-height:500px;"></iframe>
+            <span v-html="HTMLContent">
+            </span>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -855,24 +853,24 @@
                     <b-col class="form-group col-sm-12">
                         <select class="form-control" v-model="docsInteractive.ClassID">
                             <option value="">Chọn lớp muốn tải về (nếu cần)</option>
-                            <option value="true">Tạo lớp mới</option>
+
                             <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
+                            <option value="true">--- Tạo lớp mới</option>
                         </select>
                     </b-col>
 
                     <!--Create New Class-->
-                    <b-col class="form-group col-sm-12" v-if="isCreateNewClass">
+                    <b-col class="form-group col-sm-12 p-0" v-if="isCreateNewClass">
                         <fieldset>
-                            <legend>Tạo lớp học</legend>
-                            <div class="col-sm-12">
-                                <label class="label">Tên lớp học</label>
+                            <div class="col-sm-12 form-group">
+                                <label class="label">Tên lớp</label>
                                 <input type="text" class="form-control" placeholder="Tên lớp học" v-model="newClass.Name" />
                             </div>
-                            <div class="col-sm-12">
+                            <div class="col-sm-12 form-group">
                                 <label class="label">Ngày bắt đầu</label>
                                 <input type="date" class="form-control" v-model="newClass.StartDate" />
                             </div>
-                            <div class="col-sm-12">
+                            <div class="col-sm-12 form-group">
                                 <label class="label">Ngày kết thúc</label>
                                 <input type="date" class="form-control" v-model="newClass.EndDate" />
                             </div>

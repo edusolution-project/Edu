@@ -2696,6 +2696,11 @@ button, input, a {
     border-top: 1px solid #D0DFE8
 }
 
+    .list-subject:first-child {
+        padding-top: 0;
+        border-top: none;
+    }
+
     .list-subject li {
         padding-bottom: 15px;
         margin-bottom: 10px;

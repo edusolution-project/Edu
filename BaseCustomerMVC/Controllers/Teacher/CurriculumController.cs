@@ -402,17 +402,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                         })).ToList();
 //<<<<<<< HEAD
-//                foreach (var t in rsp)
-//                {
-//                    if (t.TeacherID == null || t.TeacherID == "null") continue;
-//                    else
-//                    {
-//                        var tcid = t.TeacherID;
-//                        t.TeacherID = tcid;
-//                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
-//                    }
-//                }
+////<<<<<<< HEAD
+////                foreach (var t in rsp)
+////                {
+////                    if (t.TeacherID == null || t.TeacherID == "null") continue;
+////                    else
+////                    {
+////                        var tcid = t.TeacherID;
+////                        t.TeacherID = tcid;
+////                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+////                    }
+////                }
+////=======
 //=======
+//                //foreach (var t in rsp)//???
+//                //{
+//                //    if (t.TeacherID == null || t.TeacherID == "null") continue;
+//                //    else
+//                //    {
+//                //        var tcid = t.TeacherID;
+//                //        t.TeacherID = tcid;
+//                //        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+//                //    }
+//                //}
+//>>>>>>> origin/VietPhung
 
                 response = new Dictionary<string, object>
                 {
@@ -469,7 +482,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
                         GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
                         SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                        TeacherName = o.TeacherID == null ? "": _teacherService.GetItemByID(o.TeacherID)?.FullName
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                     })).ToList()
                 },
                 { "Model", model }
