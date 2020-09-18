@@ -154,18 +154,18 @@ var EduCalendar = (function(){
         var optionsTemplate = {
             useTemplate: true,
             customButtons: {
-                btnAddEvent: {
-                    text: "Thêm sự kiện",
-                    click: function () {
-                        addEvent(_self);
-                    }
-                },
-                btnAddClass: {
-                    text: "Tạo lớp trực tuyến",
-                    click: function () {
-                        addClassOnline(_self);
-                    }
-                },
+                //btnAddEvent: {
+                //    text: "Thêm sự kiện",
+                //    click: function () {
+                //        addEvent(_self);
+                //    }
+                //},
+                //btnAddClass: {
+                //    text: "Tạo lớp trực tuyến",
+                //    click: function () {
+                //        addClassOnline(_self);
+                //    }
+                //},
                 selectMonth: {
                     text: (new Date().getMonth() + 1),
                     icon: "icon",

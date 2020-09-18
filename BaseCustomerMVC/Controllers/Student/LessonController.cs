@@ -96,18 +96,18 @@ namespace BaseCustomerMVC.Controllers.Student
             _progressHelper = progressHelper;
         }
 
-        public IActionResult Index()
-        {
-            var userid = User.Claims.GetClaimByType("UserID").Value;
-            ViewBag.User = userid;
+        //public IActionResult Index()
+        //{
+        //    var userid = User.Claims.GetClaimByType("UserID").Value;
+        //    ViewBag.User = userid;
 
-            var subjectids = _classService.CreateQuery().Find(o => o.Students.Contains(userid)).ToList().Select(x => x.SubjectID).ToList();
-            var subject = _subjectService.CreateQuery().Find(t => subjectids.Contains(t.ID)).ToList();
+        //    var subjectids = _classService.CreateQuery().Find(o => o.Students.Contains(userid)).ToList().Select(x => x.SubjectID).ToList();
+        //    var subject = _subjectService.CreateQuery().Find(t => subjectids.Contains(t.ID)).ToList();
 
-            ViewBag.Subject = subject;
+        //    ViewBag.Subject = subject;
 
-            return View();
-        }
+        //    return View();
+        //}
 
         public JsonResult GetList(DefaultModel model)
         {
@@ -149,51 +149,51 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response2);
         }
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetActiveList(DefaultModel model, string ClassID = "", string UserID = "", string SubjectID = "")
-        {
-            if (string.IsNullOrEmpty(UserID))
-                UserID = User.Claims.GetClaimByType("UserID").Value;
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetActiveList(DefaultModel model, string ClassID = "", string UserID = "", string SubjectID = "")
+        //{
+        //    if (string.IsNullOrEmpty(UserID))
+        //        UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            var subjects = _subjectService.GetAll().ToList();
+        //    var subjects = _subjectService.GetAll().ToList();
 
-            var classFilter = new List<FilterDefinition<ClassEntity>>();
-            classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(UserID)));
+        //    var classFilter = new List<FilterDefinition<ClassEntity>>();
+        //    classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(UserID)));
 
-            if (!string.IsNullOrEmpty(SubjectID))
-            {
-                classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
+        //    if (!string.IsNullOrEmpty(SubjectID))
+        //    {
+        //        classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+        //    }
 
-            var activeClass = _classService.CreateQuery().Find(Builders<ClassEntity>.Filter.And(classFilter)).ToList();
-            var activeClassIDs = activeClass.Select(t => t.ID).ToList();
+        //    var activeClass = _classService.CreateQuery().Find(Builders<ClassEntity>.Filter.And(classFilter)).ToList();
+        //    var activeClassIDs = activeClass.Select(t => t.ID).ToList();
 
-            var data = (from r in _lessonScheduleService.CreateQuery().Find(o => activeClassIDs.Contains(o.ClassID) && o.IsActive && o.EndDate >= model.StartDate && o.StartDate <= model.EndDate).ToList()
-                        let currentClass = activeClass.SingleOrDefault(o => o.ID == r.ClassID)
-                        let subject = subjects.SingleOrDefault(s => s.ID == currentClass.SubjectID)
-                        select _schedulemapping.AutoOrtherType(_lessonService.GetItemByID(r.LessonID), new LessonScheduleViewModel()
-                        {
-                            ScheduleID = r.ID,
-                            StartDate = r.StartDate,
-                            EndDate = r.EndDate,
-                            IsActive = r.IsActive,
-                            ClassID = currentClass.ID,
-                            SubjectName = subject.Name,
-                            ClassName = currentClass.Name
-                        }));
+        //    var data = (from r in _lessonScheduleService.CreateQuery().Find(o => activeClassIDs.Contains(o.ClassID) && o.IsActive && o.EndDate >= model.StartDate && o.StartDate <= model.EndDate).ToList()
+        //                let currentClass = activeClass.SingleOrDefault(o => o.ID == r.ClassID)
+        //                let subject = subjects.SingleOrDefault(s => s.ID == currentClass.SubjectID)
+        //                select _schedulemapping.AutoOrtherType(_lessonService.GetItemByID(r.LessonID), new LessonScheduleViewModel()
+        //                {
+        //                    ScheduleID = r.ID,
+        //                    StartDate = r.StartDate,
+        //                    EndDate = r.EndDate,
+        //                    IsActive = r.IsActive,
+        //                    ClassID = currentClass.ID,
+        //                    SubjectName = subject.Name,
+        //                    ClassName = currentClass.Name
+        //                }));
 
-            model.TotalRecord = data.Count();
-            var returnData = data == null || data.Count() <= 0 || data.Count() < model.PageSize || model.PageSize <= 0
-                ? data.ToList()
-                : data.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize).ToList();
-            var response = new Dictionary<string, object>
-            {
-                { "Data", returnData },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //    model.TotalRecord = data.Count();
+        //    var returnData = data == null || data.Count() <= 0 || data.Count() < model.PageSize || model.PageSize <= 0
+        //        ? data.ToList()
+        //        : data.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize).ToList();
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", returnData },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         [Obsolete]
         [HttpPost]
@@ -207,7 +207,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var classFilter = new List<FilterDefinition<ClassEntity>>();
             classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Students.Contains(UserID)));
 
-            var activeClass = _classService.CreateQuery().Find(Builders<ClassEntity>.Filter.And(classFilter)).SortBy(o => o.SubjectID).ToList();
+            var activeClass = _classService.CreateQuery().Find(Builders<ClassEntity>.Filter.And(classFilter)).ToEnumerable();
             var activeClassIDs = activeClass.Select(t => t.ID).ToList();
 
             var data = new List<LessonScheduleViewModel>();
@@ -222,7 +222,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     var lesson = _lessonService.GetItemByID(schedule.LessonID);
                     if (lesson != null)
                     {
-                        var subject = subjects.SingleOrDefault(o => o.ID == _class.SubjectID);
+                        //var subject = subjects.SingleOrDefault(o => o.ID == _class.SubjectID);
                         data.Add(_schedulemapping.AutoOrtherType(lesson, new LessonScheduleViewModel()
                         {
                             ScheduleID = schedule.ID,
@@ -230,7 +230,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             EndDate = schedule.EndDate,
                             IsActive = schedule.IsActive,
                             ClassID = _class.ID,
-                            SubjectName = subject.Name,
+                            //SubjectName = subject.Name,
                             ClassName = _class.Name
                         }));
                     }

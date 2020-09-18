@@ -111,7 +111,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
             var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _scheduleService.GetItemByID(DataResponse.ScheduleID);
             //schedule -> LessonID + class -> classubject -> skill
-            string url = schedule != null ? Url.Action("Detail", "Lesson", new { id = schedule.LessonID, ClassID = schedule.ClassSubjectID }) : null;
+            string url = schedule != null ? $"{Url.Action("Detail", "Lesson")}/{schedule.LessonID}/{schedule.ClassSubjectID}" : null;
             data.LinkLesson = url;
             return Task.FromResult(new JsonResult(data));
         }

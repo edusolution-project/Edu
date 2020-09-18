@@ -37,16 +37,12 @@ namespace BaseCustomerEntity.Database
         public List<string> Subjects { get; set; }
         [JsonProperty("Skills")]
         public List<string> Skills { get; set; }
-
-        //Multiple
-        [JsonProperty("GradeID")]
-        public string GradeID { get; set; }
-        [JsonProperty("SubjectID")]
-        public string SubjectID { get; set; }
-        [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("TeacherID")]
+        [JsonProperty("TeacherID")]//CreatorID
         public string TeacherID { get; set; }
+
+        //[JsonProperty("CreatorName")]//CreatorID
+        //public string CreatorName { get; set; }
+
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
         [JsonProperty("Modules")]
@@ -79,18 +75,6 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ClassEntity>>
             {
-                //SubjectID_1_GradeID_1_TeacherID_1
-                new CreateIndexModel<ClassEntity>(
-                    new IndexKeysDefinitionBuilder<ClassEntity>()
-                    .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)
-                    .Ascending(t=> t.TeacherID)),
-                //TeacherID_1SubjectID_1_GradeID_1_
-                new CreateIndexModel<ClassEntity>(
-                    new IndexKeysDefinitionBuilder<ClassEntity>()
-                    .Ascending(t=> t.TeacherID)
-                    .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)),
                 new CreateIndexModel<ClassEntity>(
                     new IndexKeysDefinitionBuilder<ClassEntity>()
                     .Text(t=> t.Name))

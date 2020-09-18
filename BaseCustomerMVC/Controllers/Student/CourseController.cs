@@ -174,7 +174,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model, ClassEntity entity, string basis)
+        public JsonResult GetList(DefaultModel model, ClassSubjectEntity entity, string basis)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -185,7 +185,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.IsActive && o.Center == center.ID) || o.ClassMechanism == CLASS_MECHANISM.PERSONAL));
 
             //class filter
             var currentStudent = _studentService.GetItemByID(userId);
@@ -243,18 +243,15 @@ namespace BaseCustomerMVC.Controllers.Student
             var std =
                 (from o in DataResponse
                  let progress = _progressService.GetStudentResult(o.ID, userId)
-                 let course = _courseService.GetItemByID(o.CourseID)
-                 let subject = _subjectService.GetItemByID(o.SubjectID)
-                 let grade = _gradeService.GetItemByID(o.GradeID)
+                 //let course = _courseService.GetItemByID(o.CourseID)
+                 //let subject = _subjectService.GetItemByID(o.SubjectID)
+                 //let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = subject != null && o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0
+                 let complete = progress == null ? 0 : (o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0)
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
-                     CourseName = course == null ? "" : course.Name,
                      StudentNumber = o.Students.Count,
-                     SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
-                     GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
-                     TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
+                     TeacherName = teacher == null ? "" : teacher.FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                      CompletePercent = complete > 100 ? 100 : complete
@@ -299,9 +296,9 @@ namespace BaseCustomerMVC.Controllers.Student
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
-                           courseName = o.Name,
-                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                           //courseID = o.CourseID,
+                           //courseName = o.Name,
+                           //subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
@@ -404,7 +401,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            title = o.Name,
                            endDate = o.EndDate,
                            per,
@@ -942,7 +939,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
         }
-
 
         //TODO: FIX DATA ONLY
         //public JsonResult FixProgress()

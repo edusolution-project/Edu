@@ -969,7 +969,7 @@
                                     StartDate: chapter.StartDate,
                                     EndDate: chapter.EndDate,
                                     BasePoint: chapter.BasePoint,
-                                    ConditionChapter: chapter.ConditionChapter ?? ''
+                                    ConditionChapter: chapter.ConditionChapter == null ? '' : chapter.ConditionChapter
                                 })
                             })
                             _lesson.forEach(function (lesson, k) {

@@ -26,9 +26,9 @@ namespace BaseCustomerMVC.Models
             ID = item.ID;
             Code = item.Code;
             Name = item.Name;
-            GradeID = item.GradeID;
-            SubjectID = item.SubjectID;
-            CourseID = item.CourseID;
+            //GradeID = item.GradeID;
+            //SubjectID = item.SubjectID;
+            //CourseID = item.CourseID;
             TeacherID = item.TeacherID;
             Students = item.Students;
             Created = item.Created;

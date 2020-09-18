@@ -225,7 +225,7 @@
         new Vue({
             el: "#dashboard_content",
             mounted() {
-                this.getData()
+                //this.getData()
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 var hash = window.location.hash;

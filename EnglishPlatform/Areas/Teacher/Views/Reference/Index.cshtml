@@ -31,18 +31,7 @@
     </div>
     <div class="card-header border-b" v-cloak>
         <div class="flex flex-wrap align-items-center">
-            @*<div class="box filter-box col-12 col-md-2 m-1">
-                    <select v-model="subject">
-                        <option value="">Chọn chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box col-12 col-md-2 m-1">
-                    <select v-model="grade">
-                        <option value="">Chọn cấp độ</option>
-                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                    </select>
-                </div>*@
+            
             <div class="tab bg-none col-md-12 m-1">
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
@@ -51,17 +40,30 @@
             </div>
         </div>
         <div class="col-md-12 form-row pb-2">
-            <div class="search-box m-1 col-12 col-md-3 m-1">
+            <div class="search-box m-1 col-12 col-md-2 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
             <template v-if="tab[0]">
-                <div class="box filter-box m-1 col-12 col-md-3">
+                <div class="box filter-box m-1 col-12 col-md-2">
                     <select v-model="range">
                         <option value="">-- Chọn phạm vi chia sẻ --</option>
                         <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
                         <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
                         <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                    </select>
+                </div>
+
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="subjectID">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="gradeID">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subjectID">{{item.Name}}</option>
                     </select>
                 </div>
 
@@ -261,7 +263,7 @@
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
-                    if (tab[1])
+                    if (this.tab[1])
                         fn = this.getMyClass
                     this.searchTimeout = setTimeout(function(){
                         fn()
@@ -733,9 +735,9 @@
         <b-col class="form-group flex">
             <label for="">Chuyên mục: </label>
             <select class="col-sm-4 form-control ml-2" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
-                <option value="">----</option>
-                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>
-                <option v-for="(item,k) in list_subject" :value="item.ID" v-else>{{item.Name}}</option>
+                @*<option value="">----</option>*@
+                @*<option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>*@
+                <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
             </select>
             <select class="col-sm-4 form-control ml-2" v-model="addItem.gradeID">
                 <option value="">----</option>

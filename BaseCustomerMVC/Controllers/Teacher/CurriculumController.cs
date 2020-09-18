@@ -398,18 +398,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
                             GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name
+                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                            TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                         })).ToList();
-                foreach (var t in rsp)
-                {
-                    if (t.TeacherID == null || t.TeacherID == "null") continue;
-                    else
-                    {
-                        var tcid = t.TeacherID;
-                        t.TeacherID = tcid;
-                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
-                    }
-                }
+//<<<<<<< HEAD
+//                foreach (var t in rsp)
+//                {
+//                    if (t.TeacherID == null || t.TeacherID == "null") continue;
+//                    else
+//                    {
+//                        var tcid = t.TeacherID;
+//                        t.TeacherID = tcid;
+//                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+//                    }
+//                }
+//=======
 
                 response = new Dictionary<string, object>
                 {

@@ -240,8 +240,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
             vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
             ViewBag.Class = vm;
-            ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
-            ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+            //ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
+            //ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
@@ -804,15 +804,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var std = (from o in data.ToList()
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
-                       let subject = _subjectService.GetItemByID(o.SubjectID)
+                       //let subject = _subjectService.GetItemByID(o.SubjectID)
                        let studentCount = //_classStudentService.GetClassStudents(o.ID).Count
                        _studentService.CountByClass(o.ID)
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            courseName = o.Name,
-                           subjectName = subject == null ? "" : subject.Name,
+                           //subjectName = subject == null ? "" : subject.Name,
                            thumb = o.Image ?? "",
                            endDate = o.EndDate,
                            //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
@@ -853,7 +853,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            title = o.Name,
                            endDate = o.EndDate,
                        }).ToList();
@@ -1020,7 +1020,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = dCursor.ToList();
             }
 
-            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism!=CLASS_MECHANISM.PERSONAL));
+            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -1060,6 +1060,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             let teachers = (o.Members == null || o.Members.Count == 0) ? "" : string.Join(", ", o.Members.Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
                              select new Dictionary<string, object>
                                 {
                                  { "ID", o.ID },
@@ -1078,9 +1079,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Members", o.Members },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
+                                 { "Teachers", teachers },
                                  { "Creator", o.TeacherID },
                                  { "CreatorName", creator==null?"":creator.FullName },
-                                 {"ClassMechanism",o.ClassMechanism }
+                                 { "ClassMechanism", o.ClassMechanism }
                              };
             return returndata.ToList();
         }
@@ -1228,7 +1230,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var creator = _teacherService.GetItemByID(oldData.TeacherID);
                 oldData.Members = new List<ClassMemberEntity> { };
                 if (creator != null)
-                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
+                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.OWNER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;
@@ -1502,6 +1504,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     throw new Exception("Teacher " + nSbj.TeacherID + " is not avaiable");
                 }
 
+                nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
                 nSbj.StartDate = @class.StartDate;
                 nSbj.EndDate = @class.EndDate;
@@ -1686,38 +1689,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var Course = _courseService.GetItemByID(CourseID);//Bài giảng
-                //Course.OriginID = Course.ID;
-                //Course.Center = center.ID;
-                //Course.Created = DateTime.Now;
-                //Course.CreateUser = teacher.ID;
-                //Course.IsAdmin = true;
-                //Course.IsPublic = false;
-                //Course.IsActive = true;
-                //Course.Updated = DateTime.Now;
-                //Course.TeacherID = teacher.ID;
-                //Course.TotalPractices = 0;
-                //Course.TotalLessons = 0;
-                //Course.TotalExams = 0;
-                //Course.TargetCenters = new List<string>();
-                //Course.Name = CourseName == "" ? Course.Name : CourseName;
-
-                //Course.ID = null;
-
-                ////_courseService.Save(Course);
-
-                //var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
-
-                var SkillID = Course.SkillID;//Môn học
-                var GradeID = Course.GradeID;//Cấp độ
-                var SubjectID = Course.SubjectID;//Chương trình
 
                 Class.Updated = DateTime.Now;
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
                 classSubject.CourseID = Course.ID;
-                classSubject.SkillID = SkillID;
-                classSubject.GradeID = GradeID;
-                classSubject.SubjectID = SubjectID;
+                //classSubject.CourseName = CourseName;
+                classSubject.SkillID = Course.SkillID;
+                classSubject.GradeID = Course.GradeID;
+                classSubject.SubjectID = Course.SubjectID;
                 classSubject.TeacherID = teacher.ID;
                 classSubject.TypeClass = CLASS_TYPE.EXTEND;
 
@@ -1744,33 +1724,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Course.Name = CourseName == "" ? Course.Name : CourseName;
 
                 Course.ID = null;
+
+                var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
+
                 if (isCreateNewClass)
                 {
-                    var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
-
-                    var SkillID = Course.SkillID;//Môn học
-                    var GradeID = Course.GradeID;//Cấp độ
-                    var SubjectID = Course.SubjectID;//Chương trình
-
-                    //var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                     var listclassSubject = new List<ClassSubjectEntity>();
                     var classSubject = new ClassSubjectEntity();
                     classSubject.CourseID = newID;
-                    classSubject.SkillID = SkillID;
-                    classSubject.GradeID = GradeID;
-                    classSubject.SubjectID = SubjectID;
+                    classSubject.SkillID = Course.SkillID;
+                    classSubject.GradeID = Course.GradeID;
+                    classSubject.SubjectID = Course.SubjectID;
                     classSubject.TeacherID = teacher.ID;
                     classSubject.TypeClass = CLASS_TYPE.EXTEND;
 
                     listclassSubject.Add(classSubject);
 
-                    item.CourseID = null;
                     Create(item, center.Code, listclassSubject, null);
-                }
-                else
-                {
-                    //_courseService.Save(Course);
-                    await CloneCourse(_courseService.GetItemByID(CourseID), Course);
                 }
             }
             return new JsonResult("Thêm thành công");
@@ -2166,7 +2136,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
             {
                 if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
-                
+
                 foreach (var ClassID in student.JoinedClasses)
                 {
                     var @class = _service.GetItemByID(ClassID);
