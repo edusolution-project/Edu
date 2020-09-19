@@ -147,16 +147,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json("Cơ sở không tồn tại");
             }
 
-
-
-
             if (ClassID == null)
             {
-                var myclass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
+                //var myclass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
 
                 var lclass = _classService.GetItemsByIDs(student.JoinedClasses);
 
-                var dataRespone = new List<ClassSubjectViewModel>();
+                var dataResponse = new List<ClassSubjectViewModel>();
                 foreach (var _class in lclass.ToList())
                 {
                     var data = (from r in _classSubjectService.GetByClassID(_class.ID)
@@ -186,12 +183,12 @@ namespace BaseCustomerMVC.Controllers.Student
                                     StartDate = _class.StartDate,
                                     EndDate = _class.EndDate
                                 }).ToList();
-                    dataRespone.AddRange(data);
+                    dataResponse.AddRange(data);
                 }
 
-                //var a = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.STANDARD && x.ClassID != myclass.ID);
-                //var b = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.EXTEND && x.ClassID != myclass.ID);
-                //var c = dataRespone.FindAll(x => x.ClassID == myclass.ID);
+                //var a = dataResponse.FindAll(x => x.TypeClass == CLASS_TYPE.STANDARD && x.ClassID != myclass.ID);
+                //var b = dataResponse.FindAll(x => x.TypeClass == CLASS_TYPE.EXTEND && x.ClassID != myclass.ID);
+                //var c = dataResponse.FindAll(x => x.ClassID == myclass.ID);
 
                 //var response = new Dictionary<string, object>
                 //{
@@ -202,8 +199,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 //};
                 var response = new Dictionary<string, object>
                 {
-                    {"Data", dataRespone },
-                    {"MyClassID", myclass?.ID }
+                    {"Data", dataResponse },
+                    {"Classes", lclass }
                 };
                 return new JsonResult(response);
             }
