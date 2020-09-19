@@ -178,7 +178,9 @@ namespace BaseCustomerMVC.Controllers.Student
                                     TeacherName = teacher == null ? "" : teacher.FullName,
                                     TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
                                     ClassName = _class.Name,
-                                    ClassID = r.ClassID
+                                    ClassID = r.ClassID,
+                                    StartDate = _class.StartDate,
+                                    EndDate = _class.EndDate
                                 }).ToList();
                     dataRespone.AddRange(data);
                 }
