@@ -82,6 +82,7 @@ namespace BaseCustomerEntity.Database
                 new CreateIndexModel<ClassEntity>(
                     new IndexKeysDefinitionBuilder<ClassEntity>()
                     .Ascending(t=> t.Center))
+
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

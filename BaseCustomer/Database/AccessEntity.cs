@@ -29,7 +29,11 @@ namespace BaseCustomerEntity.Database
                 //Authority_1_RoleID_1
                 new CreateIndexModel<AccessEntity>(
                     new IndexKeysDefinitionBuilder<AccessEntity>()
-                    .Ascending(t => t.Authority).Ascending(t=> t.RoleID))
+                    .Ascending(t => t.Authority).Ascending(t=> t.RoleID)),
+                //IsActive_1_RoleID_1
+                new CreateIndexModel<AccessEntity>(
+                    new IndexKeysDefinitionBuilder<AccessEntity>()
+                    .Ascending(t => t.IsActive).Ascending(t=> t.RoleID))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

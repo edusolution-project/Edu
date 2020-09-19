@@ -869,7 +869,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var endWeek = startWeek.AddDays(7);
 
             var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))

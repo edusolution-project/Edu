@@ -442,7 +442,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
             var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
 

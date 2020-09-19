@@ -468,47 +468,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //}
 
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult Publish(DefaultModel model)
-        {
-            if (model.ArrID.Length <= 0)
-            {
-                return new JsonResult(null);
-            }
-            else
-            {
-                var listID = new List<string> { model.ArrID };
-                if (model.ArrID.Contains(","))
-                    listID = model.ArrID.Split(',').ToList();
+        //[HttpPost]
+        //[Obsolete]
+        //public JsonResult Publish(DefaultModel model)
+        //{
+        //    if (model.ArrID.Length <= 0)
+        //    {
+        //        return new JsonResult(null);
+        //    }
+        //    else
+        //    {
+        //        var listID = new List<string> { model.ArrID };
+        //        if (model.ArrID.Contains(","))
+        //            listID = model.ArrID.Split(',').ToList();
 
-                var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive != true);
-                var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", true);
-                var publish = _lessonScheduleService.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
-                return new JsonResult(publish);
-            }
-        }
+        //        var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive != true);
+        //        var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", true);
+        //        var publish = _lessonScheduleService.Collection.UpdateMany(filter, update, new UpdateOptions() { IsUpsert = true });
+        //        return new JsonResult(publish);
+        //    }
+        //}
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult UnPublish(DefaultModel model)
-        {
-            if (model.ArrID.Length <= 0)
-            {
-                return new JsonResult(null);
-            }
-            else
-            {
-                var listID = new List<string> { model.ArrID };
-                if (model.ArrID.Contains(","))
-                    listID = model.ArrID.Split(',').ToList();
+        //[HttpPost]
+        //[Obsolete]
+        //public JsonResult UnPublish(DefaultModel model)
+        //{
+        //    if (model.ArrID.Length <= 0)
+        //    {
+        //        return new JsonResult(null);
+        //    }
+        //    else
+        //    {
+        //        var listID = new List<string> { model.ArrID };
+        //        if (model.ArrID.Contains(","))
+        //            listID = model.ArrID.Split(',').ToList();
 
-                var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive == true);
-                var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
-                var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
-                return new JsonResult(publish);
-            }
-        }
+        //        var filter = Builders<LessonScheduleEntity>.Filter.Where(o => listID.Contains(o.ID) && o.IsActive == true);
+        //        var update = Builders<LessonScheduleEntity>.Update.Set("IsActive", false);
+        //        var publish = _lessonScheduleService.Collection.UpdateMany(filter, update);
+        //        return new JsonResult(publish);
+        //    }
+        //}
 
         [HttpPost]
         [Obsolete]

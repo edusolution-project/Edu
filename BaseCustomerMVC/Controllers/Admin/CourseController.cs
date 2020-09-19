@@ -670,31 +670,31 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
 
-        public JsonResult FixDefCenter()
-        {
-            var defCenter = _centerService.GetItemByCode("eduso");
-            var defCenters = new List<string> { defCenter.ID };
-            _studentService.CreateQuery().UpdateMany(t => true, Builders<StudentEntity>.Update.Set(t => t.Centers, defCenters));//student
-            _service.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.Center, defCenter.ID));//class
-            _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.Center, defCenter.ID));//course
-            var defCenterMember = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name } };
-            var teachers = _teacherService.GetAll().ToList();
-            var teacherrole = "5d808d08cf9a821bdc9daf7b";
-            var headrole = "5d808d08cf9a821bdc9daf79";
-            foreach (var teacher in teachers)
-            {
-                if (teacher.Centers != null && teacher.Centers.Count > 0) continue;
-                var acc = _accountService.GetAccountByEmail(teacher.Email);
-                if (acc == null) continue;
-                teacher.Centers = defCenterMember;
-                if (acc.Type == "teacher")
-                    teacher.Centers[0].RoleID = teacherrole;
-                else
-                    teacher.Centers[0].RoleID = headrole;
-                _teacherService.Save(teacher);
-            }
-            return Json("OK");
-        }
+        //public JsonResult FixDefCenter()
+        //{
+        //    var defCenter = _centerService.GetItemByCode("eduso");
+        //    var defCenters = new List<string> { defCenter.ID };
+        //    _studentService.CreateQuery().UpdateMany(t => true, Builders<StudentEntity>.Update.Set(t => t.Centers, defCenters));//student
+        //    _service.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.Center, defCenter.ID));//class
+        //    _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.Center, defCenter.ID));//course
+        //    var defCenterMember = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name } };
+        //    var teachers = _teacherService.GetAll().ToList();
+        //    var teacherrole = "5d808d08cf9a821bdc9daf7b";
+        //    var headrole = "5d808d08cf9a821bdc9daf79";
+        //    foreach (var teacher in teachers)
+        //    {
+        //        if (teacher.Centers != null && teacher.Centers.Count > 0) continue;
+        //        var acc = _accountService.GetAccountByEmail(teacher.Email);
+        //        if (acc == null) continue;
+        //        teacher.Centers = defCenterMember;
+        //        if (acc.Type == "teacher")
+        //            teacher.Centers[0].RoleID = teacherrole;
+        //        else
+        //            teacher.Centers[0].RoleID = headrole;
+        //        _teacherService.Save(teacher);
+        //    }
+        //    return Json("OK");
+        //}
 
         #region Hoa them
 

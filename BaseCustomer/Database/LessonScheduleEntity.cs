@@ -43,15 +43,14 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<LessonScheduleEntity>>
             {
-                //ClassID_1_LessonID_1
+                //LessonID_1
                 new CreateIndexModel<LessonScheduleEntity>(
                     new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
-                    .Ascending(t => t.ClassID)
                     .Ascending(t => t.LessonID)),
-                //LessonID_1_StartDate_1_EndDate_1
+                //ClassID_1_StartDate_1_EndDate_1
                 new CreateIndexModel<LessonScheduleEntity>(
                     new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
-                    .Ascending(t=> t.LessonID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
+                    .Ascending(t=> t.ClassID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -68,10 +67,16 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(o => o.LessonID == lessonid && o.ClassSubjectID == classsubjectid)?.SingleOrDefault();
         }
 
-        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        public LessonScheduleEntity GetItemByLessonID(string lessonid)
         {
-            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonScheduleEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            if (string.IsNullOrEmpty(lessonid) || lessonid == "0") return null;
+            return Collection.Find(o => o.LessonID == lessonid)?.SingleOrDefault();
         }
+
+        //public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
+        //{
+        //    await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonScheduleEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        //}
 
         public long CountClassExam(string ClassID, DateTime? start = null, DateTime? end = null)
         {

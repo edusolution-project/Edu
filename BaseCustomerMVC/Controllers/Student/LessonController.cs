@@ -216,7 +216,9 @@ namespace BaseCustomerMVC.Controllers.Student
             var enddate = date.AddDays(1);
             foreach (var _class in activeClass)
             {
-                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.IsActive && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
+                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID 
+                //&& o.IsActive 
+                && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
                 if (schedule != null)
                 {
                     var lesson = _lessonService.GetItemByID(schedule.LessonID);
