@@ -161,5 +161,10 @@ namespace BaseCustomerEntity.Database
                 update
                 ).ModifiedCount;
         }
+
+        public ClassProgressEntity GetByClassID(string ClassID)
+        {
+            return Collection.Find(x => x.ClassID == ClassID).FirstOrDefault();
+        }
     }
 }

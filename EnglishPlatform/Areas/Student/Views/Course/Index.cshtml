@@ -66,7 +66,7 @@
                                 @*<i class="far fa-arrow-alt-circle-down ml-1"></i>*@
                             </a>
                             <p><span>Chương trình: {{item.SubjectName}}</span> - <span>Môn học: {{item.Title}}</span></p>
-                            <p><i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
+                            <p><i class="ti-time"></i> {{formatShortDate(item.StartDate)}} - <i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
                         </div>
                     </div>
                 </li>
@@ -87,7 +87,7 @@
                                 @*<i class="far fa-arrow-alt-circle-down ml-1"></i>*@
                             </a>
                             <p><span>Chương trình: {{item.SubjectName}}</span> - <span>Môn học: {{item.Title}}</span></p>
-                            <p><i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
+                            <p><i class="ti-time"></i> {{formatShortDate(item.StartDate)}} - <i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
                         </div>
                     </div>
                 </li>
@@ -269,7 +269,9 @@
                                         ClassName: item.ClassName,
                                         ClassID: item.ClassID,
                                         CourseName: item.CourseName,
-                                        SubjectName: item.SubjectName
+                                        SubjectName: item.SubjectName,
+                                        StartDate: item.StartDate,
+                                        EndDate: item.EndDate
                                     })
                                     //_that.changeAddSubject(item)
                                     //_that.changeAddGrade(item)
