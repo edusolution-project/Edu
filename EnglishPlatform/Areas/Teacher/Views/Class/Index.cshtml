@@ -473,7 +473,7 @@
                     IsOwner: false
                 },
                 curr: 0,
-                isHeadTeacher: @(isHeadTeacher?"true": "false")
+                isHeadTeacher: '@(isHeadTeacher?"true": "false")'
             },
             computed: {
                 sDate: {
@@ -1283,7 +1283,46 @@
 @section Modals{
     <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-4" v-if="!isHeadTeacher" style="pointer-events: none;">
+                <b-col class="form-group">
+                    <label class="label">Tên lớp học*</label>
+                    <input type="text" v-model="class_info.Name" class="form-control" ref="addName">
+                </b-col>
+                <b-col class="form-row row">
+                    <b-col class="col-sm-6">
+                        <label class="label">Ngày bắt đầu*</label>
+                        @*<vuejs-datepicker v-model="class_info.StartDate" format="dd/MM/yyyy" class="form-control" ref="addStartDate"></vuejs-datepicker>*@
+                        <input type="date" v-model="class_info.StartDate" class="form-control" ref="addEndDate">
+                    </b-col>
+                    <b-col class="col-sm-6">
+                        <label class="label">Ngày kết thúc*</label>
+                        @*<vuejs-datepicker v-model="class_info.EndDate" format="dd/MM/yyyy" class="form-control" ref="addEndDate"></vuejs-datepicker>*@
+                        <input type="date" v-model="class_info.EndDate" class="form-control" ref="addEndDate">
+                    </b-col>
+                </b-col>
+                <b-col class="form-group">
+                    <label class="label">Mô tả</label>
+                    <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription"></textarea>
+                </b-col>
+                <b-col class="form-group">
+                    <label class="label">Cơ chế lớp:</label>
+                    <select v-model="class_info.ClassMechanism" class="form-control">
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Lớp mở</option>
+                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Lớp đóng</option>
+                    </select>
+                </b-col>
+                <b-col class="form-group">
+                    <label class="label">Chọn ảnh lớp học</label>
+                    <div id="thumb_class" v-if="class_info.thumbnail.src">
+                        <img v-on:error="errorImgUrl()" :src="class_info.thumbnail.src" alt="" />
+                    </div>
+                    <label for="class_thumbnail" class="label frm-upload">
+                        <i class="ic ic-paper-clip"></i>Tải ảnh lên
+                        <input type="file" id="class_thumbnail" :ref="`thumbnail`" v-on:change="previewThumb()">
+                    </label>
+                </b-col>
+            </div>
+            <div class="col-md-4" v-else>
                 <b-col class="form-group">
                     <label class="label">Tên lớp học*</label>
                     <input type="text" v-model="class_info.Name" class="form-control" ref="addName" :disabled="!(isHeadTeacher || class_info.IsOwner)">

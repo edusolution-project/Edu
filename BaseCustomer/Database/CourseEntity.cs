@@ -59,6 +59,8 @@ namespace BaseCustomerEntity.Database
         public List<string> TargetCenters { get; set; }
         [JsonProperty("IsPublic")]
         public Boolean IsPublic { get; set; }
+        [JsonProperty("PublicWStudent")]
+        public Boolean PublicWStudent { get; set; }
     }
 
     public class CourseService : ServiceBase<CourseEntity>

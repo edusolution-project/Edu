@@ -63,6 +63,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonHelper _lessonHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
+        private readonly CenterService _centerService;
 
 
         public ClassSubjectController(
@@ -90,6 +91,7 @@ namespace BaseCustomerMVC.Controllers.Student
             StudentService studentService, IHostingEnvironment evn,
             LessonHelper lessonHelper,
             StudentHelper studentHelper,
+            CenterService centerService,
 
             FileProcess fileProcess)
         {
@@ -125,39 +127,113 @@ namespace BaseCustomerMVC.Controllers.Student
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            _centerService = centerService;
         }
 
-        public JsonResult GetClassSubjects(string ClassID)
+        public JsonResult GetClassSubjects(string ClassID, string basis)
         {
             //if (string.IsNullOrEmpty(ClassID))
             //    return null;
-            var response = new Dictionary<string, object>
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            if (student == null)
             {
-                { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          let subject = _subjectService.GetItemByID(r.SubjectID)
-                          let grade = _gradeService.GetItemByID(r.GradeID)
-                          let course = _courseService.GetItemByID(r.CourseID)
-                          let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
-                          let teacher = _teacherService.GetItemByID(r.TeacherID)
-                          select new ClassSubjectViewModel
-                          {
-                              ID = r.ID,
-                              SubjectID = r.SubjectID,
-                              SkillID = r.SkillID,
-                              SkillName = skill != null ? skill.Name : "",
-                              SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
-                              Color = skill != null ? skill.Color : "",
-                              SubjectName = subject.Name,
-                              GradeID = r.GradeID,
-                              GradeName = grade.Name,
-                              CourseID = r.CourseID,
-                              CourseName = course.Name,
-                              TeacherID = r.TeacherID,
-                              TeacherName = teacher==null?"Lớp cá nhân":teacher.FullName
-                          }).ToList()
-                },
-            };
-            return new JsonResult(response);
+                return Json("Không tìm thấy học viên");
+            }
+
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+            {
+                return Json("Cơ sở không tồn tại");
+            }
+            if (ClassID == null)
+            {
+                var myclass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
+
+                var lclass = _classService.GetItemsByIDs(student.JoinedClasses);
+
+                var dataRespone = new List<ClassSubjectViewModel>();
+                foreach (var _class in lclass.ToList())
+                {
+                    var data = (from r in _classSubjectService.GetByClassID(_class.ID)
+                                let subject = _subjectService.GetItemByID(r.SubjectID)
+                                let grade = _gradeService.GetItemByID(r.GradeID)
+                                let course = _courseService.GetItemByID(r.CourseID)
+                                let skill = r.SkillID == null ? null : _skillService.GetItemByID(r.SkillID)
+                                let teacher = _teacherService.GetItemByID(r.TeacherID)
+                                select new ClassSubjectViewModel
+                                {
+                                    ID = r.ID,
+                                    SubjectID = r.SubjectID,
+                                    SkillID = r.SkillID,
+                                    SkillName = skill != null ? skill.Name : "",
+                                    SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
+                                    Color = skill != null ? skill.Color : "",
+                                    SubjectName = subject.Name,
+                                    GradeID = r.GradeID,
+                                    GradeName = grade.Name,
+                                    CourseID = r.CourseID,
+                                    CourseName = course.Name,
+                                    TeacherID = r.TeacherID,
+                                    TeacherName = teacher == null ? "" : teacher.FullName,
+                                    TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
+                                    ClassName = _class.Name,
+                                    ClassID = r.ClassID
+                                }).ToList();
+                    dataRespone.AddRange(data);
+                }
+
+                //var a = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.STANDARD && x.ClassID != myclass.ID);
+                //var b = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.EXTEND && x.ClassID != myclass.ID);
+                var c = dataRespone.FindAll(x => x.ClassID == myclass.ID);
+
+                //var response = new Dictionary<string, object>
+                //{
+                //    {"ClassStandard",a },
+                //    {"ClassExtent",b },
+                //    {"MyClass",c },
+                //    {"MyClassID",myclass.ID }
+                //};
+                var response = new Dictionary<string, object>
+                {
+                    {"Data",dataRespone },
+                    {"MyClassID",myclass.ID }
+                };
+                return new JsonResult(response);
+            }
+            else
+            {
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
+                              let subject = _subjectService.GetItemByID(r.SubjectID)
+                              let grade = _gradeService.GetItemByID(r.GradeID)
+                              let course = _courseService.GetItemByID(r.CourseID)
+                              let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
+                              let teacher = _teacherService.GetItemByID(r.TeacherID)
+                              select new ClassSubjectViewModel
+                              {
+                                  ID = r.ID,
+                                  SubjectID = r.SubjectID,
+                                  SkillID = r.SkillID,
+                                  SkillName = skill != null ? skill.Name : "",
+                                  SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
+                                  Color = skill != null ? skill.Color : "",
+                                  SubjectName = subject.Name,
+                                  GradeID = r.GradeID,
+                                  GradeName = grade.Name,
+                                  CourseID = r.CourseID,
+                                  CourseName = course.Name,
+                                  TeacherID = r.TeacherID,
+                                  TeacherName = teacher==null?"Lớp cá nhân":teacher.FullName,
+                                  TypeClass = r.TypeClass==null?CLASS_TYPE.STANDARD:r.TypeClass
+                              }).ToList()
+                    },
+
+                    {"ClassMechanism",_classService.GetItemByID(ClassID).ClassMechanism }
+                };
+                return new JsonResult(response);
+            }
         }
 
         [HttpPost]

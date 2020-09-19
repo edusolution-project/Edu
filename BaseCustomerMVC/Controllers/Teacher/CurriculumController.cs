@@ -401,16 +401,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
                             TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                         })).ToList();
-                //foreach (var t in rsp)//???
-                //{
-                //    if (t.TeacherID == null || t.TeacherID == "null") continue;
-                //    else
-                //    {
-                //        var tcid = t.TeacherID;
-                //        t.TeacherID = tcid;
-                //        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
-                //    }
-                //}
+                //<<<<<<< HEAD
+                ////<<<<<<< HEAD
+                ////                foreach (var t in rsp)
+                ////                {
+                ////                    if (t.TeacherID == null || t.TeacherID == "null") continue;
+                ////                    else
+                ////                    {
+                ////                        var tcid = t.TeacherID;
+                ////                        t.TeacherID = tcid;
+                ////                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                ////                    }
+                ////                }
+                ////=======
+                //=======
+                //                //foreach (var t in rsp)//???
+                //                //{
+                //                //    if (t.TeacherID == null || t.TeacherID == "null") continue;
+                //                //    else
+                //                //    {
+                //                //        var tcid = t.TeacherID;
+                //                //        t.TeacherID = tcid;
+                //                //        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                //                //    }
+                //                //}
+                //>>>>>>> origin/VietPhung
 
                 response = new Dictionary<string, object>
                 {
@@ -601,6 +616,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
                     olditem.IsPublic = item.IsPublic;
+                    olditem.PublicWStudent = item.PublicWStudent;
                     //if (item.TargetCenters != null && item.TargetCenters[0] != null)
                     //{
                     //    var listCenters = item.TargetCenters[0].Split(',');

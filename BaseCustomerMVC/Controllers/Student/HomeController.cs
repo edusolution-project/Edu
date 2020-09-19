@@ -34,7 +34,9 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mapping;
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CourseService _courseService;
         public DefaultConfigs _default { get; }
+        private readonly ClassSubjectService _classSubjectService;
 
         private string host;
 
@@ -47,7 +49,9 @@ namespace BaseCustomerMVC.Controllers.Student
             NewsCategoryService newsCategoryService,
             ClassService classService,
             TransactionService historyTransactionService,
-            IConfiguration iConfig
+            IConfiguration iConfig,
+            CourseService courseService,
+            ClassSubjectService classSubjectService
             )
         {
             _studentService = studentService;
@@ -63,6 +67,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _transactionService = historyTransactionService;
             _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            _courseService = courseService;
+            _classSubjectService = classSubjectService;
         }
 
         public IActionResult Index(string basis)
@@ -89,6 +95,18 @@ namespace BaseCustomerMVC.Controllers.Student
             //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
             var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6);
 
+            //var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
+            //if (MyClass != null)
+            //{
+            //    var _mappingCourse = new MappingEntity<CourseEntity, CourseViewModel>();
+            //    var listMyCourse = from item in _classSubjectService.GetByClassID(MyClass.ID)
+            //                       let a = _courseService.GetItemByID(item.CourseID)
+            //                       select _mappingCourse.Clone(a, new CourseViewModel()
+            //                       {
+            //                           ClassID = MyClass.ID
+            //                       });
+            //    ViewBag.List_MyCourses = listMyCourse.ToList();
+            //}
             ViewBag.List_Courses = data.ToList();
 
             return View();

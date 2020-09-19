@@ -201,7 +201,8 @@
                     IsPublic: false,
                     TargetCenters: [],
                     NameCenters: '',
-                    SelectAll: false
+                    SelectAll: false,
+                    PublicWStudent: false
                 },
                 cloneItem: {
                     OriginID: '',
@@ -371,6 +372,7 @@
                         _that.addItem.Image = '';
                         _that.addItem.TeacherID = _that.def_teacher;
                         _that.addItem.IsPublic = false;
+                        _that.addItem.PublicWStudent = false;
                         _that.addItem.TargetCenters = [];
                     }
                     else {
@@ -385,6 +387,7 @@
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
                         _that.addItem.TeacherID = obj.TeacherID;
                         _that.addItem.IsPublic = obj.IsPublic;
+                        _that.addItem.PublicWStudent = obj.PublicWStudent;
                         if (obj.TargetCenters != null)
                             _that.addItem.TargetCenters = obj.TargetCenters;
                         else _that.addItem.TargetCenters = [];
@@ -467,6 +470,7 @@
                     _form.append('Description', _that.addItem.Description)
                     _form.append('TeacherID', _that.addItem.TeacherID)
                     _form.append('IsPublic', _that.addItem.IsPublic)
+                    _form.append('PublicWStudent', _that.addItem.PublicWStudent)
 
                     var targetStr = _that.addItem.TargetCenters;
                     if (targetStr != null) {
@@ -752,11 +756,11 @@
             </b-col>
         </div>
         <div class="d-flex">
-            <b-col class="form-group col-md-4 col-sm-12" style="padding-left:0px">
-                <label for="" class="col-sm-4">Chia sẻ</label>
+            <b-col class="form-group col-md-2 col-sm-12" style="padding-left:0px">
+                <label for="" class="col-sm-6">Chia sẻ</label>
                 <input type="checkbox" style="margin:auto" v-model="addItem.IsPublic" />
             </b-col>
-            <b-col class="form-group col-md-8 col-sm-12" v-if="addItem.IsPublic">
+            <b-col class="form-group col-md-6 col-sm-12" v-if="addItem.IsPublic">
                 @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
                 <div class="col-sm-10 row" style="position:relative">
                     <div class="col-md-3 col-sm-12">
@@ -784,6 +788,10 @@
                         </div>
                     </div>
                 </div>
+            </b-col>
+            <b-col class="form-group col-md-3 col-sm-12" style="padding-left:0px" v-if="addItem.IsPublic">
+                <label for="" class="col-sm-10">Chia sẻ với học viên: </label>
+                <input type="checkbox" style="margin:auto" v-model="addItem.PublicWStudent" />
             </b-col>
         </div>
         <div>

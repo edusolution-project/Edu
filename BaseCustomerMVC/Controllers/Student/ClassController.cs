@@ -42,7 +42,8 @@ namespace BaseCustomerMVC.Controllers.Student
             ProgressHelper progressHelper,
             ExamService examService,
             CourseLessonService courseLessonService,
-            CourseChapterService courseChapterService
+            CourseChapterService courseChapterService,
+            LessonScheduleService lessonScheduleService
         )
         {
             _classService = classService;
@@ -60,6 +61,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examService = examService;
             _courseLessonService = courseLessonService;
             _courseChapterService = courseChapterService;
+            _lessonScheduleService = lessonScheduleService;
         }
 
         #region add to my personal class
@@ -254,21 +256,29 @@ namespace BaseCustomerMVC.Controllers.Student
             //return null;
         }
 
-        private async Task RemoveClassSubject(ClassSubjectEntity cs)
+        private async Task<Boolean> RemoveClassSubject(ClassSubjectEntity cs)
         {
-            ////remove old schedule
-            var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
-            //remove chapter
-            var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
-            //remove clone lesson
-            var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
-            //remove progress: learning history => class progress, chapter progress, lesson progress
-            var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
-            //remove exam
-            var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
-            //remove classSubject
-            //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
-            await _classSubjectService.RemoveAsync(cs.ID);
+            try
+            {
+                ////remove old schedule
+                var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
+                //remove chapter
+                var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
+                //remove clone lesson
+                var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+                //remove progress: learning history => class progress, chapter progress, lesson progress
+                var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
+                //remove exam
+                var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
+                //remove classSubject
+                //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
+                await _classSubjectService.RemoveAsync(cs.ID);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, StudentEntity student, out ClassMemberEntity member, out long lessoncount, out long examcount, out long practicecount, bool notify = true)
@@ -418,6 +428,63 @@ namespace BaseCustomerMVC.Controllers.Student
                             {"Status",true }
                         });
                 }
+            }
+        }
+
+        public JsonResult Remove(string ClassSubjectID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(UserID);
+            if (student == null)
+            {
+                return Json(new Dictionary<string, object>
+                {
+                    {"Status",false },
+                    {"Msg","Thông tin tài khoản không chính xác." }
+                });
+            }
+
+            var myclass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
+            if (myclass == null)
+            {
+                return Json(new Dictionary<string, object>
+                {
+                    {"Status",false },
+                    {"Msg","Không tìm thấy lớp tương ứng." }
+                });
+            }
+
+            else
+            {
+                var lstcsj = _classSubjectService.GetByClassID(myclass.ID);
+                var csj = lstcsj.Find(x => x.ID == ClassSubjectID);
+                var msg = "";
+                var stt = false;
+                if (csj != null)
+                {
+                    var a = RemoveClassSubject(csj);
+                    if (a.Result)
+                    {
+                        msg = "Xoá thành công.";
+                        stt = true;
+                    }
+                    else
+                    {
+                        msg = "Xoá không thành công.";
+                        stt = false;
+                    }
+                }
+                else
+                {
+                    msg = "Không tìm thấy học liệu tương ứng.";
+                    stt = false;
+                }
+
+                return Json(new Dictionary<string, object>
+                {
+                    {"Status",stt },
+                    {"Msg",msg }
+                });
             }
         }
         #endregion
