@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json(new { Data = 0 });
 
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism!=CLASS_MECHANISM.PERSONAL));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
@@ -353,7 +353,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        let skill = _skillService.GetItemByID(o.SkillID)
                        select new
                        {
-                           id = _class.ID,
+                           id = o.ID,
                            //courseID = o.CourseID,
                            courseName = skill.Name + " (" + _class.Name + ")",
                            endDate = _class.EndDate,
@@ -391,15 +391,15 @@ namespace BaseCustomerMVC.Controllers.Student
             //filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL,currentStudent.ID).ID;
+            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, currentStudent.ID).ID;
 
 
             var lstSbj = new List<ClassSubjectEntity>();
             var lstClass = new List<ClassEntity>();
             //foreach (var clID in clIDs)
             //{
-                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
-                lstClass.Add(_service.GetItemByID(clID));
+            lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+            lstClass.Add(_service.GetItemByID(clID));
             //}
 
             var std = (from o in lstSbj.ToList()
@@ -409,7 +409,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        let skill = _skillService.GetItemByID(o.SkillID)
                        select new
                        {
-                           id = clID,
+                           id = o.ID,
                            //courseID = o.CourseID,
                            courseName = skill.Name + " (" + _class.Name + ")",
                            endDate = _class.EndDate,
@@ -418,7 +418,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            min = progress != null ? progress.Completed : 0,
                            score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
-                           image= o.CourseID!=null?_courseService.GetItemByID(o.CourseID).Image: "/pictures/english1.png"
+                           image = o.CourseID != null ? _courseService.GetItemByID(o.CourseID).Image : "/pictures/english1.png"
                        }).ToList();
             return Json(new { Data = std });
         }
@@ -614,6 +614,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return Json(new { });
                 }
+
                 var filterSchedule = Builders<LessonScheduleEntity>.Filter.Where(o => o.ClassID == ClassID);
                 var dataSchedule = _lessonScheduleService.Collection.Find(filterSchedule);
                 if (dataSchedule == null || dataSchedule.Count() <= 0) return Json(new { });

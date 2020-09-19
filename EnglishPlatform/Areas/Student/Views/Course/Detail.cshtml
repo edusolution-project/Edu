@@ -61,24 +61,54 @@
                 <p>{{domDecoder(classDescription)}}</p>
             </div>
         </div>
-        <div class="row row-list" v-if="tab[1]">
-            <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects">
-                <div class="box">
-                    <div class="inner text-center">
-                        <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
-                            <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
-                            @*<div>
+        <div class="form-group">
+            <h3 style="font-size:16px;" class="font-weight-bold" v-if="class_mechanism=='@BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL'">Học liệu cá nhân</h3>
+            <h3 style="font-size:16px;" class="font-weight-bold" v-else>Học liệu chính quy</h3>
+            <div class="row row-list" v-if="tab[1]">
+                <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
+                    <div class="box">
+                        <div class="inner text-center">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
+                                <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
+                                @*<div>
                                     <img :src="item.Image" style="max-width:150px; max-height:200px" />
                                 </div>*@
-                            <div>
-                                {{item.Title}}
-                            </div>
-                        </a>
-                        <span class="name center">
-                            {{item.Grade}}<br />
-                            GV: {{item.Teacher}}
-                        </span>
-                        <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                                <div>
+                                    {{item.Title}}
+                                </div>
+                            </a>
+                            <span class="name center">
+                                {{item.Grade}}<br />
+                                GV: {{item.Teacher}}
+                            </span>
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <h3 style="font-size:16px;" class="font-weight-bold pt-3" v-if="class_mechanism!='@BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL'">Học liệu chuyên đề</h3>
+            <div class="row row-list" v-if="tab[1]">
+                <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
+                    <div class="box">
+                        <div class="inner text-center">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
+                                <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
+                                @*<div>
+                                    <img :src="item.Image" style="max-width:150px; max-height:200px" />
+                                </div>*@
+                                <div>
+                                    {{item.Title}}
+                                </div>
+                            </a>
+                            <span class="name center">
+                                {{item.Grade}}<br />
+                                GV: {{item.Teacher}}
+                            </span>
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -205,7 +235,8 @@
                 },
                 linkFile: "",
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
-                title:'',
+                title: '',
+                class_mechanism:''
             },
             watch: {
             },
@@ -246,7 +277,7 @@
                     let _url = '@processUrl("GetDetail", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
-                        var _data = response.data.Data;
+                            var _data = response.data.Data;
                         _data.forEach(function (item, k)
                         {
                             _that.teacherSource.push({
@@ -255,6 +286,7 @@
                                 SubjectID: obj.SubjectID
                             })
                         })
+                            //debugger
                         _that.loaded_teacher.push(obj.SubjectID);
                     }).catch(e => { })
                 },
@@ -275,6 +307,8 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
+                                _that.class_mechanism = response.data.ClassMechanism;
+                                //debugger
                                 _that.classSubjects = [];
                                 _data.forEach(function (item, k) {
                                     _that.classSubjects.push({
@@ -285,7 +319,8 @@
                                         Teacher: item.TeacherName,
                                         Grade: item.GradeName,
                                         Chapters: [],
-                                        Lessons: []
+                                        Lessons: [],
+                                        TypeClass:item.TypeClass
                                     })
                                     //_that.changeAddSubject(item)
                                     //_that.changeAddGrade(item)

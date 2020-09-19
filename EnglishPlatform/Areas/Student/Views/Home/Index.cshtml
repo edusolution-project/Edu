@@ -100,14 +100,14 @@
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in active_course">
-                                <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
+                                <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName">
                                     <div class="box radius">
                                         <div class="thumb">
                                             <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
                                             <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
                                         </div>
                                         <div class="padding-15 inner">
-                                            <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                            <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName" class="title">{{item.courseName}}</a>
                                             <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
                                             <div class="c-bot">
                                                 <div class="flex reverse">
@@ -133,19 +133,19 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Môn học bổ trợ</h4>
-                        @*<a href="javascript:$('.fn-box-chat-eduso').focus().click()" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                        <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_mycourses" v-if="list_mycourses.length>0">
-                                <a :href="'@processUrl("Detail", "Course")/' + item.id + '#module'" :title="item.courseName">
+                                <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName">
                                 <div class="box radius">
                                     <div class="thumb">
                                         <img v-if="item.image" :src="cacheStatic(item.image,256)" alt="">
                                         <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
                                     </div>
                                     <div class="padding-15 inner">
-                                        <a :href="'@processUrl("Detail", "Course")/' + item.id + '#module'" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName" class="title">{{item.courseName}}</a>
                                         <p><i class="ti-time"></i>@DateTime.Now.ToString("dd-MM-yyyy")</p>
                                         <div class="c-bot">
                                             <div class="flex reverse">
@@ -346,7 +346,7 @@
                         //console.log("Active")
                         //console.log(response.data)
                         _that.active_course = response.data.data;
-                        debugger
+                        //debugger
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
@@ -454,7 +454,7 @@
                 let _url = '@processUrl("DetailProduct", "Home")';
                 axios.post(_url, _form)
                     .then(response => {
-                        debugger
+                        //debugger
                         _that.detailProduct = response.data;
                         $("#DetailProduct").modal();
                     }).catch(e => { });

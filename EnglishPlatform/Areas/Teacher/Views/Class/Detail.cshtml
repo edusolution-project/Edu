@@ -124,7 +124,6 @@
                                     <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
                                 </ul>
                             </b-collapse>
-
                         </div>
                     </li>
                 </ul>
@@ -149,7 +148,6 @@
                                     <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
                                 </ul>
                             </b-collapse>
-
                         </div>
                     </li>
                 </ul>
@@ -1550,7 +1548,7 @@
                     if (_that.addRef.file) {
                         _form.append('fileUpload', this.addRef.file)
                     }
-                    debugger
+                    //debugger
                     if (_that.addRef.cover) {
                         _form.append('coverImage', this.addRef.cover)
                     }
@@ -1614,7 +1612,7 @@
                     })
                 },
                 changeFile() {
-                    debugger
+                    //debugger
                     var listFiles = $('#modal_event input[type=file]')
                     if (listFiles[1].files[0] != null) { //file dinh kem
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {

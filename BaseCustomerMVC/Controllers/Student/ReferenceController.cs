@@ -98,7 +98,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 var filter = new List<FilterDefinition<ReferenceEntity>>();
                 if (isInteractive)
                 {
-                    var _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
+                    var _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive == true) };
+                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsPublic) };
+                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.TargetCenters.Contains(center.ID)) };
+                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.PublicWStudent == true) };
                     if (!string.IsNullOrEmpty(defaultModel.SearchText))
                     {
                         _filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));

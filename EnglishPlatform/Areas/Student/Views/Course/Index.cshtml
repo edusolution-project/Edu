@@ -52,7 +52,71 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-body" v-cloak>
-        <div class="row row-list">
+        <div class="form-group">
+            <h2 style="font-size:16px;" class="font-weight-bold">Học liệu chính quy</h2>
+            <ul class="list ls-practice row">
+                <li v-for="(item,k) in classSubjects" class="form-row col-md-6 col-sm-12" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD && item.ClassID!=myClassID">
+                    <div class="inner row w-100" style="max-height:150px">
+                        <div class="col-md-2" style="text-align:center;margin:auto;width:100px">
+                            <img :src="cacheStatic(item.Image,90,130)" :title="item.CourseName" />
+                        </div>
+                        <div class="col-md-10">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" :title="item.CourseName" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color: ' + item.Color">
+                                {{item.CourseName + ' (Lớp: ' + item.ClassName + ')'}}
+                                @*<i class="far fa-arrow-alt-circle-down ml-1"></i>*@
+                            </a>
+                            <p><span>Chương trình: {{item.SubjectName}}</span> - <span>Môn học: {{item.Title}}</span></p>
+                            <p><i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <h2 style="font-size:16px;" class="font-weight-bold">Học liệu chuyên đề</h2>
+            <ul class="list ls-practice row">
+                <li v-for="(item,k) in classSubjects" class="form-row col-md-6 col-sm-12" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND && item.ClassID!=myClassID">
+                    <div class="inner row w-100" style="max-height:150px">
+                        <div class="col-md-2" style="text-align:center;margin:auto;width:100px">
+                            <img :src="cacheStatic(item.Image,90,130)" :title="item.CourseName" />
+                        </div>
+                        <div class="col-md-10">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" :title="item.CourseName" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color: ' + item.Color">
+                                {{item.CourseName + ' (Lớp: ' + item.ClassName + ')'}}
+                                @*<i class="far fa-arrow-alt-circle-down ml-1"></i>*@
+                            </a>
+                            <p><span>Chương trình: {{item.SubjectName}}</span> - <span>Môn học: {{item.Title}}</span></p>
+                            <p><i class="ti-time"></i> {{formatShortDate(item.EndDate)}}</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="form-group">
+            <h2 style="font-size:16px;" class="font-weight-bold">Học liệu cá nhân</h2>
+            <ul class="list ls-practice row">
+                <li v-for="(item,k) in classSubjects" class="form-row col-md-6 col-sm-12" v-if="item.ClassID == myClassID">
+                    <div class="inner row w-100" style="max-height:150px">
+                        <div class="col-md-2" style="text-align:center;margin:auto;width:100px">
+                            <img :src="cacheStatic(item.Image,90,130)" :title="item.CourseName" />
+                        </div>
+                        <div class="col-md-10" style="position:relative">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" :title="item.CourseName" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color: ' + item.Color">
+                                {{item.CourseName + ' (Lớp: ' + item.ClassName + ')'}}
+                                @*<i class="far fa-arrow-alt-circle-down ml-1"></i>*@
+                            </a>
+                            <div><span>Chương trình: {{item.SubjectName}}</span> - <span>Môn học: {{item.Title}}</span></div>
+                            <div><i class="ti-time"></i> @DateTime.Now.ToString("dd-MM-yyyy")</div>
+                            <button type="button" class="btn btn-outline-danger" v-on:click="removeCourse(item.ID,item.CourseName)"><i class="fas fa-minus-circle"></i></button>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        @*<div class="row row-list">
             <div class="col-md-3 course-item" v-for="(item,k) in list_course">
                 <div class="box radius">
                     <a :href="'@processUrl("Detail", "Course")/' + item.ID" class="thumb"><img :src="cacheStatic(item.Thumb,256)" :alt="item.Name" class="w-100"></a>
@@ -87,7 +151,8 @@
                     <button><i class="ti-angle-right"></i></button>
                 </div>
             </div>
-        </div>
+        </div>*@
+
     </div>
 </section>
 
@@ -114,6 +179,17 @@
                 max-height: none;
                 height: auto;
             }
+
+        .btn-outline-danger {
+            position: absolute;
+            right: 30px;
+            bottom: 10px;
+            display:none;
+        }
+
+        .ls-practice li:hover .btn-outline-danger {
+            display: inline-block
+        }
     </style>
     <script>
         var isSearchDate = false;
@@ -134,6 +210,7 @@
                 //});
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                this.loadClassSubjects();
                 //console.log(this.list_grades_full);
                 this.changeSubject()
                 window.ChooseCalendar = this.chooseCalendar
@@ -161,7 +238,45 @@
                 view: 10,
                 page: 1,
                 startdate: moment(new Date(1800,1,1)),
-                enddate: moment(new Date(1800,1,1)),
+                enddate: moment(new Date(1800, 1, 1)),
+                classSubjects: [],
+                myClassID: '',
+                loadClassSubjects() {
+                    //debugger
+                    let _that = this
+                    if (_that.classSubjects.length > 0)
+                        return;
+
+                    let _form = new FormData()
+                    //_form.append('ClassID', _that.classID)
+                    let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var _data = response.data.Data;
+                                _that.myClassID = response.data.MyClassID;
+                                _that.classSubjects = [];
+                                _data.forEach(function (item, k) {
+                                    _that.classSubjects.push({
+                                        ID: item.ID,
+                                        Title: item.SkillName,
+                                        Image: item.SkillImage,
+                                        Color: item.Color,
+                                        Teacher: item.TeacherName,
+                                        Grade: item.GradeName,
+                                        Chapters: [],
+                                        Lessons: [],
+                                        TypeClass: item.TypeClass,
+                                        ClassName: item.ClassName,
+                                        ClassID: item.ClassID,
+                                        CourseName: item.CourseName,
+                                        SubjectName: item.SubjectName
+                                    })
+                                    //_that.changeAddSubject(item)
+                                    //_that.changeAddGrade(item)
+                                })
+                                //_that.$forceUpdate()
+                            }).catch(e => { })
+                }
             },
             computed: {
                 sDate: {
@@ -223,7 +338,7 @@
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY")
+                    return moment(date).format("DD-MM-YYYY")
                 },
                 chooseCalendar() {
                     $('input[name=dates]').focus().click()
@@ -264,14 +379,34 @@
                     _that.enddate = moment(new Date(1800,1,1)),
                     GetCourse();
                 },
-                cacheStatic(src, width) {
+                cacheStatic(src,width ,height) {
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&&h=" + height;
                 },
                 repDate(svalue, evalue) {
                     this.eDate = evalue;
                     this.sDate = svalue;
+                },
+                removeCourse(ID,Name) {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('ClassSubjectID', ID);
+                    let _url = '@processUrl("Remove", "Class")';
+                    if (window.confirm("Bạn muốn xoá học liệu " + Name + " ?")) {
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if (!response.data.Status) {
+                                    alert(response.data.Msg);
+                                }
+                                else {
+                                    alert(response.data.Msg);
+                                }
+                            }).catch(e => {
+                                alert(e);
+                            })
+                    }
+                    else return false;
                 }
             }
         });
