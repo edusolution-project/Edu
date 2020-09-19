@@ -391,17 +391,17 @@ namespace BaseCustomerMVC.Controllers.Student
             //filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
             //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, currentStudent.ID).ID;
+            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, currentStudent.ID)?.ID;
 
 
             var lstSbj = new List<ClassSubjectEntity>();
             var lstClass = new List<ClassEntity>();
-            //foreach (var clID in clIDs)
-            //{
-            lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
-            lstClass.Add(_service.GetItemByID(clID));
-            //}
 
+            if (!string.IsNullOrEmpty(clID))
+            {
+                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+                lstClass.Add(_service.GetItemByID(clID));
+            }
             var std = (from o in lstSbj.ToList()
                        let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
                        let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)

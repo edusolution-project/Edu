@@ -146,6 +146,10 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return Json("Cơ sở không tồn tại");
             }
+
+
+
+
             if (ClassID == null)
             {
                 var myclass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
@@ -158,7 +162,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     var data = (from r in _classSubjectService.GetByClassID(_class.ID)
                                 let subject = _subjectService.GetItemByID(r.SubjectID)
                                 let grade = _gradeService.GetItemByID(r.GradeID)
-                                let course = _courseService.GetItemByID(r.CourseID)
+                                let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
                                 let skill = r.SkillID == null ? null : _skillService.GetItemByID(r.SkillID)
                                 let teacher = _teacherService.GetItemByID(r.TeacherID)
                                 select new ClassSubjectViewModel
@@ -167,13 +171,13 @@ namespace BaseCustomerMVC.Controllers.Student
                                     SubjectID = r.SubjectID,
                                     SkillID = r.SkillID,
                                     SkillName = skill != null ? skill.Name : "",
-                                    SkillImage = !string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : ""),
+                                    SkillImage = string.IsNullOrEmpty(r.Image) ? (!string.IsNullOrEmpty(course.Image) ? course.Image : (skill != null ? skill.Image : "")) : r.Image,
                                     Color = skill != null ? skill.Color : "",
                                     SubjectName = subject.Name,
                                     GradeID = r.GradeID,
                                     GradeName = grade.Name,
                                     CourseID = r.CourseID,
-                                    CourseName = course.Name,
+                                    CourseName = string.IsNullOrEmpty(r.CourseName) ? course.Name : r.CourseName,
                                     TeacherID = r.TeacherID,
                                     TeacherName = teacher == null ? "" : teacher.FullName,
                                     TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
@@ -185,7 +189,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 //var a = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.STANDARD && x.ClassID != myclass.ID);
                 //var b = dataRespone.FindAll(x => x.TypeClass == CLASS_TYPE.EXTEND && x.ClassID != myclass.ID);
-                var c = dataRespone.FindAll(x => x.ClassID == myclass.ID);
+                //var c = dataRespone.FindAll(x => x.ClassID == myclass.ID);
 
                 //var response = new Dictionary<string, object>
                 //{
@@ -196,8 +200,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 //};
                 var response = new Dictionary<string, object>
                 {
-                    {"Data",dataRespone },
-                    {"MyClassID",myclass.ID }
+                    {"Data", dataRespone },
+                    {"MyClassID", myclass?.ID }
                 };
                 return new JsonResult(response);
             }
@@ -208,7 +212,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
                               let subject = _subjectService.GetItemByID(r.SubjectID)
                               let grade = _gradeService.GetItemByID(r.GradeID)
-                              let course = _courseService.GetItemByID(r.CourseID)
+                              let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
                               let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
                               let teacher = _teacherService.GetItemByID(r.TeacherID)
                               select new ClassSubjectViewModel
@@ -225,11 +229,10 @@ namespace BaseCustomerMVC.Controllers.Student
                                   CourseID = r.CourseID,
                                   CourseName = course.Name,
                                   TeacherID = r.TeacherID,
-                                  TeacherName = teacher==null?"Lớp cá nhân":teacher.FullName,
-                                  TypeClass = r.TypeClass==null?CLASS_TYPE.STANDARD:r.TypeClass
+                                  TeacherName = teacher == null? "Lớp cá nhân" : teacher.FullName,
+                                  TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass
                               }).ToList()
                     },
-
                     {"ClassMechanism",_classService.GetItemByID(ClassID).ClassMechanism }
                 };
                 return new JsonResult(response);
