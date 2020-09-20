@@ -157,7 +157,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
-            var centerID = _centerService.GetItemByCode(basis).ID;
+            var center = _centerService.GetItemByCode(basis);
             var Status = false;
 
             if (string.IsNullOrEmpty(student.ID) || student.ID == "0")
@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     student.CreateDate = DateTime.Now;
                     student.IsActive = true;
                     student.UserCreate = teacher.ID;
-                    student.Centers = new List<string>() { centerID };
+                    student.Centers = new List<string>() { center.ID };
                     if (student.JoinedClasses != null && student.JoinedClasses[0] != null)
                     {
                         var listClass = student.JoinedClasses[0].Split(',');
@@ -197,6 +197,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         RoleID = _roleService.GetItemByCode("student").ID
                     };
                     _accountService.CreateQuery().InsertOne(account);
+
+                    if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
+                    {
+                        var pass = _defaultPass;
+                        foreach (var clid in student.JoinedClasses)
+                        {
+                            var @class = _classService.GetItemByID(clid);
+                            if (@class != null && !string.IsNullOrEmpty(@class.ID))
+                                _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, pass, @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                            pass = "";//prevent send multiple mail with password
+                        }
+                    }
+                    else
+                        _ = _mailHelper.SendStudentJoinCenterNotify(student.FullName, student.Email, _defaultPass, center.Name);
                     return new JsonResult(response);
                 }
                 else
@@ -215,12 +229,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var oldStudent = _studentService.GetItemByID(student.ID);
                 oldStudent.FullName = student.FullName;
-
-
+                if (oldStudent.JoinedClasses == null) oldStudent.JoinedClasses = new List<string>();
                 var listClass = new List<string>();
                 if (!String.IsNullOrEmpty(student.JoinedClasses[0]))
                     listClass = student.JoinedClasses[0].Split(',').ToList();
-                oldStudent.JoinedClasses = listClass.ToList();
+                var newClasses = new List<string>();
+
+                if (listClass != null && listClass.Count > 0)
+                {
+                    foreach (var newClass in listClass)
+                    {
+                        if (!string.IsNullOrEmpty(newClass))
+                            if (oldStudent.JoinedClasses.IndexOf(newClass) < 0)
+                            {
+                                oldStudent.JoinedClasses.Add(newClass);
+                                newClasses.Add(newClass);
+                            }
+                    }
+                }
+
+
                 var infochange = false;
 
                 if (oldStudent.DateBorn != student.DateBorn)
@@ -249,6 +277,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             acc.Phone = oldStudent.Phone;
                             _accountService.Save(acc);
                         }
+                        if(newClasses.Count > 0)
+                        {
+                            foreach(var clid in newClasses)
+                            {
+                                var @class = _classService.GetItemByID(clid);
+                                if (@class != null && !string.IsNullOrEmpty(@class.ID))
+                                    _ = _mailHelper.SendStudentJoinClassNotify(student.FullName, student.Email, "", @class.Name, @class.StartDate, @class.EndDate, center.Name);
+                            }
+
+                        }
+
                         //check teacher account
                         //var tc = _teacherService.GetItemByEmail(oldStudent.Email);
                         //if (tc != null)

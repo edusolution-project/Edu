@@ -260,7 +260,7 @@ namespace BaseCustomerMVC.Globals
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
                 subject = "Chúc mừng " + StudentName + " đã trở thành học viên của " + CenterName;
-                body = "<p>Bạn vừa đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
+                body = "<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
                 "<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>" +
                 "<br/>" +
                 "<p>Thông tin đăng nhập của bạn</p>" +
@@ -271,7 +271,7 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                body += ("<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
+                body += ("<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
                 body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
             }
