@@ -424,6 +424,7 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
                     _form.append('Center', '@center')
+                    _form.append('Sort', 'DES')
                     let _url = '@processUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -935,7 +936,7 @@
 
     <!-- Modal list class -->
     <b-modal id="modal_listclass" hide-footer="true">
-        <ul class="list-group" >
+        <ul class="list-group">
             <li class="list-group-item active">Danh sách lớp học viên {{listNameClass.studentName}}</li>
             <li class="list-group-item" v-for="item in listNameClass.listClass">{{item}}</li>
         </ul>

@@ -277,9 +277,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             acc.Phone = oldStudent.Phone;
                             _accountService.Save(acc);
                         }
-                        if(newClasses.Count > 0)
+                        if (newClasses.Count > 0)
                         {
-                            foreach(var clid in newClasses)
+                            foreach (var clid in newClasses)
                             {
                                 var @class = _classService.GetItemByID(clid);
                                 if (@class != null && !string.IsNullOrEmpty(@class.ID))
@@ -404,7 +404,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
 
-        public JsonResult GetList(DefaultModel model, string Center, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID)
+        public JsonResult GetList(DefaultModel model, string Center, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID, string Sort = "ASC")
         {
             var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
             if (!HasRole(User.Claims.GetClaimByType("UserID").Value, Center, "head-teacher"))
@@ -468,7 +468,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 stfilter.Add(Builders<StudentEntity>.Filter.And(
                         Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter)).SortBy(t => t.ID);
+            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter));
+
+            if (Sort == "ASC")
+                list = list.SortBy(t => t.ID);
+            else
+                list = list.SortByDescending(t => t.ID);
             //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
