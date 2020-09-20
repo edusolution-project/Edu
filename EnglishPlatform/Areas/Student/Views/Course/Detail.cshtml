@@ -139,7 +139,7 @@
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                         <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
                             <img :src="cacheStatic(data.Image)" alt="" v-if="data.Image != null" class="w-100">
-                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                            <img :src="cacheStatic('/pictures/book.jpg')" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
                             <div>
@@ -404,7 +404,7 @@
                 cacheStatic(src, width) {
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"

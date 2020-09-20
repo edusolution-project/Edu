@@ -126,7 +126,7 @@
                             </template>
                             <template v-else>
                                 <li class="w-100">
-                                    <a href="javascript:void(0)">Không có môn học nào đang diễn ra.</a>
+                                    Không có môn học
                                 </li>
                             </template>
                         </ul>
@@ -446,7 +446,7 @@
             cacheStatic(src, width) {
                 if (src.startsWith("http"))
                     return src;
-                return "https://static.eduso.vn/" + src + "?w=" + width;
+                return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
             },
             formatPrice(value) {
                 let val = (value / 1).toFixed(0).replace(',', '.')

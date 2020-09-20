@@ -1296,7 +1296,7 @@
                 cacheStatic(src, width) {
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
                 },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key

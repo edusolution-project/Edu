@@ -56,10 +56,10 @@
             <template v-for="(item,i) in classes">
                 <template v-if="item.ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group">
-                        <h2 style="font-size:16px;" class="font-weight-bold border-b pb-2">{{item.Name}} <span style="font-size:80%;">({{formatShortDate(item.StartDate)}} - {{formatShortDate(item.EndDate)}}) </span></h2>
+                        <h2 style="font-size:16px" class="font-weight-bold border-b pb-2 red-color">{{item.Name}} <span style="font-size:80%;">({{formatShortDate(item.StartDate)}} - {{formatShortDate(item.EndDate)}}) </span></h2>
                     </div>
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD).length > 0">
-                        <h2 style="font-size:15px;" class="font-weight-bold pb-3">Học liệu chính quy</h2>
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chính quy</h2>
                         <ul class="list ls-practice row">
                             <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD && csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100">
@@ -72,14 +72,14 @@
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
                                             {{csbj.CourseName}}
                                         </a>
-                                        <p class="mb-1 pb-0 mt-1">
+                                        <p class="mb-1 pb-0 mt-1" style="font-size:13px">
                                             <span>{{csbj.SubjectName}}</span>
                                             <template v-if="csbj.SkillName != null">
                                                 -
                                                 <span>{{csbj.SkillName}}</span>
                                             </template>
                                         </p>
-                                        <p>
+                                        <p style="font-size:13px">
                                             <template v-if="csbj.TeacherName != null">
                                                 <span>GV: {{csbj.TeacherName}}</span>
                                             </template>
@@ -91,7 +91,7 @@
                     </div>
 
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND).length > 0">
-                        <h2 style="font-size:15px;" class="font-weight-bold pb-3">Học liệu chuyên đề</h2>
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chuyên đề</h2>
                         <ul class="list ls-practice row">
                             <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND && csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100" style="max-height:150px">
@@ -104,14 +104,14 @@
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
                                             {{csbj.CourseName}}
                                         </a>
-                                        <p class="mb-1 pb-0 mt-1">
+                                        <p class="mb-1 pb-0 mt-1" style="font-size:13px">
                                             <span>{{csbj.SubjectName}}</span>
                                             <template v-if="csbj.SkillName != null">
                                                 -
                                                 <span>{{csbj.SkillName}}</span>
                                             </template>
                                         </p>
-                                        <p>
+                                        <p style="font-size:13px">
                                             <template v-if="csbj.TeacherName != null">
                                                 <span>GV: {{csbj.TeacherName}}</span>
                                             </template>
@@ -124,7 +124,7 @@
                 </template>
                 <template v-else>
                     <div class="form-group">
-                        <h2 style="font-size:15px;" class="font-weight-bold pb-3">Học liệu cá nhân</h2>
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu cá nhân</h2>
                         <ul class="list ls-practice row">
                             <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100" style="max-height:150px">
@@ -137,14 +137,14 @@
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
                                             {{csbj.CourseName}}
                                         </a>
-                                        <p class="mb-1 pb-0 mt-1">
+                                        <p class="mb-1 pb-0 mt-1" style="font-size:13px">
                                             <span>{{csbj.SubjectName}}</span>
                                             <template v-if="csbj.SkillName != null">
                                                 -
                                                 <span>{{csbj.SkillName}}</span>
                                             </template>
                                         </p>
-                                        <p>
+                                        <p style="font-size:13px">
                                             <template v-if="csbj.TeacherName != null">
                                                 <span>GV: {{csbj.TeacherName}}</span>
                                             </template>
@@ -396,7 +396,7 @@
                     if (src == null) return "https://static.eduso.vn/picture/book.jpg?w=" + width;
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&h=" + height + "&mode=crop";
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&h=" + height + "&mode=crop&format=jpg";
                 },
                 //repDate(svalue, evalue) {
                 //    this.eDate = evalue;
