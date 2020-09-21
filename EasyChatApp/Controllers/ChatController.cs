@@ -180,7 +180,17 @@ namespace EasyChatApp.Controllers
                 if (string.IsNullOrEmpty(messageId))
                 {
                     //thoi diem hien tai ve sau
-                    var count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName);
+                    long count = 0;
+                    if(startDate > 0)
+                    {
+                        long _count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName && o.Time < startDate);
+                        count = _count;
+                    }
+                    else
+                    {
+                        long _count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName);
+                        count = _count;
+                    }
                     response.Code = 200;
                     response.Message = "SUCCESS";
                     if (count == 0)
@@ -190,16 +200,10 @@ namespace EasyChatApp.Controllers
                     else
                     {
                         if (pageSize == 0) pageSize = 10;
-                        if(count <= pageSize)
-                        {
-                            var data = _messagerService.CreateQuery().Find(o => o.GroupId == groupName).ToList();
-                            response.Data = data;
-                        }
-                        else
-                        {
-                            var data = startDate > 0
+
+                        var data = startDate > 0
                                 ? // lấy thông tin mới nhất
-                                _messagerService.CreateQuery().Find(o => o.Time <= startDate && o.GroupId == groupName)?
+                                _messagerService.CreateQuery().Find(o => o.Time < startDate && o.GroupId == groupName)?
                                 .Skip(pageIndex * pageSize)?
                                 .Limit(pageSize)?
                                 .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList()
@@ -208,8 +212,8 @@ namespace EasyChatApp.Controllers
                                 .Skip(pageIndex * pageSize)?
                                 .Limit(pageSize)?
                                 .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList();
-                            response.Data = data;
-                        }
+                        response.Data = data;
+
                     }
                 }
                 else

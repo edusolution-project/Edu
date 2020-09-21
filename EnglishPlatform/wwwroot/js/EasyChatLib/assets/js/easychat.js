@@ -35,20 +35,22 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
     }
     EasyChat.OpenMessageBox = function(self){
+        //debugger;
         var parent = self.parentElement;
         var root = getRoot();
         if(!self.classList.contains('active'))
         {
+            var listmessage = root.querySelector('.list-messages');
+            if(listmessage){
+                listmessage.innerHTML ="";
+            }
             pageIndex= 0;
+            time = 0;
             var active = parent.querySelector('.active');
             if(active){
                 active.classList.remove("active");
             }
             self.classList.add("active");
-            var listmessage = root.querySelector('.list-messages');
-            if(listmessage){
-                listmessage.innerHTML ="";
-            }
             var boxMessage = root.querySelector('.easy-chat__content--right');
             if(boxMessage){
                 boxMessage.querySelector('.contact-info .avatar>img').src = self.querySelector(".contact-info .avatar>img").src;
@@ -56,10 +58,10 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
 
                 //console.log(self.dataset);
                 if(self.dataset.group == "true"){
-                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,self.dataset.id,"");
+                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,self.dataset.id,"",0,0);
                 }
                 else{
-                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,"",self.dataset.id);
+                    loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,"",self.dataset.id,0,0);
                 }
 
                 boxMessage.classList.add('open');
@@ -70,8 +72,30 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             gotoBottom();
         }
     }
-    
-    var loadMessage = function(center,user,groupId,receiver){
+    var isLoad = false;
+    var createURLloadMessage = function(user,groupId,receiver,start,page){
+        if(start && page){
+            return __defaulConfig.extendsUrl.GetMessage
+            .replace("{user}",user)
+            .replace("{receiver}",receiver)
+            .replace("{groupId}",groupId)
+            .replace("{messageId}","")
+            .replace("{startDate}",start)
+            .replace("{pageIndex}",page)
+            .replace("{pageSize}",pageSize)
+        }
+        else{
+            return __defaulConfig.extendsUrl.GetMessage
+            .replace("{user}",user)
+            .replace("{receiver}",receiver)
+            .replace("{groupId}",groupId)
+            .replace("{messageId}","")
+            .replace("{startDate}",time)
+            .replace("{pageIndex}",pageIndex)
+            .replace("{pageSize}",pageSize)
+        }
+    }
+    var loadMessage = function(center,user,groupId,receiver,start,page){
         //{pageIndex}&pageSize={pageSize}
         var ajax = new Ajax();
         //var listMessage = getRoot().querySelector(".list-messages");
@@ -79,27 +103,27 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         // if(listMessage.children.length > 0){
         //     startDate = parseFloat(listMessage.children[0].querySelector("time").dataset.time);
         // }
-        var url = __defaulConfig.extendsUrl.GetMessage
-            .replace("{user}",user)
-            .replace("{receiver}",receiver)
-            .replace("{groupId}",groupId)
-            .replace("{messageId}","")
-            .replace("{startDate}",0)
-            .replace("{pageIndex}",pageIndex)
-            .replace("{pageSize}",pageSize);
-
-        ajax.proccessData("POST",url,null).then(function(res){
-            var dataJson = typeof(res) == "string" ? JSON.parse(res) : res;
-            if(dataJson != null && dataJson.code == 200){
-                var data = dataJson.data;
-                if(data != null && data.length > 0){
-                    //console.log(data);
-                    renderMessage(data,groupId,receiver,user);
-                    pageIndex++;
+        var url = createURLloadMessage(user,groupId,receiver,start,page);
+        if(start && page){
+            isLoad = false;
+        }
+        if(!isLoad){
+            isLoad = true;
+            ajax.proccessData("POST",url,null).then(function(res){
+                var dataJson = typeof(res) == "string" ? JSON.parse(res) : res;
+                if(dataJson != null && dataJson.code == 200){
+                    var data = dataJson.data;
+                    if(data != null && data.length > 0){
+                        //console.log(data);
+                        renderMessage(data,groupId,receiver,user);
+                        pageIndex++;
+                        isLoad = false;
+                    }
                 }
-            }
-        });  
-        
+            }).finally(function(){
+                isLoad = false;
+            });  
+        }
     }
 
 
@@ -118,7 +142,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         // time: 1600099668.5038116
         var groupMessages = [];
         var html = "";
-        var senderCurrent = "",time=0;
+        var senderCurrent = "";
         for(var i = 0; data != null && i < data.length ; i++){
             var message = data[i];
             var sender = message.sender;
@@ -126,9 +150,8 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             var isMaster = sender == __defaulConfig.currentUser.id;
             //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
             var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            if((senderCurrent == "" || senderCurrent == sender)||(time == 0 || (message.time - time)/(60*24*60*60)<=23)){
+            if((senderCurrent == "" || senderCurrent == sender)||(time == 0 || (message.time - time)/(60*24*60*60)<=2)){
                 senderCurrent = sender;
-                time = message.time;
                 groupMessages.push(message);
                 if(i == data.length-1){
                     html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
@@ -138,6 +161,11 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             else{
                 html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
                 groupMessages =[];
+            }
+            console.table({mt : message.time, time : time});
+            if(time == 0 || time < message.time){
+                time = message.time;
+                
             }
             //console.log(senderInfo);
             //console.log(message.id,isMaster,isPrivate);
@@ -256,12 +284,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 listmessage.addEventListener('scroll',function(e){
                     //console.log(e.target.scrollTop);
                     var top = e.target.scrollTop;
-                    if(top == 0){
+                    if(top <= 20){
                         //add element load
-                        if(isDone){
-                            //ko load quá nhiều lần
-                            isDone = false;
-                            var root = getRoot();
+                        var root = getRoot();
                             var parent = root.querySelector('.easy-chat__content .list-contact');
                             //set time out // remove element load
                             var active = parent.querySelector('.active');
@@ -272,12 +297,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                                 else{
                                     loadMessage(__defaulConfig.center,__defaulConfig.currentUser.id,"",active.dataset.id);
                                 }
-                                //loadMessage(__defaulConfig.center,)
-                                //__MESSAGE.Get(active.dataset.id);
-                                //then isDone = true;
-                                isDone = true;
                             }
-                        }
                         //e.target.removeEventListener('scroll')
                     }
                 });
