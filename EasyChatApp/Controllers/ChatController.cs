@@ -179,42 +179,13 @@ namespace EasyChatApp.Controllers
                 }
                 if (string.IsNullOrEmpty(messageId))
                 {
-                    //thoi diem hien tai ve sau
-                    long count = 0;
-                    if(startDate > 0)
-                    {
-                        long _count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName && o.Time < startDate);
-                        count = _count;
-                    }
-                    else
-                    {
-                        long _count = _messagerService.CreateQuery().Count(o => o.GroupId == groupName);
-                        count = _count;
-                    }
                     response.Code = 200;
                     response.Message = "SUCCESS";
-                    if (count == 0)
-                    {
-                        response.Data = null;
-                    }
-                    else
-                    {
-                        if (pageSize == 0) pageSize = 10;
+                    //thoi diem hien tai ve sau
+                    var listData = _messagerService.CreateQuery().Find(o => o.GroupId == groupName)?.SortByDescending(o=>o.Time)?.Skip(pageSize*pageIndex)?
+                        .Limit(pageSize)?.ToList()?.OrderBy(o=>o.Time)?.ToList();
 
-                        var data = startDate > 0
-                                ? // lấy thông tin mới nhất
-                                _messagerService.CreateQuery().Find(o => o.Time < startDate && o.GroupId == groupName)?
-                                .Skip(pageIndex * pageSize)?
-                                .Limit(pageSize)?
-                                .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList()
-                                : // lấy thong tin cũ hơn
-                                _messagerService.CreateQuery().Find(o => o.GroupId == groupName)?
-                                .Skip(pageIndex * pageSize)?
-                                .Limit(pageSize)?
-                                .SortByDescending(o => o.Time)?.ToList()?.OrderBy(o => o.Time)?.ToList();
-                        response.Data = data;
-
-                    }
+                    response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
                 }
                 else
                 {

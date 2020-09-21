@@ -19,7 +19,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         groups:[{id:"test4",name:"group"}]
     };
     var __MESSAGE = message,__MEMBER = member, __GROUP = group,__CURRENTUSER={},__SIGNALR = signalR;
-    var time = 0,pageIndex=0,pageSize=10;
+    var time = 0,pageIndex=0,pageSize=10,isDataNull=false;
     function EasyChat(){
     }
     window.EasyChat = EasyChat;
@@ -44,6 +44,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             if(listmessage){
                 listmessage.innerHTML ="";
             }
+            isDataNull= false;
             pageIndex= 0;
             time = 0;
             var active = parent.querySelector('.active');
@@ -107,17 +108,22 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         if(start && page){
             isLoad = false;
         }
-        if(!isLoad){
+        if(!isLoad && !isDataNull){
             isLoad = true;
             ajax.proccessData("POST",url,null).then(function(res){
                 var dataJson = typeof(res) == "string" ? JSON.parse(res) : res;
                 if(dataJson != null && dataJson.code == 200){
                     var data = dataJson.data;
-                    if(data != null && data.length > 0){
+                    if(data != null){
                         //console.log(data);
-                        renderMessage(data,groupId,receiver,user);
-                        pageIndex++;
+                        var objData = data.data;
+                        isDataNull = objData == null || objData.length <= 0;
+                        renderMessage(objData,groupId,receiver,user);
+                        pageIndex = objData ==null || objData.length == 0 ? pageIndex : data.pageIndex;
                         isLoad = false;
+                    }
+                    else{
+                        isDataNull = true;
                     }
                 }
             }).finally(function(){
@@ -162,13 +168,6 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
                 groupMessages =[];
             }
-            console.table({mt : message.time, time : time});
-            if(time == 0 || time < message.time){
-                time = message.time;
-                
-            }
-            //console.log(senderInfo);
-            //console.log(message.id,isMaster,isPrivate);
         }
         
         var listmessage = getRoot().querySelector('.list-messages');
@@ -284,7 +283,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 listmessage.addEventListener('scroll',function(e){
                     //console.log(e.target.scrollTop);
                     var top = e.target.scrollTop;
-                    if(top <= 20){
+                    if(top <= 5){
                         //add element load
                         var root = getRoot();
                             var parent = root.querySelector('.easy-chat__content .list-contact');
