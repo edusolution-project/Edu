@@ -43,11 +43,10 @@ namespace EasyChatApp
             for (int  i =  0; groupNames != null && i < groupNames.Count; i++)
             {
                 var groupName = groupNames[i];
+                await Groups.AddToGroupAsync(connectionId, groupName);
                 // neu chua ton tai thi add join group
                 if (!_groupToUsers.GetGroupConnections(user).Contains(groupName))
                 {
-                    //add to group
-                    await Groups.AddToGroupAsync(connectionId, groupName);
                     // tao khi join vao group lan dau
                     await _groupAndUserService.CreateTimeJoin(groupName, user);
                 }

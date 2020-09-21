@@ -115,33 +115,33 @@ namespace EnglishPlatform.Controllers
                         for(int  i = 0; i < classNames.Count; i++)
                         {
                             string className = classNames[i];
-                            var listStudent = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
-                            if (listStudent != null && listStudent.Count > 0)
-                            {
-                                listStudentOnClass.AddRange(listStudent);
-                            }
+                            var listData = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
+                            listStudentOnClass.AddRange(listData);
                         }
-                        
                         if (listStudentOnClass != null && listStudentOnClass.Count > 0)
                         {
-                            HashSet<StudentEntity> students = new HashSet<StudentEntity>(listStudentOnClass);
-                            var listClass = students?.Select(o => new MemberInfo()
+                            var listData = new List<MemberInfo>();
+                            for(int i = 0; i < listStudentOnClass.Count; i++)
                             {
-                                ID = o.ID,
-                                Name = o.FullName
-                            })?.ToList();
-
-                            return listClass;
+                                var item = listStudentOnClass[i];
+                                var member = new MemberInfo() { ID = item.ID, Name = item.FullName };
+                                var check = listData.Where(o => o.ID == member.ID);
+                                if (check.Count() == 0)
+                                {
+                                    listData.Add(member);
+                                }
+                            }
+                            return listData;
                         }
                     }
                 }
 
+                return new List<MemberInfo>();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _log.Error(MethodBase.GetCurrentMethod().Name, ex);
+                return null;
             }
-            return null;
         }
 
         [HttpPost]

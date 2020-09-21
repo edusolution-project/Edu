@@ -21,11 +21,11 @@
     <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
     <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
     <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
-
+    <link href="~/js/lib/notification/notification.css" rel="stylesheet" />
+    <script src="~/js/lib/notification/notification.js"></script>
     <script type="text/javascript">
         const g_CurrentUser = {
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
@@ -37,7 +37,7 @@
     </script>
 </head>
 <body>
-   
+
     <style>
         ::-webkit-scrollbar {
             width: 5px; /* for vertical scrollbars */
@@ -92,7 +92,7 @@
             }
         }
     </style>
-    <main id="main">        
+    <main id="main">
         @await Html.PartialAsync("_sideBarStudentNewUI")
         @RenderBody()
         <aside class="sidebar" id="sidebar_right">
@@ -230,7 +230,6 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @await Html.PartialAsync("_EasyRealtime")
     <script>
         var currentDateCalendar = '';
         var clLoadMore = "cl-load-more";
@@ -344,6 +343,7 @@
             loadCalendar(startTimePre);
         }
     </script>
+    @await Html.PartialAsync("_EasyChat")
 </body>
 </html>
 

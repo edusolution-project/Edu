@@ -219,6 +219,10 @@ div[data-status="offline"]::before{
     padding: 0 5px;
     font-size: 0.65em;
     font-weight: bold;
+    display: none;
+}
+.item-contact .noti.open{
+    display: block;
 }
 .easy-chat__ball {
     position: fixed;

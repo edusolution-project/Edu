@@ -90,18 +90,16 @@ namespace EasyChatApp.Controllers
                 _messagerService.CreateOrUpdate(item);
                 if (!string.IsNullOrEmpty(model.groupId))
                 {
-                    await _hubContext.Clients.Group(model.groupId).SendAsync("ReceiverMessage", item);
+                    await _hubContext.Clients.Group(model.groupId).SendAsync("ReceiverMessage", item,null,model.groupId);
                 }
                 else
                 {
                     var usersConnections = EasyChatHub.UserMap;
                     var connestionIds = usersConnections.GetGroupConnections(model.receiver);
-                    for(var i = 0; connestionIds != null && i < connestionIds.Count(); i++)
+                    if(connestionIds != null && connestionIds.Count() > 0)
                     {
-                        string connectionId = connestionIds.ElementAt(i);
-                        await _hubContext.Clients.User(connectionId).SendAsync("ReceiverMessage", item);
+                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item,model.user,null);
                     }
-                    
                 }
                 response.Code = 200;
                 response.Data = item;

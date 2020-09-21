@@ -20,7 +20,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     };
     var __MESSAGE = message,__MEMBER = member, __GROUP = group,__CURRENTUSER={},__SIGNALR = signalR;
     var time = 0,pageIndex=0,pageSize=10,isDataNull=false;
+    var _notification;
     function EasyChat(){
+        _notification = new notification(); 
     }
     window.EasyChat = EasyChat;
     var _mergeConfig = function(config){
@@ -68,10 +70,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 boxMessage.classList.add('open');
             }
         }
-        else{
-            updateTimeLife();
-            gotoBottom();
-        }
+        resetItemNoti(self.dataset.id);
     }
     var isLoad = false;
     var createURLloadMessage = function(user,groupId,receiver,start,page){
@@ -118,7 +117,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                         //console.log(data);
                         var objData = data.data;
                         isDataNull = objData == null || objData.length <= 0;
-                        renderMessage(objData,groupId,receiver,user);
+                        renderMessage(objData,false);
                         pageIndex = objData ==null || objData.length == 0 ? pageIndex : data.pageIndex;
                         isLoad = false;
                     }
@@ -134,7 +133,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
 
 
 
-    var renderMessage = function(data){
+    var renderMessage = function(data,isUpdate){
         // ID: "5f5f955706ff552e60156389"
         // content: "jshdgfdjfgfdghsdjhgfsfskdfjdghsfhsfsdf"
         // data: Array(1)
@@ -156,8 +155,10 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             var isMaster = sender == __defaulConfig.currentUser.id;
             //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
             var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            if((senderCurrent == "" || senderCurrent == sender)||(time == 0 || (message.time - time)/(60*24*60*60)<=2)){
+            if(senderCurrent == ""){
                 senderCurrent = sender;
+            }
+            if((senderCurrent == sender)){
                 groupMessages.push(message);
                 if(i == data.length-1){
                     html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
@@ -165,13 +166,17 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 }
             }
             else{
+                if(groupMessages.length == 0){
+                    groupMessages.push(message);
+                }
+                senderCurrent = sender;
                 html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
                 groupMessages =[];
             }
         }
         
         var listmessage = getRoot().querySelector('.list-messages');
-        if(pageIndex == 0){
+        if(pageIndex == 0 || isUpdate){
             listmessage.innerHTML += html;
             listmessage.scrollTo(0,listmessage.scrollHeight);
         }
@@ -273,6 +278,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 ball.addEventListener('click',function(){
                     if(content){
                         content.classList.toggle('open');
+                        resetBoxNoti();
                     }
                 });
             }
@@ -332,12 +338,12 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 var textArea = formChat.querySelector('textarea');
                 if(textArea){
                     var keyHove = "",valueMessage = "";
-                    textArea.onkeydown =function(e){
+                    textArea.addEventListener('keydown',function(e){
                         valueMessage = textArea.value;
                         if(keyHove == "") keyHove = e.key;
                         //console.log("keydow",e.key);
-                    };
-                    textArea.onkeyup = function(e){
+                    });
+                    textArea.addEventListener('keyup',function(e){
                         if(keyHove == 'Shift' && e.key == "Enter"){
                             // xong dong
                             console.log('xuong dong');
@@ -352,12 +358,24 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                                 SendMessage();
                             }
                         }
-                    };
+                    });
+                    textArea.onfocus = function(){
+                        var active =getRoot().querySelector('.item-contact.active');
+                        if(active){
+                            resetItemNoti(active.dataset.id);
+                        }
+                    }
                 }
                 var inputFiles = formChat.querySelector('input[type="file"]');
                 var btnImage = formChat.querySelector('[id="ec-add-image"]');
                 var btnVideo = formChat.querySelector('[id="ec-add-video"]');
                 var btnFile = formChat.querySelector('[id="ec-add-file"]');
+                var btnSend = formChat.querySelector('.btn-send');
+                if(btnSend){
+                    btnSend.addEventListener('click',function(){
+                        SendMessage();
+                    });
+                }
                 btnImage.addEventListener('click',function(){
                     inputFiles.setAttribute('accept',"image/*");
                     inputFiles.click();
@@ -461,9 +479,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
         catch (ex) {
             console.log(ex);
-            //setTimeout(function(){
-            //    ConnectHub();
-            //},5000);
+            setTimeout(function(){
+               ConnectHub();
+            },5000);
         }
     }
     //hứng thông tin từ client
@@ -472,12 +490,92 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         //update connection for user.
     })
     __SIGNALR.onclose(function(){
-        //ConnectHub();
+        ConnectHub();
     });
 
-    __SIGNALR.on("ReceiverMessage",function(data){
-        console.log("ReceiverMessage",data);
-    });
+    __SIGNALR.on("ReceiverMessage",function(data,receiver,groupId){
 
+        var id = receiver??groupId;
+        var active = getRoot().querySelector("[data-id='"+id+"']");
+        if(active){
+            if(active.classList.contains("active")){
+                renderMessage([data],true);
+            }
+        }
+        showNoti([id]);
+    });
+    var showNoti = function(data){
+        setNotiCount(data);
+        try{
+            if(_notification){
+                var el = _notification.show({
+                    type: "success",
+                    msg: "bạn có "+data.length+" tin nhắn",
+                    timeOut: 10000
+                });
+                el.addEventListener("click",function(){
+                    var content = getRoot().querySelector('.easy-chat__content');
+                    if(!content.classList.contains("open")){
+                        content.classList.add('open');
+                    }
+                });
+            }
+        }catch(ex){
+            console.log(ex);
+        }
+    }
+    var setNotiCount = function(data){
+        var boxNoti = getRoot().querySelector('.easy-chat__ball .box-noti');
+        if(boxNoti){
+            var noti = boxNoti.querySelector('.noti');
+            if(noti){
+            noti.innerHTML = data.length > 100 ? "99+" : data.length+"";
+            boxNoti.classList.add('open');}
+        }
+        var contact = getRoot().querySelector('.list-contact');
+        if(contact){
+            for(var i = 0; i < data.length;i++){
+                var id = data[0];
+                var item = contact.querySelector('[data-id="'+id+'"]');
+                if(item){
+                    var noti = item.querySelector('.noti');
+                    if(noti){
+                        noti.innerHTML = "!";
+                        noti.classList.add('open');
+                        contact.insertBefore(item,contact.children[0]);
+                    }
+                }
+            }
+        }
+    }
+    var resetItemNoti = function(id){
+        var item = getRoot().querySelector('[data-id="'+id+'"]');
+        if(item){
+            var noti = item.querySelector('.noti');
+            if(noti){
+                noti.innerHTML = "";
+                noti.classList.remove('open');
+            }
+        }
+        checkNotiShowHide();
+    }
+    var resetBoxNoti = function(){
+        var boxNoti = getRoot().querySelector('.easy-chat__ball .box-noti');
+        if(boxNoti){
+            var noti = boxNoti.querySelector('.noti');
+            if(noti){
+            noti.innerHTML = "";
+            boxNoti.classList.remove('open');}
+        }
+    }
+    var checkNotiShowHide = function(){
+        var contact = getRoot().querySelector('.list-contact');
+        if(contact){
+            var list = contact.querySelectorAll('.noti.open');
+            if(list == null || list.length <= 0){
+                resetBoxNoti();
+            }
+        }
+    }
     return EasyChat;
 }(new Message(), new Member(), new Group(), connectionHubChat,ui))

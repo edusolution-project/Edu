@@ -97,7 +97,7 @@
         if(!data.avatar){
             data.avatar = isGroup ? _config.image : _config.avatar;
         }
-        return '<div class="item-contact" title="'+data.name+'" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div></div>';
+        return '<div class="item-contact" title="'+data.name+'" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div><div class="noti"></div></div>';
     }
     var renderListItemContact = function(data,isGroup,callBack){
         var html = '';
