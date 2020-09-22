@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using Core_v2.Interfaces;
 using EasyChatApp.DataBase;
@@ -26,9 +27,11 @@ namespace EasyChatApp.Controllers
         private readonly GroupUserService _groupUserService;
         private readonly MessagerService _messagerService;
         private readonly IConfiguration _configuration;
+        private readonly GroupAndUserService _groupAndUserService;
         public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext , IConfiguration configuration
             , GroupUserService  groupUserService
-            , MessagerService messagerService)
+            , MessagerService messagerService,
+            GroupAndUserService groupAndUserService)
         {
             this._log = log;
             _roxyFilemanHandler = roxyFilemanHandler;
@@ -36,6 +39,7 @@ namespace EasyChatApp.Controllers
             _groupUserService = groupUserService;
             _messagerService = messagerService;
             _configuration = configuration;
+            _groupAndUserService = groupAndUserService;
         }
         /// <summary>
         /// 
@@ -215,11 +219,31 @@ namespace EasyChatApp.Controllers
         public string ScriptEasyChat()
         {
             string host = _configuration.GetSection("EasyChat:Host").Value;
+            string urlNoti = host + "/Chat/GetNotifications?user={user}&groupNames={groupNames}";
             string urlSend = host + "/Chat/SendMessage";
             string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
             string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&pageIndex={pageIndex}&pageSize={pageSize}";
-            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "'}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "'}";
             return value;
+        }
+        [HttpGet]
+        public List<string> GetNotifications(string user, string groupNames)
+        {
+            List<string> groups = groupNames.Split(',')?.ToList();
+            var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o=>o.ID)?.ToList();
+            if (listPrivateGroups == null) { listPrivateGroups = new List<string>(); }
+            if (groups == null) return null;
+            var listTime = _groupAndUserService.CreateQuery().Find(o => o.UserID == user && groups.Contains(o.GroupID))?.ToList();
+            if(listTime != null)
+            {
+                
+                var times = listTime.Select(o => o.TimeLife)?.ToList();
+                double max = times.Max();
+                var messages = _messagerService.CreateQuery().Find(o => o.Time >= max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId)) && o.Sender != user)?.ToList();
+                return messages.Select(o => o.GroupId)?.ToList();
+            }
+
+            return null;
         }
     }
     public class ChatModel

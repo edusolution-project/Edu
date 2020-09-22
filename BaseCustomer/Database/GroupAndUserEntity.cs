@@ -27,6 +27,7 @@ namespace BaseCustomerEntity.Database
 
         }
 
+
         [Obsolete]
         public async Task CreateTimeJoin(string groupName, string userid)
         {

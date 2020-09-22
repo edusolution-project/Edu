@@ -236,6 +236,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             __MEMBER.Create(__defaulConfig.url.member.getlist,listString).then(function(){
                 renderHTML();
                 ConnectHub();
+                getNoti();
             });
         });
     }
@@ -504,6 +505,20 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
         showNoti([id]);
     });
+    var getNoti = function(){
+        var ajax = new Ajax();
+        //"https://localhost:44374/Chat/GetNotifications?user={user}&groupNames={groupNames}"
+        var array = __GROUP.GetAll().map(function(value){ return value.id;});
+        var url = __defaulConfig.extendsUrl.GetNoti.replace("{user}",__defaulConfig.currentUser.id).replace("{groupNames}",array.toString());
+        //proccess = function (method, url, data, async) 
+        ajax.proccess("GET", url, null, false).then(function(data){
+            var objData = typeof(data) == "string" ? JSON.parse(data) : data;
+            if(objData != null && objData.length > 0){
+                showNoti(objData);
+            }
+        });
+
+    }
     var showNoti = function(data){
         setNotiCount(data);
         try{
@@ -511,7 +526,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 var el = _notification.show({
                     type: "success",
                     msg: "bạn có "+data.length+" tin nhắn",
-                    timeOut: 10000
+                    timeOut: 5000
                 });
                 el.addEventListener("click",function(){
                     var content = getRoot().querySelector('.easy-chat__content');
