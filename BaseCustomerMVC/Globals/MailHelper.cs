@@ -1,4 +1,5 @@
 ﻿using BaseCustomerEntity.Database;
+using BaseCustomerMVC.Models;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
@@ -130,6 +131,29 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.REGISTER, bccAddressses: new List<string> { _defaultSender });
         }
 
+        public async Task SendStudentJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)
+        {
+            string subject = "";
+            string body = "Chào " + Name + ",";
+            if (!String.IsNullOrEmpty(VisiblePassword))//register
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành học viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm học viên của <b>" + centerName + "</b>!</p>" +
+                "<p>Thông tin đăng nhập như sau</p>" +
+                "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
+                "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            else
+            {
+                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
+                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            }
+            var toAddress = new List<string> { Email };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.STUDENT_JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
+        }
+
         public async Task SendResetPassConfirm(AccountEntity user, string resetLink = "", string OTP = "")
         {
             try
@@ -206,6 +230,28 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
+        public async Task SendTeacherJoinClassNotify(TeacherSubjectsViewModel TC, ClassEntity @class, string CenterName)
+        {
+            string subject = "Thông báo phân công giảng dạy - " + CenterName;
+            string body = "Chào " + TC.FullName + ",";
+
+            body += "<p>Bạn vừa được phân công dạy lớp <b>" + @class.Name + "</b> tại <b>" + CenterName + "</b><p>";
+            body += "<p>Thời gian mở lớp từ: <b>" + @class.StartDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + @class.EndDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b><p>";
+            body += "<p>Các môn được phân công: <br/>";
+
+            if (TC.SubjectList == null || TC.SubjectList.Count == 0) return;
+
+            foreach (var item in TC.SubjectList)
+            {
+                body += (". " + item.SkillName + " (" + item.BookName + ")<br/>");
+            }
+
+            body += "</p>";
+            body += "<p>Quản lý lớp tại <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            var toAddress = new List<string> { TC.Email };
+            _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
+        }
+
         public async Task SendStudentJoinClassNotify(string StudentName, string Email, string VisiblePassword, string ClassName, DateTime startdate, DateTime enddate, String CenterName)
         {
             string subject = "Thông báo đăng ký học thành công - " + CenterName;
@@ -214,7 +260,7 @@ namespace BaseCustomerMVC.Globals
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
                 subject = "Chúc mừng " + StudentName + " đã trở thành học viên của " + CenterName;
-                body = "<p>Bạn vừa đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
+                body = "<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
                 "<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>" +
                 "<br/>" +
                 "<p>Thông tin đăng nhập của bạn</p>" +
@@ -225,7 +271,7 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                body += ("<p>Bạn vừa được đăng ký học lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
+                body += ("<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
                 body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
             }

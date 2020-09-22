@@ -4,6 +4,9 @@
     Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
     var myClasses = ViewBag.AllClass as List<BaseCustomerEntity.Database.ClassEntity>;
     var owner = ViewBag.User as string;
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    var isHeadteacher = ViewBag.IsHeadTeacher ?? false;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -26,64 +29,111 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-header" v-cloak>
-        <div class="flex border-b flex-wrap align-items-center">
-            <div class="box filter-box m-1 col-12 col-md-3">
-                <select v-model="range">
-                    <option value="">-- Chọn phạm vi chia sẻ --</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                </select>
+    <div class="card-header border-b" v-cloak>
+        <div class="flex flex-wrap align-items-center">
+
+            <div class="tab bg-none col-md-12 m-1">
+                <ul class="flex flex-row">
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu thường" v-on:click="tabChange(0)">Học liệu thường</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Học liệu tương tác" v-on:click="tabChange(1)">Học liệu tương tác</a></li>
+                </ul>
             </div>
-            <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-                <select v-model="target">
-                    <option value="">-- Chọn lớp --</option>
-                    @if (myClasses != null && myClasses.Count > 0)
-                    {
-                        foreach (var _class in myClasses)
-                        {
-                            <option value="@_class.ID">@_class.Name</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="search-box m-1 col-12 col-md-3">
+        </div>
+        <div class="col-md-12 form-row pb-2">
+            <div class="search-box m-1 col-12 col-md-2 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
-            <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
+            <template v-if="tab[0]">
+                <div class="box filter-box m-1 col-12 col-md-2">
+                    <select v-model="range">
+                        <option value="">-- Chọn phạm vi chia sẻ --</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.TEACHER">Tất cả lớp phụ trách</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                    </select>
+                </div>
+
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="subjectID">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="gradeID">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subjectID">{{item.Name}}</option>
+                    </select>
+                </div>
+
+                <div class="box filter-box m-1 col-12 col-md-3" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                    <select v-model="target">
+                        <option value="">-- Chọn lớp --</option>
+                        @if (myClasses != null && myClasses.Count > 0)
+                        {
+                            foreach (var _class in myClasses)
+                            {
+                                <option value="@_class.ID">@_class.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <b-button class="btn-addevent col-12 col-md-2 ml-auto" v-on:click="showAddModal()" style="float:right"><i class="ti-plus"></i></b-button>
+            </template>
         </div>
     </div>
-    <div class="card-body" v-cloak>
+    <div class="card-body pt-2" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
-            <div class="col-md-12" v-for="data in tableData">
-                <div class="inner flex">
-                    <a href="#" title="" class="thumb">
-                        <img :src="data.Image" alt="" v-if="data.Image != null">
-                        <img src="/pictures/doc1.png" alt="" v-else>
-                    </a>
-                    <div class="entry">
-                        <div>
+            <div class="col-md-6" v-for="data in tableData">
+                <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+
+                    <template v-if="tab[0]">
+                        <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                        </a>
+                        <div class="entry p-0">
                             <div>
-                                <a href="#" title="" class="title">{{data.Title}}</a>
+                                <div>
+                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="title">{{data.Title}}</a>
+                                </div>
+                            </div>
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                             </div>
                             <div>
-                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                <a href="#docsnormal" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#docsnormal" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                <a href="#docsnormal" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                <a href="#docsnormal" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                <a href="#docsnormal" title="Sửa" class="text-secondary mr-2" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'"><i class="fas fa-edit font-weight-bold"></i></a>
                             </div>
                         </div>
-                        <div class="pt-2 pb-2">
-                            <p>{{domDecoder(data.Description)}}</p>
+                    </template>
+
+                    <template v-else>
+                        <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                        </a>
+                        <div class="entry p-0">
+                            <div>
+                                <div>
+                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="title">{{data.Name}}</a>
+                                </div>
+                            </div>
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                            </div>
+                            <div>
+                                <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="fas fa-cloud-download-alt"></i> Xem chi tiết</a>
+                            </div>
                         </div>
-                        <div>
-                            <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                            <a href="#" title="Xem trước" class="btn-view btn-success" v-on:click="showPreview(data.Media.Path)" v-if="data.Media != null && isDocType(data.Media.Path) != null">Xem trước file</a>
-                            <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
-                            <a href="#" title="Xóa" class="btn-view btn-danger" v-on:click="deleteData(data)" v-if="data.OwnerID == '@owner'">Xóa</a>
-                            <a href="#" title="Sửa" class="btn-view btn-secondary" v-on:click="showAddModal(data)" v-if="data.OwnerID == '@owner'">Sửa</a>
-                        </div>
-                    </div>
+
+                    </template>
+
+
                 </div>
             </div>
             <div class="row ls-doc text-center d-block" v-else>
@@ -115,9 +165,29 @@
     <script>
         Vue.use(VueQuillEditor)
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
-                this.getData()
+                this.getData();
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                this.getMyClass();
+                window.changeAddSubject = this.changeAddSubject;
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'docsnormal':
+                            this.tabChange(0);
+                            break;
+                        case 'docsinteractive':
+                            this.tabChange(1);
+                            break;
+                    }
+                }
+                else {
+                    this.tabChange(0);
+                }
             },
             components: {
           	    LocalQuillEditor: VueQuillEditor.quillEditor
@@ -134,41 +204,104 @@
                 view: 30,
                 totalRec: 0,
                 page: 1,
+                HTMLContent: '',
                 addItem: {
-                            ID: '',
-                            Title: '',
-                            Range: '',
-                            Link: '',
-                            Target: '',
-                            Description: '',
-                            FileName: '',
-                            file: null,
-                            coverName:'',
-                            cover:null,
+                    ID: '',
+                    Title: '',
+                    Range: '',
+                    Link: '',
+                    Target: '',
+                    Description: '',
+                    FileName: '',
+                    file: null,
+                    coverName: '',
+                    cover: null,
+                    Image: '',
+                    subjectID: '',
+                    gradeID: '',
+                    isDownload: false,
+                    tags: '',
+                    isCheckDownload: false
                 },
-                allow_doc_ext: [
-                    ".doc", ".docx", ".ppt",".pptx",".pdf",".xls", ".xlsx"
+                linkFile: '',
+                typeFile:[
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "application/pdf",
+                    "application/vnd.ms-powerpoint",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
                 ],
-                linkFile:'',
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                title: '',
+                subject: '',
+                grade: '',
+                list_subject: [],
+                list_grades_full: [],
+                subjectID: '',
+                gradeID: '',
+                tab: [true, false],
+                isInteractive: false,//mặc định là false=tài liệu thường,
+                docsInteractive: {
+                    Name: '',
+                    ListChapters: [],
+                    ListClasses: [],
+                    Image: '',
+                    Creator: '',
+                    ClassID: ''
+                },
+                isCreateNewClass: false,
+                newClass: {
+                    Name: '',
+                    StartDate: '',
+                    EndDate: '',
+                    Description:''
+                }
             },
             watch : {
                 searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
+                    if (this.tab[1])
+                        fn = this.getMyClass
                     this.searchTimeout = setTimeout(function(){
                         fn()
                     }, 500)
+                },
+                subject: function () {
+                    this.getData()
+                },
+                grade: function () {
+                    this.getData()
                 },
                 range: function(){
                     this.getData()
                 },
                 target: function(){
                     this.getData()
+                },
+                gradeID: function () {
+                    this.getData()
+                },
+                subjectID: function () {
+                    this.getData()
+                },
+                "docsInteractive.ClassID": function () {
+                    debugger
+                    if (this.docsInteractive.ClassID=="true") {
+                        this.isCreateNewClass = true
+                        //alert(this.docsInteractive.NewClass)
+                    } else {
+                        this.isCreateNewClass = false
+                    }
+                    //debugger
                 }
             },
             methods: {
                 getData() {
+                    //console.log(this.list_grades_full);
                     let _that = this
                     let _form = new FormData()
                     _form.append('SearchText', _that.searchTerm)
@@ -176,14 +309,22 @@
                     _form.append('Target', _that.target)
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
-
+                    _form.append('SubjectID', _that.subjectID)
+                    _form.append('isInteractive', _that.isInteractive)
+                    _form.append('basis', '@center')
+                    if (_that.subjectID != '') {
+                        _form.append('GradeID', _that.gradeID)
+                    }
+                    else {
+                        _form.append('GradeID', '')
+                    }
                     let _url = '@processUrl("GetList", "Reference")'
-
                     axios.post(_url, _form)
                         .then(response => {
                             //debugger
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
+                            //debugger
                             this.totalRec = response.data.Model.totalRecord
                             console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
@@ -202,6 +343,13 @@
                         _that.addItem.Description = '';
                         _that.addItem.FileName = '';
                         _that.addItem.coverName = '';
+                        _that.addItem.subjectID = "";
+                        _that.addItem.gradeID = '';
+                        _that.addItem.Image = '';
+                        _that.addItem.isDownload = false;
+                        _that.addItem.Tags = '';
+                        _that.addItem.cover = null;
+                        _that.addItem.isCheckDownload = false;
                     }
                     else {
                         _that.addItem.ID = obj.ID;
@@ -210,18 +358,29 @@
                         _that.addItem.Link = obj.Link;
                         _that.addItem.Description = obj.Description;
                         _that.addItem.Target = obj.Target;
+                        _that.addItem.subjectID = obj.SubjectID;
+                        _that.addItem.gradeID = obj.GradeID;
+                        _that.addItem.isDownload = obj.isDownload;
+                        _that.addItem.tags = obj.Tags;
                         if (obj.Media != null) {
                             _that.addItem.FileName = obj.Media.Name;
+                            _that.addItem.isCheckDownload = true;
                         }
                         else {
                             _that.addItem.FileName = '';
+                            _that.addItem.isCheckDownload = false;
                         }
+                        if (obj.Image != null) {
+                            _that.addItem.Image = obj.Image;
+                            _that.addItem.cover = null;
+                        }
+
                     }
                     _that.addItem.file = {};
                     _that.$bvModal.show('modal_event')
                 },
                 openLink(obj) {
-                    obj.Viewed = obj.Viewed + 1;
+                    obj.Linked = obj.Linked + 1;
                     window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
                 },
                 download(obj) {
@@ -233,7 +392,6 @@
                 updateData() {
                     let _that = this
                     let _form = new FormData()
-
 
                     if (_that.addItem.Title == '') {
                         swal.fire({
@@ -251,6 +409,10 @@
                     _form.append('Name', _that.addItem.Title)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('Range', _that.addItem.Range)
+                    _form.append('subjectID', _that.addItem.subjectID)
+                    _form.append('gradeID', _that.addItem.gradeID)
+                    _form.append('isDownload', _that.addItem.isDownload)
+                    _form.append('Tags', _that.addItem.tags)
 
                     if (_that.addItem.file) {
                         _form.append('fileUpload', this.addItem.file)
@@ -259,12 +421,11 @@
                         _form.append('coverImage', this.addItem.cover)
                     }
 
-                    //debugger
-
-
                     let _url = '@processUrl("Save", "Reference")'
+                    this.isLoading = true;
                     axios.post(_url, _form)
                         .then(response => {
+                            _that.isLoading = false;
                             if (response.Error == null) {
                                 Swal.fire(
                                     'Đã cập nhât!',
@@ -325,16 +486,26 @@
                     var listFiles = $('#modal_event input[type=file]')
 
                     if (listFiles[1].files[0] != null) { //file dinh kem
-                        this.addItem.FileName = listFiles[1].files[0].name
-                        this.addItem.file = listFiles[1].files[0]
+                        if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
+                            this.addItem.FileName = listFiles[1].files[0].name
+                            this.addItem.file = listFiles[1].files[0]
+                            this.addItem.isCheckDownload = true;
+                        }
+                        else {
+                            alert("File không đúng định dạng, chọn lại!")
+                            this.addItem.isCheckDownload = false;
+                            return false;
+                        }
                     }
                     if (listFiles[0].files[0] != null) { //anh dai dien
                         this.addItem.coverName = listFiles[0].files[0].name
                         this.addItem.cover = listFiles[0].files[0]
                     }
-                    //debugger
                 },
                 domDecoder(str) {
+                    if (str == null)
+                        return "";
+                    //console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -347,18 +518,205 @@
                 hideModal() {
                     $('.close').click();
                 },
-                showPreview(link) {
-                    let _that = this;
-                    _that.linkFile = link;
-                    this.linkFile = _that.linkFile;
-                    _that.$bvModal.show('modal_preview')
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
+                    this.HTMLContent = this.renderContent(obj);
+                    this.title = title;
+                    if (this.isMobile())
+                        return this.download(obj);
+                    else
+                        this.$bvModal.show('modal_preview');
+                },
+                renderContent(obj) {
+                    var linkFile = obj.Media.Path;
+                    var html = "";
+                    if (obj.Media.Extension.endsWith('.pdf') || obj.Media.Path.toLowerCase().endsWith('.pdf') || obj.Media.Name.toLowerCase().endsWith('.pdf'))
+                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
+                    else {
+                        if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
+                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
+                    }
+                    let parser = new DOMParser();
+                    let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
+                    return dom.body.innerHTML;
+                },
+                doMainAct(obj) {
+                    if (obj.Media != null && this.isDocType(obj.Media.Extension)) {
+                        this.showPreview(obj)
+                    }
+                    else if (obj.Link != null && obj.Link.length > 0) {
+                        this.openLink(obj)
+                    }
+                    else if (obj.Media != null && obj.isDownload) {
+                        this.download(obj)
+                    }
+                },
+                isMobile() {
+                    var isMobile = false; //initiate as false
+                    // device detection
+                    if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)
+                        || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0, 4))) {
+                        isMobile = true;
+                    }
+                    return isMobile;
                 },
                 isDocType(path) {
                     if (path == null || path == "") return false;
-                    var idx = path.toString().lastIndexOf(".");
-                    if (idx <= 0) return false;
-                    var ext = path.substring(idx, path.length - idx);
-                    return this.allow_doc_ext.findIndex(t => t == ext) >= 0;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
+                },
+                changeAddSubject(obj) {
+                    let _that = this;
+                    //debugger
+                    if (_that.list_grades_full.findIndex(item => obj == item.ID) == -1) {
+                        _that.list_grades_full.forEach(function (sbj) {
+                            //console.log(obj.UID)
+                            if (sbj.ID == obj.UI) {
+                                sbj.GradeID = ''
+                                sbj.CourseID = ''
+                                sbj.TeacherID = ''
+                                sbj.SkillID = ''
+                                return
+                            }
+                        });
+                    }
+                },
+                loadDocsNormal() {
+                    this.getData();
+                    //alert("tai lieu thuong")
+                },
+                loadDocsInteractive() {
+                    this.getData();
+                    //alert("tai lieu tuong tac")
+                },
+                tabChange(a = 0) {
+                    // có thể load data theo từng tab để tối ưu hiệu năng
+                    // this.getData()
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
+                            this.isInteractive = false;
+                            this.loadDocsNormal();
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
+                            this.isInteractive = true;
+                            this.loadDocsInteractive();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                showDocsInteractive(obj) {
+                    let _that = this;
+                    let _form = new FormData();
+                    let _url = '@processUrl("GetCourseDetail", "Curriculum")';
+                    if (obj != null) {
+                        _that.docsInteractive.Name = obj.Name;
+                        _that.docsInteractive.Image = obj.Image;
+                        _that.docsInteractive.Creator = obj.TeacherName;
+                        _that.docsInteractive.ID = obj.ID;
+                        //debugger
+                        _form.append('ID', obj.ID)
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.docsInteractive.ListChapters = response.data.Data.Chapters;
+                                //_that.docsInteractive.ListClasses = response.data.Data.Classes;
+                                //debugger
+                            }).catch(e => { })
+                    }
+                    _that.$bvModal.show('modal_docsinteractive')
+                },
+                getMyClass() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append('Center', '@center')
+                    _url = '@processUrl("GetClassList", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //debugger
+                            _that.docsInteractive.ListClasses = response.data.Data
+                        }).catch(e => { })
+                },
+                AddToMyCourse() {
+                    let _that = this;
+                    let _form = new FormData();
+                    let _url = '@processUrl("AddToMyCourse", "Class")';
+                    _form.append('CourseID', _that.docsInteractive.ID);
+                    _form.append('CenterCode', '@center');
+                    _form.append('CourseName', _that.docsInteractive.Name);
+                    if (_that.isCreateNewClass) {
+                        _form.append('Name', _that.newClass.Name);
+                        _form.append('StartDate', this.formatDate(_that.newClass.StartDate));
+                        _form.append('EndDate', this.formatDate(_that.newClass.EndDate));
+                        _form.append('Description', _that.newClass.Description);
+                        _form.append('isCreateNewClass', _that.isCreateNewClass);
+                    }
+                    //debugger
+                    if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "") {
+                        var result = window.confirm("Bạn chưa chọn lớp để thêm học liệu, học liệu sẽ được thêm vào mục TẠO BÀI GIẢNG trong tài khoản của bạn");
+                        if (result == true) {
+                            this.isLoading = true
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    this.isLoading = false;
+                                    this.hideModal();
+                                }).catch(e => {
+                                    this.isLoading = false;
+                                    alert(e)
+                                })
+                        }
+                        else {
+                            alert("Chọn lớp để thêm");
+                        }
+                    }
+                    else {
+                        if (!_that.isCreateNewClass) {
+                            _form.append('ClassID', _that.docsInteractive.ClassID);
+                        }
+                        this.isLoading = true
+                        axios.post(_url, _form)
+                            .then(response => {
+                                this.isLoading = false;
+                                this.hideModal();
+                                if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "")
+                                    alert("Tài liệu đã được thêm vào danh mục bài giảng của bạn!");
+                                else if (_that.isCreateNewClass) {
+                                    alert("Lớp " + _that.newClass.Name + " đã được tạo, tài liệu đã được thêm vào lớp " + _that.newClass.Name + ".");
+                                }
+                                else
+                                    alert("Tài liệu đã được thêm vào lớp của bạn!");
+                            }).catch(e => {
+                                this.isLoading = false;
+                                alert(e)
+                            })
+                    }
+                },
+                formatDate(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+
+                    }
                 }
             }
         });
@@ -372,13 +730,26 @@
             <input type="text" name="" value="" class="form-control" placeholder="Tên tài liệu" v-model="addItem.Title">
         </b-col>
 
-        <b-col class="form-group">
+        <b-col class="form-group flex">
+            <label for="">Chuyên mục: </label>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.subjectID" v-on:change="changeAddSubject(addItem.subjectID)">
+                @*<option value="">----</option>*@
+                @*<option v-for="(item,k) in list_subject" :value="item.ID" v-if="addItem.subjectID==item.ID" selected>{{item.Name}}</option>*@
+                <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+            </select>
+            <select class="col-sm-4 form-control ml-2" v-model="addItem.gradeID">
+                <option value="">----</option>
+                <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID==addItem.subjectID">{{item.Name}}</option>
+            </select>
+        </b-col>
+
+        <b-col class="form-group row">
             <div class="col-sm-4">
                 <label for="">Ảnh bìa</label>
-                <input type="file" name="CoverImage" id="CoverImage" value="" class="" v-on:change="changeFile()">
+                <input type="file" v-on:change="changeFile()">
             </div>
             <div class="col-sm-8">
-                <img src="" />
+                <img :src="addItem.Image" style="max-width:200px;max-height:150px" />
             </div>
         </b-col>
 
@@ -396,8 +767,13 @@
         <b-col class="form-group">
             <label class="col-form-label">File đính kèm:</label>
             <i class="ic ic-paper-clip"></i><label class="p-1" ref="filedsp" v-on:click="$refs.file.click()">{{shortenString(addItem.FileName)}} - (Click để chọn)</label>
-            <input type="file" ref="file" class="d-none" v-on:change="changeFile()">
+            <input type="file" ref="file" class="d-none" v-on:change="changeFile()" accept=".doc, .docx, .xlsx, .xls, .ptt, pttx, .pdf">
         </b-col>
+        <b-col class="form-group" v-if="addItem.isCheckDownload">
+            <label class="col-form-label">Download:</label>
+            <input type="checkbox" name="isDownload" id="isDownload" v-model="addItem.isDownload">
+        </b-col>
+
         <b-col class="form-group">
             <label class="col-form-label">Phạm vi chia sẻ:</label>
             <select name="range" onchange="ChooseRange()" id="refRange" class="form-control d-inline w-25" v-model="addItem.Range">
@@ -419,7 +795,7 @@
 
         <b-col class="form-group">
             <label for="">Tag</label>
-            <input type="text" name="" value="" class="form-control" placeholder="Tag">
+            <input type="text" name="" value="" class="form-control" placeholder="Tag" v-model="addItem.tags">
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -433,20 +809,84 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered title="Xem trước file (vui lòng chờ nếu tốc độ mạng chậm)" size="xl">
-        <b-col class="form-group p-0 m-0">
-            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
-            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src=https://eduso.vn'+linkFile" style="min-height:500px;" v-else></iframe>
+    <b-modal :no-close-on-backdrop="true" id="modal_preview" centered :title="title" size="xl">
+        <b-col class="form-group">
+            <span v-html="HTMLContent">
+            </span>
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
             @*<template v-if="isLoading">
                     <b-button>Đang thực hiện...</b-button>
                 </template>*@
-            <template v-else>
-                @*<b-button variant="success" v-on:click="updateData()">Lưu</b-button>*@
-                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            <template>
+                <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
         </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_docsinteractive" centered :title="'Học liệu ' + docsInteractive.Name" size="xl" hide-footer="true">
+        <div class="col-md-12 form-row" style=" max-height: 500px; height: 500px;">
+            <div class="form-row col-md-9 col-sm-12 h-100">
+                <b-col class="form-group col-sm-4" style="text-align:center">
+                    <div class="col-sm-12">
+                        <img :src="cacheStatic(docsInteractive.Image,200)" v-if="docsInteractive.Image != null" />
+                        <img src="~/pictures/book.jpg" v-else />
+                    </div>
+                    <b-col class="form-group col-sm-12" style="padding:10px">
+                        <label for="">Người tạo: {{docsInteractive.Creator}}</label>
+                    </b-col>
+                </b-col>
+                <b-col class="form-group col-sm-8 h-100">
+                    <ul class="list-group h-100 overflow-auto">
+                        <li class="list-group-item active">Mục lục</li>
+                        <li v-for="item in docsInteractive.ListChapters" class="list-group-item">{{item.Name}}</li>
+                    </ul>
+                </b-col>
+            </div>
+            <div class="form-row col-md-3 col-sm-12" style="position:relative">
+                <div style="position:absolute;width:100%">
+                    <b-col class="form-group col-sm-12">
+                        <label for="">Tên tài liệu</label>
+                        <input type="text" name="" value="" class="form-control" v-model="docsInteractive.Name" placeholder="Tên tài liệu">
+                    </b-col>
+                    <b-col class="form-group col-sm-12">
+                        <select class="form-control" v-model="docsInteractive.ClassID">
+                            <option value="">Chọn lớp muốn tải về (nếu cần)</option>
+
+                            <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
+                            <option value="true">--- Tạo lớp mới</option>
+                        </select>
+                    </b-col>
+
+                    <!--Create New Class-->
+                    <b-col class="form-group col-sm-12 p-0" v-if="isCreateNewClass">
+                        <fieldset>
+                            <div class="col-sm-12 form-group">
+                                <label class="label">Tên lớp</label>
+                                <input type="text" class="form-control" placeholder="Tên lớp học" v-model="newClass.Name" />
+                            </div>
+                            <div class="col-sm-12 form-group">
+                                <label class="label">Ngày bắt đầu</label>
+                                <input type="date" class="form-control" v-model="newClass.StartDate" />
+                            </div>
+                            <div class="col-sm-12 form-group">
+                                <label class="label">Ngày kết thúc</label>
+                                <input type="date" class="form-control" v-model="newClass.EndDate" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="label">Mô tả</label>
+                                <textarea rows="2" class="form-control" placeholder="Mô tả" v-model="newClass.Description"></textarea>
+                            </div>
+                        </fieldset>
+                    </b-col>
+
+                    <b-col class="form-group col-sm-12">
+                        <b-button type="submit" v-if="isLoading" class="btn btn-secondary">Đang thực hiện...</b-button>
+                        <button type="submit" v-if="!isLoading" class="btn btn-primary" v-on:click="AddToMyCourse()">Thêm vào tài khoản</button>
+                    </b-col>
+                </div>
+            </div>
+        </div>
     </b-modal>
 }

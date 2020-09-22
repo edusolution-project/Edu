@@ -20,6 +20,5 @@ namespace BaseCustomerMVC.Models
         public string GradeName { get; set; }
         [JsonProperty("TeacherName")]
         public string TeacherName { get; set; }
-
     }
 }

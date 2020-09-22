@@ -54,7 +54,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ExamService examService,
             ChapterService chapterService,
             LessonProgressService lessonProgressService
-            
             )
         {
             _gradeService = gradeservice;
@@ -88,7 +87,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                           where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
                           let subject = _subjectService.GetItemByID(r.SubjectID)
                           let grade = _gradeService.GetItemByID(r.GradeID)
-                          let course = _courseService.GetItemByID(r.CourseID)
+                          let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
                           let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
                           select new ClassSubjectViewModel
@@ -105,7 +104,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseID = r.CourseID,
                               CourseName = course.Name,
                               TeacherID = r.TeacherID,
-                              TeacherName = teacher.FullName
+                              TeacherName = teacher.FullName,
+                              TypeClass = r.TypeClass
                           }).ToList()
                 },
             };

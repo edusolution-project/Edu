@@ -2251,6 +2251,8 @@
     <ProjectReference Include="..\BaseCustomerMVC\BaseCustomerMVC.csproj" />
     <ProjectReference Include="..\BaseEasyRealTime\BaseEasyRealTime.csproj" />
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
+    <ProjectReference Include="..\GoogleApp\GoogleApp.csproj" />
+    <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
   </ItemGroup>
 
 

@@ -18,5 +18,7 @@ namespace BaseCustomerMVC.Models
         public double TotalPrice { get; set; }
         [JsonProperty("Transactions")]
         public double Transactions { get; set; }
+        [JsonProperty("SttPayment")]
+        public Boolean SttPayment { get; set; }
     }
 }

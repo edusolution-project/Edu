@@ -12,6 +12,8 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using FileManagerCore.Interfaces;
+using Core_v2.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,11 +25,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly ReferenceService _referenceService;
         private readonly CenterService _centerService;
+        private readonly SubjectService _subjectService;
+        private readonly GradeService _gradeService;
+        private readonly CourseService _courseService;
+        private readonly MappingEntity<CourseEntity, CourseViewModel> _mapping;
         private readonly IHostingEnvironment _env;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
-        //private readonly HashSet<string> _textType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
+        private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
         private string host;
+        private string staticPath;
 
         public ReferenceController(
             TeacherService teacherService,
@@ -37,7 +45,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             IHostingEnvironment env,
             ReferenceService referenceService,
             CenterService centerService,
-            IConfiguration iConfig
+            SubjectService subjectService,
+            GradeService gradeService,
+            CourseService courseService,
+            IConfiguration iConfig,
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _teacherService = teacherService;
@@ -46,18 +58,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
             _centerService = centerService;
             _teacherHelper = teacherHelper;
+            _subjectService = subjectService;
+            _gradeService = gradeService;
             _env = env;
+            _roxyFilemanHandler = roxyFilemanHandler;
+            _courseService = courseService;
+            _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
-            if (!string.IsNullOrEmpty(basis))
-            {
-                var center = _centerService.GetItemByCode(basis);
-                if (center != null)
-                    ViewBag.Center = center;
-            }
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (!string.IsNullOrEmpty(basis))
             {
@@ -66,6 +78,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Center = center;
                 ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
+
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (teacher != null && teacher.Subjects != null)
+            {
+                var subjects = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var grades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = grades;
+                ViewBag.Subjects = subjects;
+            }
+
             var myClasses = _classService.CreateQuery()
                 .Find(t => t.Members.Any(o => o.TeacherID == UserID)
                 //&& t.IsActive
@@ -80,47 +102,88 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
-        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel)
+        public JsonResult GetList(ReferenceEntity entity, DefaultModel defaultModel, string basis, Boolean isInteractive = false) //mặc định typeDocs=false -> tài liệu thường
         {
             if (entity != null)
             {
+
+                var center = _centerService.GetItemByCode(basis);
+
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var filter = new List<FilterDefinition<ReferenceEntity>>();
 
-                var tc = (string.IsNullOrEmpty(entity.Target) || entity.Range != REF_RANGE.CLASS) ? UserID : entity.Target;
-                var filterTeacher = Builders<ReferenceEntity>.Filter.Where(o => o.Range == REF_RANGE.CLASS && o.OwnerID == tc);
-                var filterAll = Builders<ReferenceEntity>.Filter.Eq(o => o.Range, REF_RANGE.ALL);
-
-                switch (entity.Range)
+                if (isInteractive)
                 {
-                    case REF_RANGE.TEACHER:
-                        filter.Add(filterTeacher);
-                        break;
-                    case REF_RANGE.CLASS:
-                        filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.Range == entity.Range && o.Target == entity.Target));
-                        break;
-                    case REF_RANGE.ALL:
-                        filter.Add(filterAll);
-                        break;
-                    default:
-                        filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
-                        break;
+                    var filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+                    var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(filter));
+                    defaultModel.TotalRecord = result.CountDocuments();
+
+                    //var result = _referenceService.GetAll();
+                    //defaultModel.TotalRecord = result.CountDocuments();
+                    var returnData = from r in result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList()
+                                     let teacher = string.IsNullOrEmpty(r.CreateUser) ? new TeacherEntity() : (_teacherService.GetItemByID(r.CreateUser) ?? new TeacherEntity())
+                                     select _mapping.Auto(r, new CourseViewModel()
+                                     {
+                                         TeacherName = teacher.FullName
+                                     });
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
                 }
-                if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                else
                 {
-                    filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
-                }
-                var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
-                defaultModel.TotalRecord = result.CountDocuments();
+                    var filter = new List<FilterDefinition<ReferenceEntity>>();
 
-                //var result = _referenceService.GetAll();
-                //defaultModel.TotalRecord = result.CountDocuments();
-                var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", returnData },
-                    { "Model", defaultModel }
-                });
+                    var tc = (string.IsNullOrEmpty(entity.Target) || entity.Range != REF_RANGE.CLASS) ? UserID : entity.Target;
+                    var filterTeacher = Builders<ReferenceEntity>.Filter.Where(o => o.Range == REF_RANGE.CLASS && o.OwnerID == tc);
+                    var filterAll = Builders<ReferenceEntity>.Filter.Eq(o => o.Range, REF_RANGE.ALL);
+
+                    switch (entity.Range)
+                    {
+                        case REF_RANGE.TEACHER:
+                            filter.Add(filterTeacher);
+                            break;
+                        case REF_RANGE.CLASS:
+                            filter.Add(Builders<ReferenceEntity>.Filter.Where(o => o.Range == entity.Range && o.Target == entity.Target));
+                            break;
+                        case REF_RANGE.ALL:
+                            filter.Add(filterAll);
+                            break;
+                        default:
+                            filter.Add(Builders<ReferenceEntity>.Filter.Or(filterTeacher, filterAll));
+                            break;
+                    }
+                    if (!string.IsNullOrEmpty(entity.SubjectID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.SubjectID, entity.SubjectID));
+                    }
+                    if (!string.IsNullOrEmpty(entity.GradeID))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Eq(t => t.GradeID, entity.GradeID));
+                    }
+
+                    if (!string.IsNullOrEmpty(defaultModel.SearchText))
+                    {
+                        filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
+                    }
+
+                    var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
+                    defaultModel.TotalRecord = result.CountDocuments();
+
+                    //var result = _referenceService.GetAll();
+                    //defaultModel.TotalRecord = result.CountDocuments();
+                    var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", returnData },
+                        { "Model", defaultModel }
+                    });
+                }
             }
             return new JsonResult(new Dictionary<string, object>
                 {
@@ -143,6 +206,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     filter.Add(Builders<ReferenceEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                 }
+                if (!string.IsNullOrEmpty(entity.SubjectID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.SubjectID, entity.SubjectID));
+                }
+                if (!string.IsNullOrEmpty(entity.GradeID))
+                {
+                    filter.Add(Builders<ReferenceEntity>.Filter.Eq(o => o.GradeID, entity.GradeID));
+                }
                 var result = _referenceService.CreateQuery().Find(Builders<ReferenceEntity>.Filter.And(filter));
                 defaultModel.TotalRecord = result.CountDocuments();
                 var returnData = result.Skip(defaultModel.PageSize * defaultModel.PageIndex).Limit(defaultModel.PageSize).ToList();
@@ -158,7 +229,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
         }
 
-        public async Task<JsonResult> Save(ReferenceEntity entity, string basis,IFormFile formFile)
+        public async Task<JsonResult> Save(ReferenceEntity entity, string basis, IFormFile formFile)
         {
             try
             {
@@ -175,40 +246,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (files != null)
                     {
-                        //var file = files[0];
-                        //    //.Where(f => f.Name == entity.Media.Name).SingleOrDefault();
-                        //    //.FirstOrDefault();
-                        //if (file != null) //file dinh kem
-                        //{
-                        //    entity.Media = new Media();
-                        //    entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                        //    entity.Media.Created = DateTime.Now;
-                        //    entity.Media.Size = file.Length;
-                        //    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
-                        //}
-
-                        //var cover = files[1];
-                        //if (cover != null)//anh bia
-                        //{
-                        //    entity.Image= await _fileProcess.SaveMediaAsync(cover, cover.FileName, "", basis);
-                        //}
-
-                        foreach(var file in files)
+                        foreach (var file in files)
                         {
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
+
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis, true, 200, 300);
                             }
                             else
                             {
+                                var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                 entity.Media = new Media();
                                 entity.Media.Name = entity.Media.OriginalName = file.FileName;
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path =$"https://{host}//"+ await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path = mediarsp.Path;
                             }
                         }
                     }
@@ -258,9 +313,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             string extension = Path.GetExtension(file.FileName);
                             string type = extension.Replace(".", string.Empty).ToUpper();
+
+                            var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+
                             if (_imageType.Contains(type))//anh bia
                             {
-                                entity.Image = await _fileProcess.SaveMediaAsync(file, file.FileName, "", basis);
+                                entity.Image = mediarsp.Path;
                             }
                             else
                             {
@@ -269,16 +327,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 entity.Media.Created = DateTime.Now;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
-                                entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "Documents", basis);
+                                entity.Media.Path = mediarsp.Path;
                             }
                         }
+                    }
+                    else
+                    {
+                        entity.Image = oldObj.Image;
                     }
                 }
                 if (entity.Link == null)
                     entity.Link = "";
                 if (!string.IsNullOrEmpty(entity.Link))
                     if (!(entity.Link.ToLower().StartsWith("http://") || entity.Link.ToLower().StartsWith("https://")))
-                        entity.Link = "http://" + entity.Link;
+                        entity.Link = "http://" + host + "/" + entity.Link;
                 entity.UpdateTime = DateTime.Now;
                 _referenceService.Save(entity);
                 return new JsonResult(new Dictionary<string, object>
@@ -343,9 +405,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     try
                     {
-                        var filePath = Path.Combine(_env.WebRootPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
-                        var stream = System.IO.File.OpenRead(filePath);
-                        return File(stream, "application/octet-stream", item.Media.Name);
+                        if (!item.Media.Path.StartsWith("http"))
+                        {
+                            //Hard code:
+                            var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                            var stream = System.IO.File.OpenRead(filePath);
+                            return File(stream, "application/octet-stream", item.Media.Name);
+                        }
+                        return Redirect(item.Media.Path);
                     }
                     catch
                     {
@@ -363,17 +430,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var item = _referenceService.GetItemByID(ID);
                 if (item == null)
                     return BadRequest();
-                _ = _referenceService.IncView(ID, 1);
+                _ = _referenceService.IncLink(ID, 1);
                 //TODO: create view log
                 var url = item.Link;
                 if (!string.IsNullOrEmpty(url))
                 {
                     if (!url.ToLower().StartsWith("http://") && !url.ToLower().StartsWith("https://"))
-                        url = "http://" + url;
+                        url = "http://" + host + "/" + url;
                     return Redirect(url);
                 }
             }
             return BadRequest();
+        }
+
+        public JsonResult View(string ID)
+        {
+            if (!string.IsNullOrEmpty(ID))
+                _ = _referenceService.IncView(ID, 1);
+            return Json("OK");
         }
     }
 }

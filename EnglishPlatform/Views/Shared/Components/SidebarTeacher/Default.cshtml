@@ -10,10 +10,10 @@
     }
 }
 <aside class="sidebar" id="sidebar">
-    <div class="card-header">
-        <a href="/@Model.Code/teacher" class="logo" title="@Model.Name" style="max-height:100px;"><img src="@(Model.Image != null ? Model.Image : "/images/Logo.png")" /></a>
+    <div class="card-header" style="height:100px;">
+        <a href="/@Model.Code/teacher" class="logo text-center" title="@Model.Name" style="max-height:100px;"><img src="@(Model.Image != null ? Model.Image : "/images/Logo.png")" /></a>
     </div>
-    <div class="menu-bar">
+    <div class="menu-bar" style="position:absolute; top: 100px; bottom: 0; width: 100%; overflow:auto;">
         <ul>
             <li for="home">
                 <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
@@ -22,7 +22,7 @@
                 <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
             </li>
             <li for="curriculum">
-                <a href="@processUrl("Index" , "Curriculum")" title="Quản lý bài giảng"><i class="ic ic-book"></i>Quản lý bài giảng</a>
+                <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
             </li>
             <li for="course">
                 <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
@@ -49,16 +49,17 @@
                 <a href="javascript:;;" onclick="$('.fn-box-chat-eduso').focus().click()" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
             <li for="reference">
-                <a href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo"><i class="ic ic-file"></i>Tài liệu tham khảo</a>
+                <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="ic ic-file"></i>Học liệu</a>
             </li>
             <li for="news">
                 <a href="@processUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
             </li>
         </ul>
+        <div class="adv">
+            <img src="/pictures/undraw_book_lover_mkck.png" alt="">
+        </div>
     </div>
-    <div class="adv">
-        <img src="/pictures/undraw_book_lover_mkck.png" alt="">
-    </div>
+
 </aside>
 <script>
     var setActiveMenu = function (menu) {

@@ -30,6 +30,8 @@ namespace BaseCustomerEntity.Database
         public DateTime DayPayment { get; set; }
         [JsonProperty("StatusPayment")] //thoi gian thuc hien thanh toan
         public bool StatusPayment { get; set; }
+        [JsonProperty("MsgPayment")] //thông báo của trạng thái thanh toán
+        public string MsgPayment { get; set; }
     }
 
     public class TransactionService: ServiceBase<TransactionEntity>

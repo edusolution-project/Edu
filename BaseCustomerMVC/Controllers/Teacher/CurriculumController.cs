@@ -166,7 +166,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             _courseViewMapping = new MappingEntity<CourseEntity, CourseViewModel>();
             _env = evn;
-            _fileProcess = new FileProcess(evn);
+            _fileProcess = new FileProcess(evn, config);
             _publisherHost = config.GetValue<string>("SysConfig:PublisherDomain");
 
             //fix
@@ -187,7 +187,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _courseLessonService = courseLessonService;
 
         }
-
 
         #region PAGE
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -233,6 +232,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
+            ViewBag.ListCenters = _centerService.GetAll().ToList();
             if (old == 1)
                 return View("Index_o");
             return View();
@@ -398,14 +398,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
                             GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name
+                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                            TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
                         })).ToList();
-                foreach (var t in rsp)
-                {
-                    var tcid = t.TeacherID;
-                    t.TeacherID = tcid;
-                    t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
-                }
+                //<<<<<<< HEAD
+                ////<<<<<<< HEAD
+                ////                foreach (var t in rsp)
+                ////                {
+                ////                    if (t.TeacherID == null || t.TeacherID == "null") continue;
+                ////                    else
+                ////                    {
+                ////                        var tcid = t.TeacherID;
+                ////                        t.TeacherID = tcid;
+                ////                        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                ////                    }
+                ////                }
+                ////=======
+                //=======
+                //                //foreach (var t in rsp)//???
+                //                //{
+                //                //    if (t.TeacherID == null || t.TeacherID == "null") continue;
+                //                //    else
+                //                //    {
+                //                //        var tcid = t.TeacherID;
+                //                //        t.TeacherID = tcid;
+                //                //        t.TeacherName = _teacherService.GetItemByID(tcid)?.FullName;
+                //                //    }
+                //                //}
+                //>>>>>>> origin/VietPhung
 
                 response = new Dictionary<string, object>
                 {
@@ -473,6 +493,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetCourseDetail(DefaultModel model)
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.GetItemByID(UserID);
+
             var filter = new List<FilterDefinition<ClassEntity>>();
 
             var course = _service.GetItemByID(model.ID);
@@ -489,7 +512,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var courseDetail = new Dictionary<string, object>
             {
                 { "Chapters", _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
-                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
+                {"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
             };
 
             var response = new Dictionary<string, object>
@@ -563,6 +587,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.TotalPractices = 0;
                     item.TotalLessons = 0;
                     item.TotalExams = 0;
+                    //item.IsPublic = false;
+                    //if (item.TargetCenters != null && item.TargetCenters[0] != null)
+                    //{
+                    //    var listCenters = item.TargetCenters[0].Split(',');
+                    //    item.TargetCenters = listCenters.ToList();
+                    //}
 
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
@@ -585,6 +615,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
+                    olditem.IsPublic = item.IsPublic;
+                    olditem.PublicWStudent = item.PublicWStudent;
+                    //if (item.TargetCenters != null && item.TargetCenters[0] != null)
+                    //{
+                    //    var listCenters = item.TargetCenters[0].Split(',');
+                    //    item.TargetCenters = listCenters.ToList();
+                    //}
+                    olditem.TargetCenters = item.TargetCenters;
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
                     {

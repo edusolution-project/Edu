@@ -209,130 +209,130 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetSchedules(DefaultModel model)
-        {
-            TeacherEntity teacher = null;
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (!string.IsNullOrEmpty(UserID) && UserID != "0")
-            {
-                teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
-                if (teacher == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Error", "Không có thông tin giảng viên" }
-                    });
-                }
-            }
-            if (string.IsNullOrEmpty(model.ID))
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Error","Không có thông tin lớp học" },
-                });
-            }
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetSchedules(DefaultModel model)
+        //{
+        //    TeacherEntity teacher = null;
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (!string.IsNullOrEmpty(UserID) && UserID != "0")
+        //    {
+        //        teacher = UserID == "0" ? null : _teacherService.GetItemByID(UserID);
+        //        if (teacher == null)
+        //        {
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Error", "Không có thông tin giảng viên" }
+        //            });
+        //        }
+        //    }
+        //    if (string.IsNullOrEmpty(model.ID))
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Error","Không có thông tin lớp học" },
+        //        });
+        //    }
 
-            var currentClass = _classService.GetItemByID(model.ID);
+        //    var currentClass = _classService.GetItemByID(model.ID);
 
-            if (currentClass == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
+        //    if (currentClass == null)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin lớp học" }
+        //            });
+        //    }
 
-            var course = _courseService.GetItemByID(currentClass.CourseID);
+        //    var course = _courseService.GetItemByID(currentClass.CourseID);
 
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
-            var _scheduleMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
-            var classSchedule = new ClassScheduleViewModel(course)
-            {
-                Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
-                           where schedule != null
-                           select _scheduleMapping.AutoOrtherType(r, new LessonScheduleViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive
-                           })).ToList()
-            };
+        //    if (course == null)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin giáo trình" }
+        //            });
+        //    }
+        //    var _scheduleMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+        //    var classSchedule = new ClassScheduleViewModel(course)
+        //    {
+        //        Chapters = _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList(),
+        //        Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+        //                   let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+        //                   where schedule != null
+        //                   select _scheduleMapping.AutoOrtherType(r, new LessonScheduleViewModel()
+        //                   {
+        //                       ScheduleID = schedule.ID,
+        //                       StartDate = schedule.StartDate,
+        //                       EndDate = schedule.EndDate,
+        //                       IsActive = schedule.IsActive
+        //                   })).ToList()
+        //    };
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", classSchedule },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", classSchedule },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
-        [Obsolete]
-        [HttpPost]
-        public JsonResult GetChapterContent(DefaultModel model, string ChapterID)
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //[Obsolete]
+        //[HttpPost]
+        //public JsonResult GetChapterContent(DefaultModel model, string ChapterID)
+        //{
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-            if (string.IsNullOrEmpty(model.ID))
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
+        //    if (string.IsNullOrEmpty(model.ID))
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin lớp học" }
+        //            });
+        //    }
 
-            var currentClass = _classService.GetItemByID(model.ID);
-            if (currentClass == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin lớp học" }
-                    });
-            }
+        //    var currentClass = _classService.GetItemByID(model.ID);
+        //    if (currentClass == null)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin lớp học" }
+        //            });
+        //    }
 
-            var course = _courseService.GetItemByID(currentClass.CourseID);
+        //    var course = _courseService.GetItemByID(currentClass.CourseID);
 
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
+        //    if (course == null)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error",model },
+        //                {"Msg","Không có thông tin giáo trình" }
+        //            });
+        //    }
 
-            var classSchedule = new ClassScheduleViewModel(course)
-            {
-                Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
-                           select new MappingEntity<LessonEntity, LessonScheduleViewModel>().AutoOrtherType(r, new LessonScheduleViewModel()
-                           {
-                               ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive,
-                           })).ToList()
-            };
+        //    var classSchedule = new ClassScheduleViewModel(course)
+        //    {
+        //        Lessons = (from r in _lessonService.CreateQuery().Find(o => o.CourseID == course.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
+        //                   let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassID == model.ID).FirstOrDefault()
+        //                   select new MappingEntity<LessonEntity, LessonScheduleViewModel>().AutoOrtherType(r, new LessonScheduleViewModel()
+        //                   {
+        //                       ScheduleID = schedule.ID,
+        //                       StartDate = schedule.StartDate,
+        //                       EndDate = schedule.EndDate,
+        //                       IsActive = schedule.IsActive,
+        //                   })).ToList()
+        //    };
 
-            var response = new Dictionary<string, object>
-            {
-                { "Data", classSchedule },
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", classSchedule },
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         [Obsolete]
         [HttpPost]

@@ -26,8 +26,8 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-header" v-cloak>
-        <div class="flex flex-row border-b flex-wrap align-items-center">
+    <div class="card-header border-b" v-cloak>
+        <div class="flex flex-row flex-wrap align-items-center">
             <div class="search-box m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên giáo viên">
@@ -143,7 +143,7 @@
 
     <script>
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.getData()
                 //this.getActiveClass()

@@ -13,6 +13,16 @@
     <link href="~/css/_sidebar.min.css" rel="stylesheet" />
     <link href="~/css/layout.min.css" rel="stylesheet" />
     <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-178391156-1');
+    </script>
 
     <script type="text/javascript">
 
@@ -37,11 +47,30 @@
     <script src="~/js/moment.min.js"></script>
 
     <script type="text/javascript" src="~/js/lib/sweetalert2@9.js"></script>
+
+    <!--Hoà thêm-->
+    <link href="~/css/minify/minify.min.css" rel="stylesheet" />
+    <link href="~/css/stylesheet.min.css" rel="stylesheet" />
+
 </head>
 <body>
     <script>
         var activeTab;
     </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 5px; /* for vertical scrollbars */
+            height: 5px; /* for horizontal scrollbars */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5);
+        }
+    </style>
     <!-- Page Wrapper -->
     <div id="wrapper">
 
@@ -49,7 +78,7 @@
         <div id="content-wrapper">
 
             <!-- Main Content -->
-            <div id="content">
+            <div id="content" style="position:relative" data-spy="scroll" data-target="#tableContents" data-offset="20">
 
                 @await Html.PartialAsync("_sideBarTeacher")
 

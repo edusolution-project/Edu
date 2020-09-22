@@ -912,7 +912,7 @@ var Lesson = (function () {
     }
 
     var openPreview = function () {
-        window.open(document.location.href.replace("/Detail/", "/Preview/"));
+        window.open(document.location.href.replace("/Detail", "/Preview"));
     }
 
     //Preview: view + edit
@@ -2760,7 +2760,10 @@ var Lesson = (function () {
             .then(function (res) {
                 var data = JSON.parse(res);
                 if (data.Error == null) {
-                    $(obj).parent().remove();
+                    if(!$(obj).parent().hasClass('top-menu'))
+                        $(obj).parent().remove();
+                    else
+                        $(obj).parent().empty();
                     //notification("success", "Bắt đầu làm bài", 1500);
                     //console.log("NewID: " + data.Data.ID);
                     $("#ExamID").val(data.Data.ID);
@@ -3351,7 +3354,7 @@ var Lesson = (function () {
         if (isNull(data)) {
             var doButton = $('<div>', {
                 "class": "btn btn-primary m-2",
-                "onclick": "$(this).prop('disabled',true); BeginExam(this);",
+                "onclick": "BeginExam(this);",
                 "style": "cursor: pointer",
                 "text": "Làm bài"
             });
@@ -3366,6 +3369,7 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
+            console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
 
             var limit = lastExam.limit;

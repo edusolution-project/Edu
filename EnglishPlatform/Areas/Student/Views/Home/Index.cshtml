@@ -18,6 +18,7 @@
     <link href="~/css/calendar/daygrid.css" rel="stylesheet" />
     <link href="~/css/calendar/list.css" rel="stylesheet" />
     <link href="~/css/calendar/timegrid.css" rel="stylesheet" />*@
+<link href="~/css/animation/animationIsNew.css" rel="stylesheet" />
 <script>
     setActiveMenu("home");
 </script>
@@ -27,8 +28,8 @@
     }
 </style>
 <section class="module" id="dashboard_content">
-    <div class="card-header" v-cloak>
-        <div class="flex border-b justify-content-between align-items-start">
+    <div class="card-header border-b" v-cloak>
+        <div class="flex justify-content-between align-items-start">
             <div>
                 <h2 class="title">Welcome to <font>@_center.Name</font></h2>
                 <p>
@@ -98,29 +99,36 @@
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="box list-scroll">
-                            <li v-for="(item,k) in active_course">
-                                <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName">
-                                    <div class="box radius">
-                                        <div class="thumb">
-                                            <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
-                                            <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
-                                        </div>
-                                        <div class="padding-15 inner">
-                                            <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title">{{item.courseName}}</a>
-                                            <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
-                                            <div class="c-bot">
-                                                <div class="flex reverse">
-                                                    <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
-                                                    <div class="flex justify-content-between">
-                                                        <span>{{item.min}}/{{item.max}}</span>
-                                                        <span>{{item.score.toFixed(2)}}%</span>
+                            <template v-if="active_course.length > 0">
+                                <li v-for="(item,k) in active_course">
+                                    <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName">
+                                        <div class="box radius">
+                                            <div class="thumb">
+                                                <img v-if="item.thumb" :src="cacheStatic(item.thumb,256)" alt="">
+                                                <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
+                                            </div>
+                                            <div class="padding-15 inner">
+                                                <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                                <p><i class="ti-time"></i>{{formatShortDate(item.endDate)}}</p>
+                                                <div class="c-bot">
+                                                    <div class="flex reverse">
+                                                        <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                                        <div class="flex justify-content-between">
+                                                            <span>{{item.min}}/{{item.max}}</span>
+                                                            <span>{{item.score.toFixed(2)}}%</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </a>
-                            </li>
+                                    </a>
+                                </li>
+                            </template>
+                            <template v-else>
+                                <li class="w-100">
+                                    Không có môn học
+                                </li>
+                            </template>
                         </ul>
                     </div>
                 </div>
@@ -128,23 +136,39 @@
             <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
-                        <h4 class="box-head">Thảo luận</h4>
-                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <h4 class="box-head">Môn học bổ trợ</h4>
+                        <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả<i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
-                        <ul class="list-discus">
-                            <template v-if="discussion.length > 0">
-                                <li v-for="(item,k) in discussion">
-                                    <div class="flex c-top">
-                                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
-                                        <div class="c-right"><i class="icofont icofont-user"></i>{{item.sender.name}}</div>
-                                    </div>
-                                    <p>{{shortenString(item.content,160)}}.</p>
+                        <ul class="box list-scroll">
+                            <template v-if="list_mycourses.length > 0">
+                                <li v-for="(item,k) in list_mycourses">
+                                    <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName">
+                                        <div class="box radius">
+                                            <div class="thumb">
+                                                <img v-if="item.image" :src="cacheStatic(item.image,256)" alt="">
+                                                <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
+                                            </div>
+                                            <div class="padding-15 inner">
+                                                <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName" class="title">{{item.courseName}}</a>
+                                                <p><i class="ti-time"></i>@DateTime.Now.ToString("dd-MM-yyyy")</p>
+                                                <div class="c-bot">
+                                                    <div class="flex reverse">
+                                                        <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                                        <div class="flex justify-content-between">
+                                                            <span>{{item.min}}/{{item.max}}</span>
+                                                            <span>{{item.score.toFixed(2)}}%</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </li>
                             </template>
                             <template v-else>
-                                <li>
-                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.fn-box-chat-eduso').focus().click()"> <i class="far fa-comments"></i> Kết nối ngay</button>
+                                <li class="w-100">
+                                    Bạn chưa thêm môn học bổ trợ nào. <a href="@processUrl("Index", "Reference")#docsinteractive">Chọn môn học ngay!</a>
                                 </li>
                             </template>
                         </ul>
@@ -180,32 +204,33 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        @*<a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>*@
+                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">
                             <li v-for="(item,k) in list_courses">
                                 <a v-on:click="DetailProduct(item.ID)" :title="item.Title">
-                                    <div class="box radius" style="height:240px">
-                                        <div class="thumb" style="position:relative;">
-                                            <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; position:absolute; top: 0; left: 50%; margin-left: -50%; max-width:initial">
-                                            <img v-else :src="item.Thumbnail" alt="">
+                                    <div class="box radius" style="height:240px;position:relative">
+
+                                        <div class="thumb">
+                                            <img src="~/pictures/1797093_orig.gif" id="isNew" v-if="item.IsHot" style=" position: absolute; top: 0px; right: 0px; width: 40px;" />
+                                            <img v-if="item.Thumbnail" :src="cacheStatic(item.Thumbnail,256)" alt="" style="width:100%; max-width:initial">
                                         </div>
-                                        <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 7px;">
+                                        <div class="padding-15 inner" style="word-break:break-word; white-space: unset; width: 100%; padding-top: 20px;">
                                             <a v-on:click="DetailProduct(item.ID)" :title="item.Title" class="title" style="height:42px; line-height:21px;">
                                                 {{item.Title}}
                                             </a>
-                                            <div class="c-bot" style="text-align:right; width:133px;">
-                                                <div>
-                                                    <div class="c-right" style="font-size:13px; font-weight:bold"></div>
-                                                </div>
-                                                <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
-                                                    {{formatPrice(item.Discount) }} VNĐ
-                                                </div>
-                                                <div>
-                                                    <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
-                                                    @*<span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>*@
-                                                </div>
+                                            <div class="c-bot" style="text-align:right; width:133px;position:absolute;bottom:20px">
+                                                @*<div>
+                                                        <div class="c-right" style="font-size:13px; font-weight:bold"></div>
+                                                    </div>
+                                                    <div v-if="item.Discount >= 0" class="price font-weight-bold text-danger ml-auto" style="font-size:115%; text-align:right;">
+                                                        {{formatPrice(item.Discount) }} VNĐ
+                                                    </div>
+                                                    <div>
+                                                        <span style="color: #999; text-decoration:line-through; font-size:85%;" class="mt-1 mb-1">({{formatPrice(item.Price)}} VNĐ)</span>
+                                                        <span v-else class="price font-weight-bold text-danger ml-auto" style="font-size:130%; text-align:right;">{{formatPrice(item.Price)}} VNĐ</span>
+                                                    </div>*@
                                                 <div>
                                                     <button class="btn btn-danger w-100 mt-2 col-sm-12" style="padding-bottom: 5px" v-on:click="DetailProduct(item.ID)">Xem chi tiết</button>
                                                 </div>
@@ -274,7 +299,8 @@
                                         </span>
                                     </div>
                                     <div class="form-group col-sm-12" style="text-align:center">
-                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" title="Mua ngay">Mua ngay</button>
+                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" v-if="detailProduct.SttPayment" disabled title="Mua ngay">Mua ngay</button>
+                                        <button type="button" class="btn btn-danger w-100 pt-3 pb-3" v-on:click="BuyNow(detailProduct.ID)" v-else title="Mua ngay">Mua ngay</button>
                                     </div>
                                 </div>
                             </div>
@@ -296,6 +322,7 @@
             this.getFinishCourse();
             this.getNewFeed();
             this.list_courses = @Html.Raw(Json.Serialize(list_courses));
+            this.getMyCourse();
         },
         data: {
             lesson_week: [
@@ -308,6 +335,7 @@
             finish_course: [
             ],
             detailProduct: [],
+            list_mycourses:[]
         },
         watch: {
             lesson_week: function (val) {
@@ -319,13 +347,14 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("dd/MM/yyyy")')
                 let _url = '@processUrl("GetActiveListV2", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
                         //console.log("Active")
                         //console.log(response.data)
                         _that.active_course = response.data.data;
+                        //debugger
                         //console.log(_that.active_course);
                     }).catch(e => { })
             },
@@ -417,7 +446,7 @@
             cacheStatic(src, width) {
                 if (src.startsWith("http"))
                     return src;
-                return "https://static.eduso.vn/" + src + "?w=" + width;
+                return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
             },
             formatPrice(value) {
                 let val = (value / 1).toFixed(0).replace(',', '.')
@@ -433,9 +462,22 @@
                 let _url = '@processUrl("DetailProduct", "Home")';
                 axios.post(_url, _form)
                     .then(response => {
+                        //debugger
                         _that.detailProduct = response.data;
                         $("#DetailProduct").modal();
                     }).catch(e => { });
+            },
+            getMyCourse() {
+                 let _that = this
+                // Truyen param vào đây
+                let _form = new FormData()
+                @*_form.append('today', '@DateTime.Now.ToString("dd/MM/yyyy")')*@
+                let _url = '@processUrl("GetMyCourse", "Course")'
+                axios.post(_url, _form)
+                    .then(response => {
+                        _that.list_mycourses = response.data.data;
+                        //console.log(_that.active_course);
+                    }).catch(e => { })
             }
         }
     });

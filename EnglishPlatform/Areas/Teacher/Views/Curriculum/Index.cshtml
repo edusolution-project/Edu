@@ -9,6 +9,7 @@
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
     var defTeacher = ViewBag.User;
+    var listCenters = ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -30,8 +31,8 @@
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
-    <div class="card-header" v-cloak>
-        <div class="flex flex-row border-b flex-wrap align-items-center">
+    <div class="card-header border-b" v-cloak>
+        <div class="flex flex-row flex-wrap align-items-center">
             <div class="box filter-box w-152 m-1 ">
                 <select v-model="subject">
                     <option value="">Chương trình</option>
@@ -114,13 +115,14 @@
     <script>
         Vue.use(VueQuillEditor)
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 //debugger
                 this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses =@Html.Raw(Json.Serialize(courses));
+                this.list_Acenters =@Html.Raw(Json.Serialize(listCenters));
                 //this.changeSubject()
                 this.getData();
                 window.chooseFile = this.chooseFile
@@ -195,7 +197,12 @@
                     Description: '',
                     Init: false,
                     Image: '',
-                    TeacherID: ''
+                    TeacherID: '',
+                    IsPublic: false,
+                    TargetCenters: [],
+                    NameCenters: '',
+                    SelectAll: false,
+                    PublicWStudent: false
                 },
                 cloneItem: {
                     OriginID: '',
@@ -220,12 +227,14 @@
                 subject: '',
                 grade: '',
                 center: '@center',
-                view: 10,
+                view: 30,
                 hPage: 1,
                 totalRec: 0,
-                componentKey: 0
+                componentKey: 0,
+                checkShowSelect: false,
+                list_Acenters:[]
             },
-             computed: {
+            computed: {
                 page: {
                     get() {
                         return parseInt(this.hPage);
@@ -269,6 +278,24 @@
                         fn()
                     }, 500)
                 },
+                "addItem.TargetCenters": function () {
+                    this.a()
+                    //debugger
+                },
+                "addItem.SelectAll": function () {
+                    if (this.addItem.SelectAll) {
+                        for (i in this.list_Acenters) {
+                            this.addItem.TargetCenters += this.list_Acenters[i].ID+","
+                        }
+                        var targets = this.addItem.TargetCenters.toString().split(',');
+                        this.addItem.TargetCenters = []
+                        this.addItem.TargetCenters = targets
+                        this.a()
+                    }
+                    else {
+                        this.addItem.TargetCenters=[]
+                    }
+                }
             },
             methods: {
                 getData() {
@@ -332,7 +359,8 @@
                     })
                 },
                 showEditItem(obj) {
-                    //console.log(obj);
+                    console.log(obj);
+                    //debugger
                     let _that = this;
                     if (obj == null) {
                         _that.addItem.ID = '';
@@ -343,9 +371,11 @@
                         _that.addItem.SkillID = '';
                         _that.addItem.Image = '';
                         _that.addItem.TeacherID = _that.def_teacher;
+                        _that.addItem.IsPublic = false;
+                        _that.addItem.PublicWStudent = false;
+                        _that.addItem.TargetCenters = [];
                     }
                     else {
-                        console.log(obj);
                         _that.addItem.ID = obj.ID;
                         _that.addItem.SubjectID = obj.SubjectID;
                         _that.$nextTick(() => {
@@ -356,6 +386,12 @@
                         _that.addItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
                         _that.addItem.TeacherID = obj.TeacherID;
+                        _that.addItem.IsPublic = obj.IsPublic;
+                        _that.addItem.PublicWStudent = obj.PublicWStudent;
+                        if (obj.TargetCenters != null)
+                            _that.addItem.TargetCenters = obj.TargetCenters;
+                        else _that.addItem.TargetCenters = [];
+                        //debugger
                     }
                     _that.$bvModal.show('modal_event')
                 },
@@ -433,6 +469,17 @@
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('TeacherID', _that.addItem.TeacherID)
+                    _form.append('IsPublic', _that.addItem.IsPublic)
+                    _form.append('PublicWStudent', _that.addItem.PublicWStudent)
+
+                    var targetStr = _that.addItem.TargetCenters;
+                    if (targetStr != null) {
+                        var targets = targetStr.toString().split(',');
+                        if (targets.length > 0)
+                            targets.forEach(function (item, pos) {
+                                if (item != "") { _form.append('TargetCenters', item)}
+                            });
+                    }
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -644,7 +691,7 @@
                 cacheStatic(src, width) {
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
                 },
                 readURL(input) {
                     if(input.files && input.files[0]) {
@@ -654,14 +701,33 @@
                         }
                         reader.readAsDataURL(input.files[0]); // convert to base64 string
                     }
+                },
+                showSelect() {
+                    if (this.checkShowSelect == false) {
+                        $('#selectCenters').attr('style', 'display:block');
+                        this.checkShowSelect = true;
+                    }
+                    else {
+                        $('#selectCenters').attr('style', 'display:none');
+                        this.checkShowSelect = false;
+                    }
+                },
+                a() {
+                    this.addItem.NameCenters = ''
+                    for (i = 0; i < this.list_Acenters.length; i++) {
+                        for (j = 0; j < this.addItem.TargetCenters.length; j++) {
+                            if (this.list_Acenters[i].ID == this.addItem.TargetCenters[j]) {
+                                this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
+                            }
+                        }
+                    }
                 }
-
             }
         });
     </script>
 }
 @section Modals{
-    <b-modal id="modal_event" centered v-bind:title="getEditTitle()">
+    <b-modal id="modal_event" centered v-bind:title="getEditTitle()" size="xl">
         <b-col class="form-group">
             <label for="">Tên bài giảng *</label>
             <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name" ref="addName">
@@ -689,10 +755,49 @@
                 </select>
             </b-col>
         </div>
+        <div class="d-flex">
+            <b-col class="form-group col-md-2 col-sm-12" style="padding-left:0px">
+                <label for="" class="col-sm-6">Chia sẻ</label>
+                <input type="checkbox" style="margin:auto" v-model="addItem.IsPublic" />
+            </b-col>
+            <b-col class="form-group col-md-6 col-sm-12" v-if="addItem.IsPublic">
+                @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
+                <div class="col-sm-10 row" style="position:relative">
+                    <div class="col-md-3 col-sm-12">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="showSelect()">
+                            Chọn <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="col-md-9 col-sm-12">
+                        <input type="text" class="form-control " v-model="addItem.NameCenters" disabled />
+                    </div>
+                    <div class="col-sm-7" style="position:absolute;right:105px;top:40px;z-index:2">
+                        <div id="selectCenters" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:100px;width:415px;list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                <li>
+                                    <a>
+                                        <input type="checkbox" v-model="addItem.SelectAll" /><span class="lbl"> Chọn tất cả </span>
+                                    </a>
+                                </li>
+                                <li v-for="(item,k) in list_Acenters">
+                                    <a>
+                                        <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </b-col>
+            <b-col class="form-group col-md-3 col-sm-12" style="padding-left:0px" v-if="addItem.IsPublic">
+                <label for="" class="col-sm-10">Chia sẻ với học viên: </label>
+                <input type="checkbox" style="margin:auto" v-model="addItem.PublicWStudent" />
+            </b-col>
+        </div>
         <div>
             <b-col class="form-group">
                 <label for="">Giáo viên soạn thảo</label>
-                <select class="form-control" v-model="addItem.TeacherID">
+                <select class="form-control" v-model="addItem.TeacherID" style="z-index:1">
                     <option value="">Chọn giáo viên</option>
                     <option v-for="(item,k) in list_teacher" :value="item.ID">{{item.Name}}</option>
                 </select>
@@ -704,7 +809,7 @@
                 <div>
                     <button class="btn btn-info" onclick="chooseFile(this)">Chọn file</button>
                     <input type="file" name="cover" class="d-none" onchange="updateFile(this)" accept="image/jpeg,image/png,image/gif,image/bmp">
-                    <img :src="addItem.Image" />
+                    <img :src="cacheStatic(addItem.Image,100)" v-if="addItem.Image != null" />
                 </div>
             </b-col>
         </div>

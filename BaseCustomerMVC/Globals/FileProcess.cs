@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
@@ -18,10 +19,11 @@ namespace BaseCustomerMVC.Globals
         private readonly HashSet<string> _imageType = new HashSet<string>() { "JPG", "JPEG", "GIF", "PNG", "ICO", "SVG" };
         private readonly HashSet<string> _videoType = new HashSet<string>() { "MP4", "AVI", "WMV", "MOV", "FLV" };
         private readonly HashSet<string> _audioType = new HashSet<string>() { "MP3", "WAV", "WMA", "OGG", "AU", "EA" };
-        public FileProcess(IHostingEnvironment evn)
+
+        public FileProcess(IHostingEnvironment evn, IConfiguration iConfig)
         {
             _evn = evn;
-            RootPath = _evn.WebRootPath + "/Files";
+            RootPath = (iConfig.GetValue<string>("SysConfig:StaticPath") ?? _evn.WebRootPath) + "/Files";
         }
         public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
         {
@@ -114,6 +116,7 @@ namespace BaseCustomerMVC.Globals
                 }
             }
         }
+
         public async Task<bool> UpdateAsync(string link, IFormFile file)
         {
             string path = Path.Combine(RootPath, link);
@@ -127,6 +130,7 @@ namespace BaseCustomerMVC.Globals
                 return true;
             }
         }
+
         public void DeleteFile(string linkFile)
         {
             var item = linkFile;

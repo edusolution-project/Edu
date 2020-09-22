@@ -31,9 +31,8 @@
 </script>
 
 <section class="module" id="dashboard_content">
-    <div class="card-header">
-    </div>
-    <div id="schedule" class="pl-3 pr-3"></div>
+
+    <div id="schedule" class="p-3"></div>
 </section>
 <div id="skype-event" class="skype-event">
 
@@ -62,9 +61,11 @@
         </div>
     </div>
     <div class="footer-form-event">
-        <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
-        <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
-        <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
+        <button style="display:none" onclick="openWindow(this)" class="btn btn-primary btn-show-class-event" id="btn-mo-bai-hoc">
+            Mở bài học</buttonstyle="display:none">
+            <button class="btn btn-primary btn-save-event" id="btn-save-event">Lưu</button>
+            <button class="btn btn-o btn-cancel-event" id="btn-cancel-event">Hủy</button>
+            <button class="btn btn-o btn-delete-event btn-danger" id="btn-delete-event">Xóa</button>
     </div>
 </div>
 
@@ -128,7 +129,7 @@
     <script src="/js/calendar/js/Calendar.js"></script>
     <script>
         var openWindow = function (self) {
-            console.log(self);
+            //console.log(self);
             if (self.dataset.url == void 0 || self.dataset.url == null) {
                 return;
             } else {
@@ -230,6 +231,19 @@
                                 }
                                 formEvent.classList.remove("view-form");
                                 formEvent.classList.add("edit-form");
+                                
+                                //console.log(jsonData);
+                                var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
+                                btnMo.setAttribute("data-url", '');
+                                $(btnMo).hide();
+                                if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null")
+                                {
+                                    if (btnMo != null) {
+                                        btnMo.setAttribute("data-url", `/@center${jsonData.LinkLesson}`);
+                                        $(btnMo).show();
+                                    }
+                                }
+
                             }
                             if (checkTime(new Date(jsonData.Created), 0)) {
                                 // cho phép xóa
@@ -247,7 +261,7 @@
                             //longht them
                             var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
                             var btnOnline = formEvent.querySelector("button#btn-vao-lop-online");
-                            console.log(jsonData);
+                            //console.log(jsonData);
                             if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null")
                             {
                                 if (btnMo != null) {

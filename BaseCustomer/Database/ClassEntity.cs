@@ -37,16 +37,12 @@ namespace BaseCustomerEntity.Database
         public List<string> Subjects { get; set; }
         [JsonProperty("Skills")]
         public List<string> Skills { get; set; }
-
-        //Multiple
-        [JsonProperty("GradeID")]
-        public string GradeID { get; set; }
-        [JsonProperty("SubjectID")]
-        public string SubjectID { get; set; }
-        [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("TeacherID")]
+        [JsonProperty("TeacherID")]//CreatorID
         public string TeacherID { get; set; }
+
+        //[JsonProperty("CreatorName")]//CreatorID
+        //public string CreatorName { get; set; }
+
         [JsonProperty("Syllabus")]
         public string Syllabus { get; set; }
         [JsonProperty("Modules")]
@@ -69,6 +65,8 @@ namespace BaseCustomerEntity.Database
         public string Center { get; set; }
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
+        [JsonProperty("ClassMechanism")]
+        public int ClassMechanism { get; set; } //cơ chế lớp
     }
 
     public class ClassService : ServiceBase<ClassEntity>
@@ -77,21 +75,14 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ClassEntity>>
             {
-                //SubjectID_1_GradeID_1_TeacherID_1
                 new CreateIndexModel<ClassEntity>(
                     new IndexKeysDefinitionBuilder<ClassEntity>()
-                    .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)
-                    .Ascending(t=> t.TeacherID)),
-                //TeacherID_1SubjectID_1_GradeID_1_
+                    .Text(t=> t.Name)),
+                //Center_1
                 new CreateIndexModel<ClassEntity>(
                     new IndexKeysDefinitionBuilder<ClassEntity>()
-                    .Ascending(t=> t.TeacherID)
-                    .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)),
-                new CreateIndexModel<ClassEntity>(
-                    new IndexKeysDefinitionBuilder<ClassEntity>()
-                    .Text(t=> t.Name))
+                    .Ascending(t=> t.Center))
+
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -121,8 +112,12 @@ namespace BaseCustomerEntity.Database
                 Builders<ClassEntity>.Update.AddToSet("Subjects", subjectID)).Result.ModifiedCount;
         }
 
-        public IEnumerable<string> GetMultipleClassName(List<string> IDs, string CenterID = "")
+        public IEnumerable<string> GetMultipleClassName(List<string> IDs, string StudentID = "", string CenterID = "")
         {
+            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID)!=null)
+            {
+                IDs.RemoveAt(IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID));
+            }
             if (string.IsNullOrEmpty(CenterID))
                 return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
             return Collection.Find(t => IDs.Contains(t.ID) && t.Center == CenterID).Project(t => t.Name).ToEnumerable();
@@ -150,5 +145,23 @@ namespace BaseCustomerEntity.Database
             else
                 return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ClassMechanism"></param>
+        /// <param name="StudentID"></param>
+        /// <returns></returns>
+        public ClassEntity GetClassByMechanism(int ClassMechanism, string StudentID)
+        {
+            return Collection.Find(c => c.ClassMechanism == ClassMechanism && c.TeacherID == StudentID).FirstOrDefault();
+        }
+    }
+
+    public class CLASS_MECHANISM //cơ chế lớp
+    {
+        public const int CLOSE = 0, //Lop dong
+            OPEN = 1, //Lop mo
+            PERSONAL = 2;//Lop ca nhan
     }
 }

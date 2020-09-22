@@ -34,7 +34,7 @@
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Môn học</a></li>
-                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>
+                    @*<li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(2)">Tài liệu tham khảo</a></li>*@
                     <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Trao đổi / thảo luận" v-on:click="tabChange(3)">Thảo luận</a></li>
                 </ul>
             </div>
@@ -61,51 +61,99 @@
                 <p>{{domDecoder(classDescription)}}</p>
             </div>
         </div>
-        <div class="row row-list" v-if="tab[1]">
-            <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects">
-                <div class="box">
-                    <div class="inner text-center">
-                        <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
-                            <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
-                            @*<div>
+        <div class="form-group">
+            <h3 style="font-size:16px;" class="font-weight-bold" v-if="class_mechanism=='@BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL'">Học liệu cá nhân</h3>
+            <h3 style="font-size:16px;" class="font-weight-bold" v-else>Học liệu chính quy</h3>
+            <div class="row row-list" v-if="tab[1]">
+                <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
+                    <div class="box">
+                        <div class="inner text-center">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
+                                <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
+                                @*<div>
                                     <img :src="item.Image" style="max-width:150px; max-height:200px" />
                                 </div>*@
-                            <div>
-                                {{item.Title}}
-                            </div>
-                        </a>
-                        <span class="name center">
-                            {{item.Grade}}<br />
-                            GV: {{item.Teacher}}
-                        </span>
-                        <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                                <div>
+                                    {{item.Title}}
+                                </div>
+                            </a>
+                            <span class="name center">
+                                {{item.Grade}}<br />
+                                GV: {{item.Teacher}}
+                            </span>
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="form-group">
+            <h3 style="font-size:16px;" class="font-weight-bold pt-3" v-if="class_mechanism!='@BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL'">Học liệu chuyên đề</h3>
+            <div class="row row-list" v-if="tab[1]">
+                <div class="col-md-3 practice-item" v-for="(item,k) in classSubjects" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
+                    <div class="box">
+                        <div class="inner text-center">
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" title="" class="title" :style="'color: ' + item.Color">
+                                <span class="ic ic-headphone" :style="'background-image:url(' + cacheStatic(item.Image,256) + ');width: 150px; height: 200px;background-size:center; margin-bottom:5px'"></span>
+                                @*<div>
+                                    <img :src="item.Image" style="max-width:150px; max-height:200px" />
+                                </div>*@
+                                <div>
+                                    {{item.Title}}
+                                </div>
+                            </a>
+                            <span class="name center">
+                                {{item.Grade}}<br />
+                                GV: {{item.Teacher}}
+                            </span>
+                            <a :href="'@processUrl("Modules","Course")/' + item.ID" class="btn-learn" :style="'background-color: ' + item.Color">Học ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal_preview" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg" style="max-width:90%; width:90%; position: absolute; top: 5%; bottom: 5%; left: 50%; margin-left: -45%;" role="document">
+                <div class="modal-content h-100">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Tài liệu {{title}}</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container-fluid">
+                            <embed class="embed-frame col-sm-12" frameborder="0" :src="linkFile + '#toolbar=0&navpanes=0&scrollbar=0&view=FitH'" v-if="linkFile.toLowerCase().endsWith('.pdf')" style="min-height:500px;"></embed>
+                            <iframe class="embed-frame col-sm-12" frameborder="0" :src="'https://view.officeapps.live.com/op/embed.aspx?src='+linkFile" v-else style="min-height:500px;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="box" v-if="tab[2]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
-                <div class="col-md-12" v-for="data in ref.data">
-                    <div class="inner flex">
-                        <a href="#" title="" class="thumb">
-                            <img :src="cacheStatic('/pictures/doc1.png',256)" alt="">
+                <div class="col-md-6" v-for="data in ref.data">
+                    <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                        <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;">
+                            <img :src="cacheStatic(data.Image)" alt="" v-if="data.Image != null" class="w-100">
+                            <img :src="cacheStatic('/pictures/book.jpg')" alt="" v-else class="w-100">
                         </a>
-                        <div class="entry">
+                        <div class="entry p-0">
                             <div>
                                 <div>
                                     <a href="#" title="" class="title">{{data.Title}}</a>
                                 </div>
-                                <div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>
                             </div>
-                            <div class="pt-2 pb-2">
-                                <p>{{domDecoder(data.Description)}}</p>
+                            <div class="pt-0 pb-2">
+                                <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                             </div>
                             <div>
-                                <a href="#" title="Xem" class="btn-view btn-success" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0">Xem ({{data.Viewed}})</a>
-                                <a href="#" v-if="data.Media != null" v-on:click="download(data)" :title="data.Media.Name" class="btn-download btn-info">Tải về ({{data.Downloaded}})</a>
+                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
                             </div>
                         </div>
                     </div>
@@ -139,7 +187,7 @@
 @section Scripts{
     <script>
         new Vue({
-            el: "#main",
+            el: "#main_content",
             mounted() {
                 this.loadClassDetail()
                 window.loadContent = this.loadContent
@@ -182,9 +230,13 @@
                     target: '@currentClass.ID',
                     searchTerm: '',
                     data: [],
-                    view: 10,
+                    view: 20,
                     page: 1
                 },
+                linkFile: "",
+                allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
+                title: '',
+                class_mechanism:''
             },
             watch: {
             },
@@ -225,7 +277,7 @@
                     let _url = '@processUrl("GetDetail", "Course")'
                     axios.post(_url, _form)
                         .then(response => {
-                        var _data = response.data.Data;
+                            var _data = response.data.Data;
                         _data.forEach(function (item, k)
                         {
                             _that.teacherSource.push({
@@ -234,6 +286,7 @@
                                 SubjectID: obj.SubjectID
                             })
                         })
+                            //debugger
                         _that.loaded_teacher.push(obj.SubjectID);
                     }).catch(e => { })
                 },
@@ -254,6 +307,8 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
+                                _that.class_mechanism = response.data.ClassMechanism;
+                                //debugger
                                 _that.classSubjects = [];
                                 _data.forEach(function (item, k) {
                                     _that.classSubjects.push({
@@ -264,7 +319,8 @@
                                         Teacher: item.TeacherName,
                                         Grade: item.GradeName,
                                         Chapters: [],
-                                        Lessons: []
+                                        Lessons: [],
+                                        TypeClass:item.TypeClass
                                     })
                                     //_that.changeAddSubject(item)
                                     //_that.changeAddGrade(item)
@@ -315,9 +371,32 @@
                     obj.Downloaded = obj.Downloaded + 1;
                     window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
+                showPreview(obj) {
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    var link = obj.Media.Path;
+                    var title = obj.Title;
+                    let _url = '@processUrl("View", "Reference")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            obj.Viewed = obj.Viewed + 1;
+                        }).catch(e => { })
+                    let _that = this;
+                    console.log(obj);
+                    if (!link.startsWith("http"))
+                        link = "https://eduso.vn" + link;
+                    _that.linkFile = link;
+                    _that.title = title;
+                    this.linkFile = _that.linkFile;
+                    this.title = _that.title;
+                    $("#modal_preview").modal();
+                },
 
                 //SUPPORT
                 domDecoder(str) {
+                    if (str == null || str == 'null')
+                        return "";
+                    //console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -325,12 +404,20 @@
                 cacheStatic(src, width) {
                     if (src.startsWith("http"))
                         return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
+                isDocType(path) {
+                    if (path == null || path == "") return false;
+                    var idx = path.toString().lastIndexOf('.');
+                    if (idx <= 0) {
+                        var ext = path.substring(idx, path.length - idx);
+                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                }
 
             }
         });

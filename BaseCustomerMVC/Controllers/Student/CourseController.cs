@@ -5,6 +5,7 @@ using Core_v2.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,9 +134,47 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonPartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
         }
 
+
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(DefaultModel model, ClassEntity entity, string basis)
+        public JsonResult GetBestStudents(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không có dữ liệu" });
+
+            var list = new List<StudentRankingViewModel>();
+
+            var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+            var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            {
+                StudentID = g.Key,
+                TotalPoint = g.Sum(t => t.TotalPoint),
+                PracticePoint = g.Sum(t => t.PracticePoint),
+            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+
+            var rtn = new List<StudentRankingViewModel>();
+            foreach (var result in results)
+            {
+                var st = _studentService.GetItemByID(result.StudentID);
+                if (st != null)
+                {
+                    result.StudentName = st.FullName;
+                    rtn.Add(result);
+                }
+
+            }
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", rtn }
+            };
+            return new JsonResult(response);
+        }
+
+        [Obsolete]
+        [HttpPost]
+        public JsonResult GetList(DefaultModel model, ClassSubjectEntity entity, string basis)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -146,7 +185,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.IsActive && o.Center == center.ID) || o.ClassMechanism == CLASS_MECHANISM.PERSONAL));
 
             //class filter
             var currentStudent = _studentService.GetItemByID(userId);
@@ -204,29 +243,26 @@ namespace BaseCustomerMVC.Controllers.Student
             var std =
                 (from o in DataResponse
                  let progress = _progressService.GetStudentResult(o.ID, userId)
-                 let course = _courseService.GetItemByID(o.CourseID)
-                 let subject = _subjectService.GetItemByID(o.SubjectID)
-                 let grade = _gradeService.GetItemByID(o.GradeID)
+                 //let course = _courseService.GetItemByID(o.CourseID)
+                 //let subject = _subjectService.GetItemByID(o.SubjectID)
+                 //let grade = _gradeService.GetItemByID(o.GradeID)
                  let teacher = _teacherService.GetItemByID(o.TeacherID)
-                 let complete = subject != null && o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0
+                 let complete = progress == null ? 0 : (o.TotalLessons > 0 ? progress.Completed * 100 / o.TotalLessons : 0)
                  select _mappingList.AutoOrtherType(o, new StudentClassViewModel()
                  {
-                     CourseName = course == null ? "" : course.Name,
                      StudentNumber = o.Students.Count,
-                     SubjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
-                     GradeName = _gradeService.GetItemByID(o.GradeID) == null ? "" : _gradeService.GetItemByID(o.GradeID).Name,
-                     TeacherName = _teacherService.GetItemByID(o.TeacherID) == null ? "" : _teacherService.GetItemByID(o.TeacherID).FullName,
+                     TeacherName = teacher == null ? "" : teacher.FullName,
                      Progress = progress,
                      Thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
                      CompletePercent = complete > 100 ? 100 : complete
                  })).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", std },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         public JsonResult GetActiveList(DateTime today)
@@ -260,9 +296,9 @@ namespace BaseCustomerMVC.Controllers.Student
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
-                           courseName = o.Name,
-                           subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
+                           //courseID = o.CourseID,
+                           //courseName = o.Name,
+                           //subjectName = _subjectService.GetItemByID(o.SubjectID) == null ? "" : _subjectService.GetItemByID(o.SubjectID).Name,
                            endDate = o.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
@@ -278,7 +314,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không được phép truy cập" });
-            today = today.ToUniversalTime();
+            //today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -293,9 +329,10 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var currentStudent = _studentService.GetItemByID(userId);
             if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
-                return Json(new { });
+                return Json(new { Data = 0 });
 
             filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
             var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
@@ -324,7 +361,64 @@ namespace BaseCustomerMVC.Controllers.Student
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
                            score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
+                           thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
+                       }).ToList();
+            return Json(new { Data = std });
+        }
+
+        public JsonResult GetMyCourse(string basis)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+                return Json(new { Err = "Không được phép truy cập" });
+
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "Authentication Error"
+                });
+            }
+
+            var currentStudent = _studentService.GetItemByID(userId);
+            if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
+                return Json(new { });
+            //var filter = new List<FilterDefinition<ClassEntity>>();
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism==CLASS_MECHANISM.PERSONAL && o.TeacherID== currentStudent.ID));
+
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
+
+            var clID = _service.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, currentStudent.ID)?.ID;
+
+
+            var lstSbj = new List<ClassSubjectEntity>();
+            var lstClass = new List<ClassEntity>();
+
+            if (!string.IsNullOrEmpty(clID))
+            {
+                lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
+                lstClass.Add(_service.GetItemByID(clID));
+            }
+            var std = (from o in lstSbj.ToList()
+                       let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
+                       let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let skill = _skillService.GetItemByID(o.SkillID)
+                       select new
+                       {
+                           id = o.ID,
+                           //courseID = o.CourseID,
+                           courseName = skill.Name + " (" + _class.Name + ")",
+                           endDate = _class.EndDate,
+                           percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
+                           max = o.TotalLessons,
+                           min = progress != null ? progress.Completed : 0,
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
                            thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
+                           image = o.CourseID != null ? _courseService.GetItemByID(o.CourseID).Image : "/pictures/english1.png"
                        }).ToList();
             return Json(new { Data = std });
         }
@@ -365,7 +459,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            title = o.Name,
                            endDate = o.EndDate,
                            per,
@@ -406,7 +500,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
             var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
 
@@ -501,12 +595,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 ? data.ToList()
                 : data.Skip((model.PageIndex - 1) * model.PageSize).Take(model.PageSize).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", data },
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
         [System.Obsolete]
@@ -520,6 +614,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     return Json(new { });
                 }
+
                 var filterSchedule = Builders<LessonScheduleEntity>.Filter.Where(o => o.ClassID == ClassID);
                 var dataSchedule = _lessonScheduleService.Collection.Find(filterSchedule);
                 if (dataSchedule == null || dataSchedule.Count() <= 0) return Json(new { });
@@ -530,7 +625,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter));
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
 
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data",
                         DataResponse.Select(
@@ -543,18 +638,17 @@ namespace BaseCustomerMVC.Controllers.Student
                         )
                     }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", null },
                     {"Error",ex }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
-
         }
 
         [Obsolete]
@@ -904,7 +998,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 });
             }
         }
-
 
         //TODO: FIX DATA ONLY
         //public JsonResult FixProgress()

@@ -25,6 +25,8 @@ namespace BaseCustomerEntity.Database
         public string SubjectID { get; set; }
         [JsonProperty("CourseID")]
         public string CourseID { get; set; }
+        [JsonProperty("CourseName")]
+        public string CourseName { get; set; }
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
         [JsonProperty("Syllabus")]
@@ -45,6 +47,8 @@ namespace BaseCustomerEntity.Database
         public long TotalExams { get; set; }
         [JsonProperty("TotalPractices")]
         public long TotalPractices { get; set; }
+        [JsonProperty("TypeClass")]
+        public int TypeClass { get; set; }
     }
 
     public class ClassSubjectService : ServiceBase<ClassSubjectEntity>
@@ -53,6 +57,10 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<ClassSubjectEntity>>
             {
+                //ClassID_1
+                new CreateIndexModel<ClassSubjectEntity>(
+                    new IndexKeysDefinitionBuilder<ClassSubjectEntity>()
+                    .Ascending(t => t.ClassID))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -87,7 +95,7 @@ namespace BaseCustomerEntity.Database
 
         public Task RemoveClassSubjects(string[] ClassIDs)
         {
-            _ = Collection.DeleteManyAsync(t=> ClassIDs.Contains(t.ClassID));
+            _ = Collection.DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
             return Task.CompletedTask;
         }
 
@@ -108,6 +116,12 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
+    }
+
+    public class CLASS_TYPE
+    {
+        public const int STANDARD = 0, //chính khóa
+            EXTEND = 1; //bổ trợ
     }
 
 }

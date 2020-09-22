@@ -164,7 +164,9 @@ namespace EnglishPlatform.Controllers
                                     //    _studentService.GetStudentIdsByClassId(itemClass.ID);
                                     //var members = _studentService.CreateQuery().Find(o => listStudent.Contains(o.ID))?.ToList()?.Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();//chỗ này lấy hết SV???
                                     var members = _studentService.GetStudentsByClassId(itemClass.ID).Select(x => new MemberGroupInfo(x.ID, x.Email, x.FullName, false))?.ToHashSet();
+                                    //var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
                                     var teacher = _teacherService.GetItemByID(itemClass.TeacherID);
+                                    var student = _studentService.GetItemByID(itemClass.TeacherID);
                                     if (members == null)
                                     {
                                         members = new HashSet<MemberGroupInfo>() {
@@ -175,22 +177,43 @@ namespace EnglishPlatform.Controllers
                                     {
                                         for (int x = 0; x < listMemberTeacher.Count; x++)
                                         {
-                                            members.Add(new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true));
+                                            if (teacher != null)
+                                                members.Add(new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true));
+                                            if (student != null)
+                                                members.Add(new MemberGroupInfo(student.ID, student.Email, student.FullName, true));
                                         }
 
                                     }
-                                    var newGroup = new GroupEntity()
+                                    if (teacher != null)
                                     {
-                                        IsPrivateChat = false,
-                                        DisplayName = itemClass.Name,
-                                        Name = itemClass.ID,
-                                        Status = true,
-                                        Created = DateTime.Now,
-                                        CreateUser = itemClass.TeacherID,
-                                        MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true) },
-                                        Members = members
-                                    };
-                                    _groupService.CreateOrUpdate(newGroup);
+                                        var newGroup = new GroupEntity()
+                                        {
+                                            IsPrivateChat = false,
+                                            DisplayName = itemClass.Name,
+                                            Name = itemClass.ID,
+                                            Status = true,
+                                            Created = DateTime.Now,
+                                            CreateUser = itemClass.TeacherID,
+                                            MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(teacher.ID, teacher.Email, teacher.FullName, true) },
+                                            Members = members
+                                        };
+                                        _groupService.CreateOrUpdate(newGroup);
+                                    }
+                                    if (student != null)
+                                    {
+                                        var newGroup = new GroupEntity()
+                                        {
+                                            IsPrivateChat = false,
+                                            DisplayName = itemClass.Name,
+                                            Name = itemClass.ID,
+                                            Status = true,
+                                            Created = DateTime.Now,
+                                            CreateUser = itemClass.TeacherID,
+                                            MasterGroup = new HashSet<MemberGroupInfo>() { new MemberGroupInfo(student.ID, student.Email, student.FullName, true) },
+                                            Members = members
+                                        };
+                                        _groupService.CreateOrUpdate(newGroup);
+                                    }
                                 }
                             }
                         }

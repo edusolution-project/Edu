@@ -40,7 +40,10 @@ namespace BaseCustomerEntity.Database
         {
             var indexs = new List<CreateIndexModel<CenterEntity>>
             {
-
+                //Code_1
+                new CreateIndexModel<CenterEntity>(
+                    new IndexKeysDefinitionBuilder<CenterEntity>()
+                    .Ascending(t => t.Code))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

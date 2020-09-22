@@ -28,6 +28,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
+        private readonly LessonPartAnswerService _answerService;
 
         private readonly LessonService _clonelessonService;
         private readonly CloneLessonPartService _clonelessonPartService;
@@ -43,10 +44,15 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ExamDetailService _examDetailService;
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
+        private readonly CenterService _centerService;
+        private readonly StudentService _studentService;
+        private readonly TeacherService _teacherService;
+
         public HomeController(
                 CourseLessonService lessonService,
                 LessonPartService lessonPartService,
                 LessonPartQuestionService questionService,
+                LessonPartAnswerService answerService,
 
                 LessonService clonelessonService,
                 CloneLessonPartService clonelessonPartService,
@@ -66,12 +72,17 @@ namespace BaseCustomerMVC.Controllers.Admin
                 ChapterService chapterService,
 
                 ClassHelper classHelper,
-                CourseHelper courseHelper
+                CourseHelper courseHelper,
+
+                CenterService centerService,
+                StudentService studentService,
+                TeacherService teacherService
             )
         {
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
             _questionService = questionService;
+            _answerService = answerService;
 
             _clonelessonService = clonelessonService;
             _clonelessonPartService = clonelessonPartService;
@@ -93,6 +104,10 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _classHelper = classHelper;
             _courseHelper = courseHelper;
+
+            _centerService = centerService;
+            _studentService = studentService;
+            _teacherService = teacherService;
         }
 
         // GET: Home
@@ -205,6 +220,62 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("OK");
         }
 
+        public JsonResult FixFillquiz()
+        {
+            var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs)
+            {
+                var qids = _questionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _answerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _answerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var partIDs2 = _clonelessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs2)
+            {
+                var qids = _clonequestionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _cloneanswerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _cloneanswerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json("OK");
+        }
+
+        private string validateFill(string org)
+        {
+            if (string.IsNullOrEmpty(org)) return org;
+            org = org.Trim();
+            while (org.IndexOf("  ") >= 0)
+                org = org.Replace("  ", "");
+            return org;
+        }
+
         private double calculateLessonPoint(CourseLessonEntity lesson)
         {
             var point = 0.0;
@@ -292,6 +363,134 @@ namespace BaseCustomerMVC.Controllers.Admin
                 _ = _classHelper.IncreaseClassSubjectCounter(lesson.ClassSubjectID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
 
             return point;
+        }
+
+        public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)
+        {
+            try
+            {
+                var classIds = _classService.CreateQuery()
+                    .Find(t => 
+                    t.Subjects.Contains("5e4de8168a6e7b13bca5251c") || 
+                    t.Subjects.Contains("5e4df00e8a6e7b13bca52576") ||
+                    t.Subjects.Contains("5e4df0388a6e7b13bca52578") ||
+                    t.Subjects.Contains("5e4df0268a6e7b13bca52577")
+                    ).Project(t => t.ID).ToList();
+
+                var _oldCenter = _centerService.GetItemByCode("eduso");
+                var _newCenter = _centerService.GetItemByCode("benh-vien-viet-duc");
+
+                foreach (var ClassID in classIds)
+                {
+
+                    
+                    if (_oldCenter == null)
+                    {
+                        return Json("Không tìm thấy cơ sở");
+                    }
+                    if (_newCenter == null)
+                    {
+                        return Json("Không tìm thấy cơ sở mới");
+                    }
+
+                    var _class = _classService.GetItemByID(ClassID);
+                    if (_class == null)
+                    {
+                        return Json("Không tìm thấy lớp");
+                    }
+
+                    else
+                    {
+                        var _mappingClass = new Core_v2.Globals.MappingEntity<ClassEntity, ClassEntity>();
+                        var _mappingClassSub = new Core_v2.Globals.MappingEntity<ClassSubjectEntity, ClassSubjectEntity>();
+                        var listTearch = _class.Members;
+                        var listNewClsbjID = new List<string>();
+
+
+                        _class.Center = _newCenter.ID;
+
+                        _classService.Save(_class);//copy lớp
+
+                        //var a = _classProgressService.GetByClassID(_class.ID);
+                        //a.ClassID = newClass.ID;
+                        //_classProgressService.Save(a);
+
+                        var lstStudent = _studentService.GetStudentsByClassId(_class.ID);
+                        foreach (var item in lstStudent)  //copy hoc vien
+                        {
+                            //item.JoinedClasses.Remove(_class.ID);
+                            //item.JoinedClasses.Add(newClass.ID);
+
+                            var has_oldcenter_class = _classService.GetItemsByIDs(item.JoinedClasses).Any(t => t.Center == oldCenter);
+
+                            if (!has_oldcenter_class)
+                            {
+                                item.Centers.Remove(_oldCenter.ID);
+                            }
+                            if (!item.Centers.Contains(_newCenter.ID))
+                                item.Centers.Add(_newCenter.ID);
+                            _studentService.Save(item);
+
+
+
+                            //if (item.Centers.Count == 1 && item.Centers.Contains(_oldCenter.ID))
+                            //{
+                            //    item.Centers.Remove(_oldCenter.ID);
+                            //    item.Centers.Add(_newCenter.ID);
+                            //}
+                            //else if (item.Centers.Count > 1 && item.Centers.Contains(_oldCenter.ID))
+                            //{
+                            //    item.Centers.Remove(_oldCenter.ID);
+                            //    item.Centers.Add(_newCenter.ID);
+                            //}
+                            //else continue;
+                        }
+
+                        foreach (var t in listTearch)
+                        {
+                            var teacher = _teacherService.GetItemByID(t.TeacherID);
+                            var has_oldcenter_class = _classService.CreateQuery().Count(c => c.Center == _oldCenter.ID && c.Members.Any(m => m.TeacherID == teacher.ID)) > 0;
+                            var oldcenter_role = teacher.Centers.SingleOrDefault(c => c.CenterID == _oldCenter.ID);
+
+                            if (!has_oldcenter_class)
+                            {
+                                teacher.Centers.RemoveAll(c => c.CenterID == _oldCenter.ID);
+                            }
+
+                            if (!teacher.Centers.Any(c => c.CenterID == _newCenter.ID))
+                                teacher.Centers.Add(new CenterMemberEntity
+                                {
+                                    CenterID = _newCenter.ID,
+                                    RoleID = oldcenter_role.RoleID,
+                                    Code = _newCenter.Code,
+                                    Name = _newCenter.Name
+                                });
+
+
+                            _teacherService.Save(teacher);
+                        }
+
+                    }
+                }
+
+                var courses = _courseService.CreateQuery().Find(t =>
+                    t.SubjectID == "5e4de8168a6e7b13bca5251c" ||
+                    t.SubjectID == "5e4df00e8a6e7b13bca52576" ||
+                    t.SubjectID == "5e4df0388a6e7b13bca52578" ||
+                    t.SubjectID == "5e4df0268a6e7b13bca52577"
+                    ).ToEnumerable();
+                foreach(var course in courses)
+                {
+                    course.Center = _newCenter.ID;
+                    _courseService.Save(course);
+                }
+
+                return Json("OK");
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
     }
 }

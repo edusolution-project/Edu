@@ -54,7 +54,7 @@
         activeSub = "modules";
     </script>*@
 
-<div class="left-col">
+<div class="left-col" style="scroll-behavior: smooth;">
     <div class="page-title">
         <h1><a href="@processUrl("Index","Curriculum")" class="blue-color">Bài giảng</a> / @ViewData["Title"]</h1>
     </div>
@@ -62,7 +62,7 @@
         @*<div class="sub-sidebar">
                 @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
             </div>*@
-        <div class="main-content">
+        <div class="main-content" data-spy="scroll" data-target="#tableContents">
             <div class="detail pb-3 row">
                 <div class="text-left col-md-10">
                     <div class="lession-label d-inline-block">Ngày tạo: <b>@Data.Created.ToString("dd/MM/yyyy")</b></div> -
@@ -1117,9 +1117,21 @@
             var item = $(modal).children()[i];
             var li = item.children[0].children[0].children[1].text;
             var id = item.id;
-            $("#tableContents").append("<a href='#" + id + "' style='text-decoration:none;'><li class='list-group-item list-group-item-action' style='border-radius:unset'>" + li + "</li></a>");
+            var child = $(item).find('[class=modules]');
+            if ($(item).find('[class=modules]').length > 0) {
+                $("#tableContents").append("<li style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' style='text-decoration:none;'>" + li + "<i class='fas fa-caret-down' onclick='showDropDown(this,&#39;" + id + "&#39;)'></i></a></li>");
+                for (j = 0; j < $(item).find('[class=modules]').length; j++) {
+                    var chilItem = $(item).find('[class=modules]')[j];
+                    var chilLi = chilItem.children[0].children[0].children[1].text;
+                    ChilID = chilItem.id;
+                    $("#tableContents").append("<ul id='chil" + id + "' style='padding-left: 10px;display:none;'></ul>");
+                    $("#chil" + id + "").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + ChilID + "' style='text-decoration:none;'>" + chilLi + "</a></li>");
+                }
+            }
+            else {
+                $("#tableContents").append("<li class='' style='border-radius:unset;border-bottom: 1px dotted #f0f3f4;'><a href='#" + id + "' style='text-decoration:none;'>" + li + "</a></li>");
+            }
         }
-
         //var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
         $('#title').text('@Html.Raw(ViewData["Title"])')
     }
@@ -1178,6 +1190,18 @@
         }
     });
 
+    var showDropDown = function (obj, id) {
+        if (document.getElementById("chil" + id).getAttribute('style').includes('display'))
+            document.getElementById("chil" + id).style.display = "";
+        else
+            document.getElementById("chil" + id).style.display = "none";
+    }
+
+    //var test = function (obj, id) {
+    //    //debugger
+    //    $(obj).parent().attr('class', 'active')
+    //}
+
 </script>
 
 <style>
@@ -1212,31 +1236,6 @@
     .sidebar .nav-item .collapse .collapse-inner {
         padding: 0;
     }
-
-    #tableContents {
-        overflow-y: auto;
-        max-height: 570px;
-    }
-
-        #tableContents li {
-            border-left: 2px solid white
-        }
-
-            #tableContents li a {
-                color: #4E6774;
-                font-weight: 500;
-                line-height: 20px
-            }
-
-            #tableContents li:hover a {
-                color: #D03239;
-                background-color: #D03239;
-                background: #F0F3F4
-            }
-
-            #tableContents li:hover {
-                border-left: 2px solid #D03239
-            }
 
     #backToTop {
         display: none;

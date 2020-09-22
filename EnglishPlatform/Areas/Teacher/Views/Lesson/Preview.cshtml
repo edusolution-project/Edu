@@ -56,4 +56,28 @@
     var widget = new Lesson.onReady(config);
     </script>
     <link href="~/css/detailui.css" rel="stylesheet" />
+    <script>
+        $('#content').append($('<i>', { class: 'btn-close-preview', text: 'X', title: 'Đóng' }).click(function () {
+            window.close();
+            document.history = '/';
+        }));
+    </script>
+    <style>
+        .btn-close-preview {
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            z-index: 999;
+            border: solid 2px #999;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 20px;
+            font-style: normal;
+            border-radius: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
 }

@@ -22,6 +22,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly TeacherHelper _teacherHelper;
         private readonly AccountService _accountService;
         private readonly CenterService _centerService;
+        private readonly NewsService _newsService;
         private readonly ISession _session;
 
         public DefaultConfigs _default { get; }
@@ -33,6 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CenterService centerService,
             IHttpContextAccessor httpContextAccessor,
             TeacherHelper teacherHelper,
+            NewsService newsService,
             IOptions<DefaultConfigs> defaultvalue)
         {
             _teacherService = teacherService;
@@ -42,6 +44,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _centerService = centerService;
             _session = httpContextAccessor.HttpContext.Session;
             _default = defaultvalue.Value;
+            _newsService = newsService;
         }
 
         public IActionResult Index(string basis)
@@ -50,10 +53,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
                 ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
-            ViewBag.Center = _centerService.GetItemByCode(basis);
+            var center = _centerService.GetItemByCode(basis);
+            ViewBag.Center = center;
             try
             {
                 _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
+                var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == center.ID)).Limit(6);
+                ViewBag.List_Courses = data.ToList();
             }
             catch (Exception e)
             {
@@ -204,6 +210,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             user.PassWord = Core_v2.Globals.Security.Encrypt(newpass);
+            user.PassTemp = user.PassWord;
             _accountService.CreateOrUpdate(user);
             return new JsonResult(
             new Dictionary<string, object>
@@ -263,6 +270,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     StatusDesc = e.Message,
                 });
             }
+        }
+
+        public JsonResult DetailProduct(string ID)
+        {
+            var detail_product = _newsService.CreateQuery().Find(o => o.ID.Equals(ID) && o.Type == "san-pham").FirstOrDefault();
+            ViewBag.Title = detail_product?.Title;
+            return Json(detail_product);
         }
 
         //[HttpPost]

@@ -20,12 +20,20 @@ namespace BaseEasyRealTime.Entities
     {
         public NotificationService(IConfiguration config) : base(config)
         {
+            var indexs = new List<CreateIndexModel<NotificationEntity>>
+            {
+                new CreateIndexModel<NotificationEntity>(
+                    new IndexKeysDefinitionBuilder<NotificationEntity>()
+                    .Ascending(t => t.UserViews)
+                    )
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
         public IEnumerable<NotificationEntity> GetListNoViews(string userID)
         {
-            return CreateQuery().Find(o=>o.UserViews.Contains(userID))?.ToList();
+            return CreateQuery().Find(o => o.UserViews.Contains(userID))?.ToList();
         }
         public IEnumerable<string> GetViews(string groupName, string messageCode)
         {
@@ -59,7 +67,7 @@ namespace BaseEasyRealTime.Entities
 
         public bool Create(NotificationEntity item)
         {
-            if(GetViews(item.GroupName,item.MessageCode) == null)
+            if (GetViews(item.GroupName, item.MessageCode) == null)
             {
                 item.Created = DateTime.Now;
                 CreateOrUpdate(item);

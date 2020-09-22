@@ -14,6 +14,7 @@ using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
 using System.Drawing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -71,8 +72,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly GroupService _groupService;
 
-
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly CourseChapterService _courseChapterService;
+        private readonly CourseLessonService _courseLessonService;
+        private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
+        private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
+        private readonly LessonPartAnswerService _lessonPartAnswerService;
+        private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
+        private readonly ClassService _classService;
 
         public ClassController(
             AccountService accountService,
@@ -117,7 +124,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LessonPartService lessonPartService
             , LessonPartQuestionService lessonPartQuestionService,
             RoleService roleService,
-            GroupService groupService
+            GroupService groupService,
+            CourseChapterService courseChapterService,
+            CourseLessonService courseLessonService,
+            LessonPartAnswerService lessonPartAnswerService,
+            ClassService classService
             )
         {
             _accountService = accountService;
@@ -169,6 +180,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartQuestionService = lessonPartQuestionService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _groupService = groupService;
+            _courseChapterService = courseChapterService;
+            _courseLessonService = courseLessonService;
+            _lessonPartAnswerService = lessonPartAnswerService;
+            _classService = classService;
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -225,8 +240,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
             vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
             ViewBag.Class = vm;
-            ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
-            ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+            //ViewBag.Subject = _subjectService.GetItemByID(currentClass.SubjectID);
+            //ViewBag.Grade = _gradeService.GetItemByID(currentClass.GradeID);
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (teacher != null && teacher.Subjects != null)
+            {
+                var listsubjects = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var listgrades = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
+                ViewBag.Grades = listgrades;
+                ViewBag.Subjects = listsubjects;
+            }
             return View();
         }
 
@@ -779,15 +804,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var std = (from o in data.ToList()
                        let totalweek = (o.EndDate.Date - o.StartDate.Date).TotalDays / 7
-                       let subject = _subjectService.GetItemByID(o.SubjectID)
+                       //let subject = _subjectService.GetItemByID(o.SubjectID)
                        let studentCount = //_classStudentService.GetClassStudents(o.ID).Count
                        _studentService.CountByClass(o.ID)
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            courseName = o.Name,
-                           subjectName = subject == null ? "" : subject.Name,
+                           //subjectName = subject == null ? "" : subject.Name,
                            thumb = o.Image ?? "",
                            endDate = o.EndDate,
                            //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
@@ -828,7 +853,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        select new
                        {
                            id = o.ID,
-                           courseID = o.CourseID,
+                           //courseID = o.CourseID,
                            title = o.Name,
                            endDate = o.EndDate,
                        }).ToList();
@@ -844,7 +869,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var endWeek = startWeek.AddDays(7);
 
             var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -995,6 +1020,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = dCursor.ToList();
             }
 
+            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             if (!string.IsNullOrEmpty(TeacherID))
             {
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
@@ -1034,6 +1060,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
+                             let teachers = (o.Members == null || o.Members.Count == 0) ? "" : string.Join(", ", o.Members.Where(t => t.Type != ClassMemberType.OWNER).Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
                              select new Dictionary<string, object>
                                 {
                                  { "ID", o.ID },
@@ -1052,8 +1079,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "Members", o.Members },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
+                                 { "Teachers", teachers },
                                  { "Creator", o.TeacherID },
-                                 { "CreatorName", creator.FullName }
+                                 { "CreatorName", creator==null?"":creator.FullName },
+                                 { "ClassMechanism", o.ClassMechanism }
                              };
             return returndata.ToList();
         }
@@ -1087,6 +1116,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Cơ sở không đúng" }
                         });
             }
+            var tc_sj = new List<TeacherSubjectsViewModel>();
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
@@ -1143,9 +1174,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.TotalPractices += practicecount;
                         var skill = _skillService.GetItemByID(csubject.SkillID);
                         if (skill == null) continue;
-                        //Send email for each teacher
-                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                        var course = _courseService.GetItemByID(csubject.CourseID);
+                        var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                        if (tc == null)
+                            tc_sj.Add(new TeacherSubjectsViewModel
+                            {
+                                TeacherId = teacher.ID,
+                                FullName = teacher.FullName,
+                                Email = teacher.Email,
+                                SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                            });
+                        else
+                            tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
                     }
+
+                    //Send email for each teacher
+                    if (tc_sj.Count > 0)
+                        foreach (var tc in tc_sj)
+                            _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+
                     _service.Save(item);
                 }
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -1183,10 +1230,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var creator = _teacherService.GetItemByID(oldData.TeacherID);
                 oldData.Members = new List<ClassMemberEntity> { };
                 if (creator != null)
-                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.TEACHER, Name = creator.FullName });
+                    oldData.Members.Add(new ClassMemberEntity { TeacherID = creator.ID, Type = ClassMemberType.OWNER, Name = creator.FullName });
                 oldData.TotalLessons = 0;
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;
+                oldData.ClassMechanism = item.ClassMechanism;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1209,6 +1257,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             long lessoncount = 0;
                             long examcount = 0;
                             long practicecount = 0;
+
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
                                 nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
@@ -1220,6 +1269,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //update period
                                 oSbj.StartDate = item.StartDate.ToUniversalTime();
                                 oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                oSbj.TypeClass = nSbj.TypeClass;
                                 var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                 if (teacher == null) continue;
 
@@ -1228,8 +1278,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     oSbj.TeacherID = nSbj.TeacherID;
                                     var skill = _skillService.GetItemByID(oSbj.SkillID);
                                     if (skill == null) continue;
-                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                    var course = _courseService.GetItemByID(nSbj.CourseID);
+                                    var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                                    if (tc == null)
+                                        tc_sj.Add(new TeacherSubjectsViewModel
+                                        {
+                                            TeacherId = teacher.ID,
+                                            FullName = teacher.FullName,
+                                            Email = teacher.Email,
+                                            SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                                        });
+                                    else
+                                        tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
                                 }
+                                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+
                                 _classSubjectService.Save(oSbj);
                                 examcount = oSbj.TotalExams;
                                 lessoncount = oSbj.TotalLessons;
@@ -1241,6 +1304,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     Type = ClassMemberType.TEACHER
                                 };
                             }
+
                             processCS.Add(nSbj.ID);
                             if (!oldData.Skills.Contains(nSbj.SkillID))
                                 oldData.Skills.Add(nSbj.SkillID);
@@ -1292,6 +1356,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //update data
                 _service.Save(oldData);
+
+                if (tc_sj.Count > 0)
+                    foreach (var tc in tc_sj)
+                        _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+
                 if (mustUpdateName)
                 {
                     var change = _groupService.UpdateGroupDisplayName(oldData.ID, oldData.Name);
@@ -1435,6 +1504,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     throw new Exception("Teacher " + nSbj.TeacherID + " is not avaiable");
                 }
 
+                nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
                 nSbj.StartDate = @class.StartDate;
                 nSbj.EndDate = @class.EndDate;
@@ -1578,6 +1648,348 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
+        #region Add To My Course
+        public async Task<JsonResult> AddToMyCourse(string CourseID, string CenterCode, string CourseName = "", string ClassID = null, ClassEntity item = null, Boolean isCreateNewClass = false)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var teacher = _teacherService.GetItemByID(userId);
+            if (teacher == null)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Vui lòng đăng nhập lại" }
+                        });
+            }
+            var center = _centerService.GetItemByCode(CenterCode);
+            if (center == null || teacher.Centers.Count(t => t.Code == CenterCode) == 0)
+            {
+                return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Cơ sở không đúng" }
+                        });
+            }
+
+            if (ClassID != null)
+            {
+                var Class = _service.GetItemByID(ClassID);
+                if (Class == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>()
+                        {
+                            {"Error", "Lớp không tồn tại" }
+                        });
+                }
+
+                var Course = _courseService.GetItemByID(CourseID);//Bài giảng
+
+                Class.Updated = DateTime.Now;
+                var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
+                var classSubject = new ClassSubjectEntity();
+                classSubject.CourseID = Course.ID;
+                //classSubject.CourseName = CourseName;
+                classSubject.SkillID = Course.SkillID;
+                classSubject.GradeID = Course.GradeID;
+                classSubject.SubjectID = Course.SubjectID;
+                classSubject.TeacherID = teacher.ID;
+                classSubject.TypeClass = CLASS_TYPE.EXTEND;
+
+                oldSubjects.Add(classSubject);
+
+                Create(Class, center.Code, oldSubjects, null);
+            }
+            else
+            {
+                var Course = _courseService.GetItemByID(CourseID);//Bài giảng
+                Course.OriginID = Course.ID;
+                Course.Center = center.ID;
+                Course.Created = DateTime.Now;
+                Course.CreateUser = teacher.ID;
+                Course.IsAdmin = true;
+                Course.IsPublic = false;
+                Course.IsActive = true;
+                Course.Updated = DateTime.Now;
+                Course.TeacherID = teacher.ID;
+                Course.TotalPractices = 0;
+                Course.TotalLessons = 0;
+                Course.TotalExams = 0;
+                Course.TargetCenters = new List<string>();
+                Course.Name = CourseName == "" ? Course.Name : CourseName;
+
+                Course.ID = null;
+
+                var newID = await CloneCourse(_courseService.GetItemByID(CourseID), Course);
+
+                if (isCreateNewClass)
+                {
+                    var listclassSubject = new List<ClassSubjectEntity>();
+                    var classSubject = new ClassSubjectEntity();
+                    classSubject.CourseID = newID;
+                    classSubject.SkillID = Course.SkillID;
+                    classSubject.GradeID = Course.GradeID;
+                    classSubject.SubjectID = Course.SubjectID;
+                    classSubject.TeacherID = teacher.ID;
+                    classSubject.TypeClass = CLASS_TYPE.EXTEND;
+
+                    listclassSubject.Add(classSubject);
+
+                    Create(item, center.Code, listclassSubject, null);
+                }
+            }
+            return new JsonResult("Thêm thành công");
+        }
+
+        public async Task<string> CloneCourse(CourseEntity oldcourse, CourseEntity newcourse)
+        {
+            try
+            {
+                var _userCreate = User.Claims.GetClaimByType("UserID").Value;
+                //var course = _service.GetItemByID(CourseID);//Clone
+                //if (course == null)
+                //{
+                //    return Json(new { error = "Dữ liệu không đúng, vui lòng kiểm tra lại" });
+                //}
+                var newID = await CopyCourse(oldcourse, newcourse, _userCreate);//?????
+                return newID;
+                //return Json("OK");
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<string> CopyCourse(CourseEntity org_course, CourseEntity target_course, string _userCreate = "")
+        {
+            try
+            {
+                var new_course = _cloneCourseMapping.Clone(org_course, new CourseEntity());
+
+                new_course.OriginID = org_course.ID;
+                new_course.Name = target_course.Name;
+                new_course.Code = target_course.Code;
+                new_course.Description = target_course.Description;
+                new_course.GradeID = target_course.GradeID;
+                new_course.SubjectID = target_course.SubjectID;
+                new_course.TeacherID = _userCreate;
+                new_course.CreateUser = _userCreate;
+                new_course.Center = target_course.Center ?? org_course.Center;
+                new_course.SkillID = target_course.SkillID;
+                new_course.Created = DateTime.Now;
+                new_course.Updated = DateTime.Now;
+                new_course.IsActive = true;
+                new_course.IsUsed = false;
+                new_course.IsPublic = false;
+                _courseService.Collection.InsertOne(new_course);
+
+                //var a = _courseChapterService.CreateQuery().Find(o => o.CourseID == org_course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+                //foreach (var item in a)
+                //{
+                await CloneChapter(new CourseChapterEntity
+                {
+                    OriginID = "0",
+                    CourseID = new_course.ID,
+                }, _userCreate, org_course.ID);
+                //}
+
+                return new_course.ID;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private async Task<CourseChapterEntity> CloneChapter(CourseChapterEntity item, string _userCreate, string orgCourseID)
+        {
+            try
+            {
+                if (item.OriginID != "0")
+                    _courseChapterService.Collection.InsertOne(item);
+                else
+                {
+                    item.ID = "0";
+                }
+
+                var lessons = _courseLessonService.GetChapterLesson(orgCourseID, item.OriginID);
+                //var lessons = _courseLessonService.CreateQuery().Find(o => o.CourseID == orgCourseID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+                if (lessons != null && lessons.Count() > 0)
+                {
+                    foreach (var o in lessons)
+                    {
+                        if (o.ChapterID == item.OriginID)
+                        {
+                            var new_lesson = _cloneCourseLessonMapping.Clone(o, new CourseLessonEntity());
+                            new_lesson.CourseID = item.CourseID;
+                            new_lesson.ChapterID = item.ID;
+                            new_lesson.CreateUser = _userCreate;
+                            new_lesson.Created = DateTime.Now;
+                            new_lesson.OriginID = o.ID;
+                            await CloneLesson(new_lesson, _userCreate);
+                        }
+                    }
+                }
+
+                var subChapters = _courseChapterService.GetSubChapters(orgCourseID, item.OriginID);
+                foreach (var o in subChapters)
+                {
+                    var new_chapter = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
+                    new_chapter.CourseID = item.CourseID;
+                    new_chapter.ParentID = item.ID;
+                    new_chapter.CreateUser = _userCreate;
+                    new_chapter.Created = DateTime.Now;
+                    new_chapter.OriginID = o.ID;
+                    await CloneChapter(new_chapter, _userCreate, orgCourseID);
+                }
+                return item;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private async Task CloneLesson(CourseLessonEntity item, string _userCreate)
+        {
+            try
+            {
+                _courseLessonService.CreateQuery().InsertOne(item);
+
+                var parts = _lessonPartService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+                foreach (var _child in parts.ToEnumerable())
+                {
+                    var _item = new LessonPartEntity()
+                    {
+                        OriginID = _child.ID,
+                        Title = _child.Title,
+                        Description = _child.Description,
+                        IsExam = _child.IsExam,
+                        Media = _child.Media,
+                        Point = _child.Point,
+                        Order = _child.Order,
+                        ParentID = item.ID,
+                        Timer = _child.Timer,
+                        Type = _child.Type,
+                        Updated = DateTime.Now,
+                        Created = DateTime.Now,
+                        CourseID = item.CourseID,
+                    };
+
+                    await CloneLessonPart(_item, _userCreate);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private async Task CloneLessonPart(LessonPartEntity item, string _userCreate)
+        {
+            _lessonPartService.Collection.InsertOne(item);
+            var questions = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+            foreach (var _child in questions.ToEnumerable())
+            {
+                var _item = new LessonPartQuestionEntity()
+                {
+                    OriginID = _child.ID,
+                    Content = _child.Content,
+                    CreateUser = _userCreate,
+                    Description = _child.Description,
+                    Media = _child.Media,
+                    Point = _child.Point,
+                    Order = _child.Order,
+                    ParentID = item.ID,
+                    Updated = DateTime.Now,
+                    Created = DateTime.Now,
+                    CourseID = item.CourseID,
+                };
+                ////change Media path
+                //if (_item.Media != null && _item.Media.Path != null)
+                //    if (!_item.Media.Path.StartsWith("http://"))
+                //        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                await CloneLessonQuestion(_item, _userCreate);
+            }
+        }
+
+        private async Task CloneLessonQuestion(LessonPartQuestionEntity item, string _userCreate)
+        {
+            _lessonPartQuestionService.Collection.InsertOne(item);
+            var answers = _lessonPartAnswerService.CreateQuery().Find(o => o.ParentID == item.OriginID);
+            foreach (var _child in answers.ToEnumerable())
+            {
+                var _item = new LessonPartAnswerEntity()
+                {
+                    OriginID = _child.ID,
+                    Content = _child.Content,
+                    CreateUser = _userCreate,
+                    IsCorrect = _child.IsCorrect,
+                    Media = _child.Media,
+                    Order = _child.Order,
+                    ParentID = item.ID,
+                    Updated = DateTime.Now,
+                    Created = DateTime.Now,
+                    CourseID = item.CourseID
+                };
+                //if (_item.Media != null && _item.Media.Path != null)
+                //    //if (!_item.Media.Path.StartsWith("http://"))
+                //    //    _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                //    if (_item.Media.Path.StartsWith("http://"))
+                //        _item.Media.Path = "http://" + _publisherHost + _item.Media.Path;
+                await CloneLessonAnswer(_item);
+            }
+        }
+
+        private async Task CloneLessonAnswer(LessonPartAnswerEntity item)
+        {
+            await _lessonPartAnswerService.Collection.InsertOneAsync(item);
+        }
+
+        public async Task<JsonResult> CopyChapter(string ChapID, string NewCourseID)
+        {
+            var orgChapter = _chapterService.GetItemByID(ChapID);
+            if (orgChapter == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy thông tin" }
+                    });
+            }
+            else
+            {
+                var clone_chap = _cloneCourseChapterMapping.Clone(orgChapter, new CourseChapterEntity()
+                {
+                    CourseID = NewCourseID
+                });
+                clone_chap.OriginID = orgChapter.ID;
+                clone_chap.Order = (int)_chapterService.GetSubChapters(orgChapter.CourseID, orgChapter.ParentID).Count();
+                var chapter = await CloneChapter(clone_chap, orgChapter.CreateUser, orgChapter.CourseID);
+                if (chapter.TotalLessons > 0)
+                {
+                    if (chapter.ParentID == "0")
+                        await _courseHelper.IncreaseCourseCounter(chapter.CourseID, chapter.TotalLessons, chapter.TotalExams, chapter.TotalPractices);
+                    else
+                        await _courseHelper.IncreaseCourseChapterCounter(chapter.ParentID, chapter.TotalLessons, chapter.TotalExams, chapter.TotalPractices);
+                }
+
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", chapter },
+                    { "Error", null }
+                });
+            }
+        }
+        #endregion
+
         #region Student Detail
         public JsonResult GetLearningProgress(DefaultModel model, string ClassID, string ClassSubjectID)
         {
@@ -1716,12 +2128,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var StudentID = model.ID;
             var student = _studentService.GetItemByID(StudentID);
+            var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID);
             if (student == null)
                 return null;
 
             var data = new List<StudentSummaryViewModel>();
             if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
             {
+                if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
 
                 foreach (var ClassID in student.JoinedClasses)
                 {

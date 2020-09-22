@@ -101,12 +101,12 @@ namespace BaseCustomerMVC.Controllers.Student
                 StudentName = _studentService.GetItemByID(o.StudentID).FullName
             })).ToList();
 
-            var respone = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
             {
                 { "Data", std},
                 { "Model", model }
             };
-            return new JsonResult(respone);
+            return new JsonResult(response);
         }
 
 
@@ -126,7 +126,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList();
                 var mapping = new MappingEntity<ExamDetailEntity, ExamDetailViewModel>();
 
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", DataResponse.Select(
                         o=> mapping.AutoOrtherType(o,new ExamDetailViewModel(){
@@ -138,16 +138,16 @@ namespace BaseCustomerMVC.Controllers.Student
                         )
                     }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
             catch (Exception ex)
             {
-                var respone = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", null },
                     {"Error",ex }
                 };
-                return new JsonResult(respone);
+                return new JsonResult(response);
             }
 
         }
@@ -178,6 +178,16 @@ namespace BaseCustomerMVC.Controllers.Student
                     {
                        { "Error", "Thông tin không đúng" }
                     });
+                }
+
+                //COMPLETE ALL INCOMPLETE EXAMS
+                var incompleted_exs = _examService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.StudentID == userid && o.Status == false).SortBy(t => t.Number).ToEnumerable();
+                if (incompleted_exs != null && incompleted_exs.Count() > 0)
+                {
+                    foreach (var ex in incompleted_exs)
+                    {
+                        _examService.CompleteNoEssay(ex, _lesson, out _, false);
+                    }
                 }
 
                 var marked = _examService.CreateQuery().Find(o => o.LessonScheduleID == _schedule.ID && o.StudentID == userid && o.Marked).FirstOrDefault();

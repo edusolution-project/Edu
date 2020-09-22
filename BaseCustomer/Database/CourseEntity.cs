@@ -55,6 +55,12 @@ namespace BaseCustomerEntity.Database
         public long TotalPractices { get; set; }
         [JsonProperty("Center")]
         public string Center { get; set; }
+        [JsonProperty("TargetCenters")]
+        public List<string> TargetCenters { get; set; }
+        [JsonProperty("IsPublic")]
+        public Boolean IsPublic { get; set; }
+        [JsonProperty("PublicWStudent")]
+        public Boolean PublicWStudent { get; set; }
     }
 
     public class CourseService : ServiceBase<CourseEntity>
@@ -67,16 +73,19 @@ namespace BaseCustomerEntity.Database
                 //TeacherID_1_SubjectID_1_GradeID_1_IsActive_1
                 new CreateIndexModel<CourseEntity>(
                     new IndexKeysDefinitionBuilder<CourseEntity>()
-                    .Ascending(t=> t.TeacherID)
+                    .Ascending(t => t.Center)
+                    .Ascending(t => t.TeacherID)
                     .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)
-                    .Ascending(t=>t.IsActive)
+                    .Ascending(t => t.GradeID)
+                    .Ascending(t => t.IsActive)
                     ),
-                //SubjectID_1_GradeID_1_IsActive_1
+                //Center_1_GradeID_1_IsActive_1
                 new CreateIndexModel<CourseEntity>(
                     new IndexKeysDefinitionBuilder<CourseEntity>()
+                    .Ascending(t => t.Center)
                     .Ascending(t => t.SubjectID)
-                    .Ascending(t=> t.GradeID)
+                    .Ascending(t => t.GradeID)
+                    .Ascending(t => t.IsActive)
                     ),
                 new CreateIndexModel<CourseEntity>(
                     new IndexKeysDefinitionBuilder<CourseEntity>()
