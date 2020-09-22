@@ -14,6 +14,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using FileManagerCore.Interfaces;
 using Core_v2.Globals;
+using System.Net;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Net.Http;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -36,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly HashSet<string> _fileType = new HashSet<string>() { "DOC", "DOCX", "XLS", "XLSX", "PPTX", "PPTX", "PDF" };
         private string host;
         private string staticPath;
+
+        private string RootPath { get; }
 
         public ReferenceController(
             TeacherService teacherService,
@@ -66,6 +72,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
+
+            RootPath = (iConfig.GetValue<string>("SysConfig:StaticPath") ?? _env.WebRootPath) + "/Files";
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -449,5 +457,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _ = _referenceService.IncView(ID, 1);
             return Json("OK");
         }
+
+        public JsonResult ChangeLinkImage()
+        {
+            try
+            {
+                var folder = "eduso/IMG";
+                folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
+                string uploads = Path.Combine(RootPath, folder);
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+
+                //var i = 1;
+                var listImgDriver = _referenceService.CreateQuery().Find(x => x.Image != null && x.Image.Contains("drive.google.com"));
+                foreach (var item in listImgDriver.ToList())
+                {
+                    var path = item.Image.Replace("view", "download");
+                    var fileName = path.Substring(path.IndexOf("id=") + 3);
+                    using (WebClient myWebClient = new WebClient())
+                    {
+                        myWebClient.DownloadFile(path, $"{uploads}/{fileName}.jpg");
+                        //i++;
+                    }
+
+                    item.Image = $"Files/{folder}/{fileName}";
+                    _referenceService.Save(item);
+                }
+                return null;
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
     }
 }
