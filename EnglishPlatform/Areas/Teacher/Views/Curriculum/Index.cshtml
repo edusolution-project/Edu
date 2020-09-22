@@ -284,11 +284,14 @@
                 },
                 "addItem.SelectAll": function () {
                     if (this.addItem.SelectAll) {
+                        //debugger
+                        this.addItem.TargetCenters = []
                         for (i in this.list_Acenters) {
-                            this.addItem.TargetCenters += this.list_Acenters[i].ID+","
+                            debugger
+                            //if (this.addItem.TargetCenters.includes(this.list_Acenters[i].ID) == false) 
+                                this.addItem.TargetCenters += this.list_Acenters[i].ID + ","
                         }
                         var targets = this.addItem.TargetCenters.toString().split(',');
-                        this.addItem.TargetCenters = []
                         this.addItem.TargetCenters = targets
                         this.a()
                     }
@@ -388,9 +391,19 @@
                         _that.addItem.TeacherID = obj.TeacherID;
                         _that.addItem.IsPublic = obj.IsPublic;
                         _that.addItem.PublicWStudent = obj.PublicWStudent;
-                        if (obj.TargetCenters != null)
+                        if (obj.TargetCenters != null) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
-                        else _that.addItem.TargetCenters = [];
+                            if (obj.TargetCenters.length == this.list_Acenters.length) {
+                                _that.addItem.SelectAll = true;
+                            }
+                            else {
+                                _that.addItem.SelectAll = false;
+                            }
+                        }
+                        else {
+                            _that.addItem.TargetCenters = [];
+                            _that.addItem.SelectAll = false;
+                        }
                         //debugger
                     }
                     _that.$bvModal.show('modal_event')

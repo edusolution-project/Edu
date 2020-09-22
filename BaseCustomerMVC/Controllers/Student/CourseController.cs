@@ -355,7 +355,8 @@ namespace BaseCustomerMVC.Controllers.Student
                        {
                            id = o.ID,
                            //courseID = o.CourseID,
-                           courseName = skill.Name + " (" + _class.Name + ")",
+                           //courseName = skill.Name + " (" + _class.Name + ")",
+                           courseName = o.CourseID == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
                            endDate = _class.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
@@ -411,7 +412,8 @@ namespace BaseCustomerMVC.Controllers.Student
                        {
                            id = o.ID,
                            //courseID = o.CourseID,
-                           courseName = skill.Name + " (" + _class.Name + ")",
+                           //courseName = skill.Name + " (" + _class.Name + ")",
+                           courseName = o.CourseID==null?"":_courseService.GetItemByID(o.CourseID).Name,
                            endDate = _class.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
