@@ -3,12 +3,15 @@ using BaseCustomerMVC.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
@@ -48,6 +51,12 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
 
+        private readonly ReferenceService _referenceService;
+
+        private string host;
+        private string staticPath;
+        private string RootPath { get; }
+
         public HomeController(
                 CourseLessonService lessonService,
                 LessonPartService lessonPartService,
@@ -76,7 +85,9 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 CenterService centerService,
                 StudentService studentService,
-                TeacherService teacherService
+                TeacherService teacherService,
+                IConfiguration iConfig,
+                ReferenceService referenceService
             )
         {
             _lessonService = lessonService;
@@ -108,6 +119,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             _centerService = centerService;
             _studentService = studentService;
             _teacherService = teacherService;
+
+            host = iConfig.GetValue<string>("SysConfig:Domain");
+            staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
         }
 
         // GET: Home
@@ -486,6 +500,41 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
 
                 return Json("OK");
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public JsonResult ChangeLinkImage()
+        {
+            try
+            {
+                var folder = "eduso/IMG";
+                folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
+                string uploads = Path.Combine(staticPath + "/Files", folder);
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+
+                //var i = 1;
+                var listImgDriver = _referenceService.CreateQuery().Find(x => x.Image != null && x.Image.Contains("drive.google.com"));
+                foreach (var item in listImgDriver.ToList())
+                {
+                    var path = item.Image.Replace("view", "download");
+                    var fileName = path.Substring(path.IndexOf("id=") + 3);
+                    using (WebClient myWebClient = new WebClient())
+                    {
+                        myWebClient.DownloadFile(path, $"{uploads}/{fileName}.jpg");
+                        //i++;
+                    }
+
+                    item.Image = $"Files/{folder}/{fileName}";
+                    _referenceService.Save(item);
+                }
+                return null;
             }
             catch (Exception ex)
             {
