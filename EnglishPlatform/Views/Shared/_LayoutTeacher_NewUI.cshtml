@@ -8,6 +8,7 @@
         return $"/{center}{url}";
     }
 }
+@using Microsoft.AspNetCore.Http;
 <html>
 
 <head>
@@ -24,6 +25,8 @@
 
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
+
+    <link href="~/css/w3.css" rel="stylesheet" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -121,6 +124,50 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
+            <div class="box p-3 row" id="profile" style="position:relative">
+                <div class="col-md-3 col-xs-12" style="text-align:center">
+                    @if (Context.Session.GetString("userAvatar") != null)
+                    {
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                    }
+                    else
+                    {
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                    }
+
+                    <div id="Demo" class="w3-dropdown-content w3-bar-block w3-card-4 w3-animate-zoom" style="width:210px;border-radius:10px">
+                        <a href="@processUrl("Profile","Home")#myprofile" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
+                    <a href="@processUrl("Profile","Home")" style="color:#222222 !important">@User.Identity.Name</a>
+                </div>
+                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
+                    <span style="cursor:pointer" onclick="openNav()">☰</span>
+                </div>
+
+                <script>
+                    function openNav() {
+                        var x = document.getElementById("Demo");
+                        if (x.className.indexOf("w3-show") == -1) {
+                            x.className += " w3-show";
+                        } else {
+                            x.className = x.className.replace(" w3-show", "");
+                        }
+
+                        function closeNav() {
+                            var x = document.getElementById("Demo");
+                            //if (x.className.indexOf("w3-show") == -1) {
+                            //    x.className += " w3-show";
+                            //}
+                            //else {
+                            x.className = x.className.replace(" w3-show", "");
+                            //}
+                        }
+                    }
+                </script>
+            </div>
             <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
                 <i class="fas fa-star" style="font-size:150%"></i>
                 <i class="fas fa-star" style="font-size:250%"></i>
@@ -166,72 +213,72 @@
                 }
             </style>
             @*<div class="box padding-15" id="plan_box">
-                    <div class="select-date flex">
-                        <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
-                        <div class="week">
-                            02/12/2019 - 09/12/2019
+            <div class="select-date flex">
+                <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
+                <div class="week">
+                    02/12/2019 - 09/12/2019
+                </div>
+                <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
+            </div>
+            <div class="table-detail">
+                <div class="tr">
+                    <div class="c-d td">T2</div>
+                    <div class="c-cl td">
+                        <div class="flex">
+                            <span class="time">08:30</span>
+                            <span class="title">IEL</span>
                         </div>
-                        <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
-                    </div>
-                    <div class="table-detail">
-                        <div class="tr">
-                            <div class="c-d td">T2</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T3</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T4</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T5</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T6</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T7</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">CN</div>
-                            <div class="c-cl td">
-                            </div>
+                        <div class="flex">
+                            <span class="time">08:30</span>
+                            <span class="title">IEL</span>
                         </div>
                     </div>
-                </div>*@
+                </div>
+                <div class="tr">
+                    <div class="c-d td">T3</div>
+                    <div class="c-cl td">
+                    </div>
+                </div>
+                <div class="tr">
+                    <div class="c-d td">T4</div>
+                    <div class="c-cl td">
+                        <div class="flex">
+                            <span class="time">08:30</span>
+                            <span class="title">IEL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tr">
+                    <div class="c-d td">T5</div>
+                    <div class="c-cl td">
+                    </div>
+                </div>
+                <div class="tr">
+                    <div class="c-d td">T6</div>
+                    <div class="c-cl td">
+                    </div>
+                </div>
+                <div class="tr">
+                    <div class="c-d td">T7</div>
+                    <div class="c-cl td">
+                        <div class="flex">
+                            <span class="time">08:30</span>
+                            <span class="title">IEL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tr">
+                    <div class="c-d td">CN</div>
+                    <div class="c-cl td">
+                    </div>
+                </div>
+            </div>
+        </div>*@
 
 
             @*<div class="adv">
-                    <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
-                </div>*@
+            <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
+        </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>

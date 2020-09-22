@@ -35,7 +35,7 @@
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
-                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
+                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px" />
                     <img v-else src="/images/no-avatar.png" />
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
@@ -110,7 +110,25 @@
         new Vue({
             el: ".module",
             mounted() {
-                this.getProfile()
+                this.getProfile();
+                var hash = window.location.hash;
+                //debugger
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //debugger
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'myprofile':
+                            this.changeState(0);
+                            break;
+                        case 'changlepassword':
+                            this.changeState(1);
+                            break;
+                    }
+                }
+                else {
+                    this.changeState(0);
+                }
             },
             data: {
                 isInfo: true,
@@ -132,16 +150,20 @@
                 pass_type: 'password',
             },
             watch: {
+                
             },
             methods: {
                 changeState(s = 0) {
                     let _that = this
+                    //debugger
                     switch (s) {
                         case 1:
+                            history.replaceState({}, "Đổi mật khẩu", "#changlepassword");
                             _that.isPass = true
                             _that.isInfo = false
                             break;
                         default:
+                            history.replaceState({}, "Thông tin cá nhân", "#myprofile");
                             _that.isPass = false
                             _that.isInfo = true
                             break;

@@ -482,7 +482,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //i++;
                     }
 
-                    item.Image = $"Files/{folder}/{fileName}";
+                    item.Image = $"/Files//{folder}/{fileName}";
                     _referenceService.Save(item);
                 }
                 return null;

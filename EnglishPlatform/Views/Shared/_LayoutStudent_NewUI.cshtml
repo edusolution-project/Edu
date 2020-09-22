@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
+
 @{
+    var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
+
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -8,6 +11,7 @@
         return $"/{center}{url}";
     }
 }
+@using Microsoft.AspNetCore.Http;
 <html>
 
 <head>
@@ -25,7 +29,9 @@
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
-    
+
+    <link href="~/css/w3.css" rel="stylesheet" />
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
     <script>
@@ -41,7 +47,7 @@
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
             name: "@User.Identity.Name",
             id: "@User.FindFirst("UserID")?.Value",
-            center : "@TempData[User.FindFirst("UserID")?.Value]"
+            center: "@TempData[User.FindFirst("UserID")?.Value]"
         }
 
     </script>
@@ -111,6 +117,52 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
+            <div class="box p-3 row" id="profile" style="position:relative">
+                <div class="col-md-3 col-xs-12" style="text-align:center">
+                    @*<img v-on:error="errorImgUrl()" :src="student.Avatar" alt="" style="width:32px;height:32px;border-radius:20px" />*@
+                    @if (Context.Session.GetString("userAvatar") != null)
+                    {
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()"/>
+                    }
+                    else
+                    {
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()"/>
+                    }
+
+                    <div id="Demo" class="w3-dropdown-content w3-bar-block w3-card-4 w3-animate-zoom" style="width:210px;border-radius:10px">
+                        <a href="@processUrl("Profile","Home")#myprofile" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
+                    <a href="@processUrl("Profile","Home")" style="color:#222222 !important">@User.Identity.Name</a>
+                </div>
+                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
+                    <span style="cursor:pointer" onclick="openNav()">☰</span>
+                </div>
+
+                <script>
+                    function openNav() {
+                        var x = document.getElementById("Demo");
+                        if (x.className.indexOf("w3-show") == -1) {
+                            x.className += " w3-show";
+                        }
+                        else {
+                            x.className = x.className.replace(" w3-show", "");
+                        }
+                    }
+
+                    function closeNav() {
+                        var x = document.getElementById("Demo");
+                        //if (x.className.indexOf("w3-show") == -1) {
+                        //    x.className += " w3-show";
+                        //}
+                        //else {
+                            x.className = x.className.replace(" w3-show", "");
+                        //}
+                    }
+                </script>
+            </div>
             <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
                 <i class="fas fa-star" style="font-size:150%"></i>
                 <i class="fas fa-star" style="font-size:250%"></i>
@@ -248,7 +300,23 @@
                         .then(response => {
                             this.list_star = response.data.Data;
                         }).catch(e => { })
+                }
+            }
+        });
+
+        new Vue({
+            el: "#profile",
+            mounted() {
+                this.student=@Html.Raw(Json.Serialize(student));
+            },
+            data: {
+                avatar: {
+                    src: '/images/no-avatar.png',
+                    file: null,
+                    height: 150,
+                    width: 150
                 },
+                student: []
             }
         });
     </script>
