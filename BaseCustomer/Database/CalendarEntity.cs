@@ -61,6 +61,9 @@ namespace BaseCustomerEntity.Database
                 new CreateIndexModel<CalendarEntity>(
                     new IndexKeysDefinitionBuilder<CalendarEntity>()
                     .Ascending(t=> t.GroupID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
+                new CreateIndexModel<CalendarEntity>(
+                    new IndexKeysDefinitionBuilder<CalendarEntity>()
+                    .Ascending(t=> t.GroupID).Ascending(t=> t.TeacherID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
                 //CreateUser_1_StartDate_1_EndDate_1
                 new CreateIndexModel<CalendarEntity>(
                     new IndexKeysDefinitionBuilder<CalendarEntity>()

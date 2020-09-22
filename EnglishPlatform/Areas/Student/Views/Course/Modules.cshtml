@@ -55,7 +55,7 @@
     </div>
     <div class="card-header border-b" v-cloak>
         <div class="flex pb-2">
-            <h2 class="title"><a href="@processUrl("Detail", "Course")/@currentCs.ClassID#module" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
+            <h2 class="title"><a href="@processUrl("Index", "Course")#@currentCs.ClassID" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>

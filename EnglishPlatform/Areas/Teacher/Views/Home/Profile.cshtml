@@ -64,12 +64,12 @@
                         <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email" readonly="readonly">
                     </div>
                     @*<div class="form-group" v-if="isInfo">
-                        <label for="password">Mật khẩu</label>
-                        <div class="relative">
-                            <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
-                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
-                        </div>
-                    </div>*@
+                            <label for="password">Mật khẩu</label>
+                            <div class="relative">
+                                <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
+                                <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                            </div>
+                        </div>*@
                     <!--  -->
                     <div class="form-group" v-if="isPass">
                         <label for="password_old">Mật khẩu cũ*</label>
@@ -110,13 +110,14 @@
         new Vue({
             el: ".module",
             mounted() {
-                this.getProfile()
+                //this.getProfile()
+                this.avatar.src = this.cacheStatic(this.profile.Avatar, 150),
+                this.avatar.file = this.avatar.src
             },
             data: {
                 isInfo: true,
                 isPass: false,
-                profile: {
-                },
+                profile: @Html.Raw(Json.Serialize(Model)),
                 avatar: {
                     src: '/images/no-avatar.png',
                     file: null,
@@ -148,7 +149,7 @@
                     }
                     //console.log(s);
                 },
-                getProfile() {
+                @*getProfile() {
                      let _url = '@processUrl("GetProfile","Home")'
                      axios.get(_url)
                          .then(response =>{
@@ -161,7 +162,7 @@
                          }).catch(e =>{})
                     //this.avatar.src = this.profile.avatar
                     //this.avatar.file = this.profile.avatar
-                },
+                },*@
                 updateProfile() {
                     let _url = '@processUrl("SaveProfile","Home")'
                     let _form = new FormData()
@@ -239,6 +240,11 @@
                     } else {
                         this.pass_type = 'password'
                     }
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&h=" + width + "&mode=crop&format=jpg";
                 },
             }
         });

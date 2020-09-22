@@ -75,13 +75,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [Obsolete]
-        public Task<JsonResult> GetList(DefaultModel model, DateTime start, DateTime end)
+        public Task<JsonResult> GetList(DefaultModel model, DateTime start, DateTime end, string basis)
         {
             try
             {
-                if (TempData["center_router"] != null)
+                if (!string.IsNullOrEmpty(basis))
                 {
-                    var center = _centerService.GetItemByCode(TempData["center_router"].ToString());
+                    var center = _centerService.GetItemByCode(basis);
                     var userId = User?.FindFirst("UserID").Value;
                     if (center != null && userId != null)
                     {
