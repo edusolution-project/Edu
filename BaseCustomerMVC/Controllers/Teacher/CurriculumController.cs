@@ -232,7 +232,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             ViewBag.RoleCode = User.Claims.GetClaimByType(ClaimTypes.Role).Value;
             ViewBag.Model = model;
-            ViewBag.ListCenters = _centerService.GetAll().ToList();
+            //ViewBag.ListCenters = _centerService.GetAll().ToList();
             if (old == 1)
                 return View("Index_o");
             return View();

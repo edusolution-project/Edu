@@ -9,7 +9,7 @@
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
     var defTeacher = ViewBag.User;
-    var listCenters = ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
+    //var listCenters = ViewBag.ListCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -122,7 +122,6 @@
                 //debugger
                 this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses =@Html.Raw(Json.Serialize(courses));
-                this.list_Acenters =@Html.Raw(Json.Serialize(listCenters));
                 //this.changeSubject()
                 this.getData();
                 window.chooseFile = this.chooseFile
@@ -231,8 +230,7 @@
                 hPage: 1,
                 totalRec: 0,
                 componentKey: 0,
-                checkShowSelect: false,
-                list_Acenters:[]
+                displaySelect: false
             },
             computed: {
                 page: {
@@ -279,25 +277,8 @@
                     }, 500)
                 },
                 "addItem.TargetCenters": function () {
-                    this.a()
+                    this.checkToggle()
                     //debugger
-                },
-                "addItem.SelectAll": function () {
-                    if (this.addItem.SelectAll) {
-                        //debugger
-                        this.addItem.TargetCenters = []
-                        for (i in this.list_Acenters) {
-                            debugger
-                            //if (this.addItem.TargetCenters.includes(this.list_Acenters[i].ID) == false) 
-                                this.addItem.TargetCenters += this.list_Acenters[i].ID + ","
-                        }
-                        var targets = this.addItem.TargetCenters.toString().split(',');
-                        this.addItem.TargetCenters = targets
-                        this.a()
-                    }
-                    else {
-                        this.addItem.TargetCenters=[]
-                    }
                 }
             },
             methods: {
@@ -393,7 +374,7 @@
                         _that.addItem.PublicWStudent = obj.PublicWStudent;
                         if (obj.TargetCenters != null) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
-                            if (obj.TargetCenters.length == this.list_Acenters.length) {
+                            if (obj.TargetCenters.length == this.list_centers.length) {
                                 _that.addItem.SelectAll = true;
                             }
                             else {
@@ -450,7 +431,7 @@
                     let _form = new FormData()
 
                     if (_that.addItem.Name == '') {
-                        alert("Please fill in required fields");
+                        alert("Vui lòng điền đầy đủ thông tin");
                         this.$refs["addName"].focus();
                         return false;
                     }
@@ -715,25 +696,29 @@
                         reader.readAsDataURL(input.files[0]); // convert to base64 string
                     }
                 },
-                showSelect() {
-                    if (this.checkShowSelect == false) {
-                        $('#selectCenters').attr('style', 'display:block');
-                        this.checkShowSelect = true;
-                    }
-                    else {
-                        $('#selectCenters').attr('style', 'display:none');
-                        this.checkShowSelect = false;
-                    }
+                toggleSelect() {
+                    this.displaySelect = !this.displaySelect
                 },
-                a() {
+                checkToggle() {
+                    this.addItem.SelectAll = (this.addItem.TargetCenters.length == this.list_centers.length)
                     this.addItem.NameCenters = ''
-                    for (i = 0; i < this.list_Acenters.length; i++) {
+                    for (i = 0; i < this.list_centers.length; i++) {
                         for (j = 0; j < this.addItem.TargetCenters.length; j++) {
-                            if (this.list_Acenters[i].ID == this.addItem.TargetCenters[j]) {
-                                this.addItem.NameCenters += this.list_Acenters[i].Name + '; '
+                            if (this.list_centers[i].ID == this.addItem.TargetCenters[j]) {
+                                this.addItem.NameCenters += this.list_centers[i].Name + '; '
                             }
                         }
                     }
+                },
+                checkToggleAll() {
+                    var _that = this
+                    _that.addItem.TargetCenters = []
+                    if (_that.addItem.SelectAll) {
+                        _that.list_centers.forEach(function (item, pos) {
+                            _that.addItem.TargetCenters.push(item.ID)
+                        })
+                    }
+                    _that.checkToggle()
                 }
             }
         });
@@ -775,24 +760,24 @@
             </b-col>
             <b-col class="form-group col-md-6 col-sm-12" v-if="addItem.IsPublic">
                 @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
-                <div class="col-sm-10 row" style="position:relative">
+                <div class="col-sm-12 row" style="position:relative">
                     <div class="col-md-3 col-sm-12">
-                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="showSelect()">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()">
                             Chọn <span class="caret"></span>
                         </button>
                     </div>
-                    <div class="col-md-9 col-sm-12">
+                    <div class="col-md-9 col-sm-12" v-on:click="toggleSelect()">
                         <input type="text" class="form-control " v-model="addItem.NameCenters" disabled />
                     </div>
-                    <div class="col-sm-7" style="position:absolute;right:105px;top:40px;z-index:2">
-                        <div id="selectCenters" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:100px;width:415px;list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                    <div class="col-md-9" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelect">
+                        <div id="selectCenters">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto; height:100px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
                                 <li>
                                     <a>
-                                        <input type="checkbox" v-model="addItem.SelectAll" /><span class="lbl"> Chọn tất cả </span>
+                                        <input type="checkbox" v-model="addItem.SelectAll" v-on:change="checkToggleAll()" /><span class="lbl"> Chọn tất cả </span>
                                     </a>
                                 </li>
-                                <li v-for="(item,k) in list_Acenters">
+                                <li v-for="(item,k) in list_centers">
                                     <a>
                                         <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
                                     </a>
