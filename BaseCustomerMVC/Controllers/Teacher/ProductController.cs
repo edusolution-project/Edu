@@ -79,10 +79,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var DataResponse =
                 from t in list_products
+                let @class = _classService.GetItemByID(t.ClassID) ?? new ClassEntity()
                 select _mapping.AutoOrtherType(t, new NewsViewModel()
                 {
-                    ClassName = t.ClassID == null || t.ClassID == "0" || t.ClassID == "" ? null : _classService.GetItemByID(t.ClassID).Name,
-                    CenterName = t.CenterID == null || t.CenterID == "0" || t.CenterID == "" ? null : _centerService.GetItemByID(t.CenterID).Name,
+                    ClassName = @class.Name,
+                    CenterName = center.Name,
                     TotalPrice = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).Project(o => o.Price).ToList().Sum(o => o),
                     Transactions = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).CountDocuments()
                 });
@@ -102,15 +103,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var list = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID);
             model.TotalRecord = list.CountDocuments();
 
-            var list_products=list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            var list_products = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
 
             //var list_products = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.CenterID == center.ID).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
             var DataResponse =
                from t in list_products
+               let @class = _classService.GetItemByID(t.ClassID) ?? new ClassEntity()
                select _mapping.AutoOrtherType(t, new NewsViewModel()
                {
-                   ClassName = t.ClassID == null || t.ClassID == "0" || t.ClassID == "" ? null : _classService.GetItemByID(t.ClassID).Name,
-                   CenterName = t.CenterID == null || t.CenterID == "0" || t.CenterID == "" ? null : _centerService.GetItemByID(t.CenterID).Name,
+                   ClassName = @class.Name,
+                   CenterName = center.Name,
                    TotalPrice = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).Project(o => o.Price).ToList().Sum(o => o),
                    Transactions = _transactionService.CreateQuery().Find(o => o.NewsID == t.ID).CountDocuments()
                });
