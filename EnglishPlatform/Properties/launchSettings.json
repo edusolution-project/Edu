@@ -7,14 +7,17 @@
       "sslPort": 0
     },
     "iisExpress": {
-      "applicationUrl": "http://localhost:61259",
-      "sslPort": 0
+      "applicationUrl": "https://test.eduso.vn",
+      "sslPort": 44303
     }
   },
   "profiles": {
     "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true
+      "commandName": "IIS",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     "EnglishPlatform": {
       "commandName": "IISExpress",
