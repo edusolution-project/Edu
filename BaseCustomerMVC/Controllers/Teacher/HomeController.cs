@@ -80,10 +80,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var account = _teacherService.GetItemByID(_teacherid);
             if (account == null)
                 return Redirect("/login");
-
-
-            //ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
-            //_session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
+            ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
+            _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
         }
 

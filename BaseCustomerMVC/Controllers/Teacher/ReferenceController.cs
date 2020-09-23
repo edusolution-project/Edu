@@ -458,40 +458,5 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json("OK");
         }
 
-        public JsonResult ChangeLinkImage()
-        {
-            try
-            {
-                var folder = "eduso/IMG";
-                folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
-                string uploads = Path.Combine(RootPath, folder);
-                if (!Directory.Exists(uploads))
-                {
-                    Directory.CreateDirectory(uploads);
-                }
-
-                //var i = 1;
-                var listImgDriver = _referenceService.CreateQuery().Find(x => x.Image != null && x.Image.Contains("drive.google.com"));
-                foreach (var item in listImgDriver.ToList())
-                {
-                    var path = item.Image.Replace("view", "download");
-                    var fileName = path.Substring(path.IndexOf("id=") + 3);
-                    using (WebClient myWebClient = new WebClient())
-                    {
-                        myWebClient.DownloadFile(path, $"{uploads}/{fileName}.jpg");
-                        //i++;
-                    }
-
-                    item.Image = $"/Files//{folder}/{fileName}";
-                    _referenceService.Save(item);
-                }
-                return null;
-            }
-            catch(Exception ex)
-            {
-                return Json(ex.Message);
-            }
-        }
-
     }
 }

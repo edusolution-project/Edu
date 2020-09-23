@@ -538,7 +538,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         //i++;
                     }
 
-                    item.Image = $"Files/{folder}/{fileName}";
+                    item.Image = $"/Files//{folder}/{fileName}.jpg";
                     _referenceService.Save(item);
                 }
                 return Json("OK");
