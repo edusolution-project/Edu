@@ -500,6 +500,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var active = getRoot().querySelector("[data-id='"+id+"']");
         if(active){
             if(active.classList.contains("active")){
+                if(data.sender == __defaulConfig.currentUser.id){
+                    return;
+                }
                 renderMessage([data],true);
             }
         }

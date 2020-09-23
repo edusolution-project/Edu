@@ -35,7 +35,12 @@
         var ajax = createAjax();
         return ajax.proccess("GET", url, null, false).then(function(data){
             //console.log(data);
-            __GROUPS = typeof(data) == "string" ? JSON.parse(data) : data;
+            if(data){
+                __GROUPS = typeof(data) == "string" ? JSON.parse(data) : data;
+            }
+            else{
+                __GROUPS = [];
+            }
         });
         //console.log("abc");
     }
