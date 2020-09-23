@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using Core_v2.Interfaces;
 using EasyChatApp.DataBase;
@@ -18,7 +19,7 @@ namespace EasyChatApp.Controllers
 {
     [Route("[controller]/[action]")]
     [ApiController]
-    public class ChatController : ControllerBase
+    public class ChatController : Controller
     {
         private readonly IHubContext<EasyChatHub> _hubContext;
         private readonly ILog _log;
@@ -26,9 +27,11 @@ namespace EasyChatApp.Controllers
         private readonly GroupUserService _groupUserService;
         private readonly MessagerService _messagerService;
         private readonly IConfiguration _configuration;
+        private readonly GroupAndUserService _groupAndUserService;
         public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext , IConfiguration configuration
             , GroupUserService  groupUserService
-            , MessagerService messagerService)
+            , MessagerService messagerService,
+            GroupAndUserService groupAndUserService)
         {
             this._log = log;
             _roxyFilemanHandler = roxyFilemanHandler;
@@ -36,6 +39,7 @@ namespace EasyChatApp.Controllers
             _groupUserService = groupUserService;
             _messagerService = messagerService;
             _configuration = configuration;
+            _groupAndUserService = groupAndUserService;
         }
         /// <summary>
         /// 
@@ -49,64 +53,65 @@ namespace EasyChatApp.Controllers
         /// <param name="connectionId"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<Response> SendMessage(string messageId ,string center, string user, string groupId, string receiver, string message, string connectionId)
+        public async Task<Response> SendMessage([FromQuery]ChatModel model)
         {
             Response response = new Response();
             //await Task.Delay(100);
             try
             {
-                //MessagerEntity item = string.IsNullOrEmpty(messageId) ? new MessagerEntity {Sender = user} : _messagerService.GetItemByID(messageId);
-                //#region group or user
-                //if (!string.IsNullOrEmpty(groupId))
-                //{
-                //    item.GroupId = groupId;
-                //}
-                //if (!string.IsNullOrEmpty(receiver))
-                //{
-                //    var group = _groupUserService.GetGroupPrivate(user, receiver);
-                //    item.GroupId = group.ID;
-                //}
-                //#endregion
-                //var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(center, user, HttpContext);
-                //if (medias == null || medias.Count == 0)
-                //{
-                //    item.Content = message;
-                //}
-                //else
-                //{
-                //    List<MetaData> metaDatas = new List<MetaData>();
-                //    for (int i = 0; i < medias.Count; i++)
-                //    {
-                //        var media = medias[i];
-                //        metaDatas.Add(new MetaData()
-                //        {
-                //            Id = media.FileId,
-                //            Type = media.Extends,
-                //            Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
-                //        });
-                //    }
-                //    item.Data = metaDatas;
-                //}
-                //_messagerService.CreateOrUpdate(item);
-                //if (!string.IsNullOrEmpty(groupId))
-                //{
-                //    await _hubContext.Clients.Group(groupId).SendAsync("ReceiverMessage", item);
-                //}
-                //else
-                //{
-                //    await _hubContext.Clients.User(connectionId).SendAsync("ReceiverMessage", item);
-                //}
-
-                //response.Code = 200;
-                //response.Data = item;
-                //response.Message = "SUCCESS";
+                MessagerEntity item = string.IsNullOrEmpty(model.messageId) ? new MessagerEntity {Sender = model.user } : _messagerService.GetItemByID(model.messageId);
+                #region group or user
+                if (!string.IsNullOrEmpty(model.groupId))
+                {
+                    item.GroupId = model.groupId;
+                }
+                if (!string.IsNullOrEmpty(model.receiver))
+                {
+                    var group = _groupUserService.GetGroupPrivate(model.user, model.receiver);
+                    item.GroupId = group.ID;
+                }
+                #endregion
+                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(model.center, model.user, HttpContext);
+                if (medias == null || medias.Count == 0)
+                {
+                    item.Content = model.message;
+                }
+                else
+                {
+                    List<MetaData> metaDatas = new List<MetaData>();
+                    for (int i = 0; i < medias.Count; i++)
+                    {
+                        var media = medias[i];
+                        metaDatas.Add(new MetaData()
+                        {
+                            Id = media.FileId,
+                            Type = media.Extends,
+                            Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
+                        });
+                    }
+                    item.Data = metaDatas;
+                }
+                _messagerService.CreateOrUpdate(item);
+                if (!string.IsNullOrEmpty(model.groupId))
+                {
+                    await _hubContext.Clients.Group(model.groupId).SendAsync("ReceiverMessage", item,null,model.groupId);
+                }
+                else
+                {
+                    var usersConnections = EasyChatHub.UserMap;
+                    var connestionIds = usersConnections.GetGroupConnections(model.receiver);
+                    if(connestionIds != null && connestionIds.Count() > 0)
+                    {
+                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item,model.user,null);
+                    }
+                }
+                response.Code = 200;
+                response.Data = item;
+                response.Message = "SUCCESS";
 
             }
             catch(Exception ex)
             {
-                StackTrace stackTrace = new StackTrace();
-                MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
-                await _log.Error(methodBase.Name, ex);
                 response.Code = 500;
                 response.Message = ex.Message;
                 response.Data = null;
@@ -163,12 +168,12 @@ namespace EasyChatApp.Controllers
         }
 
         [HttpPost]
-        public async Task<Response> GetMessages(string user, string receiver, string groupId, string messageId, double startDate, double endDate)
+        [Obsolete]
+        public async Task<Response> GetMessages(string user, string receiver, string groupId, string messageId, double startDate, int pageIndex, int pageSize)
         {
             Response response = new Response();
             try
             {
-
                 string groupName = groupId;
                 if (!string.IsNullOrEmpty(receiver))
                 {
@@ -176,10 +181,13 @@ namespace EasyChatApp.Controllers
                 }
                 if (string.IsNullOrEmpty(messageId))
                 {
-                    var data = _messagerService.CreateQuery().Find(o => (o.Time >= startDate && o.Time <= endDate) && o.GroupId == groupName)?.ToList();
                     response.Code = 200;
-                    response.Data = data;
                     response.Message = "SUCCESS";
+                    //thoi diem hien tai ve sau
+                    var listData = _messagerService.CreateQuery().Find(o => o.GroupId == groupName)?.SortByDescending(o=>o.Time)?.Skip(pageSize*pageIndex)?
+                        .Limit(pageSize)?.ToList()?.OrderBy(o=>o.Time)?.ToList();
+
+                    response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
                 }
                 else
                 {
@@ -188,7 +196,6 @@ namespace EasyChatApp.Controllers
                     response.Data = data;
                     response.Message = "SUCCESS";
                 }
-
 
                 return response;
 
@@ -205,17 +212,49 @@ namespace EasyChatApp.Controllers
             return response;
         }
 
+        public GroupMapping<string> GroupMapping()
+        {
+            return EasyChatHub.GroupMapping;
+        }
         public string ScriptEasyChat()
         {
             string host = _configuration.GetSection("EasyChat:Host").Value;
+            string urlNoti = host + "/Chat/GetNotifications?user={user}&groupNames={groupNames}";
             string urlSend = host + "/Chat/SendMessage";
             string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
-            string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&endDate={endDate}";
-            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "'}";
+            string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&pageIndex={pageIndex}&pageSize={pageSize}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "'}";
             return value;
         }
-    }
+        [HttpGet]
+        public List<string> GetNotifications(string user, string groupNames)
+        {
+            List<string> groups = groupNames.Split(',')?.ToList();
+            var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o=>o.ID)?.ToList();
+            if (listPrivateGroups == null) { listPrivateGroups = new List<string>(); }
+            if (groups == null) return null;
+            var listTime = _groupAndUserService.CreateQuery().Find(o => o.UserID == user && groups.Contains(o.GroupID))?.ToList();
+            if(listTime != null)
+            {
+                
+                var times = listTime.Select(o => o.TimeLife)?.ToList();
+                double max = times.Max();
+                var messages = _messagerService.CreateQuery().Find(o => o.Time >= max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId)) && o.Sender != user)?.ToList();
+                return messages.Select(o => o.GroupId)?.ToList();
+            }
 
+            return null;
+        }
+    }
+    public class ChatModel
+    {
+        public string messageId { get; set; }
+        public string center { get; set; }
+        public string user { get; set; }
+        public string groupId { get; set; }
+        public string receiver { get; set; }
+        public string message { get; set; }
+    }
     public class Response
     {
         public int Code { get; set; }

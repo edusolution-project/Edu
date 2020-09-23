@@ -17,4 +17,9 @@
     <ProjectReference Include="..\RoxyFileManager\FileManagerCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GoogleDrive\Drive.Storge\" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

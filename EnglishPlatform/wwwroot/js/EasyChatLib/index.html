@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/easy-chat.css">
+    <title>Document</title>
+</head>
+<body>
+    <div id="preview"></div>
+    <div id="preview2"></div>
+    <div id="easy-chat"></div>
+    
+    <script src="http://localhost:61259/home/CurrentUser"></script>
+    <script>
+        console.log(g_CurrentUser);
+    </script>
+    <script src="assets/js/Lib/signalr.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:8998/chathub")
+            .build();
+    </script>
+    <script src="assets/js/text.js"></script>
+    <script src="assets/js/members.js"></script>
+    <script src="assets/js/groups.js"></script>
+    <script src="assets/js/message.js"></script>
+    <script src="assets/js/UI.js"></script>
+    <script src="assets/js/easychat.js"></script>
+    <script>
+        var easyChat = new EasyChat();
+        easyChat.Create();
+    </script>
+</body>
+</html>

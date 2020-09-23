@@ -65,12 +65,14 @@ namespace AndcultureCode.ZoomClient
 
             if (!string.IsNullOrWhiteSpace(response.ErrorMessage))
             {
-                throw new Exception(response.ErrorMessage);
+                return null;
+                //throw new Exception(response.ErrorMessage);
             }
 
             if (!string.IsNullOrWhiteSpace(response.StatusDescription) && !string.IsNullOrWhiteSpace(response.Content))
             {
-                throw new Exception($"{response.StatusDescription} || {response.Content}");
+                return null;
+                //throw new Exception($"{response.StatusDescription} || {response.Content}");
             }
 
             return null;
