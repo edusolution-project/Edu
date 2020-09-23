@@ -23,6 +23,10 @@
 <link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
+
+<!--Lazy load-->
+<script src="~/js/vue-lazyload.js"></script>
+
 <script>
     setActiveMenu("curriculum");
 </script>
@@ -69,7 +73,7 @@
                     </td>
                     <td>
                         <template v-if="item.Image">
-                            <img :src="cacheStatic(item.Image,100)" style="max-width:100px; max-height:100px;" />
+                            <img v-lazy="cacheStatic(item.Image,100)" style="max-width:100px; max-height:100px;" />
                         </template>
                     </td>
                     <td>{{item.SubjectName}}</td>
@@ -722,6 +726,16 @@
                 }
             }
         });
+
+        //lazy load
+        Vue.use(VueLazyload, {
+            preLoad: 1.3,
+            error: '~/pictures/book.jpg',
+            //loading: '~/img/Spin-1.8s-200px.gif',
+            attempt: 1,
+            // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
+            //listenEvents: ['scroll']
+        })
     </script>
 }
 @section Modals{
