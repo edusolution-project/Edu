@@ -91,7 +91,7 @@
             </div>
         </div>
         <div class="row margin-b20">
-            <div class="col-md-5 col-sm-12">
+            <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Môn học đang diễn ra</h4>
@@ -133,42 +133,57 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-7 col-sm-12">
+            <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Môn học bổ trợ</h4>
                         <a href="@processUrl("Index", "Course")" title="Xem tất cả" class="link-all">Xem tất cả<i class="ti-arrow-right"></i></a>
                     </div>
-                    <!---->
-                    <div class="box bg-1 padding-15 height-245 card-group" style="overflow-y:auto">
-                        <ul class="box list-scroll" style="display:contents !important">
+                    <div class="box bg-1 padding-15 height-245 overflow-auto">
+                        <ul class="box flex-row list-unstyled">
                             <template v-if="list_mycourses.length > 0">
-                                <div class="col-sm-4" v-for="(item,k) in list_mycourses" style="padding-bottom:30px">
-                                    <li style="margin:auto">
-                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName">
-                                            <div class="box radius">
-                                                <div class="thumb">
-                                                    <img v-if="item.image" :src="cacheStatic(item.image,256)" alt="">
-                                                    <img v-else :src="cacheStatic('/pictures/ielts1.png')" alt="">
-                                                </div>
-                                                <div class="padding-15 inner">
-                                                    <a :href="'@processUrl("Modules", "Course")/' + item.id" target="_blank" :title="item.courseName" class="title">{{item.courseName}}</a>
-                                                    <p><i class="ti-time"></i>@DateTime.Now.ToString("dd-MM-yyyy")</p>
-                                                    <div class="c-bot">
-                                                        <div class="flex reverse">
-                                                            <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
-                                                            <div class="flex justify-content-between">
-                                                                <span>{{item.min}}/{{item.max}}</span>
-                                                                <span>{{item.score.toFixed(2)}}%</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                <li v-for="(item,k) in list_mycourses" class="w-100">
+                                    <div>
+                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title font-weight-bold text-dark">{{item.courseName}}</a>
+                                        <div class="flex reverse pt-2 pb-2">
+                                            <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                            <div class="flex justify-content-between pb-1">
+                                                <span>{{item.min}}/{{item.max}}</span>
+                                                <span>{{item.score.toFixed(2)}}%</span>
                                             </div>
-                                        </a>
-                                    </li>
-                                </div>
+                                        </div>
+                                    </div>
+                                </li>
                             </template>
+                            <template v-if="list_mycourses.length > 0">
+                                <li v-for="(item,k) in list_mycourses" class="w-100">
+                                    <div>
+                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title font-weight-bold text-dark">{{item.courseName}}</a>
+                                        <div class="flex reverse pt-2 pb-2">
+                                            <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                            <div class="flex justify-content-between pb-1">
+                                                <span>{{item.min}}/{{item.max}}</span>
+                                                <span>{{item.score.toFixed(2)}}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </template>
+                            <template v-if="list_mycourses.length > 0">
+                                <li v-for="(item,k) in list_mycourses" class="w-100">
+                                    <div>
+                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title font-weight-bold text-dark">{{item.courseName}}</a>
+                                        <div class="flex reverse pt-2 pb-2">
+                                            <b-progress :value="item.percent" :max="100" class="mb-3"></b-progress>
+                                            <div class="flex justify-content-between pb-1">
+                                                <span>{{item.min}}/{{item.max}}</span>
+                                                <span>{{item.score.toFixed(2)}}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </template>
+
                             <template v-else>
                                 <li class="w-100">
                                     Bạn chưa thêm môn học bổ trợ nào. <a href="@processUrl("Index", "Reference")#docsinteractive">Chọn môn học ngay!</a>
