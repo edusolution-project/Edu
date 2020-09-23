@@ -214,8 +214,8 @@
                 }
             </style>
             @*<div class="adv">
-            <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
-        </div>*@
+                    <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
+                </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -233,7 +233,7 @@
             </div>
         </aside>
         <div v-cloak>
-            @RenderSection("Modals", false)
+           @* @RenderSection("Modals", false)*@
         </div>
     </main>
 
@@ -279,6 +279,10 @@
     @if (center == "ern")
     {
         @await Html.PartialAsync("_EasyRealtime")
+    }
+    else
+    {
+        @await Html.PartialAsync("_EasyChat")
     }
 </body>
 </html>

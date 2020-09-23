@@ -116,11 +116,11 @@
                     @*<img v-on:error="errorImgUrl()" :src="student.Avatar" alt="" style="width:32px;height:32px;border-radius:20px" />*@
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
-                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()"/>
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
                     }
                     else
                     {
-                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()"/>
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
                     }
 
                     <div id="Demo" class="w3-dropdown-content w3-bar-block w3-card-4 w3-animate-zoom" style="width:210px;border-radius:10px">
@@ -152,7 +152,7 @@
                         //    x.className += " w3-show";
                         //}
                         //else {
-                            x.className = x.className.replace(" w3-show", "");
+                        x.className = x.className.replace(" w3-show", "");
                         //}
                     }
                 </script>
@@ -278,6 +278,10 @@
     @if (center == "ern")
     {
         @await Html.PartialAsync("_EasyRealtime")
+    }
+    else
+    {
+        @await Html.PartialAsync("_EasyChat")
     }
 </body>
 </html>

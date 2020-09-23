@@ -207,7 +207,7 @@
         var exts = isSender ? createExtendsSettings():"";
         switch(type){
             case Type.IMAGE:
-                html += '<img class="lazy-load" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
+                html += '<img onmouseover="if(this.src!=this.dataset.src){this.src=this.dataset.src;}" class="lazy-loaded" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
                 break;
             case Type.AUDIO:
                 html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
@@ -224,7 +224,6 @@
         }
         html += '</div></div>'+exts;
         return '<div class="data">'+html+'</div>'
-
     }
     return UI;
 }());

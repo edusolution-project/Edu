@@ -77,7 +77,8 @@
                     } else {
                         reject({
                             status: request.status,
-                            statusText: request.statusText
+                            statusText: request.statusText,
+                            request : request
                         });
                     }
                 }
@@ -148,6 +149,24 @@
             }
         }
         return data;
+    }
+    Ajax.prototype.getResponseHeader = function(url){
+        var client = new XMLHttpRequest();
+        return new Promise(function (resolve, reject) {
+            console.log(client.readyState);
+            client.onreadystatechange = function () {
+                console.log(client.readyState);
+                if(client.readyState == 2){
+                    var contentType = client.getResponseHeader("location");
+                    client.abort();
+                    console.log(contentType);
+                    resolve(contentType);
+                }
+            }
+            client.open("GET", url, true);
+            client.setRequestHeader("Access-Control-Allow-Origin","*");
+            client.send();
+        });
     }
     return Ajax;
 }());

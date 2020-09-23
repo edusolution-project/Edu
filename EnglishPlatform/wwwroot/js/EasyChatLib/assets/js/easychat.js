@@ -170,7 +170,8 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     groupMessages.push(message);
                 }
                 senderCurrent = sender;
-                html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,groupMessages);
+                var name = senderInfo != null && senderInfo.length > 0 ? senderInfo[0].name : sender;
+                html += UI.renderGroupMessage(isMaster,name,null,groupMessages);
                 groupMessages =[];
             }
         }
