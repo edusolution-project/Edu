@@ -341,7 +341,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("dd/MM/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
                 let _url = '@processUrl("GetActiveListV2", "Course")'
                 axios.post(_url, _form)
                     .then(response => {

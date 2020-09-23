@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://longht.eduso.vn/",
+      "applicationUrl": "https://test.eduso.vn/",
       "sslPort": 0
     },
     "iisExpress": {
@@ -13,8 +13,11 @@
   },
   "profiles": {
     "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true
+      "commandName": "IIS",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     "EnglishPlatform": {
       "commandName": "IISExpress",
