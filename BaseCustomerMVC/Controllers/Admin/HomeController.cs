@@ -1,14 +1,18 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
 using Core_v2.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace BaseCustomerMVC.Controllers.Admin
@@ -48,6 +52,13 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
 
+        private readonly ReferenceService _referenceService;
+
+        private string host;
+        private string staticPath;
+        private string RootPath { get; }
+        private readonly IHostingEnvironment _env;
+
         public HomeController(
                 CourseLessonService lessonService,
                 LessonPartService lessonPartService,
@@ -76,7 +87,10 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 CenterService centerService,
                 StudentService studentService,
-                TeacherService teacherService
+                TeacherService teacherService,
+                IConfiguration iConfig,
+                IHostingEnvironment env,
+                ReferenceService referenceService
             )
         {
             _lessonService = lessonService;
@@ -108,6 +122,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             _centerService = centerService;
             _studentService = studentService;
             _teacherService = teacherService;
+            _referenceService = referenceService;
+
+            _env = env;
+
+            host = iConfig.GetValue<string>("SysConfig:Domain");
+            staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
+            RootPath = staticPath ?? _env.WebRootPath;
         }
 
         // GET: Home
@@ -370,8 +391,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             try
             {
                 var classIds = _classService.CreateQuery()
-                    .Find(t => 
-                    t.Subjects.Contains("5e4de8168a6e7b13bca5251c") || 
+                    .Find(t =>
+                    t.Subjects.Contains("5e4de8168a6e7b13bca5251c") ||
                     t.Subjects.Contains("5e4df00e8a6e7b13bca52576") ||
                     t.Subjects.Contains("5e4df0388a6e7b13bca52578") ||
                     t.Subjects.Contains("5e4df0268a6e7b13bca52577")
@@ -383,7 +404,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 foreach (var ClassID in classIds)
                 {
 
-                    
+
                     if (_oldCenter == null)
                     {
                         return Json("Không tìm thấy cơ sở");
@@ -479,12 +500,47 @@ namespace BaseCustomerMVC.Controllers.Admin
                     t.SubjectID == "5e4df0388a6e7b13bca52578" ||
                     t.SubjectID == "5e4df0268a6e7b13bca52577"
                     ).ToEnumerable();
-                foreach(var course in courses)
+                foreach (var course in courses)
                 {
                     course.Center = _newCenter.ID;
                     _courseService.Save(course);
                 }
 
+                return Json("OK");
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public JsonResult ChangeLinkImage()
+        {
+            try
+            {
+                var folder = "eduso/IMG";
+                folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
+                string uploads = Path.Combine(RootPath + "/Files", folder);
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+
+                //var i = 1;
+                var listImgDriver = _referenceService.CreateQuery().Find(x => x.Image != null && x.Image.Contains("drive.google.com")).ToList();
+                foreach (var item in listImgDriver)
+                {
+                    var path = item.Image.Replace("view", "download");
+                    var fileName = path.Substring(path.IndexOf("id=") + 3);
+                    using (WebClient myWebClient = new WebClient())
+                    {
+                        myWebClient.DownloadFile(path, $"{uploads}/{fileName}.jpg");
+                        //i++;
+                    }
+
+                    item.Image = $"Files/{folder}/{fileName}.jpg";
+                    _referenceService.Save(item);
+                }
                 return Json("OK");
             }
             catch (Exception ex)

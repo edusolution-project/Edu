@@ -21,8 +21,11 @@
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 
+<!--Lazy load-->
+<script src="~/js/vue-lazyload.js"></script>
+
 <section class="module" id="dashboard_content">
-    <div class="card-header">
+    @*<div class="card-header">
 
         <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
             <div class="box filter-box d-none">
@@ -46,7 +49,7 @@
                 <input type="text" name="" placeholder="Tên lớp cần tìm">
             </div>
         </div>
-    </div>
+    </div>*@
 
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -55,7 +58,7 @@
         <template v-if="classes.length > 0">
             <template v-for="(item,i) in classes">
                 <template v-if="item.ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
-                    <div class="form-group">
+                    <div class="form-group" :id="item.ID">
                         <h2 style="font-size:16px" class="font-weight-bold border-b pb-2 red-color">{{item.Name}} <span style="font-size:80%;">({{formatShortDate(item.StartDate)}} - {{formatShortDate(item.EndDate)}}) </span></h2>
                     </div>
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD).length > 0">
@@ -65,7 +68,7 @@
                                 <div class="inner d-flex w-100">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img :src="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -97,7 +100,7 @@
                                 <div class="inner d-flex w-100" style="max-height:150px">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img :src="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -130,7 +133,7 @@
                                 <div class="inner d-flex w-100" style="max-height:150px">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img :src="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -424,6 +427,16 @@
                 }
             }
         });
+
+        //lazy load
+        Vue.use(VueLazyload, {
+            preLoad: 1.3,
+            error: '~/pictures/book.jpg',
+            //loading: '~/img/Spin-1.8s-200px.gif',
+            attempt: 1,
+            // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
+            //listenEvents: ['scroll']
+        })
 
         @*$(document).ready(function () {
             alert(@TempData["message"])

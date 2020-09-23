@@ -36,7 +36,7 @@
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
-                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" />
+                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px"/>
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                 </div>
@@ -104,13 +104,29 @@
         new Vue({
             el: ".module",
             mounted() {
-                this.getProfile()
+                //this.getProfile();
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    hash = hash.split('#')[1]
+                    //debugger
+                    //console.log(hash)
+                    switch (hash) {
+                        case 'myprofile':
+                            this.changeState(0);
+                            break;
+                        case 'changlepassword':
+                            this.changeState(1);
+                            break;
+                    }
+                }
+                else {
+                    this.changeState(0);
+                }
             },
             data: {
                 isInfo: true,
                 isPass: false,
-                profile: {
-                },
+                profile: @Html.Raw(Json.Serialize(Model)),
                 avatar: {
                     src: '/images/no-avatar.png',
                     file: null,
@@ -132,10 +148,12 @@
                     let _that = this
                     switch (s) {
                         case 1:
+                            history.replaceState({}, "Đổi mật khẩu", "#changlepassword");
                             _that.isPass = true
                             _that.isInfo = false
                             break;
                         default:
+                            history.replaceState({}, "Thông tin cá nhân", "#myprofile");
                             _that.isPass = false
                             _that.isInfo = true
                             break;
@@ -232,6 +250,11 @@
                     } else {
                         this.pass_type = 'password'
                     }
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&h=" + width + "&mode=crop&format=jpg";
                 },
             }
         });

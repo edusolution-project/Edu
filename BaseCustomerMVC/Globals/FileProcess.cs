@@ -88,7 +88,7 @@ namespace BaseCustomerMVC.Globals
                             image.Save(fileStream, imageEncoder);
                             //await formFile.CopyToAsync(fileStream);
                             //return "/Files/" + folder + "/" + fileName;
-                            return $"{"/Files/"}/{folder}/{fileName}";
+                            return $"{"/Files"}/{folder}/{fileName}";
                         }
                     }
                 }

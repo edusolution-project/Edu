@@ -14,6 +14,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using FileManagerCore.Interfaces;
 using Core_v2.Globals;
+using System.Net;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Net.Http;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {

@@ -82,18 +82,25 @@
                         <a :href="'@processUrl("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
                     </td>
                     <td style="width:300px;text-align:left">
-                        @*<a href="#">{{item.ClassName}}</a>*@
-                        <div style=" white-space: nowrap; width: 300px; overflow: hidden; text-overflow: ellipsis;">
-                            <a href="javascript:void(0)" :title="item.ClassName" v-on:click="showListClass(item.ClassName,item.FullName)">{{item.ClassName}}</a>
-                        </div>
+                        @**@
+                        <template v-if="item.JoinedClasses.length==1">
+                            <a :href="'@processUrl("Detail", "Class")/'+item.JoinedClasses+'#module'">{{item.ClassName}}</a>
+                        </template>
+                        <template v-else>
+                            <div style=" white-space: nowrap; width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                                <a href="javascript:void(0)" :title="item.ClassName" v-on:click="showListClass(item.ClassName,item.FullName,item.JoinedClasses)">{{item.ClassName}}</a>
+                            </div>
+                        </template>
                     </td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
                     <td style="width:150px">
-                        <button class="btn-act btn-trash" title="Sửa thông tin" v-on:click="showStudentModal(item)"><i class="ti-pencil-alt"></i></button>
-                        @*<button class="btn-act btn-trash" title="Thêm vào lớp" v-on:click="showModalAddClass(item)"><i class="ti-plus"></i></button>*@
-                        <button class="btn-act btn-trash" v-on:click="showEditPassModal(item)" title="Đổi mật khẩu"><i class="ti-key"></i></button>
-                        <button class="btn-act btn-trash" title="Xoá học viên" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button>
+                        @if (IsHeadTeacher)
+                        {
+                            <button class="btn-act btn-trash" title="Sửa thông tin" v-on:click="showStudentModal(item)"><i class="ti-pencil-alt"></i></button>
+                            <button class="btn-act btn-trash" v-on:click="showEditPassModal(item)" title="Đổi mật khẩu"><i class="ti-key"></i></button>
+                            <button class="btn-act btn-trash" title="Xoá học viên" v-on:click="removeStudent(item)"><i class="ti-trash"></i></button>
+                        }
                     </td>
                 </tr>
             </tbody>
@@ -375,7 +382,7 @@
                 isHeadTeacher: '@Html.Raw(Json.Serialize(IsHeadTeacher))',
                 listNameClass: {
                     studentName: '',
-                    listClass:[]
+                    listClass: []
                 }
             },
             watch: {
@@ -773,12 +780,19 @@
                     var url = '@processUrl("ExportStudent", "StudentManage")/?ClassID=' + classID +'&&basic=@center';
                     window.open(url);
                 },
-                showListClass(listNameClass,studentName) {
+                showListClass(listNameClass,studentName,listClassID) {
                     let _that = this;
                     var str = listNameClass;
                     res = str.split("; ");
-                    _that.listNameClass.listClass = res;
+                    //_that.listNameClass.listClass = res;
                     _that.listNameClass.studentName = studentName;
+                    listClassID.forEach(function (item,k) {
+                        _that.listNameClass.listClass.push({
+                            ID: item,
+                            Name: res[k]
+                        })
+                    })
+
                     this.$bvModal.show('modal_listclass')
                 }
             }
@@ -935,10 +949,12 @@
     </b-modal>
 
     <!-- Modal list class -->
-    <b-modal id="modal_listclass" hide-footer="true">
+    <b-modal id="modal_listclass" hide-footer="true" v-bind:title="'Danh sách lớp của học viên ' +listNameClass.studentName">
         <ul class="list-group">
-            <li class="list-group-item active">Danh sách lớp học viên {{listNameClass.studentName}}</li>
-            <li class="list-group-item" v-for="item in listNameClass.listClass">{{item}}</li>
+            @*<li class="list-group-item active">Danh sách lớp của học viên {{listNameClass.studentName}}</li>*@
+            <li class="list-group-item" v-for="(item,k) in listNameClass.listClass">
+                <a :href="'@processUrl("Detail", "Class")/'+item.ID+'#module'">{{item.Name}}</a>
+            </li>
         </ul>
     </b-modal>
 }

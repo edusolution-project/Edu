@@ -21,6 +21,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
+        private readonly CenterService _centerService;
         //private readonly ClassStudentService _classStudentService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
@@ -34,7 +35,8 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService classService,
             TeacherService teacherService,
             StudentService studentService,
-            LessonScheduleService scheduleService
+            LessonScheduleService scheduleService,
+            CenterService centerService
             )
         {
             this._calendarService = calendarService;
@@ -45,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _teacherService = teacherService;
             _studentService = studentService;
             _scheduleService = scheduleService;
+            _centerService = centerService;
             //_classStudentService = classStudentService;
         }
 
@@ -54,15 +57,23 @@ namespace BaseCustomerMVC.Controllers.Student
             return View();
         }
         [Obsolete]
-        public Task<JsonResult> GetList(DefaultModel model)
+        public Task<JsonResult> GetList(DefaultModel model, string basis)
         {
             if (!User.Identity.IsAuthenticated) return Task.FromResult(new JsonResult(new { code = 540 }));
-            var userId = User?.FindFirst("UserID").Value;
-            var currentStudent = _studentService.GetItemByID(userId);
-            if (currentStudent == null || currentStudent.JoinedClasses == null) return Task.FromResult(new JsonResult(new { }));
-            var data = _calendarHelper.GetListEvent(model.Start, model.End, currentStudent.JoinedClasses.ToList(), userId);
-            if (data == null) return Task.FromResult(new JsonResult(new { }));
-            return Task.FromResult(new JsonResult(data));
+            if (!string.IsNullOrEmpty(basis))
+            {
+                var center = _centerService.GetItemByCode(basis);
+                var userId = User?.FindFirst("UserID").Value;
+                var currentStudent = _studentService.GetItemByID(userId);
+                if (currentStudent == null || currentStudent.JoinedClasses == null) return Task.FromResult(new JsonResult(new { }));
+                var classIds = _classService.GetItemsByIDs(currentStudent.JoinedClasses).Where(t => t.Center == center.ID).Select(t => t.ID).ToList();
+                var data = _calendarHelper.GetListEvent(model.Start, model.End, classIds);
+
+                if (data == null) return Task.FromResult(new JsonResult(new { }));
+                return Task.FromResult(new JsonResult(data));
+            }
+            return Task.FromResult(new JsonResult(new { code = 403 }));
+
         }
         [HttpPost]
         [Obsolete]

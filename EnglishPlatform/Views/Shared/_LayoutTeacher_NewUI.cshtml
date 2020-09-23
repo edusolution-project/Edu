@@ -8,6 +8,7 @@
         return $"/{center}{url}";
     }
 }
+@using Microsoft.AspNetCore.Http;
 <html>
 
 <head>
@@ -26,6 +27,18 @@
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <link href="~/js/lib/notification/notification.css" rel="stylesheet" />
     <script src="~/js/lib/notification/notification.js"></script>
+
+    <link href="~/css/w3.css" rel="stylesheet" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-178391156-1');
+    </script>
 
     <script type="text/javascript">
         const g_CurrentUser = {
@@ -105,72 +118,79 @@
 <body>
     <main id="main">
         @await Component.InvokeAsync("SidebarTeacher", new { centerCode = center })
-        @*@await Html.PartialAsync("_sidebarTeacherNewUI")*@
-        @RenderBody()
-        <aside class="sidebar" id="sidebar_right">
-            <div class="box padding-15" id="plan_box">
-                <div class="select-date flex">
-                    <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
-                    <div class="week">
-                        02/12/2019 - 09/12/2019
-                    </div>
-                    <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
-                </div>
-                <div class="table-detail">
-                    <div class="tr">
-                        <div class="c-d td">T2</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T3</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T4</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T5</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T6</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">T7</div>
-                        <div class="c-cl td">
-                            <div class="flex">
-                                <span class="time">08:30</span>
-                                <span class="title">IEL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tr">
-                        <div class="c-d td">CN</div>
-                        <div class="c-cl td">
-                        </div>
-                    </div>
-                </div>
+        <div id="main_content">
+            @RenderBody()
+            <div v-cloak>
+                @RenderSection("Modals", false)
             </div>
-            <div class="box p-3" style="margin: 10px;border-radius: 15px; background: #D0DFE8;">
+        </div>
+        <aside class="sidebar" id="sidebar_right">
+            <div class="box p-3 row" id="profile" style="position:relative">
+                <div class="col-md-3 col-xs-12" style="text-align:center">
+                    @if (Context.Session.GetString("userAvatar") != null)
+                    {
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                    }
+                    else
+                    {
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                    }
+
+                    <div id="Demo" class="w3-dropdown-content w3-bar-block w3-card-4 w3-animate-zoom" style="width:210px;border-radius:10px">
+                        <a href="@processUrl("Profile","Home")#myprofile" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
+                    <a href="@processUrl("Profile","Home")" style="color:#222222 !important">@User.Identity.Name</a>
+                </div>
+                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
+                    <span style="cursor:pointer" onclick="openNav()">☰</span>
+                </div>
+
+                <script>
+                    function openNav() {
+                        var x = document.getElementById("Demo");
+                        if (x.className.indexOf("w3-show") == -1) {
+                            x.className += " w3-show";
+                        } else {
+                            x.className = x.className.replace(" w3-show", "");
+                        }
+
+                        function closeNav() {
+                            var x = document.getElementById("Demo");
+                            //if (x.className.indexOf("w3-show") == -1) {
+                            //    x.className += " w3-show";
+                            //}
+                            //else {
+                            x.className = x.className.replace(" w3-show", "");
+                            //}
+                        }
+                    }
+                </script>
+            </div>
+            <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
+                <i class="fas fa-star" style="font-size:150%"></i>
+                <i class="fas fa-star" style="font-size:250%"></i>
+                <i class="fas fa-star" style="font-size:150%"></i>
+            </div>
+            <div id="top_star" class="box p-3">
+                <div class="heading flex pb-2">
+                    <h4 class="box-head text-center" style="font-size:110%;">Ngôi sao đang lên</h4>
+                </div>
+                <ul style="border: solid 1px #CCC; border-radius:10px;" class="p-2">
+                    <template v-for="(item,k) in list_star">
+                        <li v-if="k < 10" class="p-2 list-unstyled">
+                            <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
+                            <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
+                            <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
+                            <i class="fas fa-star" style="color:orange" v-else></i>
+                            <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span></a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <div class="box p-3" style="margin:0 10px;border-radius: 15px; background: #D0DFE8;">
                 <div class="heading flex">
                     <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmcZ3GdRT1PdHOLvp1LrtamL"><h4 class="box-head text-danger" style="font-size:110%">Hướng dẫn sử dụng</h4></a>
                 </div>
@@ -187,10 +207,15 @@
                     </li>
                 </ul>
             </div>
-
+            <style>
+                #top_star li:hover {
+                    background-color: #EEE;
+                    cursor: pointer;
+                }
+            </style>
             @*<div class="adv">
-                    <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
-                </div>*@
+            <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
+        </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -251,123 +276,10 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @*@await Html.PartialAsync("_EasyRealtime")*@
-    <script>
-        var clLoadMore = "cl-load-more";
-        var currentDateCalendar;
-        var formatTwoNumber = function (n) {
-            if (n < 10) return `0${n}`;
-            return `${n}`;
-        }
-        var formatDateTime = function (dt,qr) {
-            var current = dt;
-            var year = current.getFullYear();
-            var month = formatTwoNumber((current.getMonth() + 1));
-            var day = formatTwoNumber(current.getDate());
-            return (qr == void 0)
-                ? `${day}/${month}/${year}`
-                : `${year}-${month}-${day}`;
-        }
-
-        var caculatorDate = function (dt, number) {
-            dt.setDate(dt.getDate() - number)
-            return dt;
-        }
-
-        var loadCalendar = function (start, end) {
-            if (start == void 0) {
-                start = caculatorDate(new Date(), (new Date().getDay() - 1));
-            } else {
-                var cpStart = new Date(start.getTime());
-                start = caculatorDate(cpStart, (cpStart.getDay() - 1));
-            }
-            var temp = new Date(start.getTime());
-            var end = caculatorDate(temp, -6);
-
-            currentDateCalendar = start;
-            var plan_box = document.getElementById("plan_box");
-            if (plan_box != null) {
-                var week = plan_box.querySelector(".week");
-                if (week != null) {
-                    week.innerHTML = formatDateTime(start) + " - " + formatDateTime(end);
-                }
-            }
-
-            var tableDetail = plan_box.querySelector(".table-detail");
-            if (tableDetail != null) {
-                tableDetail.children[0].children[1].innerHTML = "";
-                tableDetail.children[1].children[1].innerHTML = "";
-                tableDetail.children[2].children[1].innerHTML = "";
-                tableDetail.children[3].children[1].innerHTML = "";
-                tableDetail.children[4].children[1].innerHTML = "";
-                tableDetail.children[5].children[1].innerHTML = "";
-                tableDetail.children[6].children[1].innerHTML = "";
-
-                tableDetail.children[0].children[1].classList.remove(clLoadMore);
-                tableDetail.children[1].children[1].classList.remove(clLoadMore);
-                tableDetail.children[2].children[1].classList.remove(clLoadMore);
-                tableDetail.children[3].children[1].classList.remove(clLoadMore);
-                tableDetail.children[4].children[1].classList.remove(clLoadMore);
-                tableDetail.children[5].children[1].classList.remove(clLoadMore);
-                tableDetail.children[6].children[1].classList.remove(clLoadMore);
-
-
-                _ajax.proccess("GET", "@processUrl("GetList","Calendar")?start=" + formatDateTime(start,1) + "&end=" + formatDateTime(end,1), {}).then(function (data) {
-                    if (data != null) {
-                        var dataJson = JSON.parse(data);
-                        if (dataJson != {} && dataJson.length > 0) {
-                            for (var i = 0; i < dataJson.length; i++) {
-                                var item = dataJson[i];
-                                var startDate = new Date(item.start);
-                                var index = startDate.getDay() - 1;
-                                if (index == -1) index = 6;
-                                var _hidden = "";
-                                var _hidden = "";
-                                if (tableDetail.children[index].children[1].children.length >= 1) {
-                                    _hidden = "cl-hidden";
-                                    if (!tableDetail.children[index].children[1].classList.contains(clLoadMore)) {
-                                        tableDetail.children[index].children[1].classList.add(clLoadMore);
-                                    }
-                                }
-                                var html = `<div class="flex ${_hidden}">
-                                            <span class="time">${formatTwoNumber(startDate.getHours())}:${formatTwoNumber(startDate.getMinutes())}</span>
-                                            <span class="title">${item.title}</span>
-                                        </div>`;
-
-                                tableDetail.children[index].children[1].innerHTML += html;
-                            }
-
-                            var listLoadMore = tableDetail.querySelectorAll("." + clLoadMore);
-                            for (var i = 0; i < listLoadMore.length; i++) {
-                                var item = listLoadMore[i];
-                                item.innerHTML += `<button class="btn btn-sm" onclick="showAllEvent(this)">+ show</button>`;
-                            }
-                        }
-                    }
-                })
-            }
-
-        }
-
-        loadCalendar();
-
-        var showAllEvent = function (self) {
-            var elRoot = self.parentNode;
-            elRoot.classList.toggle(clLoadMore);
-            self.innerHTML = elRoot.classList.contains(clLoadMore) ? "+ show" : "- hidden";
-        }
-         var loadCalendarPre = function () {
-            var timePre = new Date(currentDateCalendar.getTime());
-            var startTimePre = caculatorDate(timePre, 7);
-            loadCalendar(startTimePre);
-        }
-        var loadCalendarNext = function () {
-            var timePre = new Date(currentDateCalendar.getTime());
-            var startTimePre = caculatorDate(timePre, -7);
-            loadCalendar(startTimePre);
-        }
-    </script>
-    @await Html.PartialAsync("_EasyChat")
+    @if (center == "ern")
+    {
+        @await Html.PartialAsync("_EasyRealtime")
+    }
 </body>
 </html>
 

@@ -61,10 +61,10 @@ namespace BaseCustomerMVC.Globals
             }
             // bỏ check trùng
             // check event da ton tai hay chua
-            if (existEvent(item.EndDate, item.StartDate, item.GroupID))
-            {
-                //trùng
-            }
+            //if (existEvent(item.EndDate, item.StartDate, item.GroupID))
+            //{
+            //    //trùng
+            //}
             item.Created = DateTime.Now;
             if (item.Status == 5)
             {
@@ -141,10 +141,10 @@ namespace BaseCustomerMVC.Globals
         public List<CalendarEventModel> GetListEvent(DateTime startDate, DateTime endDate, List<string> classList)
         {
             var filter = new List<FilterDefinition<CalendarEntity>>();
-            //if (classList != null && classList.Count > 0)
-            //{
-            //    filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID)));
-            //}
+            if (classList != null && classList.Count > 0)
+            {
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID)));
+            }
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
@@ -153,7 +153,7 @@ namespace BaseCustomerMVC.Globals
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
-            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToList().Select(o => new CalendarEventModel()
+            var DataResponse = data == null || data.Count() <= 0 ? null : data.ToEnumerable().Select(o => new CalendarEventModel()
             {
                 end = o.EndDate,
                 start = o.StartDate,
@@ -161,7 +161,8 @@ namespace BaseCustomerMVC.Globals
                 id = o.ID,
                 title = o.Title,
                 url = "",
-                Status = o.Status
+                Status = o.Status,
+                Color = o.Status == 5 ? "#ccc" : ""
             }).ToList();
             return DataResponse;
         }
@@ -171,6 +172,7 @@ namespace BaseCustomerMVC.Globals
             bool isTeacher = _teacherService.GetItemByID(userid) != null;
             if (classList == null) classList = new List<string>();
             var filter = new List<FilterDefinition<CalendarEntity>>();
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID) && (o.TeacherID == userid)));
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
@@ -185,7 +187,8 @@ namespace BaseCustomerMVC.Globals
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
                 filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate && o.EndDate <= _endDate)));
             }
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.IsDel == false) && (o.CreateUser == userid || classList.Contains(o.GroupID))));
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
+
             var data = filter.Count > 0 ? _calendarService.Collection.Find(Builders<CalendarEntity>.Filter.And(filter)) : _calendarService.GetAll();
 
             var DataResponse = new List<CalendarEventModel>();
@@ -194,16 +197,16 @@ namespace BaseCustomerMVC.Globals
                 DataResponse = null;
             else
                 DataResponse =
-                    (from r in data.ToList() //TODO: Too heavy => add info to schedule & add to Event later
-                     let schedule = _lessonScheduleService.GetItemByID(r.ScheduleID)
-                     let classSbj = schedule != null ? _classSubjectService.GetItemByID(schedule.ClassSubjectID) : null
-                     let skill = classSbj != null ? _skillService.GetItemByID(classSbj.SkillID) : null
+                    (from r in data.ToEnumerable() //.ToList() //TODO: Too heavy => add info to schedule & add to Event later
+                                                   //let schedule = _lessonScheduleService.GetItemByID(r.ScheduleID)
+                                                   //let classSbj = schedule != null ? _classSubjectService.GetItemByID(schedule.ClassSubjectID) : null
+                                                   //let skill = classSbj != null ? _skillService.GetItemByID(classSbj.SkillID) : null
                      select new CalendarEventModel()
                      {
                          start = r.StartDate,
                          groupid = r.GroupID,
                          id = r.ID,
-                         title = r.Title + (skill == null ? "" : (" (" + skill.Name + ")")),
+                         title = r.Title,// + (skill == null ? "" : (" (" + skill.Name + ")")),
                          url = "",
                          skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
                          Status = r.Status,
