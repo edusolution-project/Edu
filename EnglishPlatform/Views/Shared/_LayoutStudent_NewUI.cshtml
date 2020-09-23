@@ -30,7 +30,6 @@
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
 
-    <link href="~/css/w3.css" rel="stylesheet" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -118,8 +117,7 @@
         </div>
         <aside class="sidebar" id="sidebar_right">
             <div class="box p-3 row" id="profile" style="position:relative">
-                <div class="col-md-3 col-xs-12" style="text-align:center">
-                    @*<img v-on:error="errorImgUrl()" :src="student.Avatar" alt="" style="width:32px;height:32px;border-radius:20px" />*@
+                <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
                         <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
@@ -128,38 +126,33 @@
                     {
                         <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
                     }
-
-                    <div id="Demo" class="w3-dropdown-content w3-bar-block w3-card-4 w3-animate-zoom" style="width:210px;border-radius:10px">
-                        <a href="@processUrl("Profile","Home")#myprofile" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
-                        <a href="@processUrl("Profile","Home")#changlepassword" class="w3-bar-item w3-button" style="border-radius:10px" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
-                    </div>
                 </div>
                 <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
                     <a href="@processUrl("Profile","Home")" style="color:#222222 !important">@User.Identity.Name</a>
                 </div>
-                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
+                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto;position:relative">
                     <span style="cursor:pointer" onclick="openNav()">☰</span>
+
+                    <div id="myProfile" class="dropdown-option" style=" position: absolute; right: 30px; top: 30px;background-color:#f1f1f1;border-radius:10px;display:none">
+                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="openNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                    </div>
                 </div>
+                
+                <style>
+                    /*#myProfile .dropdown-item:hover {
+                        background-color: red !im;
+                    }*/
+                </style>
 
                 <script>
                     function openNav() {
-                        var x = document.getElementById("Demo");
-                        if (x.className.indexOf("w3-show") == -1) {
-                            x.className += " w3-show";
-                        }
-                        else {
-                            x.className = x.className.replace(" w3-show", "");
-                        }
-                    }
-
-                    function closeNav() {
-                        var x = document.getElementById("Demo");
-                        //if (x.className.indexOf("w3-show") == -1) {
-                        //    x.className += " w3-show";
-                        //}
-                        //else {
-                        x.className = x.className.replace(" w3-show", "");
-                        //}
+                        var display = document.getElementById("myProfile").style.display;
+                        debugger
+                        if (display=="none")
+                            document.getElementById("myProfile").style.display = "block";
+                        else
+                            document.getElementById("myProfile").style.display = "none";
                     }
                 </script>
             </div>
