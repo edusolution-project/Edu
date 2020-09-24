@@ -61,11 +61,11 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();
         }
 
-        public LessonScheduleEntity GetItemByLessonID_ClassSubjectID(string lessonid, string classsubjectid)
-        {
-            if (string.IsNullOrEmpty(lessonid) || lessonid == "0" || string.IsNullOrEmpty(classsubjectid)) return null;
-            return Collection.Find(o => o.LessonID == lessonid && o.ClassSubjectID == classsubjectid)?.SingleOrDefault();
-        }
+        //public LessonScheduleEntity GetItemByLessonID_ClassSubjectID(string lessonid, string classsubjectid)
+        //{
+        //    if (string.IsNullOrEmpty(lessonid) || lessonid == "0" || string.IsNullOrEmpty(classsubjectid)) return null;
+        //    return Collection.Find(o => o.LessonID == lessonid && o.ClassSubjectID == classsubjectid)?.SingleOrDefault();
+        //}
 
         public LessonScheduleEntity GetItemByLessonID(string lessonid)
         {
@@ -138,6 +138,12 @@ namespace BaseCustomerEntity.Database
                 data = Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.Type == SCHEDULE_TYPE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
             return data.SortByDescending(t => t.StartDate).ToList();
         }
+
+        public IEnumerable<LessonScheduleEntity> GetByClassSubject(string ClassSubjectID)
+        {
+            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID).ToEnumerable();
+        }
+
 
         public async Task RemoveClassSubject(string ClassSubjectID)
         {

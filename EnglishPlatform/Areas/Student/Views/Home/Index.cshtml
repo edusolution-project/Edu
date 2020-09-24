@@ -155,11 +155,6 @@
                                     </div>
                                 </li>
                             </template>
-                            @*<template v-if="list_mycourses.length > 0">
-                                    <li v-for="(item,k) in list_mycourses" class="w-100 pb-2">
-                                        <a :href="'@processUrl("Modules", "Course")/' + item.id" :title="item.courseName" class="title font-weight-bold text-dark">{{item.courseName}}<span style="font-size:90%">({{item.min}}/{{item.max}})</span></a>
-                                    </li>
-                                </template>*@
                             <template v-else>
                                 <li class="w-100">
                                     Bạn chưa thêm môn học bổ trợ nào. <a href="@processUrl("Index", "Reference")#docsinteractive">Chọn môn học ngay!</a>
@@ -447,7 +442,12 @@
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             },
             BuyNow(classid) {
-                window.location.href = '@processUrl("Payment", "Home")/' + classid;
+                Swal.fire({
+                    title: 'Lưu ý',
+                    html: 'Cổng thanh toán đang nâng cấp, vui lòng quay lại sau',
+                    icon: 'warning'
+                });
+                //window.location.href = '@processUrl("Payment", "Home")/' + classid;
             },
             DetailProduct(ID) {
                 let _that = this

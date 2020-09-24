@@ -30,7 +30,7 @@
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
 
-    <link href="~/css/w3.css" rel="stylesheet" />
+    @*<link href="~/css/w3.css" rel="stylesheet" />*@
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -117,9 +117,8 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
-            <div class="box p-3 row" id="profile" style="position:relative">
+            @*<div class="box p-3 row" id="profile" style="position:relative">
                 <div class="col-md-3 col-xs-12" style="text-align:center">
-                    @*<img v-on:error="errorImgUrl()" :src="student.Avatar" alt="" style="width:32px;height:32px;border-radius:20px" />*@
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
                         <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()"/>
@@ -162,7 +161,7 @@
                         //}
                     }
                 </script>
-            </div>
+            </div>*@
             <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
                 <i class="fas fa-star" style="font-size:150%"></i>
                 <i class="fas fa-star" style="font-size:250%"></i>
@@ -281,7 +280,7 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @if (center == "ern")
+    @if (center == "ern" || center == "truong-thpt-chuyen-vinh-phuc")
     {
         @await Html.PartialAsync("_EasyRealtime")
     }

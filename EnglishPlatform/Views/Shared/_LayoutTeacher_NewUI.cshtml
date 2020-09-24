@@ -26,7 +26,7 @@
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
 
-    <link href="~/css/w3.css" rel="stylesheet" />
+    @*<link href="~/css/w3.css" rel="stylesheet" />*@
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -123,7 +123,7 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
-            <div class="box p-3 row" id="profile" style="position:relative">
+            <div class="box p-3 row d-none" id="profile" style="position:relative">
                 <div class="col-md-3 col-xs-12" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
@@ -212,8 +212,8 @@
                 }
             </style>
             @*<div class="adv">
-            <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
-        </div>*@
+                    <img src="/pictures/undraw_book_lover_mkck_2.png" alt="">
+                </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -277,7 +277,7 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @if (center == "ern")
+    @if (center == "ern" || center == "truong-thpt-chuyen-vinh-phuc")
     {
         @await Html.PartialAsync("_EasyRealtime")
     }

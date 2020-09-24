@@ -235,6 +235,12 @@ namespace BaseCustomerMVC.Globals
             return _calendarService.CreateQuery().DeleteMany(t => t.ScheduleID == ScheduleID).DeletedCount;
         }
 
+        public long RemoveManySchedules(List<string> schids)
+        {
+            return _calendarService.CreateQuery().DeleteMany(t => schids.Contains(t.ScheduleID)).DeletedCount;
+        }
+
+
         [Obsolete]
         public async Task ScheduleAutoConvertEvent()
         {
