@@ -59,6 +59,8 @@ var Lesson = (function () {
 
     var exam_timeout = null;
 
+    var quiz3m_ans = [];
+
     var config = {
         container: "",
         mod: "",
@@ -310,14 +312,11 @@ var Lesson = (function () {
 
         lessonBody.append(partsHolder);
         if (isMobileDevice()) {
-            console.log("Mobile detected");
-            $('#pills-tabContent').addClass("col-12 m-0 p-0");
+            $('#pills-tabContent').attr("class", "w-100 m-0 p-0").show();
             $('#pills-tabContent .main-column:first-child').addClass("border-right-0");
         }
         else {
-            console.log("Desktop detected");
             $('.main-column').addClass('scrollbar-outer').scrollbar();
-
         }
 
     }
@@ -561,8 +560,10 @@ var Lesson = (function () {
                         var media = null;
                         var html = null;
                         if ($(this).find(".QUIZ3").length > 0) {
-                            $(this).addClass("h-100");
-                            media = $(this).find(".Q3_absrow > .media-holder:first");
+                            if (!isMobileDevice()) {
+                                $(this).addClass("h-100");
+                                media = $(this).find(".Q3_absrow > .media-holder:first");
+                            }
                         }
                         else {
                             media = $(this).find(".quiz-wrapper > .media-holder");
@@ -876,6 +877,8 @@ var Lesson = (function () {
             }
         }
 
+        //alert(_UImode);
+
     }
 
     var switchUIMode = function (mode) {
@@ -892,7 +895,8 @@ var Lesson = (function () {
         switch (_UImode) {
             case UIMode.LECTURE_ONLY:
                 leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-12").show();//scrollwrapper
-                rightCol.parent().hide();
+                if (!isMobileDevice())
+                    rightCol.parent().hide();
                 break;
             case UIMode.EXAM_ONLY:
                 leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-4").show();
@@ -973,7 +977,7 @@ var Lesson = (function () {
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
-        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? " Q3_absrow" : "") });
+        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? (!isMobileDevice() ? "Q3_absrow" : "") : "") });
 
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
@@ -1252,33 +1256,40 @@ var Lesson = (function () {
         }
         switch (template) {
             case "QUIZ2":
-                //change here
-                var container = $("#" + data.ParentID + " .quiz-wrapper");
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
-                var boxHeader = $("<div>", { "class": "quiz-box-header" });
-                boxHeader.append($("<div>", {
-                    "class": "quiz-text", "html": breakLine(data.Content)
-                    //+ point
-                }));
-                renderMediaContent(data, boxHeader);
-                quizitem.append(boxHeader);
+                if (!isMobileDevice()) {
 
-                container.append(quizitem);
-                var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
+                    //change here
+                    var container = $("#" + data.ParentID + " .quiz-wrapper");
+                    var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+                    var boxHeader = $("<div>", { "class": "quiz-box-header" });
+                    boxHeader.append($("<div>", {
+                        "class": "quiz-text", "html": breakLine(data.Content)
+                        //+ point
+                    }));
+                    renderMediaContent(data, boxHeader);
+                    quizitem.append(boxHeader);
 
-                quizitem.append(answer_wrapper);
+                    container.append(quizitem);
+                    var answer_wrapper = $("<div>", { "class": "answer-wrapper" });
 
-                if (data.Description !== null) {
-                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                    quizitem.append(extend);
+                    quizitem.append(answer_wrapper);
+
+                    if (data.Description !== null) {
+                        var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
+                        quizitem.append(extend);
+                    }
+
+                    for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
+                        var item = data.Answers[i];
+                        renderPreviewAnswer(item, template);
+                    }
                 }
+                else {
 
-                for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
-                    var item = data.Answers[i];
-                    renderPreviewAnswer(item, template);
                 }
                 break;
             case "QUIZ3":
+
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 //console.log(container);
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
@@ -1450,15 +1461,20 @@ var Lesson = (function () {
                     mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
-                    if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
-                        data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
-                        data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
-                    ) {
-                        mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
+                    if (!isMobileDevice()) {
+                        if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                            data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
+                            data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
+                        ) {
+                            mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
+                        }
+                        else {
+                            if (data.Media != null)
+                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                        }
                     }
                     else {
-                        if (data.Media != null)
-                            mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                        mediaHolder.append($("<a>", { "href": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"), "class": "btn btn-primary", "onclick": "ViewFile(this)", text: data.Media.OriginalName, "target": "_blank" }));
                     }
                     break;
                 default:
@@ -2760,7 +2776,7 @@ var Lesson = (function () {
             .then(function (res) {
                 var data = JSON.parse(res);
                 if (data.Error == null) {
-                    if(!$(obj).parent().hasClass('top-menu'))
+                    if (!$(obj).parent().hasClass('top-menu'))
                         $(obj).parent().remove();
                     else
                         $(obj).parent().empty();
@@ -2848,7 +2864,7 @@ var Lesson = (function () {
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
 
-        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? " Q3_absrow" : "") });
+        var ItemRow = $("<div>", { "class": "row " + (_UImode == UIMode.EXAM_ONLY ? (!isMobileDevice() ? "Q3_absrow" : "") : "") });
 
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
@@ -2966,31 +2982,48 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     ItemRow.before($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
-                var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
-                itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
-                renderMediaContent(data, ItemRow, "");
-                ItemRow.append(itemBody);
+                if (!isMobileDevice()) {
+                    var itemBody = $("<div>", { "class": "quiz-wrapper col-8" });
+                    itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                    renderMediaContent(data, ItemRow, "");
+                    ItemRow.append(itemBody);
 
-                ItemRow.find(".media-holder").addClass("col-12");
-                var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
-                ItemRow.append(answers_box);
-                $(answers_box).droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        var prevHolder = ui.helper.data('parent');
-                        $(prevHolder).find(".placeholder").show();
-                        $(this).append($(ui.draggable));
+                    ItemRow.find(".media-holder").addClass("col-12");
+                    var answers_box = $("<div>", { "class": "answer-wrapper no-child col-4", "data-part-id": data.ID });
+                    ItemRow.append(answers_box);
+                    $(answers_box).droppable({
+                        tolerance: "intersect",
+                        accept: ".answer-item",
+                        activeClass: "hasAnswer",
+                        hoverClass: "answerHover",
+                        drop: function (event, ui) {
+                            var prevHolder = ui.helper.data('parent');
+                            $(prevHolder).find(".placeholder").show();
+                            $(this).append($(ui.draggable));
+                        }
+                    });
+                    container.append(tabsitem);
+                    //Render Question
+                    totalQuiz = data.Questions.length;
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var item = data.Questions[i];
+                        renderExamQuestion(item, data.Type);
                     }
-                });
-                container.append(tabsitem);
-                //Render Question
-                totalQuiz = data.Questions.length;
-                for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
-                    var item = data.Questions[i];
-                    renderExamQuestion(item, data.Type);
+                }
+                else {
+                    var itemBody = $("<div>", { "class": "quiz-wrapper col-12" });
+                    itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
+                    renderMediaContent(data, ItemRow, "");
+                    ItemRow.append(itemBody);
+
+                    ItemRow.find(".media-holder").addClass("col-12");
+                    container.append(tabsitem);
+                    //Render Question
+                    totalQuiz = data.Questions.length;
+                    for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
+                        var item = data.Questions[i];
+                        renderExamQuestion(item, data.Type);
+                    }
                 }
                 break;
             case "ESSAY":
@@ -3065,55 +3098,91 @@ var Lesson = (function () {
         }
         switch (template) {
             case "QUIZ3":
-                var container = $("#" + data.ParentID + " .quiz-wrapper");
-                var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+                if (!isMobileDevice()) {
+                    var container = $("#" + data.ParentID + " .quiz-wrapper");
+                    var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
 
-                var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
-                var answer_part = $("<div>", {
-                    "class": "answer-pane no-child col-6",
-                    "data-question-id": data.ID,
-                    "data-part-id": data.ParentID,
-                    "data-lesson-id": config.lesson_id,
-                    "data-type": template
-                });
-                quizitem.append(quiz_part);
-                quizitem.append(answer_part);
-                var pane_item = $("<div>", { "class": "pane-item" });
-                if (data.Media == null) {
-                    pane_item.append($("<div>", {
-                        "class": "quiz-text", "html": breakLine(data.Content)
-                        //+ point
-                    }));
-                } else {
-                    renderMediaContent(data, pane_item);
-                }
-                quiz_part.append(pane_item);
-                container.append(quizitem);
-
-                $(answer_part).droppable({
-                    tolerance: "intersect",
-                    accept: ".answer-item",
-                    activeClass: "hasAnswer",
-                    hoverClass: "answerHover",
-                    drop: function (event, ui) {
-                        $(this).find(".placeholder").hide();
-                        var prevHolder = ui.helper.data('parent');
-
-                        if ($(this).find(".answer-item").length > 0) {//remove all answer to box
-                            //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
-                            $(prevHolder).append($(this).find(".answer-item"));
-                        }
-                        else {
-                            $(prevHolder).find(".placeholder").show();
-                        };
-                        $(this).append($(ui.draggable));
+                    var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
+                    var answer_part = $("<div>", {
+                        "class": "answer-pane no-child col-6",
+                        "data-question-id": data.ID,
+                        "data-part-id": data.ParentID,
+                        "data-lesson-id": config.lesson_id,
+                        "data-type": template
+                    });
+                    quizitem.append(quiz_part);
+                    quizitem.append(answer_part);
+                    var pane_item = $("<div>", { "class": "pane-item" });
+                    if (data.Media == null) {
+                        pane_item.append($("<div>", {
+                            "class": "quiz-text", "html": breakLine(data.Content)
+                            //+ point
+                        }));
+                    } else {
+                        renderMediaContent(data, pane_item);
                     }
-                });
+                    quiz_part.append(pane_item);
+                    container.append(quizitem);
 
-                //console.log(data);
-                for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
-                    var item = data.CloneAnswers[i];
-                    renderExamAnswer(item, data.ParentID, template);
+                    $(answer_part).droppable({
+                        tolerance: "intersect",
+                        accept: ".answer-item",
+                        activeClass: "hasAnswer",
+                        hoverClass: "answerHover",
+                        drop: function (event, ui) {
+                            $(this).find(".placeholder").hide();
+                            var prevHolder = ui.helper.data('parent');
+
+                            if ($(this).find(".answer-item").length > 0) {//remove all answer to box
+                                //$(container).siblings(".answer-wrapper").append($(this).find(".answer-item"));
+                                $(prevHolder).append($(this).find(".answer-item"));
+                            }
+                            else {
+                                $(prevHolder).find(".placeholder").show();
+                            };
+                            $(this).append($(ui.draggable));
+                        }
+                    });
+
+                    //console.log(data);
+                    for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                        var item = data.CloneAnswers[i];
+                        renderExamAnswer(item, data.ParentID, template);
+                    }
+                }
+                else {
+                    var container = $("#" + data.ParentID + " .quiz-wrapper");
+                    var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
+
+                    var quiz_part = $("<div>", { "class": "quiz-pane col-6" });
+                    var answer_part = $("<div>", {
+                        "class": "answer-pane no-child col-6",
+                        "data-question-id": data.ID,
+                        "data-part-id": data.ParentID,
+                        "data-lesson-id": config.lesson_id,
+                        "data-type": template
+                    });
+
+                    quizitem.append(quiz_part);
+                    quizitem.append(answer_part);
+                    var pane_item = $("<div>", { "class": "pane-item" });
+                    if (data.Media == null) {
+                        pane_item.append($("<div>", {
+                            "class": "quiz-text", "html": breakLine(data.Content)
+                            //+ point
+                        }));
+                    } else {
+                        renderMediaContent(data, pane_item);
+                    }
+                    quiz_part.append(pane_item);
+                    container.append(quizitem);
+
+                    quiz3m_ans[data.ID] = [];
+
+                    for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
+                        var item = data.CloneAnswers[i];
+                        renderExamAnswer(item, data.ParentID, template);
+                    }
                 }
                 break;
             default:
@@ -3201,31 +3270,81 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ3":
-                var placeholder = $("#" + data.ParentID).find(".answer-pane");
-                $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", {
-                    "class": "pane-item placeholder",
-                    "text": "Thả câu trả lời ở đây"
-                }));
+                if (!isMobileDevice()) {
+                    var placeholder = $("#" + data.ParentID).find(".answer-pane");
+                    $(placeholder).removeClass("no-child");
+                    placeholder.empty().append($("<div>", {
+                        "class": "pane-item placeholder",
+                        "text": "Thả câu trả lời ở đây"
+                    }));
 
-                container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
+                    container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
-                if (data.Content != null)
-                    answer.append($("<input>", { "type": "hidden", "value": data.Content }));
+                    if (data.Content != null)
+                        answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
-                if (data.Media != null) {
-                    renderMediaContent(data, answer);
+                    if (data.Media != null) {
+                        renderMediaContent(data, answer);
+                    }
+                    else
+                        answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+
+                    var x = Math.floor((Math.random() * 2));
+
+                    if (x > 0)
+                        container.append(answer);
+                    else
+                        container.prepend(answer);
                 }
-                else
-                    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                else {
+                    var placeholder = $("#" + data.ParentID).find(".answer-pane");
+                    $(placeholder).removeClass("no-child");
+                    var answerselector = $("<div>", {
+                        "id": "plc_" + data.ParentID,
+                        "class": "pane-item placeholder w-100 q3_select",
+                        "onchange": "AnswerQuestion(this)",
+                        "data-part-id": partid,
+                        "data-lesson-id": config.lesson_id,
+                        "data-question-id": data.ParentID,
+                        "data-type": template,
+                        "name": "rd_" + data.ParentID
+                    });
+                    placeholder.empty().append(answerselector);
+                    console.log(quiz3m_ans[partid]);
+                    quiz3m_ans[partid].push({ data });
+                    console.log(quiz3m_ans[partid]);
 
-                var x = Math.floor((Math.random() * 2));
+                    answerselector.append($("<div>", { text: "-- Chọn đáp án -- ", value: "" }));
 
-                if (x > 0)
-                    container.append(answer);
-                else
-                    container.prepend(answer);
+                    container = $("#" + partid);
 
+                    var optanswer = $("<div>", { "class": "q3-answer-holder", "value": data.ID, "thumb": data.Media.Path })
+
+                    if (data.Media != null) {
+                        renderMediaContent(data, optanswer);
+                    }
+                    else
+                        optanswer.append(data.Content);
+
+                    
+
+
+                    //if ($(container).find('select').length == 1) {
+                    //    $(container).find('select').append(optanswer)
+                    //}
+
+                    var x = Math.floor((Math.random() * 2));
+                    if (x > 0)
+                        $(container).find('.q3_select:first').append(optanswer);
+                    else
+                        $(container).find(".q3_select:first .answer-holder:first").after(optanswer);
+
+                    $(container).find('.q3_select:gt(0)').each(function (pos, item) {
+                        var opts = $(container).find('.q3_select:first .q3-answer-holder:gt(0)').clone();
+                        $(item).find('.q3-answer-holder:gt(0)').remove();
+                        $(item).append(opts);
+                    })
+                }
                 //container.append(answer);
                 break;
             case "QUIZ1":
@@ -3573,16 +3692,29 @@ var Lesson = (function () {
             case "QUIZ3":
                 partID = dataset.partId;
                 questionId = dataset.questionId;
-                var item = _this.querySelector('fieldset');
-                var label = item.querySelector('label');
-                if (label == null) {
-                    label = item.querySelector("[src]").src;
+                if (!isMobileDevice()) {
+                    var item = _this.querySelector('fieldset');
+                    var label = item.querySelector('label');
+                    if (label == null) {
+                        label = item.querySelector("[src]").src;
+                    }
+                    else {
+                        label = item.querySelector('label').innerHTML;
+                    }
+                    value = item == void 0 ? "" : label;
+                    answerID = item.id;
                 }
                 else {
-                    label = item.querySelector('label').innerHTML;
+                    var select = $('#' + dataset.questionId + ' select');
+                    answerID = $(select).val();
+                    if (answerID == "") {
+                        delAnswerForStudentNoRender(questionId);
+                        return false;
+                    }
+                    else {
+                        value = $(select).find('option:selected').text();
+                    }
                 }
-                value = item == void 0 ? "" : label;
-                answerID = item.id;
                 break;
             case "ESSAY":
                 partID = dataset.partId;
@@ -3810,12 +3942,14 @@ var Lesson = (function () {
                 $(quiz).val(answerValue);
                 break;
             case "QUIZ3":
-                var quiz = document.getElementById(quizID);
-                var content = quiz.querySelector('[data-question-id="' + quizID + '"]');
-                var answer = document.getElementById(answerID);
-                var abc = answer.outerHTML;
-                answer.remove();
-                content.innerHTML = abc;
+                if (!isMobileDevice()) {
+                    var quiz = document.getElementById(quizID);
+                    var content = quiz.querySelector('[data-question-id="' + quizID + '"]');
+                    var answer = document.getElementById(answerID);
+                    var abc = answer.outerHTML;
+                    answer.remove();
+                    content.innerHTML = abc;
+                }
                 break;
             case "ESSAY":
                 var quiz = document.getElementById("essay-" + quizID);
@@ -4260,5 +4394,14 @@ var toggleExpand = function (obj) {
 }
 
 var isMobileDevice = function () {
-    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    //return true;
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // true for mobile device
+        //console.log("Mobile detected");
+        return true;
+    } else {
+        // false for not mobile device
+        //console.log("Desktop detected");
+        return false;
+    }
 };

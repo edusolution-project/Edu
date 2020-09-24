@@ -216,7 +216,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var enddate = date.AddDays(1);
             foreach (var _class in activeClass)
             {
-                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID 
+                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID
                 //&& o.IsActive 
                 && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
                 if (schedule != null)
@@ -309,6 +309,8 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
                 ViewBag.Class = currentClass;
+                if (string.IsNullOrEmpty(currentCs.CourseName))
+                    currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
                 ViewBag.Subject = currentCs;
                 ViewBag.NextLesson = nextLesson;
                 ViewBag.Chapter = chapter;

@@ -281,15 +281,15 @@
     <div class="menu-bar w-100">
         <ul class="d-flex p-0 m-0 h-100 align-items-center">
             <li for="home" class="top-menu">
-                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i>Trang chủ</a>
+                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i><span>Trang chủ</span></a>
             </li>
             <i class="fa fa-chevron-left mt-1"></i>
             <li for="class" class="top-menu">
                 <a href="@processUrl("Detail", "Course")/@Class.ID#module" title="@Class.Name">@Class.Name</a>
             </li>
             <i class="fa fa-chevron-left mt-1 mr-1"></i>
-            <li for="path_menu" class="top-menu" style="width:130px;">
-                <a title="Mục lục"><i class="ic fas fa-list-ol"></i>Mục lục</a>
+            <li for="path_menu" class="top-menu" style="width:auto;">
+                <a title="@ClassSubject.CourseName" style="max-width: unset;text-overflow:ellipsis"><i class="ic fas fa-list-ol"></i>@(string.IsNullOrEmpty(ClassSubject.CourseName) ? "Mục lục" : ClassSubject.CourseName )</a>
                 <div class="sub-menu">
                     <div class="content-holder">
                         <ul class="chap_content"></ul>
@@ -302,7 +302,18 @@
         </ul>
     </div>
 </aside>
+<style>
+    @@media only screen and (max-width: 600px) {
+        .menu-bar .top-menu:first-child span {
+            display: none;
+        }
 
+        .menu-bar .top-menu a {
+            max-width: 50px;
+            text-overflow: ellipsis;
+        }
+    }
+</style>
 <script>
     var root_nav = $('li[for=path_menu] .content-holder');
 
