@@ -134,7 +134,7 @@
                 <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto;position:relative">
                     @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
                     <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" onmouseover="hoverCss(this)" onmouseout="hoverCss(this)" style="font-size:20px;cursor:pointer"></i>
-                    <div id="myProfile" style=" position: absolute; right: 5px; top: 40px;background-color:#f1f1f1;border-radius:10px;display:none;width:210px">
+                    <div id="myProfile" style=" position: absolute; right: 10px; top: 40px;background-color:#f1f1f1;border-radius:10px;display:none;width:210px;border:0.5px solid rgb(204, 204, 204);width:210px">
                         <a href="@processUrl("Profile","Home")#myprofile" onclick="openNav()" onmouseover="hoverFullName(this)" onmouseout="hoverFullName(this)" style="padding:12px 16px;font-weight:600;display:block;color:#00314c">
                             <i class="ti-user" style="font-weight:600"></i> Thông tin cá nhân
                         </a>
@@ -157,11 +157,11 @@
                         var circle = document.getElementById("ti-arrow-circle").getAttribute("class");
                         if (circle.includes("ti-arrow-circle-left")) {
                             document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-down";
-                            document.getElementById("ti-arrow-circle").style.color = "#D03239";
+                            document.getElementById("ti-arrow-circle").style.color = "";
                         }
                         else {
                             document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-left";
-                            document.getElementById("ti-arrow-circle").style.color = "";
+                            document.getElementById("ti-arrow-circle").style.color = "#D03239";
                         }
                     }
 
