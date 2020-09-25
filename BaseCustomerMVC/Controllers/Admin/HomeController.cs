@@ -584,7 +584,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
 
             var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
-                                     where a.Media != null && a.Media.Path.Contains("drive.google.com") == false && a.Media.Extension.Contains()
+                                     where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
                                      select new
                                      {
                                          ID = a.ID,
@@ -614,6 +614,33 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
 
             return Json("OK");
+        }
+
+        public JsonResult UpdateCourseName()
+        {
+            //var listClassSub = from lcs in _classSubjectService.GetAll().ToEnumerable();
+            //let CourseName=_courseService.GetItemByID(lcs.CourseID)?.Name
+            //select new
+            //{
+            //    ID = lcs.ID,
+            //    CourseID
+            //}
+            try
+            {
+                var listClassSub = _classSubjectService.GetAll().ToEnumerable();
+
+                foreach (var item in listClassSub)
+                {
+                    var course = _courseService.GetItemByID(item.CourseID);
+                    item.CourseName = course == null ? "" : course.Name;
+                    _classSubjectService.Save(item);
+                }
+                return Json("OK");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
     }
 }

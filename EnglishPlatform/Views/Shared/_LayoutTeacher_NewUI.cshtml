@@ -128,18 +128,19 @@
                 <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
-                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
                     }
                     else
                     {
-                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" onmouseover="openNav()" />
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
                     }
                 </div>
-                <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
-                    <a href="@processUrl("Profile","Home")" style="color:#222222 !important">@User.Identity.Name</a>
+                <div class="col-md-6 col-xs-8" id="fullname">
+                    <a href="@processUrl("Profile","Home")" title="@User.Identity.Name">@User.Identity.Name</a>
                 </div>
                 <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
-                    <span style="cursor:pointer" onclick="openNav()">☰</span>
+                    @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
+                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
                     <div id="myDropdown" class="dropdown-content">
                         <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
                         <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
@@ -168,7 +169,7 @@
                     }
 
                         .dropdown-content a {
-                            color: black;
+                            color: #00314c;
                             padding: 12px 16px;
                             text-decoration: none;
                             display: block;
@@ -176,15 +177,64 @@
 
                     .dropdown a:hover {
                         background-color: #ddd;
+                       
+                    }
+
+                    #myDropdown a{
+                        font-weight:600
+                    }
+
+                    #myDropdown i{
+                        font-weight:600
+                    }
+
+                    #myDropdown a:hover{
+                        color: #D03239
                     }
 
                     .show {
                         display: block;
                     }
+
+                    #myDropdown {
+                        top: 40px
+                    }
+
+                    #ti-arrow-circle {
+                        cursor: pointer
+                    }
+
+                        #ti-arrow-circle:hover {
+                            color: #D03239
+                        }
+
+                    #fullname {
+                        text-align: left;
+                        margin: auto;
+                    }
+
+                        #fullname a {
+                            color: #00314c;
+                            font-weight: 600
+                        }
+
+                        #fullname a:hover {
+                            color: #D03239;
+                        }
                 </style>
                 <script>
                     function openNav() {
+                        //debugger
                         document.getElementById("myDropdown").classList.toggle("show");
+                        var circle = document.getElementById("ti-arrow-circle").getAttribute("class");
+                        if (circle.includes("ti-arrow-circle-left")) {
+                            document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-down";
+                            document.getElementById("ti-arrow-circle").style.color = "#D03239";
+                        }
+                        else {
+                            document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-left";
+                            document.getElementById("ti-arrow-circle").style.color = "";
+                        }
                     }
                 </script>
             </div>
