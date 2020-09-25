@@ -266,7 +266,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //o.Status == false && 
             o.StudentID == userID).SortByDescending(o => o.ID).FirstOrDefault();
             //hết hạn => đóng luôn
-            var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(LessonID, ClassSubjectID);
+            var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
             if (x != null && !x.Status)
             {
                 if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)

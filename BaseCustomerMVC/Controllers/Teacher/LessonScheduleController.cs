@@ -609,7 +609,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var lessonids = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
             foreach (var id in lessonids)
             {
-                var schedule = _lessonScheduleService.GetItemByLessonID_ClassSubjectID(id, entity.ClassSubjectID);
+                var schedule = _lessonScheduleService.GetItemByLessonID(id);
                 schedule.StartDate = entity.StartDate;
                 schedule.EndDate = entity.EndDate;
                 UpdateCalendar(schedule, UserID);

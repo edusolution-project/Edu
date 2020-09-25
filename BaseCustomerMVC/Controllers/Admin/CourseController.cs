@@ -32,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly LessonService _lessonService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ProgressHelper _progressHelper;
+        private readonly CalendarService _calendarService;
 
         //private readonly LessonPartService _lessonPartService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -700,7 +701,9 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private async Task RemoveClassSubject(ClassSubjectEntity cs)
         {
-            ////remove old schedule
+            //remove old schedule
+            var schids = _lessonScheduleService.GetByClassSubject(cs.ID).Select(t => t.ID).AsEnumerable();
+            _calendarService.CreateQuery().DeleteMany(Builders<CalendarEntity>.Filter.In(t => t.ScheduleID, schids));
             var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
             //remove chapter
             var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);

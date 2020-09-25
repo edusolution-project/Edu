@@ -187,12 +187,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //where account != null
                     //let role = roles.Find(r => r.ID == account.RoleID)
                     //where role != null
+                let @class = _serviceClass.GetItemByID(t.ClassID)
+                let @center = _serviceCenter.GetItemByID(t.CenterID)
                 select _mapping.AutoOrtherType(t, new NewsViewModel()
                 {
                     //ParentName = t.Name == null ? null : _serviceNewCate.CreateQuery().Find(x => x.ID == t.ParentID).ToList()
-                    ClassName = t.ClassID == null || t.ClassID == "0" || t.ClassID == "" ? null : _serviceClass.GetItemByID(t.ClassID).Name,
-                    CenterName = t.CenterID == null || t.CenterID == "0" || t.CenterID == "" ? null : _serviceCenter.GetItemByID(t.CenterID).Name
-
+                    ClassName = @class?.Name,
+                    CenterName = @center?.Name
                 });
             var response = new Dictionary<string, object>
             {

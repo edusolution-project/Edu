@@ -350,19 +350,19 @@ namespace BaseCustomerMVC.Controllers.Student
                        let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
                        let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
                        let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
-                       let skill = _skillService.GetItemByID(o.SkillID)
+                       //let skill = _skillService.GetItemByID(o.SkillID)
+                       let course = _courseService.GetItemByID(o.CourseID)
                        select new
                        {
                            id = o.ID,
                            //courseID = o.CourseID,
-                           //courseName = skill.Name + " (" + _class.Name + ")",
-                           courseName = o.CourseID == null ? "" : _courseService.GetItemByID(o.CourseID).Name,
+                           courseName = course?.Name,
                            endDate = _class.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
                            score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
-                           thumb = string.IsNullOrEmpty(o.Image) ? "/pictures/english1.png" : o.Image,
+                           thumb = string.IsNullOrEmpty(o.Image) ? course?.Image : o.Image,
                        }).ToList();
             return Json(new { Data = std });
         }
@@ -407,20 +407,17 @@ namespace BaseCustomerMVC.Controllers.Student
                        let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
                        let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
                        let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
-                       let skill = _skillService.GetItemByID(o.SkillID)
+                       let course = _courseService.GetItemByID(o.CourseID)
+                       //let skill = _skillService.GetItemByID(o.SkillID)
                        select new
                        {
                            id = o.ID,
-                           //courseID = o.CourseID,
-                           //courseName = skill.Name + " (" + _class.Name + ")",
-                           courseName = o.CourseID==null?"":_courseService.GetItemByID(o.CourseID).Name,
+                           courseName = course?.Name,
                            endDate = _class.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
                            min = progress != null ? progress.Completed : 0,
-                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
-                           thumb = string.IsNullOrEmpty(_class.Image) ? "/pictures/english1.png" : _class.Image,
-                           image = o.CourseID != null ? _courseService.GetItemByID(o.CourseID).Image : "/pictures/english1.png"
+                           score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0
                        }).ToList();
             return Json(new { Data = std });
         }

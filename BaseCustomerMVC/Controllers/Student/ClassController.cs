@@ -1,8 +1,11 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CourseHelper _courseHelper;
         //private readonly MailHelper _mailHelper;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly CalendarHelper _calendarHelper;
         private readonly ChapterService _chapterService;
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
@@ -43,7 +47,8 @@ namespace BaseCustomerMVC.Controllers.Student
             ExamService examService,
             CourseLessonService courseLessonService,
             CourseChapterService courseChapterService,
-            LessonScheduleService lessonScheduleService
+            LessonScheduleService lessonScheduleService,
+            CalendarHelper calendarHelper
         )
         {
             _classService = classService;
@@ -62,6 +67,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _courseLessonService = courseLessonService;
             _courseChapterService = courseChapterService;
             _lessonScheduleService = lessonScheduleService;
+            _calendarHelper = calendarHelper;
         }
 
         #region add to my personal class
@@ -260,7 +266,13 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             try
             {
-                ////remove old schedule
+
+                //remove old schedule
+                //remove calendar
+                var schids = _lessonScheduleService.GetByClassSubject(cs.ID).Select(t => t.ID).ToList();
+
+                _calendarHelper.RemoveManySchedules(schids);
+
                 var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
                 //remove chapter
                 var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);

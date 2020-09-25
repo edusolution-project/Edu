@@ -85,7 +85,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var userId = User?.FindFirst("UserID").Value;
                     if (center != null && userId != null)
                     {
-                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == center.ID)?.ToList();
+                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type != ClassMemberType.OWNER) && o.Center == center.ID)?.ToList();
                         if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
                         var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
                         if (data == null) return Task.FromResult(new JsonResult(new { }));

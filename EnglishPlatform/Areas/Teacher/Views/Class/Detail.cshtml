@@ -196,8 +196,8 @@
                 <div class="col-md-6" v-for="data in ref.data">
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                         <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
-                            <img :src="data.Image" alt="" v-if="data.Image != null" class="w-100">
-                            <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            <img src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
                             <div>
@@ -1778,8 +1778,12 @@
                         var ext = path.substring(idx, path.length - idx);
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
-                }
-
+                },
+                cacheStatic(src, width) {
+                    if (src.startsWith("http"))
+                        return src;
+                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
+                },
             }
             });
 
