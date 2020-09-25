@@ -11,9 +11,24 @@ namespace EasyChatApp
     {
         #region local memory
         private readonly static ConnectIdToCurrentUser _connectIdToCurrentUser = new ConnectIdToCurrentUser();
-        private readonly static GroupMapping<string> _userMapping = new GroupMapping<string>();
+        private static readonly GroupMapping<string> _userMapping = new GroupMapping<string>();
         private readonly static ConnectIdToUser _connectIdToUser = new ConnectIdToUser();
         private readonly static GroupMapping<string> _groupToUsers = new GroupMapping<string>();
+
+        internal static GroupMapping<string> UserMap
+        {
+            get
+            {
+                return _userMapping;
+            }
+        }
+        internal static GroupMapping<string> GroupMapping
+        {
+            get
+            {
+                return _groupToUsers;
+            }
+        }
         #endregion
         private readonly GroupAndUserService _groupAndUserService;
         public EasyChatHub(GroupAndUserService groupAndUserService)
@@ -21,22 +36,22 @@ namespace EasyChatApp
             _groupAndUserService = groupAndUserService;
         }
         [Obsolete]
-        public async Task Online(string user, List<string> groupNames)
+        public async Task Online(string user, string groups)
         {
             var connectionId = Context.ConnectionId;
-            for(int  i =  0; groupNames != null && i < groupNames.Count; i++)
+            List<string> groupNames = groups.Split(',')?.ToList();
+            for (int  i =  0; groupNames != null && i < groupNames.Count; i++)
             {
                 var groupName = groupNames[i];
+                await Groups.AddToGroupAsync(connectionId, groupName);
                 // neu chua ton tai thi add join group
                 if (!_groupToUsers.GetGroupConnections(user).Contains(groupName))
                 {
-                    //add to group
-                    await Groups.AddToGroupAsync(connectionId, groupName);
                     // tao khi join vao group lan dau
                     await _groupAndUserService.CreateTimeJoin(groupName, user);
                 }
                 _groupToUsers.Add(user, groupName);
-                await Clients.OthersInGroup(groupName).SendAsync("OnlineToGroup",groupName, user);
+                await Clients.Group(groupName).SendAsync("OnlineToGroup",groupName, user);
             }
             _userMapping.Add(user, connectionId);
             _connectIdToUser.Add(connectionId, user);
@@ -161,7 +176,7 @@ namespace EasyChatApp
             {
                 if (!_connections.TryGetValue(connectionId, out string user))
                 {
-                    _connections.Add(connectionId, user);
+                    _connections.Add(connectionId, userId);
                 }
                 else
                 {

@@ -41,6 +41,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private string host;
         private string staticPath;
 
+        private string RootPath { get; }
+
         public ReferenceController(
             TeacherService teacherService,
             TeacherHelper teacherHelper,
@@ -70,6 +72,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
+
+            RootPath = (iConfig.GetValue<string>("SysConfig:StaticPath") ?? _env.WebRootPath) + "/Files";
         }
 
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
@@ -453,5 +457,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _ = _referenceService.IncView(ID, 1);
             return Json("OK");
         }
+
     }
 }
