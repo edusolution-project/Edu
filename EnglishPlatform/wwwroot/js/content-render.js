@@ -49,6 +49,8 @@ CKEDITOR.on('instanceCreated', function (event) {
 });
 CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
 
+var quiz3m_ans = [];
+
 var Lesson = (function () {
 
     var _totalPart = 0;
@@ -58,8 +60,6 @@ var Lesson = (function () {
     var _UImode = null;
 
     var exam_timeout = null;
-
-    var quiz3m_ans = [];
 
     var config = {
         container: "",
@@ -1449,10 +1449,11 @@ var Lesson = (function () {
         if (data.Media != null) {
             var mediaHolder = $("<div>", { "class": "media-holder mt-2 mb-2 " + type });
             //var contentWrapper = $("<div>", { class: "m-content" });
+            //console.log(type);
             switch (type) {
                 case "IMG":
                     mediaHolder.append(
-                        $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") }));
+                        $("<img>", { "class": "img-fluid lazy", "src": cacheStatic(data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")) }));
                     break;
                 case "VIDEO":
                     mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
@@ -1481,7 +1482,7 @@ var Lesson = (function () {
                     if (data.Media.Extension != null)
                         if (data.Media.Extension.indexOf("image") >= 0)
                             mediaHolder.append(
-                                $("<img>", { "class": "img-fluid lazy", "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") }));
+                                $("<img>", { "class": "img-fluid lazy", "src": cacheStatic(data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")) }));
                         else if (data.Media.Extension.indexOf("video") >= 0)
                             mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                         else if (data.Media.Extension.indexOf("audio") >= 0)
@@ -3019,6 +3020,15 @@ var Lesson = (function () {
                     ItemRow.find(".media-holder").addClass("col-12");
                     container.append(tabsitem);
                     //Render Question
+
+                    quiz3m_ans[data.ID] = [];
+
+                    tabsitem.append(
+                        $("<div>", { style: "position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index:9999; background: #FFF; display:none; padding-top:100px;", id: 'ans_wrapper_' + data.ID })
+                            .append($("<div>", { style: "overflow:auto; height:95%; width:100%;", class: "inner_wrap" }))
+                            .append($("<input>", { type: "hidden", class: "quizid" }))
+                    );
+
                     totalQuiz = data.Questions.length;
                     for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
                         var item = data.Questions[i];
@@ -3049,8 +3059,6 @@ var Lesson = (function () {
                     itembox.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", onclick: "SaveEssay('" + data.Questions[0].ID + "',this)" }));
                     itembox.append($("<input>", { type: "file", name: "ESF_" + data.Questions[0].ID, class: "hide", accept: " audio/*, .doc, .docx", onchange: "UpdateFilename(this)" }));
                 }
-
-
 
                 //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
 
@@ -3174,10 +3182,9 @@ var Lesson = (function () {
                     } else {
                         renderMediaContent(data, pane_item);
                     }
+
                     quiz_part.append(pane_item);
                     container.append(quizitem);
-
-                    quiz3m_ans[data.ID] = [];
 
                     for (var i = 0; data.CloneAnswers != null && i < data.CloneAnswers.length; i++) {
                         var item = data.CloneAnswers[i];
@@ -3302,48 +3309,54 @@ var Lesson = (function () {
                     var answerselector = $("<div>", {
                         "id": "plc_" + data.ParentID,
                         "class": "pane-item placeholder w-100 q3_select",
-                        "onchange": "AnswerQuestion(this)",
+                        "onclick": "ChooseQ3Ans('" + data.ParentID + "','" + partid + "')",
                         "data-part-id": partid,
                         "data-lesson-id": config.lesson_id,
                         "data-question-id": data.ParentID,
                         "data-type": template,
                         "name": "rd_" + data.ParentID
-                    });
+                    }).append("Chọn đáp án");
                     placeholder.empty().append(answerselector);
-                    console.log(quiz3m_ans[partid]);
-                    quiz3m_ans[partid].push({ data });
-                    console.log(quiz3m_ans[partid]);
+                    quiz3m_ans[partid].push(data);
 
-                    answerselector.append($("<div>", { text: "-- Chọn đáp án -- ", value: "" }));
 
                     container = $("#" + partid);
 
-                    var optanswer = $("<div>", { "class": "q3-answer-holder", "value": data.ID, "thumb": data.Media.Path })
+                    var ans_wrapper = $('#ans_wrapper_' + partid + " .inner_wrap");
+
+                    //console.log(ans_wrapper);
+                    var optanswer = $("<div>", { class: 'd-flex align-items-center pl-3 pr-3' })
+                        .append($('<input>', {
+                            type: "radio", name: "ans_" + partid, "class": "q3-answer mr-2", "value": data.ID,
+                            onclick: "TakeQ3Ans(this,'" + partid + "')",
+                            "data-part-id": partid,
+                            "data-lesson-id": config.lesson_id,
+                            "data-id": data.ID,
+                            "data-type": template,
+                            "data-value": data.Content,
+                            "style": "width: 32px; height: 32px;"
+                        }))
 
                     if (data.Media != null) {
                         renderMediaContent(data, optanswer);
                     }
                     else
-                        optanswer.append(data.Content);
-
-                    
-
-
-                    //if ($(container).find('select').length == 1) {
-                    //    $(container).find('select').append(optanswer)
-                    //}
+                        optanswer.append($("<span>", { text: data.Content }));
 
                     var x = Math.floor((Math.random() * 2));
                     if (x > 0)
-                        $(container).find('.q3_select:first').append(optanswer);
-                    else
-                        $(container).find(".q3_select:first .answer-holder:first").after(optanswer);
+                        ans_wrapper.append(optanswer);
 
-                    $(container).find('.q3_select:gt(0)').each(function (pos, item) {
-                        var opts = $(container).find('.q3_select:first .q3-answer-holder:gt(0)').clone();
-                        $(item).find('.q3-answer-holder:gt(0)').remove();
-                        $(item).append(opts);
-                    })
+                    //$(container).find('.q3_select:first').append(optanswer);
+                    else
+                        ans_wrapper.prepend(optanswer);
+                    //$(container).find(".q3_select:first .answer-holder:first").after(optanswer);
+
+                    //$(container).find('.q3_select:gt(0)').each(function (pos, item) {
+                    //    var opts = $(container).find('.q3_select:first .q3-answer-holder:gt(0)').clone();
+                    //    $(item).find('.q3-answer-holder:gt(0)').remove();
+                    //    $(item).append(opts);
+                    //})
                 }
                 //container.append(answer);
                 break;
@@ -3353,7 +3366,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "radio",
-                    "class": "input-checkbox answer-checkbox form-check-input",
+                    "class": "input-checkbox answer-checkbox",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3374,7 +3387,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "checkbox",
-                    "class": "input-checkbox answer-checkbox form-check-input",
+                    "class": "input-checkbox answer-checkbox",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3647,6 +3660,23 @@ var Lesson = (function () {
         });
     }
 
+    var chooseQ3Ans = function (quizId, partId) {
+        var wrapper = $('#ans_wrapper_' + partId);
+        $(wrapper).find('.quizid').val(quizId)
+        console.log('#ans_wrapper_' + partId);
+        $(wrapper).show()
+    }
+
+    var takeQ3Ans = function (obj, partId) {
+        var wrapper = $('#ans_wrapper_' + partId);
+        var quizid = $('#ans_wrapper_' + partId + ' .quizid').val();
+        var content = $(obj).siblings();
+        $('#plc_' + quizid).empty().append($(content).clone());
+        $(obj)[0].dataset.questionId = quizid;
+        AnswerQuestion($(obj)[0]);
+        $(wrapper).hide()
+    }
+
     var AnswerQuestion = function (_this, _that) {
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
@@ -3705,15 +3735,10 @@ var Lesson = (function () {
                     answerID = item.id;
                 }
                 else {
-                    var select = $('#' + dataset.questionId + ' select');
-                    answerID = $(select).val();
-                    if (answerID == "") {
-                        delAnswerForStudentNoRender(questionId);
-                        return false;
-                    }
-                    else {
-                        value = $(select).find('option:selected').text();
-                    }
+                    partID = dataset.partId;
+                    answerID = dataset.id;
+                    questionId = dataset.questionId;
+                    value = dataset.value;
                 }
                 break;
             case "ESSAY":
@@ -4058,6 +4083,8 @@ var Lesson = (function () {
     window.BeginExam = startExam;
     window.AnswerQuestion = AnswerQuestion;
     window.CompleteExam = completeExam;
+    window.ChooseQ3Ans = chooseQ3Ans;
+    window.TakeQ3Ans = takeQ3Ans;
     window.CompleteLectureExam = completeLectureExam;
     window.Redo = redoExam;
     window.DoLectureExam = doLectureExam;
@@ -4390,7 +4417,15 @@ var toggleExpand = function (obj) {
         $(obj).removeClass("fa-caret-up");
         _openingPart = '';
     }
+}
 
+
+
+var cacheStatic = function (src) {
+    //console.log(src);
+    if (src.startsWith("http"))
+        return src;
+    return "https://static.eduso.vn/" + src + "?&format=jpg";
 }
 
 var isMobileDevice = function () {

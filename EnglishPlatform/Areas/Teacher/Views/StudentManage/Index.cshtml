@@ -82,9 +82,8 @@
                         <a :href="'@processUrl("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
                     </td>
                     <td style="width:300px;text-align:left">
-                        @**@
-                        <template v-if="item.JoinedClasses.length==1">
-                            <a :href="'@processUrl("Detail", "Class")/'+item.JoinedClasses+'#module'">{{item.ClassName}}</a>
+                        <template v-if="item.JoinedClasses != null && item.JoinedClasses.length == 1">
+                            <a :href="'@processUrl("Detail", "Class")/' + item.JoinedClasses + '#module'">{{item.ClassName}}</a>
                         </template>
                         <template v-else>
                             <div style=" white-space: nowrap; width: 300px; overflow: hidden; text-overflow: ellipsis;">
@@ -430,7 +429,6 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
-                    _form.append('Center', '@center')
                     _form.append('Sort', 'DES')
                     let _url = '@processUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)
@@ -743,7 +741,6 @@
                     this.createStudent.idStudent = data.ID
                     this.createStudent.passStudent= ''
                     this.$bvModal.show('modal_pass')
-                    this.searchTerm=''
                 },
                 changePass() {
                     let _that = this

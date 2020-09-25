@@ -106,9 +106,9 @@ var ExamReview = (function () {
         renderExam();
         renderQuizCounter();
         renderResult();
-        if (!config.isTeacher) {
-            $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
-        }
+        //if (!config.isTeacher) {
+        //    $('.tab-pane .part-column').addClass('scrollbar-outer').scrollbar();
+        //}
         renderNavigation();
     }
 
