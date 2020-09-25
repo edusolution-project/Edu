@@ -2,7 +2,7 @@
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
     var currentCs = ViewBag.ClassSubject as BaseCustomerMVC.Models.ClassSubjectViewModel;
     //var completePercent = (int)ViewBag.CompletePercent;
-    ViewData["Title"] = currentCs.SkillName + " - " + currentCs.ClassName;
+    ViewData["Title"] = currentCs.CourseName + " - " + currentCs.ClassName;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -55,7 +55,7 @@
     </div>
     <div class="card-header border-b" v-cloak>
         <div class="flex pb-2">
-            <h2 class="title"><a href="@processUrl("Index", "Course")#@currentCs.ClassID" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.SkillName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
+            <h2 class="title"><a href="@processUrl("Index", "Course")#@currentCs.ClassID" title="@currentCs.ClassName" class="text-dark"><i class="ti-arrow-left d-none"></i>@currentCs.ClassName</a> / <span class="end-break">@currentCs.CourseName (@currentCs.CompletedLesssons/@currentCs.TotalLessons)</span></h2>
             <div class="c-right bad">
                 <div class="flex">
                     <b-progress :value="@currentCs.CompletedLesssons" :max="@currentCs.TotalLessons" class="mb-3"></b-progress>

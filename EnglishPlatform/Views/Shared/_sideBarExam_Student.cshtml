@@ -216,6 +216,10 @@
         padding: 0px !important;
     }
 
+    #QuizNav .selection {
+        background-color: #007bff !important;
+    }
+
     .fullscreenSupport {
         width: 100%;
     }
@@ -277,15 +281,15 @@
                 cursor: default;
             }
 </style>
-<aside class="d-flex justify-content-start bg-white" id="sidebar">
+<aside class="d-flex flex-column flex-md-row justify-content-start bg-white" id="sidebar">
     <div class="menu-bar w-100">
-        <ul class="d-flex p-0 m-0 h-100 align-items-center">
+        <ul class="d-flex p-0 m-0 h-100 align-items-center overflow-hidden">
             <li for="home" class="top-menu">
                 <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic fas fa-home"></i><span>Trang chủ</span></a>
             </li>
             <i class="fa fa-chevron-left mt-1"></i>
             <li for="class" class="top-menu" style="max-width:130px;">
-                <a href="@processUrl("Detail", "Course")/@Class.ID#module" title="@Class.Name">@Class.Name</a>
+                <a href="@processUrl("Index", "Course")#module" title="@Class.Name">@Class.Name</a>
             </li>
             <i class="fa fa-chevron-left mt-1 mr-1"></i>
             <li for="path_menu" class="top-menu" style="width:auto;">
@@ -302,8 +306,42 @@
         </ul>
     </div>
 </aside>
+<script>
+    $(document).ready(function () {
+        if (isMobileDevice()) {
+            var lessoninfo = $('.menu-bar .top-menu[for=lesson-info]');
+            var quizNav = $('.menu-bar #QuizNav');
+            $(lessoninfo).attr("class", "top-menu d-flex");
+            $('.menu-bar').after(quizNav).after(lessoninfo);
+        }
+    });
+
+</script>
 <style>
     @@media only screen and (max-width: 600px) {
+        .btn-toggle-width {
+            display: none;
+        }
+
+        .right-content.no-info-bar {
+            top: 48px;
+        }
+
+        .right-content.showQuiz {
+            top:200px;
+        }
+
+        #QuizNav {
+            top: 91px;
+            height: 100px;
+            overflow: auto;
+            background: #FFF;
+        }
+
+        .menu-bar u {
+            overflow: hidden;
+        }
+
         .menu-bar .top-menu:first-child span {
             display: none;
         }
@@ -313,14 +351,37 @@
         }
 
         input[type=checkbox] {
-            height: 16px;
-            width: 24px;
+            height: 24px;
+            width: 32px;
             display: inline block;
         }
 
         input[type=radio] {
-            height: 16px;
-            width: 24px;
+            height: 24px;
+            width: 32px;
+        }
+
+        .top-menu[for=lesson-info] {
+            list-style: none;
+            border-bottom: solid 1px #CCC;
+            border-top: solid 1px #CCC;
+            height: 43px;
+        }
+
+            .top-menu[for=lesson-info] span {
+                font-size: 100% !important;
+            }
+
+            .top-menu[for=lesson-info] .no-mobile {
+                font-size: 0 !important;
+            }
+
+            .top-menu[for=lesson-info] #bottom-counter {
+                font-size: 120% !important;
+            }
+
+        .right-content {
+            top: 90px;
         }
     }
 </style>

@@ -53,6 +53,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly TeacherService _teacherService;
 
         private readonly ReferenceService _referenceService;
+        private readonly CalendarService _calendarService;
+        private readonly LessonScheduleService _lessonScheduleService;
 
         private string host;
         private string staticPath;
@@ -90,7 +92,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                 TeacherService teacherService,
                 IConfiguration iConfig,
                 IHostingEnvironment env,
-                ReferenceService referenceService
+                ReferenceService referenceService,
+                CalendarService calendarService,
+                LessonScheduleService lessonScheduleService
             )
         {
             _lessonService = lessonService;
@@ -123,6 +127,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _studentService = studentService;
             _teacherService = teacherService;
             _referenceService = referenceService;
+            _calendarService = calendarService;
+            _lessonScheduleService = lessonScheduleService;
 
             _env = env;
 
@@ -386,6 +392,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             return point;
         }
 
+
+        #region Fix Region
         public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)
         {
             try
@@ -548,5 +556,22 @@ namespace BaseCustomerMVC.Controllers.Admin
                 return Json(ex.Message);
             }
         }
+
+        public JsonResult FixCalendar()
+        {
+            var calendars = _calendarService.GetAll().ToEnumerable();
+            var count = 0;
+            foreach (var calendar in calendars)
+            {
+                var sch = _lessonScheduleService.GetItemByID(calendar.ScheduleID);
+                if (sch == null)
+                {
+                    _calendarService.Remove(calendar.ID);
+                    count++;
+                }
+            }
+            return Json("DEL " + count);
+        }
+        #endregion
     }
 }

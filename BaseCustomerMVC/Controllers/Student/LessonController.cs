@@ -393,6 +393,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             ViewBag.Lesson = lessonview;
             ViewBag.Class = currentClass;
+            if (string.IsNullOrEmpty(currentCs.CourseName))
+                currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
             ViewBag.Subject = currentCs;
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;

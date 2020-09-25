@@ -199,23 +199,27 @@ footer {
     vertical-align: top;
 }
 
-#nav-menu {
-    z-index: 2;
-    padding: 8px;
+@media (max-width : 600px) {
+
+    .QUIZ1 .answer-item,
+    .QUIZ4 .answer-item,
+    .QUIZ2 .answer-item {
+        max-width: 50%;
+    }
 }
 
-    #nav-menu.bd-top {
-        border-top: dashed 1px #CCC;
-    }
+#nav-menu.bd-top {
+    border-top: dashed 1px #CCC;
+}
 
-    #nav-menu.bd-bottom {
-        border-bottom: dashed 1px #CCC;
-    }
+#nav-menu.bd-bottom {
+    border-bottom: dashed 1px #CCC;
+}
 
 
-    #nav-menu .lesson-tab {
-        height: 42px;
-    }
+#nav-menu .lesson-tab {
+    height: 42px;
+}
 
 #pills-tab {
     width: 100%;

@@ -132,7 +132,7 @@ var ExamReview = (function () {
         root.innerHTML = "";
         var number = 1;
         var ul = document.createElement("ul");
-        ul.style.width = "calc(100% - 100px)";
+        //ul.style.width = "calc(100% - 100px)";
         ul.style.display = "inline-block";
         for (var i = 0; i < parts.length; i++) {
             var part = parts[i];
@@ -152,9 +152,9 @@ var ExamReview = (function () {
         $(".top-menu[for=lesson-info]").prepend($('<span>',
             {
                 class: "m-2 text-muted font-weight-bold",
-                style: "font-size: 150%",
+                style: "font-size: 150%;white-space: nowrap;",
 
-            }).append("Kết quả: ").append($('<span>',
+            }).append($("<span>", { class: "no-mobile" }).append("Kết quả: ")).append($('<span>',
                 { class: "text-primary", text: config.exam.Point + "/" + config.exam.MaxPoint })).append(" (" + durationFormat(duration) + ")"));
 
         var totalhead = document.getElementById('total-point-head');
@@ -252,7 +252,7 @@ var ExamReview = (function () {
         var id = this.parentElement.dataset.id;
         var partID = this.parentElement.dataset.part;
         var part = document.getElementById("pills-part-" + partID);
-        
+
 
 
         if (part != null) {
@@ -598,8 +598,12 @@ var ExamReview = (function () {
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             var content = "";
-            if (item.Content != null)
-                content = item.Content.replace(/\n/g, '<br/>');
+
+            if (item.Media != null)
+                content = renderMedia(item.Media)
+            else
+                if (item.Content != null)
+                    content = item.Content.replace(/\n/g, '<br/>');
             var answers = "";
             html += '<div class="quiz-item row m-0" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="QUIZ3">';
             html += '<div class="quiz-pane col-4 align-top"><div class="pane-item"><div class="quiz-text">' + content + '</div></div></div>';
@@ -662,9 +666,9 @@ var ExamReview = (function () {
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
                 if (answer.IsCorrect)
-                    html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
+                    html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + (answer.Media != null ? renderMedia(answer.Media) : answer.Content) + '</label>';
                 else
-                    html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + answer.Content + '</del></label>';
+                    html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + (answer.Media != null ? renderMedia(answer.Media) : answer.Content) + '</del></label>';
                 html += '</div>';
                 html += renderMedia(answer.Media);
                 html += '</fieldset>';
@@ -732,8 +736,8 @@ var ExamReview = (function () {
                 html += '<div> Điểm :<input onkeyup="validate(this)" max="' + data.Point + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + data.Point + '</div>';
                 html += '<i>Bài chữa :</i>';
                 var realContent = content == null ? "" : content;
-                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + item.ID +'">' + realContent + '</textarea></div>';
-                
+                html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + item.ID + '">' + realContent + '</textarea></div>';
+
                 //upload file
                 var type = "type='file'";
                 var strFile = "this.parentElement.querySelector('input[" + type + "]')";
@@ -833,18 +837,18 @@ var ExamReview = (function () {
         //var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "d-inline-block text-white font-weight-bold align-middle pl-2" });
 
         var lesson_info_holder = $('.top-menu[for=lesson-info]');
-        var prev_btn = $('<button>', { class: "prevtab btn btn-primary m-2", disabled: "disabled", onclick: "window.PrevPart()" }).append($('<i>', { class: "fas fa-arrow-circle-left mr-2" })).append("Câu trước");
+        var prev_btn = $('<button>', { class: "prevtab btn btn-primary m-2", disabled: "disabled", onclick: "window.PrevPart()" }).append($('<i>', { class: "fas fa-arrow-circle-left" })).append($("<span>", { class: "no-mobile ml-2" }).append("Câu trước"));
         lesson_info_holder.append(prev_btn);//.append(quiz_counter);
         //var ct_action_holder = $('<div>', { class: "text-center" });
 
         //if (_type != 1) {
-        var explain_btn = $('<button>', { class: "btn btn-primary mt-2 mr-2 mb-2", onclick: "ToggleExplain(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+        var explain_btn = $('<button>', { class: "btn btn-primary mt-2 mr-2 mb-2", onclick: "ToggleExplain(this)" }).append('<i class="fas fa-info-circle"></i>').append($("<span>", { class: "no-mobile ml-2" }).append("Giải thích"));
         //var golist_btn = $('<button>', { class: "btn btn-success pl-3 pr-3 ml-1", onclick: "GoList(this)", text: "Về danh sách" });
-        var redo_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "Redo(this)" }).append($("<i>", { "class": "fas fa-play mr-2" })).append("Thực hiện lại");
+        var redo_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "Redo(this)" }).append($("<i>", { "class": "fas fa-redo-alt" })).append($("<span>", { class: "no-mobile ml-2" }).append("Thực hiện lại"));
         lesson_info_holder.append(explain_btn).append(redo_btn);//.append(golist_btn);
         //}
         var next_btn_holder = $('<div>', { class: "text-right align-self-end" });
-        var next_btn = $('<button>', { class: "nexttab btn btn-primary m-2", onclick: "window.NextPart()" }).append($('<i>', { class: "fas fa-arrow-circle-right mr-2" })).append("Câu sau");
+        var next_btn = $('<button>', { class: "nexttab btn btn-primary m-2", onclick: "window.NextPart()" }).append($('<i>', { class: "fas fa-arrow-circle-right" })).append($("<span>", { class: "no-mobile ml-2" }).append("Câu sau"));
         lesson_info_holder.append(next_btn);
 
         //nav_bottom_wrapper.append(prev_btn_holder).append(ct_action_holder).append(next_btn_holder);
@@ -888,9 +892,8 @@ var ExamReview = (function () {
     var renderQuizCounter = function () {
         $(".top-menu[for=lesson-info] .prevtab")
             .after($('<button>', { class: "quizNumber btn btn-primary mt-2 mr-2 mb-2", onclick: "window.ToggleNav(this)", tooltips: "Ẩn hiện bảng theo dõi" })
-                .append($("<i>", { class: "fas fa-question-circle mr-2" })).append("Danh sách câu trả lời"));
+                .append($("<i>", { class: "fas fa-question-circle" })).append($("<span>", { class: "no-mobile ml-2" }).append("Danh sách câu trả lời")));
         $(".quizNumber").focus().click();
-
     }
 
     var redo = function () {
@@ -1037,3 +1040,15 @@ var ExamReview = (function () {
     return ExamReview;
 }());
 
+var isMobileDevice = function () {
+    //return true;
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // true for mobile device
+        //console.log("Mobile detected");
+        return true;
+    } else {
+        // false for not mobile device
+        //console.log("Desktop detected");
+        return false;
+    }
+};

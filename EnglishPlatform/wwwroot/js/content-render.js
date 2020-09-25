@@ -740,9 +740,8 @@ var Lesson = (function () {
                 var iconprev = $("<i>", { "class": "fas fa-arrow-circle-left mr-2" });
                 var nexttab = $("<button>", { "class": "nexttab btn btn-primary m-2", "title": "Câu tiếp", "onclick": "NextPart()" });
                 var iconnext = $("<i>", { "class": "fas fa-arrow-circle-right mr-2" });
-                prevtab.append(iconprev).append("Câu trước");;
-                nexttab.append(iconnext).append("Câu sau");;
-
+                prevtab.append(iconprev).append($("<span>", { class: "no-mobile" }).append("Câu trước"));
+                nexttab.append(iconnext).append($("<span>", { class: "no-mobile" }).append("Câu sau"));
 
                 prevtab.prop("disabled", true);
 
@@ -758,8 +757,8 @@ var Lesson = (function () {
                 var quiz_counter = $('<div>', { id: 'quiz-counter-holder', class: "text-white font-weight-bold align-middle" });
                 nav_bottom.append(quiz_counter);
 
-                var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");;
-                var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                var complete_btn = $('<button>', { class: "btn btn-primary mt-2 mb-2", onclick: "CompleteExam()" }).append('<i class="fas fa-save mr-2"></i>').append($("<span>", { class: "no-mobile" }).append("Nộp bài"));
+                var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%; white-space:nowrap" })
                     .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
                     .append($("<span>", { class: "time-counter " }));
 
@@ -897,6 +896,8 @@ var Lesson = (function () {
                 leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-12").show();//scrollwrapper
                 if (!isMobileDevice())
                     rightCol.parent().hide();
+                //console.log("lecture only")
+                $('.right-content').addClass("no-info-bar");
                 break;
             case UIMode.EXAM_ONLY:
                 leftCol.parent().removeClass("col-md-6").removeClass("col-md-12").addClass("col-md-4").show();
@@ -2382,17 +2383,46 @@ var Lesson = (function () {
         }
     }
 
-    var goQuiz = function (quizid) {
+    var goQuiz = function (quizid, obj) {
         var _quiz = $('#' + quizid);
-        console.log(quizid);
         var _partid = _quiz.attr('data-part-id');
         var _part = $('.tab-pane#pills-part-' + _partid);
-        if (_part.hasClass('active')) {
-            return false;
+        var part = _part[0];
+        if (part != null) {
+            var el = part.querySelector("[id='" + quizid + "']");
+            if (!part.classList.contains("active")) {
+                part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
+                part.classList.add(...["show", "active"]);
+            }
+            var select = part.querySelector(".selection");
+            if (select != null) {
+                select.classList.remove("selection");
+            }
+            var aSelect = $('#QuizNav')[0].querySelector('.selection');
+            if (aSelect != null) {
+                aSelect.classList.remove("selection");
+            }
+            //console.log(getNavigationRoot());
+            $('#' + quizid).addClass("selection");
+            $(obj).addClass("selection");
+            el.classList.add("selection");
+            //console.log(el);
+            el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+            if (_part.hasClass('active')) {
+                return false;
+            }
+
+            var panes = $('.tab-pane');
+            var index = panes.index($('.tab-pane.active'));
+            goPartInx(index);
         }
-        var panes = $('.tab-pane');
-        var index = panes.index(_part);
-        goPartInx(index);
+        //if (_part.hasClass('active')) {
+        //    return false;
+        //}
+        //var panes = $('.tab-pane');
+        //var index = panes.index(_part);
+        //goPartInx(index);
     }
 
     var goPartInx = function (idx) {
@@ -2438,6 +2468,37 @@ var Lesson = (function () {
         //else
         //    $('.card-footer').removeClass("expand");
         //$(obj).toggleClass('btn-warning');
+    }
+
+    var _eventGotoSelection = function (event) {
+        var id = this.parentElement.dataset.id;
+        var partID = this.parentElement.dataset.part;
+        var part = document.getElementById("pills-part-" + partID);
+
+        if (part != null) {
+            var el = part.querySelector("[id='" + id + "']");
+            if (!part.classList.contains("active")) {
+                part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
+                part.classList.add(...["show", "active"]);
+            }
+            var select = part.querySelector(".selection");
+            if (select != null) {
+                select.classList.remove("selection");
+            }
+            var aSelect = getNavigationRoot().querySelector('.selection');
+            if (aSelect != null) {
+                aSelect.classList.remove("selection");
+            }
+            //console.log(getNavigationRoot());
+            this.classList.add("selection");
+            el.classList.add("selection");
+            //console.log(el);
+            el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
+
+            var panes = $('.tab-pane');
+            var index = panes.index($('.tab-pane.active'));
+            goPartInx(index);
+        }
     }
 
     //Exam
@@ -2657,8 +2718,14 @@ var Lesson = (function () {
                     "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
                     "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-save mr-2"></i>').append("Nộp bài");
-                wrapper.append(completeButton);
+                }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "no-mobile ml-2" }).append("Nộp bài"));
+                if (isMobileDevice()) {
+                    $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
+                    $('.top-menu[for=lesson-info]').append(completeButton);
+                    $('.right-content').removeClass("no-info-bar");
+                }
+                else
+                    wrapper.append(completeButton);
                 $('#rightCol').find('.tab-pane').show();
                 renderQuizCounter();
             }
@@ -3092,10 +3159,12 @@ var Lesson = (function () {
         //    trigger: 'hover'
         //});
         ApplyAdditionVocabStyle();
-        $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
-        $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
 
-        startDragDrop();
+        if (!isMobileDevice()) {
+            $('.Q3_absrow .quiz-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+            $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
+            startDragDrop();
+        }
     }
 
     var renderExamQuestion = function (data, template) {
@@ -3232,11 +3301,11 @@ var Lesson = (function () {
         //console.log(holder);
         var input = $("<span>", { class: "fillquiz" });
         $(holder).find(".fillquiz").remove();
-        $(holder).addClass("quiz-item").attr("id", data.ID);
+        $(holder).addClass("quiz-item").attr("id", data.ID).attr("data-part-id", data.ParentID);
         //console.log(data);
         var plcholder = data.Content;
         if (plcholder == null || plcholder.length == 0)
-            plcholder = "Nhập câu trả lời...";
+            plcholder = "Trả lời...";
         $(input)
             .attr("id", "inputQZ2-" + data.ID)
             .attr("data-part-id", data.ParentID)
@@ -3325,7 +3394,7 @@ var Lesson = (function () {
                     var ans_wrapper = $('#ans_wrapper_' + partid + " .inner_wrap");
 
                     //console.log(ans_wrapper);
-                    var optanswer = $("<div>", { class: 'd-flex align-items-center pl-3 pr-3' })
+                    var optanswer = $("<div>", { class: 'd-flex align-items-center pl-3 pr-3 mb-3' })
                         .append($('<input>', {
                             type: "radio", name: "ans_" + partid, "class": "q3-answer mr-2", "value": data.ID,
                             onclick: "TakeQ3Ans(this,'" + partid + "')",
@@ -3377,7 +3446,7 @@ var Lesson = (function () {
                     "name": "rd_" + data.ParentID
                 }));
                 if (data.Content != null)
-                    form.append($("<label>", { "class": "answer-text form-check-label", "for": data.ID, "html": breakLine(data.Content) }));
+                    form.append($("<label>", { "class": "answer-text form-check-label ml-2", "for": data.ID, "html": breakLine(data.Content) }));
                 renderMediaContent(data, answer);
                 container.append(answer);
                 break;
@@ -3450,7 +3519,7 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = function () {
-
+        $('.btnCompleteExam').hide();
         if (config.mod != mod.TEACHERPREVIEW) {
             var dataform = new FormData();
             console.log("Complete :" + $('#ExamID').val());
@@ -3663,7 +3732,8 @@ var Lesson = (function () {
     var chooseQ3Ans = function (quizId, partId) {
         var wrapper = $('#ans_wrapper_' + partId);
         $(wrapper).find('.quizid').val(quizId)
-        console.log('#ans_wrapper_' + partId);
+        $(wrapper).find('input[type="radio"]').prop("checked", false);
+        //console.log('#ans_wrapper_' + partId);
         $(wrapper).show()
     }
 
@@ -3888,7 +3958,7 @@ var Lesson = (function () {
                 completed = "completed";
                 rendAgain(answer);
             }
-            answerList += '<button class="btn bg-secondary text-white rounded-quiz ' + completed + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="window.GoQuiz(\'' + item.id + '\')">' + (i + 1) + '</button>';
+            answerList += '<button class="btn bg-secondary text-white rounded-quiz ' + completed + '" type="button" id="quizNav' + item.id + '" name="quizNav' + item.id + '" onclick="window.GoQuiz(\'' + item.id + '\', this)">' + (i + 1) + '</button>';
         }
 
         var quiz_number_counter = $('#quiz_number_counter');
@@ -3903,7 +3973,7 @@ var Lesson = (function () {
                 tooltips: "Toggle Scoreboard"
             })
                 .append($("<i>", { class: "fas fa-question-circle mr-2" }))
-                .append("Câu đã trả lời ").append($("<span>", {
+                .append($("<span>", { class: "no-mobile" }).append("Câu đã trả lời")).append($("<span>", {
                     class: "completed ml-1",
                     text: count
                 })).append(" / ")
@@ -3938,8 +4008,8 @@ var Lesson = (function () {
             var btn = document.getElementById("btn-completed");
             if (btn != null) btn.style.display = "none!important";
         }
-
-        startDragDrop();
+        if (!isMobileDevice())
+            startDragDrop();
     }
 
     var rendAgain = function (value) {
@@ -4418,8 +4488,6 @@ var toggleExpand = function (obj) {
         _openingPart = '';
     }
 }
-
-
 
 var cacheStatic = function (src) {
     //console.log(src);

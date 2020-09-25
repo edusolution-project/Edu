@@ -100,11 +100,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Areas\Student\Views\Course\Detail_cshtml" />
     <None Remove="Views\Shared\_LayoutTeacher.oldcshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\scss\sb-admin-2.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Student\Views\Course\Detail_cshtml" />
   </ItemGroup>
 
   <ItemGroup>

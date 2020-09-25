@@ -808,23 +808,23 @@ namespace BaseCustomerMVC.Controllers.Student
 
         public IActionResult Detail(string id, string basis)
         {
-            //return Redirect(Url.Action("Modules", "Course") + "/" + id);
-            var currentClass = _service.GetItemByID(id);
-            var userId = User.Claims.GetClaimByType("UserID").Value;
-            if (currentClass == null)
-                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
-            //var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
-            if (!_studentService.IsStudentInClass(currentClass.ID, userId))
-                return Redirect($"/{basis}{Url.Action("Index")}");
-            var vm = new ClassViewModel(currentClass);
-            var subjects = _classSubjectService.GetByClassID(currentClass.ID);
-            var skillIDs = subjects.Select(t => t.SkillID).Distinct();
-            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
-            vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
-            vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
-            ViewBag.Class = vm;
-            ViewBag.UserID = userId;
-            return View();
+            return Redirect(Url.Action("Index", "Course"));
+            //var currentClass = _service.GetItemByID(id);
+            //var userId = User.Claims.GetClaimByType("UserID").Value;
+            //if (currentClass == null)
+            //    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+            ////var classStudent = _classStudentService.GetClassStudent(currentClass.ID, userId);
+            //if (!_studentService.IsStudentInClass(currentClass.ID, userId))
+            //    return Redirect($"/{basis}{Url.Action("Index")}");
+            //var vm = new ClassViewModel(currentClass);
+            //var subjects = _classSubjectService.GetByClassID(currentClass.ID);
+            //var skillIDs = subjects.Select(t => t.SkillID).Distinct();
+            //var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
+            //vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
+            //vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
+            //ViewBag.Class = vm;
+            //ViewBag.UserID = userId;
+            //return View();
         }
 
         //public IActionResult Syllabus(DefaultModel model, string id)
@@ -858,18 +858,19 @@ namespace BaseCustomerMVC.Controllers.Student
             //long completed = 0;
             //if (progress != null && progress.TotalLessons > 0)
             //    completed = progress.Completed;
-            var subject = _subjectService.GetItemByID(currentCs.SubjectID);
-            if (subject == null)
-                return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+            //var subject = _subjectService.GetItemByID(currentCs.SubjectID);
+            //if (subject == null)
+            //    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             //ViewBag.Completed = completed;
             ViewBag.ClassSubject = new ClassSubjectViewModel()
             {
                 ID = currentCs.ID,
-                Name = subject.Name,
+                //Name = subject.Name,
                 CourseID = currentCs.CourseID,
                 ClassID = currentClass.ID,
                 ClassName = currentClass.Name,
-                SkillName = _skillService.GetItemByID(currentCs.SkillID).Name,
+                CourseName = string.IsNullOrEmpty(currentCs.CourseName) ? _courseService.GetItemByID(currentCs.CourseID)?.Name : currentCs.CourseName,
+                //SkillName = _skillService.GetItemByID(currentCs.SkillID).Name,
                 CompletedLesssons = progress == null ? 0 : progress.Completed,
                 TotalLessons = currentCs.TotalLessons,
             };
