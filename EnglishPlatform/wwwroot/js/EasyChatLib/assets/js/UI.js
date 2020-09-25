@@ -12,6 +12,7 @@
         edit : urlBase +"assets/Icon/Outline/image-1.svg",
         extends : urlBase +"assets/Icon/Outline/more-vertical.svg",
         trash : urlBase +"assets/Icon/Outline/icon_trash_24.png",
+        loading : urlBase +"assets/Icon/loading.svg",
     };
     function UI(config){
         _mergeConfig(config);
@@ -206,7 +207,7 @@
         var exts = isSender ? createExtendsSettings():"";
         switch(type){
             case Type.IMAGE:
-                html += '<img src="'+data.url+'" alt="'+data.id+data.type+'">';
+                html += '<img onmouseover="if(this.src!=this.dataset.src){this.src=this.dataset.src;}" class="lazy-loaded" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
                 break;
             case Type.AUDIO:
                 html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
@@ -223,7 +224,6 @@
         }
         html += '</div></div>'+exts;
         return '<div class="data">'+html+'</div>'
-
     }
     return UI;
 }());
