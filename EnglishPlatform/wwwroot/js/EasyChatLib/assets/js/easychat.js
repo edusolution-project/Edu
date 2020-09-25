@@ -147,36 +147,40 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         // isDel: false
         // sender: "5db11841b5433109d4533cae"
         // time: 1600099668.5038116
-        var groupMessages = [];
-        var html = "";
-        var senderCurrent = "";
+        //debugger
+            var groupMessages = [];
+            var html = "";
+            var senderCurrent = "";
         for (var i = 0; data != null && i < data.length; i++) {
-            var message = data[i];
-            var sender = message.sender;
-            //var groupId = message.groupId;
-            var isMaster = sender == __defaulConfig.currentUser.id;
-            //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
-            var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            if (senderCurrent == "") {
-                senderCurrent = sender;
-            }
-            if ((senderCurrent == sender)) {
-                groupMessages.push(message);
-                if (i == data.length - 1) {
+            //debugger
+                var message = data[i];
+                var sender = message.sender;
+                //var groupId = message.groupId;
+                var isMaster = sender == __defaulConfig.currentUser.id;
+                //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
+                var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
+                if (senderCurrent == "") {
+                    senderCurrent = sender;
+                }
+                if ((senderCurrent == sender)) {
+                    groupMessages.push(message);
+                    if (i == data.length - 1) {
+                        //html += UI.renderGroupMessage(isMaster, "test", null, groupMessages);
+                        html += UI.renderGroupMessage(isMaster, senderInfo[0].name, null, groupMessages);
+                        groupMessages = [];
+                    }
+                }
+                else {
+                    if (groupMessages.length == 0) {
+                        groupMessages.push(message);
+                    }
+                    senderCurrent = sender;
+                    //html += UI.renderGroupMessage(isMaster, "test", null, groupMessages);
                     html += UI.renderGroupMessage(isMaster, senderInfo[0].name, null, groupMessages);
                     groupMessages = [];
                 }
             }
-            else {
-                if (groupMessages.length == 0) {
-                    groupMessages.push(message);
-                }
-                senderCurrent = sender;
-                html += UI.renderGroupMessage(isMaster, senderInfo[0].name, null, groupMessages);
-                groupMessages = [];
-            }
-        }
-
+        
         var listmessage = getRoot().querySelector('.list-messages');
         if (pageIndex == 0 || isUpdate) {
             listmessage.innerHTML += html;

@@ -548,5 +548,72 @@ namespace BaseCustomerMVC.Controllers.Admin
                 return Json(ex.Message);
             }
         }
+
+        public JsonResult UpFileToDriver()
+        {
+            string[] type =
+            {
+                "DOC",
+                //"PDF",
+                //"PPT",
+                //"XLS",
+                //"IMG",
+                "VIDEO",
+                "AUDIO"
+            };
+            //var a = _lessonPartService.GetAll().Limit(10).ToList();
+            //var b = _lessonService.GetAll().Limit(10).ToList();
+            //var c = _courseChapterService.GetAll().Limit(10).ToList();
+            var listLessonPart = from lp in _lessonPartService.CreateQuery().Find(x => type.Contains(x.Type)).ToEnumerable()
+                                 where lp.Media!=null && lp.Media.Path.Contains("drive.google.com")==false
+                                 select new
+                                 {
+                                     ID = lp.ID,
+                                     Update = lp.Updated,
+                                     FileMedia = lp.Media
+                                 };
+
+            var listLessonPartQuiz=from q in _questionService.GetAll().ToEnumerable()
+                                   where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
+                                   select new
+                                   {
+                                       ID = q.ID,
+                                       Update = q.Updated,
+                                       FileMedia = q.Media
+                                   };
+
+
+            var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
+                                     where a.Media != null && a.Media.Path.Contains("drive.google.com") == false && a.Media.Extension.Contains()
+                                     select new
+                                     {
+                                         ID = a.ID,
+                                         Update = a.Updated,
+                                         FileMedia = a.Media,
+                                         Type = a.Media.Extension
+                                     };
+
+            var d = from x in _answerService.GetAll().ToEnumerable()
+                    where x.Media != null && x.Media.Path.Contains("drive.google.com") == true
+                    select new
+                    {
+                        ID = x.ID,
+                        Update = x.Updated,
+                        FileMedia = x.Media,
+                        Type=x.Media.Extension
+                    };
+
+            //var r = listLessonPart.ToList();
+            //var u = listLessonPartQuiz.ToList();
+            var i = listLessonPartAnswer.ToList();
+            var o = d.ToList();
+
+            foreach (var item in listLessonPart.ToList())
+            {
+                //if(item.FileMedia.)
+            }
+
+            return Json("OK");
+        }
     }
 }
