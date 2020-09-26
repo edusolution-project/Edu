@@ -141,7 +141,7 @@ namespace EnglishPlatform.Controllers
                                 }
                             }
                         }
-                        for(int  i =0; listTeacherOnClass != null && i < listTeacherOnClass.Count; i++)
+                        for(int  i = 0; listTeacherOnClass != null && i < listTeacherOnClass.Count; i++)
                         {
                             var item = listTeacherOnClass[i];
                             var member = new MemberInfo() { ID = item.ID, Name = item.FullName };
