@@ -25,13 +25,17 @@ namespace EnglishPlatform.Controllers
         protected readonly Dictionary<string, string> _mapConnectId = new Dictionary<string,string>();
         protected readonly Dictionary<string, List<string>> _mapUsersConnectionId = new Dictionary<string, List<string>>();
         private readonly StudentService _studentService;
+        private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
+        private readonly ClassSubjectService _classSubjectService;
         private readonly ILog _log;
-        public EasyChatController(StudentService studentService, ClassService classService, ILog log)
+        public EasyChatController(StudentService studentService, ClassService classService, ILog log, ClassSubjectService classSubjectService, TeacherService teacherService)
         {
             _studentService = studentService;
             _classService = classService;
             _log = log;
+            _classSubjectService = classSubjectService;
+            _teacherService = teacherService;
         }
 
         // danh sách group 
@@ -110,17 +114,22 @@ namespace EnglishPlatform.Controllers
                 if (User != null && User.Identity.IsAuthenticated)
                 {
                     List<StudentEntity> listStudentOnClass = new List<StudentEntity>();
+                    List<TeacherEntity> listTeacherOnClass = new List<TeacherEntity>();
+                    var listData = new List<MemberInfo>();
                     if (classNames != null && classNames.Count > 0)
                     {
-                        for(int  i = 0; i < classNames.Count; i++)
+                        var listSubjects = _classSubjectService.CreateQuery().Find(o => classNames.Contains(o.ClassID))?.ToList()?.Select(o=>o.TeacherID);
+                        listTeacherOnClass = listSubjects == null || listSubjects.Count() > 0 ? _teacherService.CreateQuery().Find(o=> listSubjects.Contains(o.ID))?.ToList() : null;
+                        for (int  i = 0; i < classNames.Count; i++)
                         {
                             string className = classNames[i];
-                            var listData = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
-                            listStudentOnClass.AddRange(listData);
+                            var listDatas = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
+                            
+                            listStudentOnClass.AddRange(listDatas);
                         }
                         if (listStudentOnClass != null && listStudentOnClass.Count > 0)
                         {
-                            var listData = new List<MemberInfo>();
+                            
                             for(int i = 0; i < listStudentOnClass.Count; i++)
                             {
                                 var item = listStudentOnClass[i];
@@ -131,9 +140,19 @@ namespace EnglishPlatform.Controllers
                                     listData.Add(member);
                                 }
                             }
-                            return listData;
+                        }
+                        for(int  i =0; listTeacherOnClass != null && i < listTeacherOnClass.Count; i++)
+                        {
+                            var item = listTeacherOnClass[i];
+                            var member = new MemberInfo() { ID = item.ID, Name = item.FullName };
+                            var check = listData.Where(o => o.ID == member.ID);
+                            if (check.Count() == 0)
+                            {
+                                listData.Add(member);
+                            }
                         }
                     }
+                    return listData;
                 }
 
                 return new List<MemberInfo>();
