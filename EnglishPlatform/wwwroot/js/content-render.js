@@ -3412,7 +3412,7 @@ var Lesson = (function () {
                         renderMediaContent(data, optanswer);
                     }
                     else
-                        optanswer.append($("<span>", { text: data.Content }));
+                        optanswer.append($("<span>", { style: 'width:10%', class: 'flex-fill', text: data.Content }));
 
                     var x = Math.floor((Math.random() * 2));
                     if (x > 0)
@@ -3744,7 +3744,7 @@ var Lesson = (function () {
         var quizid = $('#ans_wrapper_' + partId + ' .quizid').val();
         var content = $(obj).siblings();
         $('#plc_' + quizid).empty().append($(content).clone());
-        $('#plc_' + quizid).addClass("bg-info");
+        $('#plc_' + quizid).addClass("bg-answered");
         $(obj)[0].dataset.questionId = quizid;
         AnswerQuestion($(obj)[0]);
         $(wrapper).hide()
