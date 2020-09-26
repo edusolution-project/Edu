@@ -107,6 +107,8 @@
                 display: none;
             }
         }
+
+
     </style>
     <main id="main">
         @await Html.PartialAsync("_sideBarStudentNewUI")
@@ -116,20 +118,26 @@
                 @RenderSection("Modals", false)
             </div>
         </div>
+
         <aside class="sidebar" id="sidebar_right">
+            <style>
+                #profile a:hover {
+                    color: #D03239;
+                }
+            </style>
             <div class="box p-3 row" id="profile" style="position:relative">
                 <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
-                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
                     }
                     else
                     {
-                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
                     }
                 </div>
                 <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
-                    <a href="@processUrl("Profile","Home")" style="color:#00314c;font-weight:600" title="@User.Identity.Name" onmouseover="hoverFullName(this)" onmouseout="hoverFullName(this)">@User.Identity.Name</a>
+                    <a href="@processUrl("Profile","Home")" style="color:#00314c;font-weight:600" title="@User.Identity.Name">@User.Identity.Name</a>
                 </div>
                 <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto;position:relative">
                     @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
@@ -144,6 +152,7 @@
                     </div>
 
                 </div>
+
 
                 <script>
                     function openNav() {
@@ -165,15 +174,15 @@
                         }
                     }
 
-                    function hoverCss(obj) {
-                        //debugger
-                        if (obj.style.color == "") {
-                            obj.style.color = "#D03239"
-                        }
-                        else {
-                            obj.style.color = ""
-                        }
-                    }
+                    //function hoverCss(obj) {
+                    //    //debugger
+                    //    if (obj.style.color == "") {
+                    //        obj.style.color = "#D03239"
+                    //    }
+                    //    else {
+                    //        obj.style.color = ""
+                    //    }
+                    //}
 
                     function hoverFullName(obj) {
                         //debugger
@@ -243,6 +252,9 @@
                 </ul>
             </div>
         </aside>
+
+
+
     </main>
     <!-- chat--->
 
@@ -271,22 +283,6 @@
                             this.list_star = response.data.Data;
                         }).catch(e => { })
                 }
-            }
-        });
-
-        new Vue({
-            el: "#profile",
-            mounted() {
-                this.student=@Html.Raw(Json.Serialize(student));
-            },
-            data: {
-                avatar: {
-                    src: '/images/no-avatar.png',
-                    file: null,
-                    height: 150,
-                    width: 150
-                },
-                student: []
             }
         });
     </script>

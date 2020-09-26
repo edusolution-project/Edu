@@ -238,9 +238,17 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     try
                     {
-                        var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
-                        var stream = System.IO.File.OpenRead(filePath);
-                        return File(stream, "application/octet-stream", item.Media.Name);
+                        if (!item.Media.Path.StartsWith("http"))
+                        {
+                            //Hard code:
+                            var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                            var stream = System.IO.File.OpenRead(filePath);
+                            return File(stream, "application/octet-stream", item.Media.Name);
+                        }
+                        return Redirect(item.Media.Path);
+                        //var filePath = Path.Combine(string.IsNullOrEmpty(staticPath) ? _env.WebRootPath : staticPath, item.Media.Path.TrimStart('/').Replace("/", "\\"));
+                        //var stream = System.IO.File.OpenRead(filePath);
+                        //return File(stream, "application/octet-stream", item.Media.Name);
                     }
                     catch
                     {

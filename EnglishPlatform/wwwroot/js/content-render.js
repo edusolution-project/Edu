@@ -2720,7 +2720,7 @@ var Lesson = (function () {
                     "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
                     "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "no-mobile ml-2" }).append("Nộp bài"));
+                }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "ml-2" }).append("Nộp bài"));
                 if (isMobileDevice()) {
                     $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
                     $('.top-menu[for=lesson-info]').append(completeButton);
@@ -3744,6 +3744,7 @@ var Lesson = (function () {
         var quizid = $('#ans_wrapper_' + partId + ' .quizid').val();
         var content = $(obj).siblings();
         $('#plc_' + quizid).empty().append($(content).clone());
+        $('#plc_' + quizid).addClass("bg-info");
         $(obj)[0].dataset.questionId = quizid;
         AnswerQuestion($(obj)[0]);
         $(wrapper).hide()

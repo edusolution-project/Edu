@@ -572,7 +572,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             return Json("DEL " + count);
         }
-        #endregion
 
         public JsonResult UpFileToDriver()
         {
@@ -590,7 +589,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //var b = _lessonService.GetAll().Limit(10).ToList();
             //var c = _courseChapterService.GetAll().Limit(10).ToList();
             var listLessonPart = from lp in _lessonPartService.CreateQuery().Find(x => type.Contains(x.Type)).ToEnumerable()
-                                 where lp.Media!=null && lp.Media.Path.Contains("drive.google.com")==false
+                                 where lp.Media != null && lp.Media.Path.Contains("drive.google.com") == false
                                  select new
                                  {
                                      ID = lp.ID,
@@ -598,25 +597,25 @@ namespace BaseCustomerMVC.Controllers.Admin
                                      FileMedia = lp.Media
                                  };
 
-            var listLessonPartQuiz=from q in _questionService.GetAll().ToEnumerable()
-                                   where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
-                                   select new
-                                   {
-                                       ID = q.ID,
-                                       Update = q.Updated,
-                                       FileMedia = q.Media
-                                   };
+            var listLessonPartQuiz = from q in _questionService.GetAll().ToEnumerable()
+                                     where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
+                                     select new
+                                     {
+                                         ID = q.ID,
+                                         Update = q.Updated,
+                                         FileMedia = q.Media
+                                     };
 
 
             var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
-                                     where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
-                                     select new
-                                     {
-                                         ID = a.ID,
-                                         Update = a.Updated,
-                                         FileMedia = a.Media,
-                                         Type = a.Media.Extension
-                                     };
+                                       where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
+                                       select new
+                                       {
+                                           ID = a.ID,
+                                           Update = a.Updated,
+                                           FileMedia = a.Media,
+                                           Type = a.Media.Extension
+                                       };
 
             var d = from x in _answerService.GetAll().ToEnumerable()
                     where x.Media != null && x.Media.Path.Contains("drive.google.com") == true
@@ -625,7 +624,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         ID = x.ID,
                         Update = x.Updated,
                         FileMedia = x.Media,
-                        Type=x.Media.Extension
+                        Type = x.Media.Extension
                     };
 
             //var r = listLessonPart.ToList();
@@ -662,10 +661,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 return Json("OK");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }
         }
+        #endregion
     }
 }
