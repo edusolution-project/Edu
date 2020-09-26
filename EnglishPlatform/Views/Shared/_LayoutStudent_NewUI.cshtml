@@ -135,8 +135,8 @@
                     @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
                     <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
                     <div id="myDropdown" class="dropdown-content">
-                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
-                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="openNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
                     </div>
                 </div>
                 <style>
@@ -200,7 +200,7 @@
 
                     #ti-arrow-circle {
                         cursor: pointer;
-                        vertical-align:middle
+                        vertical-align: middle
                     }
 
                         #ti-arrow-circle:hover {
@@ -220,6 +220,13 @@
                             #fullname a:hover {
                                 color: #D03239;
                             }
+
+                    /*#profile img{
+                        border:1px solid white;
+                    }
+                    #profile:hover img {
+                        border: 1px solid #D03239;
+                    }*/
                 </style>
                 <script>
                     function openNav() {
@@ -276,8 +283,8 @@
                 </ul>
             </div>
             @*<div class="adv">
-            <img src="/pictures/adv1.png" alt="">
-        </div>*@
+                    <img src="/pictures/adv1.png" alt="">
+                </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -344,6 +351,11 @@
     {
         @await Html.PartialAsync("_EasyRealtime")
     }
+    else
+    {
+        @await Html.PartialAsync("_EasyChat")
+    }
+
 </body>
 </html>
 

@@ -86,6 +86,7 @@ transform: translateX(-100%);
 .easy-chat__content.open{
     display: block;
 }
+
 .easy-chat__content textarea {
     resize: none;
 }
@@ -136,8 +137,8 @@ transform: translateX(-100%);
 }
 
 .contact-info .avatar {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     border: 1px solid #ccc;
     display: inline-block;
@@ -155,20 +156,14 @@ transform: translateX(-100%);
     right: 0;
     bottom: 0;
 }
+
 .contact-info .user-info {
-    width: 50%;
+    width: 80%;
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
     padding-left: 10px;
-}
-.contact-info .user-info {
-    width: 50%;
-    display: inline-block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-left: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 4px;
 }
 
 .contact-info .user-info .name {
@@ -181,6 +176,7 @@ transform: translateX(-100%);
     color: #33aaff;
     font-size: 0.75em;
     font-weight: bold;
+    display: none;
 }
 
 .item-contact .time-online {
@@ -189,6 +185,7 @@ transform: translateX(-100%);
     top: 10px;
     right: 10px;
     color: #3a0808;
+    display: none;
 }
 div[data-status="online"],div[data-status="offline"]{
     position: relative;
@@ -283,10 +280,10 @@ div[data-status="offline"]::before{
 .easy-chat__content--right {
     background: #fff;
     position: fixed;
-    left: 420px;
+    left: 132px;
     bottom: 15px;
     height: 500px;
-    width: 450px;
+    width: 350px;
     border: 1px solid #ccc;
     display: none;
 }
@@ -297,12 +294,13 @@ div[data-status="offline"]::before{
     width: 100%;
     height: 350px;
     overflow: hidden;
-    background: aliceblue;
+    background: #c0c1c159;
 }
 
 .content--right__header {
     position: relative;
     border-bottom: 1px solid #ccc;
+    padding: 5px;
 }
 
 .content--right__header .extends {
@@ -310,7 +308,7 @@ div[data-status="offline"]::before{
     top: 0;
     right: 0;
     bottom: 0;
-    padding: 10px;
+    padding: 0px;
     text-align: center;
 }
 
@@ -319,12 +317,13 @@ div[data-status="offline"]::before{
 }
 
 .content--right__header .contact-info .user-info {
-    padding-bottom: 0;
+    padding-bottom: 5px;
 }
 
 .content--right__header .contact-info .user-info .time-online {
     font-size: 0.75em;
     color: #ccc;
+    display: none;
 }
 .list-messages {
     height: 100%;
@@ -371,7 +370,7 @@ div[data-status="offline"]::before{
     background: #fff;
     border: 1px solid #cccc;
     padding: 10px;
-    border-radius: 0 30px 0 30px;
+    border-radius: 10px;
     text-align: justify;
     width: 90%;
 }
@@ -419,9 +418,6 @@ div[data-status="offline"]::before{
 .group-message .data .button-extends .btn-extends:hover{
     color:#f1e2a7;
 }
-.message {
-    margin-top: 30px;
-}
 
 .message-receiver .user-info {text-align: right;width: 100%;}
 
@@ -435,9 +431,8 @@ div[data-status="offline"]::before{
 
 .message-receiver .group-message .data .content {
     margin-left: auto;
-    border-radius: 30px 0 30px 0;
-    background: #33aaff;
-    color: #fff;
+    background: #b0a4ccbf;
+    color: #000000;
 }
 .message .time-send {
     color: #ccc;
@@ -502,6 +497,6 @@ div[data-status="offline"]::before{
     box-shadow: 0px 8px 10px #33aaff6e;
 }
 .content--left__header .form-search {
-    padding-bottom: 16px;
+    padding-bottom: 4px;
     border-bottom: 1px solid #cccc;
 }

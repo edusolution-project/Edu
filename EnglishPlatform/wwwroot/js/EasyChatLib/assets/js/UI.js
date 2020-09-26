@@ -90,15 +90,16 @@
         '</div>'+
         '<div class="extends">'+
             '<button class="btn btn-close" onclick="EasyChat.CloseMessageBox()">'+
-                '<img src="'+_config.power+'" alt="đóng chat">'+
+                '<i class="fa fa-arrow-left" aria-hidden="true"></i>'+
             '</button>'+
         '</div>';
     }
     var createItemContact = function(data,isGroup,callBack){
+        var _strLop = isGroup ? "Lớp " : "";
         if(!data.avatar){
             data.avatar = isGroup ? _config.image : _config.avatar;
         }
-        return '<div class="item-contact" title="'+data.name+'" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div><div class="noti"></div></div>';
+        return '<div class="item-contact" title="'+data.name+'" data-id="'+data.id+'" data-group="'+isGroup+'" onclick="'+callBack+'"><div class="contact-info"><div class="avatar" data-status=""><img src="'+data.avatar+'" alt=""></div><div class="user-info"><div class="name">'+_strLop+data.name+'</div><div class="status-text">...</div></div></div><div class="time-online">...</div><div class="noti"></div></div>';
     }
     var renderListItemContact = function(data,isGroup,callBack){
         var html = '';
@@ -109,7 +110,7 @@
         return html;
     }
     UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages){
-        var classSender= isSender ? "message-sender":"message-receiver";
+        var classSender= !isSender ? "message-sender":"message-receiver";
         var _avatar = !avatar ? _config.avatar : avatar;
         var msgs = renderMessages(messages,isSender);
         var html =
@@ -213,7 +214,7 @@
                 html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
                 break;
             case Type.VIDEO:
-                html += '<video src="'+data.url+'" controls>Your browser does not support the video tag.</video>';
+                html += '<video style="max-width:300px" src="'+data.url+'" controls>Your browser does not support the video tag.</video>';
                 break;
             case Type.DOC:
                 html+='<div class="data-'+data.type.replace(".","")+'"><a href="'+data.url+'">'+data.id+data.type+'</a></div>';
