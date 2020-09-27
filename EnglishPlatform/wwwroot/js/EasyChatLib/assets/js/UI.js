@@ -201,15 +201,8 @@
         //var date = new Date(time);
     }
     var createExtendsSettings = function(id){
-        var eventOpen = "javascript:this.parentElement.childNodes[1].classList.toggle('open')";
-        return '<div class="button-extends">'+
-            '<div class="dropdown-list">'+
-                '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="'+_config.extends+'" alt="extends"></button>'+
-                '<div class="item-extends">'+
-                    '<button class="btn btn-delete" data-message="'+id+'" onclick="EasyChat.RemoveMessage(this)"><img src="'+_config.trash+'" alt="Xóa"></button>'+
-                '</div>'+
-            '</div>'+
-        '</div>';
+        var eventOpen = "";//"javascript:this.parentElement.childNodes[1].classList.toggle('open')";
+        return '<div class="button-extends"><button class="btn btn-delete" data-message="' + id + '" onclick="EasyChat.RemoveMessage(this)"><img src="' + _config.trash + '" alt="Xóa"></button></div>';
     }
     var createDataDel = function () {
         var exts = "";
@@ -224,7 +217,7 @@
         var html = '<div class="item-meta-data">';
         switch(type){
             case Type.IMAGE:
-                html += '<img onmouseover="if(this.src!=this.dataset.src){this.src=this.dataset.src;}" class="lazy-loaded" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
+                html += '<div class="data-image"><div class="view-full" onclick="UI.OpenImage(this)">xem bản đầy đủ</div><img class="lazy-loaded" data-src="' + data.url + '" src="https://drive.google.com/thumbnail?id=' + data.id + '" alt="' + data.id + data.type + '"></div>';
                 break;
             case Type.AUDIO:
                 html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
@@ -241,6 +234,61 @@
         }
         html += '</div>';
         return html;
+    }
+    UI.OpenImage = function (self) {
+        var parent = self.parentElement;
+        var data = parent.querySelector("[data-src]");
+        if (data) {
+            window.open(data.dataset.src, "_blank");
+        }
+    }
+    UI.prototype.CreateAnswerBox = function (message,callBack) {
+        if (!message) message = " Bạn muốn xóa tin nhắn này !";
+        var div = document.createElement("div");
+        div.setAttribute("style", "position:fixed;top:0;left:0;right:0;z-index:999999999999;background:#000;width:100%;height:100%;opacity:0.5");
+        document.body.appendChild(div);
+        var box = document.createElement("div");
+        box.setAttribute("style", "position:fixed;top:0;left:0;right:0;z-index:9999999999999;bottom: 0;background:#fff;opacity:1;width:300px;max-width:90%;margin:auto;height:150px;padding:20px");
+        var titleMessage = document.createElement("div");
+        titleMessage.setAttribute("style", "padding: 30px 0;text-align: center;font-weight: bold;");
+        titleMessage.classList = "title-comfirm-box-chat";
+        titleMessage.innerHTML = message;
+        var bodyMessage = document.createElement("div");
+        bodyMessage.style.textAlign = "center";
+        bodyMessage.classList = "body-comfirm-box-chat";
+        var buttonYes = document.createElement("span");
+        buttonYes.classList = "btn btn-sm btn-danger";
+        buttonYes.setAttribute("style", "width:40%;margin-right:5px");
+        buttonYes.innerHTML = "yes";
+        var buttonNo = document.createElement("span");
+        buttonNo.setAttribute("style", "width:40%;margin-left:5px")
+        buttonNo.classList = "btn btn-sm btn-primary";
+        buttonNo.innerHTML = "no";
+       
+        buttonYes.onclick = function () {
+            callBack.call();
+            destroy(div);
+            destroy(box);
+        };
+        buttonNo.onclick = function () {
+            destroy(div);
+            destroy(box);
+        };
+        bodyMessage.appendChild(buttonYes);
+        bodyMessage.appendChild(buttonNo);
+        box.appendChild(titleMessage);
+        box.appendChild(bodyMessage);
+        document.body.appendChild(box);
+
+        
+    }
+    var destroy = function (el) {
+        if (el) {
+            el.remove();
+        }
+    }
+    var setStyleShadow = function (el) {
+        el.setAttr
     }
     return UI;
 }());

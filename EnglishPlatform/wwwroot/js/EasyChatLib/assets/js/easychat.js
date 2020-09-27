@@ -70,8 +70,14 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 boxMessage.classList.add('open');
             }
             var contentBox = root.querySelector('.easy-chat__content');
-            if(contentBox){
-                contentBox.setAttribute('style','width:0px;border:0;padding:0');
+            if (contentBox) {
+                if (window.outerWidth < 992) {
+                    contentBox.setAttribute('style', 'z-index:999999999999');
+                }
+                else {
+                    contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
+                }
+               
             }
             var left = root.querySelector('.easy-chat__content--left');
             if(left){
@@ -160,8 +166,25 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
         //console.log(listmessage.height,listmessage.outerHeight);
         
-
+        //addEventOnloadImage();
     }
+
+    var addEventOnloadImage = function () {
+        var listImage = getRoot().querySelectorAll("[data-src]");
+        if (listImage) {
+            setTimeout(function () {
+                for (var i = 0; i < listImage.length; i++) {
+                    var item = listImage[i];
+                    if (item) {
+                        if (item.dataset.src != item.src) {
+                            item.src = item.dataset.src;
+                        }
+                    }
+                }
+            }, 5000);
+        }
+    }
+
     EasyChat.CloseMessageBox = function(){
         var root = getRoot();
         var left = root.querySelector('.easy-chat__content--left');
@@ -441,7 +464,8 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
                     //var lastItem = listmessage.querySelectorAll(".message");
                     listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data]);
-                    listmessage.scrollTo(0,listmessage.scrollHeight);
+                    listmessage.scrollTo(0, listmessage.scrollHeight);
+                    //addEventOnloadImage();
                 }
                 //console.log(res);
             });
@@ -606,23 +630,23 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
     }
-    //https://easychat.eduso.vn/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}
     EasyChat.RemoveMessage = function (self) {
         var id = self.dataset.message;
         var user = __defaulConfig.currentUser.id;
-        var ajax = new Ajax();
-        //(method, url, data, async)
-        ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
-            .then(function (res) {
-                var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
-                if (data.code == 200) {
-                    removeMessageHTML(id);
-                }
-               
-            })
-            .finally(function (data) {
-                console.log("finally", data);
+        if (id && user) {
+            UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+                var ajax = new Ajax();
+                //(method, url, data, async)
+                ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+                    .then(function (res) {
+                        var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+                        if (data.code == 200) {
+                            removeMessageHTML(id);
+                        }
+
+                    });
             });
+        }
     }
     EasyChat.ViewMore = function (self) {
         var parent = self.parentElement;
