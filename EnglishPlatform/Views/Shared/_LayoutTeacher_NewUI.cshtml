@@ -18,15 +18,11 @@
 
     <link href="~/css/minify/minify.min.css" rel="stylesheet" />
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
-    @*longht them*@
-    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
-    <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-    <link href="~/js/calendar/css/style.css" rel="stylesheet" />
+
 
     <script src="~/js/minify/common.min.js?20200326"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
 
-    @*<link href="~/css/w3.css" rel="stylesheet" />*@
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -128,11 +124,11 @@
                 <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
-                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
+                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
                     }
                     else
                     {
-                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name"/>
+                        <img src="/images/no-avatar.png" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
                     }
                 </div>
                 <div class="col-md-6 col-xs-8" id="fullname">
@@ -142,8 +138,8 @@
                     @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
                     <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
                     <div id="myDropdown" class="dropdown-content">
-                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="closeNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
-                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="closeNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
+                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="openNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
                     </div>
                 </div>
                 <style>
@@ -164,8 +160,8 @@
                         z-index: 1;
                         width: 210px;
                         border-radius: 10px;
-                        top:50px;
-                        right:10px
+                        top: 50px;
+                        right: 10px
                     }
 
                         .dropdown-content a {
@@ -177,7 +173,6 @@
 
                     .dropdown a:hover {
                         background-color: #ddd;
-                       
                     }
 
                     #myDropdown {
@@ -186,17 +181,17 @@
                         width: 210px;
                     }
 
-                    #myDropdown a {
-                        font-weight: 600;
-                    }
+                        #myDropdown a {
+                            font-weight: 600;
+                        }
 
-                    #myDropdown i{
-                        font-weight:600
-                    }
+                        #myDropdown i {
+                            font-weight: 600
+                        }
 
-                    #myDropdown a:hover{
-                        color: #D03239
-                    }
+                        #myDropdown a:hover {
+                            color: #D03239
+                        }
 
                     .show {
                         display: block;
@@ -207,7 +202,8 @@
                     }
 
                     #ti-arrow-circle {
-                        cursor: pointer
+                        cursor: pointer;
+                        vertical-align: middle
                     }
 
                         #ti-arrow-circle:hover {
@@ -224,9 +220,9 @@
                             font-weight: 600
                         }
 
-                        #fullname a:hover {
-                            color: #D03239;
-                        }
+                            #fullname a:hover {
+                                color: #D03239;
+                            }
                 </style>
                 <script>
                     function openNav() {
@@ -288,68 +284,7 @@
                     cursor: pointer;
                 }
             </style>
-            @*<div class="box padding-15" id="plan_box">
-                    <div class="select-date flex">
-                        <button class="btn-prv" onclick="loadCalendarPre()"><i class="ti-angle-left"></i></button>
-                        <div class="week">
-                            02/12/2019 - 09/12/2019
-                        </div>
-                        <button class="btn-prv" onclick="loadCalendarNext()"><i class="ti-angle-right"></i></button>
-                    </div>
-                    <div class="table-detail">
-                        <div class="tr">
-                            <div class="c-d td">T2</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T3</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T4</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T5</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T6</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">T7</div>
-                            <div class="c-cl td">
-                                <div class="flex">
-                                    <span class="time">08:30</span>
-                                    <span class="title">IEL</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tr">
-                            <div class="c-d td">CN</div>
-                            <div class="c-cl td">
-                            </div>
-                        </div>
-                    </div>
-                </div>*@
+
 
 
             @*<div class="adv">
@@ -417,8 +352,19 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @*@await Html.PartialAsync("_EasyRealtime")*@
-    @*@await Html.PartialAsync("_EasyChat")*@
+
+    @if (center == "ern")
+    {
+        @*longht them*@
+        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
+        <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
+        <link href="~/js/calendar/css/style.css" rel="stylesheet" />
+        @await Html.PartialAsync("_EasyRealtime")
+    }
+    else
+    {
+        @await Html.PartialAsync("_EasyChat")
+    }
 
 </body>
 </html>

@@ -50,6 +50,9 @@ namespace EnglishPlatform.Controllers
 
         private string host;
 
+        private readonly ISession _session;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
@@ -68,6 +71,7 @@ namespace EnglishPlatform.Controllers
             , NewsCategoryService newsCategoryService
             , QCService QCService
             , IConfiguration iConfig
+            , IHttpContextAccessor httpContextAccessor
             )
         {
             _accessesService = accessesService;
@@ -91,6 +95,8 @@ namespace EnglishPlatform.Controllers
             _newsCategoryService = newsCategoryService;
             _QCService = QCService;
             host = iConfig.GetValue<string>("SysConfig:Domain");
+            _httpContextAccessor = httpContextAccessor;
+            _session = _httpContextAccessor.HttpContext.Session;
         }
 
         public IActionResult Index()
@@ -123,6 +129,8 @@ namespace EnglishPlatform.Controllers
                                 centerCode = centers.FirstOrDefault().Code;
                             else
                                 centerCode = center.Code;
+
+                            _session.SetString("userAvatar", tc.Avatar);
                         }
                         break;
                     default:
@@ -140,6 +148,8 @@ namespace EnglishPlatform.Controllers
                             {
                                 centerCode = center.Code;
                             }
+
+                            _session.SetString("userAvatar", st.Avatar);
                         }
                         break;
                 }

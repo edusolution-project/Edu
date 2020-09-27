@@ -103,6 +103,7 @@ namespace EasyChatApp.Controllers
                     if(connestionIds != null && connestionIds.Count() > 0)
                     {
                         await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item,model.user,null);
+                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("Notication", model.receiver);
                     }
                 }
                 response.Code = 200;
@@ -227,7 +228,7 @@ namespace EasyChatApp.Controllers
             return value;
         }
         [HttpGet]
-        public List<string> GetNotifications(string user, string groupNames)
+        public HashSet<string> GetNotifications(string user, string groupNames)
         {
             List<string> groups = groupNames.Split(',')?.ToList();
             var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o=>o.ID)?.ToList();
@@ -240,10 +241,24 @@ namespace EasyChatApp.Controllers
                 var times = listTime.Select(o => o.TimeLife)?.ToList();
                 double max = times.Max();
                 var messages = _messagerService.CreateQuery().Find(o => o.Time >= max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId)) && o.Sender != user)?.ToList();
-                return messages.Select(o => o.GroupId)?.ToList();
+                return messages.Select(o => o.GroupId)?.ToHashSet();
             }
 
             return null;
+        }
+
+        public bool TestHub(string connectionId, string groupName)
+        {
+            _hubContext.Clients.Group(groupName).SendAsync("Test", "groupName");
+            _hubContext.Clients.Clients(new List<string>() { connectionId }).SendAsync("Test", "clients");
+            _hubContext.Clients.All.SendAsync("Test", "All");
+            return true;
+        }
+        public object GetConnections (string user)
+        {
+            var usersConnections = EasyChatHub.UserMap;
+            //var connestionIds = usersConnections.GetGroupConnections(user);
+            return usersConnections;
         }
     }
     public class ChatModel

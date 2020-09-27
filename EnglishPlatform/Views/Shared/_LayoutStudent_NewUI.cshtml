@@ -118,13 +118,7 @@
                 @RenderSection("Modals", false)
             </div>
         </div>
-
         <aside class="sidebar" id="sidebar_right">
-            <style>
-                #profile a:hover {
-                    color: #D03239;
-                }
-            </style>
             <div class="box p-3 row" id="profile" style="position:relative">
                 <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
@@ -139,58 +133,115 @@
                 <div class="col-md-6 col-xs-8" style="text-align:left;margin:auto">
                     <a href="@processUrl("Profile","Home")" style="color:#00314c;font-weight:600" title="@User.Identity.Name">@User.Identity.Name</a>
                 </div>
-                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto;position:relative">
+                <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
                     @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
-                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" onmouseover="hoverCss(this)" onmouseout="hoverCss(this)" style="font-size:20px;cursor:pointer"></i>
-                    <div id="myProfile" style=" position: absolute; right: 10px; top: 40px;background-color:#f1f1f1;border-radius:10px;display:none;width:210px;border:0.5px solid rgb(204, 204, 204);width:210px">
-                        <a href="@processUrl("Profile","Home")#myprofile" onclick="openNav()" onmouseover="hoverFullName(this)" onmouseout="hoverFullName(this)" style="padding:12px 16px;font-weight:600;display:block;color:#00314c">
-                            <i class="ti-user" style="font-weight:600"></i> Thông tin cá nhân
-                        </a>
-                        <a href="@processUrl("Profile","Home")#changlepassword" onclick="openNav()" onmouseover="hoverFullName(this)" onmouseout="hoverFullName(this)" style="padding:12px 16px;font-weight:600;display:block;color:#00314c">
-                            <i class="ti-key" style="font-weight:600"></i> Đổi mật khẩu
-                        </a>
+                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
+                    <div id="myDropdown" class="dropdown-content">
+                        <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="openNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
                     </div>
-
                 </div>
+                <style>
+                    .dropdown {
+                        float: right;
+                        position: relative;
+                        display: inline-block;
+                    }
 
+                    .dropdown-content {
+                        display: none;
+                        position: absolute;
+                        background-color: #f1f1f1;
+                        min-width: 160px;
+                        overflow: auto;
+                        /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+                        right: 0;
+                        z-index: 1;
+                        width: 210px;
+                        border-radius: 10px;
+                        top: 50px;
+                        right: 10px
+                    }
 
+                        .dropdown-content a {
+                            color: #00314c;
+                            padding: 12px 16px;
+                            text-decoration: none;
+                            display: block;
+                        }
+
+                    .dropdown a:hover {
+                        background-color: #ddd;
+                    }
+
+                    #myDropdown {
+                        border: 0.5px solid rgb(204, 204, 204);
+                        right: 10px;
+                        width: 210px;
+                    }
+
+                        #myDropdown a {
+                            font-weight: 600;
+                        }
+
+                        #myDropdown i {
+                            font-weight: 600
+                        }
+
+                        #myDropdown a:hover {
+                            color: #D03239
+                        }
+
+                    .show {
+                        display: block;
+                    }
+
+                    #myDropdown {
+                        top: 40px
+                    }
+
+                    #ti-arrow-circle {
+                        cursor: pointer;
+                        vertical-align: middle
+                    }
+
+                        #ti-arrow-circle:hover {
+                            color: #D03239
+                        }
+
+                    #fullname {
+                        text-align: left;
+                        margin: auto;
+                    }
+
+                        #fullname a {
+                            color: #00314c;
+                            font-weight: 600
+                        }
+
+                            #fullname a:hover {
+                                color: #D03239;
+                            }
+
+                    /*#profile img{
+                        border:1px solid white;
+                    }
+                    #profile:hover img {
+                        border: 1px solid #D03239;
+                    }*/
+                </style>
                 <script>
                     function openNav() {
-                        var display = document.getElementById("myProfile").style.display;
                         //debugger
-                        if (display == "none")
-                            document.getElementById("myProfile").style.display = "block";
-                        else
-                            document.getElementById("myProfile").style.display = "none";
-
+                        document.getElementById("myDropdown").classList.toggle("show");
                         var circle = document.getElementById("ti-arrow-circle").getAttribute("class");
                         if (circle.includes("ti-arrow-circle-left")) {
                             document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-down";
-                            document.getElementById("ti-arrow-circle").style.color = "";
+                            document.getElementById("ti-arrow-circle").style.color = "#D03239";
                         }
                         else {
                             document.getElementById("ti-arrow-circle").className = "ti-arrow-circle-left";
-                            document.getElementById("ti-arrow-circle").style.color = "#D03239";
-                        }
-                    }
-
-                    //function hoverCss(obj) {
-                    //    //debugger
-                    //    if (obj.style.color == "") {
-                    //        obj.style.color = "#D03239"
-                    //    }
-                    //    else {
-                    //        obj.style.color = ""
-                    //    }
-                    //}
-
-                    function hoverFullName(obj) {
-                        //debugger
-                        if (obj.style.color == "rgb(0, 49, 76)") {
-                            obj.style.color = "#D03239"
-                        }
-                        else {
-                            obj.style.color = "#00314c"
+                            document.getElementById("ti-arrow-circle").style.color = "";
                         }
                     }
                 </script>
@@ -234,8 +285,8 @@
                 </ul>
             </div>
             @*<div class="adv">
-            <img src="/pictures/adv1.png" alt="">
-        </div>*@
+                    <img src="/pictures/adv1.png" alt="">
+                </div>*@
             <div class="box padding-15 d-none">
                 <div class="heading flex">
                     <h4 class="box-head">Tin tức nổi bật</h4>
@@ -252,9 +303,6 @@
                 </ul>
             </div>
         </aside>
-
-
-
     </main>
     <!-- chat--->
 
@@ -285,6 +333,7 @@
                 }
             }
         });
+
     </script>
     @RenderSection("Scripts", false)
     <!--Start of Tawk.to Script-->
@@ -300,10 +349,15 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @if (center == "ern" || center == "truong-thpt-chuyen-vinh-phuc")
+    @if (center == "ern")
     {
         @await Html.PartialAsync("_EasyRealtime")
     }
+    else
+    {
+        @await Html.PartialAsync("_EasyChat")
+    }
+
 </body>
 </html>
 

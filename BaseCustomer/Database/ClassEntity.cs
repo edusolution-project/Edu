@@ -10,13 +10,6 @@ namespace BaseCustomerEntity.Database
 {
     public class ClassEntity : EntityBase
     {
-        
-            [JsonProperty("CourseID")]
-        public string CourseID { get; set; }
-        [JsonProperty("SubjectID")]
-        public string SubjectID { get; set; }
-        [JsonProperty("GradeID")]
-        public string GradeID { get; set; }
         [JsonProperty("Name")]
         public string Name { get; set; }
         [JsonProperty("Code")]
