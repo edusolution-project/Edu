@@ -485,6 +485,25 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         //showNoti([userId]);
         console.log(userId);
     });
+    __SIGNALR.on("RemoveMessage", function (message, groupId) {
+        removeMessageHTML(message.ID);
+    });
+
+    var removeMessageHTML = function (messageId) {
+        var message = getRoot().querySelector("[data-id='" + messageId + "']");
+        if (message) {
+            message.innerHTML = '<div class="content" style="padding-left:25px; color :#ccc"> tin nhắn đã bị xóa </div>';
+            var parent = message.parentElement;
+            if (parent) {
+                var vm = parent.querySelector(".view-more-meta-data");
+                if (vm) {
+                    vm.remove();
+                }
+                var btn = parent.querySelector('.button-extends');
+            }
+        }
+    }
+
     __SIGNALR.on("ReceiverMessage",function(data,receiver,groupId){
 
         var id = receiver??groupId;
@@ -585,6 +604,42 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             if(list == null || list.length <= 0){
                 resetBoxNoti();
             }
+        }
+    }
+    //https://easychat.eduso.vn/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}
+    EasyChat.RemoveMessage = function (self) {
+        var id = self.dataset.message;
+        var user = __defaulConfig.currentUser.id;
+        var ajax = new Ajax();
+        //(method, url, data, async)
+        ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+            .then(function (res) {
+                var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+                if (data.code == 200) {
+                    removeMessageHTML(id);
+                }
+               
+            })
+            .finally(function (data) {
+                console.log("finally", data);
+            });
+    }
+    EasyChat.ViewMore = function (self) {
+        var parent = self.parentElement;
+        if (parent) {
+            var p = parent.parentElement.querySelector(".meta-data");
+            if (p) {
+                p.classList.toggle("open");
+                if (self.classList.contains("show")) {
+                    self.classList.remove("show");
+                    self.innerHTML = "xem thêm";
+                }
+                else {
+                    self.classList.add("show");
+                    self.innerHTML = "thu gọn";
+                }
+            }
+
         }
     }
     return EasyChat;

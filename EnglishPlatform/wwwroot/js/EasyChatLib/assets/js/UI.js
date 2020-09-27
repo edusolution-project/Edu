@@ -152,22 +152,35 @@
         if(Extensions.DOC.indexOf(extension)>-1) return Type.DOC;
         return Type.ORTHER;
     }
-    var renderMesssage = function(message,isSender){
-        var medias = message.data;
-        var text = message.content;
+    var renderMesssage = function (message, isSender) {
         var html = "";
-        if(text){
-            html += createDataText(message.ID,text,isSender);
+        var time = typeof (message.time) == "string" ? parseFloat(message.time) : message.time;
+        if (message.isDel) {
+            html += createDataDel();
         }
-        if(medias){
-            for(var i = 0; i < medias.length; i++){
-                if(medias[i]){
-                    html += createMetaData(medias[i],isSender);
+        else {
+            var medias = message.data;
+            var text = message.content;
+            
+            if (text) {
+                html += createDataText(message.ID, text, isSender);
+            }
+            if (medias) {
+                var exts = medias.length > 0 && isSender ? createExtendsSettings(message.ID) : "";
+                if (medias.length > 0) {
+                    var viewMore = medias.length <= 1 ? "" : "<div class='view-more-meta-data'><a onclick='EasyChat.ViewMore(this)' style='display:block;width:100%;text-align: center;padding-top: 10px;'>xem thêm</a></div>"
+                    html += '<div data-id="' + message.ID + '" class="data data-meta"><div class="content"><div class="meta-data">';
+
+                    for (var i = 0; i < medias.length; i++) {
+                        if (medias[i]) {
+                            html += createMetaData(message.ID, medias[i], isSender);
+                        }
+                    }
+                    html += '</div>' + viewMore+'</div>' + exts + "</div>";
                 }
             }
         }
-        var time = typeof(message.time) == "string" ? parseFloat(message.time) : message.time;
-        return [html,time];
+        return [html, time];
     }
     var ConveterTime = function(time){
         var min = 60*24*60;
@@ -187,25 +200,28 @@
         return date+"-"+month+"-"+year+" "+hour+":"+minute;
         //var date = new Date(time);
     }
-    var createExtendsSettings = function(){
+    var createExtendsSettings = function(id){
         var eventOpen = "javascript:this.parentElement.childNodes[1].classList.toggle('open')";
         return '<div class="button-extends">'+
             '<div class="dropdown-list">'+
                 '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="'+_config.extends+'" alt="extends"></button>'+
                 '<div class="item-extends">'+
-                    '<button class="btn btn-delete"><img src="'+_config.trash+'" alt="Xóa"></button>'+
+                    '<button class="btn btn-delete" data-message="'+id+'" onclick="EasyChat.RemoveMessage(this)"><img src="'+_config.trash+'" alt="Xóa"></button>'+
                 '</div>'+
             '</div>'+
         '</div>';
     }
+    var createDataDel = function () {
+        var exts = "";
+        return '<div class="data data-text"><div class="content" style="padding-left:25px; color :#ccc"> tin nhắn đã bị xóa </div>' + exts + '</div>';
+    }
     var createDataText = function(id,message,isSender){
-        var exts = isSender ? createExtendsSettings() : "";
+        var exts = isSender ? createExtendsSettings(id) : "";
          return '<div data-id="'+id+'" class="data data-text"><div class="content" style="padding-left:25px">'+message+'</div>'+exts+'</div>';
     }
-    var createMetaData = function(data,isSender){
-        var type = getExtensionType(data.type.toLowerCase().replace(".",""));
-        var html = '<div class="content">'+'<div data-id="'+data.id+'" class="meta-data">';
-        var exts = isSender ? createExtendsSettings():"";
+    var createMetaData = function(id,data){
+        var type = getExtensionType(data.type.toLowerCase().replace(".", ""));
+        var html = '<div class="item-meta-data">';
         switch(type){
             case Type.IMAGE:
                 html += '<img onmouseover="if(this.src!=this.dataset.src){this.src=this.dataset.src;}" class="lazy-loaded" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
@@ -223,8 +239,8 @@
                 html+='<div class="data-file"><a href="'+data.url+'">'+data.id+data.type+'</a></div>';
                 break;
         }
-        html += '</div></div>'+exts;
-        return '<div class="data">'+html+'</div>'
+        html += '</div>';
+        return html;
     }
     return UI;
 }());

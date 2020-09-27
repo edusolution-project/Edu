@@ -103,7 +103,7 @@ namespace EasyChatApp.Controllers
                     if(connestionIds != null && connestionIds.Count() > 0)
                     {
                         await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item,model.user,null);
-                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("Notication", model.receiver);
+                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("Notication", model.user);
                     }
                 }
                 response.Code = 200;
@@ -120,11 +120,13 @@ namespace EasyChatApp.Controllers
             return response;
         } 
         [HttpPost]
-        public async Task<Response> RemoveMessage(string user, string messageId, string connectionId)
+        public async Task<Response> RemoveMessage(string user, string messageId)
         {
             Response response = new Response();
             try
             {
+                if (string.IsNullOrEmpty(user)) { return new Response() { Code= 405,Message= "not permission" }; }
+                if (string.IsNullOrEmpty(messageId)) { return new Response() { Code = 404, Message = "not found data" }; }
                 var message = _messagerService.GetItemByID(messageId);
                 if(message != null)
                 {
@@ -135,13 +137,24 @@ namespace EasyChatApp.Controllers
                         response.Code = 200;
                         response.Message = "SUCCESS";
                         response.Data = message;
-                        if (!string.IsNullOrEmpty(connectionId))
+
+                        var group = _groupUserService.GetItemByID(message.GroupId);
+                        if(group == null)
                         {
-                            await _hubContext.Clients.Client(connectionId).SendAsync("RemoveMessage", message.ID);
+                            await _hubContext.Clients.Group(message.GroupId).SendAsync("RemoveMessage", message,message.GroupId);
                         }
                         else
                         {
-                            await _hubContext.Clients.Group(message.GroupId).SendAsync("RemoveMessage", message.ID);
+                            var mm = group.Members.Where(o => o != user)?.FirstOrDefault();
+                            if(mm != null)
+                            {
+                                var usersConnections = EasyChatHub.UserMap;
+                                var connestionIds = usersConnections.GetGroupConnections(mm);
+                                if (connestionIds != null && connestionIds.Count() > 0)
+                                {
+                                    await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("RemoveMessage", message,user);
+                                }
+                            }
                         }
                         return response;
                     }

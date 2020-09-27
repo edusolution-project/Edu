@@ -377,7 +377,7 @@ div[data-status="offline"]::before{
 .group-message .data .button-extends {
     position: absolute;
     top: 0;
-    right: 15px;
+    left: 15px;
     bottom: 0;
     width: 30px;
     height: 30px;
@@ -499,4 +499,16 @@ div[data-status="offline"]::before{
 .content--left__header .form-search {
     padding-bottom: 4px;
     border-bottom: 1px solid #cccc;
+}
+.meta-data{
+    display:block;
+    width:100%;
+    max-height:150px;
+    overflow:auto;
+}
+.meta-data.open{
+    max-height:unset;
+}
+.meta-data .item-meta-data {
+    margin-bottom: 5px;
 }
