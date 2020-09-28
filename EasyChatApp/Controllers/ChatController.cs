@@ -322,8 +322,27 @@ namespace EasyChatApp.Controllers
                 
                 var times = listTime.Select(o => o.TimeLife)?.ToList();
                 double max = times.Max();
-                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId) || (o.IsPublic == true && o.Sender == SYSTEM_EDUSO)) && o.Sender != user && o.IsDel == false)?.ToList();
-                return messages.Select(o => o.GroupId)?.ToHashSet();
+                
+                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                var messagesPrivate = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                var publicMessage = _messagerService.CreateQuery().Find(o => o.Time > max && (o.IsPublic == true && o.Sender == SYSTEM_EDUSO) && o.IsDel == false)?.ToList();
+                var listData = messages != null && messages.Count > 0 ? messages.Select(o => o.GroupId)?.ToHashSet() : new HashSet<string>();
+
+                if(messagesPrivate != null)
+                {
+                    for(int i =0; i < messagesPrivate.Count; i++)
+                    {
+                        listData.Add(messagesPrivate[i].Sender);
+                    };
+                }
+
+                if(publicMessage != null)
+                {
+                    if(publicMessage.Count > 0) listData.Add(SYSTEM_EDUSO);
+                }
+                return listData.Count > 0 ? listData : null;
             }
 
             return null;

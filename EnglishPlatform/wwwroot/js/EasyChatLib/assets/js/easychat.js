@@ -545,7 +545,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         ConnectHub();
     });
     __SIGNALR.on("Notication",function(userId){
-        showNoti([userId]);
+        //showNoti([userId]);
     });
     __SIGNALR.on("Test",function(userId){
         //showNoti([userId]);
@@ -592,10 +592,11 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var url = __defaulConfig.extendsUrl.GetNoti.replace("{user}",__defaulConfig.currentUser.id).replace("{groupNames}",array.toString());
         //proccess = function (method, url, data, async) 
         ajax.proccess("GET", url, null, false).then(function(data){
+            if(data){
             var objData = typeof(data) == "string" ? JSON.parse(data) : data;
             if(objData != null && objData.length > 0){
                 showNoti(objData);
-            }
+            }}
         });
 
     }
@@ -603,17 +604,21 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         setNotiCount(data);
         try{
             if(_notification){
-                var el = _notification.show({
-                    type: "success",
-                    msg: "bạn có "+data.length+" tin nhắn",
-                    timeOut: 5000
-                });
-                el.addEventListener("click",function(){
-                    var content = getRoot().querySelector('.easy-chat__content');
-                    if(!content.classList.contains("open")){
-                        content.classList.add('open');
+                if(data){
+                    var el = _notification.show({
+                        type: "success",
+                        msg: "bạn có "+data.length+" tin nhắn",
+                        timeOut: 5000
+                    });
+                    if(el){
+                        el.addEventListener("click",function(){
+                            var content = getRoot().querySelector('.easy-chat__content');
+                            if(!content.classList.contains("open")){
+                                content.classList.add('open');
+                            }
+                        });
                     }
-                });
+                }
             }
         }catch(ex){
             console.log(ex);
@@ -630,14 +635,16 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var contact = getRoot().querySelector('.list-contact');
         if(contact){
             for(var i = 0; i < data.length;i++){
-                var id = data[0];
+                if(data[i]){
+                    var id = data[i];
                 var item = contact.querySelector('[data-id="'+id+'"]');
-                if(item){
-                    var noti = item.querySelector('.noti');
-                    if(noti){
-                        noti.innerHTML = "!";
-                        noti.classList.add('open');
-                        contact.insertBefore(item,contact.children[0]);
+                    if(item){
+                        var noti = item.querySelector('.noti');
+                        if(noti){
+                            noti.innerHTML = "!";
+                            noti.classList.add('open');
+                            contact.insertBefore(item,contact.children[0]);
+                        }
                     }
                 }
             }
