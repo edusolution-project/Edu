@@ -251,7 +251,7 @@ namespace EasyChatApp.Controllers
                     response.Code = 200;
                     response.Message = "SUCCESS";
                     //thoi diem hien tai ve sau
-                    var listData = _messagerService.CreateQuery().Find(o => (o.GroupId == groupName && o.IsPublic == false) || (o.Sender == SYSTEM_EDUSO && o.IsPublic == true))?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                    var listData = _messagerService.CreateQuery().Find(o => o.IsDel == false && (o.GroupId == groupName && o.IsPublic == false) || (o.Sender == SYSTEM_EDUSO && o.IsPublic == true))?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
                         .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
 
                     response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
@@ -269,7 +269,7 @@ namespace EasyChatApp.Controllers
                         response.Code = 200;
                         response.Message = "SUCCESS";
                         //thoi diem hien tai ve sau
-                        var listData = _messagerService.CreateQuery().Find(o => o.GroupId == groupName && o.IsPublic == false)?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                        var listData = _messagerService.CreateQuery().Find(o => o.IsDel == false && o.GroupId == groupName && o.IsPublic == false)?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
                             .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
 
                         response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
@@ -322,7 +322,7 @@ namespace EasyChatApp.Controllers
                 
                 var times = listTime.Select(o => o.TimeLife)?.ToList();
                 double max = times.Max();
-                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId) || (o.IsPublic == true && o.Sender == SYSTEM_EDUSO)) && o.Sender != user)?.ToList();
+                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId) || (o.IsPublic == true && o.Sender == SYSTEM_EDUSO)) && o.Sender != user && o.IsDel == false)?.ToList();
                 return messages.Select(o => o.GroupId)?.ToHashSet();
             }
 
