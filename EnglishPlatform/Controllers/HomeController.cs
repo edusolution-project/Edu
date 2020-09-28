@@ -129,8 +129,8 @@ namespace EnglishPlatform.Controllers
                                 centerCode = centers.FirstOrDefault().Code;
                             else
                                 centerCode = center.Code;
-
-                            _session.SetString("userAvatar", tc.Avatar);
+                            if (!string.IsNullOrEmpty(tc.Avatar))
+                                _session.SetString("userAvatar", tc.Avatar);
                         }
                         break;
                     default:
@@ -148,8 +148,8 @@ namespace EnglishPlatform.Controllers
                             {
                                 centerCode = center.Code;
                             }
-
-                            _session.SetString("userAvatar", st.Avatar);
+                            if (!string.IsNullOrEmpty(st.Avatar))
+                                _session.SetString("userAvatar", st.Avatar);
                         }
                         break;
                 }
@@ -963,7 +963,7 @@ namespace EnglishPlatform.Controllers
             }
             return Json("OK " + count + " - " + countdelete + " _ " + str);
         }
-       
+
         #endregion
         [HttpGet]
         public string CurrentUser()
@@ -971,12 +971,12 @@ namespace EnglishPlatform.Controllers
             try
             {
                 string strScript = "var g_UserOnline={id:'',name:'',email:''}";
-                if(User.Identity.IsAuthenticated)
+                if (User.Identity.IsAuthenticated)
                 {
                     string userId = User.FindFirst("UserID").Value;
                     string name = User.Identity.Name;
                     string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value;
-                    strScript = "var g_UserOnline={id:'" + userId + "',name:'"+name+"',email:'"+email+"'}";
+                    strScript = "var g_UserOnline={id:'" + userId + "',name:'" + name + "',email:'" + email + "'}";
                 }
 
                 return strScript;
