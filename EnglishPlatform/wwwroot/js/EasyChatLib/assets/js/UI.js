@@ -156,9 +156,7 @@
         var html = "";
         var time = typeof (message.time) == "string" ? parseFloat(message.time) : message.time;
         if (message.isDel) {
-            if(message.isPublic == false){
-                html += createDataDel();
-            }
+            html += createDataDel();
         }
         else {
             var medias = message.data;
