@@ -690,6 +690,24 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             });
         }
     }
+    EasyChat.RemoveMessageAdmin = function (id,userAdmin) {
+        var id = id;
+        var user = userAdmin;
+        if (id && user) {
+            UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+                var ajax = new Ajax();
+                //(method, url, data, async)
+                ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+                    .then(function (res) {
+                        var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+                        if (data.code == 200) {
+                            removeMessageHTML(id);
+                        }
+
+                    });
+            });
+        }
+    }
     EasyChat.ViewMore = function (self) {
         var parent = self.parentElement;
         if (parent) {

@@ -190,24 +190,32 @@ namespace EasyChatApp.Controllers
                         response.Message = "SUCCESS";
                         response.Data = message;
 
-                        var group = _groupUserService.GetItemByID(message.GroupId);
-                        if(group == null)
+                        if (message.IsPublic == true)
                         {
-                            await _hubContext.Clients.Group(message.GroupId).SendAsync("RemoveMessage", message,message.GroupId);
+                            await _hubContext.Clients.All.SendAsync("RemoveMessage", message, SYSTEM_EDUSO);
                         }
                         else
                         {
-                            var mm = group.Members.Where(o => o != user)?.FirstOrDefault();
-                            if(mm != null)
+                            var group = _groupUserService.GetItemByID(message.GroupId);
+                            if (group == null)
                             {
-                                var usersConnections = EasyChatHub.UserMap;
-                                var connestionIds = usersConnections.GetGroupConnections(mm);
-                                if (connestionIds != null && connestionIds.Count() > 0)
+                                await _hubContext.Clients.Group(message.GroupId).SendAsync("RemoveMessage", message, message.GroupId);
+                            }
+                            else
+                            {
+                                var mm = group.Members.Where(o => o != user)?.FirstOrDefault();
+                                if (mm != null)
                                 {
-                                    await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("RemoveMessage", message,user);
+                                    var usersConnections = EasyChatHub.UserMap;
+                                    var connestionIds = usersConnections.GetGroupConnections(mm);
+                                    if (connestionIds != null && connestionIds.Count() > 0)
+                                    {
+                                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("RemoveMessage", message, user);
+                                    }
                                 }
                             }
                         }
+                        
                         return response;
                     }
                     else
@@ -223,9 +231,6 @@ namespace EasyChatApp.Controllers
             }
             catch (Exception ex)
             {
-                StackTrace stackTrace = new StackTrace();
-                MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
-                await _log.Error(methodBase.Name, ex);
                 response.Code = 500;
                 response.Message = ex.Message;
                 response.Data = null;
