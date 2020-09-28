@@ -190,8 +190,8 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var obj = {
             center : __defaulConfig.center,
             user: user,
-            groupId: user,
-            receiver : null,
+            groupId: "",
+            receiver : user,
             message: message,
         }
         var frm = document.createElement('form');

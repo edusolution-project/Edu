@@ -2,7 +2,7 @@
     "use strict";
     var __GROUPS = [];
     var __TEXT = text;
-    var __DEFAULT_GROUP = {id:g_EasyChatURL.SYSTEM_EDUSO,name:"Hệ thống EDUSO",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
+    //var __DEFAULT_GROUP = {id:g_EasyChatURL.SYSTEM_EDUSO,name:"Hệ thống EDUSO",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
     function Group(){
 
     }
@@ -50,7 +50,7 @@
         // center: "5eb982be07ed0c1894762c40"
         // id: "5e7206342ab6d6169c02b1f8"
         // name: "Phát triển bền vững"
-        updateItem(__DEFAULT_GROUP);
+        //updateItem(__DEFAULT_GROUP);
         return __GROUPS;
     }
 

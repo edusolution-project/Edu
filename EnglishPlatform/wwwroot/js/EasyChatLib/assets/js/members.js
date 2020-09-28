@@ -49,12 +49,14 @@
         return __MEMBERS.filter(function(v){if(v.id == id) return v;});
     }
     Member.prototype.GetAll = function(){
+        updateItem(__DEFAULT_MEMBER);
         return __MEMBERS;
     }
     Member.prototype.Search = function(textSearch){
         return search(textSearch);
     }
-    Member.prototype.Update = function(members){
+    Member.prototype.Update = updateItem;
+    var updateItem = function(members){
         if(!members.length) members = [members];
         for(var i = 0 ; i < members.length; i++){
             var item = members[i];
@@ -62,7 +64,7 @@
                 __MEMBERS.push(item);
             }
         }
-    }
+    };
     Member.prototype.Remove = function(id){
         var member = search(id);
         if(member.length > 0){
