@@ -95,7 +95,7 @@
         '</div>';
     }
     var createItemContact = function(data,isGroup,callBack){
-        var _strLop = isGroup ? "Lớp " : "";
+        var _strLop = isGroup && !data.isSystem ? "Lớp " : "";
         if(!data.avatar){
             data.avatar = isGroup ? _config.image : _config.avatar;
         }

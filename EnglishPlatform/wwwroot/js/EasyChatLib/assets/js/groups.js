@@ -2,6 +2,7 @@
     "use strict";
     var __GROUPS = [];
     var __TEXT = text;
+    var __DEFAULT_GROUP = {id:g_EasyChatURL.SYSTEM_EDUSO,name:"Hệ thống EDUSO",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
     function Group(){
 
     }
@@ -45,6 +46,11 @@
         //console.log("abc");
     }
     Group.prototype.GetAll = function(){
+        // avatar: "/js/EasyChatLib/assets/Icon/Outline/image.svg"
+        // center: "5eb982be07ed0c1894762c40"
+        // id: "5e7206342ab6d6169c02b1f8"
+        // name: "Phát triển bền vững"
+        updateItem(__DEFAULT_GROUP);
         return __GROUPS;
     }
 
@@ -57,7 +63,8 @@
     Group.prototype.Search = function(textSearch){
         return search(textSearch);
     }
-    Group.prototype.Update = function(groups){
+    Group.prototype.Update = updateItem;
+    var updateItem = function(groups){
         if(!groups.length) groups = [groups];
         for(var i = 0 ; i < groups.length; i++){
             var item = groups[i];

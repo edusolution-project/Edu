@@ -4,6 +4,8 @@
 
 <link rel="stylesheet" href="~/js/EasyChatLib/assets/css/easy-chat.css">
 <div id="easy-chat"></div>
+
+<script src="https://localhost:44374/chat/ScriptEasyChat"></script>
 <script src="~/js/EasyChatLib/assets/js/Lib/signalr.js"></script>
 <script src="/home/CurrentUser"></script>
 <script src="~/js/EasyChatLib/assets/js/text.js"></script>
@@ -12,7 +14,6 @@
 <script src="~/js/EasyChatLib/assets/js/message.js"></script>
 <script src="~/js/EasyChatLib/assets/js/UI.js"></script>
 <script src="~/js/EasyChatLib/assets/js/easychat.js"></script>
-<script src="https://localhost:44374/chat/ScriptEasyChat"></script>
 <script>
     var easyChat = new EasyChat();
     var opts = {
@@ -22,7 +23,7 @@
                 getlist: "/api/EasyChat/GetClassList"
             },
             member: {
-                getlist:"/api/EasyChat/GetMembers"
+                getlist: "/api/EasyChat/GetMembers"
             }
         },
         extendsUrl: g_EasyChatURL,

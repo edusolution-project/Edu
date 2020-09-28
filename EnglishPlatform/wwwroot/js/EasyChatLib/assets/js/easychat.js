@@ -185,6 +185,57 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         }
     }
 
+
+    EasyChat.prototype.AdminSendMessage = function(){
+        var obj = {
+            center : __defaulConfig.center,
+            user : __MEMBER.GetAdmin().id,
+            groupId : __MEMBER.GetAdmin().id,
+            receiver : null,
+            message : "Hệ thông EDUSO cập nhật tính năng chat mới !",
+        }
+        var frm = document.createElement('form');
+        frm.setAttribute("enctype","multipart/form-data");
+        var formData = new FormData(frm);
+        var keys = Object.keys(obj);
+        var url = __defaulConfig.extendsUrl.SendMessage,query="";
+        //var object = {};
+        for(var i = 0; i < keys.length ; i++){
+            var key = keys[i];
+            if(obj[key]){ 
+                query+= query == ""? "?"+key+"="+obj[key] : "&"+key+"="+obj[key];
+            }
+        }
+        // var files = getRoot().querySelector('.form-chat input[type="file"]').files;
+        // if(files){
+        //     if(files.length > 0){
+        //         for(var i = 0; i < files.length; i++){
+        //             var file = files[i];
+        //             formData.append("Files",file);
+        //         }
+        //     }
+        // }
+        new Ajax().proccessData("POST", url+query, formData).then(function(res){
+            //{"code":200,"message":"SUCCESS","data":{"content":"xin chao","data":null,"sender":"5d8389c2d5d1bf27e4410c04","groupId":"5e7206342ab6d6169c02b1f8","time":1600450346555.0994,"isDel":false,"ID":"5f64ef2ab7a41d3308cb5e52"}}
+            var jsonData = typeof(res) == "string" ? JSON.parse(res) : res;
+            if(jsonData.code == 200){
+                var listmessage = getRoot().querySelector('.list-messages');
+                var messageText = getRoot().querySelector('.form-chat textarea');
+                var files = getRoot().querySelector('.form-chat input[type="file"]');
+                messageText.value = "";
+                files.value = "";
+                var isMaster = __defaulConfig.currentUser.id == jsonData.data.sender;
+                var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(jsonData.data.sender);
+                //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
+                //var lastItem = listmessage.querySelectorAll(".message");
+                listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data]);
+                listmessage.scrollTo(0, listmessage.scrollHeight);
+                //addEventOnloadImage();
+            }
+            //console.log(res);
+        });
+    }
+
     EasyChat.CloseMessageBox = function(){
         var root = getRoot();
         var left = root.querySelector('.easy-chat__content--left');

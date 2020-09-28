@@ -21,6 +21,7 @@ namespace EasyChatApp.Controllers
     [ApiController]
     public class ChatController : Controller
     {
+        const string SYSTEM_EDUSO = "sytem_eduso";
         private readonly IHubContext<EasyChatHub> _hubContext;
         private readonly ILog _log;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -59,57 +60,92 @@ namespace EasyChatApp.Controllers
             //await Task.Delay(100);
             try
             {
-                MessagerEntity item = string.IsNullOrEmpty(model.messageId) ? new MessagerEntity {Sender = model.user } : _messagerService.GetItemByID(model.messageId);
-                #region group or user
-                if (!string.IsNullOrEmpty(model.groupId))
+                if (model.user == SYSTEM_EDUSO || model.groupId == SYSTEM_EDUSO)
                 {
-                    item.GroupId = model.groupId;
-                }
-                if (!string.IsNullOrEmpty(model.receiver))
-                {
-                    var group = _groupUserService.GetGroupPrivate(model.user, model.receiver);
-                    item.GroupId = group.ID;
-                }
-                #endregion
-                var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(model.center, model.user, HttpContext);
-                if (medias == null || medias.Count == 0)
-                {
-                    item.Content = model.message;
-                }
-                else
-                {
-                    List<MetaData> metaDatas = new List<MetaData>();
-                    for (int i = 0; i < medias.Count; i++)
+                    MessagerEntity item = new MessagerEntity() { IsPublic = true, Content = model.message,GroupId = SYSTEM_EDUSO, Sender = model.user };
+                    var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(model.center, model.user, HttpContext);
+                    if (medias == null || medias.Count == 0)
                     {
-                        var media = medias[i];
-                        metaDatas.Add(new MetaData()
+                        item.Content = model.message;
+                    }
+                    else
+                    {
+                        List<MetaData> metaDatas = new List<MetaData>();
+                        for (int i = 0; i < medias.Count; i++)
                         {
-                            Id = media.FileId,
-                            Type = media.Extends,
-                            Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
-                        });
+                            var media = medias[i];
+                            metaDatas.Add(new MetaData()
+                            {
+                                Id = media.FileId,
+                                Type = media.Extends,
+                                Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
+                            });
+                        }
+                        item.Data = metaDatas;
                     }
-                    item.Data = metaDatas;
-                }
-                _messagerService.CreateOrUpdate(item);
-                if (!string.IsNullOrEmpty(model.groupId))
-                {
-                    await _hubContext.Clients.Group(model.groupId).SendAsync("ReceiverMessage", item,null,model.groupId);
+                    _messagerService.CreateOrUpdate(item);
+
+                    response.Code = 200;
+                    response.Data = item;
+                    response.Message = "SUCCESS";
+                    if(model.user == SYSTEM_EDUSO)
+                    {
+                        await _hubContext.Clients.All.SendAsync("ReceiverMessage", item,null, SYSTEM_EDUSO);
+                    }
                 }
                 else
                 {
-                    var usersConnections = EasyChatHub.UserMap;
-                    var connestionIds = usersConnections.GetGroupConnections(model.receiver);
-                    if(connestionIds != null && connestionIds.Count() > 0)
+                    MessagerEntity item = string.IsNullOrEmpty(model.messageId) ? new MessagerEntity { Sender = model.user } : _messagerService.GetItemByID(model.messageId);
+                    #region group or user
+                    if (!string.IsNullOrEmpty(model.groupId))
                     {
-                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item,model.user,null);
-                        await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("Notication", model.user);
+                        item.GroupId = model.groupId;
                     }
+                    if (!string.IsNullOrEmpty(model.receiver))
+                    {
+                        var group = _groupUserService.GetGroupPrivate(model.user, model.receiver);
+                        item.GroupId = group.ID;
+                    }
+                    #endregion
+                    var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(model.center, model.user, HttpContext);
+                    if (medias == null || medias.Count == 0)
+                    {
+                        item.Content = model.message;
+                    }
+                    else
+                    {
+                        List<MetaData> metaDatas = new List<MetaData>();
+                        for (int i = 0; i < medias.Count; i++)
+                        {
+                            var media = medias[i];
+                            metaDatas.Add(new MetaData()
+                            {
+                                Id = media.FileId,
+                                Type = media.Extends,
+                                Url = Program.GoogleDriveApiService.CreateLinkViewFile(media.FileId)
+                            });
+                        }
+                        item.Data = metaDatas;
+                    }
+                    _messagerService.CreateOrUpdate(item);
+                    if (!string.IsNullOrEmpty(model.groupId))
+                    {
+                        await _hubContext.Clients.Group(model.groupId).SendAsync("ReceiverMessage", item, null, model.groupId);
+                    }
+                    else
+                    {
+                        var usersConnections = EasyChatHub.UserMap;
+                        var connestionIds = usersConnections.GetGroupConnections(model.receiver);
+                        if (connestionIds != null && connestionIds.Count() > 0)
+                        {
+                            await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("ReceiverMessage", item, model.user, null);
+                            await _hubContext.Clients.Clients(connestionIds.ToList()).SendAsync("Notication", model.user);
+                        }
+                    }
+                    response.Code = 200;
+                    response.Data = item;
+                    response.Message = "SUCCESS";
                 }
-                response.Code = 200;
-                response.Data = item;
-                response.Message = "SUCCESS";
-
             }
             catch(Exception ex)
             {
@@ -183,42 +219,62 @@ namespace EasyChatApp.Controllers
 
         [HttpPost]
         [Obsolete]
-        public async Task<Response> GetMessages(string user, string receiver, string groupId, string messageId, double startDate, int pageIndex, int pageSize)
+        public Response GetMessages(string user, string receiver, string groupId, string messageId, double startDate, int pageIndex, int pageSize)
         {
             Response response = new Response();
             try
             {
-                string groupName = groupId;
-                if (!string.IsNullOrEmpty(receiver))
-                {
-                    groupName = _groupUserService.GetGroupPrivate(user, receiver).ID;
-                }
-                if (string.IsNullOrEmpty(messageId))
+                if (groupId == SYSTEM_EDUSO)
                 {
                     response.Code = 200;
                     response.Message = "SUCCESS";
-                    //thoi diem hien tai ve sau
-                    var listData = _messagerService.CreateQuery().Find(o => o.GroupId == groupName)?.SortByDescending(o=>o.Time)?.Skip(pageSize*pageIndex)?
-                        .Limit(pageSize)?.ToList()?.OrderBy(o=>o.Time)?.ToList();
+                    if (user != SYSTEM_EDUSO)
+                    {
+                        //thoi diem hien tai ve sau
+                        var listData = _messagerService.CreateQuery().Find(o => (o.Sender == SYSTEM_EDUSO || o.Sender == user) && o.IsPublic == true)?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                            .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
 
-                    response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
+                        response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
+                    }
+                    else
+                    {
+                        var listData = _messagerService.CreateQuery().Find(o => o.GroupId == SYSTEM_EDUSO && o.IsPublic == true)?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                            .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
+
+                        response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
+                    }
                 }
                 else
                 {
-                    var data = _messagerService.GetItemByID(messageId);
-                    response.Code = 200;
-                    response.Data = data;
-                    response.Message = "SUCCESS";
-                }
+                    string groupName = groupId;
+                    if (!string.IsNullOrEmpty(receiver))
+                    {
+                        groupName = _groupUserService.GetGroupPrivate(user, receiver).ID;
+                    }
+                    if (string.IsNullOrEmpty(messageId))
+                    {
+                        response.Code = 200;
+                        response.Message = "SUCCESS";
+                        //thoi diem hien tai ve sau
+                        var listData = _messagerService.CreateQuery().Find(o => o.GroupId == groupName && o.IsPublic == false)?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                            .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
 
-                return response;
+                        response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
+                    }
+                    else
+                    {
+                        var data = _messagerService.GetItemByID(messageId);
+                        response.Code = 200;
+                        response.Data = data;
+                        response.Message = "SUCCESS";
+                    }
+
+                    return response;
+                }
 
             }
             catch (Exception ex)
             {
-                StackTrace stackTrace = new StackTrace();
-                MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
-                await _log.Error(methodBase.Name, ex);
                 response.Code = 500;
                 response.Message = ex.Message;
                 response.Data = null;
@@ -237,7 +293,7 @@ namespace EasyChatApp.Controllers
             string urlSend = host + "/Chat/SendMessage";
             string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
             string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&pageIndex={pageIndex}&pageSize={pageSize}";
-            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "'}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "','SYSTEM_EDUSO':'"+ SYSTEM_EDUSO + "'}";
             return value;
         }
         [HttpGet]
@@ -253,7 +309,7 @@ namespace EasyChatApp.Controllers
                 
                 var times = listTime.Select(o => o.TimeLife)?.ToList();
                 double max = times.Max();
-                var messages = _messagerService.CreateQuery().Find(o => o.Time >= max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId)) && o.Sender != user)?.ToList();
+                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && (groups.Contains(o.GroupId) || listPrivateGroups.Contains(o.GroupId)) && o.Sender != user)?.ToList();
                 return messages.Select(o => o.GroupId)?.ToHashSet();
             }
 

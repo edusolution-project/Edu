@@ -2,6 +2,7 @@
     "use strict";
     var __MEMBERS = [];
     var __TEXT = text;
+    var __DEFAULT_MEMBER = {id:g_EasyChatURL.SYSTEM_EDUSO,name:"Hệ thống EDUSO",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
     function Member(){
 
     }
@@ -31,6 +32,9 @@
             }
         });
     }
+    Member.prototype.GetAdmin = function(){
+        return __DEFAULT_MEMBER;
+    }
     Member.prototype.Create = function(url,listClass){
         var ajax = createAjax();
         return ajax.proccessWithDataHeader("GET", url, {classNames:listClass} , false).then(function(data){
@@ -39,6 +43,9 @@
         });
     }
     Member.prototype.GetItemByID = function(id){
+        if(id == __DEFAULT_MEMBER.id){
+            return [__DEFAULT_MEMBER];
+        }
         return __MEMBERS.filter(function(v){if(v.id == id) return v;});
     }
     Member.prototype.GetAll = function(){

@@ -59,9 +59,6 @@ namespace BaseCustomerEntity.Database
                 var item = listData[i];
                 item.TimeLife = unixTimestamp;
                 await CreateQuery().ReplaceOneAsync(Builders<GroupAndUserEntity>.Filter.Eq(s => s.ID, item.ID), item);
-                //var filter = Builders<GroupAndUserEntity>.Filter.Eq(s => s.ID, item.ID);
-                //var update = Builders<GroupAndUserEntity>.Update.AddToSet("TimeLife", unixTimestamp);
-                //await CreateQuery().UpdateOneAsync(filter, update);
             }
         }
     }

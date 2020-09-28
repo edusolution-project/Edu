@@ -462,7 +462,7 @@ div[data-status="offline"]::before{
 }
 
 .form-chat .box-text {
-    width: 350px;
+    width: 100%;
     margin-left: 5px;
     background: #ffff;
     height: 75px;
