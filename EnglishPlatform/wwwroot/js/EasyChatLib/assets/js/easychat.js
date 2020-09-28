@@ -186,13 +186,13 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     }
 
 
-    EasyChat.prototype.AdminSendMessage = function(){
+    EasyChat.prototype.AdminSendMessage = function(user,message){
         var obj = {
             center : __defaulConfig.center,
-            user : __MEMBER.GetAdmin().id,
-            groupId : __MEMBER.GetAdmin().id,
+            user: user,
+            groupId: user,
             receiver : null,
-            message : "Hệ thông EDUSO cập nhật tính năng chat mới !",
+            message: message,
         }
         var frm = document.createElement('form');
         frm.setAttribute("enctype","multipart/form-data");
@@ -206,15 +206,6 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 query+= query == ""? "?"+key+"="+obj[key] : "&"+key+"="+obj[key];
             }
         }
-        // var files = getRoot().querySelector('.form-chat input[type="file"]').files;
-        // if(files){
-        //     if(files.length > 0){
-        //         for(var i = 0; i < files.length; i++){
-        //             var file = files[i];
-        //             formData.append("Files",file);
-        //         }
-        //     }
-        // }
         new Ajax().proccessData("POST", url+query, formData).then(function(res){
             //{"code":200,"message":"SUCCESS","data":{"content":"xin chao","data":null,"sender":"5d8389c2d5d1bf27e4410c04","groupId":"5e7206342ab6d6169c02b1f8","time":1600450346555.0994,"isDel":false,"ID":"5f64ef2ab7a41d3308cb5e52"}}
             var jsonData = typeof(res) == "string" ? JSON.parse(res) : res;
