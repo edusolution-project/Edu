@@ -35,7 +35,7 @@
             <div class="flex padding-b25">
                 <div class="box filter-box w-152">
                     <select v-model="search_subject">
-                        <option value="">-- Tất cả các môn ---</option>
+                        <option value="">-- Tất cả học liệu ---</option>
                         <option v-for="(item, k) in classSubjects"
                                 :value="item.ID">
                             {{item.Title}}
@@ -116,8 +116,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item,k) in sumarryData">
-                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                        <tr v-for="(item,k) in summaryData">
+                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
                             <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
                             <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
                             <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
@@ -133,7 +133,7 @@
 @section Scripts {
     <script>
         new Vue({
-            el: "#main",
+            el: ".module",
             mounted() {
                 this.loadClassSubjects()
                 var start = moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")');
@@ -165,7 +165,7 @@
                 summaryFields: [
                     {
                         key: 'subject',
-                        label: 'Môn học'
+                        label: 'Học liệu'
                     },
                     {
                         key: 'progress',
@@ -225,7 +225,7 @@
                     },
                 ],
                 progressData: [],
-                sumarryData: [],
+                summaryData: [],
                 resultData: [],
                 view: 10,
                 page: 1,
@@ -330,7 +330,7 @@
                     let _url = '@processUrl("GetLearningSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.sumarryData = response.data.Data;
+                            _that.summaryData = response.data.Data;
                             _that.rank = response.data.Result;
                             _that.avgPoint = response.data.Result.avg;
                         }).catch(e => { })
@@ -350,7 +350,7 @@
                             _data.forEach(function (item, k) {
                                 _that.classSubjects.push({
                                     ID: item.ID,
-                                    Title: item.SkillName,
+                                    Title: item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName,
                                     Image: item.SkillImage,
                                 })
 

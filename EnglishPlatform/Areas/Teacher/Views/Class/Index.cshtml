@@ -1477,7 +1477,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in student_data.data">
-                            <td>{{k+1}}</td>
+                            <td>{{(student_data.page - 1) * student_data.view + k + 1}}</td>
                             <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                             <td>{{item.Email}}</td>
                             <td>{{item.Phone}}</td>

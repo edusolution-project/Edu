@@ -1020,14 +1020,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = dCursor.ToList();
             }
 
-            classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             if (!string.IsNullOrEmpty(TeacherID))
             {
-                classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
-                ownerfilter = Builders<ClassEntity>.Filter.Where(o => o.TeacherID == TeacherID);
+                if (!skip_owned)
+                    classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID && t.Type == ClassMemberType.TEACHER)));
+                else
+                    classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == TeacherID)));
             }
-            else
-                ownerfilter = Builders<ClassEntity>.Filter.Where(o => o.TeacherID == UserID);
 
             if (!skipActive)
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
@@ -1036,22 +1035,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 classfilter.Add(Builders<ClassEntity>.Filter.Where(t => data.Contains(t.ID)));
 
             if (!string.IsNullOrEmpty(model.SearchText))
-                classfilter.Add(Builders<ClassEntity>.Filter.Text("\"" + model.SearchText + "\""));
+                classfilter.Add(Builders<ClassEntity>.Filter.Text(
+                    //"\"" + 
+                    model.SearchText
+                    //+ "\""
+                    ));
 
             if (classfilter.Count == 0)
                 return null;
 
             var classResult = _service.Collection.Find(
                 Builders<ClassEntity>.Filter.And(
-                    Builders<ClassEntity>.Filter.Where(o => o.Center == Center),
-                    skip_owned ?
-                    Builders<ClassEntity>.Filter.And(classfilter) :
-                    Builders<ClassEntity>.Filter.Or(
-                        Builders<ClassEntity>.Filter.And(ownerfilter),
-                        Builders<ClassEntity>.Filter.And(classfilter)
-                        )
-                    )
-                );
+                    Builders<ClassEntity>.Filter.Where(o => o.Center == Center && o.ClassMechanism != CLASS_MECHANISM.PERSONAL),
+                    Builders<ClassEntity>.Filter.And(classfilter)
+                ));
 
             model.TotalRecord = classResult.CountDocuments();
 
@@ -1694,7 +1691,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
                 classSubject.CourseID = Course.ID;
-                //classSubject.CourseName = CourseName;
+                classSubject.CourseName = CourseName;
                 classSubject.SkillID = Course.SkillID;
                 classSubject.GradeID = Course.GradeID;
                 classSubject.SubjectID = Course.SubjectID;
@@ -2193,13 +2190,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ClassSubjectID = sbj.ID
                     }, new StudentSummaryViewModel()
                     {
-                        SkillName = _skillService.GetItemByID(sbj.SkillID).Name,
+
+                        CourseName = sbj.CourseName,
                         Rank = -1,
                         TotalStudents = (int)total_students,
                         TotalLessons = sbj.TotalLessons,
                         TotalExams = sbj.TotalExams,
                         TotalPractices = sbj.TotalPractices
                     });
+
+                if (string.IsNullOrEmpty(summary.CourseName))
+                {
+                    var course = _courseService.GetItemByID(sbj.CourseID);
+                    if (course == null)
+                    {
+                        summary.SkillName = _skillService.GetItemByID(sbj.SkillID).Name;
+                    }
+                    else
+                    {
+                        summary.CourseName = course.Name;
+                    }
+                }
 
                 summary.AvgPoint = summary.TotalExams > 0 ? summary.TotalPoint / summary.TotalExams : 0;
                 summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);

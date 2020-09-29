@@ -222,7 +222,7 @@ namespace EnglishPlatform.Controllers
                             string _token = Guid.NewGuid().ToString();
                             HttpContext.SetValue(Cookies.DefaultLogin, _token, Cookies.ExpiresLogin, false);
 
-                            var center = _centerService.GetDefault();
+                            var center = new CenterEntity(); // _centerService.GetDefault();
                             string centerCode = center.Code;
                             string roleCode = "";
                             var tc = _teacherService.GetItemByID(user.UserID) ?? _teacherService.GetItemByEmail(user.UserName);
@@ -244,7 +244,7 @@ namespace EnglishPlatform.Controllers
                                             foreach (var ct in tc.Centers)
                                             {
                                                 var _ct = _centerService.GetItemByID(ct.CenterID);
-                                                if (_ct == null || _ct.ExpireDate <= DateTime.Now)
+                                                if (_ct == null || _ct.ExpireDate <= DateTime.Now || !_ct.Status)
                                                 {
                                                     continue;
                                                     //return Json(new ReturnJsonModel
@@ -266,6 +266,15 @@ namespace EnglishPlatform.Controllers
                                             centerCode = center.Code;
                                             roleCode = "";
                                         }
+                                        if (string.IsNullOrEmpty(center.Code))//no valid center
+                                        {
+                                            return Json(new ReturnJsonModel
+                                            {
+                                                StatusCode = ReturnStatus.ERROR,
+                                                StatusDesc = "Tài khoản của bạn đang bị khóa, vui lòng liên hệ quản trị viên để được hỗ trợ"
+                                            });
+                                        }
+
                                     }
                                     break;
                                 case ACCOUNT_TYPE.ADMIN:
@@ -277,7 +286,38 @@ namespace EnglishPlatform.Controllers
                                     if (st != null)
                                     {
                                         defaultUser = new UserModel(st.ID, st.FullName);
-                                        centerCode = (st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
+
+
+                                        if (st.Centers != null && st.Centers.Count > 0)//return to first valid center
+                                        {
+                                            foreach (var ct in st.Centers)
+                                            {
+                                                var _ct = _centerService.GetItemByID(ct);
+                                                if (_ct == null || _ct.ExpireDate <= DateTime.Now || !_ct.Status)
+                                                    continue;
+                                                else
+                                                {
+                                                    centerCode = _ct.Code;
+                                                    //roleCode = _roleService.GetItemByID(st.RoleID).Code;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            centerCode = center.Code;
+                                            roleCode = "";
+                                        }
+                                        if (string.IsNullOrEmpty(center.Code))//no valid center
+                                        {
+                                            return Json(new ReturnJsonModel
+                                            {
+                                                StatusCode = ReturnStatus.ERROR,
+                                                StatusDesc = "Tài khoản của bạn đang bị khóa, vui lòng liên hệ quản trị viên để được hỗ trợ."
+                                            });
+                                        }
+
+                                        //centerCode = (st.Centers != null && st.Centers.Count > 0) ? _centerService.GetItemByID(st.Centers.FirstOrDefault()).Code : center.Code;
                                         roleCode = "student";
                                     }
                                     break;
@@ -303,7 +343,7 @@ namespace EnglishPlatform.Controllers
                                     return Json(new ReturnJsonModel
                                     {
                                         StatusCode = ReturnStatus.ERROR,
-                                        StatusDesc = "Tài khoản đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ"
+                                        StatusDesc = "Tài khoản của bạn đang bị khóa. Vui lòng liên hệ với quản trị viên để được hỗ trợ."
                                     });
                                 }
                             }

@@ -93,14 +93,14 @@
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
 
                     <template v-if="tab[0]">
-                        <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
+                        <a href="javascript:;" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
                             <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
                             <div>
                                 <div>
-                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Title" class="title">{{data.Title}}</a>
+                                    <a href="javascript:;" v-on:click="doMainAct(data)" :title="data.Title" class="title">{{data.Title}}</a>
                                 </div>
                             </div>
                             <div class="pt-0 pb-2">
@@ -117,14 +117,14 @@
                     </template>
 
                     <template v-else>
-                        <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
+                        <a href="javascript:;" v-on:click="showDocsInteractive(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
                             <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
                             <div>
                                 <div>
-                                    <a href="#" v-on:click="doMainAct(data)" :title="data.Name" class="title">{{data.Name}}</a>
+                                    <a href="javascript:;" v-on:click="showDocsInteractive(data)" :title="data.Name" class="title">{{data.Name}}</a>
                                 </div>
                             </div>
                             <div class="pt-0 pb-2">
@@ -134,10 +134,7 @@
                                 <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="fas fa-cloud-download-alt"></i> Xem chi tiết</a>
                             </div>
                         </div>
-
                     </template>
-
-
                 </div>
             </div>
             <div class="row ls-doc text-center d-block" v-else>
