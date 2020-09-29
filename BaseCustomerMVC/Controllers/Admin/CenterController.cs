@@ -34,12 +34,14 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
 
         private readonly StudentHelper _studentHelper;
+        private readonly FileProcess _fileProcess;
 
         public CenterController(CenterService service
             , RoleService roleService
             , AccountService accountService
             , StudentService studentService
             , StudentHelper studentHelper
+            , FileProcess fileProcess
             , IHostingEnvironment evn
             )
         {
@@ -47,7 +49,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
-
+            _fileProcess = fileProcess;
             _studentHelper = studentHelper;
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
         }
@@ -115,7 +117,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(CenterEntity item, IFormFile upload)
+        public async Task<JsonResult> Create(CenterEntity item, IFormFile upload)
         {
             var checkAbbr = true;
             var newabbr = item.Abbr.ToLower().Trim();
@@ -151,43 +153,44 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (upload != null && upload.Length > 0)
             {
                 var fileName = item.Code + "_" + Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
-                var dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload/center");
-                var path = Path.Combine(dirPath, fileName);
 
-                if (!Directory.Exists(dirPath))
-                    Directory.CreateDirectory(dirPath);
+                //var dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload/center");
+                //var path = Path.Combine(dirPath, fileName);
 
-                var standardSize = new SixLabors.Primitives.Size(512, 384);
+                //if (!Directory.Exists(dirPath))
+                //    Directory.CreateDirectory(dirPath);
 
-                using (Stream inputStream = upload.OpenReadStream())
-                {
-                    using (var image = Image.Load<Rgba32>(inputStream))
-                    {
-                        var imageEncoder = new JpegEncoder()
-                        {
-                            Quality = 90,
-                            Subsample = JpegSubsample.Ratio444
-                        };
+                //var standardSize = new SixLabors.Primitives.Size(512, 384);
 
-                        int width = image.Width;
-                        int height = image.Height;
-                        if ((width > standardSize.Width) || (height > standardSize.Height))
-                        {
-                            ResizeOptions options = new ResizeOptions
-                            {
-                                Mode = ResizeMode.Max,
-                                Size = standardSize,
-                            };
-                            image.Mutate(x => x
-                             .Resize(options));
+                //using (Stream inputStream = upload.OpenReadStream())
+                //{
+                //    using (var image = Image.Load<Rgba32>(inputStream))
+                //    {
+                //        var imageEncoder = new JpegEncoder()
+                //        {
+                //            Quality = 90,
+                //            Subsample = JpegSubsample.Ratio444
+                //        };
 
-                            //.Grayscale());
-                        }
-                        image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
-                    }
-                }
-                var url = $"{"/upload/center/"}{fileName}";
-                item.Image = url;
+                //        int width = image.Width;
+                //        int height = image.Height;
+                //        if ((width > standardSize.Width) || (height > standardSize.Height))
+                //        {
+                //            ResizeOptions options = new ResizeOptions
+                //            {
+                //                Mode = ResizeMode.Max,
+                //                Size = standardSize,
+                //            };
+                //            image.Mutate(x => x
+                //             .Resize(options));
+
+                //            //.Grayscale());
+                //        }
+                //        image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
+                //    }
+                //}
+                //var url = $"{"/upload/center/"}{fileName}";
+                item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", "", true, 200, 300);
             }
 
             _service.Save(item);

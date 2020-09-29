@@ -168,15 +168,15 @@
                             </div>
                         </div>
 
-                    <div class="form-row">
-                        <div class="form-group col-md-8">
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
 
-                            <div class="form-row">
-                                <div class="input-group col-md-12">
-                                    @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
-                                    <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
+                                <div class="form-row">
+                                    <div class="input-group col-md-12">
+                                        @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
+                                        <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
+                                    </div>
                                 </div>
-                            </div>
 
                                 <div class="form-row">
                                     <div class="input-group col-md-6">
@@ -481,7 +481,6 @@
                 targets += $(this).attr('id')+",";
                 }
         });
-        debugger
 
         $(form).find("input:disabled").removeAttr("disabled");
 
@@ -558,11 +557,11 @@
             $(".subjectDisplay").val('');
             $('.subjectSelect input[type=checkbox]').prop("checked", false);
             var line = '';
-            console.log(targets);
+            //console.log(targets);
             if (targets != null && targets.length > 0)
                 for (var i = 0; i < targets.length; i++) {
-                    debugger
                     //console.log(subjects);
+                    if (targets[i] == "") continue;
                     $(".subjectSelect input[type=checkbox]#" + targets[i]).prop("checked", true);
 
                     $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: targets[i] }));
