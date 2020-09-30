@@ -14,7 +14,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     var __defaulConfig = {
         center:"eduso",
         id:"easy-chat",
-        currentUser :{id:"test",name:"Hoàng Thái Long",email:"longthaihoang94@gmail.com",center:""},
+        currentUser :{id:"test",name:"Hoàng Thái Long",email:"longthaihoang94@gmail.com",center:"",isAdmin:false},
         members : [{id:"test2",name:"member"}],
         groups:[{id:"test4",name:"group"}]
     };
@@ -153,7 +153,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             var isMaster = sender == __defaulConfig.currentUser.id;
             //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
             var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[message]);
+            html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[message],__defaulConfig.currentUser.isAdmin,sender);
         }
         
         var listmessage = getRoot().querySelector('.list-messages');
@@ -184,49 +184,6 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }, 5000);
         }
     }
-
-
-    EasyChat.prototype.AdminSendMessage = function(user,message){
-        var obj = {
-            center : __defaulConfig.center,
-            user: user,
-            groupId: "",
-            receiver : user,
-            message: message,
-        }
-        var frm = document.createElement('form');
-        frm.setAttribute("enctype","multipart/form-data");
-        var formData = new FormData(frm);
-        var keys = Object.keys(obj);
-        var url = __defaulConfig.extendsUrl.SendMessage,query="";
-        //var object = {};
-        for(var i = 0; i < keys.length ; i++){
-            var key = keys[i];
-            if(obj[key]){ 
-                query+= query == ""? "?"+key+"="+obj[key] : "&"+key+"="+obj[key];
-            }
-        }
-        new Ajax().proccessData("POST", url+query, formData).then(function(res){
-            //{"code":200,"message":"SUCCESS","data":{"content":"xin chao","data":null,"sender":"5d8389c2d5d1bf27e4410c04","groupId":"5e7206342ab6d6169c02b1f8","time":1600450346555.0994,"isDel":false,"ID":"5f64ef2ab7a41d3308cb5e52"}}
-            var jsonData = typeof(res) == "string" ? JSON.parse(res) : res;
-            if(jsonData.code == 200){
-                var listmessage = getRoot().querySelector('.list-messages');
-                var messageText = getRoot().querySelector('.form-chat textarea');
-                var files = getRoot().querySelector('.form-chat input[type="file"]');
-                messageText.value = "";
-                files.value = "";
-                var isMaster = __defaulConfig.currentUser.id == jsonData.data.sender;
-                var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(jsonData.data.sender);
-                //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
-                //var lastItem = listmessage.querySelectorAll(".message");
-                listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data]);
-                listmessage.scrollTo(0, listmessage.scrollHeight);
-                //addEventOnloadImage();
-            }
-            //console.log(res);
-        });
-    }
-
     EasyChat.CloseMessageBox = function(){
         var root = getRoot();
         var left = root.querySelector('.easy-chat__content--left');
@@ -470,6 +427,11 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 receiver : active.dataset.group =="false" ? active.dataset.id : null,
                 message : typeof(message) == "string" ? message : null,
             }
+            // send message all
+            if(obj.receiver == __defaulConfig.extendsUrl.SYSTEM_EDUSO && __defaulConfig.currentUser.isAdmin == true){
+                obj.user = __defaulConfig.extendsUrl.SYSTEM_EDUSO;
+            }
+
             var frm = document.createElement('form');
             frm.setAttribute("enctype","multipart/form-data");
             var formData = new FormData(frm);
@@ -505,7 +467,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(jsonData.data.sender);
                     //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
                     //var lastItem = listmessage.querySelectorAll(".message");
-                    listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data]);
+                    listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data],__defaulConfig.currentUser.isAdmin,jsonData.data.sender);
                     listmessage.scrollTo(0, listmessage.scrollHeight);
                     //addEventOnloadImage();
                 }
@@ -679,42 +641,42 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
     }
-    EasyChat.RemoveMessage = function (self) {
-        var id = self.dataset.message;
-        var user = __defaulConfig.currentUser.id;
-        if (id && user) {
-            UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
-                var ajax = new Ajax();
-                //(method, url, data, async)
-                ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
-                    .then(function (res) {
-                        var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
-                        if (data.code == 200) {
-                            removeMessageHTML(id);
-                        }
+    // EasyChat.RemoveMessage = function (self) {
+    //     var id = self.dataset.message;
+    //     var user = __defaulConfig.currentUser.id;
+    //     if (id && user) {
+    //         UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+    //             var ajax = new Ajax();
+    //             //(method, url, data, async)
+    //             ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+    //                 .then(function (res) {
+    //                     var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+    //                     if (data.code == 200) {
+    //                         removeMessageHTML(id);
+    //                     }
 
-                    });
-            });
-        }
-    }
-    EasyChat.RemoveMessageAdmin = function (id,userAdmin) {
-        var id = id;
-        var user = userAdmin;
-        if (id && user) {
-            UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
-                var ajax = new Ajax();
-                //(method, url, data, async)
-                ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
-                    .then(function (res) {
-                        var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
-                        if (data.code == 200) {
-                            removeMessageHTML(id);
-                        }
+    //                 });
+    //         });
+    //     }
+    // }
+    // EasyChat.RemoveMessageAdmin = function (id,userAdmin) {
+    //     var id = id;
+    //     var user = userAdmin;
+    //     if (id && user) {
+    //         UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+    //             var ajax = new Ajax();
+    //             //(method, url, data, async)
+    //             ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+    //                 .then(function (res) {
+    //                     var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+    //                     if (data.code == 200) {
+    //                         removeMessageHTML(id);
+    //                     }
 
-                    });
-            });
-        }
-    }
+    //                 });
+    //         });
+    //     }
+    // }
     EasyChat.ViewMore = function (self) {
         var parent = self.parentElement;
         if (parent) {
@@ -733,5 +695,6 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
 
         }
     }
+    
     return EasyChat;
 }(new Message(), new Member(), new Group(), connectionHubChat,ui))

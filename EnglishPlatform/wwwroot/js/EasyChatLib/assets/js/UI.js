@@ -109,10 +109,10 @@
         }
         return html;
     }
-    UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages){
-        var classSender= !isSender ? "message-sender":"message-receiver";
+    UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages,isAdmin,sender){
+        var classSender= !isSender && !(isAdmin == true && sender == g_EasyChatURL.SYSTEM_EDUSO) ? "message-sender":"message-receiver";
         var _avatar = !avatar ? _config.avatar : avatar;
-        var msgs = renderMessages(messages,isSender);
+        var msgs = renderMessages(messages,isSender,isAdmin);
         var html =
             '<div class="message '+classSender+'">'+
                 '<div class="user-info">'+
@@ -124,12 +124,12 @@
             '</div>';
         return html;
     }
-    var renderMessages = function(messages,isSender){
+    var renderMessages = function(messages,isSender,isAdmin){
         var html = "";
         var time = 0;
         if(messages){
             for(var i =0; i < messages.length; i++){
-                var msg = renderMesssage(messages[i],isSender);
+                var msg = renderMesssage(messages[i],isSender,isAdmin);
                 html += msg[0];
                 time = time < msg[1] ? msg[1] : time;
             }
@@ -152,7 +152,7 @@
         if(Extensions.DOC.indexOf(extension)>-1) return Type.DOC;
         return Type.ORTHER;
     }
-    var renderMesssage = function (message, isSender) {
+    var renderMesssage = function (message, isSender,isAdmin) {
         var html = "";
         var time = typeof (message.time) == "string" ? parseFloat(message.time) : message.time;
         if (message.isDel) {
@@ -163,10 +163,10 @@
             var text = message.content;
             
             if (text) {
-                html += createDataText(message.ID, text, isSender);
+                html += createDataText(message.ID, text, isSender, message.sender,isAdmin);
             }
             if (medias) {
-                var exts = medias.length > 0 && isSender ? createExtendsSettings(message.ID) : "";
+                var exts = medias.length > 0 && (isSender || (message.sender == g_EasyChatURL.SYSTEM_EDUSO && isAdmin == true)) ? createExtendsSettings(message.ID) : "";
                 if (medias.length > 0) {
                     var viewMore = medias.length <= 1 ? "" : "<div class='view-more-meta-data'><a onclick='EasyChat.ViewMore(this)' style='display:block;width:100%;text-align: center;padding-top: 10px;'>xem thêm</a></div>"
                     html += '<div data-id="' + message.ID + '" class="data data-meta"><div class="content"><div class="meta-data">';
@@ -208,8 +208,8 @@
         var exts = "";
         return '<div class="data data-text"><div class="content" style="padding-left:25px; color :#ccc"> tin nhắn đã bị xóa </div>' + exts + '</div>';
     }
-    var createDataText = function(id,message,isSender){
-        var exts = isSender ? createExtendsSettings(id) : "";
+    var createDataText = function(id,message,isSender,sender, isAdmin){
+        var exts = isSender  || (isAdmin == true && sender == g_EasyChatURL.SYSTEM_EDUSO)? createExtendsSettings(id) : "";
          return '<div data-id="'+id+'" class="data data-text"><div class="content" style="padding-left:25px">'+message+'</div>'+exts+'</div>';
     }
     var createMetaData = function(id,data){

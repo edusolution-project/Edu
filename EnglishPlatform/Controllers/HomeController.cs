@@ -966,7 +966,8 @@ namespace EnglishPlatform.Controllers
                     string userId = User.FindFirst("UserID").Value;
                     string name = User.Identity.Name;
                     string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value;
-                    strScript = "var g_UserOnline={id:'" + userId + "',name:'"+name+"',email:'"+email+"'}";
+                    bool isAdmin = "huonghl@utc.edu.vn" == email;
+                    strScript = isAdmin ? "var g_UserOnline={id:'" + userId + "',name:'"+name+"',email:'"+email+"',isAdmin:true}" : "var g_UserOnline={id:'" + userId + "',name:'" + name + "',email:'" + email + "',isAdmin:false}";
                 }
 
                 return strScript;
