@@ -94,5 +94,10 @@ namespace BaseCustomerEntity.Database
             await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
         }
 
+        //public List<toem> GetItemByClassSubjectID(string ClassSubjectID)
+        //{
+        //    return Collection.Find(x => x.ClassSubjectID == ClassSubjectID).ToEnumerable();
+        //}
+
     }
 }

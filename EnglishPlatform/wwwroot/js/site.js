@@ -48,8 +48,7 @@ var Ajax = function (url, method, data, async) {
 }
 
 function Submit(formName, url, actionName, fn) {
-
-    var form = document.querySelector('form[name="' + formName + '"]');
+   var form = document.querySelector('form[name="' + formName + '"]');
     var _url = url == "" || url == void 0 || url == null ? form.action : url;
     var _method = form.method;
     var requires = $(form).find(':required');

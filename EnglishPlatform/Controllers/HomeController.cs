@@ -130,7 +130,7 @@ namespace EnglishPlatform.Controllers
                             else
                                 centerCode = center.Code;
 
-                            _session.SetString("userAvatar", tc.Avatar);
+                            _session.SetString("userAvatar", tc.Avatar==null? "/images/no-avatar.png":tc.Avatar);
                         }
                         break;
                     default:
@@ -149,7 +149,7 @@ namespace EnglishPlatform.Controllers
                                 centerCode = center.Code;
                             }
 
-                            _session.SetString("userAvatar", st.Avatar);
+                            _session.SetString("userAvatar", st.Avatar == null ? "/images/no-avatar.png" : st.Avatar);
                         }
                         break;
                 }

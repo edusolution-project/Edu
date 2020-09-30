@@ -167,10 +167,12 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="@processUrl("CreateOrUpdateLesson","Curriculum")" name="lessonForm" enctype="multipart/form-data" method="post">
+                    <form action="@processUrl("CreateOrUpdateLesson","Class")" name="lessonForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <input type="hidden" name="ChapterID" value="" />
+                        <input type="hidden" name="ClassID" id="ClassID" value="@ViewBag.ClassID" />
+                        <input type="hidden" name="ClassSubjectID" id="ClassSubjectID" value="@ViewBag.ClassSJ" />
                         <div class="row">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Kiểu bài:</label>
@@ -212,39 +214,39 @@
                                        }>
                             </div>
                         </div>*@
-                        <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                                <select name="Etype" class="form-control" onchange="showCoefficient(this)" required @if (isLock) { @: readonly="true"
-                                        }>
-                                    @*<option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
+                    <div class="row">
+                        <div class="form-group col-md-6" for="examOnly">
+                            <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                            <select name="Etype" class="form-control" onchange="showCoefficient(this)" required @if (isLock) { @: readonly="true"
+                                    }>
+                                @*<option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Checkpoint Exam</option>
                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Experiment</option>
                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Intership report</option>
                 <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">End-of-course Exam</option>*@
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required disabled>
-                            </div>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
+                                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
+                            </select>
                         </div>
+
+                        <div class="form-group col-md-6" for="examOnly">
+                            <label class="col-form-label">Hệ số:</label>
+                            <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required disabled="disabled">
+                        </div>
+                    </div>
                         <div class="row chooseOrder" style="display:none">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Thứ tự:</label>
-                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng" >
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@processUrl("CreateOrUpdateLesson","Curriculum")','update' , AddLessonCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('lessonForm', '@processUrl("CreateOrUpdateLesson","Class")','update' , AddLessonCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -407,9 +409,9 @@
     var modulesBody = $('.modules-wrapper');
 
     var RenderLesson = function (item) {
-        //debugger
         var oldItem = $('#' + item.ID);
-
+        var i = '@Data.ID';
+        debugger
         var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0", id: item.ID });
         var leftPart = $("<div>", { "class": "col-md-10" });
         var rightPart = $("<div>", { "class": "col-md-2 text-right row-action" });
@@ -419,7 +421,7 @@
         itemData.append($("<a>", {
             "class": "action-link",
             "name": "Title",
-            "href": "@processUrl("Lesson", "Curriculum")/" + item.ID + "/@Data.ID",
+            "href": "@processUrl("Detail", "Lesson")/" + item.ID + "/@ViewBag.ClassSJ",
             "lid": item.ID,
             "text": item.Title,
             "onclick": "openLesson(this)",
@@ -433,6 +435,7 @@
 
         leftPart.append(itemData);
 
+        //debugger
         rightPart.append($("<i>", {
             "class": "far fa-edit", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Sửa", "onclick": "return EditLesson(this,'" + item.ID + "'); return false;",
             "cid": item.ChapterID,
@@ -615,10 +618,11 @@
 
         $.ajax({
             type: "POST",
-            url: '@processUrl("GetCourseDetail", "Curriculum")',
-            data: {ID: "@Data.ID"},
+            url: '@processUrl("GetCourseDetail", "Class")',
+            data: { ID: "@Data.ID", ClassSubjectID: "@ViewBag.ClassSJ" },
             dataType:"json",
             success: function (data) {
+                //debugger
                 hideModal();
                 modulesBody.html("");
 
@@ -737,6 +741,7 @@
     }
 
     function AddLessonCallback(res) {
+        //debugger
         if (res != null) {
             var result = $.parseJSON(res);
             if (result.Error != null) {
@@ -857,6 +862,7 @@
 
     function AddLesson(ID)
     {
+        //debugger
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
         modalTitle.text("Add Lesson");
@@ -872,7 +878,7 @@
 
     function EditLesson(obj, ID)
     {
-        debugger
+        //debugger
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
         modal.find(".chooseOrder").show();
@@ -886,7 +892,7 @@
         var multiple = $(obj).attr("mul");
         var etype = $(obj).attr("etype");
         var order = $(obj).attr("order");
-        debugger
+
         modal.find("[name=Title]").val(title);
         modal.find("[name=ChapterID]").val(chapter);
         modal.find("[name=ID]").val(ID);
@@ -896,6 +902,7 @@
         modal.find("[name=Multiple]").val(multiple);
         modal.find("[name=Etype]").val(etype);
         modal.find("[name=Order]").val(order);
+        modal.find("[name=coefficient]").val(parseInt(etype)+1);
         //debugger
         SelectTemplate(type);
         return false;
@@ -1121,6 +1128,7 @@
         var title = $(obj).text();
         //console.log($(obj).text());
         $("#lessonFrameModal iframe").attr("src", url + "?frameview=1")
+        //debugger
         window.history.pushState({ frame: 1, url: url, title: title }, title, url);
         document.title = title;
         hideModal();
@@ -1129,7 +1137,7 @@
     }
 
     function closeLessonFrame() {
-        var url = '@processUrl("Modules", "Curriculum")/@Data.ID';
+        var url = '@processUrl("Editor", "Class")/@Data.ID/@ViewBag.ClassID';
         var title = '@Data.Name';
         window.history.pushState({ frame: 0, url: url, title: title }, title, url);
         console.log("close");
@@ -1199,6 +1207,7 @@
 
     $(window).on('popstate', function (event) {
         //alert(1);
+        //debugger
         var state = event.originalEvent.state;
         if (state != null && state.frame == 1) {
             var url = state.url;
