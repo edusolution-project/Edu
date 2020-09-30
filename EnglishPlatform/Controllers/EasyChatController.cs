@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace EnglishPlatform.Controllers
 {
@@ -46,25 +47,36 @@ namespace EnglishPlatform.Controllers
             {
                 if (User != null && User.Identity.IsAuthenticated)
                 {
-                    
-                    List<string> classIdList = _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
 
-                    if(classIdList == null || classIdList.Count == 0)
+                    var listClass = _classService.CreateQuery().Find(o => o.IsActive == true && o.EndDate >= DateTime.Now &&
+                     o.Members.Any(t => t.TeacherID == User.FindFirst("UserID").Value && t.Type == ClassMemberType.TEACHER))?.ToList()
+                            ?.Select(o => new MemberInfo()
+                            {
+                                ID = o.ID,
+                                Name = o.Name,
+                                Center = o.Center
+                            })?.ToList();
+
+                    if(listClass != null && listClass.Count > 0)
                     {
-                        classIdList = _classService.GetTeacherClassList(User.FindFirst("UserID").Value)?.ToList();
-                    }
-
-                    if(classIdList != null && classIdList.Count >0)
-                    {
-                        var listClass = _classService.GetItemsByIDs(classIdList)?.Select(o => new MemberInfo()
-                        {
-                            ID = o.ID,
-                            Name = o.Name,
-                            Center = o.Center
-                        })?.ToList();
-
                         return listClass;
                     }
+
+                    List<string> classIdList =  _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
+                    if(classIdList != null)
+                    {
+                        //student
+                        return _classService.GetItemsByIDs(classIdList).Where(t =>  (t.IsActive == true && t.EndDate >= DateTime.Now) && (t.ClassMechanism == CLASS_MECHANISM.PERSONAL))?.ToList()
+                            ?.Select(o => new MemberInfo()
+                            {
+                                ID = o.ID,
+                                Name = o.Name,
+                                Center = o.Center
+                            })?.ToList();
+                    }
+                    
+
+                    
                 }
 
             }
