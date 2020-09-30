@@ -1292,11 +1292,6 @@
                             }
                         }).catch(e => { })
                 },
-                cacheStatic(src, width) {
-                    if (src.startsWith("http"))
-                        return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
-                },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
                 },
@@ -1777,12 +1772,7 @@
                         var ext = path.substring(idx, path.length - idx);
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
-                },
-                cacheStatic(src, width) {
-                    if (src.startsWith("http"))
-                        return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
-                },
+                }
             }
             });
 

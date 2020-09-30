@@ -266,7 +266,7 @@ namespace EnglishPlatform.Controllers
                                             centerCode = center.Code;
                                             roleCode = "";
                                         }
-                                        if (string.IsNullOrEmpty(center.Code))//no valid center
+                                        if (string.IsNullOrEmpty(centerCode))//no valid center
                                         {
                                             return Json(new ReturnJsonModel
                                             {
@@ -308,7 +308,7 @@ namespace EnglishPlatform.Controllers
                                             centerCode = center.Code;
                                             roleCode = "";
                                         }
-                                        if (string.IsNullOrEmpty(center.Code))//no valid center
+                                        if (string.IsNullOrEmpty(centerCode))//no valid center
                                         {
                                             return Json(new ReturnJsonModel
                                             {

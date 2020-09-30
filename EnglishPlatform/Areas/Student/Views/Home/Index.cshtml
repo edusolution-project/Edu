@@ -38,7 +38,7 @@
             </div>
             @if (allcenters != null && allcenters.Count > 1)
             {
-                <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="display:none; border: solid 2px green">
+                <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="display:none; border: solid 2px green; max-width:150px;">
                     @foreach (var ct in allcenters)
                     {
                         <option value="@ct.Code">@ct.Name</option>
@@ -431,11 +431,6 @@
                 else {
                     document.location = '@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classSubjectID
                 }
-            },
-            cacheStatic(src, width) {
-                if (src.startsWith("http"))
-                    return src;
-                return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
             },
             formatPrice(value) {
                 let val = (value / 1).toFixed(0).replace(',', '.')

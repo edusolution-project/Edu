@@ -246,27 +246,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 //foreach (var file in files)
                                 //{
-                                    var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
-                                    string extension = Path.GetExtension(file.FileName);
-                                    var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
-                                    item.Media = new Media();
-                                    item.Media.Name = item.Media.OriginalName = file.FileName;
-                                    item.Media.Created = DateTime.Now;
-                                    item.Media.Size = file.Length;
-                                    if (typeVideo.Contains(extension))
-                                    {
-                                        item.Media.Extension = "video/mp4";
-                                    }
-                                    else if (typeAudio.Contains(extension))
-                                    {
-                                        item.Media.Extension = "audio/mp3";
-                                    }
-                                    else
-                                    {
-                                        item.Media.Extension = extension;
-                                    }
-                                    //item.Media.Extension = extension.Equals(".mp4")?"video/mp4":extension;
-                                    item.Media.Path = mediarsp.Path;
+                                var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
+                                string extension = Path.GetExtension(file.FileName);
+                                var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                                item.Media = new Media();
+                                item.Media.Name = item.Media.OriginalName = file.FileName;
+                                item.Media.Created = DateTime.Now;
+                                item.Media.Size = file.Length;
+                                if (typeVideo.Contains(extension))
+                                {
+                                    item.Media.Extension = "video/mp4";
+                                }
+                                else if (typeAudio.Contains(extension))
+                                {
+                                    item.Media.Extension = "audio/mp3";
+                                }
+                                else
+                                {
+                                    item.Media.Extension = extension;
+                                }
+                                //item.Media.Extension = extension.Equals(".mp4")?"video/mp4":extension;
+                                item.Media.Path = mediarsp.Path;
                                 //}
                             }
                         }
@@ -895,6 +895,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     continue;
                 }
 
+                //move text behind fillQuiz
+                var textNode = quiz.SelectSingleNode(".//text()");
+                if (textNode != null)
+                {
+                    var cloneNode = textNode.Clone();
+                    textNode.Remove();
+                    quiz.ParentNode.InsertAfter(cloneNode, quiz);
+                }
+
                 var ans = inputNode.GetAttributeValue("ans", null);
                 if (ans == null)
                     ans = inputNode.GetAttributeValue("placeholder", null);
@@ -1066,7 +1075,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var file = files.Where(f => f.Name == quiz.Media.Name).FirstOrDefault();//update media
                             string extension = Path.GetExtension(file.FileName);
-                            if(file!=null)
+                            if (file != null)
                             {
                                 if (typeImage.Contains(extension))
                                 {
@@ -1098,7 +1107,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     //item.Media.Extension = extension.Equals(".mp4")?"video/mp4":extension;
                                     quiz.Media.Path = mediarsp.Path;
                                 }
-                            }                            
+                            }
                         }
                     }
 
@@ -1194,7 +1203,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             }
 
                                             //if (answer.Media != null)
-                                            
+
                                         }
                                     }
                                 }

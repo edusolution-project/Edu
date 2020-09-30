@@ -398,11 +398,6 @@
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
                 },
-                cacheStatic(src, width) {
-                    if (src.startsWith("http"))
-                        return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
-                },
                 renderContent(obj) {
                     var linkFile = obj.Media.Path;
                     var html = "";

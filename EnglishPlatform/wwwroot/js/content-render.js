@@ -1978,6 +1978,7 @@ var Lesson = (function () {
                             $(input).attr("value", content).attr("contenteditable", false).attr("readonly", "true");
 
                         }
+                        console.log(data);
                         $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
                         $(fillquizs[i]).attr("contenteditable", false).attr("readonly", "true").after(" ");
                     }
@@ -4490,13 +4491,6 @@ var toggleExpand = function (obj) {
         $(obj).removeClass("fa-caret-up");
         _openingPart = '';
     }
-}
-
-var cacheStatic = function (src) {
-    //console.log(src);
-    if (src.startsWith("http"))
-        return src;
-    return "https://static.eduso.vn/" + src + "?&format=jpg";
 }
 
 var isMobileDevice = function () {
