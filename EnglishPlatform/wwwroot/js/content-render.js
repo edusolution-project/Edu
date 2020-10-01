@@ -481,7 +481,7 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
-                lessonBody.css('top', 0);
+                lessonBody.css('top', 0);                
                 //no header
                 break;
             case mod.REVIEW:
@@ -3039,8 +3039,9 @@ var Lesson = (function () {
                 //Render Description
                 //console.log("quiz2");
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
+                    itemBody.append($("<div>", { "class": "part-description5" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
+                console.log(itembox);
 
                 //Render Question
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -3296,8 +3297,7 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-
-        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
+        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description5");
 
         var holder = $(container).find("fillquiz")[pos];
         if (holder == null) return;

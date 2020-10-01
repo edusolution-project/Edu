@@ -96,7 +96,6 @@
     <Content Remove="compilerconfig.json" />
     <Content Remove="Views\Shared\_sideBarStudent - Copy.cshtml" />
     <Content Remove="Views\Shared\_sideBarTeacher_o.cshtml" />
-    <Content Remove="wwwroot\js\minify\detail.min.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -224,7 +223,13 @@
     <None Include="wwwroot\js\lib\teacher.config.url.base.js" />
     <None Include="wwwroot\js\lib\xhr.js" />
     <None Include="wwwroot\js\masonry.pkgd.min.js" />
+    <None Include="wwwroot\js\minify\common.lib.min.js" />
+    <None Include="wwwroot\js\minify\common.lib.min.js.map" />
+    <None Include="wwwroot\js\minify\common.min.js" />
+    <None Include="wwwroot\js\minify\common.min.js.map" />
+    <None Include="wwwroot\js\minify\detail.fn.min.js" />
     <None Include="wwwroot\js\minify\detail.min.js" />
+    <None Include="wwwroot\js\minify\detail.min.js.map" />
     <None Include="wwwroot\js\moment-with-locales.min.js" />
     <None Include="wwwroot\js\moment.js" />
     <None Include="wwwroot\js\moment.min.js" />
