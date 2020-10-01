@@ -84,8 +84,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
-        private readonly CloneCourseLessonService _cloneCourseLessonService;
-
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
@@ -133,7 +131,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , ExamDetailService examDetailService
                  , StudentService studentService
                  , CourseLessonService courseLessonService
-            , CloneCourseLessonService cloneCourseLessonService
                  )
         {
             _service = service;
@@ -187,7 +184,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _courseLessonService = courseLessonService;
-            _cloneCourseLessonService = cloneCourseLessonService;
 
         }
 
