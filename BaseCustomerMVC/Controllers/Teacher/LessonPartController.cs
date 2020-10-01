@@ -1029,7 +1029,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             quiz.Media.Created = DateTime.Now;
                                             quiz.Media.Size = file.Length;
                                             quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
-                                            quiz.Media.Path = "image/png";
+                                            quiz.Media.Extension = "image/png";
                                         }
                                         else
                                         {
