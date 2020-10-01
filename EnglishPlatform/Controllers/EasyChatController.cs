@@ -61,7 +61,7 @@ namespace EnglishPlatform.Controllers
                     if(classIdList != null)
                     {
                         //student
-                        var listClassStudent = _classService.GetItemsByIDs(classIdList).Where(t =>  (t.IsActive == true && t.EndDate >= DateTime.Now) && (t.ClassMechanism == CLASS_MECHANISM.PERSONAL))?.ToList()
+                        var listClassStudent = _classService.GetItemsByIDs(classIdList)
                             ?.Select(o => new MemberInfo()
                             {
                                 ID = o.ID,
