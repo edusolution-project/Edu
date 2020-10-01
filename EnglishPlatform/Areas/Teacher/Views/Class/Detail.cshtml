@@ -107,11 +107,23 @@
                 <h3 style="font-size:15px;" class="font-weight-bold">Học liệu chính quy</h3>
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
-                        <div class="inner">
-                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                            </a>
+                        <div class="inner" v-on:mouseover="mouseover(obj.ID)" v-on:mouseleave="mouseleave(obj.ID)">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                        <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                        <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 flex m-md-auto" style="display:none" v-bind:id="obj.ID" :ref="obj.ID">
+                                    @*<label v-bind:for="obj.ID">Chế độ soạn thảo: </label> &nbsp;&nbsp;
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" v-bind:id="obj.ID" v-model="obj.IsEditor" v-on:change="showEditor(obj)" checked>
+                                            <label class="custom-control-label" v-bind:for="obj.ID"></label>
+                                        </div>*@
+                                    <a href="javascript:;" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color:'+obj.Color" v-on:click="showEditor(obj)">Chuyển chế độ soạn thảo</a>
+                                </div>
+                            </div>
                             <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
                                 <ul class="list">
                                     <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
@@ -131,11 +143,23 @@
                 <h3 style="font-size:15px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects">
-                        <div class="inner" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
-                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                            </a>
+                        <div class="inner" v-on:mouseover="mouseover(obj.ID)" v-on:mouseleave="mouseleave(obj.ID)" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                        <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                        <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                                    </a>
+                                </div>
+                                <div class="col-md-4 flex m-md-auto" style="display:none" v-bind:id="obj.ID" :ref="obj.ID">
+                                    @*<label v-bind:for="obj.ID">Chế độ soạn thảo: </label> &nbsp;&nbsp;
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" v-bind:id="obj.ID" v-model="obj.IsEditor" v-on:change="showEditor(obj)" checked>
+                <label class="custom-control-label" v-bind:for="obj.ID"></label>
+            </div>*@
+                                    <a href="javascript:;" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color:'+obj.Color" v-on:click="showEditor(obj)">Chuyển chế độ soạn thảo</a>
+                                </div>
+                            </div>
                             <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
                                 <ul class="list">
                                     <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
@@ -835,6 +859,9 @@
                 "ref.gradeID": function () {
                     this.loadPreference()
                 },
+                //"classSubjects.IsEditor": function () {
+                //    alert(1)
+                //}
             },
             methods: {
                 tabChange(a = 0) {
@@ -914,7 +941,10 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
-                                    TypeClass:item.TypeClass
+                                    TypeClass: item.TypeClass,
+                                    IsEditor: false,
+                                    CourseID: item.CourseID,
+                                    ClassID: item.ClassID
                                 });
                                 //loadContent(item.ID);
                                 //_that.changeAddSubject(item)
@@ -1771,6 +1801,25 @@
                     if (idx <= 0) {
                         var ext = path.substring(idx, path.length - idx);
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
+                    }
+                },
+                showEditor(obj) {
+                    //debugger
+                    window.location.href = '@processUrl("Editor","Class")/' + obj.CourseID + '/' + obj.ClassID;
+                    //alert(1)
+                },
+                mouseover(obj) {
+                    //debugger
+                    if (document.getElementById(obj).style.display == "none") {
+                        document.getElementById(obj).style.display = "block"
+                    }
+                    //else {
+                    //    document.getElementById(obj).style.display = "none"
+                    //}
+                },
+                mouseleave(obj) {
+                    if (document.getElementById(obj).style.display == "block") {
+                        document.getElementById(obj).style.display = "none"
                     }
                 }
             }
