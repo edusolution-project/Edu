@@ -52,7 +52,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+            {
+                var validCenters = (from r in teacher.Centers
+                                    let ct = _centerService.GetItemByID(r.CenterID)
+                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    select ct).ToList();
+                //teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+                if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
+                    return Redirect("/logout");
+                ViewBag.AllCenters = validCenters;
+            }
+            else
+                return Redirect("/logout");
+
             var center = _centerService.GetItemByCode(basis);
             ViewBag.Center = center;
             try

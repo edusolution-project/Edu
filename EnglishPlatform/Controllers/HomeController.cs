@@ -105,7 +105,7 @@ namespace EnglishPlatform.Controllers
             var type = User.Claims.GetClaimByType("Type");
             if (type != null)
             {
-                var center = _centerService.GetDefault();
+                var center = new CenterEntity();
                 string centerCode = center.Code;
                 //string roleCode = "";
                 string userID = User.FindFirst("UserID").Value;
@@ -122,10 +122,13 @@ namespace EnglishPlatform.Controllers
                     case ACCOUNT_TYPE.TEACHER:
                         if (tc != null)
                         {
-                            var centers = tc.Centers
-                                .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
-                                .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
-                            if (centers != null)
+                            var centers = (from r in tc.Centers
+                                           let ct = _centerService.GetItemByID(r.CenterID)
+                                           where ct != null && ct.ExpireDate > DateTime.Now && ct.Status
+                                           select ct).ToList();
+                            //.Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
+                            //.Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            if (centers != null && centers.Count > 0)
                                 centerCode = centers.FirstOrDefault().Code;
                             else
                                 centerCode = center.Code;
@@ -155,15 +158,18 @@ namespace EnglishPlatform.Controllers
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                return Redirect($"{centerCode}/{type.Value}");
+                if (!string.IsNullOrEmpty(centerCode))
+                    return Redirect($"{centerCode}/{type.Value}");
+                
             }
-            else
-            {
-                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-            }
-            return View();
+            return Redirect("/logout");
+            //else
+            //{
+            //    _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+            //    HttpContext.SignOutAsync(Cookies.DefaultLogin);
+            //    return RedirectToAction("Login");
+            //}
+            //return View();
         }
 
 
@@ -1017,7 +1023,7 @@ namespace EnglishPlatform.Controllers
                     string name = User.Identity.Name;
                     string email = User.FindFirst(System.Security.Claims.ClaimTypes.Email).Value;
                     bool isAdmin = "huonghl@utc.edu.vn" == email;
-                    strScript = isAdmin ? "var g_UserOnline={id:'" + userId + "',name:'"+name+"',email:'"+email+"',isAdmin:true}" : "var g_UserOnline={id:'" + userId + "',name:'" + name + "',email:'" + email + "',isAdmin:false}";
+                    strScript = isAdmin ? "var g_UserOnline={id:'" + userId + "',name:'" + name + "',email:'" + email + "',isAdmin:true}" : "var g_UserOnline={id:'" + userId + "',name:'" + name + "',email:'" + email + "',isAdmin:false}";
                 }
 
                 return strScript;

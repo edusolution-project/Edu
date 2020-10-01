@@ -79,11 +79,24 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Redirect("/");
             var student = _studentService.GetItemByID(_studentid);
             var centerID = "";
-            ViewBag.Student = student;
+
             if (student != null)
-                ViewBag.AllCenters = student.Centers?.Select(t => _centerService.GetItemByID(t)).Where(t => t.ExpireDate >= DateTime.Now && t.Status)?.ToList();
+            {
+                var validCenters = (from r in student.Centers
+                                    let ct = _centerService.GetItemByID(r)
+                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    select ct).ToList();
+                if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
+                    return Redirect("/logout");
+                ViewBag.AllCenters = validCenters;
+
+            }
+            //ViewBag.AllCenters = student.Centers?.Select(t => _centerService.GetItemByID(t)).Where(t => t.ExpireDate >= DateTime.Now && t.Status)?.ToList();
             else
-                return Redirect("/");
+                return Redirect("/logout");
+
+            ViewBag.Student = student;
+
             if (!string.IsNullOrEmpty(basis))
             {
                 var center = _centerService.GetItemByCode(basis);
