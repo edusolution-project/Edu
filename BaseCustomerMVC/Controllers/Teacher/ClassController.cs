@@ -2233,7 +2233,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        #region Edit
+        #region Edit in Class
         public IActionResult Editor(string basis, string ID, string ClassID)
         {
             if (string.IsNullOrEmpty("ID"))
@@ -2257,7 +2257,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             //var classSubject = _classSubjectService.CreateQuery().Find(x => x.ClassID == ClassID && x.TeacherID == UserID).FirstOrDefault();
             //var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
-            var chapters=_chapterService.CreateQuery().Find(x=>x.ClassID==ClassID && x.CourseID==data.ID).ToList();
+            var chapters = _chapterService.CreateQuery().Find(x => x.ClassID == ClassID && x.CourseID == data.ID).ToList();
 
             ViewBag.Chapter = chapters;
             ViewBag.User = UserID;
@@ -2328,7 +2328,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult GetCourseDetail(DefaultModel model, string ClassSubjectID,string ClassID="")
+        public JsonResult GetCourseDetail(DefaultModel model, string ClassSubjectID, string ClassID = "")
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(UserID);
@@ -2518,6 +2518,162 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _lessonService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
             }
             return pos;
+        }
+
+        public JsonResult CreateOrUpdateChapter(ChapterEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+                if (item.CourseID == null || _courseService.GetItemByID(item.CourseID) == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "No Course Found" }
+                    });
+                }
+
+                var data = _chapterService.GetItemByID(item.ID);
+                if (data == null)
+                {
+                    item.Created = DateTime.Now;
+                    item.IsAdmin = true;
+                    item.IsActive = false;
+                    item.Updated = DateTime.Now;
+                    item.Order = int.MaxValue - 1;
+                    _chapterService.Save(item);
+                    ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
+                }
+                else
+                {
+                    item.Updated = DateTime.Now;
+                    var newOrder = item.Order - 1;
+                    var oldParent = data.ParentID;
+
+                    data.Name = item.Name;
+                    data.ParentID = item.ParentID;
+                    data.Description = item.Description;
+
+                    _chapterService.Save(data);
+                    if (oldParent != item.ParentID)//Change Root chapter
+                    {
+                        if (item.TotalLessons > 0)
+                        {
+                            //decrease old parent counter
+                            _ = _courseHelper.IncreaseCourseChapterCounter(oldParent, 0 - data.TotalLessons, 0 - data.TotalExams, 0 - data.TotalPractices);
+
+                            //increase old parent counter
+                            _ = _courseHelper.IncreaseCourseChapterCounter(item.ParentID, data.TotalLessons, data.TotalExams, data.TotalPractices);
+                        }
+                        //move chapter to bottom of new parent chap
+                        ChangeChapterPosition(data, int.MaxValue);
+                    }
+                    else
+                        ChangeChapterPosition(data, newOrder);
+                }
+
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", item },
+                    { "Error", null }
+                });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error",ex.Message }
+                });
+            }
+        }
+
+        private int ChangeChapterPosition(ChapterEntity item, int pos)
+        {
+            var parts = new List<ChapterEntity>();
+            parts = _chapterService.CreateQuery().Find(o => o.CourseID == item.CourseID && o.ParentID == item.ParentID)
+                .SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+
+            var ids = parts.Select(o => o.ID).ToList();
+
+            var oldPos = ids.IndexOf(item.ID);
+            if (oldPos == pos && (item.Order == pos))
+                return oldPos;
+
+            if (pos > parts.Count())
+                pos = parts.Count() - 1;
+            item.Order = pos;
+
+            _chapterService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+            int entry = -1;
+            foreach (var part in parts)
+            {
+                if (part.ID == item.ID) continue;
+                if (entry == pos - 1)
+                    entry++;
+                entry++;
+                part.Order = entry;
+                _chapterService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+            }
+            return pos;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> RemoveChapter(DefaultModel model)
+        {
+            try
+            {
+                var ID = model.ArrID;
+                var chapter = _chapterService.GetItemByID(ID);
+                if (chapter == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                {"Error", null }
+                            });
+                }
+                //Decrease counter
+                if (chapter.TotalLessons > 0)
+                    if (chapter.ParentID == "0")
+                        await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0 - chapter.TotalLessons, 0 - chapter.TotalExams, 0 - chapter.TotalPractices);
+                    else
+                        await _courseHelper.IncreaseCourseChapterCounter(chapter.ParentID, 0 - chapter.TotalLessons, 0 - chapter.TotalExams, 0 - chapter.TotalPractices);
+
+                //Remove chapter
+                await RemoveCourseChapter(chapter);
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", ID },
+                                {"Error", null }
+                            });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message}
+                });
+            }
+        }
+
+        private async Task RemoveCourseChapter(ChapterEntity chap)
+        {
+            //_lessonService.CreateQuery().DeleteMany(o => o.ChapterID == chap.ID);
+            var lessons = _lessonService.GetChapterLesson(chap.ClassSubjectID,chap.ID);
+            if (lessons != null && lessons.Count() > 0)
+                foreach (var lesson in lessons)
+                    _ = RemoveSingleLesson(lesson);
+
+            var subchapters = _chapterService.CreateQuery().Find(o => o.ParentID == chap.ID).ToList();
+            if (subchapters != null && subchapters.Count > 0)
+                foreach (var chapter in subchapters)
+                    await RemoveCourseChapter(chapter);
+            ChangeChapterPosition(chap, int.MaxValue);
+            await _chapterService.RemoveAsync(chap.ID);
         }
 
         #endregion

@@ -2,7 +2,7 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.CourseEntity;
-    var listChapter = ViewBag.Chapter as List<BaseCustomerEntity.Database.CourseChapterEntity>;
+    var listChapters = ViewBag.Chapter as List<BaseCustomerEntity.Database.CourseChapterEntity>;
     var isLock = Data.IsActive;// || Data.IsUsed;
     var user = ViewBag.User as string;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
@@ -118,6 +118,8 @@
                     <form action="@processUrl("CreateOrUpdate","Chapter")" name="chapterForm" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="ID" />
                         <input type="hidden" name="CourseID" id="CourseID" value="@Data.ID" />
+                        <input type="hidden" name="ClassID" id="ClassID" value="@ViewBag.ClassID" />
+                        <input type="hidden" name="ClassSubjectID" id="ClassSubjectID" value="@ViewBag.ClassSJ" />
                         <div class="form-group">
                             <label class="col-form-label">Tên chương:</label>
                             <input type="text" class="form-control" name="Name" required @if (isLock) { @: readonly="true"
@@ -129,9 +131,9 @@
                                     }>
                                 <option value="0">------</option>
                                 @{
-                                    for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                    for (int i = 0; ViewBag.Chapter != null && i < ViewBag.Chapter.Count; i++)
                                     {
-                                        <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+                                        <option value="@ViewBag.Chapter[i].ID">@ViewBag.Chapter[i].Name</option>
                                     }
                                 }
                             </select>
@@ -151,7 +153,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@processUrl("CreateOrUpdateChapter","Curriculum")','update' , AddChapterCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('chapterForm', '@processUrl("CreateOrUpdateChapter","Class")','update' , AddChapterCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -282,9 +284,9 @@
                                 <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
                                         }>
                                     <option value="0">------</option>
-                                    @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
+                                    @{ for (int i = 0; ViewBag.Chapter != null && i < ViewBag.Chapter.Count; i++)
                                         {
-                                            <option value="@listChapter[i].ID">@listChapter[i].Name</option>
+                                            <option value="@ViewBag.Chapter[i].ID">@ViewBag.Chapter[i].Name</option>
                                         }
                                     }
                                 </select>
@@ -411,7 +413,7 @@
     var RenderLesson = function (item) {
         var oldItem = $('#' + item.ID);
         var i = '@Data.ID';
-        debugger
+        //debugger
         var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0", id: item.ID });
         var leftPart = $("<div>", { "class": "col-md-10" });
         var rightPart = $("<div>", { "class": "col-md-2 text-right row-action" });
@@ -808,7 +810,7 @@
     {
         if(confirm('Confirm remove?'))
         {
-            ExcuteOnlyItem(ID, '@processUrl("Remove", "Curriculum")', function(){
+            ExcuteOnlyItem(ID, '@processUrl("Remove", "Class")', function(){
                  document.location = '@processUrl("Index", "Curriculum")';
             });
         }
@@ -855,7 +857,7 @@
             confirmButtonText: 'Đồng ý xóa!'
         }).then((result) => {
             if (result.value) {
-                ExcuteOnlyItem(ID, '@processUrl("RemoveChapter", "Curriculum")', DeleteChapterCallback);
+                ExcuteOnlyItem(ID, '@processUrl("RemoveChapter", "Class")', DeleteChapterCallback);
             }
         })
     }
@@ -938,13 +940,13 @@
             confirmButtonText: 'Đồng ý xóa!'
         }).then((result) => {
             if (result.value) {
-                ExcuteOnlyItem(ID, '@processUrl("RemoveLesson", "Curriculum")', DeleteLessonCallback);
+                ExcuteOnlyItem(ID, '@processUrl("RemoveLesson", "Class")', DeleteLessonCallback);
             }
         })
     }
 
     function CloneLesson(ID) {
-        ExcuteOnlyItem(ID, '@processUrl("CopyLesson", "Curriculum")', LoadData);
+        ExcuteOnlyItem(ID, '@processUrl("CopyLesson", "Class")', LoadData);
     }
     /*
      *Hòa thêm 10/7/2020
@@ -963,7 +965,7 @@
         data.append("CourseID", courseID);
         data.append("ChapID", ID);
         //data.append("ArrLessonID", ArrLessonID);
-        _url = "@processUrl("CopyChapter", "Curriculum")";
+        _url = "@processUrl("CopyChapter", "Class")";
         _method = "POST";
         fn = LoadData;
         Ajax(_url, "POST", data, true).then(function (res) {
@@ -999,7 +1001,7 @@
         data.append("Title", title);
         data.append("ChapterID", chapterid);
         data.append("CourseID", courseid);
-        _url = "@processUrl("CopyLesson", "Curriculum")";
+        _url = "@processUrl("CopyLesson", "Class")";
         _method = "POST";
         fn = LoadData;
         $('#copyLessonModel').modal('hide');
