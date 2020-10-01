@@ -39,7 +39,8 @@
             email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
             name: "@User.Identity.Name",
             type: '@User.FindFirst("Type")?.Value',
-            id: "@User.FindFirst("UserID")?.Value"
+            id: "@User.FindFirst("UserID")?.Value",
+            isAdmin:"huonghl@utc.edu.vn"=="@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value"
         }
     </script>
     @RenderSection("style", false)
