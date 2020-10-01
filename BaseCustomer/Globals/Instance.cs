@@ -84,8 +84,6 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();
 
-            services.AddSingleton<CloneCourseLessonService>();
-
             return services;
         }
     }
