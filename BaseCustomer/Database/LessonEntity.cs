@@ -95,5 +95,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
+
+        public LessonEntity GetItemByOriginID(string OriginID)
+        {
+            return Collection.Find(x => x.OriginID == OriginID).FirstOrDefault();
+        }
     }
 }

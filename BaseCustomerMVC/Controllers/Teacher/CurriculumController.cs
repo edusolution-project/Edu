@@ -84,6 +84,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
+        private readonly CloneCourseLessonService _cloneCourseLessonService;
 
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
@@ -132,6 +133,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , ExamDetailService examDetailService
                  , StudentService studentService
                  , CourseLessonService courseLessonService
+            , CloneCourseLessonService cloneCourseLessonService
                  )
         {
             _service = service;
@@ -185,6 +187,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _courseLessonService = courseLessonService;
+            _cloneCourseLessonService = cloneCourseLessonService;
 
         }
 
@@ -508,7 +511,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Msg","Không có thông tin giáo trình" }
                     });
             }
-
             var courseDetail = new Dictionary<string, object>
             {
                 { "Chapters", _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
@@ -1346,8 +1348,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
                         _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //_ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType, 0);
                     else
                         _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //_ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType,0);
                 }
                 else
                 {
