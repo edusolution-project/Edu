@@ -11,6 +11,8 @@ using BaseCoreEmail;
 using BaseCustomerEntity.Database;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
 namespace AutoEmailEduso
 {
@@ -26,8 +28,10 @@ namespace AutoEmailEduso
         private static TeacherService _teacherService;
         private static SkillService _skillService;
         private static MailHelper _mailHelper;
-        private static bool isTest = false;
+        private static bool isTest = true;
         private static int count = 0;
+
+        private static LessonScheduleService _lessonScheduleService;
 
         static async Task Main(string[] args)
         {
@@ -46,11 +50,30 @@ namespace AutoEmailEduso
             _teacherService = new TeacherService(configuration);
             _mailHelper = new MailHelper(configuration);
             _skillService = new SkillService(configuration);
+            _lessonScheduleService = new LessonScheduleService(configuration);
 
             isTest = configuration["Test"] == "1";
 
             Console.WriteLine("Processing Schedule...");
-            await SendIncomingLesson();
+
+            if (!args.Any())
+            {
+                //default
+            }
+            else
+            {
+                switch (args[0])
+                {
+                    case "SendWeeklyReport":
+                        await SendWeeklyReport();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            //await SendIncomingLesson();
+            await SendWeeklyReport();
             Console.WriteLine(count + " mail Sent!");
 
             using (EventLog eventLog = new EventLog("Application"))
@@ -60,6 +83,132 @@ namespace AutoEmailEduso
             }
             //Console.ReadKey();
         }
+
+        public static async Task SendWeeklyReport()
+        {
+            //quet co so dang active
+            //lay mail gv quan ly co so (tru mail huongho@utc.edu.vn dua vao bcc)
+            //quet danh sach lop dang hoat dong trong co so, trong moi lop quet tung hoc lieu
+            //thong ke tinh trang hoat dong cua tung lop: sl hoc sinh, so bai hoc trong tuan, so hoc sinh tham gia, diem hoc sinh....
+            //test: eduso
+            var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0).AddHours(1);
+            var startWeek = currentTime.AddDays(DayOfWeek.Sunday - currentTime.DayOfWeek);
+            var endWeek = startWeek.AddDays(7);
+
+            string subject = $"Báo cáo tiến độ học tập từ ngày {startWeek} đến ngày {endWeek}";
+            string body = $"Chào bạn," +
+                $"<p>Báo cáo tiến độ học tập từ ngày {startWeek} đến ngày {endWeek}</p>" +
+                @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
+                    <thead>
+                        <tr style='font-weight:bold'>
+                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>STT</td>
+                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Lớp</td>
+                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Sĩ số lớp</td>
+                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Số học sinh chưa đăng nhập hệ thống</td>
+                            <td colspan='3' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Điểm học tập</td>
+                            <td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ học tập</td>
+                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Ghi chú</td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Số học sinh đạt kết quả > 50%</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Số HS điểm 0%</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Số HS đạt điểm <= 50%</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tài liệu chính quy</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tài liệu chuyên đề</td>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+            var tbody = "";
+            List<TeacherEntity> teacherList = null;
+            //var activeCenters = _centerService.CreateQuery().Find(x => x.ExpireDate <= currentTime);//xem lai luc luu la gio GTM hay gi
+            var activeCenters = _centerService.GetActiveCenter(currentTime);//xem lai luc luu la gio GTM hay gi
+            if (activeCenters != null && activeCenters.Count() > 0)
+            {
+                foreach (var center in activeCenters.ToList())
+                {
+                    var teacherHeader = _teacherService.CreateQuery().Find(x => x.Centers.Find(o => o.CenterID == center.ID).CenterID.Contains(center.ID) && x.IsActive == true);
+
+                    var activeClasses = _classService.GetActiveClass(time: currentTime, Center: center.ID).ToList();
+                    var index = 0;
+                    var totalStudent = 0;
+                    if (activeClasses != null && activeClasses.Count() > 0)
+                    {
+                        foreach (var _class in activeClasses)
+                        {
+                            var countStudent = _studentService.GetStudentsByClassId(_class.ID).Count();//si so lop
+                            totalStudent += countStudent;
+                            var classSubjects = _classSubjectService.GetByClassID(_class.ID); //so mon hoc trong lop
+                            tbody += "<tr>" +
+                                $"<td>{index}</td>" +
+                                $"<td>{_class.Name}</td>" +
+                                $"<td>{countStudent}</td>" +
+                                $"<td>4</td>" +
+                                $"<td>20</td>" +
+                                $"<td>16</td>" +
+                                $"<td><table>";
+                            if (classSubjects != null && classSubjects.Count() > 0)
+
+                                foreach (var classsb in classSubjects)
+                                {
+                                    if (classsb.TypeClass == CLASS_TYPE.STANDARD)
+                                    {
+                                        var lessonschedules = _lessonScheduleService.CreateQuery().Find(x => x.ClassSubjectID == classsb.ID && x.StartDate >= startWeek && x.EndDate <= endWeek);
+                                        tbody +=
+                                        $"<tr>" +
+                                        $"<td>Môn {classsb.CourseName} có {lessonschedules.CountDocuments()} trong tuần</td>" +
+                                        $"</tr>";
+                                    }
+                                    else
+                                    {
+                                        var lessonschedules = _lessonScheduleService.CreateQuery().Find(x => x.ClassSubjectID == classsb.ID && x.StartDate >= startWeek && x.EndDate <= endWeek);
+                                        tbody +=
+                                        $"<tr>" +
+                                        $"<td>Môn {classsb.CourseName} có {lessonschedules.CountDocuments()} trong tuần</td>" +
+                                        $"</tr>";
+                                    }
+                                }
+                            tbody += $"</table>" +
+                                    $"</td>" +
+                                    $"<td></td>";
+                            index++;
+                        }
+
+                    }
+                    tbody += $"<tr>" +
+                        $"<td></td>" +
+                        $"<td>Cộng tổng</td>" +
+                        $"<td>{totalStudent}</td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"</tr>" +
+                        $"<tr>" +
+                        $"<td></td>" +
+                        $"<td>Tỉ lệ %</td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"<td></td>" +
+                        $"</tr>" +
+                        $"<tbody></table>"
+                        ;
+                }
+                //isTest = true;
+                var toAddress = isTest ? new List<string> { "nguyenvanhoa2017602593@gmail.com" } : teacherList.Select(t => t.Email).ToList();
+                _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                count++;
+            }
+        }
+
 
         public static async Task SendIncomingLesson()
         {
