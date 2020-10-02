@@ -236,10 +236,8 @@ var Lesson = (function () {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
-        //debugger
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
-                //debugger
                 _data = JSON.parse(res).Data;
                 switch (config.mod) {
                     case mod.PREVIEW: //curriculum view
@@ -1642,7 +1640,6 @@ var Lesson = (function () {
 
     var modalEditLesson = function (ID) {
         var modal = $('#lessonModal');
-        debugger
         $.ajax({
             type: "POST",
             url: config.url.load,
@@ -1672,7 +1669,6 @@ var Lesson = (function () {
     }
 
     var modalEditPart = function (id) {
-        debugger
         stopAllMedia();
         var modalForm = window.partForm;
         $('#action').val(config.url.save_part);

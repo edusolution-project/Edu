@@ -220,7 +220,7 @@
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                         <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
                             <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                            <img src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
+                            <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
                             <div>
@@ -679,7 +679,6 @@
         var mainInstance = new Vue({
             el: "#main_content",
             mounted() {
-                this.loadClassDetail()
                 this.list_subject = @Html.Raw(Json.Serialize(listsubjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(listgrades));
                 window.loadContent = this.loadContent
@@ -859,9 +858,6 @@
                 "ref.gradeID": function () {
                     this.loadPreference()
                 },
-                //"classSubjects.IsEditor": function () {
-                //    alert(1)
-                //}
             },
             methods: {
                 tabChange(a = 0) {
@@ -876,7 +872,6 @@
                     switch (a) {
                         case 0:
                             history.replaceState({ tab: a }, this.className + " - Tổng quan", "#info");
-                            this.loadClassDetail();
                             break;
                         case 1:
                             history.replaceState({ tab: a }, this.className + " - Môn học", "#module");
@@ -896,26 +891,6 @@
                             break;
                     }
                     this.$forceUpdate()
-                },
-                loadClassDetail() {
-                    let _that = this
-                    let _form = new FormData()
-                    _form.append('ID', _that.classID)
-                    let _url = '@processUrl("GetDetail", "Class")'
-
-                    axios.post(_url, _form)
-                        .then(response => {
-                            var _data = response.data.Data;
-                            _data.forEach(function (item, k) {
-                                _that.teacherSource.push({
-                                    ID: item.id,
-                                    FullName: item.fullname,
-                                    SubjectID: obj.SubjectID
-                                })
-                            })
-                            _that.loaded_teacher.push(obj.SubjectID);
-                        }).catch(e => { })
-
                 },
                 loadClassSubjects() {
                     let _that = this
@@ -941,10 +916,7 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
-                                    TypeClass: item.TypeClass,
-                                    IsEditor: false,
-                                    CourseID: item.CourseID,
-                                    ClassID: item.ClassID
+                                    TypeClass:item.TypeClass
                                 });
                                 //loadContent(item.ID);
                                 //_that.changeAddSubject(item)
@@ -1808,20 +1780,7 @@
                     window.location.href = '@processUrl("Editor","Class")/' + obj.CourseID + '/' + obj.ClassID;
                     //alert(1)
                 },
-                mouseover(obj) {
-                    //debugger
-                    if (document.getElementById(obj).style.display == "none") {
-                        document.getElementById(obj).style.display = "block"
-                    }
-                    //else {
-                    //    document.getElementById(obj).style.display = "none"
-                    //}
-                },
-                mouseleave(obj) {
-                    if (document.getElementById(obj).style.display == "block") {
-                        document.getElementById(obj).style.display = "none"
-                    }
-                }
+                
             }
             });
 

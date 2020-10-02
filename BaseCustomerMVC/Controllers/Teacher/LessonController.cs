@@ -105,8 +105,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Lesson = Data;
             ViewBag.Title = Data.Title;
 
-            //if (frameview == 1)
-            //    return View("FrameDetails");
+            if (frameview == 1)
+                return View("FrameDetails");
             return View();
         }
 

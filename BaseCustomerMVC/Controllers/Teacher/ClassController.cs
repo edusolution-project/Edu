@@ -432,33 +432,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //}
 
         #region ClassDetail
-        [HttpPost]
-        public JsonResult GetDetail(string ID)
-        {
-            try
-            {
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var currentClass = _service.GetItemByID(ID);
-                var classSubject = _classSubjectService.CreateQuery().Find(x => x.ClassID == ID && x.TeacherID == UserID).FirstOrDefault();
-                if (currentClass == null)
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                        {"Error", "Không tìm thấy lớp học" }
-                    });
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", currentClass },
-                    {"ClassSubject", classSubject}
-                });
-            }
-            catch (Exception ex)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    {"Error", ex.Message }
-                });
-            }
-        }
+        //[HttpPost]
+        //public JsonResult GetDetail(string ID)
+        //{
+        //    try
+        //    {
+        //        var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //        var currentClass = _service.GetItemByID(ID);
+        //        var classSubject = _classSubjectService.CreateQuery().Find(x => x.ClassID == ID && x.TeacherID == UserID).FirstOrDefault();
+        //        if (currentClass == null)
+        //            return new JsonResult(new Dictionary<string, object>
+        //            {
+        //                {"Error", "Không tìm thấy lớp học" }
+        //            });
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            { "Data", currentClass },
+        //            {"ClassSubject", classSubject}
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new JsonResult(new Dictionary<string, object>
+        //        {
+        //            {"Error", ex.Message }
+        //        });
+        //    }
+        //}
 
         //TODO: Check Usage
         //[HttpPost]
