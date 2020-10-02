@@ -493,7 +493,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public JsonResult GetCourseDetail(DefaultModel model)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var teacher = _teacherService.GetItemByID(UserID);
+            //var teacher = _teacherService.GetItemByID(UserID);
 
             var filter = new List<FilterDefinition<ClassEntity>>();
 
@@ -510,8 +510,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var courseDetail = new Dictionary<string, object>
             {
                 { "Chapters", _chapterService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
-                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
-                {"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
             };
 
             var response = new Dictionary<string, object>
@@ -1344,10 +1343,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
                         _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
-                        //_ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType, 0);
+                    //_ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType, 0);
                     else
                         _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
-                        //_ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType,0);
+                    //_ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType,0);
                 }
                 else
                 {

@@ -22,6 +22,8 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace EnglishPlatform.Controllers
 {
@@ -160,7 +162,7 @@ namespace EnglishPlatform.Controllers
                 //cache
                 if (!string.IsNullOrEmpty(centerCode))
                     return Redirect($"{centerCode}/{type.Value}");
-                
+
             }
             return Redirect("/logout");
             //else
@@ -237,12 +239,16 @@ namespace EnglishPlatform.Controllers
                                 _studentService.GetStudentByEmail(user.UserName) :
                                 _studentService.GetItemByID(user.UserID);
 
+
+
                             var defaultUser = new UserModel() { };
                             switch (Type)
                             {
                                 case ACCOUNT_TYPE.TEACHER:
                                     if (tc != null)
                                     {
+                                        if (!string.IsNullOrEmpty(tc.Avatar))
+                                            _session.SetString("userAvatar", tc.Avatar);
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
 
                                         if (tc.Centers != null && tc.Centers.Count > 0)//return to first valid center
@@ -292,7 +298,8 @@ namespace EnglishPlatform.Controllers
                                     if (st != null)
                                     {
                                         defaultUser = new UserModel(st.ID, st.FullName);
-
+                                        if (!string.IsNullOrEmpty(st.Avatar))
+                                            _session.SetString("userAvatar", st.Avatar);
 
                                         if (st.Centers != null && st.Centers.Count > 0)//return to first valid center
                                         {
@@ -361,7 +368,6 @@ namespace EnglishPlatform.Controllers
                                 new Claim(ClaimTypes.Name, defaultUser.Name),
                                 new Claim(ClaimTypes.Role,roleCode),
                                 new Claim("Type", Type)};
-
 
                             var claimsIdentity = new ClaimsIdentity(claims, Cookies.DefaultLogin);
                             _ = new AuthenticationProperties
