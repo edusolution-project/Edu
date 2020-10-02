@@ -3038,7 +3038,7 @@ var Lesson = (function () {
                 //Render Description
                 //console.log("quiz2");
                 if (data.Description != null) {
-                    itemBody.append($("<div>", { "class": "part-description5" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
+                    itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
                 console.log(itembox);
 
@@ -3296,7 +3296,7 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description5");
+        var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
         if (holder == null) return;

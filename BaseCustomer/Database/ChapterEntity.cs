@@ -84,9 +84,14 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public List<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
+        public IEnumerable<ChapterEntity> GetByClassSubject(string ClassSubjectID)
         {
-            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID).SortBy(t => t.Order).ToEnumerable();
+        }
+
+        public IEnumerable<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
+        {
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
 
         public async Task RemoveClassSubjectChapter(string ClassSubjectID)

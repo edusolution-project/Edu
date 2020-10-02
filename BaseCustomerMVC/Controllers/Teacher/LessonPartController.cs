@@ -1007,7 +1007,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 quiz.Media.Created = DateTime.Now;
                                 quiz.Media.Size = 0;
-                                quiz.Media.Path = quiz.Media.Name.Trim();
+                                quiz.Media.Extension = quiz.Media.Name.Trim();
                                 //item.Media.Extension = "image/png";
                             }
                             else

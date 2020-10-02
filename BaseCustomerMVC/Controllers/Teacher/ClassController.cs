@@ -2244,15 +2244,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        #region Edit in Class
-        public IActionResult Editor(string basis, string ID, string ClassID)
+        #region Edit
+        public IActionResult Editor(string basis, string ID)
         {
             if (string.IsNullOrEmpty("ID"))
                 return Redirect($"/{basis}{Url.Action("Index")}");
 
-            var data = _courseService.GetItemByID(ID);
-            if (data == null)
+            var currentClassSbj = _classSubjectService.GetItemByID(ID);
+            if (currentClassSbj == null)
                 return Redirect($"/{basis}{Url.Action("Index")}");
+
+            var currentClass = _classService.GetItemByID(currentClassSbj.ClassID);
 
             //var isUsed = isCourseUsed(data.ID);
             //Cap nhat IsUsed
@@ -2262,19 +2264,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    _service.Save(data);
             //}
 
-            ViewBag.Data = data;
-            ViewBag.Title = data.Name;
+            ViewBag.ClassSbj = currentClassSbj;
+            ViewBag.Class = currentClass;
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            //var classSubject = _classSubjectService.CreateQuery().Find(x => x.ClassID == ClassID && x.TeacherID == UserID).FirstOrDefault();
-            //var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
-            var chapters = _chapterService.CreateQuery().Find(x => x.ClassID == ClassID && x.CourseID == data.ID).ToList();
+
+            var chapters = _chapterService.GetByClassSubject(ID).ToList();
 
             ViewBag.Chapter = chapters;
             ViewBag.User = UserID;
-            ViewBag.Course = data;
-            ViewBag.ClassID = ClassID;
-            ViewBag.ClassSJ = chapters[0].ClassSubjectID;
 
             return View("Editor");
         }
@@ -2300,11 +2298,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
-                        _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
-                    //_ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType, 0);
+                        _ = _classHelper.IncreaseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                     else
-                        _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
-                    //_ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType,0);
+                        _ = _classHelper.IncreaseClassSubjectCounter(item.ClassSubjectID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                 }
                 else
                 {
