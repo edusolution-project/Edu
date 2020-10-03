@@ -114,7 +114,7 @@
         var _avatar = !avatar ? _config.avatar : avatar;
         var msgs = renderMessages(messages,isSender,isAdmin);
         var html =
-            '<div class="message '+classSender+'">'+
+            '<div class="message '+classSender+'" data-user-send="'+sender+'">'+
                 '<div class="user-info">'+
                     '<div class="avatar"><img src="'+_avatar+'" alt="'+name+'"></div>'+
                     '<div class="name">'+name+'</div>'+
