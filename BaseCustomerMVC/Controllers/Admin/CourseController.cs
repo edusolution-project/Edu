@@ -532,7 +532,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //remove Schedule, Part, Question, Answer
                     _ = _lessonScheduleService.RemoveManyClass(ids);
                     //CreateQuery().DeleteMany(o => ids.Contains(o.ClassID));
-                    _ = _lessonHelper.RemoveClone(ids);
+                    _ = _lessonHelper.RemoveManyClassLessons(ids);
                     _ = _examService.RemoveManyClassExam(ids);
                     //Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     //_examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));

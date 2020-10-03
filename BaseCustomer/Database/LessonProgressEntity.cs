@@ -41,6 +41,8 @@ namespace BaseCustomerEntity.Database
         public DateTime LastTry { get; set; }
         [JsonProperty("PointChange")]
         public double PointChange { get; set; }
+        [JsonProperty("Multiple")]
+        public double Multiple { get; set; }
     }
     public class LessonProgressService : ServiceBase<LessonProgressEntity>
     {
@@ -68,6 +70,11 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<LessonProgressEntity>()
                     .Ascending(t => t.StudentID)
                     .Ascending(t=> t.LessonID)
+                    ),
+                //LessonID_1
+                new CreateIndexModel<LessonProgressEntity>(
+                    new IndexKeysDefinitionBuilder<LessonProgressEntity>()
+                    .Ascending(t=> t.LessonID)
                     )
 
             };
@@ -77,7 +84,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdateLastLearn(LearningHistoryEntity item)
         {
-            var currentProgress = GetByStudentID_LessonID( item.StudentID, item.LessonID);
+            var currentProgress = GetByStudentID_LessonID(item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
                 currentProgress = new LessonProgressEntity
@@ -127,6 +134,7 @@ namespace BaseCustomerEntity.Database
                     LastPoint = point,
                     MaxPoint = point,
                     MinPoint = point,
+                    Multiple = lesson.Multiple,
                     Tried = item.Number,
                     LastTry = item.Updated,
                     PointChange = point
@@ -159,6 +167,8 @@ namespace BaseCustomerEntity.Database
 
                 if (point > currentProgress.MaxPoint) currentProgress.MaxPoint = point;
                 if (point < currentProgress.MinPoint) currentProgress.MinPoint = point;
+
+                currentProgress.Multiple = lesson.Multiple;
 
                 await Collection.ReplaceOneAsync(t => t.ID == currentProgress.ID, currentProgress);
             }

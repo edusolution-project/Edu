@@ -87,13 +87,13 @@ namespace BaseCustomerEntity.Database
         }
 
 
-        public Task RemoveClassSubjects(string ClassID)
+        public Task RemoveByClass(string ClassID)
         {
             _ = Collection.DeleteManyAsync(t => t.ClassID == ClassID);
             return Task.CompletedTask;
         }
 
-        public Task RemoveClassSubjects(string[] ClassIDs)
+        public Task RemoveManyClass(string[] ClassIDs)
         {
             _ = Collection.DeleteManyAsync(t => ClassIDs.Contains(t.ClassID));
             return Task.CompletedTask;

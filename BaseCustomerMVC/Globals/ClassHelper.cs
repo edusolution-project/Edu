@@ -24,7 +24,6 @@ namespace BaseCustomerMVC.Globals
             ClassSubjectService classSubjectService,
             ChapterService chapterService,
             LessonService lessonService,
-
             LessonHelper lessonHelper
         )
         {

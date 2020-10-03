@@ -434,7 +434,7 @@
         }));
         @if(!isLock)
         {
-        @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showCopyLesson('" + item.ID + "',this);return false" }));
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
@@ -954,7 +954,7 @@
         //debugger
     }
 
-    function showPupup(id, _this) {
+    function showCopyLesson(id, _this) {
         $("#copyLessonModel").modal();
         var modal = $("#copyLessonModel");
         var title = $(_this).parent().parent().find("[name=Title]").text().trim();

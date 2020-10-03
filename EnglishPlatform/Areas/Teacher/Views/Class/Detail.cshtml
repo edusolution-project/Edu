@@ -1745,8 +1745,8 @@
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
                 },
-                showEditor(obj) {                    
-                    window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/' + obj.ClassID;                   
+                showEditor(obj) {    
+                    window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/@currentClass.ID';                   
                 },
                 
             }

@@ -679,7 +679,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     new_lesson.OriginID = o.ID;
                     new_lesson.ChapterID = "0";
                     new_lesson.Order = rootlessonOrder++;
-                    await CloneLesson(new_lesson, _userCreate);
+                    await CloneLesson(o, _userCreate);
                 }
                 //increase target course counter
                 await _courseHelper.IncreaseCourseCounter(newCourseID, join_course.TotalLessons, join_course.TotalExams, join_course.TotalPractices);
@@ -1317,15 +1317,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
-                        _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);                    
+                        _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                     else
-                        _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);                    
+                        _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                 }
                 else
                 {
                     item.Updated = DateTime.Now;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
+
+                    //update counter if type change
+                    if (item.TemplateType != data.TemplateType)
+                    {
+                        var examInc = 0;
+                        var pracInc = 0;
+                        if (IsLessonHasQuiz(item.ID)) pracInc = 1;
+                        if (item.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
+                        {
+                            examInc = -1;
+                            item.IsPractice = pracInc == 1;
+                        }
+                        else
+                        {
+                            examInc = 1;
+                            item.IsPractice = false;
+                            pracInc = pracInc == 1 ? -1 : 0;
+                        }
+                        if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
+                            _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 0, examInc, pracInc);
+                        else
+                            _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 0, examInc, pracInc);
+                    }
+
                     _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
 
                     if (item.Order != newOrder)//change Position
@@ -1520,7 +1544,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     OriginID = _child.ID,
                     Title = _child.Title,
                     Description = _child.Description,
-                    IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
                     Order = _child.Order,
@@ -1654,6 +1677,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 throw ex;
             }
+        }
+
+        private bool IsLessonHasQuiz(string ID)
+        {
+            return _lessonPartService.GetByLessonID(ID).Any(t => quizType.Contains(t.Type));
         }
         #endregion
 
@@ -1842,7 +1870,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     OriginID = _child.ID,
                     Title = _child.Title,
                     Description = _child.Description != null ? _child.Description.Replace("src=\"/", "src=\"http://" + _publisherHost + "/") : null,
-                    IsExam = _child.IsExam,
                     Media = _child.Media,
                     Point = _child.Point,
                     Order = _child.Order,

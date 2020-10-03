@@ -95,5 +95,11 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
+
+
+        public long CountChapterLesson(string ChapterID)
+        {
+            return Collection.CountDocumentsAsync(t => t.ChapterID == ChapterID).Result;
+        }
     }
 }

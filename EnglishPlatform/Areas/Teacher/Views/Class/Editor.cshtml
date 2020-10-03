@@ -299,13 +299,13 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@processUrl("JoinLesson","ClassSubject")','join' , MergeLessonCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinLessonModal', '@processUrl("JoinLesson","Class")','join' , MergeLessonCallback)">Lưu</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
+    @*<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
         <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
             <div class="modal-content">
                 <div class="modal-header p-2">
@@ -322,7 +322,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>*@
 }
 
 <style>
@@ -356,11 +356,12 @@
             "class": "action-link",
             "name": "Title",
             "href": "@processUrl("Detail", "Lesson")/" + item.ID + "/@Data.ID",
+            "target": "_blank",
             "lid": item.ID,
             "text": item.Title,
-            "onclick": "openLesson(this)",
-            "data-toggle": 'modal',
-            "data-target": "#lessonFrameModal"
+            //"onclick": "openLesson(this)",
+            //"data-toggle": 'modal',
+            //"data-target": "#lessonFrameModal"
         }));
 
         if (item.Description != null) {
@@ -381,7 +382,7 @@
             "limit": item.Limit,
             "order": item.Order + 1
         }));
-        rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
+        rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showCloneLesson('" + item.ID + "',this);return false" }));
         rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         rowData.append(leftPart);
@@ -777,10 +778,10 @@
         modal.find("[name=Point]").val(point);
         modal.find("[name=Timer]").val(timer);
         modal.find("[name=Limit]").val(limit);
-        modal.find("[name=Multiple]").val(multiple);
+        modal.find("[name=Multiple]").val(parseInt(etype) + 1);
         modal.find("[name=Etype]").val(etype);
         modal.find("[name=Order]").val(order);
-        modal.find("[name=coefficient]").val(parseInt(etype)+1);
+        //modal.find("[name=coefficient]").val(parseInt(etype)+1);
         //debugger
         SelectTemplate(type);
         return false;
@@ -852,7 +853,7 @@
         //debugger
     }
 
-    function showPupup(id, _this) {
+    function showCloneLesson(id, _this) {
         $("#copyLessonModel").modal();
         var modal = $("#copyLessonModel");
         var title = $(_this).parent().parent().find("[name=Title]").text().trim();
@@ -1005,13 +1006,8 @@
         var url = $(obj).attr("href");
         var title = $(obj).text();
         //console.log($(obj).text());
-        $("#lessonFrameModal iframe").attr("src", url + "?frameview=1")
+        window.open(url);
         //debugger
-        window.history.pushState({ frame: 1, url: url, title: title }, title, url);
-        document.title = title;
-        hideModal();
-        //console.log("open");
-        $('#lessonFrameModal').modal('show').show();
     }
 
     function closeLessonFrame() {
@@ -1083,7 +1079,7 @@
         LoadData();
     });
 
-    $(window).on('popstate', function (event) {
+    @*$(window).on('popstate', function (event) {
         //alert(1);
         //debugger
         var state = event.originalEvent.state;
@@ -1102,7 +1098,7 @@
             //console.log("close");
             hideModal();
         }
-    });
+    });*@
 
     var showDropDown = function (obj, id) {
         if (document.getElementById("chil" + id).getAttribute('style').includes('display'))

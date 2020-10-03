@@ -178,7 +178,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var exams = _examService.GetAll().ToList();
             foreach (var e in exams)
             {
-                if (e.ClassID != "5f6aaf6a1182591bdc167037") continue;
+                //if (e.ClassID != "5f6aaf6a1182591bdc167037") continue;
                 var lesson = _clonelessonService.GetItemByID(e.LessonID);
                 if (lesson != null)
                 {
@@ -262,7 +262,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var exs = _examService.CreateQuery().Find(t => t.LessonID == lp.LessonID && t.StudentID == lp.StudentID).SortBy(t => t.Number);
                     foreach (var ex in exs.ToEnumerable())
                     {
-                        if (ex.ClassID != "5f6aaf6a1182591bdc167037") continue;
+                        //if (ex.ClassID != "5f6aaf6a1182591bdc167037") continue;
                         if (ex.Marked) _examService.CompleteFull(ex, ls, out _, false);
                         else
                             if (_examService.IsOver(ex.ID))
