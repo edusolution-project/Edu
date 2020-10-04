@@ -1511,7 +1511,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var ids = parts.Select(o => o.ID).ToList();
 
             var oldPos = ids.IndexOf(item.ID);
-            if (oldPos == pos)
+            if (oldPos == pos && oldPos == item.Order)
                 return oldPos;
 
             if (pos > parts.Count())

@@ -128,7 +128,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Thêm chương</h5>
+                    <h5 class="modal-title" id="modalTitle">Thêm bài</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -263,13 +263,13 @@
                             <label class="col-form-label">Tạo chương mới</label>
                             <input type="checkbox" name="CreateNewChapter" id="CreateNewChapter" onchange="IsCreateNewChapter(this)" /> <br />
                             <label class="col-form-label hide" id="NewLable"> Tên chương mới: </label>
-                            <input type="text" class="form-control hide" name="newName" id="newName" placeholder="Tên chương mới" />
+                            <input type="text" class="hide" name="newName" id="newName" placeholder="Tên chương mới" />
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","ClassSubject")','join' , AddChapterCallback)">Lưu</button>
+                    <button type="button" class="btn btn-primary" onclick="return Submit('joinChapterModal', '@processUrl("JoinChapter","Class")','join' , AddChapterCallback)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -306,23 +306,23 @@
     </div>
 
     @*<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
-        <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
-            <div class="modal-content">
-                <div class="modal-header p-2">
-                    <h5 class="modal-title" id="modalTitle">Cập nhật nội dung</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeLessonFrame()">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-0">
-                    <iframe width="100%" height="100%" style="display: flex; border:none;" src=""></iframe>
-                </div>
-                <div class="modal-footer p-2 d-none">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeLessonFrame()">Đóng</button>
+            <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h5 class="modal-title" id="modalTitle">Cập nhật nội dung</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeLessonFrame()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <iframe width="100%" height="100%" style="display: flex; border:none;" src=""></iframe>
+                    </div>
+                    <div class="modal-footer p-2 d-none">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeLessonFrame()">Đóng</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>*@
+        </div>*@
 }
 
 <style>
@@ -656,15 +656,15 @@
                 return false;
             }
             else {
-                chapter = result.Data;
-                //console.log("chapter " + chapter.ID);
-                $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
-                var o = new Option(chapter.Name, chapter.ID);
+                //chapter = result.Data;
+                ////console.log("chapter " + chapter.ID);
+                //$('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
+                //var o = new Option(chapter.Name, chapter.ID);
 
-                /// jquerify the DOM object 'o' so we can use the html method
-                $(o).html(chapter.Name);
-                $("#ParentID").append(o);
-                RenderChapter(chapter);
+                ///// jquerify the DOM object 'o' so we can use the html method
+                //$(o).html(chapter.Name);
+                //$("#ParentID").append(o);
+                //RenderChapter(chapter);
                 LoadData();
                 hideModal();
             }
@@ -680,14 +680,16 @@
                 return false;
             }
             else {
+                alert("Đã nhân bản chương");
                 chapter = result.Data;
-                //console.log("chapter " + chapter.ID);
-                $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
-                var o = new Option(chapter.Name, chapter.ID);
-                /// jquerify the DOM object 'o' so we can use the html method
-                $(o).html(chapter.Name);
-                $("#ParentID").append(o);
-                RenderChapter(chapter);
+                ////console.log("chapter " + chapter.ID);
+                //$('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
+                //var o = new Option(chapter.Name, chapter.ID);
+                ///// jquerify the DOM object 'o' so we can use the html method
+                //$(o).html(chapter.Name);
+                //$("#ParentID").append(o);
+                //RenderChapter(chapter);
+                LoadData();
                 hideModal();
             }
         }
@@ -718,6 +720,7 @@
         modal.find("[name=Name]").val("");
         modal.find("[name=ID]").val("");
         modal.find("[name=Order]").val("---");
+        modal.find("[name=Description]").val("");
         modal.find("[name=ParentID]").val(parentchap);
     }
 
@@ -830,24 +833,13 @@
      */
 
     function CloneChapter(ID,_this) {
-        var courseID = document.getElementById("CourseID").value;
-        var cloneChapter = document.getElementById(ID);
-
-        //var ArrLessonID = "";
-        //for (var i = 0; i < cloneChapter.children[1].childElementCount; i++) {
-        //    ArrLessonID += cloneChapter.children[1].children[i].getAttribute("id") + ",";
-        //}
-        //debugger
         var data = new FormData();
-        data.append("CourseID", courseID);
         data.append("ChapID", ID);
-        //data.append("ArrLessonID", ArrLessonID);
         _url = "@processUrl("CopyChapter", "Class")";
         _method = "POST";
-        fn = LoadData;
+        fn = CloneChapterCallBack;
         Ajax(_url, "POST", data, true).then(function (res) {
             if (fn != void 0) fn(res);
-            //console.log(res);
             return false;
         });
         //debugger
@@ -962,6 +954,7 @@
     }
 
     function DeleteChapterCallback(res) {
+        console.log(res);
 
         if (res != null) {
             var result = $.parseJSON(res);
@@ -976,7 +969,8 @@
             else {
                 $('.modules#' + result.Data).remove();
                 //debugger
-                $("#ParentID option[value=" + result.Data+"]").remove();
+                $("#ParentID option[value=" + result.Data + "]").remove();
+                $('.sidebar-holder [href="#' + result.Data + '"]').parent().remove();
             }
         }
 

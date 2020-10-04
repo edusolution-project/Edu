@@ -66,8 +66,12 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<LessonEntity>()
                     .Ascending(t => t.ClassSubjectID)
                     .Ascending(t=> t.ChapterID)
+                    ),
+                //ChapterID_1_Order_1_ID_1
+                new CreateIndexModel<LessonEntity>(
+                    new IndexKeysDefinitionBuilder<LessonEntity>()
+                    .Ascending(t=> t.ChapterID)
                     .Ascending(t=> t.Order)),
-                //ClassID_1
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
                     .Ascending(t => t.ClassID))

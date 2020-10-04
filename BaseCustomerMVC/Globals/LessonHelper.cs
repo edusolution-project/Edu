@@ -36,6 +36,7 @@ namespace BaseCustomerMVC.Globals
 
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _courseLessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
         private readonly MappingEntity<LessonEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonEntity, LessonEntity>();
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public LessonHelper(
             LessonService lessonService,
@@ -432,13 +433,17 @@ namespace BaseCustomerMVC.Globals
             return lesson;
         }
 
-
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
         {
             var cltask = _cloneLessonPartService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             var cqtask = _cloneQuestionService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartQuestionEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             var catask = _cloneAnswerService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartAnswerEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             await Task.WhenAll(cltask, cqtask, catask);
+        }
+
+        public bool IsQuizLesson(string ID)
+        {
+            return _cloneLessonPartService.GetByLessonID(ID).Any(t => quizType.Contains(t.Type));
         }
     }
 }

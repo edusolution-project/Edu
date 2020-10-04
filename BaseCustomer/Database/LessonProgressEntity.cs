@@ -144,7 +144,6 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var avg = currentProgress.AvgPoint * currentProgress.Tried;
-
                 if (item.Number > currentProgress.Tried)//new 
                 {
                     currentProgress.Tried = item.Number;

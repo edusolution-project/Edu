@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             foreach (var l in lessons)
             {
                 //calculateCloneLessonPoint(l);
-                IncreaseCounter(l);
+                _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
             }
             str += (DateTime.Now - start).TotalSeconds;
             start = DateTime.Now;
@@ -411,14 +411,6 @@ namespace BaseCustomerMVC.Controllers.Admin
 
 
             return point;
-        }
-
-        private void IncreaseCounter(LessonEntity lesson)
-        {
-            if (lesson.ChapterID != "0")
-                _ = _classHelper.IncreaseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _classHelper.IncreaseClassSubjectCounter(lesson.ClassSubjectID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
         }
 
         private void IncreaseCourseCounter(CourseLessonEntity lesson)
