@@ -160,6 +160,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var center = _centerService.GetItemByCode(basis);
             var Status = false;
 
+            long left = 0;
+            if (!string.IsNullOrEmpty(basis))
+            {
+                center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                    return null;
+                var totalStudent = _studentService.CountByCenter(center.ID);
+                if (center.Limit > 0)
+                    left = center.Limit - totalStudent;
+                else
+                    left = long.MaxValue;
+            }
+
+            if (center == null || left <= 0)
+            {
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",null },
+                        {"Msg",$"Cơ sở {center.Name} đã đạt hạt mức.Vui lòng liên hệ với quản trị viên để thêm hạn mức!" },
+                        {"Status",Status }
+                    };
+                return Json(response);
+                //return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
+            }
+
             if (string.IsNullOrEmpty(student.ID) || student.ID == "0")
             {
                 if (student.FullName == "" || student.Email == "") return null;

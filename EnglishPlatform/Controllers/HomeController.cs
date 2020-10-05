@@ -1043,13 +1043,10 @@ namespace EnglishPlatform.Controllers
         public IActionResult Test()
         {
             StudentEntity userST = null;
-            if (User.Claims.GetClaimByType("UserID") != null)
-            {
-                var userId = User.Claims.GetClaimByType("UserID").Value;
-                userST = _studentService.GetItemByID(userId);
-            }
-            else
-            {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            userST = _studentService.GetItemByID(userId);
+            if (userST == null)
+            { 
                 userST = _studentService.GetItemByID("5db11765b5433109d4533ca4");//tk buithihong98@gmail.com
             }
             //var userTC = _studentService.GetItemByID(userId);
