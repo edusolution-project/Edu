@@ -228,7 +228,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     item.Media.Created = DateTime.Now;
                                     item.Media.Size = 0;
                                     item.Media.Path = item.Media.Name.Trim();
-                                    //item.Media.Extension = "image/png";
+                                    item.Media.Extension = "image/png";
                                 }
                                 else
                                 {
@@ -248,11 +248,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 //{
                                 var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
                                 string extension = Path.GetExtension(file.FileName);
-                                var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+
                                 item.Media = new Media();
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
                                 item.Media.Created = DateTime.Now;
                                 item.Media.Size = file.Length;
+                                if(!typeImage.Contains(extension))
+                                {
+                                    var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                                    item.Media.Path = mediarsp.Path;
+                                }
+                                ádkjfasdlkflkashdflkjjahslkfhas
                                 if (typeVideo.Contains(extension))
                                 {
                                     item.Media.Extension = "video/mp4";
@@ -261,12 +267,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     item.Media.Extension = "audio/mp3";
                                 }
+                                else if (typeImage.Contains(extension))
+                                {
+                                    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                    item.Media.Extension = "image/png";
+                                }
                                 else
                                 {
                                     item.Media.Extension = extension;
                                 }
                                 //item.Media.Extension = extension.Equals(".mp4")?"video/mp4":extension;
-                                item.Media.Path = mediarsp.Path;
+
                                 //}
                             }
                         }
@@ -1007,8 +1018,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 quiz.Media.Created = DateTime.Now;
                                 quiz.Media.Size = 0;
-                                quiz.Media.Extension = quiz.Media.Name.Trim();
-                                //item.Media.Extension = "image/png";
+                                quiz.Media.Path = quiz.Media.Name.Trim();
+                                item.Media.Extension = "image/png";
                             }
                             else
                             {

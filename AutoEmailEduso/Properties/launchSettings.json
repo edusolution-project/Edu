@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AutoEmailEduso": {
+      "commandName": "Project",
+      "commandLineArgs": "SendWeeklyReport"
+    }
+  }
+}
