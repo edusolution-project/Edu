@@ -1003,11 +1003,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (CreateNewChapter.Equals("on"))
                 {
-                    if (newName != null || newName != "")
-                        rootChap.Name = newName;
-
                     var clonechap = _cloneCourseChapterMapping.Clone(rootChap, new CourseChapterEntity());
+                    if (newName != null || newName != "")
+                        clonechap.Name = newName;
                     clonechap.Order = currentChapIndex;
+                    clonechap.OriginID = rootChap.ID;
+
                     var newChapter = await CloneChapter(clonechap, _userCreate, rootChap.CourseID); ;
 
                     var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();

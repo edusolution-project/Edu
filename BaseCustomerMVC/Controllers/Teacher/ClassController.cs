@@ -2219,7 +2219,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Error", "Dữ liệu không đúng" }
                     });
                 }
-                var currentChapIndex = (int)_chapterService.GetSubChapters(rootChap.CourseID, rootChap.ParentID).Count();
+                var currentChapIndex = (int)_chapterService.GetSubChapters(rootChap.ClassSubjectID, rootChap.ParentID).Count();
                 var currentLessonIndex = (int)_lessonService.CountChapterLesson(rootChap.ID);
 
                 var joinLessons = _lessonService.GetChapterLesson(joinChap.ClassSubjectID, joinChap.ID).OrderBy(o => o.Order);
@@ -2227,11 +2227,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (CreateNewChapter.Equals("on"))
                 {
-                    if (newName != null || newName != "")
-                        rootChap.Name = newName;
+
                     var chapMap = new MappingEntity<ChapterEntity, ChapterEntity>();
                     var clonechap = chapMap.Clone(rootChap, new ChapterEntity());
                     clonechap.Order = currentChapIndex;
+                    if (newName != null || newName != "")
+                        clonechap.Name = newName;
+                    clonechap.OriginID = rootChap.ID;
                     var newChapter = await _classHelper.CloneChapter(clonechap, _userCreate, rootChap.ClassSubjectID); ;
 
                     var lessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
