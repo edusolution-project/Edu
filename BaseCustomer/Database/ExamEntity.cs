@@ -218,7 +218,7 @@ namespace BaseCustomerEntity.Database
                         foreach (var answer in _realAnwserQuiz2)
                         {
                             if (!string.IsNullOrEmpty(answer.Content))
-                                foreach (var ans in answer.Content.Split('/'))
+                                foreach (var ans in answer.Content.Split('|'))
                                 {
                                     if (!string.IsNullOrEmpty(ans.Trim()))
                                         quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));

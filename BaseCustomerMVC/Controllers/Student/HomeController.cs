@@ -74,11 +74,28 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Index(string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var type = User.Claims.GetClaimByType("Type").Value;
+            if (type != ACCOUNT_TYPE.STUDENT)
+                return Redirect("/");
             var student = _studentService.GetItemByID(_studentid);
             var centerID = "";
-            ViewBag.Student = student;
+
             if (student != null)
-                ViewBag.AllCenters = student.Centers?.Where(t => _centerService.GetItemByID(t).ExpireDate >= DateTime.Now).Select(t => _centerService.GetItemByID(t))?.ToList();
+            {
+                var validCenters = (from r in student.Centers
+                                    let ct = _centerService.GetItemByID(r)
+                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    select ct).ToList();
+                if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
+                    return Redirect("/logout");
+                ViewBag.AllCenters = validCenters;
+
+            }
+            //ViewBag.AllCenters = student.Centers?.Select(t => _centerService.GetItemByID(t)).Where(t => t.ExpireDate >= DateTime.Now && t.Status)?.ToList();
+            else
+                return Redirect("/logout");
+
+            ViewBag.Student = student;
 
             if (!string.IsNullOrEmpty(basis))
             {
@@ -90,24 +107,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
 
-            //var category = _newsCategoryService.GetItemByCode("san-pham");
-
-            //var data = _newsService.CreateQuery().Find(o => o.CenterID == centerID && o.Type == "san-pham" && o.IsActive == true ||o.IsPublic == true && o.IsActive==true).Limit(6);
-            var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6);
-
-            //var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
-            //if (MyClass != null)
-            //{
-            //    var _mappingCourse = new MappingEntity<CourseEntity, CourseViewModel>();
-            //    var listMyCourse = from item in _classSubjectService.GetByClassID(MyClass.ID)
-            //                       let a = _courseService.GetItemByID(item.CourseID)
-            //                       select _mappingCourse.Clone(a, new CourseViewModel()
-            //                       {
-            //                           ClassID = MyClass.ID
-            //                       });
-            //    ViewBag.List_MyCourses = listMyCourse.ToList();
-            //}
-            ViewBag.List_Courses = data.ToList();
+            //BAD => NEED MOVE TO API
+            ViewBag.List_Courses = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6).ToList();
 
             return View();
         }
@@ -129,9 +130,14 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Profile(string basis)
         {
             string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
+
             var account = _studentService.GetItemByID(_studentid);
             if (account == null)
                 return Redirect("/logout");
+
+            var type = User.Claims.GetClaimByType("Type").Value;
+            if (type != ACCOUNT_TYPE.STUDENT)
+                return Redirect("/#");
 
             if (!string.IsNullOrEmpty(basis))
             {
@@ -142,7 +148,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
-            _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
         }
 
@@ -153,7 +158,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
                 var account = _studentService.GetItemByID(_studentid);
                 var avatar = account.Avatar ?? _default.defaultAvatar;
-                _session.SetString("userAvatar", avatar);
                 ViewBag.avatar = avatar;
                 account.Avatar = avatar;
                 return Json(new ReturnJsonModel

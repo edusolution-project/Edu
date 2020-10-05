@@ -511,6 +511,17 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
+
+            //COMPLETE ALL PREV INCOMPLETE EXAMS
+            var incompleted_exs = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.StudentID == exam.StudentID && o.Status == false && o.Number < exam.Number).SortBy(t => t.Number).ToEnumerable();
+            if (incompleted_exs != null && incompleted_exs.Count() > 0)
+            {
+                foreach (var ex in incompleted_exs)
+                {
+                    _examService.CompleteNoEssay(ex, lesson, out _, false);
+                }
+            }
+
             exam = _examService.CompleteNoEssay(exam, lesson, out point);
             return new JsonResult(new
             {
@@ -523,6 +534,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 QuestionsPass = exam.QuestionsPass
             });
         }
+
 
         public IActionResult Index(DefaultModel model)
         {

@@ -13,6 +13,7 @@ namespace BaseCustomerMVC.Globals
     public class LessonHelper
     {
         private readonly LessonService _lessonService;
+        private readonly CourseLessonService _courseLessonService;
 
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CalendarHelper _calendarHelper;
@@ -35,9 +36,11 @@ namespace BaseCustomerMVC.Globals
 
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _courseLessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
         private readonly MappingEntity<LessonEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonEntity, LessonEntity>();
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public LessonHelper(
             LessonService lessonService,
+            CourseLessonService courseLessonService,
 
             LessonScheduleService lessonScheduleService,
             CalendarHelper calendarHelper,
@@ -52,6 +55,7 @@ namespace BaseCustomerMVC.Globals
         )
         {
             _lessonService = lessonService;
+            _courseLessonService = courseLessonService;
 
             _lessonScheduleService = lessonScheduleService;
             _calendarHelper = calendarHelper;
@@ -65,31 +69,143 @@ namespace BaseCustomerMVC.Globals
             _cloneQuestionService = cloneLessonPartQuestionService;
         }
 
-        public void RemoveClone(string id)
-        {
-            _cloneLessonPartService.Collection.DeleteMany(o => o.ClassID == id);
-            _cloneQuestionService.Collection.DeleteMany(o => o.ClassID == id);
-            _cloneAnswerService.Collection.DeleteMany(o => o.ClassID == id);
-        }
-
         public async Task RemoveClassSubjectLesson(string ClassSubjectID)
         {
             var lstask = _lessonService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
+
+            var scids = _lessonScheduleService.Collection.Find(o => o.ClassSubjectID == ClassSubjectID).Project(o => o.ID).ToList();
+            if(scids != null && scids.Count() > 0)
+                _calendarHelper.RemoveManySchedules(scids);
+
+            var sctask = _lessonScheduleService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
             var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
             var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
             var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
-            await Task.WhenAll(lstask, cltask, cqtask, catask);
+            await Task.WhenAll(lstask, sctask, cltask, cqtask, catask);
         }
 
-        public async Task RemoveClone(string[] ids)
+        public async Task RemoveManyClassLessons(string[] ids)
         {
             var lstask = _lessonService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
+            
+            var scids = _lessonScheduleService.Collection.Find(o => ids.Contains(o.ClassID)).Project(o => o.ID).ToList();
+            if (scids != null && scids.Count() > 0)
+                _calendarHelper.RemoveManySchedules(scids);
+
             var sctask = _lessonScheduleService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             await Task.WhenAll(lstask, sctask, cltask, cqtask, catask);
         }
+
+        public async Task RemoveSingleLesson(string id)
+        {
+            var lstask = _lessonService.Collection.DeleteManyAsync(o => o.ID == id);
+            var sctask = _lessonScheduleService.Collection.DeleteManyAsync(o => o.LessonID == id);
+            var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ParentID == id);
+            var quizs = _cloneQuestionService.Collection.Find(o => o.LessonID == id).Project(t => t.ID).ToList();
+            var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => o.LessonID == id);
+            Task<DeleteResult> catask = null;
+            if (quizs != null && quizs.Count > 0)
+            {
+                catask = _cloneAnswerService.Collection.DeleteManyAsync(o => quizs.Contains(o.ParentID));
+                await Task.WhenAll(lstask, sctask, cltask, cqtask, catask);
+            }
+            else
+                await Task.WhenAll(lstask, sctask, cltask, cqtask);
+        }
+
+        #region Copy CourseLesson From CourseLesson
+        public async Task CopyCourseLessonFromCourseLesson(CourseLessonEntity orgItem, CourseLessonEntity cloneItem)
+        {
+            var lesson = _courseLessonMapping.Clone(orgItem, new CourseLessonEntity());
+            lesson.CreateUser = cloneItem.CreateUser;
+            lesson.OriginID = orgItem.ID;
+            lesson.Created = DateTime.Now;
+            lesson.Updated = DateTime.Now;
+            lesson.CourseID = cloneItem.CourseID;
+            lesson.ChapterID = cloneItem.ChapterID;
+            lesson.Order = cloneItem.Order;
+
+            _courseLessonService.CreateQuery().InsertOne(lesson);
+
+            var parts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.OriginID);
+
+            foreach (var part in parts.ToEnumerable())
+            {
+                CloneCourseLessonPart(part, new LessonPartEntity
+                {
+                    ParentID = lesson.ID,
+                    CourseID = lesson.CourseID
+                });
+            }
+        }
+
+        private void CloneCourseLessonPart(LessonPartEntity orgItem, LessonPartEntity cloneItem)
+        {
+            var item = _lessonPartMapping.Clone(orgItem, new CloneLessonPartEntity());
+            item.ParentID = cloneItem.ParentID;
+            item.CourseID = cloneItem.CourseID;
+            item.OriginID = orgItem.ID;
+            item.Created = DateTime.Now;
+            item.Updated = DateTime.Now;
+
+            _lessonPartService.Collection.InsertOne(item);
+
+            var questions = _lessonPartQuestionService.GetByPartID(item.OriginID);
+            if (questions != null && questions.Count() > 0)
+            {
+                foreach (var question in questions)
+                {
+                    CloneCourseQuestion(question, new LessonPartQuestionEntity
+                    {
+                        ParentID = item.ID,
+                        CourseID = item.CourseID
+                    });
+                }
+            }
+        }
+
+        private void CloneCourseQuestion(LessonPartQuestionEntity orgItem, LessonPartQuestionEntity cloneItem)
+        {
+            var item = _lessonPartQuestionMapping.Clone(orgItem, new LessonPartQuestionEntity());
+
+            item.OriginID = orgItem.ID;
+            item.ParentID = cloneItem.ParentID;
+            item.CourseID = cloneItem.CourseID;
+            item.Created = DateTime.Now;
+            item.Updated = DateTime.Now;
+
+            _lessonPartQuestionService.Collection.InsertOne(item);
+
+            var list = _lessonPartAnswerService.GetByQuestionID(item.OriginID);
+            if (list != null && list.Count() > 0)
+            {
+                foreach (var answer in list)
+                {
+                    CloneCourseAnswer(answer, new LessonPartAnswerEntity
+                    {
+                        ParentID = item.ID,
+                        CourseID = item.CourseID
+                    });
+
+                }
+            }
+        }
+
+        private void CloneCourseAnswer(LessonPartAnswerEntity orgItem, LessonPartAnswerEntity cloneItem)
+        {
+            var item = _lessonPartAnswerMapping.Clone(orgItem, new CloneLessonPartAnswerEntity());
+            item.OriginID = orgItem.ID;
+            item.ParentID = cloneItem.ParentID;
+            item.Created = DateTime.Now;
+            item.Updated = DateTime.Now;
+            item.CourseID = cloneItem.CourseID;
+
+            _lessonPartAnswerService.Collection.InsertOne(item);
+        }
+        #endregion
 
         #region Copy Lesson From CourseLesson
         public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem)
@@ -200,10 +316,12 @@ namespace BaseCustomerMVC.Globals
             var lesson = _lessonMapping.Clone(orgLesson, new LessonEntity());
             lesson.ChapterID = cloneItem.ChapterID;
             lesson.OriginID = orgLesson.ID;
-            lesson.ClassID = cloneItem.ClassID;
-            lesson.ClassSubjectID = cloneItem.ClassSubjectID;
+            lesson.ClassID = string.IsNullOrEmpty(cloneItem.ClassID) ? orgLesson.ClassID : cloneItem.ClassID;
+            lesson.ClassSubjectID = string.IsNullOrEmpty(cloneItem.ClassSubjectID) ? orgLesson.ClassSubjectID : cloneItem.ClassSubjectID;
+            lesson.Title = string.IsNullOrEmpty(cloneItem.Title) ? orgLesson.Title : cloneItem.Title;
             lesson.Created = DateTime.Now;
             lesson.Updated = DateTime.Now;
+            lesson.Order = cloneItem.Order;
             lesson.ID = null;
 
             lesson = InitLesson(lesson);
@@ -299,7 +417,7 @@ namespace BaseCustomerMVC.Globals
         }
         #endregion
 
-        private LessonEntity InitLesson(LessonEntity lesson)
+        public LessonEntity InitLesson(LessonEntity lesson)
         {
             _lessonService.Save(lesson);
             var schedule = new LessonScheduleEntity
@@ -315,13 +433,17 @@ namespace BaseCustomerMVC.Globals
             return lesson;
         }
 
-
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
         {
             var cltask = _cloneLessonPartService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             var cqtask = _cloneQuestionService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartQuestionEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             var catask = _cloneAnswerService.Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<CloneLessonPartAnswerEntity>.Update.Set("ClassSubjectID", classSubject.ID));
             await Task.WhenAll(cltask, cqtask, catask);
+        }
+
+        public bool IsQuizLesson(string ID)
+        {
+            return _cloneLessonPartService.GetByLessonID(ID).Any(t => quizType.Contains(t.Type));
         }
     }
 }

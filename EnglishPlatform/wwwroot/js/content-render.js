@@ -236,10 +236,8 @@ var Lesson = (function () {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
-        //debugger
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
-                //debugger
                 _data = JSON.parse(res).Data;
                 switch (config.mod) {
                     case mod.PREVIEW: //curriculum view
@@ -482,7 +480,7 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
-                lessonBody.css('top', 0);
+                lessonBody.css('top', 0);                
                 //no header
                 break;
             case mod.REVIEW:
@@ -1642,7 +1640,6 @@ var Lesson = (function () {
 
     var modalEditLesson = function (ID) {
         var modal = $('#lessonModal');
-        debugger
         $.ajax({
             type: "POST",
             url: config.url.load,
@@ -1672,7 +1669,6 @@ var Lesson = (function () {
     }
 
     var modalEditPart = function (id) {
-        debugger
         stopAllMedia();
         var modalForm = window.partForm;
         $('#action').val(config.url.save_part);
@@ -1981,6 +1977,7 @@ var Lesson = (function () {
                             $(input).attr("value", content).attr("contenteditable", false).attr("readonly", "true");
 
                         }
+                        console.log(data);
                         $(fillquizs[i]).attr("title", quiz.Description == null ? "" : quiz.Description);
                         $(fillquizs[i]).attr("contenteditable", false).attr("readonly", "true").after(" ");
                     }
@@ -3043,6 +3040,7 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
+                console.log(itembox);
 
                 //Render Question
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -3298,7 +3296,6 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
@@ -4493,13 +4490,6 @@ var toggleExpand = function (obj) {
         $(obj).removeClass("fa-caret-up");
         _openingPart = '';
     }
-}
-
-var cacheStatic = function (src) {
-    //console.log(src);
-    if (src.startsWith("http"))
-        return src;
-    return "https://static.eduso.vn/" + src + "?&format=jpg";
 }
 
 var isMobileDevice = function () {

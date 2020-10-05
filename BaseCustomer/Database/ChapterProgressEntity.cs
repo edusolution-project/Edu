@@ -30,7 +30,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
         [JsonProperty("ExamDone")]
-        public long ExamDone { get; set; }
+        public double ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
         [JsonProperty("TotalPoint")]
@@ -110,8 +110,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.ExamDone++;
-                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);//%
+                    progress.ExamDone = progress.ExamDone + item.Multiple;
+                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
@@ -120,7 +120,7 @@ namespace BaseCustomerEntity.Database
         public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
         {
             var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
-            var change = (pointchange > 0 ? pointchange : item.PointChange);
+            var change = (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;
             if (progress == null)
             {
                 progress = NewProgressEntity(_chapterService.GetItemByID(item.ChapterID), item.StudentID);
@@ -131,7 +131,7 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.PracticeCount == 0)//new
-                    progress.PracticeCount++;
+                    progress.PracticeCount = progress.PracticeCount + item.Multiple;
                 progress.LastLessonID = item.ID;
                 progress.PracticePoint += change;
                 progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;

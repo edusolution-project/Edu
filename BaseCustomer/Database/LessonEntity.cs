@@ -66,8 +66,12 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<LessonEntity>()
                     .Ascending(t => t.ClassSubjectID)
                     .Ascending(t=> t.ChapterID)
+                    ),
+                //ChapterID_1_Order_1_ID_1
+                new CreateIndexModel<LessonEntity>(
+                    new IndexKeysDefinitionBuilder<LessonEntity>()
+                    .Ascending(t=> t.ChapterID)
                     .Ascending(t=> t.Order)),
-                //ClassID_1
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
                     .Ascending(t => t.ClassID))
@@ -96,9 +100,10 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
 
-        public LessonEntity GetItemByOriginID(string OriginID)
+
+        public long CountChapterLesson(string ChapterID)
         {
-            return Collection.Find(x => x.OriginID == OriginID).FirstOrDefault();
+            return Collection.CountDocumentsAsync(t => t.ChapterID == ChapterID).Result;
         }
     }
 }

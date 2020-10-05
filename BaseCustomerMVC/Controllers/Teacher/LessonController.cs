@@ -105,8 +105,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Lesson = Data;
             ViewBag.Title = Data.Title;
 
-            //if (frameview == 1)
-            //    return View("FrameDetails");
+            if (frameview == 1)
+                return View("FrameDetails");
             return View();
         }
 
@@ -436,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.GetItemByID(item.ID);
+                var data = string.IsNullOrEmpty(item.ID) ? null : _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
@@ -659,8 +659,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             chapter.ConditionChapter = ConditionChapter;
             _chapterService.Save(chapter);
             var subchaps = _chapterService.GetSubChapters(chapter.ClassSubjectID, chapter.ID);
-            if (subchaps != null && subchaps.Count > 0)
-                subchaps.ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
+            if (subchaps != null && subchaps.Count() > 0)
+                subchaps.ToList().ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
         }
 
 

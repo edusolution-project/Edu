@@ -11,6 +11,8 @@ namespace BaseCustomerMVC.Models
         public int Rank { get; set; }
         [JsonProperty("SkillName")]
         public string SkillName { get; set; }
+        [JsonProperty("CourseName")]
+        public string CourseName { get; set; }
         [JsonProperty("ClassName")]
         public string ClassName { get; set; }
         [JsonProperty("TotalStudents")]
@@ -22,7 +24,7 @@ namespace BaseCustomerMVC.Models
         public long TotalExams { get; set; }
         [JsonProperty("TotalPractices")]
         public long TotalPractices { get; set; }
-        [JsonProperty("RankPoint")] 
+        [JsonProperty("RankPoint")]
         public double RankPoint { get; set; }
     }
 }

@@ -21,16 +21,10 @@
 
     <link href="~/css/minify/minify.min.css?20200615" rel="stylesheet" />
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
-    @*longht them*@
-    <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
-    <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-    <link href="~/js/calendar/css/style.css" rel="stylesheet" />
 
-    <script src="~/js/minify/common.min.js?20200326"></script>
+    <script src="~/js/minify/common.min.js?20200930"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
     <script src="~/mdbootstrap/js/bootstrap.min.js"></script>
-
-    @*<link href="~/css/w3.css" rel="stylesheet" />*@
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
@@ -107,8 +101,6 @@
                 display: none;
             }
         }
-
-
     </style>
     <main id="main">
         @await Html.PartialAsync("_sideBarStudentNewUI")
@@ -119,11 +111,11 @@
             </div>
         </div>
         <aside class="sidebar" id="sidebar_right">
-            <div class="box p-3 row" id="profile" style="position:relative">
+            <div class="pt-3 p-2 row" id="profile" style="position:relative">
                 <div class="col-md-3 col-xs-12 dropdown" style="text-align:center">
                     @if (Context.Session.GetString("userAvatar") != null)
                     {
-                        <img src="@Context.Session.GetString("userAvatar")" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
+                        <img src="https://static.eduso.vn/@Context.Session.GetString("userAvatar")?w=32&h=32&format=jpg&mode=crop" style="width:32px;height:32px;border-radius:20px" title="@User.Identity.Name" />
                     }
                     else
                     {
@@ -134,7 +126,6 @@
                     <a href="@processUrl("Profile","Home")" style="color:#00314c;font-weight:600" title="@User.Identity.Name">@User.Identity.Name</a>
                 </div>
                 <div class="col-md-3 col-xs-4" style="text-align:left;margin:auto">
-                    @*<span style="cursor:pointer" onclick="openNav()">☰</span>*@
                     <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
                     <div id="myDropdown" class="dropdown-content">
                         <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
@@ -246,10 +237,10 @@
                     }
                 </script>
             </div>
-            <div style="height:80px; color: orange; padding-top: 25px;" class="text-center">
-                <i class="fas fa-star" style="font-size:150%"></i>
-                <i class="fas fa-star" style="font-size:250%"></i>
-                <i class="fas fa-star" style="font-size:150%"></i>
+            <div style="height:25px; padding-top: 5px;" class="text-center red-color">
+                <i class="fas fa-star" style="font-size:110%"></i>
+                <i class="fas fa-star" style="font-size:160%"></i>
+                <i class="fas fa-star" style="font-size:110%"></i>
             </div>
             <div id="top_star" class="box p-3">
                 <div class="heading flex pb-2">
@@ -261,7 +252,7 @@
                             <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
                             <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
                             <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
-                            <i class="fas fa-star" style="color:orange" v-else></i>
+                            <i class="fas fa-star red-color" v-else></i>
                             <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span>
                         </li>
                     </template>
@@ -351,6 +342,10 @@
     <!--End of Tawk.to Script-->
     @if (center == "ern")
     {
+        @*longht them*@
+        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
+        <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
+        <link href="~/js/calendar/css/style.css" rel="stylesheet" />
         @await Html.PartialAsync("_EasyRealtime")
     }
     else

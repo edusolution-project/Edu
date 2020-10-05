@@ -95,7 +95,7 @@
         '</div>';
     }
     var createItemContact = function(data,isGroup,callBack){
-        var _strLop = isGroup ? "Lớp " : "";
+        var _strLop = isGroup && !data.isSystem ? "Lớp " : "";
         if(!data.avatar){
             data.avatar = isGroup ? _config.image : _config.avatar;
         }
@@ -109,10 +109,10 @@
         }
         return html;
     }
-    UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages){
-        var classSender= !isSender ? "message-sender":"message-receiver";
+    UI.prototype.renderGroupMessage = function(isSender,name,avatar,messages,isAdmin,sender){
+        var classSender= !isSender && !(isAdmin == true && sender == g_EasyChatURL.SYSTEM_EDUSO) ? "message-sender":"message-receiver";
         var _avatar = !avatar ? _config.avatar : avatar;
-        var msgs = renderMessages(messages,isSender);
+        var msgs = renderMessages(messages,isSender,isAdmin);
         var html =
             '<div class="message '+classSender+'">'+
                 '<div class="user-info">'+
@@ -124,12 +124,12 @@
             '</div>';
         return html;
     }
-    var renderMessages = function(messages,isSender){
+    var renderMessages = function(messages,isSender,isAdmin){
         var html = "";
         var time = 0;
         if(messages){
             for(var i =0; i < messages.length; i++){
-                var msg = renderMesssage(messages[i],isSender);
+                var msg = renderMesssage(messages[i],isSender,isAdmin);
                 html += msg[0];
                 time = time < msg[1] ? msg[1] : time;
             }
@@ -152,22 +152,35 @@
         if(Extensions.DOC.indexOf(extension)>-1) return Type.DOC;
         return Type.ORTHER;
     }
-    var renderMesssage = function(message,isSender){
-        var medias = message.data;
-        var text = message.content;
+    var renderMesssage = function (message, isSender,isAdmin) {
         var html = "";
-        if(text){
-            html += createDataText(message.ID,text,isSender);
+        var time = typeof (message.time) == "string" ? parseFloat(message.time) : message.time;
+        if (message.isDel) {
+            html += createDataDel();
         }
-        if(medias){
-            for(var i = 0; i < medias.length; i++){
-                if(medias[i]){
-                    html += createMetaData(medias[i],isSender);
+        else {
+            var medias = message.data;
+            var text = message.content;
+            
+            if (text) {
+                html += createDataText(message.ID, text, isSender, message.sender,isAdmin);
+            }
+            if (medias) {
+                var exts = medias.length > 0 && (isSender || (message.sender == g_EasyChatURL.SYSTEM_EDUSO && isAdmin == true)) ? createExtendsSettings(message.ID) : "";
+                if (medias.length > 0) {
+                    var viewMore = medias.length <= 1 ? "" : "<div class='view-more-meta-data'><a onclick='EasyChat.ViewMore(this)' style='display:block;width:100%;text-align: center;padding-top: 10px;'>xem thêm</a></div>"
+                    html += '<div data-id="' + message.ID + '" class="data data-meta"><div class="content"><div class="meta-data">';
+
+                    for (var i = 0; i < medias.length; i++) {
+                        if (medias[i]) {
+                            html += createMetaData(message.ID, medias[i], isSender);
+                        }
+                    }
+                    html += '</div>' + viewMore+'</div>' + exts + "</div>";
                 }
             }
         }
-        var time = typeof(message.time) == "string" ? parseFloat(message.time) : message.time;
-        return [html,time];
+        return [html, time];
     }
     var ConveterTime = function(time){
         var min = 60*24*60;
@@ -187,28 +200,24 @@
         return date+"-"+month+"-"+year+" "+hour+":"+minute;
         //var date = new Date(time);
     }
-    var createExtendsSettings = function(){
-        var eventOpen = "javascript:this.parentElement.childNodes[1].classList.toggle('open')";
-        return '<div class="button-extends">'+
-            '<div class="dropdown-list">'+
-                '<button onclick="'+eventOpen+'" class="btn btn-extends"> <img src="'+_config.extends+'" alt="extends"></button>'+
-                '<div class="item-extends">'+
-                    '<button class="btn btn-delete"><img src="'+_config.trash+'" alt="Xóa"></button>'+
-                '</div>'+
-            '</div>'+
-        '</div>';
+    var createExtendsSettings = function(id){
+        var eventOpen = "";//"javascript:this.parentElement.childNodes[1].classList.toggle('open')";
+        return '<div class="button-extends"><button class="btn btn-delete" data-message="' + id + '" onclick="EasyChat.RemoveMessage(this)"><img src="' + _config.trash + '" alt="Xóa"></button></div>';
     }
-    var createDataText = function(id,message,isSender){
-        var exts = isSender ? createExtendsSettings() : "";
+    var createDataDel = function () {
+        var exts = "";
+        return '<div class="data data-text"><div class="content" style="padding-left:25px; color :#ccc"> tin nhắn đã bị xóa </div>' + exts + '</div>';
+    }
+    var createDataText = function(id,message,isSender,sender, isAdmin){
+        var exts = isSender  || (isAdmin == true && sender == g_EasyChatURL.SYSTEM_EDUSO)? createExtendsSettings(id) : "";
          return '<div data-id="'+id+'" class="data data-text"><div class="content" style="padding-left:25px">'+message+'</div>'+exts+'</div>';
     }
-    var createMetaData = function(data,isSender){
-        var type = getExtensionType(data.type.toLowerCase().replace(".",""));
-        var html = '<div class="content">'+'<div data-id="'+data.id+'" class="meta-data">';
-        var exts = isSender ? createExtendsSettings():"";
+    var createMetaData = function(id,data){
+        var type = getExtensionType(data.type.toLowerCase().replace(".", ""));
+        var html = '<div class="item-meta-data">';
         switch(type){
             case Type.IMAGE:
-                html += '<img onmouseover="if(this.src!=this.dataset.src){this.src=this.dataset.src;}" class="lazy-loaded" data-src="'+data.url+'" src="'+_config.loading+'" alt="'+data.id+data.type+'">';
+                html += '<div class="data-image"><div class="view-full" onclick="UI.OpenImage(this)">xem bản đầy đủ</div><img class="lazy-loaded" data-src="' + data.url + '" src="https://drive.google.com/thumbnail?id=' + data.id + '" alt="' + data.id + data.type + '"></div>';
                 break;
             case Type.AUDIO:
                 html += '<audio controls><source src="'+data.url+'" type="audio/ogg"><source src="'+data.url+'" type="audio/mpeg">Your browser does not support the audio tag.</audio>';
@@ -223,8 +232,63 @@
                 html+='<div class="data-file"><a href="'+data.url+'">'+data.id+data.type+'</a></div>';
                 break;
         }
-        html += '</div></div>'+exts;
-        return '<div class="data">'+html+'</div>'
+        html += '</div>';
+        return html;
+    }
+    UI.OpenImage = function (self) {
+        var parent = self.parentElement;
+        var data = parent.querySelector("[data-src]");
+        if (data) {
+            window.open(data.dataset.src, "_blank");
+        }
+    }
+    UI.prototype.CreateAnswerBox = function (message,callBack) {
+        if (!message) message = " Bạn muốn xóa tin nhắn này !";
+        var div = document.createElement("div");
+        div.setAttribute("style", "position:fixed;top:0;left:0;right:0;z-index:999999999999;background:#000;width:100%;height:100%;opacity:0.5");
+        document.body.appendChild(div);
+        var box = document.createElement("div");
+        box.setAttribute("style", "position:fixed;top:0;left:0;right:0;z-index:9999999999999;bottom: 0;background:#fff;opacity:1;width:300px;max-width:90%;margin:auto;height:150px;padding:20px");
+        var titleMessage = document.createElement("div");
+        titleMessage.setAttribute("style", "padding: 30px 0;text-align: center;font-weight: bold;");
+        titleMessage.classList = "title-comfirm-box-chat";
+        titleMessage.innerHTML = message;
+        var bodyMessage = document.createElement("div");
+        bodyMessage.style.textAlign = "center";
+        bodyMessage.classList = "body-comfirm-box-chat";
+        var buttonYes = document.createElement("span");
+        buttonYes.classList = "btn btn-sm btn-danger";
+        buttonYes.setAttribute("style", "width:40%;margin-right:5px");
+        buttonYes.innerHTML = "yes";
+        var buttonNo = document.createElement("span");
+        buttonNo.setAttribute("style", "width:40%;margin-left:5px")
+        buttonNo.classList = "btn btn-sm btn-primary";
+        buttonNo.innerHTML = "no";
+       
+        buttonYes.onclick = function () {
+            callBack.call();
+            destroy(div);
+            destroy(box);
+        };
+        buttonNo.onclick = function () {
+            destroy(div);
+            destroy(box);
+        };
+        bodyMessage.appendChild(buttonYes);
+        bodyMessage.appendChild(buttonNo);
+        box.appendChild(titleMessage);
+        box.appendChild(bodyMessage);
+        document.body.appendChild(box);
+
+        
+    }
+    var destroy = function (el) {
+        if (el) {
+            el.remove();
+        }
+    }
+    var setStyleShadow = function (el) {
+        el.setAttr
     }
     return UI;
 }());

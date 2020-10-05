@@ -26,6 +26,7 @@ namespace EasyChatApp.DataBase
         public string GroupId { get; set; } // ten group
         public double Time { get; set; } = new UnixTime().Now(); // gio gui
         public bool IsDel { get; set; } = false;
+        public bool IsPublic { get; set; } = false;
     }
     public class MetaData
     {
@@ -42,6 +43,9 @@ namespace EasyChatApp.DataBase
                 new CreateIndexModel<MessagerEntity>(
                     new IndexKeysDefinitionBuilder<MessagerEntity>()
                     .Ascending(t => t.Time)),
+                 new CreateIndexModel<MessagerEntity>(
+                    new IndexKeysDefinitionBuilder<MessagerEntity>()
+                    .Ascending(t => t.IsPublic)),
                 new CreateIndexModel<MessagerEntity>(
                     new IndexKeysDefinitionBuilder<MessagerEntity>()
                     .Ascending(t=> t.GroupId))

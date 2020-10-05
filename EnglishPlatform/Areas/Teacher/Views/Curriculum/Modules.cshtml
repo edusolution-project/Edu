@@ -200,18 +200,7 @@
                                        }>
                             </div>
                         </div>
-                        @*<div class="row d-none">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Điểm :</label>
-                                <input type="text" class="form-control" name="Point" placeholder="0" value="1" required @if (isLock) { @: readonly="true"
-                                       }>
-                            </div>
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" placeholder="> 0" value="1" required @if (isLock) { @: readonly="true"
-                                       }>
-                            </div>
-                        </div>*@
+
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Kiểu bài kiểm tra:</label>
@@ -231,7 +220,7 @@
 
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required disabled>
+                                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
                             </div>
                         </div>
                         <div class="row chooseOrder" style="display:none">
@@ -326,7 +315,7 @@
                             <label class="col-form-label">Tạo chương mới</label>
                             <input type="checkbox" name="CreateNewChapter" id="CreateNewChapter" onchange="IsCreateNewChapter(this)" /> <br />
                             <label class="col-form-label hide" id="NewLable"> Tên chương mới: </label>
-                            <input type="text" class="form-control hide" name="newName" id="newName" placeholder="Tên chương mới" />
+                            <input type="text" class="hide" name="newName" id="newName" placeholder="Tên chương mới" />
                         </div>
                     </form>
                 </div>
@@ -407,7 +396,6 @@
     var modulesBody = $('.modules-wrapper');
 
     var RenderLesson = function (item) {
-        //debugger
         var oldItem = $('#' + item.ID);
 
         var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0", id: item.ID });
@@ -446,7 +434,7 @@
         }));
         @if(!isLock)
         {
-        @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showPupup('" + item.ID + "',this);return false" }));
+        @:rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showCopyLesson('" + item.ID + "',this);return false" }));
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
@@ -872,7 +860,6 @@
 
     function EditLesson(obj, ID)
     {
-        debugger
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
         modal.find(".chooseOrder").show();
@@ -886,7 +873,7 @@
         var multiple = $(obj).attr("mul");
         var etype = $(obj).attr("etype");
         var order = $(obj).attr("order");
-        debugger
+
         modal.find("[name=Title]").val(title);
         modal.find("[name=ChapterID]").val(chapter);
         modal.find("[name=ID]").val(ID);
@@ -896,7 +883,7 @@
         modal.find("[name=Multiple]").val(multiple);
         modal.find("[name=Etype]").val(etype);
         modal.find("[name=Order]").val(order);
-        //debugger
+
         SelectTemplate(type);
         return false;
     }
@@ -967,7 +954,7 @@
         //debugger
     }
 
-    function showPupup(id, _this) {
+    function showCopyLesson(id, _this) {
         $("#copyLessonModel").modal();
         var modal = $("#copyLessonModel");
         var title = $(_this).parent().parent().find("[name=Title]").text().trim();
