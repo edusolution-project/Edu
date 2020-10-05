@@ -119,10 +119,6 @@ namespace AutoEmailEduso
             var day = currentTime.Day;
             var month = currentTime.Month;
             var year = currentTime.Year;
-            //var currentTime = new DateTime(2020,10,5);
-            //var startWeek = currentTime.AddDays(DayOfWeek.Sunday - currentTime.DayOfWeek).AddDays(1);
-            //var endWeek = startWeek.AddDays(7);
-            //var startWeek = currentTime.AddDays(-7).AddHours();
             var startWeek = new DateTime(year,month,day,0,0,0).AddDays(-7).AddMinutes(1);
             var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
             var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
@@ -351,20 +347,9 @@ namespace AutoEmailEduso
                                @"</tr>
                                 <tbody>
                                 </table>";
-                    //<tr style='font-weight: 600;background-color: yellow'>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;text-align: left'>Tỉ lệ %</td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                    //</tr>
 
                     body += tbody;
-                    //percent = ().ToString("#0.00") +"%";
+                    percent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100).ToString("#0.00") + "%";
                     isTest = true;
                     //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
                     var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com"} : listTeacherHeader;
