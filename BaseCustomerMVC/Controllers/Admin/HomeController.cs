@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -143,7 +144,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
 
-        public JsonResult FixScoreData()//Big fix
+        public async Task<JsonResult> FixScoreData()//Big fix
         {
             _chapterService.CreateQuery().UpdateMany(t => true, Builders<ChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _classSubjectService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
@@ -155,7 +156,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             var str = "Phase 1: ";
 
             //calculate lesson maxpoint
-            var courselessons = _lessonService.GetAll().ToEnumerable();
+            var courselessons = _lessonService.GetAll().ToEnumerable().ToList();
             foreach (var cl in courselessons)
             {
                 //calculateLessonPoint(cl);
@@ -165,11 +166,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             start = DateTime.Now;
             str += "<br/> Phase 2: ";
             //calculate clone lesson maxpoint
-            var lessons = _clonelessonService.GetAll().ToEnumerable();
+            var lessons = _clonelessonService.GetAll().ToEnumerable().ToList();
             foreach (var l in lessons)
             {
                 //calculateCloneLessonPoint(l);
-                _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
+               await _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
             }
             str += (DateTime.Now - start).TotalSeconds;
             start = DateTime.Now;
@@ -190,16 +191,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var parts = _clonelessonPartService.GetByLessonID(e.LessonID);//remove orphan parts
                     foreach (var part in parts)
                     {
-                        _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
+                        await _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
                         var quizs = _clonequestionService.GetByPartID(part.ID);
                         foreach (var quiz in quizs)
                         {
-                            _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
-                            _ = _clonequestionService.RemoveAsync(quiz.ID);
+                            await _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
+                            await _clonequestionService.RemoveAsync(quiz.ID);
                         }
-                        _ = _clonelessonPartService.RemoveAsync(part.ID);
+                        await _clonelessonPartService.RemoveAsync(part.ID);
                     }
-                    _ = _examService.RemoveAsync(e.ID);
+                    await _examService.RemoveAsync(e.ID);
                 }
             }
             str += (DateTime.Now - start).TotalSeconds;

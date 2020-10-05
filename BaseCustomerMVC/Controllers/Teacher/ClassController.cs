@@ -10,11 +10,8 @@ using Core_v2.Globals;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization.Serializers;
 using BaseEasyRealTime.Entities;
-using System.Drawing;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -388,41 +385,104 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return null;
             var data = new List<StudentSummaryViewModel>();
 
-            var total_students = _studentService.CountByClass(@class.ID);
+            var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
+            var total_students = students.Count();
 
             var results = _progressHelper.GetClassResults(@class.ID)
                 .OrderByDescending(t => t.RankPoint).ToList();
 
-            foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
-            {
-                var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
-                    .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity()
-                    {
-                        ClassID = @class.ID,
-                        StudentID = student.ID
-                    }, new StudentSummaryViewModel()
-                    {
-                        Rank = -1,
-                        TotalStudents = (int)total_students
-                    });
+            var listSummary = (from student in students
+                               let result = results.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
+                               let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
+                               select new StudentSummaryViewModel
+                               {
+                                   StudentID = student.ID,
+                                   FullName = student.FullName,
+                                   RankPoint = rankPoint,
+                                   Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                                   ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                                   PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                                   TotalPoint = result.TotalPoint,
+                                   PracticePoint = result.PracticePoint,
+                                   TotalExams = @class.TotalExams,
+                                   TotalLessons = @class.TotalLessons,
+                                   TotalPractices = @class.TotalPractices,
+                                   TotalStudents = total_students,
+                                   LastDate = result.LastDate
+                               }).ToList();
 
-                summary.ClassName = @class.Name;
-                summary.FullName = student.FullName;
-                summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+            //foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
+            //{
+            //    var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
+            //        .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity()
+            //        {
+            //            ClassID = @class.ID,
+            //            StudentID = student.ID
+            //        }, new StudentSummaryViewModel()
+            //        {
+            //            Rank = -1,
+            //            TotalStudents = (int)total_students
+            //        });
 
-                summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
-                summary.ExamResult = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
-                summary.PracticeResult = @class.TotalPractices > 0 ? summary.PracticePoint / @class.TotalPractices : 0;
+            //    summary.ClassName = @class.Name;
+            //    summary.FullName = student.FullName;
+            //    summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
 
-                summary.TotalExams = @class.TotalExams;
-                summary.TotalLessons = @class.TotalLessons;
-                summary.TotalPractices = @class.TotalPractices;
+            //    summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+            //    summary.ExamResult = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+            //    summary.PracticeResult = @class.TotalPractices > 0 ? summary.PracticePoint / @class.TotalPractices : 0;
 
-                data.Add(summary);
-            }
+            //    summary.TotalExams = @class.TotalExams;
+            //    summary.TotalLessons = @class.TotalLessons;
+            //    summary.TotalPractices = @class.TotalPractices;
+
+            //    data.Add(summary);
+            //}
             var response = new Dictionary<string, object>
             {
-                { "Data", data},
+                { "Data", listSummary},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetClassSubjectResult(DefaultModel model, string ClassSubjectID)
+        {
+            var csbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (csbj == null)
+                return null;
+            var data = new List<StudentSummaryViewModel>();
+
+            var students = _studentService.GetStudentsByClassId(csbj.ClassID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName }); ;
+
+            var total_students = students.Count();
+
+            var csbjResults = _progressHelper.GetClassSubjectResults(csbj.ID)
+                .OrderByDescending(t => t.RankPoint).ToList();
+
+            var listSummary = (from student in students
+                               let result = csbjResults.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
+                               let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
+                               select new StudentSummaryViewModel
+                               {
+                                   StudentID = student.ID,
+                                   FullName = student.FullName,
+                                   RankPoint = rankPoint,
+                                   Rank = csbjResults.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                                   ExamResult = csbj.TotalExams > 0 ? result.TotalPoint / csbj.TotalExams : 0,
+                                   PracticeResult = csbj.TotalPractices > 0 ? result.PracticePoint / csbj.TotalPractices : 0,
+                                   TotalPoint = result.TotalPoint,
+                                   PracticePoint = result.PracticePoint,
+                                   TotalExams = csbj.TotalExams,
+                                   TotalLessons = csbj.TotalLessons,
+                                   TotalPractices = csbj.TotalPractices,
+                                   TotalStudents = total_students,
+                                   LastDate = result.LastDate
+                               }).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", listSummary },
                 { "Model", model }
             };
             return new JsonResult(response);
@@ -2325,8 +2385,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
-
-
         #endregion
 
         public IActionResult CheckPoint(DefaultModel model, string basis)
@@ -2371,7 +2429,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 }))?.ToList()
                         })).ToList()
                     });
-
 
                     ViewBag.Lesson = lessonview;
                     //ViewBag.Class = currentClass;

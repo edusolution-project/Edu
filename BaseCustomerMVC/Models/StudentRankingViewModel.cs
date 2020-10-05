@@ -25,5 +25,7 @@ namespace BaseCustomerMVC.Models
         public double PracticePoint { get; set; }
         [JsonProperty("RankPoint")]
         public double RankPoint { get; set; }
+        [JsonProperty("LastDate")]
+        public DateTime LastDate { get; set; }
     }
 }

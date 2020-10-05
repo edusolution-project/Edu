@@ -35,14 +35,6 @@
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
             <h2 class="title"><a href="@processUrl("Detail", "Class")" title="{{domDecoder(className)}}"><i class="ti-arrow-left d-none"></i></a>{{domDecoder(className)}}</h2>
-            @*<div class="search-box mr-2" v-if="tab[2]">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" placeholder="Search">
-                </div>
-                <div class="flex" v-if="tab[2]">
-                    <b-button class="btn-addevent btn-student" v-on:click="showStudentModal()"><i class="ti-plus"></i></b-button>
-                    <b-button class="btn-addevent btn-student" style="margin-left:5px" v-on:click="showStudentUploadModal()"><i class="ti-zip"></i></b-button>
-                </div>*@
         </div>
         <div class="flex j-between border-b">
             <div class="tab bg-none">
@@ -57,6 +49,12 @@
             <div class="c-right">
                 <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
             </div>
+        </div>
+        <div class="box filter-box m-1" v-if="tab[2]">
+            <select v-model="searchCsbj">
+                <option value="">Tổng hợp</option>
+                <option v-for="(item,k) in classSubjects" :value="item.ID">{{item.CourseName}}</option>
+            </select>
         </div>
     </div>
     <div class="h4 m-3" v-cloak cloak-holder>
@@ -88,12 +86,16 @@
                 <h3 style="font-size:15px;" class="font-weight-bold">Học liệu chính quy</h3>
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
-                        <div class="class_row d-flex justify-content-star">
+                        <div class="class_row d-flex justify-content-start">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                                 <i class="far fa-arrow-alt-circle-down ml-1"></i>
                             </a>
-                            <a href="javascript:;" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 text-black" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
+                                <i class="fas fa-poll-h ml-3"></i>
+                                Bảng điểm
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
                                 Chuyển chế độ soạn thảo
                             </a>
@@ -116,12 +118,19 @@
                 <h3 style="font-size:15px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
-                        <div class="class_row">
+                        <div class="class_row d-flex justify-content-start">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
                                 <i class="far fa-arrow-alt-circle-down ml-1"></i>
                             </a>
-                            <a href="javascript:;" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" :style="'color:'+obj.Color" v-on:click="showEditor(obj)">Chuyển chế độ soạn thảo</a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
+                                <i class="fas fa-poll-h ml-3"></i>
+                                Bảng điểm
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
+                                <i class="far fa-edit ml-3"></i>
+                                Chuyển chế độ soạn thảo
+                            </a>
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
                             <ul class="list">
@@ -139,7 +148,7 @@
             </div>
         </div>
         <div class="box" v-if="tab[2]">
-            <table id="ed_table" class="table">
+            <table id="ed_table" class="table" v-if="searchCsbj == ''">
                 <thead>
                     <tr>
                         <th rowspan="2">#</th>
@@ -160,7 +169,43 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="(item,k) in studentData">
+                    <tr v-for="(item,k) in scoreData">
+                        <td>{{(k+1)}}</td>
+                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                        <td>{{formatTime(item.LastDate)}}</td>
+                        <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td>
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>
+                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table v-else class="table" id="ed_table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">#</th>
+                        <th rowspan="2">Họ tên</th>
+                        <th rowspan="2">Tiến độ</th>
+                        <th rowspan="2">Lần học cuối</th>
+                        <th colspan="3">Luyện tập</th>
+                        <th colspan="3">Kiểm tra</th>
+                        <th rowspan="2">Xếp hạng</th>
+                    </tr>
+                    <tr>
+                        <th>Thực hiện</th>
+                        <th>TB</th>
+                        <th>TK</th>
+                        <th>Thực hiện</th>
+                        <th>TB</th>
+                        <th>TK</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in scoreData">
                         <td>{{(k+1)}}</td>
                         <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.FullName}}</a></td>
                         <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
@@ -253,37 +298,16 @@
                     </div>
                 </li>
             </ul>
-
-
-            @*<div class="row ls-doc" v-if="ref.data.length > 0">
-                    <div class="col-md-12" v-for="data in ref.data">
-                        <div class="list-item">
-                            <div class="item">
-                                <div class="item-title" onclick="this.parentElement.classList.toggle('open');">{{data[0].LessonScheduleName}} ({{data.length}}) {{data.Marked}}</div>
-                                <div class="item-body" v-for="item in data">
-                                    <div>{{item.StudentName}} - {{item.Point}}</div>
-                                    <button v-if="!item.Marked" type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm điểm</button>
-                                    <button v-else type="button" title="click vào đây để chấm điểm" v-on:click="showPointModal(item.ID)" :data-id="item.ID">Chấm lại</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="row ls-doc text-center d-block" v-else>
-                    Không có exam để chấm
-                </div>*@
         </div>
     </div>
-
 </section>
 @section Scripts{
     <style>
-        .class_row a:last-child {
+        .class_row a:nth-child(n+2) {
             display: none;
         }
 
-        .class_row:hover a:last-child {
+        .class_row:hover a:nth-child(n+2) {
             display: block;
         }
     </style>
@@ -669,8 +693,8 @@
                 window.openHistory = this.openHistory
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
-                    hash = hash.split('#')[1]
-                    //console.log(hash)
+                    var hash = hash.split('#')[1];
+                    
                     switch (hash) {
                         case 'info':
                             this.tabChange(0);
@@ -678,7 +702,7 @@
                         case 'module':
                             this.tabChange(1);
                             break;
-                        case 'student':
+                        case 'score':
                             this.tabChange(2);
                             break;
                         case 'reference':
@@ -701,6 +725,7 @@
                 editorOption: {
                     theme: 'snow'
                 },
+                searchCsbj:'',
                 classID: '@currentClass.ID',
                 className: '@currentClass.Name',
                 startDate: '@currentClass.StartDate',
@@ -760,7 +785,7 @@
                         label: 'Xếp hạng'
                     }
                 ],
-                studentData: [
+                scoreData: [
                 ],
                 //view: 10,
                 //page: 1,
@@ -828,6 +853,9 @@
                 "ref.gradeID": function () {
                     this.loadPreference()
                 },
+                searchCsbj: function () {
+                    this.loadClassScore()
+                }
             },
             methods: {
                 tabChange(a = 0) {
@@ -848,8 +876,9 @@
                             this.loadClassSubjects();
                             break;
                         case 2:
-                            history.replaceState({ tab: a }, this.className + " - Danh sách học viên", "#student");
-                            this.loadClassStudent();
+                            history.replaceState({ tab: a }, this.className + " - Bảng điểm", "#score");
+                            this.loadClassSubjects();
+                            this.loadClassScore();
                             break;
                         case 3:
                             history.replaceState({ tab: a }, this.className + " - Tài liệu tham khảo", "#reference");
@@ -874,6 +903,7 @@
                         .then(response => {
                             var _data = response.data.Data;
                             _that.classSubjects = [];
+                            console.log(_that.classSubject)
                             _data.forEach(function (item, k) {
                                 //debugger
                                 _that.classSubjects.push({
@@ -1035,22 +1065,40 @@
                         }).catch(e => { })
                     //console.log(this.list_lessons_result);
                 },
-                loadClassStudent() {
+                loadClassScore() {
                     let _that = this
                     let _form = new FormData()
-                    _form.append('ClassID', _that.classID)
-                    _form.append('PageSize', 1000)
-                    _form.append('PageIndex', 1)
-                    let _url = '@processUrl("GetClassResult", "Class")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            console.log(response.data);
-                            _that.studentData = response.data.Data;
-                            this.studentData = _that.studentData
-                            this.totalRec = response.data.Model.totalRecord
-                            //var tt = response.data.Model.totalRecord;
-                            //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
-                        }).catch(e => { })
+
+                    if (this.searchCsbj == '') {
+                        _form.append('ClassID', _that.classID)
+                        _form.append('PageSize', 1000)
+                        _form.append('PageIndex', 1)
+                        let _url = '@processUrl("GetClassResult", "Class")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                console.log(response.data);
+                                _that.scoreData = response.data.Data;
+                                this.scoreData = _that.scoreData
+                                this.totalRec = response.data.Model.totalRecord
+                                //var tt = response.data.Model.totalRecord;
+                                //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                            }).catch(e => { })
+                    }
+                    else {
+                        _form.append('ClassSubjectID', this.searchCsbj)
+                        _form.append('PageSize', 1000)
+                        _form.append('PageIndex', 1)
+                        let _url = '@processUrl("GetClassSubjectResult", "Class")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                console.log(response.data);
+                                _that.scoreData = response.data.Data;
+                                this.scoreData = _that.scoreData
+                                this.totalRec = response.data.Model.totalRecord
+                                //var tt = response.data.Model.totalRecord;
+                                //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
+                            }).catch(e => { })
+                    }
                 },
                 loadPreference() {
                     //console.log(4)
@@ -1710,7 +1758,6 @@
                 domDecoder(str) {
                     if (str == null)
                         return "";
-                    console.log(str);
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + str, 'text/html');
                     return dom.body.textContent;
@@ -1745,10 +1792,14 @@
                         return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
                     }
                 },
-                showEditor(obj) {    
-                    window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/@currentClass.ID';                   
+                showEditor(obj) {
+                    window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/@currentClass.ID';
                 },
-                
+                showScoreboard(obj) {
+                    this.searchCsbj = obj.ID;
+                    this.tabChange(2);
+                }
+
             }
             });
 

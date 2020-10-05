@@ -136,13 +136,6 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
         }
 
-        public IEnumerable<ClassSubjectProgressEntity> GetClassListOfCurrentSubject(string ClassSubjectID)
-        {
-            var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (currentObj == null) return null;
-            return CreateQuery().Find(t => t.ClassID == currentObj.ClassID).ToEnumerable();
-        }
-
         public IEnumerable<ClassSubjectProgressEntity> GetListOfCurrentSubject(string ClassSubjectID)
         {
             var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);

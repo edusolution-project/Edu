@@ -103,6 +103,7 @@ namespace BaseCustomerMVC.Globals
                 TotalPoint = t.TotalPoint,
                 PracticePoint = t.PracticePoint,
                 Count = t.Completed,
+                LastDate = t.LastDate,
                 RankPoint = CalculateRankPoint(t.TotalPoint, t.PracticePoint, t.Completed)
             }).ToEnumerable().ToList();
         }
@@ -117,6 +118,7 @@ namespace BaseCustomerMVC.Globals
                 TotalPoint = t.TotalPoint,
                 PracticePoint = t.PracticePoint,
                 Count = t.Completed,
+                LastDate = t.LastDate,
                 RankPoint = CalculateRankPoint(t.TotalPoint, t.PracticePoint, t.Completed)
             }).ToEnumerable();
         }
