@@ -102,7 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               GradeID = r.GradeID,
                               GradeName = grade.Name,
                               CourseID = r.CourseID,
-                              CourseName = course.Name,
+                              CourseName = string.IsNullOrEmpty(course.Name) ? skill?.Name : course.Name,
                               TeacherID = r.TeacherID,
                               TeacherName = teacher.FullName,
                               TypeClass = r.TypeClass

@@ -19,6 +19,8 @@ namespace BaseCustomerMVC.Models
         public double TotalPoint { get; set; }
         [JsonProperty("ExamDone")]
         public long ExamDone { get; set; }
+        [JsonProperty("PracticeDone")]
+        public long PracticeDone { get; set; }
         [JsonProperty("Count")]
         public int Count { get; set; }
         [JsonProperty("PracticePoint")]

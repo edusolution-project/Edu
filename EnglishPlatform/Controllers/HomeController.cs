@@ -178,6 +178,7 @@ namespace EnglishPlatform.Controllers
         [Route("/login")]
         public IActionResult Login()
         {
+            _session.Remove("userAvatar");
             //long limit = 0;
             //long count = _accountService.CreateQuery().CountDocuments(_ => true);
             //if (count <= limit)
@@ -247,6 +248,7 @@ namespace EnglishPlatform.Controllers
                                 case ACCOUNT_TYPE.TEACHER:
                                     if (tc != null)
                                     {
+                                        
                                         if (!string.IsNullOrEmpty(tc.Avatar))
                                             _session.SetString("userAvatar", tc.Avatar);
                                         defaultUser = new UserModel(tc.ID, tc.FullName);
@@ -723,10 +725,12 @@ namespace EnglishPlatform.Controllers
         {
             var basis = HttpContext.Request;
             string keys = User.FindFirst("UserID")?.Value;
+
             if (!string.IsNullOrEmpty(keys))
             {
                 CacheExtends.ClearCache(keys);
             }
+            _session.Remove("userAvatar");
             await HttpContext.SignOutAsync(Cookies.DefaultLogin);
             HttpContext.Remove(Cookies.DefaultLogin);
 

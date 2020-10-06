@@ -396,6 +396,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
                                select new StudentSummaryViewModel
                                {
+                                   ExamDone = result.ExamDone,
+                                   Completed = result.Count,
+                                   PracticeDone = result.PracticeDone,
                                    StudentID = student.ID,
                                    FullName = student.FullName,
                                    RankPoint = rankPoint,
@@ -404,6 +407,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
                                    TotalPoint = result.TotalPoint,
                                    PracticePoint = result.PracticePoint,
+                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone: 0,
+                                   AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
                                    TotalExams = @class.TotalExams,
                                    TotalLessons = @class.TotalLessons,
                                    TotalPractices = @class.TotalPractices,
@@ -465,6 +470,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
                                select new StudentSummaryViewModel
                                {
+                                   ExamDone = result.ExamDone,
+                                   PracticeDone = result.PracticeDone,
+                                   Completed = result.Count,
                                    StudentID = student.ID,
                                    FullName = student.FullName,
                                    RankPoint = rankPoint,
@@ -473,6 +481,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    PracticeResult = csbj.TotalPractices > 0 ? result.PracticePoint / csbj.TotalPractices : 0,
                                    TotalPoint = result.TotalPoint,
                                    PracticePoint = result.PracticePoint,
+                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+                                   AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
                                    TotalExams = csbj.TotalExams,
                                    TotalLessons = csbj.TotalLessons,
                                    TotalPractices = csbj.TotalPractices,
