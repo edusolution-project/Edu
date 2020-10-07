@@ -346,6 +346,7 @@ var ExamReview = (function () {
     }
 
     var renderLessonPart = function (data, index, type) {
+        //debugger
         //writeLog("renderLessonPart", data);
         var active = "";
         if (index != void 0 && index == 0) {
@@ -386,6 +387,7 @@ var ExamReview = (function () {
     }
 
     var renderAnswer = function (data, type) {
+        //debugger
         var quizId = data.QuestionID;
 
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
@@ -418,14 +420,126 @@ var ExamReview = (function () {
 
         }
         else { //"QUIZ2"
+            //debugger
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
 
-                if (_check)
-                    $('#' + quizId + ' .student-answer').append(" <span class='text-success'>" + data.AnswerValue + "</span>");
-                else
+                if (_check) {
+                    var html = "";
+                    $('#' + quizId + ' .student-answer').append("<span class='text-success'>" + data.AnswerValue + "</span>");
+
+                    var _answer = $("#quiz2-" + quizId)[0];
+                    var content_answer = $(_answer).find(".text-success")[0].textContent.trim();
+
+                    var correct_answer = _answer.nextElementSibling;
+                    var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
+                    var listContent = content_correct_answer.split(' | ');
+                    for (i = 0; i < listContent.length; i++) {
+                        //debugger
+                        if (listContent[i] == content_answer) {
+                            html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
+                        }
+                        else {
+                            html += " | " + listContent[i];
+                        }
+                    }
+                    $($(correct_answer).find(".text-success")[0]).html(html.substring(3));
+                    //debugger
+                }
+                else {
                     $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
+
+                    var _answer = $("#quiz2-" + quizId)[0];
+                    var content_answer = $(_answer).find(".text-danger")[0].textContent;
+
+                    var correct_answer = _answer.nextElementSibling;
+                    var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
+                    var listContent = content_correct_answer.split(' | ');
+                    var html = "";
+                    var tile = "";
+                    for (i = 0; i < listContent.length; i++) {
+                        //debugger
+                        if (listContent[i].length > content_answer.length) {
+                            var test1 = 0;
+                            for (j = 0; j < listContent[i].length; j++) {
+                                if (listContent[i][j] == content_answer[j]) {
+                                    test1++;
+                                }
+                            }
+                            tile += test1 + ",";
+                        }
+                        else {
+                            var test2 = 0;
+                            for (j = 0; j < content_answer.length; j++) {
+                                if (listContent[i][j] == content_answer[j]) {
+                                    test2++;
+                                }
+                            }
+                            tile += test2 + ",";
+                        }
+                    }
+
+                    //debugger
+                    var tile = tile.split(",");
+                    tile.pop();
+                    for (i = 0; i < tile.length; i++) {
+                        tile[i] = parseInt(tile[i]);
+                    }
+                    var index = 0;
+                    max = tile[0];
+                    for (i = 0; i < tile.length; i++) {
+                        if (max < tile[i]) {
+                            max = tile[i];
+                            index = i;
+                        }
+                    }
+
+                    var chosai = "";
+                    debugger
+                    if (listContent[index].length > content_answer.length) {
+                        for (i = 0; i < listContent[index].length; i++) {
+                            if (listContent[index][i] == content_answer[i]) {
+                                chosai += listContent[index][i];
+                            }
+                            else {
+                                chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
+                            }
+                        }
+                        //for (i = (listContent[index].length - content_answer.length); i < listContent[index].length; i++) {
+                        //    chosai += listContent[index][i];
+                        //}
+                    }
+                    else {
+                        for (i = 0; i < (content_answer.length - listContent[index].length); i++) {
+                            listContent[index] += "_";
+                        }
+                        for (i = 0; i < content_answer.length; i++) {
+                            if (listContent[index][i] == content_answer[i]) {
+                                //debugger
+                                if (i >= listContent[index][i].length) {
+                                    //listContent[index][i] += "";
+                                    //break;
+                                }
+                                //else {
+                                    chosai += listContent[index][i];
+                                //}
+                            }
+                            else {
+                                chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
+                            }
+                        }
+                    }
+
+                    for (i = 0; i < listContent.length; i++) {
+                        if (i == index) {
+                            listContent[i] = chosai;
+                        }
+                        html += listContent[i] + " | ";
+                    }
+                    $($(correct_answer).find(".text-success")[0]).html(html.substring(0, html.lastIndexOf('|') - 1));
+                    debugger
+                }
             }
         }
 
@@ -540,7 +654,9 @@ var ExamReview = (function () {
         return html;
     }
 
+    //dien tu
     var renderQUIZ2 = function (data) {
+        //debugger
         //console.log(data);
         //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -558,9 +674,10 @@ var ExamReview = (function () {
             html += '<div class="quiz-box-header"><h5 class="title">' + itemContent + '</h5>' + renderMedia(item.Media) + '</div>';
             html += '<div class="answer-wrapper row">';
             html += '<fieldset class="answer-item student-answer col-md-6" id="quiz2-' + item.ID + '">';
-            html += '<i>Trả lời</i>';
+            html += '<i>Trả lời: </i>';
             html += '</fieldset>';
             var content = "";
+            //debugger
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
                 content += content == "" ? answer.Content : " | " + answer.Content;
@@ -1052,3 +1169,7 @@ var isMobileDevice = function () {
         return false;
     }
 };
+
+var test = function () {
+
+}
