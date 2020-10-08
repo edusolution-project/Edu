@@ -69,8 +69,8 @@ namespace AutoEmailEduso
             isTest = configuration["Test"] == "1";
             //isTest = true;
 
-           
-
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             if (!args.Any())
             {
                 Console.WriteLine("Processing Schedule...");
@@ -89,11 +89,7 @@ namespace AutoEmailEduso
                         break;
                 }
             }
-
-            //
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            //await SendWeeklyReport();
+            //await SendMonthlyReport();
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
@@ -124,7 +120,6 @@ namespace AutoEmailEduso
             var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
             foreach (var center in centersActive)
             {
-                Console.WriteLine($" Send Weekly Report To {center.Name}");
                 var percent = "";
                 //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                 {
@@ -158,9 +153,9 @@ namespace AutoEmailEduso
                                         </tr>
                                     </thead>
                                     <tbody>";
-                    //< td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse' > Tài liệu chính quy </ td >
+                    //<td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse'> Tài liệu chính quy </td>
 
-                    //                             < td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse' > Tài liệu chuyên đề </ td >
+                    //                             <td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse'> Tài liệu chuyên đề </td>
                     var tbody = "";
                     tbody += "<tbody>";
                     var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
@@ -188,20 +183,20 @@ namespace AutoEmailEduso
 
                         //Lay danh sach ID bai hoc duoc mo trong tuan
 
-                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate>= startWeek).ToList();
 
                         var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
                         //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                         var activeProgress = _lessonProgressService.CreateQuery().Find(
                             x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                            && x.LastDate <= endWeek && x.LastDate>= startWeek).ToEnumerable();
 
 
                         //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                         var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                             x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                            && x.LastDate <= endWeek && x.LastDate>= startWeek).ToEnumerable();
 
                         var stChuaVaoLop = classStudent - activeStudents.Count();
                         totalstChuaVaoLop += stChuaVaoLop;
@@ -227,7 +222,7 @@ namespace AutoEmailEduso
                         var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
 
                         //ket qua lam bai cua hoc sinh trong lop
-                        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried> 0)
                                            group r by r.StudentID
                                            into g
                                            select new StudentResult
@@ -238,9 +233,9 @@ namespace AutoEmailEduso
                                            }).ToList();
 
                         //render ket qua hoc tap
-                        var min8 = classResult.Count(t => t.AvgPoint >= 80);
-                        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                        var min0 = classResult.Count(t => t.AvgPoint > 0 && t.AvgPoint < 50);
+                        var min8 = classResult.Count(t => t.AvgPoint>= 80);
+                        var min5 = classResult.Count(t => t.AvgPoint>= 50 && t.AvgPoint <80);
+                        var min0 = classResult.Count(t => t.AvgPoint> 0 && t.AvgPoint <50);
                         var equal0 = classResult.Count(t => t.AvgPoint == 0);
 
                         if (index % 2 == 0)
@@ -267,7 +262,7 @@ namespace AutoEmailEduso
 
 
                         List<double> points = new List<double>();
-                        var classSbjes_active = _classSubjectService.CreateQuery().Find(o => o.StartDate <= endWeek && o.EndDate >= startWeek && o.TotalExams > 0 && o.ClassID == _class.ID).ToEnumerable();//danh sach mon hoc trong lop dang hoat dong
+                        var classSbjes_active = _classSubjectService.CreateQuery().Find(o => o.StartDate <= endWeek && o.EndDate>= startWeek && o.TotalExams> 0 && o.ClassID == _class.ID).ToEnumerable();//danh sach mon hoc trong lop dang hoat dong
                         
                         var diemtren8 = min8 == 0 ? "--" : min8.ToString();
                         var diemtren5 = min5 == 0 ? "--" : min5.ToString();
@@ -351,13 +346,23 @@ namespace AutoEmailEduso
                     body += tbody;
                     percent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100).ToString("#0.00") + "%";
                     isTest = true;
-                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
-                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com"} : listTeacherHeader;
+                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
+                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
                     var bccAddress = isTest == true ? null : new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, $"<p style='font: 0'> Tỉ lệ học sinh đã học: {percent}</p>" + body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject,body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"<p style='display: none'> Tỉ lệ học sinh đã học: {percent}</p>" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject,body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                 }
+                Console.WriteLine($"Send Weekly Report To {center.Name} Is Done!");
             }
+        }
+
+        public static async Task SendMonthlyReport()
+        {
+            var subject = $"Cáo cáo học tập trong tháng";
+            var body = @"<iframe src='https://quickchart.io/chart?c={type:'bar',data:{labels:[2012,2013,2014,2015,2016],datasets:[{label:'Users',data:[120,60,50,180,120]}]}}' title='W3Schools Free Online Web Tutorials'></iframe>";
+
+            var toAddress = new List<string> { "nguyenhoa.dev@gmail.com" };
+            _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
 
         public static async Task SendIncomingLesson()
@@ -366,7 +371,7 @@ namespace AutoEmailEduso
             Console.WriteLine(currentTime);
             var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
             var period = 60;
-            if (activeClasses != null && activeClasses.Count() > 0)
+            if (activeClasses != null && activeClasses.Count()> 0)
             {
                 foreach (var @class in activeClasses)
                 {
@@ -374,7 +379,7 @@ namespace AutoEmailEduso
                         .OrderBy(t => t.ClassID)
                         .ThenBy(t => t.ClassSubjectID)
                         .ThenBy(t => t.StartDate).ToList();
-                    if (activeSchedules != null && activeSchedules.Count() > 0)
+                    if (activeSchedules != null && activeSchedules.Count()> 0)
                     {
                         string subjectID = "";
                         string classID = "";
@@ -515,6 +520,17 @@ namespace AutoEmailEduso
             public string StudentID { get; set; }
             public int ExamCount { get; set; }
             public double AvgPoint { get; set; }
+        }
+
+        private static void WriteText()
+        {
+            string fileLPath = @"G:\New folder\listStudenID.txt";
+
+            List<string> lines = new List<string>();
+            var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
+            lines.AddRange(StudentsID);
+
+            System.IO.File.WriteAllLines(fileLPath, lines);
         }
     }
 
