@@ -393,6 +393,7 @@ var ExamReview = (function () {
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
+        //debugger
         var _check = false;
         if (cautraloidung == cautraloi) { _check = true; }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
@@ -405,9 +406,18 @@ var ExamReview = (function () {
                     $('#' + quizId + ' .student-answer').append(_answer);
                     break;
                 case "QUIZ3":
+                    //debugger
                     var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
-                    if (!_check)//wrong answer                        
+                    //if (!_check)//wrong answer                        
+                    //    _answer.addClass("bg-danger");
+                    if (_check) {//dap an dung
+                        _answer.removeClass("bg-danger");
+                        _answer.addClass("bg-success");
+                    }
+                    else {//dap an sai
+                        _answer.removeClass("bg-success");
                         _answer.addClass("bg-danger");
+                    }
                     $('#' + quizId + ' .student-answer').append(_answer);
                     break;
                 case "QUIZ4":
@@ -480,7 +490,7 @@ var ExamReview = (function () {
                         }
                     }
 
-                    //debugger
+                        //debugger
                     var tile = tile.split(",");
                     tile.pop();
                     for (i = 0; i < tile.length; i++) {
@@ -488,57 +498,59 @@ var ExamReview = (function () {
                     }
                     var index = 0;
                     max = tile[0];
-                    for (i = 0; i < tile.length; i++) {
-                        if (max < tile[i]) {
-                            max = tile[i];
-                            index = i;
+                    if (max != 0) {
+                        for (i = 0; i < tile.length; i++) {
+                            if (max < tile[i]) {
+                                max = tile[i];
+                                index = i;
+                            }
                         }
-                    }
 
-                    var chosai = "";
-                    debugger
-                    if (listContent[index].length > content_answer.length) {
-                        for (i = 0; i < listContent[index].length; i++) {
-                            if (listContent[index][i] == content_answer[i]) {
-                                chosai += listContent[index][i];
-                            }
-                            else {
-                                chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
-                            }
-                        }
-                        //for (i = (listContent[index].length - content_answer.length); i < listContent[index].length; i++) {
-                        //    chosai += listContent[index][i];
-                        //}
-                    }
-                    else {
-                        for (i = 0; i < (content_answer.length - listContent[index].length); i++) {
-                            listContent[index] += "_";
-                        }
-                        for (i = 0; i < content_answer.length; i++) {
-                            if (listContent[index][i] == content_answer[i]) {
-                                //debugger
-                                if (i >= listContent[index][i].length) {
-                                    //listContent[index][i] += "";
-                                    //break;
-                                }
-                                //else {
+                        var chosai = "";
+                        //debugger
+                        if (listContent[index].length > content_answer.length) {
+                            for (i = 0; i < listContent[index].length; i++) {
+                                if (listContent[index][i] == content_answer[i]) {
                                     chosai += listContent[index][i];
-                                //}
+                                }
+                                else {
+                                    chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
+                                }
                             }
-                            else {
-                                chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
+                            //for (i = (listContent[index].length - content_answer.length); i < listContent[index].length; i++) {
+                            //    chosai += listContent[index][i];
+                            //}
+                        }
+                        else {
+                            for (i = 0; i < (content_answer.length - listContent[index].length); i++) {
+                                listContent[index] += "_";
+                            }
+                            for (i = 0; i < content_answer.length; i++) {
+                                if (listContent[index][i] == content_answer[i]) {
+                                    //debugger
+                                    if (i >= listContent[index][i].length) {
+                                        //listContent[index][i] += "";
+                                        //break;
+                                    }
+                                    //else {
+                                    chosai += listContent[index][i];
+                                    //}
+                                }
+                                else {
+                                    chosai += "<span style='color:red'>" + listContent[index][i] + "</span>";
+                                }
                             }
                         }
-                    }
 
-                    for (i = 0; i < listContent.length; i++) {
-                        if (i == index) {
-                            listContent[i] = chosai;
+                        for (i = 0; i < listContent.length; i++) {
+                            if (i == index) {
+                                listContent[i] = chosai;
+                            }
+                            html += listContent[i] + " | ";
                         }
-                        html += listContent[i] + " | ";
+                        $($(correct_answer).find(".text-success")[0]).html(html.substring(0, html.lastIndexOf('|') - 1));
+                        //debugger
                     }
-                    $($(correct_answer).find(".text-success")[0]).html(html.substring(0, html.lastIndexOf('|') - 1));
-                    debugger
                 }
             }
         }
@@ -695,7 +707,9 @@ var ExamReview = (function () {
         return html;
     }
 
+    //noi dap an
     var renderQUIZ3 = function (data) {
+        //debugger
         //writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -731,6 +745,7 @@ var ExamReview = (function () {
                 //if (!answer.IsCorrect) continue;
                 var media = renderMedia(answer.Media);
                 if (media == "") {
+                    //debugger
                     answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle' + (answer.IsCorrect ? " bg-success" : " d-none") + '" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
                 }
                 else {
