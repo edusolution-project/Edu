@@ -30,13 +30,13 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("LastDate")]
         public DateTime LastDate { get; set; }
         [JsonProperty("ExamDone")]
-        public double ExamDone { get; set; }
+        public long ExamDone { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
-        [JsonProperty("PracticeCount")]//Count of Completed Non-exam lesson 
-        public double PracticeCount { get; set; }
+        [JsonProperty("PracticeDone")]//Count of Completed Non-exam lesson 
+        public long PracticeDone { get; set; }
         [JsonProperty("PracticeAvgPoint")]//Avg Point of Non-exam lesson
         public double PracticeAvgPoint { get; set; }
         [JsonProperty("PracticePoint")]//Total Point of Non-exam lesson
@@ -80,7 +80,7 @@ namespace BaseCustomerEntity.Database
         {
             var currentObj = _chapterService.GetItemByID(item.ChapterID);
             if (currentObj == null) return;
-            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID);
 
             if (progress == null)
             {
@@ -102,7 +102,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdatePoint(LessonProgressEntity item, double pointchange = 0)
         {
-            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID);
             if (progress == null)
             {
                 return;
@@ -110,7 +110,7 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.ExamDone = progress.ExamDone + item.Multiple;
+                    progress.ExamDone += (long)item.Multiple;
                 progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
@@ -119,22 +119,19 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
         {
-            var progress = GetItemByChapterID(item.ChapterID, item.StudentID, item.ClassSubjectID);
+            var progress = GetItemByChapterID(item.ChapterID, item.StudentID);
             var change = (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;
             if (progress == null)
             {
-                progress = NewProgressEntity(_chapterService.GetItemByID(item.ChapterID), item.StudentID);
-                progress.LastLessonID = item.ID;
-                progress.PracticePoint += change;
-                await Collection.InsertOneAsync(progress);
+                return;
             }
             else
             {
-                if (item.Tried == 1 || progress.PracticeCount == 0)//new
-                    progress.PracticeCount = progress.PracticeCount + item.Multiple;
+                if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    progress.PracticeDone += (long)item.Multiple;
                 progress.LastLessonID = item.ID;
                 progress.PracticePoint += change;
-                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeCount;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
             await UpdateParentChap_PracticePoint(progress, change);
@@ -142,7 +139,7 @@ namespace BaseCustomerEntity.Database
 
         public async Task UpdateParentChap_PracticePoint(ChapterProgressEntity item, double pointchange)
         {
-            var progress = GetItemByChapterID(item.ParentID, item.StudentID, item.ClassSubjectID);
+            var progress = GetItemByChapterID(item.ParentID, item.StudentID);
             if (progress == null)
             {
                 var parentChap = _chapterService.GetItemByID(item.ParentID);
@@ -163,7 +160,7 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public ChapterProgressEntity GetItemByChapterID(string ChapterID, string StudentID, string ClassSubjectID)
+        public ChapterProgressEntity GetItemByChapterID(string ChapterID, string StudentID)
         {
             return CreateQuery().Find(t => t.ChapterID == ChapterID && t.StudentID == StudentID
             //&& t.ClassSubjectID == ClassSubjectID => don't need now
@@ -181,7 +178,6 @@ namespace BaseCustomerEntity.Database
             {
                 StudentID = StudentID,
                 Completed = 1,
-                PracticeCount = chapter.PracticeCount,
                 ClassID = chapter.ClassID,
                 ClassSubjectID = chapter.ClassSubjectID,
                 ChapterID = chapter.ID,

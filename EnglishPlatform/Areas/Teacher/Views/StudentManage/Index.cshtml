@@ -429,6 +429,7 @@
                     _form.append('PageSize', _that.view)
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
+                    _form.append('Center', '@center')
                     _form.append('Sort', 'DES')
                     let _url = '@processUrl("GetList", "StudentManage")'
                     axios.post(_url, _form)

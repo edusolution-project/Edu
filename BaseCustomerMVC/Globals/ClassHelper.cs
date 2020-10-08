@@ -85,20 +85,20 @@ namespace BaseCustomerMVC.Globals
         internal async Task ChangeLessonPracticeState(LessonEntity lesson)
         {
             if (lesson.ChapterID != "0")
-                await IncreaseChapterCounter(lesson.ChapterID, 0, 0, (lesson.IsPractice ? 1 : -1) * lesson.Multiple);
+                await IncreaseChapterCounter(lesson.ChapterID, 0, 0, (lesson.IsPractice ? 1 : -1) * (long)lesson.Multiple);
             else
-                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, 0, 0, (lesson.IsPractice ? 1 : -1) * lesson.Multiple);
+                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, 0, 0, (lesson.IsPractice ? 1 : -1) * (long)lesson.Multiple);
         }
 
-        public async Task IncreaseLessonCounter(LessonEntity lesson, double lessonInc, double examInc, double pracInc)
+        public async Task IncreaseLessonCounter(LessonEntity lesson, long lessonInc, long examInc, long pracInc)
         {
             if (lesson.ChapterID != "0")
-                await IncreaseChapterCounter(lesson.ChapterID, lessonInc, examInc * lesson.Multiple, pracInc * lesson.Multiple);
+                await IncreaseChapterCounter(lesson.ChapterID, lessonInc, examInc * (long)lesson.Multiple, pracInc * (long)lesson.Multiple);
             else
-                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, lessonInc, examInc * lesson.Multiple, pracInc * lesson.Multiple);
+                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, lessonInc, examInc * (long)lesson.Multiple, pracInc * (long)lesson.Multiple);
         }
 
-        public async Task IncreaseChapterCounter(string ID, double lesInc, double examInc, double pracInc, List<string> listid = null)//prevent circular ref
+        public async Task IncreaseChapterCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
         {
             var r = await _chapterService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>()
                 .Inc(t => t.TotalLessons, lesInc)
@@ -124,7 +124,7 @@ namespace BaseCustomerMVC.Globals
             }
         }
 
-        public async Task IncreaseClassSubjectCounter(string ID, double lesInc, double examInc, double pracInc)
+        public async Task IncreaseClassSubjectCounter(string ID, long lesInc, long examInc, long pracInc)
         {
             var r = await _classSubjectService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ClassSubjectEntity>()
                 .Inc(t => t.TotalLessons, lesInc)
@@ -140,7 +140,7 @@ namespace BaseCustomerMVC.Globals
             }
         }
 
-        public async Task IncreaseClassCounter(string ID, double lesInc, double examInc, double pracInc)
+        public async Task IncreaseClassCounter(string ID, long lesInc, long examInc, long pracInc)
         {
             var r = await _classService.CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ClassEntity>()
                 .Inc(t => t.TotalLessons, lesInc)

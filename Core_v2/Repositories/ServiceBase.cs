@@ -78,7 +78,7 @@ namespace Core_v2.Repositories
 
         public IFindFluent<T, T> GetAll()
         {
-            return _collection.Find(_ => true);
+            return _collection.Find(_ => _.ID != null);
         }
 
         public T CreateOrUpdate(T item)

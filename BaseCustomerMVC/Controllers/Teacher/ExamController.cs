@@ -38,31 +38,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly LessonProgressService _lessonProgressService;
+
+        private readonly LessonHelper _lessonHelper;
+
         //private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
         public ExamController(ExamService service,
-            ExamDetailService examDetailService
-        , StudentService studentService
-            , ClassService classService
-            , LessonService lessonService
-            , LessonScheduleService lessonScheduleService
-            , CloneLessonPartService cloneLessonPartService
-            , CloneLessonPartAnswerService cloneLessonPartAnswerService
-            , CloneLessonPartQuestionService cloneLessonPartQuestionService
-            , TeacherService teacherService
-            , LearningHistoryService learningHistoryService
-            , LessonPartQuestionService lessonPartQuestionService
-            , LessonPartAnswerService lessonPartAnswerService
-            , LessonProgressService lessonProgressService
-            //, ScoreService scoreService
-            , IRoxyFilemanHandler roxyFilemanHandler
+            ExamDetailService examDetailService,
+            StudentService studentService,
+            ClassService classService,
+            LessonService lessonService,
+            LessonScheduleService lessonScheduleService,
+            CloneLessonPartService cloneLessonPartService,
+            CloneLessonPartAnswerService cloneLessonPartAnswerService,
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            TeacherService teacherService,
+            LearningHistoryService learningHistoryService,
+            LessonPartQuestionService lessonPartQuestionService,
+            LessonPartAnswerService lessonPartAnswerService,
+            LessonProgressService lessonProgressService,
+            LessonHelper lessonHelper,
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _learningHistoryService = learningHistoryService;
             _service = service;
             _classService = classService;
             _lessonService = lessonService;
+            _lessonHelper = lessonHelper;
             _lessonScheduleService = lessonScheduleService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartService = cloneLessonPartService;
@@ -73,7 +77,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
             _lessonProgressService = lessonProgressService;
-            //_scoreService = scoreService;
+            _lessonHelper = lessonHelper;
             _roxyFilemanHandler = roxyFilemanHandler;
         }
 
@@ -307,7 +311,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast=false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast = false)
         {
             try
             {
@@ -319,7 +323,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var lesson = _lessonService.GetItemByID(currentExam.LessonID);
                     currentExam.Point = point;
                     currentExam.Marked = true;
-                    currentExam = _service.CompleteFull(currentExam, lesson, out point);
+                    currentExam = _lessonHelper.CompleteFull(currentExam, lesson, out point);
                     return new JsonResult(new Dictionary<string, object>
                         {
                             { "Data", _service.GetItemByID(oldItem.ExamID) }

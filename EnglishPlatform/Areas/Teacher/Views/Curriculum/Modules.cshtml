@@ -1147,7 +1147,7 @@
             }
         }
         //var title = document.getElementsByClassName('page-title')[0].children[0].textContent;
-        $('#title').text('@Html.Raw(ViewData["Title"])')
+        $('#title').text("@Html.Raw(ViewData["Title"].ToString().Replace("\"","'"))");
     }
 
     //-------------------

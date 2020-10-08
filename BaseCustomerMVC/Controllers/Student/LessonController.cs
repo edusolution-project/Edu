@@ -24,6 +24,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
+        private readonly LessonHelper _lessonHelper;
+
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
 
@@ -46,29 +48,28 @@ namespace BaseCustomerMVC.Controllers.Student
         //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
         public LessonController(
-            SubjectService subjectService
-            , CourseService courseService
-            , ClassService classService
-            //, ClassStudentService classStudentService
-            , StudentService studentService
-            , ClassSubjectService classSubjectService
-            , ChapterService chapterService
-            , ProgressHelper progressHelper
-            , ChapterProgressService chapterProgressService
-            , LessonScheduleService lessonScheduleService
-            , LearningHistoryService learningHistoryService
-
-            , LessonService lessonService
-            , ExamService examService
-            , ExamDetailService examDetailService
-            , LessonPartService lessonPartService
+            SubjectService subjectService,
+            CourseService courseService,
+            ClassService classService,
+            StudentService studentService,
+            ClassSubjectService classSubjectService,
+            ChapterService chapterService,
+            ProgressHelper progressHelper,
+            ChapterProgressService chapterProgressService,
+            LessonScheduleService lessonScheduleService,
+            LearningHistoryService learningHistoryService,
+            LessonService lessonService,
+            LessonHelper lessonHelper,
+            ExamService examService,
+            ExamDetailService examDetailService,
+            LessonPartService lessonPartService,
             //, LessonPartQuestionService lessonPartQuestionService
             //, LessonPartAnswerService lessonPartAnswerService
 
-            , CloneLessonPartService cloneLessonPartService
-            , CloneLessonPartAnswerService cloneLessonPartAnswerService
-            , CloneLessonPartQuestionService cloneLessonPartQuestionService
-            , VocabularyService vocabularyService
+            CloneLessonPartService cloneLessonPartService,
+            CloneLessonPartAnswerService cloneLessonPartAnswerService,
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            VocabularyService vocabularyService
             )
         {
             _subjectService = subjectService;
@@ -83,6 +84,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _learningHistoryService = learningHistoryService;
 
             _lessonService = lessonService;
+            _lessonHelper = lessonHelper;
             _lessonPartService = lessonPartService;
             _examService = examService;
             _examDetailService = examDetailService;
@@ -284,7 +286,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (conditionchap.BasePoint > 0 && chapter.PracticeCount > 0)
                     {
                         //check condition
-                        var progress = _chapterProgressService.GetItemByChapterID(conditionchap.ID, UserID, conditionchap.ClassSubjectID);
+                        var progress = _chapterProgressService.GetItemByChapterID(conditionchap.ID, UserID);
                         if (progress == null)
                         {
                             pass = false;
@@ -340,7 +342,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (!exam.Status)//Check review khi chưa kết thúc bài kiểm tra => hoàn thành bài
             {
-                _examService.CompleteNoEssay(exam, _lessonService.GetItemByID(exam.LessonID), out _);
+                _lessonHelper.CompleteNoEssay(exam, _lessonService.GetItemByID(exam.LessonID), out _);
                 //return Redirect($"/{basis}{Url.Action("Index", "Course")}");
                 exam = _examService.GetItemByID(exam.ID);
             }
@@ -547,7 +549,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (endtime < DateTime.UtcNow) // hết thời gian 
                     {
                         // => kết thúc bài kt
-                        lastexam = _examService.CompleteNoEssay(lastexam, lesson, out _);
+                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _);
                         //throw new NotImplementedException();
                         //lastexam.Status = true;
                         ////TODO: Chấm điểm last exam

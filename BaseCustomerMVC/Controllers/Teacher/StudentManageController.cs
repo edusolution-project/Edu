@@ -18,6 +18,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Microsoft.AspNetCore.Razor.Language;
 using OfficeOpenXml.ConditionalFormatting;
 using OfficeOpenXml.Style;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -421,10 +422,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { error = "Có lỗi, vui lòng thực hiện lại" });
         }
 
-        public JsonResult GetList(DefaultModel model, string Center, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID, string Sort = "ASC")
+        public JsonResult GetList(DefaultModel model, string basis, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID, string Sort = "ASC")
         {
             var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
-            if (!HasRole(User.Claims.GetClaimByType("UserID").Value, Center, "head-teacher"))
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Error", "Cơ sở không đúng"}
+                });
+            }
+            if (!HasRole(User.Claims.GetClaimByType("UserID").Value, basis, "head-teacher"))
             {
                 TeacherID = User.Claims.GetClaimByType("UserID").Value;
             }
@@ -468,19 +477,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
 
             var stfilter = new List<FilterDefinition<StudentEntity>>();
-
-            if (!string.IsNullOrEmpty(Center))
-            {
-                var @center = _centerService.GetItemByCode(Center);
-                if (@center == null) return new JsonResult(new Dictionary<string, object>
-                    {
-                        { "Error", "Cơ sở không đúng"}
-                    });
-                stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
-            }
+            stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(center.ID)));
 
             if (checkClass)
                 stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
+
             if (!string.IsNullOrEmpty(model.SearchText))
 
                 stfilter.Add(Builders<StudentEntity>.Filter.And(

@@ -458,9 +458,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _lessonService.CreateQuery().InsertOne(item);
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
+                    { 
                         _ = _chapterService.IncreaseLessonCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //TODO: CAP NHAT LAI DIEM
+                    }
                     else
+                    { 
                         _ = _courseService.IncreaseLessonCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //TODO: CAP NHAT LAI DIEM
+                    }
                 }
                 else
                 {

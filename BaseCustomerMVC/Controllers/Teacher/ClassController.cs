@@ -407,7 +407,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
                                    TotalPoint = result.TotalPoint,
                                    PracticePoint = result.PracticePoint,
-                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone: 0,
+                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
                                    AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
                                    TotalExams = @class.TotalExams,
                                    TotalLessons = @class.TotalLessons,
@@ -415,34 +415,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    TotalStudents = total_students,
                                    LastDate = result.LastDate
                                }).ToList();
-
-            //foreach (var student in _studentService.GetStudentsByClassId(@class.ID))
-            //{
-            //    var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
-            //        .AutoOrtherType(_classProgressService.GetStudentResult(@class.ID, student.ID) ?? new ClassProgressEntity()
-            //        {
-            //            ClassID = @class.ID,
-            //            StudentID = student.ID
-            //        }, new StudentSummaryViewModel()
-            //        {
-            //            Rank = -1,
-            //            TotalStudents = (int)total_students
-            //        });
-
-            //    summary.ClassName = @class.Name;
-            //    summary.FullName = student.FullName;
-            //    summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
-
-            //    summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
-            //    summary.ExamResult = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
-            //    summary.PracticeResult = @class.TotalPractices > 0 ? summary.PracticePoint / @class.TotalPractices : 0;
-
-            //    summary.TotalExams = @class.TotalExams;
-            //    summary.TotalLessons = @class.TotalLessons;
-            //    summary.TotalPractices = @class.TotalPractices;
-
-            //    data.Add(summary);
-            //}
             var response = new Dictionary<string, object>
             {
                 { "Data", listSummary},
@@ -489,11 +461,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    TotalStudents = total_students,
                                    LastDate = result.LastDate
                                }).ToList();
+            var rootChapters = _chapterService.GetSubChapters(ClassSubjectID, "0").ToList();
+            var chapterSummary = from r in rootChapters
+                                 select _progressHelper.GetChapterResults(r.ID).ToList();
 
             var response = new Dictionary<string, object>
             {
-                { "Data", listSummary },
-                { "Model", model }
+                { "Data", listSummary},
+                { "Chapter", rootChapters },
+                { "Student", students },
+                { "Result", chapterSummary }
             };
             return new JsonResult(response);
         }
