@@ -58,8 +58,8 @@
                 </select>
             </div>
             <div class="m-1 position-relative" v-if="searchCsbj != ''">
-                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()">
-                    Chọn chương cần xem <span class="caret"></span>
+                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
+                    Xem điểm theo tuần <span class="caret"></span>
                 </button>
                 <div style="position:absolute;left:0;top:40px;z-index:2" v-if="displaySelect">
                     <div id="selectCenters">
@@ -68,7 +68,7 @@
                                 <input type="checkbox" v-model="filterChap.SelectAll" v-on:change="checkToggleAll()" /><span class="lbl"> Tất cả chương </span>
                             </li>
                             <li v-for="(item,k) in scoreSbjChap" class="d-flex flex-row align-items-center">
-                                <input type="checkbox" :value="item.ID" v-model="filterChap.TargetChaps" /><span class="ml-1 lbl"> {{item.Name}} </span>
+                                <input type="checkbox" :value="item.ID" v-model="filterChap.TargetChaps" v-on:change="checkToggle()" /><span class="ml-1 lbl"> {{item.Name}} </span>
                             </li>
                         </ul>
                     </div>
@@ -1118,12 +1118,13 @@
                                 _that.scoreSbjStudent = response.data.Student;
                                 var result = response.data.Result;
                                 if (_that.scoreSbjChap.length > 0) {
-                                    for (i = 0; i < _that.scoreSbjChap.length; i++) {
+                                    for (i = 0; i < _that.scoreSbjChap.length && i < 2; i++) {
                                         this.filterChap.TargetChaps.push(_that.scoreSbjChap[i].ID);
                                         if (result != null)
                                             _that.scoreSbjChap[i].Result = result[i];
                                     }
-                                    this.filterChap.SelectAll = true;
+                                    if(_that.scoreSbjChap.length <= 2)
+                                        this.filterChap.SelectAll = true;
                                 }
                                 this.scoreSbjChap = _that.scoreSbjChap
                                 this.scoreSbjStudent = _that.scoreSbjStudent
@@ -1781,7 +1782,7 @@
                 },
                 getAvgTotal(pos, studentID) {
                     var rs = this.scoreSbjChap[pos].Result;
-                    console.log(rs);
+                    if (rs == null) return -1;
                     var result = rs.filter(t => t.StudentID == studentID);
                     if (result.length == 0)
                         return -1;
@@ -1834,7 +1835,6 @@
                     this.filterChap.SelectAll = (this.filterChap.TargetChaps.length == this.scoreSbjChap.length)
                 },
                 checkToggleAll() {
-
                     var _that = this
                     _that.filterChap.TargetChaps = []
                     if (_that.filterChap.SelectAll) {

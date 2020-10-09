@@ -241,7 +241,7 @@ namespace BaseCustomerMVC.Globals
                 {
                     progress.ExamDone += incCount;
                     progress.TotalPoint += incPoint;
-                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
                     await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ChapterProgressEntity>.Update
@@ -256,7 +256,7 @@ namespace BaseCustomerMVC.Globals
                     progress.PracticeDone += incPracCount;
                     progress.PracticePoint += incPracPoint;
 
-                    progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
                     await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassSubjectProgressEntity>.Update
@@ -309,7 +309,7 @@ namespace BaseCustomerMVC.Globals
 
                     progress.ExamDone += incCount;
                     progress.TotalPoint += incPoint;
-                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
                     await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassSubjectProgressEntity>.Update
@@ -326,7 +326,7 @@ namespace BaseCustomerMVC.Globals
 
                     progress.PracticeDone += incPracCount;
                     progress.PracticePoint += incPracPoint;
-                    progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
                     await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassSubjectProgressEntity>.Update
@@ -358,7 +358,7 @@ namespace BaseCustomerMVC.Globals
                 {
                     progress.ExamDone += incCount;
                     progress.TotalPoint += incPoint;
-                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
                     await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassSubjectProgressEntity>.Update
@@ -373,7 +373,7 @@ namespace BaseCustomerMVC.Globals
                     progress.PracticeDone += incPracCount;
                     progress.PracticePoint += incPracPoint;
 
-                    progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
                     await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassSubjectProgressEntity>.Update
@@ -409,12 +409,12 @@ namespace BaseCustomerMVC.Globals
                     progress.ExamDone += incCount;
                     progress.TotalPoint += incPoint;
 
-                    progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
                     await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassProgressEntity>.Update
                         .Inc(t => t.ExamDone, incCount)
-                        .Inc(t => t.TotalPoint, incCount)
+                        .Inc(t => t.TotalPoint, incPoint)
                         .Set(t => t.AvgPoint, progress.AvgPoint)
                         );
                 }
@@ -423,7 +423,7 @@ namespace BaseCustomerMVC.Globals
                     progress.PracticeDone += incPracCount;
                     progress.PracticePoint += incPracPoint;
 
-                    progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
                     await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
                         Builders<ClassProgressEntity>.Update

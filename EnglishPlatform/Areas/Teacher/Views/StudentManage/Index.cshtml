@@ -81,12 +81,12 @@
                         <a :href="'@processUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
                         <a :href="'@processUrl("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
                     </td>
-                    <td style="width:300px;text-align:left">
+                    <td style="text-align:left">
                         <template v-if="item.JoinedClasses != null && item.JoinedClasses.length == 1">
                             <a :href="'@processUrl("Detail", "Class")/' + item.JoinedClasses + '#module'">{{item.ClassName}}</a>
                         </template>
                         <template v-else>
-                            <div style=" white-space: nowrap; width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                            <div style="overflow: hidden; text-overflow: ellipsis;">
                                 <a href="javascript:void(0)" :title="item.ClassName" v-on:click="showListClass(item.ClassName,item.FullName,item.JoinedClasses)">{{item.ClassName}}</a>
                             </div>
                         </template>
@@ -144,6 +144,12 @@
     </script>
 
     <style>
+        #ed_table tr th:first-child,
+        #ed_table tr td:first-child {
+            width: 50px;
+            max-width: 50px;
+        }
+
         #app {
             font-family: "Avenir", Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;

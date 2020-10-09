@@ -115,7 +115,13 @@
 </section>
 
 @section Scripts{
-
+    <style>
+        #ed_table tr th:first-child,
+        #ed_table tr td:first-child {
+            width: 50px;
+            max-width: 50px;
+        }
+    </style>
     <script>
         Vue.use(VueQuillEditor)
         new Vue({

@@ -325,7 +325,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(new Dictionary<string, object> { });
             filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Centers.Any(c => c.Code == basis)));
             filter.Add(Builders<TeacherEntity>.Filter.Where(o => o.Subjects.Contains(SubjectID)));
+            //hide huonghl@utc.edu.vn
+            if (basis != "eduso")
+                filter.Add(Builders<TeacherEntity>.Filter.Where(t => t.Email != "huonghl@utc.edu.vn"));
             var teachers = _teacherService.Collection.Find(Builders<TeacherEntity>.Filter.And(filter));
+
             var response = new Dictionary<string, object>
             {
                 { "Data", teachers.ToList().Select(o => new
@@ -1215,6 +1219,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 nSbj.TotalLessons = course.TotalLessons;
                 nSbj.TotalPractices = course.TotalPractices;
                 nSbj.TotalExams = course.TotalExams;
+                nSbj.Image = course.Image;
 
                 var skill = _skillService.GetItemByID(nSbj.SkillID);
 
@@ -1232,7 +1237,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _courseHelper.CloneForClassSubject(nSbj);
 
                 if (notify)
-                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, skill?.Name, @class.StartDate, @class.EndDate, center.Name);
+                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, nSbj.CourseName, @class.StartDate, @class.EndDate, center.Name);
                 return nSbj.ID;
             }
             catch (Exception e)
