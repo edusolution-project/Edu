@@ -24,7 +24,6 @@ namespace BaseCustomerMVC.Globals
             ClassSubjectService classSubjectService,
             ChapterService chapterService,
             LessonService lessonService,
-
             LessonHelper lessonHelper
         )
         {
@@ -43,7 +42,7 @@ namespace BaseCustomerMVC.Globals
             return item;
         }
 
-        private async Task<ChapterEntity> CloneChapter(ChapterEntity item, string _userCreate, string orgClassSubjectID)
+        public async Task<ChapterEntity> CloneChapter(ChapterEntity item, string _userCreate, string orgClassSubjectID)
         {
             if (item.OriginID != "0")
                 _chapterService.Collection.InsertOne(item);
@@ -86,9 +85,17 @@ namespace BaseCustomerMVC.Globals
         internal async Task ChangeLessonPracticeState(LessonEntity lesson)
         {
             if (lesson.ChapterID != "0")
-                await IncreaseChapterCounter(lesson.ChapterID, 0, 0, lesson.IsPractice ? 1 : -1);
+                await IncreaseChapterCounter(lesson.ChapterID, 0, 0, (lesson.IsPractice ? 1 : -1) * (long)lesson.Multiple);
             else
-                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, 0, 0, lesson.IsPractice ? 1 : -1);
+                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, 0, 0, (lesson.IsPractice ? 1 : -1) * (long)lesson.Multiple);
+        }
+
+        public async Task IncreaseLessonCounter(LessonEntity lesson, long lessonInc, long examInc, long pracInc)
+        {
+            if (lesson.ChapterID != "0")
+                await IncreaseChapterCounter(lesson.ChapterID, lessonInc, examInc * (long)lesson.Multiple, pracInc * (long)lesson.Multiple);
+            else
+                await IncreaseClassSubjectCounter(lesson.ClassSubjectID, lessonInc, examInc * (long)lesson.Multiple, pracInc * (long)lesson.Multiple);
         }
 
         public async Task IncreaseChapterCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref

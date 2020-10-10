@@ -48,12 +48,17 @@ namespace BaseCustomerEntity.Database
 
         public async Task RemoveManyAsync(List<string> Ids)
         {
-            await Collection.DeleteManyAsync(t => Ids.Contains(t.ID));
+            await CreateQuery().DeleteManyAsync(t => Ids.Contains(t.ID));
         }
 
         public IEnumerable<CloneLessonPartQuestionEntity> GetByPartID(string PartID)
         {
             return CreateQuery().Find(o => o.ParentID == PartID).ToEnumerable();
+        }
+
+        public long CountByLessonID(string LessonID)
+        {
+            return CreateQuery().CountDocuments(t => t.LessonID == LessonID);
         }
     }
 

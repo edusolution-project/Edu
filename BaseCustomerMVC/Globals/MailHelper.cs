@@ -37,6 +37,25 @@ namespace BaseCustomerMVC.Globals
                "<p>Email này cùng các tệp tin đính kèm là các thông tin bảo mật của Eduso và chỉ có mục đích được gửi cho những người nhận được nêu tại email. Nếu Quý vị không phải là người nhận dự kiến của email này cùng các tập tin kèm theo, vui lòng không thực hiện bất cứ hành động nào trên cơ sở email và các tập tin này. Việc chia sẻ, phát tán bất cứ nội dung nào của email này cùng các tập tin đính kèm là hoàn toàn không được phép nếu không có sự đồng ý bằng văn bản của Eduso. Eduso không chịu trách nhiệm về sự truyền tải chính xác, đầy đủ và kịp thời của thông tin trong email và các tập tin này. Trường hợp Quý vị nhận được email này do có sự nhầm lẫn hoặc lỗi hệ thống, vui lòng thông báo cho Eduso qua email này và xóa email cùng các tập tin đính kèm khỏi hệ thống của Quý vị.Trân trọng cảm ơn.</p>" +
                "</div>";
 
+        private static readonly string extendTeacher = 
+        @"<div style='color:#333;font-size: 90%;'>
+            <div>
+                <i style='text-decoration: underline;'>Bạn có thể:</i>
+            </div>
+            <div style='padding-left: 30px;'>
+                <p style='padding-top: 5px;margin: 0;'>
+                    - Vào <b style='color: red;'>""Lớp học của tôi""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
+                    - Vào <b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
+                    - Vào <b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
+                    - Vào <b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học
+                </p>
+            </div>
+        </div>";
+
+        private static readonly string extendStudent = "<div style='padding-top:20px; border-top:solid 1px #CCC; margin-top: 50px; font-size: 0.6rem; color: #999'>" +
+               "<p>Email này cùng các tệp tin đính kèm là các thông tin bảo mật của Eduso và chỉ có mục đích được gửi cho những người nhận được nêu tại email. Nếu Quý vị không phải là người nhận dự kiến của email này cùng các tập tin kèm theo, vui lòng không thực hiện bất cứ hành động nào trên cơ sở email và các tập tin này. Việc chia sẻ, phát tán bất cứ nội dung nào của email này cùng các tập tin đính kèm là hoàn toàn không được phép nếu không có sự đồng ý bằng văn bản của Eduso. Eduso không chịu trách nhiệm về sự truyền tải chính xác, đầy đủ và kịp thời của thông tin trong email và các tập tin này. Trường hợp Quý vị nhận được email này do có sự nhầm lẫn hoặc lỗi hệ thống, vui lòng thông báo cho Eduso qua email này và xóa email cùng các tập tin đính kèm khỏi hệ thống của Quý vị.Trân trọng cảm ơn.</p>" +
+               "</div>";
+
         public async Task<int> SendBaseEmail(List<string> toAddresses, string subject, string body, int action_type, List<string> ccAddresses = null, List<string> bccAddressses = null, string fromMail = "", string fromPass = "", string fromName = "", List<AFile> files = null)
         {
             string senderID = _defaultSender;
@@ -120,7 +139,7 @@ namespace BaseCustomerMVC.Globals
 
         public async Task SendRegisterEmail(AccountEntity user, string Password)
         {
-            string subject = "Chúc mừng " + user.Name + " đã đăng ký tài khoản thành công tại Eduso";
+            string subject = "Chào mừng " + user.Name + " đã tham gia hệ thống EDUSO";
             string body = "Chào " + user.Name + "," +
                 "<p>Tài khoản của bạn đã khởi tạo thành công trên nền tảng hỗ trợ học tập của <a href='https://eduso.vn'>Eduso</a></p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
@@ -137,8 +156,8 @@ namespace BaseCustomerMVC.Globals
             string body = "Chào " + Name + ",";
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
-                subject = "Chúc mừng " + Name + " đã trở thành học viên của " + centerName;
-                body = "<p>Bạn vừa được đăng ký làm học viên của <b>" + centerName + "</b>!</p>" +
+                subject = "Chào mừng " + Name + " đã trở thành học viên của " + centerName;
+                body += "<p>Bạn vừa được đăng ký làm học viên của <b>" + centerName + "</b>!</p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
@@ -146,8 +165,8 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
-                body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                subject = "Chào mừng " + Name + " đã trở thành học viên của " + centerName;
+                body += "<p>Bạn vừa được đăng ký làm học viên của " + centerName + "!</p>" +
                 "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             }
             var toAddress = new List<string> { Email };
@@ -189,38 +208,41 @@ namespace BaseCustomerMVC.Globals
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.RESET_PASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendTeacherJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName)
+        public async Task SendTeacherJoinCenterNotify(string Name, string Email, string VisiblePassword, string centerName, string type = "giáo viên")
         {
             string subject = "";
+            subject = "Chào mừng " + Name + " tham gia hệ thống EDUSO";
             string body = "Chào " + Name + ",";
+            
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
-                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
-                body = "<p>Bạn vừa được đăng ký làm giáo viên của <b>" + centerName + "</b>!</p>" +
+                body = "<p>Bạn vừa được đăng ký làm "+ type + " của <b>" + centerName + "</b>!</p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
+                extendTeacher +
                 "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             }
             else
             {
-                subject = "Chúc mừng " + Name + " đã trở thành giáo viên của " + centerName;
                 body = "<p>Bạn vừa được đăng ký làm giáo viên của " + centerName + "!</p>" +
+                extendTeacher +
                 "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             }
             var toAddress = new List<string> { Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
 
-        public async Task SendTeacherJoinClassNotify(string Name, string Email, string className, string skillname, DateTime startdate, DateTime enddate, string CenterName)
+        public async Task SendTeacherJoinClassNotify(string Name, string Email, string className, string courseName, DateTime startdate, DateTime enddate, string CenterName)
         {
             string subject = "Thông báo phân công giảng dạy - " + CenterName;
             string body = "Chào " + Name + ",";
 
-            if (!string.IsNullOrEmpty(className) && !(string.IsNullOrEmpty(skillname)))
+            if (!string.IsNullOrEmpty(className) && !(string.IsNullOrEmpty(courseName)))
             {
-                body += ("<p>Bạn vừa được phân công dạy môn: <b>" + skillname + "</b> - lớp <b>" + className + "</b> tại <b>" + CenterName + "</b></p>");
+                body += ("<p>Bạn vừa được phân công dạy học liệu: <b>" + courseName + "</b> - lớp <b>" + className + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
+                body += extendTeacher;
             }
             else
                 return;
@@ -237,17 +259,18 @@ namespace BaseCustomerMVC.Globals
 
             body += "<p>Bạn vừa được phân công dạy lớp <b>" + @class.Name + "</b> tại <b>" + CenterName + "</b><p>";
             body += "<p>Thời gian mở lớp từ: <b>" + @class.StartDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + @class.EndDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b><p>";
-            body += "<p>Các môn được phân công: <br/>";
-
+            body += "<p>Các học liệu được phân công: <br/>";
+            
             if (TC.SubjectList == null || TC.SubjectList.Count == 0) return;
 
             foreach (var item in TC.SubjectList)
             {
-                body += (". " + item.SkillName + " (" + item.BookName + ")<br/>");
+                body += (". " + item.BookName + "<br/>");
             }
 
             body += "</p>";
             body += "<p>Quản lý lớp tại <a href='https://eduso.vn'>Eduso.vn</a><p>";
+            body += extendTeacher;
             var toAddress = new List<string> { TC.Email };
             _ = await SendBaseEmail(toAddress, subject, body, MailPhase.JOIN_CLASS, bccAddressses: new List<string> { _defaultSender });
         }
@@ -259,21 +282,24 @@ namespace BaseCustomerMVC.Globals
 
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
-                subject = "Chúc mừng " + StudentName + " đã trở thành học viên của " + CenterName;
-                body = "<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
+                subject = "Chào mừng " + StudentName + " đã trở thành học viên của " + CenterName;
+                body += "<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>" +
                 "<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>" +
                 "<br/>" +
                 "<p>Thông tin đăng nhập của bạn</p>" +
                 "<p>Website đăng nhập: <b><a href='https://eduso.vn/login' target='_blank'>Eduso.vn</a></b></p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
-                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn' target='_blank'>Eduso.vn</a><p>";
+                "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn' target='_blank'>Eduso.vn</a><p>" +
+                extendStudent;
+                
             }
             else
             {
                 body += ("<p>Bạn vừa tham gia vào lớp <b>" + ClassName + "</b> tại <b>" + CenterName + "</b></p>");
                 body += ("<p>Lớp được mở từ: <b>" + startdate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + enddate.ToLocalTime().ToString("dd/MM/yyyy") + "</b></p>");
                 body += "<p>Đăng nhập để bắt đầu học ngay trên <a href='https://eduso.vn/login'>Eduso.vn</a><p>";
+                body += extendStudent;
             }
             //body += "<p>Đăng nhập để trải nghiệm ngay trên <a href='https://eduso.vn'>Eduso.vn</a><p>";
             var toAddress = new List<string> { Email };

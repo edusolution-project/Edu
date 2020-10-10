@@ -34,21 +34,24 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
 
         private readonly StudentHelper _studentHelper;
+        private readonly TeacherService _teacherService;
         private readonly FileProcess _fileProcess;
 
-        public CenterController(CenterService service
-            , RoleService roleService
-            , AccountService accountService
-            , StudentService studentService
-            , StudentHelper studentHelper
-            , FileProcess fileProcess
-            , IHostingEnvironment evn
+        public CenterController(
+            CenterService service,
+            RoleService roleService,
+            AccountService accountService,
+            TeacherService teacherService,
+            StudentHelper studentHelper,
+            FileProcess fileProcess,
+            IHostingEnvironment evn
             )
         {
             _env = evn;
             _service = service;
             _roleService = roleService;
             _accountService = accountService;
+            _teacherService = teacherService;
             _fileProcess = fileProcess;
             _studentHelper = studentHelper;
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
@@ -153,50 +156,19 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (upload != null && upload.Length > 0)
             {
                 var fileName = item.Code + "_" + Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
-
-                //var dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/upload/center");
-                //var path = Path.Combine(dirPath, fileName);
-
-                //if (!Directory.Exists(dirPath))
-                //    Directory.CreateDirectory(dirPath);
-
-                //var standardSize = new SixLabors.Primitives.Size(512, 384);
-
-                //using (Stream inputStream = upload.OpenReadStream())
-                //{
-                //    using (var image = Image.Load<Rgba32>(inputStream))
-                //    {
-                //        var imageEncoder = new JpegEncoder()
-                //        {
-                //            Quality = 90,
-                //            Subsample = JpegSubsample.Ratio444
-                //        };
-
-                //        int width = image.Width;
-                //        int height = image.Height;
-                //        if ((width > standardSize.Width) || (height > standardSize.Height))
-                //        {
-                //            ResizeOptions options = new ResizeOptions
-                //            {
-                //                Mode = ResizeMode.Max,
-                //                Size = standardSize,
-                //            };
-                //            image.Mutate(x => x
-                //             .Resize(options));
-
-                //            //.Grayscale());
-                //        }
-                //        image.Save(path, imageEncoder); // Automatic encoder selected based on extension.
-                //    }
-                //}
-                //var url = $"{"/upload/center/"}{fileName}";
                 item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", "", true, 200, 300);
             }
 
             _service.Save(item);
+
+            //Check Default Teacher: huonghl@utc.edu.vn
+            _teacherService.CreateQuery().UpdateMany(t => t.Email == "huonghl@utc.edu.vn",
+                Builders<TeacherEntity>.Update.AddToSet(t => t.Centers, new CenterMemberEntity { CenterID = item.ID, Code = item.Code, Name = item.Name, RoleID = _roleService.GetItemByCode("head-teacher").ID })
+                );
+
             Dictionary<string, object> response = new Dictionary<string, object>()
                     {
-                        {"Data",item },
+                        {"Data", item },
                         {"Error",null },
                         {"Msg","Cập nhật thành công" }
                     };

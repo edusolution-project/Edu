@@ -15,15 +15,21 @@ namespace BaseCustomerMVC.Models
         public string StudentID { get; set; }
         [JsonProperty("AvgPoint")]
         public double AvgPoint { get; set; }
+        [JsonProperty("PracticeAvgPoint")]
+        public double PracticeAvgPoint { get; set; }
         [JsonProperty("TotalPoint")]
         public double TotalPoint { get; set; }
         [JsonProperty("ExamDone")]
         public long ExamDone { get; set; }
+        [JsonProperty("PracticeDone")]
+        public long PracticeDone { get; set; }
         [JsonProperty("Count")]
         public int Count { get; set; }
         [JsonProperty("PracticePoint")]
         public double PracticePoint { get; set; }
         [JsonProperty("RankPoint")]
         public double RankPoint { get; set; }
+        [JsonProperty("LastDate")]
+        public DateTime LastDate { get; set; }
     }
 }

@@ -106,8 +106,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.ExamDone++;
-                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);
+                    progress.ExamDone += (long)item.Multiple;
+                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
@@ -124,7 +124,8 @@ namespace BaseCustomerEntity.Database
             else
             {
                 if (item.Tried == 1 || progress.PracticeDone == 0)//new
-                    progress.PracticeDone++;
+                    progress.PracticeDone += (long)item.Multiple;
+                progress.LastLessonID = item.ID;
                 progress.PracticePoint += change;
                 progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
@@ -134,13 +135,6 @@ namespace BaseCustomerEntity.Database
         public ClassSubjectProgressEntity GetItemByClassSubjectID(string ClassSubjectID, string StudentID)
         {
             return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).FirstOrDefault();
-        }
-
-        public IEnumerable<ClassSubjectProgressEntity> GetClassListOfCurrentSubject(string ClassSubjectID)
-        {
-            var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (currentObj == null) return null;
-            return CreateQuery().Find(t => t.ClassID == currentObj.ClassID).ToEnumerable();
         }
 
         public IEnumerable<ClassSubjectProgressEntity> GetListOfCurrentSubject(string ClassSubjectID)

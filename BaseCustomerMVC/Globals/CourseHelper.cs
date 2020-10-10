@@ -53,7 +53,7 @@ namespace BaseCustomerMVC.Globals
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
         {
             _ = CloneChapterForClassSubject(classSubject);
-            _courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
+            //_courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
         internal long CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)

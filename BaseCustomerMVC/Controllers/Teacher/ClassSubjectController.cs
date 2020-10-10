@@ -102,7 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               GradeID = r.GradeID,
                               GradeName = grade.Name,
                               CourseID = r.CourseID,
-                              CourseName = course.Name,
+                              CourseName = string.IsNullOrEmpty(course.Name) ? skill?.Name : course.Name,
                               TeacherID = r.TeacherID,
                               TeacherName = teacher.FullName,
                               TypeClass = r.TypeClass
@@ -170,6 +170,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //        {"Error", ex.Message }
             //    });
             //}
+        }
+
+
+        [HttpPost]
+        public JsonResult GetFullStructure(string ID)
+        {
+            var currentCs = _classSubjectService.GetItemByID(ID);
+            if (currentCs == null)
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy học liệu" }
+                    });
+
+            var courseDetail = new Dictionary<string, object>
+            {
+                { "Chapters", _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
+            };
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", courseDetail }
+                };
+
+            return new JsonResult(response);
         }
 
         [HttpPost]
