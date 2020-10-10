@@ -1,0 +1,17 @@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration _config
+@{
+    ViewData["Title"] = "Support";
+}
+<h1>Support</h1>
+@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+<script type="text/javascript" charset="utf-8">
+    var currentEmail = '@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value';
+    var currentUser = {
+        id: '@User.FindFirst("UserID")?.Value',
+        name: '@User.Identity.Name',
+        email: '@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value',
+        type: '@User.FindFirst("Type")?.Value',
+        isAdmin : '@_config.GetSection("IsAdmin")?.Value.Split(',').Contains(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)'
+    };
+</script>
+

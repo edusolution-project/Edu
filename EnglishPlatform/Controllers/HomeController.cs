@@ -54,6 +54,7 @@ namespace EnglishPlatform.Controllers
 
         private readonly ISession _session;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IConfiguration _configuration;
 
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
@@ -74,6 +75,7 @@ namespace EnglishPlatform.Controllers
             , QCService QCService
             , IConfiguration iConfig
             , IHttpContextAccessor httpContextAccessor
+            , IConfiguration configuration
             )
         {
             _accessesService = accessesService;
@@ -99,6 +101,7 @@ namespace EnglishPlatform.Controllers
             host = iConfig.GetValue<string>("SysConfig:Domain");
             _httpContextAccessor = httpContextAccessor;
             _session = _httpContextAccessor.HttpContext.Session;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -1042,6 +1045,11 @@ namespace EnglishPlatform.Controllers
             {
                 return ex.Message;
             }
+        }
+
+        public IActionResult Support()
+        {
+            return View();
         }
     }
 
