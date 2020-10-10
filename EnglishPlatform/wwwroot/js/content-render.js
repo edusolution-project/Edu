@@ -1672,7 +1672,7 @@ var Lesson = (function () {
     }
 
     var modalEditPart = function (id) {
-        debugger
+        //debugger
         stopAllMedia();
         var modalForm = window.partForm;
         $('#action').val(config.url.save_part);
@@ -3861,13 +3861,58 @@ var Lesson = (function () {
         }
     }
 
+    //check ki tu dac biet
+    var checkSpecialCharacters = function (chain) {
+        //debugger
+        //var newchain = "";
+        var space = ["&nbsp;", "&shy;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;", "&lrm;", "&rlm;", "&#160;", "\00A0", "&#xa0;", "\A0"];//khoang trang
+        var beginningClose = ["&rsquo;", "&#8217;", "\2019", "&#x2019;", "\2019", "&acute;", "&#180;", "\00B4", "&#xb4;", "\B4","’"];//nhay don dong
+        var beginningOpen = ["&lsquo;", "&#8216;", "\2018", "&#x2018;", "\2018","‘"];//nhay don mo
+        var quotationOpen = ["&ldquo;", "&#8220;", "\201C", "&#x201C;", "\201C","“"];//nhay kep mo
+        var quotationClose = ["&rdquo;", "&#8221;", "\201D", "&#x201D;", "\201D","”"];//nhay kep dong
+
+
+
+        for (i = 0; i < space.length; i++) {
+            //debugger
+            if (chain.includes(space[i])) {
+                chain = chain.replaceAll(space[i]," ");
+            }
+        }
+        for (i = 0; i < beginningClose.length; i++) {
+            if (chain.includes(beginningClose[i])) {
+                chain = chain.replaceAll(beginningClose[i],"'")
+            }
+        }
+        for (i = 0; i < beginningOpen.length; i++) {
+            if (chain.includes(beginningOpen[i])) {
+                chain = chain.replaceAll(beginningOpen[i], "'")
+            }
+        }
+        for (i = 0; i < quotationClose.length; i++) {
+            if (chain.includes(quotationClose[i])) {
+                chain = chain.replaceAll(quotationClose[i], "\"")
+            }
+        }
+        for (i = 0; i < quotationOpen.length; i++) {
+            if (chain.includes(quotationOpen[i])) {
+                chain = chain.replaceAll(quotationOpen[i], "\"")
+            }
+        }
+        return chain;
+    }
+
+    //dien cau hoi phan bai lam cua hoc vien
     var AnswerFillQuestion = function (spanID) {
+        //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
         var type = dataset.type;
         var questionId = dataset.questionId;
-        var value = $('#' + spanID).text();
+        var a = $('#' + spanID).text();
+        var value = checkSpecialCharacters(a);
+        //debugger
         var dataform = new FormData();
 
         dataform.append("ExamID", $("input[name=ExamID]").val());
@@ -4200,6 +4245,8 @@ var Lesson = (function () {
 
     window.SwitchMode = switchMode;
     window.ToggleQuizExplain = ToggleQuizExplain;
+
+    window.checkSpecialCharacters = checkSpecialCharacters;
     return LessonInstance;
 }());
 
@@ -4253,12 +4300,21 @@ var submitForm = function (event, modalId, callback) {
 
 
     //console.log(formdata);
-
+    debugger
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
+    else {
+        //replace ki tu dac biet
+        var txt = CKEDITOR.instances.editor.getData();
+        var description = checkSpecialCharacters(txt);
+        formdata.delete("Description");
+        formdata.append("Description", description);
+        debugger
+    }
+
 
     $('div.editorck').each(function (idx, obj) {
         if ($(this).siblings("[id^=cke_]").length > 0) {

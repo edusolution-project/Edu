@@ -386,6 +386,20 @@ var ExamReview = (function () {
         return html;
     }
 
+    //loai bo dau cach - ki tu dac biet
+    var checkSpecialCharacters = function (chain) {
+        //debugger
+        //var newchain = "";
+        var space = ["&nbsp;", "&shy;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;", "&lrm;", "&rlm;", "&#160;", "\00A0", "&#xa0;","\A0"];
+        for (i = 0; i < space.length; i++) {
+            //debugger
+            if (chain.includes(space[i])) {
+                chain = chain.replaceAll(space[i], "_");
+            }
+        }
+        return chain;
+    }
+
     var renderAnswer = function (data, type) {
         //debugger
         var quizId = data.QuestionID;
@@ -434,20 +448,23 @@ var ExamReview = (function () {
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
-
+                //debugger
                 if (_check) {
+                    var content_answer = "";
                     var html = "";
                     $('#' + quizId + ' .student-answer').append("<span class='text-success'>" + data.AnswerValue + "</span>");
 
                     var _answer = $("#quiz2-" + quizId)[0];
-                    var content_answer = $(_answer).find(".text-success")[0].textContent.trim();
+                    content_answer = $(_answer).find(".text-success")[0].textContent.trim();
 
                     var correct_answer = _answer.nextElementSibling;
                     var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
                     var listContent = content_correct_answer.split(' | ');
+                    debugger
                     for (i = 0; i < listContent.length; i++) {
                         //debugger
                         if (listContent[i] == content_answer) {
+                        //if (data.Point>0) {
                             html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
                         }
                         else {
@@ -462,28 +479,59 @@ var ExamReview = (function () {
                     $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
 
                     var _answer = $("#quiz2-" + quizId)[0];
-                    var content_answer = $(_answer).find(".text-danger")[0].textContent;
+                    var a = $(_answer).find(".text-danger")[0].textContent;
+                    var content_answer = checkSpecialCharacters(a);
 
                     var correct_answer = _answer.nextElementSibling;
                     var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
                     var listContent = content_correct_answer.split(' | ');
+
+                    for (i = 0; i < listContent.length; i++) {
+                        listContent[i] = checkSpecialCharacters(listContent[i]);
+                    }
+
                     var html = "";
                     var tile = "";
+                    
+                    //for (i = 0; i < listContent.length; i++) {
+                    //    debugger
+                    //    if (listContent[i].length > content_answer.length) {
+                    //        var test1 = 0;
+                    //        for (j = 0; j < listContent[i].length; j++) {
+                    //            if (listContent[i][j] == content_answer[j]) {
+                    //                test1++;
+                    //            }
+                    //        }
+                    //        tile += test1 + ",";
+                    //    }
+                    //    else {
+                    //        var test2 = 0;
+                    //        for (j = 0; j < content_answer.length; j++) {
+                    //            if (listContent[i][j] == content_answer[j]) {
+                    //                test2++;
+                    //            }
+                    //        }
+                    //        tile += test2 + ",";
+                    //    }
+                    //}
+
+                    //debugger
                     for (i = 0; i < listContent.length; i++) {
-                        //debugger
-                        if (listContent[i].length > content_answer.length) {
+                        var arrayTxt1 = listContent[i].split(" ");//dap an dung
+                        var arrayTxt2 = content_answer.split(" ");//dap an hoc sinh dien
+                        if (arrayTxt1.length > arrayTxt2.length) {
                             var test1 = 0;
-                            for (j = 0; j < listContent[i].length; j++) {
-                                if (listContent[i][j] == content_answer[j]) {
+                            for (j = 0; j < arrayTxt2.length; j++) {
+                                if (arrayTxt1[j] == arrayTxt2[j]) {
                                     test1++;
                                 }
                             }
                             tile += test1 + ",";
                         }
                         else {
-                            var test2 = 0;
-                            for (j = 0; j < content_answer.length; j++) {
-                                if (listContent[i][j] == content_answer[j]) {
+                            test2 = 0;
+                            for (j = 0; j < arrayTxt1.length; j++) {
+                                if (arrayTxt1[j] == arrayTxt2[j]) {
                                     test2++;
                                 }
                             }
@@ -491,7 +539,7 @@ var ExamReview = (function () {
                         }
                     }
 
-                    
+
                     //debugger
                     var tile = tile.split(",");
                     tile.pop();
@@ -501,6 +549,7 @@ var ExamReview = (function () {
                     var index = 0;
                     max = tile[0];
 
+                    //debugger
                     if (max != 0) {
                         for (i = 0; i < tile.length; i++) {
                             if (max < tile[i]) {
@@ -512,35 +561,53 @@ var ExamReview = (function () {
                         var chodung1 = "";//ben dap an hoc sinh tra loi
                         var chodung2 = "";//ben dap an dung
 
-                        var detail_CorrectAnswer = listContent[index].split(" ");
-                        var detail_Answer = content_answer.split(" ");
+                        var detail_CorrectAnswer = listContent[index].split(" "); //dap an dung của hệ thống
+                        var detail_Answer = content_answer.split(" "); //dap an hoc vien dien
                         //debugger
-                        if (detail_CorrectAnswer.length >= detail_Answer.length) {//TH dap an dung dai hon dap an hoc sinh dien
-                            for (i = 0; i < detail_CorrectAnswer.length; i++) {
-                                if (detail_CorrectAnswer[i] == detail_Answer[i]) {
-                                    chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span >" + detail_CorrectAnswer[i] + "</span> ";
-                                }
-                                else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600;text-decoration: underline'>" + detail_CorrectAnswer[i] + "</span> ";
-                                }
-                            }
-                        }
-                        else {//TH dap an dung ngan hon dap an hoc sinh dien
+                        if (detail_CorrectAnswer.length == detail_Answer.length) {//TH dap an dung = dap an hoc sinh dien
+                            //debugger
                             for (i = 0; i < detail_Answer.length; i++) {
                                 if (detail_CorrectAnswer[i] == detail_Answer[i]) {
                                     chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span >" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
                                     chodung1 += "<span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                }
+                            }
+                        }
+                        else if (detail_CorrectAnswer.length > detail_Answer.length) {//TH dap an dung dai hon dap an hoc sinh dien
+                            //debugger
+                            for (i = 0; i < detail_Answer.length; i++) {
+                                if (detail_CorrectAnswer[i] == detail_Answer[i]) {
+                                    chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                }
+                                else {
+                                    chodung1 += " <span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += " <span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                }
+                            }
+                            for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
+                                chodung2 += detail_CorrectAnswer[i];
+                            }
+                        }
+                        else {//TH dap an dung ngan hon dap an hoc sinh dien
+                            //debugger
+                            for (i = 0; i < detail_CorrectAnswer.length; i++) {
+                                if (detail_CorrectAnswer[i] == detail_Answer[i]) {
+                                    chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                }
+                                else {
+                                    chodung1 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                                     //chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
-                            //for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
-                            //    chodung1 += "<span style='font-weight:600'>" + detail_Answer[i] + "</span> ";
-                            //}
+                            for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
+                                chodung1 += "<span style='font-weight:600'>" + detail_Answer[i] + "</span> ";
+                            }
                         }
                         newlistContent = "";
                         for (i = 0; i < listContent.length; i++) {

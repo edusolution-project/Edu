@@ -1311,6 +1311,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
+
+        //chạy lại data cho phần điền từ
+        public async Task<JsonResult> UpdateAnswer()
+        {
+            try
+            {
+                return Json("OK");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
     }
 
     public class PronunExplain

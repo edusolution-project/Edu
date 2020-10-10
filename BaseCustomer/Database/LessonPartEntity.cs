@@ -25,7 +25,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("IsExam")]
         public bool IsExam { get; set; }
         [JsonProperty("Point")]
-        public double Point { get; set; }
+         public double Point { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
