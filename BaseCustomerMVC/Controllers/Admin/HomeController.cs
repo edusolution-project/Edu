@@ -183,7 +183,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             var cids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
             var delcIds = _clonelessonPartService.CreateQuery().Find(t => !cids.Contains(t.ParentID)).Project(t => t.ID).ToList();
-            
+
             foreach (var partid in delcIds)
             {
                 var part = _clonelessonPartService.GetItemByID(partid);
@@ -349,7 +349,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             if (ex.Marked) _lessonHelper.CompleteFull(ex, ls, out _, false);
                             else
                                 if (_examService.IsOver(ex.ID))
-                                _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
+                                    _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
                         }
                     }
                 }
@@ -359,6 +359,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             str += " End. ";
             return Json(str);
         }
+
+        public async Task<JsonResult> Remark(string ExamID)//Big fix
+        {
+            var exam = _examService.GetItemByID(ExamID);
+            var lesson = _clonelessonService.GetItemByID(exam.LessonID);
+            _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+            return Json("OK");
+        }
+
 
         public JsonResult FixFillquiz()
         {

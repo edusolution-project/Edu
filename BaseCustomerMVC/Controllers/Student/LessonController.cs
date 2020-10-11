@@ -714,18 +714,18 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Msg","Học viên không có trong danh sách lớp" }
                     });
 
-            var course = _courseService.GetItemByID(currentCs.CourseID);
+            //var course = _courseService.GetItemByID(currentCs.CourseID);
 
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
+            //if (course == null)
+            //{
+            //    return new JsonResult(new Dictionary<string, object> {
+            //            {"Data",null },
+            //            {"Error",model },
+            //            {"Msg","Không có thông tin giáo trình" }
+            //        });
+            //}
 
-            var classSchedule = new ClassScheduleViewModel(course)
+            var classSchedule = new ClassScheduleViewModel()
             {
                 Chapters = _chapterService.GetSubChapters(currentCs.ID, ChapterID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()

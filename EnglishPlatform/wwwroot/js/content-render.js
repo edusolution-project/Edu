@@ -60,6 +60,7 @@ var Lesson = (function () {
     var _UImode = null;
 
     var exam_timeout = null;
+    var __answer_sending = false;
 
     var config = {
         container: "",
@@ -480,7 +481,7 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
-                lessonBody.css('top', 0);                
+                lessonBody.css('top', 0);
                 //no header
                 break;
             case mod.REVIEW:
@@ -2732,7 +2733,7 @@ var Lesson = (function () {
                 renderQuizCounter();
             }
             else {
-                console.log(lastExam);
+                //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 lastExamResult =
@@ -3040,7 +3041,7 @@ var Lesson = (function () {
                 if (data.Description != null) {
                     itemBody.append($("<div>", { "class": "part-description" }).html(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")));
                 }
-                console.log(itembox);
+                //console.log(itembox);
 
                 //Render Question
                 for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
@@ -3477,7 +3478,12 @@ var Lesson = (function () {
 
     }
 
-    var completeExam = function (isOvertime) {
+    var completeExam = async function (isOvertime) {
+        showLoading("Đang nộp bài...");
+        while (__answer_sending) {
+            console.log("wait for complete answering ...");
+            await new Promise(r => setTimeout(r, 500));
+        }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
         if ($('#QuizNav').hasClass("show"))
@@ -3506,10 +3512,6 @@ var Lesson = (function () {
             }
             else {
                 stopCountdown();
-                //if (isOvertime)
-                //    notification("success", "Thời gian làm bài đã hết", 1500);
-                //else
-                //    notification("success", "Đã nộp bài", 1500);
                 localStorage.clear();
                 renderCompleteExam({
                     maxPoint: 100, point: 1, limit: 0, number: 1,
@@ -3518,10 +3520,16 @@ var Lesson = (function () {
                 });
             }
         }
+        hideLoading();
     }
 
-    var completeLectureExam = function () {
+    var completeLectureExam = async function () {
+        showLoading("Đang nộp bài...");
         $('.btnCompleteExam').hide();
+        while (__answer_sending) {
+            console.log("wait for complete answering ...");
+            await new Promise(r => setTimeout(r, 500));
+        }
         if (config.mod != mod.TEACHERPREVIEW) {
             var dataform = new FormData();
             console.log("Complete :" + $('#ExamID').val());
@@ -3547,6 +3555,7 @@ var Lesson = (function () {
                 questionsTotal: document.querySelectorAll(".quiz-item").length
             });
         }
+        hideLoading();
     }
 
     var renderCompleteExam = function (data) {
@@ -3751,6 +3760,7 @@ var Lesson = (function () {
     }
 
     var AnswerQuestion = function (_this, _that) {
+        __answer_sending = true;
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
         // dataset trên item
@@ -3846,8 +3856,11 @@ var Lesson = (function () {
 
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+                __answer_sending = false;
+
             })
                 .catch(function (err) {
+                    __answer_sending = false;
                     notification("error", err, 3000);
                 });
         }
@@ -3871,10 +3884,13 @@ var Lesson = (function () {
         dataform.append("LessonPartID", partID);
         dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
+        __answer_sending = true;
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+                __answer_sending = false;
             })
                 .catch(function (err) {
+                    __answer_sending = false;
                     notification("error", err, 3000);
                 });
         }

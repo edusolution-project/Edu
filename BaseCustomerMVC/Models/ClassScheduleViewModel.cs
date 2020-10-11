@@ -8,6 +8,9 @@ namespace BaseCustomerMVC.Models
 {
     public class ClassScheduleViewModel : CourseEntity
     {
+        public ClassScheduleViewModel()
+        {
+        }
 
         public ClassScheduleViewModel(CourseEntity item)
         {

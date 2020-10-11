@@ -276,7 +276,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             item.Updated = DateTime.Now;
-            
+
             _examService.Save(item);
 
             return new JsonResult(new Dictionary<string, object>
@@ -399,7 +399,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     if (item.AnswerID == null && item.AnswerValue == null && files.Count == 0)
                     {
-                        return new JsonResult(item);
+                        return Json(item);
                     }
 
                     var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
@@ -447,7 +447,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         _examService.CreateOrUpdate(exam);
                         var xitem = map.Clone(item, new ExamDetailEntity() { });
                         _examDetailService.CreateOrUpdate(xitem);
-                        return new JsonResult(xitem);
+                        return Json(xitem);
                     }
                     else
                     {
@@ -461,7 +461,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 exam.QuestionsDone -= 1;
                                 exam.Updated = DateTime.Now;
                                 _examService.CreateOrUpdate(exam);
-                                return new JsonResult(item);
+                                return Json(item);
                             }
                         }
                         else
@@ -469,7 +469,7 @@ namespace BaseCustomerMVC.Controllers.Student
                             item.Updated = DateTime.Now;
                             var xitem = map.Auto(oldItem, item);
                             _examDetailService.CreateOrUpdate(xitem);
-                            return new JsonResult(xitem);
+                            return Json(xitem);
                         }
 
                     }
@@ -481,11 +481,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 _examDetailService.CreateOrUpdate(item);
                 exam.Updated = DateTime.Now;
                 _examService.CreateOrUpdate(exam);
-                return new JsonResult(item);
+                return Json(item);
             }
             else
             {
-                return new JsonResult("Access Denied");
+                return Json("Access Denied");
             }
         }
 
@@ -526,7 +526,7 @@ namespace BaseCustomerMVC.Controllers.Student
         //submit form
         [HttpPost]
         [Obsolete]
-        public JsonResult CompleteExam(string ExamID)
+        public async Task<JsonResult> CompleteExam(string ExamID)
         {
             var exam = _examService.GetItemByID(ExamID);
 
