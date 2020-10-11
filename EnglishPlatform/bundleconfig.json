@@ -32,6 +32,7 @@
       "wwwroot/js/vue@2.6.0.js",
       "wwwroot/js/axios.min.js",
       "wwwroot/js/jquery.min.js",
+      "wwwroot/js/script.js",
       "wwwroot/js/bootstrap-vue.min.js",
       "wwwroot/js/moment.min.js",
       "wwwroot/js/moment-with-locales.min.js"
@@ -64,6 +65,7 @@
       "wwwroot/js/site.js",
       "wwwroot/vendor/jquery/jquery.min.js",
       "wwwroot/js/jquery-ui.min.js",
+      "wwwroot/js/script.js",
       "wwwroot/js/custom.js",
       "wwwroot/js/popper.min.js",
       "wwwroot/vendor/bootstrap/js/bootstrap.js",

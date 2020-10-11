@@ -377,14 +377,13 @@ div[data-status="offline"]::before{
 .group-message .data .button-extends {
     position: absolute;
     top: 0;
-    right: 15px;
+    left: 15px;
     bottom: 0;
     width: 30px;
     height: 30px;
     padding: 0;
     margin: auto;
-    
-    
+    display:none;
 }
 .group-message .data .button-extends .btn-extends,
 .group-message .data .button-extends .btn-edit,
@@ -398,10 +397,7 @@ div[data-status="offline"]::before{
     padding: 0 4px;
     z-index: 999;
 }
-.group-message .data .button-extends .item-extends{
-    display: none;
-}
-.group-message .data .button-extends .item-extends.open{
+.group-message .data:hover .button-extends{
     display: block;
 }
 .group-message .data .button-extends .btn-edit:hover,
@@ -466,7 +462,7 @@ div[data-status="offline"]::before{
 }
 
 .form-chat .box-text {
-    width: 350px;
+    width: 100%;
     margin-left: 5px;
     background: #ffff;
     height: 75px;
@@ -499,4 +495,74 @@ div[data-status="offline"]::before{
 .content--left__header .form-search {
     padding-bottom: 4px;
     border-bottom: 1px solid #cccc;
+}
+.meta-data{
+    display:block;
+    width:100%;
+    max-height:150px;
+    overflow:auto;
+}
+.meta-data.open{
+    max-height:unset;
+}
+
+.meta-data .item-meta-data img {
+    height: 100%;
+    width: auto;
+    margin: auto;
+    text-align: center;
+}
+
+.meta-data .item-meta-data {
+    margin-bottom: 5px;
+    width: 100%;
+    max-height: 140px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.data-image {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.data-image > .view-full {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: #fff;
+    font-size: 20px;
+    margin: auto;
+    text-align: center;
+    background: #312f2f94;
+    padding: 30px;
+    cursor:pointer;
+}
+
+.data-image:hover .view-full {
+    display: block;
+}
+/**mobile*/
+
+@media screen and (max-width: 992px) {
+    .easy-chat__content--right, .easy-chat__content {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        margin: auto;
+        height: 90vh;
+        max-height: unset;
+        max-width: unset;
+    }
+    .content--right__body {
+        height: calc(100% - 140px);
+    }
+    ..content--left__body{
+        height:80vh;
+    }
 }

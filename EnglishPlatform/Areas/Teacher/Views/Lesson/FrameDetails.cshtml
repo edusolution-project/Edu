@@ -2,10 +2,6 @@
     ViewData["Title"] = ViewBag.Title;
     Layout = "~/Views/Shared/_LayoutTeacher_frame.cshtml";
     var Data = ViewBag.Data as BaseCustomerEntity.Database.LessonEntity;
-    if (Data == null)
-    {
-        Data = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
-    }
     var Class = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
 }
 <style>

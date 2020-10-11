@@ -41,6 +41,8 @@ namespace BaseCustomerEntity.Database
         public DateTime LastTry { get; set; }
         [JsonProperty("PointChange")]
         public double PointChange { get; set; }
+        [JsonProperty("Multiple")]
+        public double Multiple { get; set; }
     }
     public class LessonProgressService : ServiceBase<LessonProgressEntity>
     {
@@ -68,6 +70,11 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<LessonProgressEntity>()
                     .Ascending(t => t.StudentID)
                     .Ascending(t=> t.LessonID)
+                    ),
+                //LessonID_1
+                new CreateIndexModel<LessonProgressEntity>(
+                    new IndexKeysDefinitionBuilder<LessonProgressEntity>()
+                    .Ascending(t=> t.LessonID)
                     )
 
             };
@@ -75,9 +82,9 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task UpdateLastLearn(LearningHistoryEntity item)
+        public async Task UpdateLearn(LearningHistoryEntity item)
         {
-            var currentProgress = GetByStudentID_LessonID( item.StudentID, item.LessonID);
+            var currentProgress = GetByStudentID_LessonID(item.StudentID, item.LessonID);
             if (currentProgress == null)
             {
                 currentProgress = new LessonProgressEntity
@@ -103,7 +110,7 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public async Task<LessonProgressEntity> UpdateLastPoint(ExamEntity item)
+        public async Task<LessonProgressEntity> UpdatePoint(ExamEntity item)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null) return null;
@@ -127,6 +134,7 @@ namespace BaseCustomerEntity.Database
                     LastPoint = point,
                     MaxPoint = point,
                     MinPoint = point,
+                    Multiple = lesson.Multiple,
                     Tried = item.Number,
                     LastTry = item.Updated,
                     PointChange = point
@@ -136,7 +144,6 @@ namespace BaseCustomerEntity.Database
             else
             {
                 var avg = currentProgress.AvgPoint * currentProgress.Tried;
-
                 if (item.Number > currentProgress.Tried)//new 
                 {
                     currentProgress.Tried = item.Number;
@@ -160,22 +167,17 @@ namespace BaseCustomerEntity.Database
                 if (point > currentProgress.MaxPoint) currentProgress.MaxPoint = point;
                 if (point < currentProgress.MinPoint) currentProgress.MinPoint = point;
 
+                currentProgress.Multiple = lesson.Multiple;
                 await Collection.ReplaceOneAsync(t => t.ID == currentProgress.ID, currentProgress);
             }
             return currentProgress;
         }
 
 
-        //public LessonProgressEntity GetByClassSubjectID_StudentID_LessonID(string ClassSubjectID, string StudentID, string LessonID)
-        //{
-        //    return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
-        //}
-
         public LessonProgressEntity GetByStudentID_LessonID(string StudentID, string LessonID)
         {
             return CreateQuery().Find(t => t.StudentID == StudentID && t.LessonID == LessonID).FirstOrDefault();
         }
-
 
         public List<LessonProgressEntity> GetByClassID_StudentID(string ClassID, string StudentID)
         {
@@ -187,14 +189,9 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID && t.StudentID == StudentID).SortByDescending(t => t.LastDate).ToList();
         }
 
-        public async Task UpdateClassSubject(ClassSubjectEntity classSubject)
-        {
-            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<LessonProgressEntity>.Update.Set("ClassSubjectID", classSubject.ID));
-        }
-
         public void ResetPoint(LessonProgressEntity item)
         {
-            Collection.UpdateMany(t => t.ID == item.ID, Builders<LessonProgressEntity>.Update.Set(t => t.LastPoint, 0));
+            Collection.UpdateOne(t => t.ID == item.ID, Builders<LessonProgressEntity>.Update.Set(t => t.LastPoint, 0));
         }
     }
 }

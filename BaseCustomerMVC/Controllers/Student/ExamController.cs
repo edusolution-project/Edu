@@ -20,43 +20,66 @@ namespace BaseCustomerMVC.Controllers.Student
     public class ExamController : StudentController
     {
 
+        private readonly IndexService _indexService;
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
+
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonService _lessonService;
+        private readonly LessonHelper _lessonHelper;
+
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
+
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
-        private readonly LearningHistoryService _learningHistoryService;
+        //private readonly LearningHistoryService _learningHistoryService;
+
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+
+        private readonly ProgressHelper _progressHelper;
+
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
-        public ExamController(ExamService examService,
+        public ExamController(
+            IndexService indexService,
+            ExamService examService,
+            ExamDetailService examDetailService,
+
+            LessonService lessonService,
+            LessonScheduleService lessonScheduleService,
+            LessonHelper lessonHelper,
+
+            CloneLessonPartService cloneLessonPartService,
+            CloneLessonPartAnswerService cloneLessonPartAnswerService,
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+
+            StudentService studentService,
+            ClassService classService,
+            TeacherService teacherService,
+
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
-            ExamDetailService examDetailService
-        , StudentService studentService
-            , ClassService classService
-            , LessonService lessonService
-            , LessonScheduleService lessonScheduleService
-            , CloneLessonPartService cloneLessonPartService
-            , CloneLessonPartAnswerService cloneLessonPartAnswerService
-            , CloneLessonPartQuestionService cloneLessonPartQuestionService
-            , TeacherService teacherService
-            , LearningHistoryService learningHistoryService
-            , IRoxyFilemanHandler roxyFilemanHandler
+
+            ProgressHelper progressHelper,
+
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _lessonPartQuestionService = lessonPartQuestionService;
             _lessonPartAnswerService = lessonPartAnswerService;
-            _learningHistoryService = learningHistoryService;
+
+            //_learningHistoryService = learningHistoryService;
+
             _examService = examService;
+            _indexService = indexService;
             _classService = classService;
             _lessonService = lessonService;
+            _lessonHelper = lessonHelper;
+
             _lessonScheduleService = lessonScheduleService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartService = cloneLessonPartService;
@@ -64,6 +87,9 @@ namespace BaseCustomerMVC.Controllers.Student
             _examDetailService = examDetailService;
             _studentService = studentService;
             _teacherService = teacherService;
+
+            _progressHelper = progressHelper;
+
             _roxyFilemanHandler = roxyFilemanHandler;
         }
 
@@ -154,7 +180,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(ExamEntity item)
+        public async Task<JsonResult> Create(ExamEntity item)
         {
             var userid = User.Claims.GetClaimByType("UserID").Value;
 
@@ -186,7 +212,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     foreach (var ex in incompleted_exs)
                     {
-                        _examService.CompleteNoEssay(ex, _lesson, out _, false);
+                        _lessonHelper.CompleteNoEssay(ex, _lesson, out _, false);
                     }
                 }
 
@@ -200,7 +226,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
 
                 item.StudentID = userid;
-                item.Number = (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == _schedule.ID && o.StudentID == item.StudentID) + 1;
+                item.Number = //(int)_indexService.GetNewIndex(_schedule.ID + "_" + item.StudentID);
+
+                (int)_examService.CreateQuery().CountDocuments(o => o.LessonScheduleID == _schedule.ID && o.StudentID == item.StudentID) + 1;
                 if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -243,12 +271,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
-                _examService.ResetLesssonPoint(_lesson, item.StudentID);
+
+                await _progressHelper.ResetLesssonPoint(_lesson, item.StudentID);
             }
 
             item.Updated = DateTime.Now;
-            //_examService.CreateOrUpdate(item);//MAPPING BUG
+            
             _examService.Save(item);
+
             return new JsonResult(new Dictionary<string, object>
             {
                 { "Data", item }
@@ -511,7 +541,18 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
-            exam = _examService.CompleteNoEssay(exam, lesson, out point);
+
+            //COMPLETE ALL PREV INCOMPLETE EXAMS
+            var incompleted_exs = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.StudentID == exam.StudentID && o.Status == false && o.Number < exam.Number).SortBy(t => t.Number).ToEnumerable();
+            if (incompleted_exs != null && incompleted_exs.Count() > 0)
+            {
+                foreach (var ex in incompleted_exs)
+                {
+                    _lessonHelper.CompleteNoEssay(ex, lesson, out _, false);
+                }
+            }
+
+            exam = _lessonHelper.CompleteNoEssay(exam, lesson, out point);
             return new JsonResult(new
             {
                 Point = point,
@@ -523,6 +564,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 QuestionsPass = exam.QuestionsPass
             });
         }
+
 
         public IActionResult Index(DefaultModel model)
         {

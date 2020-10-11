@@ -168,15 +168,15 @@
                             </div>
                         </div>
 
-                    <div class="form-row">
-                        <div class="form-group col-md-8">
+                        <div class="form-row">
+                            <div class="form-group col-md-8">
 
-                            <div class="form-row">
-                                <div class="input-group col-md-12">
-                                    @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
-                                    <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
+                                <div class="form-row">
+                                    <div class="input-group col-md-12">
+                                        @*<label for="exampleFormControlFile1">Ảnh đại diện: </label>*@
+                                        <span>Ảnh đại diện</span><input type="file" class="form-control-file" id="Thumbnail" name="Thumbnail">
+                                    </div>
                                 </div>
-                            </div>
 
                                 <div class="form-row">
                                     <div class="input-group col-md-6">
@@ -400,7 +400,7 @@
                             //public +
                             "<td class='text-center' style='width: 130px;'>" +
                             "<button onclick =\"Preview('" + item.ID + "')\" type='button' class='btn btn-primary' data-placement='top' title='Xem trước' > <i class='fas fa-eye'></i> </button>" +
-                            "<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +
+                            @*"<button onclick =\"Clone('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Nhân bản' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-clone'></i> </button>" +*@
                             "<button onclick =\"Edits('" + item.ID + "','@Url.Action("GetDetail", "Product", new { Area = "admin" })','@Url.Action("CreateOrUpdate","Product", new { Area = "admin" })',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ProductModal'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa " + item.Title + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete", "Product", new { Area = "admin" })',loadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
@@ -481,7 +481,6 @@
                 targets += $(this).attr('id')+",";
                 }
         });
-        debugger
 
         $(form).find("input:disabled").removeAttr("disabled");
 
@@ -558,11 +557,11 @@
             $(".subjectDisplay").val('');
             $('.subjectSelect input[type=checkbox]').prop("checked", false);
             var line = '';
-            console.log(targets);
+            //console.log(targets);
             if (targets != null && targets.length > 0)
                 for (var i = 0; i < targets.length; i++) {
-                    debugger
                     //console.log(subjects);
+                    if (targets[i] == "") continue;
                     $(".subjectSelect input[type=checkbox]#" + targets[i]).prop("checked", true);
 
                     $('.subject_wrapper').append($("<input>", { type: "hidden", name: "Subjects", value: targets[i] }));

@@ -84,9 +84,14 @@ namespace BaseCustomerEntity.Database
             }
         }
 
-        public List<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
+        public IEnumerable<ChapterEntity> GetByClassSubject(string ClassSubjectID)
         {
-            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToList();
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID).SortBy(t => t.Order).ToEnumerable();
+        }
+
+        public IEnumerable<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
+        {
+            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
 
         public async Task RemoveClassSubjectChapter(string ClassSubjectID)
@@ -94,10 +99,23 @@ namespace BaseCustomerEntity.Database
             await Collection.DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
         }
 
-        //public List<toem> GetItemByClassSubjectID(string ClassSubjectID)
-        //{
-        //    return Collection.Find(x => x.ClassSubjectID == ClassSubjectID).ToEnumerable();
-        //}
+        public IEnumerable<ChapterEntity> GetByClassSubjectID(string ClassSubjectID)
+        {
+            return Collection.Find(x => x.ClassSubjectID == ClassSubjectID).ToEnumerable();
+        }
 
+        public List<string> GetChapTreeIDs(string ClassSubjectID, string rootchapID)
+        {
+            var listIDs = new List<string> { rootchapID };
+            var subchapIDs = GetSubChapters(ClassSubjectID, rootchapID).Select(c => c.ID).ToList();
+            foreach (var cid in subchapIDs)
+            {
+                var scids = GetChapTreeIDs(ClassSubjectID, cid);
+                if (scids.Contains(rootchapID))//circular ref
+                    scids.Remove(rootchapID);
+                listIDs.AddRange(GetChapTreeIDs(ClassSubjectID, cid));
+            }
+            return listIDs;
+        }
     }
 }

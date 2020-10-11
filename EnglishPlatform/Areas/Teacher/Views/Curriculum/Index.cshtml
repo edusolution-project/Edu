@@ -77,7 +77,7 @@
                         </template>
                     </td>
                     <td>{{item.SubjectName}}</td>
-                    <td>{{item.SkillName}}</td>
+                    @*<td>{{item.SkillName}}</td>*@
                     <td>{{item.GradeName}}</td>
                     <td>{{item.TeacherName}}</td>
                     <td>{{formatShortDate(item.Created)}}</td>
@@ -115,7 +115,13 @@
 </section>
 
 @section Scripts{
-
+    <style>
+        #ed_table tr th:first-child,
+        #ed_table tr td:first-child {
+            width: 50px;
+            max-width: 50px;
+        }
+    </style>
     <script>
         Vue.use(VueQuillEditor)
         new Vue({
@@ -157,10 +163,10 @@
                         key: 'subject_name',
                         label: 'Chương trình'
                     },
-                    {
-                        key: 'skill',
-                        label: 'Môn học'
-                    },
+                    //{
+                    //    key: 'skill',
+                    //    label: 'Môn học'
+                    //},
                     {
                         key: 'level',
                         label: 'Cấp độ'
@@ -685,11 +691,6 @@
                 updateFile(obj) {
                     //$(obj).siblings(".btnAddfile").text(obj.files[0].name);
                     readURL(obj);
-                },
-                cacheStatic(src, width) {
-                    if (src.startsWith("http"))
-                        return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&format=jpg";
                 },
                 readURL(input) {
                     if(input.files && input.files[0]) {

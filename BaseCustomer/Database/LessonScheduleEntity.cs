@@ -106,7 +106,6 @@ namespace BaseCustomerEntity.Database
             return data.SortByDescending(t => t.StartDate).ToList();
         }
 
-
         public long CountClassSubjectExam(List<string> ClassSubjectIDs, DateTime? start = null, DateTime? end = null)
         {
             //var validTime = new DateTime(1900, 1, 1);
@@ -143,7 +142,6 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID).ToEnumerable();
         }
-
 
         public async Task RemoveClassSubject(string ClassSubjectID)
         {

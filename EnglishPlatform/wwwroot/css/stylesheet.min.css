@@ -2459,6 +2459,10 @@ button, input, a {
     overflow: hidden
 }
 
+#ed_table{
+    table-layout:fixed;
+}
+
 #ed_table thead {
     background: #D0DFE8
 }
@@ -2478,7 +2482,9 @@ button, input, a {
     #ed_table tbody td {
         text-align: center;
         vertical-align: middle;
-        padding: 1rem .5rem
+        padding: 1rem .5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
         #ed_table tbody td span {

@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -28,6 +29,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly ClassHelper _classHelper;
         private readonly CourseHelper _courseHelper;
+        private readonly LessonHelper _lessonHelper;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -86,6 +88,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 ClassHelper classHelper,
                 CourseHelper courseHelper,
+                LessonHelper lessonHelper,
 
                 CenterService centerService,
                 StudentService studentService,
@@ -122,6 +125,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _classHelper = classHelper;
             _courseHelper = courseHelper;
+            _lessonHelper = lessonHelper;
 
             _centerService = centerService;
             _studentService = studentService;
@@ -143,24 +147,110 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
 
-        public JsonResult FixScoreData()//Big fix
+        public async Task<JsonResult> FixScoreData()//Big fix
         {
+            var start = DateTime.Now;
+            var str = "";
+            str += "Phase 0: ";
+            //Clear orphan part: Run Once
+
+            var ids = _lessonService.GetAll().Project(t => t.ID).ToList();
+
+
+            long delpart = 0;
+            var delIds = _lessonPartService.CreateQuery().Find(t => !ids.Contains(t.ParentID)).Project(t => t.ID).ToList();
+
+            foreach (var partid in delIds)
+            {
+                var part = _lessonPartService.GetItemByID(partid);
+                if (_lessonService.GetItemByID(part.ParentID) == null)
+                {
+                    _lessonPartService.Remove(partid);
+                    var quizs = _questionService.GetByPartID(partid);
+                    if (quizs != null && quizs.Count() > 0)
+                    {
+                        foreach (var quiz in quizs)
+                        {
+                            _questionService.Remove(quiz.ID);
+                            await _answerService.CreateQuery().DeleteManyAsync<LessonPartAnswerEntity>(t => t.ParentID == quiz.ID);
+                        }
+                    }
+                    delpart++;
+                }
+            }
+
+            var cdelpart = 0;
+
+            var cids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
+            var delcIds = _clonelessonPartService.CreateQuery().Find(t => !cids.Contains(t.ParentID)).Project(t => t.ID).ToList();
+            
+            foreach (var partid in delcIds)
+            {
+                var part = _clonelessonPartService.GetItemByID(partid);
+                if (_clonelessonService.GetItemByID(part.ParentID) == null)
+                {
+                    _clonelessonPartService.Remove(partid);
+                    var quizs = _clonequestionService.GetByPartID(partid);
+                    if (quizs != null && quizs.Count() > 0)
+                    {
+                        foreach (var quiz in quizs)
+                        {
+                            _clonequestionService.Remove(quiz.ID);
+                            await _cloneanswerService.RemoveByParentAsync(quiz.ID);
+                        }
+                    }
+                    cdelpart++;
+                }
+            }
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += (" _ DEL " + delpart + "_" + cdelpart + "<DELDONE>");
+            str += "Phase 1: ";
             _chapterService.CreateQuery().UpdateMany(t => true, Builders<ChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _classSubjectService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _classService.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _courseChapterService.CreateQuery().UpdateMany(t => true, Builders<CourseChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
 
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+
             //calculate lesson maxpoint
-            var courselessons = _lessonService.GetAll().ToEnumerable();
-            foreach (var cl in courselessons)
+            var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
+
+            foreach (var clid in clids)
+            {
+                var cl = _lessonService.GetItemByID(clid);
                 calculateLessonPoint(cl);
+                IncreaseCourseCounter(cl);
+            }
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += " Phase 2: ";
             //calculate clone lesson maxpoint
-            var lessons = _clonelessonService.GetAll().ToEnumerable();
-            foreach (var l in lessons)
+            var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
+            //.Project(t => new LessonEntity
+            //{
+            //    ID = t.ID,
+            //    ChapterID = t.ChapterID,
+            //    ClassSubjectID = t.ClassSubjectID,
+            //    TemplateType = t.TemplateType,
+            //    IsPractice = t.IsPractice,
+            //    Multiple = t.Multiple
+            //}).ToList();
+            foreach (var lid in lids)
+            {
+                var l = _clonelessonService.GetItemByID(lid);
                 calculateCloneLessonPoint(l);
+                await _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
+            }
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += " Phase 3: ";
+            //return Json(str);
             //reapply exam maxpoint
             var exams = _examService.GetAll().ToEnumerable();
+
             foreach (var e in exams)
             {
                 var lesson = _clonelessonService.GetItemByID(e.LessonID);
@@ -174,19 +264,21 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var parts = _clonelessonPartService.GetByLessonID(e.LessonID);//remove orphan parts
                     foreach (var part in parts)
                     {
-                        _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
+                        await _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
                         var quizs = _clonequestionService.GetByPartID(part.ID);
                         foreach (var quiz in quizs)
                         {
-                            _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
-                            _ = _clonequestionService.RemoveAsync(quiz.ID);
+                            await _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
+                            await _clonequestionService.RemoveAsync(quiz.ID);
                         }
-                        _ = _clonelessonPartService.RemoveAsync(part.ID);
+                        await _clonelessonPartService.RemoveAsync(part.ID);
                     }
-                    _ = _examService.RemoveAsync(e.ID);
+                    await _examService.RemoveAsync(e.ID);
                 }
             }
-
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += " Phase 4: ";
             //reset progress
 
             _chapterProgressService.CreateQuery().UpdateMany(t => true, Builders<ChapterProgressEntity>.Update
@@ -195,20 +287,25 @@ namespace BaseCustomerMVC.Controllers.Admin
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
-                .Set(t => t.PracticeCount, 0)
+                .Set(t => t.PracticeDone, 0)
                 );
 
-
             _classSubjectProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectProgressEntity>.Update
-                .Set(t => t.AvgPoint, 0)
                 .Set(t => t.TotalPoint, 0)
+                .Set(t => t.PracticePoint, 0)
+                .Set(t => t.PracticeAvgPoint, 0)
+                .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
+                .Set(t => t.PracticeDone, 0)
                 );
 
             _classProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassProgressEntity>.Update
-                .Set(t => t.AvgPoint, 0)
                 .Set(t => t.TotalPoint, 0)
+                .Set(t => t.PracticePoint, 0)
+                .Set(t => t.PracticeAvgPoint, 0)
+                .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
+                .Set(t => t.PracticeDone, 0)
                 );
 
             _lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
@@ -220,9 +317,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                 .Set(t => t.Tried, 0)
                 );
 
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += " Phase 5: ";
 
-            var lessonProgresses = _lessonProgressService.GetAll().ToList();
-
+            var lessonProgresses = _lessonProgressService
+                //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26")
+                .GetAll()
+                .Project(t => new LessonProgressEntity { ID = t.ID, LessonID = t.LessonID, StudentID = t.StudentID }).ToList();
             //recalculate point
             foreach (var lp in lessonProgresses)
             {
@@ -233,18 +335,29 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
                 else
                 {
-                    var exs = _examService.CreateQuery().Find(t => t.LessonID == lp.LessonID && t.StudentID == lp.StudentID).SortBy(t => t.Number);
-                    foreach (var ex in exs.ToEnumerable())
+                    var progress = _lessonProgressService.GetItemByID(lp.ID);
+                    progress.Multiple = ls.Multiple;
+                    _lessonProgressService.Save(progress);
+
+                    var exs = _examService.CreateQuery().Find(t => t.LessonID == lp.LessonID && t.StudentID == lp.StudentID).Project(t => t.ID).SortBy(t => t.Number);
+                    foreach (var exid in exs.ToEnumerable())
                     {
-                        if (ex.Marked) _examService.CompleteFull(ex, ls, out _, false);
-                        else
-                            if (_examService.IsOver(ex.ID))
-                            _examService.CompleteNoEssay(ex, ls, out _, false);
+                        var ex = _examService.GetItemByID(exid);
+                        if (ex != null)
+                        {
+                            //if (ex.ClassID != "5f60dd6b0dd2b41448907f26") continue;
+                            if (ex.Marked) _lessonHelper.CompleteFull(ex, ls, out _, false);
+                            else
+                                if (_examService.IsOver(ex.ID))
+                                _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
+                        }
                     }
                 }
             }
-
-            return Json("OK");
+            str += (DateTime.Now - start).TotalSeconds;
+            start = DateTime.Now;
+            str += " End. ";
+            return Json(str);
         }
 
         public JsonResult FixFillquiz()
@@ -316,10 +429,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (part.Type == "ESSAY")
                     {
                         point += part.Point;
+                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
                     }
                     else
                     {
                         point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
                     }
                 }
                 hasPractice = true;
@@ -339,11 +454,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             _lessonService.Save(lesson);
 
-            if (lesson.ChapterID != "0")
-                _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-
             return point;
         }
 
@@ -360,15 +470,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (part.Type == "ESSAY")
                     {
                         point += part.Point;
+                        _clonequestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
                     }
                     else
                     {
                         point += _clonequestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                        _clonequestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
                     }
                 }
                 hasPractice = true;
             }
-
 
             lesson.Point = point;
             if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
@@ -384,14 +495,18 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             _clonelessonService.Save(lesson);
 
-            if (lesson.ChapterID != "0")
-                _ = _classHelper.IncreaseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _classHelper.IncreaseClassSubjectCounter(lesson.ClassSubjectID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+
 
             return point;
         }
 
+        private void IncreaseCourseCounter(CourseLessonEntity lesson)
+        {
+            if (lesson.ChapterID != "0")
+                _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+            else
+                _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+        }
 
         #region Fix Region
         public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)

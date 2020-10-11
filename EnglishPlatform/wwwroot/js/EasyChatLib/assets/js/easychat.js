@@ -14,11 +14,11 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
 (function (message, member, group, signalR, UI) {
     "use strict";
     var __defaulConfig = {
-        center: "eduso",
-        id: "easy-chat",
-        currentUser: { id: "test", name: "Hoàng Thái Long", email: "longthaihoang94@gmail.com", center: "" },
-        members: [{ id: "test2", name: "member" }],
-        groups: [{ id: "test4", name: "group" }]
+        center:"eduso",
+        id:"easy-chat",
+        currentUser :{id:"test",name:"Hoàng Thái Long",email:"longthaihoang94@gmail.com",center:"",isAdmin:false},
+        members : [{id:"test2",name:"member"}],
+        groups:[{id:"test4",name:"group"}]
     };
     var __MESSAGE = message, __MEMBER = member, __GROUP = group, __CURRENTUSER = {}, __SIGNALR = signalR;
     var time = 0, pageIndex = 0, pageSize = 10, isDataNull = false;
@@ -72,7 +72,13 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
             var contentBox = root.querySelector('.easy-chat__content');
             if (contentBox) {
-                contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
+                if (window.outerWidth < 992) {
+                    contentBox.setAttribute('style', 'z-index:999999999999');
+                }
+                else {
+                    contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
+                }
+               
             }
             var left = root.querySelector('.easy-chat__content--left');
             if (left) {
@@ -148,7 +154,7 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             var isMaster = sender == __defaulConfig.currentUser.id;
             //var isPrivate = __GROUP.GetItemByID(groupId).length <= 0;
             var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(sender);
-            html += UI.renderGroupMessage(isMaster, senderInfo[0].name, null, [message]);
+            html += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[message],__defaulConfig.currentUser.isAdmin,sender);
         }
 
         var listmessage = getRoot().querySelector('.list-messages');
@@ -160,10 +166,26 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             listmessage.innerHTML = html + listmessage.innerHTML;
         }
         //console.log(listmessage.height,listmessage.outerHeight);
-
-
+        
+        //addEventOnloadImage();
     }
-    EasyChat.CloseMessageBox = function () {
+
+    var addEventOnloadImage = function () {
+        var listImage = getRoot().querySelectorAll("[data-src]");
+        if (listImage) {
+            setTimeout(function () {
+                for (var i = 0; i < listImage.length; i++) {
+                    var item = listImage[i];
+                    if (item) {
+                        if (item.dataset.src != item.src) {
+                            item.src = item.dataset.src;
+                        }
+                    }
+                }
+            }, 5000);
+        }
+    }
+    EasyChat.CloseMessageBox = function(){
         var root = getRoot();
         var left = root.querySelector('.easy-chat__content--left');
         if (left) {
@@ -406,6 +428,11 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 receiver: active.dataset.group == "false" ? active.dataset.id : null,
                 message: typeof (message) == "string" ? message : null,
             }
+            // send message all
+            if(obj.receiver == __defaulConfig.extendsUrl.SYSTEM_EDUSO && __defaulConfig.currentUser.isAdmin == true){
+                obj.user = __defaulConfig.extendsUrl.SYSTEM_EDUSO;
+            }
+
             var frm = document.createElement('form');
             frm.setAttribute("enctype", "multipart/form-data");
             var formData = new FormData(frm);
@@ -441,8 +468,9 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     var senderInfo = isMaster ? [__defaulConfig.currentUser] : __MEMBER.GetItemByID(jsonData.data.sender);
                     //var isGroup = getRoot().querySelector('.item-contact.active').dataset.group == "true";
                     //var lastItem = listmessage.querySelectorAll(".message");
-                    listmessage.innerHTML += UI.renderGroupMessage(isMaster, senderInfo[0].name, null, [jsonData.data]);
+                    listmessage.innerHTML += UI.renderGroupMessage(isMaster,senderInfo[0].name,null,[jsonData.data],__defaulConfig.currentUser.isAdmin,jsonData.data.sender);
                     listmessage.scrollTo(0, listmessage.scrollHeight);
+                    //addEventOnloadImage();
                 }
                 //console.log(res);
             });
@@ -479,14 +507,33 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     __SIGNALR.onclose(function () {
         ConnectHub();
     });
-    __SIGNALR.on("Notication", function (userId) {
-        showNoti([userId]);
+    __SIGNALR.on("Notication",function(userId){
+        //showNoti([userId]);
     });
     __SIGNALR.on("Test", function (userId) {
         //showNoti([userId]);
         console.log(userId);
     });
-    __SIGNALR.on("ReceiverMessage", function (data, receiver, groupId) {
+    __SIGNALR.on("RemoveMessage", function (message, groupId) {
+        removeMessageHTML(message.ID);
+    });
+
+    var removeMessageHTML = function (messageId) {
+        var message = getRoot().querySelector("[data-id='" + messageId + "']");
+        if (message) {
+            message.innerHTML = '<div class="content" style="padding-left:25px; color :#ccc"> tin nhắn đã bị xóa </div>';
+            var parent = message.parentElement;
+            if (parent) {
+                var vm = parent.querySelector(".view-more-meta-data");
+                if (vm) {
+                    vm.remove();
+                }
+                var btn = parent.querySelector('.button-extends');
+            }
+        }
+    }
+
+    __SIGNALR.on("ReceiverMessage",function(data,receiver,groupId){
 
         var id = receiver ?? groupId;
         var active = getRoot().querySelector("[data-id='" + id + "']");
@@ -507,31 +554,36 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
         var array = __GROUP.GetAll().map(function (value) { return value.id; });
         var url = __defaulConfig.extendsUrl.GetNoti.replace("{user}", __defaulConfig.currentUser.id).replace("{groupNames}", array.toString());
         //proccess = function (method, url, data, async) 
-        ajax.proccess("GET", url, null, false).then(function (data) {
-            var objData = typeof (data) == "string" ? JSON.parse(data) : data;
-            if (objData != null && objData.length > 0) {
+        ajax.proccess("GET", url, null, false).then(function(data){
+            if(data){
+            var objData = typeof(data) == "string" ? JSON.parse(data) : data;
+            if(objData != null && objData.length > 0){
                 showNoti(objData);
-            }
+            }}
         });
 
     }
     var showNoti = function (data) {
         setNotiCount(data);
-        try {
-            if (_notification) {
-                var el = _notification.show({
-                    type: "success",
-                    msg: "bạn có " + data.length + " tin nhắn",
-                    timeOut: 5000
-                });
-                el.addEventListener("click", function () {
-                    var content = getRoot().querySelector('.easy-chat__content');
-                    if (!content.classList.contains("open")) {
-                        content.classList.add('open');
+        try{
+            if(_notification){
+                if(data){
+                    var el = _notification.show({
+                        type: "success",
+                        msg: "bạn có "+data.length+" tin nhắn",
+                        timeOut: 5000
+                    });
+                    if(el){
+                        el.addEventListener("click",function(){
+                            var content = getRoot().querySelector('.easy-chat__content');
+                            if(!content.classList.contains("open")){
+                                content.classList.add('open');
+                            }
+                        });
                     }
-                });
+                }
             }
-        } catch (ex) {
+        }catch(ex){
             console.log(ex);
         }
     }
@@ -545,24 +597,26 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
         var contact = getRoot().querySelector('.list-contact');
-        if (contact) {
-            for (var i = 0; i < data.length; i++) {
-                var id = data[0];
-                var item = contact.querySelector('[data-id="' + id + '"]');
-                if (item) {
-                    var noti = item.querySelector('.noti');
-                    if (noti) {
-                        noti.innerHTML = "!";
-                        noti.classList.add('open');
-                        contact.insertBefore(item, contact.children[0]);
+        if(contact){
+            for(var i = 0; i < data.length;i++){
+                if(data[i]){
+                    var id = data[i];
+                var item = contact.querySelector('[data-id="'+id+'"]');
+                    if(item){
+                        var noti = item.querySelector('.noti');
+                        if(noti){
+                            noti.innerHTML = "!";
+                            noti.classList.add('open');
+                            contact.insertBefore(item,contact.children[0]);
+                        }
                     }
                 }
             }
         }
     }
-    var resetItemNoti = function (id) {
-        var item = getRoot().querySelector('[data-id="' + id + '"]');
-        if (item) {
+    var resetItemNoti = function(id){
+        var item = getRoot().querySelector('[data-id="'+id+'"]');
+        if(item){
             var noti = item.querySelector('.noti');
             if (noti) {
                 noti.innerHTML = "";
@@ -590,5 +644,60 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
     }
+    EasyChat.RemoveMessage = function (self) {
+        var id = self.dataset.message;
+        var user = __defaulConfig.currentUser.isAdmin ? __defaulConfig.extendsUrl.SYSTEM_EDUSO : __defaulConfig.currentUser.id;
+        if (id && user) {
+            UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+                var ajax = new Ajax();
+                //(method, url, data, async)
+                ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+                    .then(function (res) {
+                        var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+                        if (data.code == 200) {
+                            removeMessageHTML(id);
+                        }
+
+                    });
+            });
+        }
+    }
+    // EasyChat.RemoveMessageAdmin = function (id,userAdmin) {
+    //     var id = id;
+    //     var user = userAdmin;
+    //     if (id && user) {
+    //         UI.CreateAnswerBox("Bạn muốn xóa tin nhắn này !", function () {
+    //             var ajax = new Ajax();
+    //             //(method, url, data, async)
+    //             ajax.proccess("POST", __defaulConfig.extendsUrl.RemoveMessage.replace("{user}", user).replace("{messageId}", id).replace("&connectionId={connectionId}", ""), JSON.stringify({ user: user, messageId: id }), true)
+    //                 .then(function (res) {
+    //                     var data = typeof (res) == "string" && res != "" ? JSON.parse(res) : res;
+    //                     if (data.code == 200) {
+    //                         removeMessageHTML(id);
+    //                     }
+
+    //                 });
+    //         });
+    //     }
+    // }
+    EasyChat.ViewMore = function (self) {
+        var parent = self.parentElement;
+        if (parent) {
+            var p = parent.parentElement.querySelector(".meta-data");
+            if (p) {
+                p.classList.toggle("open");
+                if (self.classList.contains("show")) {
+                    self.classList.remove("show");
+                    self.innerHTML = "xem thêm";
+                }
+                else {
+                    self.classList.add("show");
+                    self.innerHTML = "thu gọn";
+                }
+            }
+
+        }
+    }
+    
     return EasyChat;
 }(new Message(), new Member(), new Group(), connectionHubChat, ui))

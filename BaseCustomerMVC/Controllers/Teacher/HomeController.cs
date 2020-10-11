@@ -52,12 +52,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
             string _teacherid = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.GetItemByID(_teacherid);
             if (teacher != null)
-                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+            {
+                var validCenters = (from r in teacher.Centers
+                                    let ct = _centerService.GetItemByID(r.CenterID)
+                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    select ct).ToList();
+                //teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+                if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
+                    return Redirect("/logout");
+               ViewBag.AllCenters = validCenters;
+            }
+            else
+                return Redirect("/logout");
+
             var center = _centerService.GetItemByCode(basis);
             ViewBag.Center = center;
             try
-            {
-                _session.SetString("userAvatar", teacher.Avatar ?? _default.defaultAvatar);
+            {                
                 var data = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == center.ID)).Limit(6);
                 ViewBag.List_Courses = data.ToList();
             }
@@ -80,8 +91,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var account = _teacherService.GetItemByID(_teacherid);
             if (account == null)
                 return Redirect("/login");
-            ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
-            _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
+            ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;            
             return View(account);
         }
 
@@ -92,8 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 string _teacherID = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
                 var account = _teacherService.GetItemByID(_teacherID);
-                var avatar = account.Avatar ?? _default.defaultAvatar;
-                _session.SetString("userAvatar", avatar);
+                var avatar = account.Avatar ?? _default.defaultAvatar;                
                 ViewBag.avatar = avatar;
                 account.Avatar = avatar;
                 return Json(new ReturnJsonModel

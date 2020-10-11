@@ -61,6 +61,7 @@ namespace BaseCustomerEntity.Database
         private CloneLessonPartService _cloneLessonPartService;
         private CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private CloneLessonPartAnswerService _cloneLessonPartAnswerService;
+
         private LessonProgressService _lessonProgressService;
         private ChapterProgressService _chapterProgressService;
         private ClassSubjectProgressService _classSubjectProgressService;
@@ -132,217 +133,223 @@ namespace BaseCustomerEntity.Database
             return Task.CompletedTask;
         }
 
-        public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
-        {
-            exam.Status = true;
-            point = 0;
-            var pass = 0;
-            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
-            var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
-            for (int i = 0; listDetails != null && i < listDetails.Count; i++)
-            {
-                // check câu trả lời đúng
-                bool isTrue = false;
-                var examDetail = listDetails[i];
+        //public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
+        //{
+        //    exam.Status = true;
+        //    point = 0;
+        //    var pass = 0;
+        //    var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+        //    //Fix duplicate
+        //    if (exam.Number == 1)
+        //    {
+        //        CreateQuery().UpdateMany(t => t.StudentID == exam.StudentID && t.LessonID == exam.StudentID && t.ID != exam.ID, Builders<ExamEntity>.Update.Set(t => t.Number, 0));
+        //    }
 
-                // giá trị câu trả lời 
-                //var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
+        //    var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
+        //    for (int i = 0; listDetails != null && i < listDetails.Count; i++)
+        //    {
+        //        // check câu trả lời đúng
+        //        bool isTrue = false;
+        //        var examDetail = listDetails[i];
 
-                //bài tự luận
-                if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
+        //        // giá trị câu trả lời 
+        //        //var answerValue = string.IsNullOrEmpty(examDetail.AnswerValue) ? string.Empty : regex.Replace(examDetail.AnswerValue, "")?.ToLower()?.Trim();
 
-                var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
-                if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+        //        //bài tự luận
+        //        if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
 
-                var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
-                if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
+        //        var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
+        //        if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
+        //        var question = _cloneLessonPartQuestionService.GetItemByID(examDetail.QuestionID);
+        //        if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                CloneLessonPartAnswerEntity _correctanswer = null;
+        //        var realAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(o => o.IsCorrect && o.ParentID == examDetail.QuestionID).ToList();
 
-                //bài chọn hoặc nối đáp án
-                if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
-                {
-                    switch (part.Type)
-                    {
-                        case "QUIZ1":
-                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
-                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
-                            if (_correctanswer == null) continue;
-                            examDetail.RealAnswerID = _correctanswer.ID;
-                            examDetail.RealAnswerValue = _correctanswer.Content;
-                            break;
-                        case "QUIZ3":
-                            if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
-                            _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
-                            //ID not match => check value
-                            if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
-                                _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
-                            if (_correctanswer == null) continue;
-                            examDetail.RealAnswerID = _correctanswer.ID;
-                            examDetail.RealAnswerValue = _correctanswer.Content;
-                            break;
-                        case "QUIZ4":
-                            var realIds = examDetail.AnswerID.Split(',');
-                            examDetail.RealAnswerID = string.Join(",", realAnswers.Select(t => t.ID));
-                            examDetail.RealAnswerValue = string.Join(",", realAnswers.Select(t => t.Content));
-                            if (realIds.Length != realAnswers.Count()) continue;//incorrect
-                            var isCorrect = true;
-                            foreach (var id in realIds)
-                            {
-                                if (realAnswers.FirstOrDefault(t => t.ID == id) == null)//incorrect
-                                {
-                                    isCorrect = false;
-                                    break;
-                                }
-                            }
-                            if (isCorrect)
-                            {
-                                _correctanswer = realAnswers.FirstOrDefault();
-                                if (_correctanswer == null) continue;
-                                _correctanswer.ID = examDetail.AnswerID;
-                                _correctanswer.Content = examDetail.AnswerValue;
-                            }
-                            break;
-                    }
-                }
-                else //bài điền từ
-                {
-                    if (examDetail.AnswerValue != null && part.Type == "QUIZ2")
-                    {
-                        var _realAnwserQuiz2 = realAnswers?.ToList();
+        //        CloneLessonPartAnswerEntity _correctanswer = null;
 
-                        if (_realAnwserQuiz2 == null) continue;
-                        List<string> quiz2answer = new List<string>();
-                        foreach (var answer in _realAnwserQuiz2)
-                        {
-                            if (!string.IsNullOrEmpty(answer.Content))
-                                foreach (var ans in answer.Content.Split('/'))
-                                {
-                                    if (!string.IsNullOrEmpty(ans.Trim()))
-                                        quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));
-                                }
-                        }
-                        var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.Trim());
+        //        //bài chọn hoặc nối đáp án
+        //        if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
+        //        {
+        //            switch (part.Type)
+        //            {
+        //                case "QUIZ1":
+        //                    if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+        //                    _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+        //                    if (_correctanswer == null) continue;
+        //                    examDetail.RealAnswerID = _correctanswer.ID;
+        //                    examDetail.RealAnswerValue = _correctanswer.Content;
+        //                    break;
+        //                case "QUIZ3":
+        //                    if (_cloneLessonPartAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+        //                    _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
+        //                    //ID not match => check value
+        //                    if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
+        //                        _correctanswer = realAnswers.FirstOrDefault(t => t.Content == examDetail.AnswerValue);
+        //                    if (_correctanswer == null) continue;
+        //                    examDetail.RealAnswerID = _correctanswer.ID;
+        //                    examDetail.RealAnswerValue = _correctanswer.Content;
+        //                    break;
+        //                case "QUIZ4":
+        //                    var realIds = examDetail.AnswerID.Split(',');
+        //                    examDetail.RealAnswerID = string.Join(",", realAnswers.Select(t => t.ID));
+        //                    examDetail.RealAnswerValue = string.Join(",", realAnswers.Select(t => t.Content));
+        //                    if (realIds.Length != realAnswers.Count()) continue;//incorrect
+        //                    var isCorrect = true;
+        //                    foreach (var id in realIds)
+        //                    {
+        //                        if (realAnswers.FirstOrDefault(t => t.ID == id) == null)//incorrect
+        //                        {
+        //                            isCorrect = false;
+        //                            break;
+        //                        }
+        //                    }
+        //                    if (isCorrect)
+        //                    {
+        //                        _correctanswer = realAnswers.FirstOrDefault();
+        //                        if (_correctanswer == null) continue;
+        //                        _correctanswer.ID = examDetail.AnswerID;
+        //                        _correctanswer.Content = examDetail.AnswerValue;
+        //                    }
+        //                    break;
+        //            }
+        //        }
+        //        else //bài điền từ
+        //        {
+        //            if (examDetail.AnswerValue != null && part.Type == "QUIZ2")
+        //            {
+        //                var _realAnwserQuiz2 = realAnswers?.ToList();
 
-                        if (quiz2answer.Contains(normalizeAns))
-                            _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
-                    }
+        //                if (_realAnwserQuiz2 == null) continue;
+        //                List<string> quiz2answer = new List<string>();
+        //                foreach (var answer in _realAnwserQuiz2)
+        //                {
+        //                    if (!string.IsNullOrEmpty(answer.Content))
+        //                        foreach (var ans in answer.Content.Split('|'))
+        //                        {
+        //                            if (!string.IsNullOrEmpty(ans.Trim()))
+        //                                quiz2answer.Add(NormalizeSpecialApostrophe(ans.Trim()));
+        //                        }
+        //                }
+        //                var normalizeAns = NormalizeSpecialApostrophe(examDetail.AnswerValue.Trim());
 
-                }
+        //                if (quiz2answer.Contains(normalizeAns))
+        //                    _correctanswer = _realAnwserQuiz2.FirstOrDefault(); //điền từ đúng, chấp nhận viết hoa viết thường
+        //            }
 
-                if (_correctanswer != null)
-                {
-                    point += question.Point;
-                    pass++;
-                    examDetail.Point = question.Point;
-                    examDetail.RealAnswerID = _correctanswer.ID;
-                    examDetail.RealAnswerValue = _correctanswer.Content;
-                }
-                if (updateTime)
-                    examDetail.Updated = DateTime.Now;
-                _examDetailService.CreateOrUpdate(examDetail);
-            }
+        //        }
 
-            exam.QuestionsPass = pass;
-            exam.Point = point;
-            if (updateTime)
-                exam.Updated = DateTime.Now;
-            exam.MaxPoint = lesson.Point;
-            exam.QuestionsDone = listDetails.Count();
-            //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
-            exam.QuestionsTotal =
-                _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == exam.LessonID);
-            //_cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
+        //        if (_correctanswer != null)
+        //        {
+        //            point += question.Point;
+        //            pass++;
+        //            examDetail.Point = question.Point;
+        //            examDetail.RealAnswerID = _correctanswer.ID;
+        //            examDetail.RealAnswerValue = _correctanswer.Content;
+        //        }
+        //        if (updateTime)
+        //            examDetail.Updated = DateTime.Now;
+        //        _examDetailService.CreateOrUpdate(examDetail);
+        //    }
 
-            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
-            //_lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
-            Save(exam);
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
-            //&& lesson.Etype != LESSON_ETYPE.PRACTICE
-            )
-            {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePoint(lessonProgress);
-                Task.WhenAll(cttask, cstask, ctask);
-            }
-            else
-            {
-                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress);
-                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
-                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress);
-                Task.WhenAll(cttask
-                    //, cstask, ctask
-                    );
-            }
+        //    exam.QuestionsPass = pass;
+        //    exam.Point = point;
+        //    if (updateTime)
+        //        exam.Updated = DateTime.Now;
+        //    exam.MaxPoint = lesson.Point;
+        //    exam.QuestionsDone = listDetails.Count();
+        //    //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
+        //    exam.QuestionsTotal =
+        //        _cloneLessonPartQuestionService.Collection.CountDocuments(t => t.LessonID == exam.LessonID);
+        //    //_cloneLessonPartService.Collection.CountDocuments(t => t.ParentID == lesson.ID && t.Type == "essay");
 
-            return exam;
-        }
+        //    var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+        //    //_lessonProgressService.GetByClassSubjectID_StudentID_LessonID(exam.ClassSubjectID, exam.StudentID, exam.LessonID);
+        //    Save(exam);
 
-        //Hoàn thành bài tự luận
-        public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
-        {
-            var oldEx = GetItemByID(exam.ID);
-            exam.Status = true;
-            point = 0;
-            var pass = 0;
-            var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
-            foreach (var detail in listDetails)
-                point += detail.Point;
+        //    if (lesson.TemplateType == LESSON_TEMPLATE.EXAM
+        //    //&& lesson.Etype != LESSON_ETYPE.PRACTICE
+        //    )
+        //    {
+        //        if (lessonProgress.ChapterID != "0")
+        //            _ = _lessonHelp
+        //                _chapterProgressService.UpdatePoint(lessonProgress);
+        //        else
+        //            _ = _classSubjectProgressService.UpdatePoint(lessonProgress);
+        //    }
+        //    else
+        //    {
+        //        if (lessonProgress.ChapterID != "0")
+        //            _ = _chapterProgressService.UpdatePracticePoint(lessonProgress);
+        //        else
+        //            _ = _classSubjectProgressService.UpdatePracticePoint(lessonProgress);
+        //    }
 
-            exam.Point = point;
-            exam.LastPoint = oldEx != null ? oldEx.Point : 0;
-            if (updateTime)
-                exam.Updated = DateTime.Now;
-            exam.MaxPoint = lesson.Point;
-            exam.QuestionsDone = listDetails.Count();
+        //    return exam;
+        //}
 
-            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
+        ////Hoàn thành bài tự luận
+        //public ExamEntity CompleteFull(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
+        //{
+        //    var oldEx = GetItemByID(exam.ID);
+        //    exam.Status = true;
+        //    point = 0;
+        //    var pass = 0;
+        //    var listDetails = _examDetailService.Collection.Find(o => o.ExamID == exam.ID).ToList();
+        //    foreach (var detail in listDetails)
+        //        point += detail.Point;
 
-            var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
-            Save(exam);
-            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-            {
-                var cttask = _chapterProgressService.UpdatePoint(lessonProgress, pointchange);
-                var cstask = _classSubjectProgressService.UpdatePoint(lessonProgress, pointchange);
-                var ctask = _classProgressService.UpdatePoint(lessonProgress, pointchange);
-                Task.WhenAll(cttask, cstask, ctask);
-            }
-            else
-            {
-                var cttask = _chapterProgressService.UpdatePracticePoint(lessonProgress, pointchange);
-                var cstask = _classSubjectProgressService.UpdatePracticePoint(lessonProgress, pointchange);
-                var ctask = _classProgressService.UpdatePracticePoint(lessonProgress, pointchange);
-                Task.WhenAll(cttask);
-            }
+        //    exam.Point = point;
+        //    exam.LastPoint = oldEx != null ? oldEx.Point : 0;
+        //    if (updateTime)
+        //        exam.Updated = DateTime.Now;
+        //    exam.MaxPoint = lesson.Point;
+        //    exam.QuestionsDone = listDetails.Count();
 
-            return exam;
-        }
+        //    var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
 
-        public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
-        {
-            var result = false;
-            var lessonProgress = _lessonProgressService.GetByStudentID_LessonID(studentID, lesson.ID);
-            if (lessonProgress != null)
-            {
-                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                {
-                    _chapterProgressService.DecreasePoint(lessonProgress);
-                    _classSubjectProgressService.DecreasePoint(lessonProgress);
-                    _classProgressService.DecreasePoint(lessonProgress);
-                }
-                else
-                {
-                    _chapterProgressService.DecreasePracticePoint(lessonProgress);
-                    _classSubjectProgressService.DecreasePracticePoint(lessonProgress);
-                    _classProgressService.DecreasePracticePoint(lessonProgress);
-                }
-                _lessonProgressService.ResetPoint(lessonProgress);
-            }
-            return result;
-        }
+        //    var lessonProgress = _lessonProgressService.UpdateLastPoint(exam).Result;
+        //    Save(exam);
+        //    if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+        //    {
+        //        if (lessonProgress.ChapterID != "0")
+        //            _ = _chapterProgressService.UpdatePoint(lessonProgress, pointchange);
+        //        else
+        //            _ = _classSubjectProgressService.UpdatePoint(lessonProgress, pointchange);
+        //    }
+        //    else
+        //    {
+        //        if (lessonProgress.ChapterID != "0")
+        //            _ = _chapterProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+        //        else
+        //            _ = _classSubjectProgressService.UpdatePracticePoint(lessonProgress, pointchange);
+        //    }
+
+        //    return exam;
+        //}
+
+        //public bool ResetLesssonPoint(LessonEntity lesson, string studentID)
+        //{
+        //    var result = false;
+        //    var lessonProgress = _lessonProgressService.GetByStudentID_LessonID(studentID, lesson.ID);
+        //    if (lessonProgress != null)
+        //    {
+        //        if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+        //        {
+        //            _chapterProgressService.DecreasePoint(lessonProgress);
+        //            _classSubjectProgressService.DecreasePoint(lessonProgress);
+        //            _classProgressService.DecreasePoint(lessonProgress);
+        //        }
+        //        else
+        //        {
+        //            _chapterProgressService.DecreasePracticePoint(lessonProgress);
+        //            _classSubjectProgressService.DecreasePracticePoint(lessonProgress);
+        //            _classProgressService.DecreasePracticePoint(lessonProgress);
+        //        }
+        //        _lessonProgressService.ResetPoint(lessonProgress);
+        //    }
+        //    return result;
+        //}
 
         public ExamEntity GetLastestExam(string LessonID)
         {

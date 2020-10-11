@@ -83,13 +83,17 @@ namespace BaseCustomerEntity.Database
         {
             var progress = GetStudentResult(item.ClassID, item.StudentID);
             if (progress == null)
+            {
                 return;
+            }
             else
             {
                 if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.ExamDone++;
-                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange);
+                    progress.ExamDone += (long)item.Multiple;
+                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
                 progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+                if (progress.AvgPoint > 100)
+                    throw (new Exception(item.LessonID + " - " + item.ID));
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
         }
@@ -97,15 +101,17 @@ namespace BaseCustomerEntity.Database
         public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
         {
             var progress = GetStudentResult(item.ClassID, item.StudentID);
+            var change = (pointchange > 0 ? pointchange : item.PointChange);
             if (progress == null)
             {
                 return;
             }
             else
             {
-                if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.PracticeDone++;
-                progress.PracticePoint += (pointchange > 0 ? pointchange : item.PointChange);
+                if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    progress.PracticeDone += (long)item.Multiple;
+                progress.LastLessonID = item.ID;
+                progress.PracticePoint += change;
                 progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
                 await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
             }
@@ -165,6 +171,11 @@ namespace BaseCustomerEntity.Database
         public ClassProgressEntity GetByClassID(string ClassID)
         {
             return Collection.Find(x => x.ClassID == ClassID).FirstOrDefault();
+        }
+
+        public ClassProgressEntity GetItemByClassID(string ClassID, string StudentID)
+        {
+            return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID).FirstOrDefault();
         }
     }
 }

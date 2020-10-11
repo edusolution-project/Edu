@@ -802,13 +802,13 @@ var ExamReview = (function () {
     var renderQUIZ1 = function (data) {
         //writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
             html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
-        html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+        html += '<div class="col-md-6 d-inline-block align-top h-100 overflow-auto"><div class="quiz-wrapper part-column">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="QUIZ1">';
@@ -857,7 +857,7 @@ var ExamReview = (function () {
         //console.log(data);
         //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
@@ -897,7 +897,7 @@ var ExamReview = (function () {
         //debugger
         //writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
@@ -952,7 +952,7 @@ var ExamReview = (function () {
     var renderQUIZ4 = function (data) {
         //writeLog("renderQUIZ4", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)
@@ -1003,7 +1003,7 @@ var ExamReview = (function () {
 
     var renderESSAY = function (data) {
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
-        var html = '<div class="col-md-6 d-inline-block h-100" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
+        var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
         if (data.Title != null)
             html += '<h5 class="title">' + data.Title + '</h5 >';
         if (data.Description != null)

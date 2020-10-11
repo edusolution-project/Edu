@@ -66,7 +66,12 @@ namespace BaseCustomerEntity.Database
 
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
         {
-            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamDetailEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            await CreateQuery().UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamDetailEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+        }
+
+        public IEnumerable<ExamDetailEntity> GetByExamID(string ExamID)
+        {
+            return CreateQuery().Find(o => o.ExamID == ExamID).ToEnumerable();
         }
     }
 }

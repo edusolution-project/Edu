@@ -27,29 +27,29 @@
 <section class="module" id="dashboard_content">
     @*<div class="card-header">
 
-        <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
-            <div class="box filter-box d-none">
-                <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
-                <span class="ic ic-picker inactive"></span>
+            <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
+                <div class="box filter-box d-none">
+                    <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
+                    <span class="ic ic-picker inactive"></span>
+                </div>
+                <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+                    <select v-model="subject" v-on:change="changeSubject()">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-3 ml-0 mb-1 ml-md-2">
+                    <select name="" v-model="grade" v-on:change="changeGrade()">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" placeholder="Tên lớp cần tìm">
+                </div>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
-                <select v-model="subject" v-on:change="changeSubject()">
-                    <option value="">Chọn chương trình</option>
-                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                </select>
-            </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 ml-md-2">
-                <select name="" v-model="grade" v-on:change="changeGrade()">
-                    <option value="">Chọn cấp độ</option>
-                    <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
-                </select>
-            </div>
-            <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" placeholder="Tên lớp cần tìm">
-            </div>
-        </div>
-    </div>*@
+        </div>*@
 
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -68,7 +68,7 @@
                                 <div class="inner d-flex w-100">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -100,7 +100,7 @@
                                 <div class="inner d-flex w-100" style="max-height:150px">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -133,7 +133,7 @@
                                 <div class="inner d-flex w-100" style="max-height:150px">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
-                                            <img v-lazy="cacheStatic(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                            <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
                                     <div class="flex-fill ml-2">
@@ -412,11 +412,8 @@
                 //    _that.enddate = moment(new Date(1800,1,1)),
                 //    GetCourse();
                 //},
-                cacheStatic(src, width, height) {
-                    if (src == null) return "https://static.eduso.vn/picture/book.jpg?w=" + width;
-                    if (src.startsWith("http"))
-                        return src;
-                    return "https://static.eduso.vn/" + src + "?w=" + width + "&h=" + height + "&mode=crop&format=jpg";
+                cacheImg(src, width, height) {
+                    return cacheStatic(src, width, height, 'picture/book.jpg');
                 },
                 //repDate(svalue, evalue) {
                 //    this.eDate = evalue;

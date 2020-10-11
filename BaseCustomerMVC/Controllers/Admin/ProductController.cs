@@ -65,7 +65,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 foreach (var target in item.Targets[0].ToString().Split(','))
                 {
-                    if (target != null || target != "")
+                    if (!string.IsNullOrEmpty(target))
                         item.Targets.Add(target);
                 }
                 item.Targets.RemoveAt(0);
