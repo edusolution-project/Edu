@@ -1642,7 +1642,7 @@ var Lesson = (function () {
 
     var modalEditLesson = function (ID) {
         var modal = $('#lessonModal');
-        debugger
+        //debugger
         $.ajax({
             type: "POST",
             url: config.url.load,
@@ -3864,41 +3864,29 @@ var Lesson = (function () {
     //check ki tu dac biet
     var checkSpecialCharacters = function (chain) {
         //debugger
-        //var newchain = "";
-        var space = ["&nbsp;", "&shy;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;", "&lrm;", "&rlm;", "&#160;", "\00A0", "&#xa0;", "\A0"];//khoang trang
-        var beginningClose = ["&rsquo;", "&#8217;", "\2019", "&#x2019;", "\2019", "&acute;", "&#180;", "\00B4", "&#xb4;", "\B4","’"];//nhay don dong
-        var beginningOpen = ["&lsquo;", "&#8216;", "\2018", "&#x2018;", "\2018","‘"];//nhay don mo
-        var quotationOpen = ["&ldquo;", "&#8220;", "\201C", "&#x201C;", "\201C","“"];//nhay kep mo
-        var quotationClose = ["&rdquo;", "&#8221;", "\201D", "&#x201D;", "\201D","”"];//nhay kep dong
+        chain = chain.trim();
+        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
+        var beginning = [8217, 8216, 180, 8216, 8242, 8219];//ki tu ‘’ trong word
+        var quotation = [8220, 8221, 8243];//check ki tu “” trong word
 
+        for (i = 0; i < chain.length; i++) {//check ki tu khoang trang dac biet
+            if (space.includes(chain[i])) {
+                chain[i] = " ";
+            }
+        }
 
+        for (i = 0; i < chain.length; i++) {//check ki tu ‘’ trong word
+            if (beginning.includes(chain[i])) {
+                chain[i] = "'";
+            }
+        }
 
-        for (i = 0; i < space.length; i++) {
-            //debugger
-            if (chain.includes(space[i])) {
-                chain = chain.replaceAll(space[i]," ");
+        for (i = 0; i < chain.length; i++) {//check ki tu “” trong word
+            if (quotation.includes(chain[i])) {
+                chain[i] = "\"";
             }
         }
-        for (i = 0; i < beginningClose.length; i++) {
-            if (chain.includes(beginningClose[i])) {
-                chain = chain.replaceAll(beginningClose[i],"'")
-            }
-        }
-        for (i = 0; i < beginningOpen.length; i++) {
-            if (chain.includes(beginningOpen[i])) {
-                chain = chain.replaceAll(beginningOpen[i], "'")
-            }
-        }
-        for (i = 0; i < quotationClose.length; i++) {
-            if (chain.includes(quotationClose[i])) {
-                chain = chain.replaceAll(quotationClose[i], "\"")
-            }
-        }
-        for (i = 0; i < quotationOpen.length; i++) {
-            if (chain.includes(quotationOpen[i])) {
-                chain = chain.replaceAll(quotationOpen[i], "\"")
-            }
-        }
+        //debugger
         return chain;
     }
 
@@ -3910,9 +3898,9 @@ var Lesson = (function () {
         var partID = dataset.partId;
         var type = dataset.type;
         var questionId = dataset.questionId;
+        //debugger
         var a = $('#' + spanID).text();
         var value = checkSpecialCharacters(a);
-        //debugger
         var dataform = new FormData();
 
         dataform.append("ExamID", $("input[name=ExamID]").val());
@@ -4300,7 +4288,7 @@ var submitForm = function (event, modalId, callback) {
 
 
     //console.log(formdata);
-    debugger
+    //debugger
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
         //formdata.append("Description", myEditor.getData())
@@ -4308,11 +4296,12 @@ var submitForm = function (event, modalId, callback) {
     }
     else {
         //replace ki tu dac biet
-        var txt = CKEDITOR.instances.editor.getData();
-        var description = checkSpecialCharacters(txt);
+        //var txt = CKEDITOR.instances.editor.getData();
+        //var description = checkSpecialCharacters(txt);
+        var description = CKEDITOR.instances.editor.getData();
         formdata.delete("Description");
         formdata.append("Description", description);
-        debugger
+        //debugger
     }
 
 

@@ -390,14 +390,14 @@ var ExamReview = (function () {
     var checkSpecialCharacters = function (chain) {
         //debugger
         //var newchain = "";
-        var space = ["&nbsp;", "&shy;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;", "&lrm;", "&rlm;", "&#160;", "\00A0", "&#xa0;","\A0"];
+        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];
         for (i = 0; i < space.length; i++) {
             //debugger
             if (chain.includes(space[i])) {
                 chain = chain.replaceAll(space[i], "_");
             }
         }
-        return chain;
+        return chain.trim();
     }
 
     var renderAnswer = function (data, type) {
@@ -602,7 +602,7 @@ var ExamReview = (function () {
                                 }
                                 else {
                                     chodung1 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_Answer[i] + "</span> ";
-                                    //chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
