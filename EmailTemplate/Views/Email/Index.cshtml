@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+<canvas id="myChart"></canvas>
+<img id="imagess" alt="Alternate Text" />
+
+@section Scripts{ 
+    <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            // The type of chart we want to create
+            type: 'line',
+
+            // The data for our dataset
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'My First dataset',
+                    backgroundColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: [0, 10, 5, 2, 20, 30, 45]
+                }]
+            },
+
+            // Configuration options go here
+            options: {},
+            plugins: [{
+                afterRender: function () {
+                    var x = chart.toBase64Image();
+                    var image = document.getElementById("imagess");
+                    image.setAttribute("src", x);
+                    // send image to email
+                }
+            }]
+        });
+    </script>
+}
+@*
+    create chart => render => send ctrl => chart.destroy =>  create chart
+*@
