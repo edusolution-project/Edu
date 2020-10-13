@@ -944,7 +944,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 foreach (var chapter in chapters)
                 {
                     //var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId, currentCs.ID);
+                    var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, userId);
                     //if (extend != null) chapter.Description = extend.Description;
                     var viewModel = new MappingEntity<ChapterEntity, ChapterProgressViewModel>().AutoOrtherType(chapter, new ChapterProgressViewModel());
                     viewModel.TotalLessons = chapter.TotalLessons;

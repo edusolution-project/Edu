@@ -108,7 +108,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             //BAD => NEED MOVE TO API
-            ViewBag.List_Courses = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6);
+            ViewBag.List_Courses = _newsService.CreateQuery().Find(o => o.Type == "san-pham" && o.IsActive == true && o.Targets.Any(t => t == centerID)).Limit(6).ToList();
 
             return View();
         }
@@ -148,7 +148,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
             ViewBag.avatar = account.Avatar ?? _default.defaultAvatar;
-            _session.SetString("userAvatar", account.Avatar ?? _default.defaultAvatar);
             return View(account);
         }
 
@@ -159,7 +158,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 string _studentid = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0";
                 var account = _studentService.GetItemByID(_studentid);
                 var avatar = account.Avatar ?? _default.defaultAvatar;
-                _session.SetString("userAvatar", avatar);
                 ViewBag.avatar = avatar;
                 account.Avatar = avatar;
                 return Json(new ReturnJsonModel

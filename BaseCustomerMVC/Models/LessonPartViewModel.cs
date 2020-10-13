@@ -16,7 +16,6 @@ namespace BaseCustomerMVC.Models
             this.Created = o.Created;
             this.Description = o.Description;
             this.ID = o.ID;
-            this.IsExam = o.IsExam;
             this.Order = o.Order;
             this.ParentID = o.ParentID;
             this.Point = o.Point;
@@ -39,7 +38,6 @@ namespace BaseCustomerMVC.Models
                 Created = this.Created,
                 Description = this.Description,
                 ID = this.ID,
-                IsExam = this.IsExam,
                 Order = this.Order,
                 ParentID = this.ParentID,
                 Point = this.Point,

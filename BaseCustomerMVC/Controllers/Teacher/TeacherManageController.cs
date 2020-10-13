@@ -153,6 +153,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (!string.IsNullOrEmpty(model.SearchText))
                 filterTC.Add(Builders<TeacherEntity>.Filter.Text("\"" + model.SearchText + "\""));
+
+            //hide huonghl@utc.edu.vn
+            if (basis != "eduso")
+                filterTC.Add(Builders<TeacherEntity>.Filter.Where(t => t.Email != "huonghl@utc.edu.vn"));
+
             var list = _teacherService.Collection.Find(Builders<TeacherEntity>.Filter.And(filterTC)).SortByDescending(t => t.ID);
 
             model.TotalRecord = list.CountDocuments();
@@ -162,10 +167,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var _mapping = new MappingEntity<TeacherEntity, TeacherViewModel>();
 
             var data =
-
                 from t in list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList()
-                    //let account = _accountService.CreateQuery().Find(o => o.UserID == t.ID && o.Type == ACCOUNT_TYPE.TEACHER).FirstOrDefault()
-                    //where account != null
                 let role = roles.Find(r => r.ID == t.Centers.Single(c => c.Code == basis).RoleID)
                 where role != null
                 select _mapping.AutoOrtherType(t, new TeacherViewModel()
@@ -341,7 +343,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public async Task<JsonResult> ChangePass(string basis, string ID, string Password)
         {
-
             if (string.IsNullOrEmpty(basis))
                 return Json(new { error = "Bạn không được quyền thực hiện chức năng này" });
 

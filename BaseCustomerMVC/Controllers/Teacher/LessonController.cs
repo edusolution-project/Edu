@@ -436,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.GetItemByID(item.ID);
+                var data = string.IsNullOrEmpty(item.ID) ? null : _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.Now;
@@ -458,9 +458,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _lessonService.CreateQuery().InsertOne(item);
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
+                    { 
                         _ = _chapterService.IncreaseLessonCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //TODO: CAP NHAT LAI DIEM
+                    }
                     else
+                    { 
                         _ = _courseService.IncreaseLessonCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                        //TODO: CAP NHAT LAI DIEM
+                    }
                 }
                 else
                 {
@@ -659,8 +665,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             chapter.ConditionChapter = ConditionChapter;
             _chapterService.Save(chapter);
             var subchaps = _chapterService.GetSubChapters(chapter.ClassSubjectID, chapter.ID);
-            if (subchaps != null && subchaps.Count > 0)
-                subchaps.ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
+            if (subchaps != null && subchaps.Count() > 0)
+                subchaps.ToList().ForEach((ChapterEntity item) => UpdateConditionChapter(item, ConditionChapter));
         }
 
 

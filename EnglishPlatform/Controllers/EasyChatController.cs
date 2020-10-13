@@ -23,7 +23,7 @@ namespace EnglishPlatform.Controllers
     public class EasyChatController : ControllerBase
     {
         protected readonly Dictionary<string, List<string>> _mapUserOffline = new Dictionary<string, List<string>>();
-        protected readonly Dictionary<string, string> _mapConnectId = new Dictionary<string,string>();
+        protected readonly Dictionary<string, string> _mapConnectId = new Dictionary<string, string>();
         protected readonly Dictionary<string, List<string>> _mapUsersConnectionId = new Dictionary<string, List<string>>();
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
@@ -86,14 +86,14 @@ namespace EnglishPlatform.Controllers
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
             return null;
         }
         [HttpGet]
-        public List<MemberInfo> GetMembersInClass (string className)
+        public List<MemberInfo> GetMembersInClass(string className)
         {
             try
             {
@@ -136,19 +136,19 @@ namespace EnglishPlatform.Controllers
                     var listData = new List<MemberInfo>();
                     if (classNames != null && classNames.Count > 0)
                     {
-                        var listSubjects = _classSubjectService.CreateQuery().Find(o => classNames.Contains(o.ClassID))?.ToList()?.Select(o=>o.TeacherID);
-                        listTeacherOnClass = listSubjects == null || listSubjects.Count() > 0 ? _teacherService.CreateQuery().Find(o=> listSubjects.Contains(o.ID))?.ToList() : null;
-                        for (int  i = 0; i < classNames.Count; i++)
+                        var listSubjects = _classSubjectService.CreateQuery().Find(o => classNames.Contains(o.ClassID))?.ToList()?.Select(o => o.TeacherID);
+                        listTeacherOnClass = listSubjects == null || listSubjects.Count() > 0 ? _teacherService.CreateQuery().Find(o => listSubjects.Contains(o.ID))?.ToList() : null;
+                        for (int i = 0; i < classNames.Count; i++)
                         {
                             string className = classNames[i];
                             var listDatas = _studentService.CreateQuery().Find(o => o.JoinedClasses.Contains(className))?.ToList();
-                            
+
                             listStudentOnClass.AddRange(listDatas);
                         }
                         if (listStudentOnClass != null && listStudentOnClass.Count > 0)
                         {
-                            
-                            for(int i = 0; i < listStudentOnClass.Count; i++)
+
+                            for (int i = 0; i < listStudentOnClass.Count; i++)
                             {
                                 var item = listStudentOnClass[i];
                                 var member = new MemberInfo() { ID = item.ID, Name = item.FullName };
@@ -159,7 +159,7 @@ namespace EnglishPlatform.Controllers
                                 }
                             }
                         }
-                        for(int  i = 0; listTeacherOnClass != null && i < listTeacherOnClass.Count; i++)
+                        for (int i = 0; listTeacherOnClass != null && i < listTeacherOnClass.Count; i++)
                         {
                             var item = listTeacherOnClass[i];
                             var member = new MemberInfo() { ID = item.ID, Name = item.FullName };
@@ -182,7 +182,7 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpPost]
-        public bool EditMessage(string id,string message)
+        public bool EditMessage(string id, string message)
         {
             try
             {
@@ -246,7 +246,7 @@ namespace EnglishPlatform.Controllers
         }
 
         [HttpPost]
-        public bool CreateMessage(string message,string groupName, string userName)
+        public bool CreateMessage(string message, string groupName, string userName)
         {
             try
             {
@@ -260,7 +260,7 @@ namespace EnglishPlatform.Controllers
 
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _log.Error(MethodBase.GetCurrentMethod().Name, ex);
             }
@@ -268,23 +268,23 @@ namespace EnglishPlatform.Controllers
         }
 
         // add key connectid và key userId
-        private bool AddMapUserWithConnectId(string userId,string connectId)
+        private bool AddMapUserWithConnectId(string userId, string connectId)
         {
-            lock(_mapUsersConnectionId)
+            lock (_mapUsersConnectionId)
             {
                 if (!_mapUsersConnectionId.TryGetValue(userId, out List<string> connectionIds))
                 {
                     connectionIds = new List<string>() { };
                     _mapUsersConnectionId.Add(userId, connectionIds);
                 }
-                lock(connectionIds)
+                lock (connectionIds)
                 {
                     connectionIds.Add(connectId);
                 }
             }
             return false;
         }
-        private bool AddMapConnectIdWithUser(string userId,string connectId)
+        private bool AddMapConnectIdWithUser(string userId, string connectId)
         {
             lock (_mapConnectId)
             {
@@ -298,9 +298,9 @@ namespace EnglishPlatform.Controllers
 
         private void RemoveMapConnectionId(string connectionId)
         {
-            lock(_mapConnectId)
+            lock (_mapConnectId)
             {
-                if(_mapConnectId.TryGetValue(connectionId,out string userId))
+                if (_mapConnectId.TryGetValue(connectionId, out string userId))
                 {
                     _mapConnectId.Remove(connectionId);
                 }
@@ -312,7 +312,7 @@ namespace EnglishPlatform.Controllers
             {
                 if (_mapUsersConnectionId.TryGetValue(userId, out List<string> connections))
                 {
-                    if(connections == null)
+                    if (connections == null)
                     {
                         _mapUsersConnectionId.Remove(userId);
                     }
@@ -320,7 +320,7 @@ namespace EnglishPlatform.Controllers
                     {
                         if (connections.Count > 0)
                         {
-                            lock(connections)
+                            lock (connections)
                             {
                                 connections.Remove(connectionId);
                             }
