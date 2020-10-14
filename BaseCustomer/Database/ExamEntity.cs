@@ -53,6 +53,8 @@ namespace BaseCustomerEntity.Database
         public long QuestionsPass { get; set; }
         [JsonProperty("LastPoint")]
         public double LastPoint { get; set; }
+        [JsonProperty("OldExamID")]
+        public string OldExamID { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
