@@ -897,7 +897,6 @@ var ExamReview = (function () {
     }
 
     var redo = function () {
-        //debugger
         document.location = config.url.exam + "/" + config.lesson.ID + "/" + config.exam.ClassSubjectID + "#redo";
     }
 
