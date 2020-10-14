@@ -53,7 +53,7 @@
     <script src="~/js/content-render.js?20200822"></script>
     <script src="/generic_wiris/integration/WIRISplugins.js?viewer=image"></script>
     @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
-    <script>
+<script>
     var config = {
         container: "lessonContainer",
         mod: mod.PREVIEW,
@@ -66,13 +66,15 @@
             move_part: '@processUrl("ChangePosition", "LessonPart")',
             export_quiztemp: '@processUrl("ExportQuestionTemplate","Curriculum")',
             import_quiz: '@processUrl("ImportQuestion","Curriculum")',
+            export_quiztemp_with_word: '@processUrl("ExportQuestionTemplateWithWord", "Curriculum")',
+            import_quiz_with_word: '@processUrl("ImportQuestionWithWord", "Curriculum")',
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
         chap_id: '@Data.ChapterID'
     }
     var widget = new Lesson.onReady(config);
-    </script>
+</script>
     <link href="~/css/detailui.css" rel="stylesheet" />
     <script>
         var RefreshPage = function () {

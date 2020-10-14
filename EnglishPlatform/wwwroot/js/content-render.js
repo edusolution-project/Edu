@@ -1930,7 +1930,8 @@ var Lesson = (function () {
                 renderAddMedia(contentholder.find(".media_holder"), "", "", data != null ? data.Media : null);
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "onclick": "AddNewQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm câu hỏi'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -2034,7 +2035,8 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add question
                 if (data != null && data.Questions != null) {
@@ -2215,36 +2217,62 @@ var Lesson = (function () {
             $(wrapper).find(".btnAddAnswer").before(clone);
     }
 
-    var showCloneQuestion = function () {
-        Swal.fire({
-            title: '<strong>Chọn thao tác</strong>',
-            icon: 'question',
-            html:
-                '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this)"><i class="fas fa-upload"></i> Chọn file câu hỏi </button>' +
-                '<input type="file" class="d-none" accept=".xlsx, .xls"/>' +
-                '<button type="button" class="btn btn-secondary mr-2" onclick="DownloadQuestionTemplate(this)"><i class="fas fa-file-download"></i> Tải file mẫu </button>',
-            //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
-            confirmButtonText: 'Đóng',
-        })
+    var showCloneQuestion = function (obj, type) {
+        //debugger
+        if (type == 0) {//file excel
+            Swal.fire({
+                title: '<strong>Chọn thao tác</strong>',
+                icon: 'question',
+                html:
+                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,0)"><i class="fas fa-upload"></i> Chọn file câu hỏi </button>' +
+                    '<input type="file" class="d-none" accept=".xlsx, .xls"/>' +
+                    '<button type="button" class="btn btn-secondary mr-2" onclick="DownloadQuestionTemplate(this,0)"><i class="fas fa-file-download"></i> Tải file mẫu </button>',
+                //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
+                confirmButtonText: 'Đóng',
+            })
+        }
+        else {//file word
+            Swal.fire({
+                title: '<strong>Chọn thao tác</strong>',
+                icon: 'question',
+                html:
+                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,1)"><i class="fas fa-upload"></i> Chọn file câu hỏi </button>' +
+                    '<input type="file" class="d-none" accept=".docx, .doc"/>' +
+                    '<button type="button" class="btn btn-secondary mr-2" onclick="DownloadQuestionTemplate(this,1)"><i class="fas fa-file-download"></i> Tải file mẫu </button>',
+                //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
+                confirmButtonText: 'Đóng',
+            })
+        }
     }
 
-    var downloadQuestionTemplate = function () {
-        window.open(config.url.export_quiztemp);
+    var downloadQuestionTemplate = function (obj,type) {
+        if (type == 0) {//file excel
+            window.open(config.url.export_quiztemp);
+        }
+        else {//file word
+            window.open(config.url.export_quiztemp_with_word);
+        }
+       
     }
 
-    var chooseQuestionFile = function (obj) {
+    var chooseQuestionFile = function (obj,type) {
         $(obj).siblings('input').unbind().change(function (e) {
-            uploadQuestionFile(e);
+            uploadQuestionFile(e,type);
         });
         $(obj).siblings('input').focus().click();
     }
 
-    var uploadQuestionFile = function (e) {
+    var uploadQuestionFile = function (e,type) {
         Swal.showLoading();
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
         formData.append('file', e.target.files[0]);
-        xhr.open('POST', config.url.import_quiz);
+        if (type == 0) {//file excel
+            xhr.open('POST', config.url.import_quiz);
+        }
+        else {//file word
+            xhr.open('POST', config.url.import_quiz_with_word);
+        }
         xhr.send(formData);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
@@ -3870,20 +3898,22 @@ var Lesson = (function () {
         var quotation = [8220, 8221, 8243];//check ki tu “” trong word
 
         for (i = 0; i < chain.length; i++) {//check ki tu khoang trang dac biet
-            if (space.includes(chain[i])) {
-                chain[i] = " ";
+            if (space.includes(chain[i].charCodeAt())) {
+                chain = chain.replace(chain[i]," ");
             }
         }
 
         for (i = 0; i < chain.length; i++) {//check ki tu ‘’ trong word
-            if (beginning.includes(chain[i])) {
-                chain[i] = "'";
+            if (beginning.includes(chain[i].charCodeAt())) {
+                //chain[i] = "'";
+                chain = chain.replace(chain[i], "'");
             }
         }
 
         for (i = 0; i < chain.length; i++) {//check ki tu “” trong word
-            if (quotation.includes(chain[i])) {
-                chain[i] = "\"";
+            if (quotation.includes(chain[i].charCodeAt())) {
+                //chain[i] = "\"";
+                chain = chain.replace(chain[i], "\"");
             }
         }
         //debugger

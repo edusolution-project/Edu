@@ -391,10 +391,10 @@ var ExamReview = (function () {
         //debugger
         //var newchain = "";
         var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];
-        for (i = 0; i < space.length; i++) {
+        for (i = 0; i < chain.length; i++) {
             //debugger
-            if (chain.includes(space[i])) {
-                chain = chain.replaceAll(space[i], "_");
+            if (space.includes(chain[i].charCodeAt())) {
+                chain = chain.replaceAll(chain[i], "_");
             }
         }
         return chain.trim();

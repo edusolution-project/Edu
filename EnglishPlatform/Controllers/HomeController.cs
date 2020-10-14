@@ -1520,7 +1520,7 @@ namespace EnglishPlatform.Controllers
                         var endtime = (lastexam.Created.AddMinutes(lastexam.Timer));
                         if (endtime < DateTime.UtcNow) // hết thời gian 
                         {
-                            lastexam = _examService.CompleteNoEssay(lastexam, lesson, out _);
+                            //lastexam = _examService.CompleteNoEssay(lastexam, lesson, out _);
                         }
                     }
 

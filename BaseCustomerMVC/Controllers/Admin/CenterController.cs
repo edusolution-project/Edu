@@ -44,7 +44,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             TeacherService teacherService,
             StudentHelper studentHelper,
             FileProcess fileProcess,
-            IHostingEnvironment evn
+            IHostingEnvironment evn,
+            StudentService studentService
             )
         {
             _env = evn;

@@ -793,10 +793,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult ExportStudent(string basic, string ClassID)
         {
             var center = _centerService.GetItemByCode(basic);
-            var Data4Export = ClassID == null ? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)) : _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(ClassID));
-            var @class = ClassID == null ? "" : _classService.GetItemByID(ClassID).Name;
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            //IFindFluent<StudentEntity, StudentEntity> Data4Export = null;
+            List<StudentEntity> Data4Export = new List<StudentEntity>();
+            if (!_teacherHelper.HasRole(teacher.ID,center.ID, "head-teacher"))
+            {
+                var listJoinClass = _classService.CreateQuery().Find(x => x.Members.Any(y => y.TeacherID == teacher.ID)).Project(x=>x.ID);
+                if (string.IsNullOrEmpty(ClassID))
+                {
+                    foreach (var item in listJoinClass.ToList())
+                    {
+                        //Data4Export = _studentService.CreateQuery().Find(x=>x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(item));
+                        Data4Export.AddRange(_studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(item)).ToList());
+                    }
+                }
+                else
+                {
+                    Data4Export.AddRange(_studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(ClassID)).ToList());
+                }
+            }
+            else
+            {
+                Data4Export.AddRange(ClassID == null ? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList() : _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(ClassID)).ToList());
+            }
+            //var Data4Export = ClassID == null ? _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)) : _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Contains(ClassID));
+            var @class = ClassID == null ? "" : _classService.GetItemByID(ClassID).Name;
             var stream = new MemoryStream();
 
             //xuat file excel
@@ -915,7 +937,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         index++;
                     }
-                    var cells = ws.Cells[1, countColHeader, (int)Data4Export.CountDocuments() + 2, countColHeader];
+                    var cells = ws.Cells[1, countColHeader, (int)Data4Export.Count() + 2, countColHeader];
                     cells.AutoFitColumns();
                     cells.Style.Border.Top.Style =
                     cells.Style.Border.Left.Style =
