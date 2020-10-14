@@ -327,7 +327,10 @@ var Lesson = (function () {
             throw "No data";
         }
         var data = _data;
-
+        if (data.TemplateType == 2) {
+            renderLessonData.prototype.IsTest = true;
+        }
+        //debugger
         var mainContainer = $('#' + config.container);
         var lessonHeader = mainContainer.find('.card-header');
         var lessonBody = mainContainer.find('.card-body');
@@ -576,6 +579,7 @@ var Lesson = (function () {
                     })
                 }
                 break;
+                //debugger
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
@@ -586,7 +590,7 @@ var Lesson = (function () {
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
-                    renderStudentPart(item, false);
+                    renderStudentPart(item,false);
                 }
                 if (data.Part != null && data.Part.length == 1) {
                     $('.fas.fa-caret-down:first').click();
@@ -875,9 +879,11 @@ var Lesson = (function () {
                 $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
             }
         }
-
+        debugger
         //alert(_UImode);
-
+        if (!renderLessonData.prototype.IsTest) {
+            renderOldAnswer(renderLessonData.prototye.examID);
+        }
     }
 
     var switchUIMode = function (mode) {
@@ -1508,6 +1514,7 @@ var Lesson = (function () {
     }
 
     var startDragDrop = function () {
+        //debugger
         $(".answer-item").draggable({
             cursor: "move",
             helper: 'clone',
@@ -2506,6 +2513,7 @@ var Lesson = (function () {
 
     //Exam
     var renderExam = function () {
+        //debugger
         //load lastest exam state from server
         var dataform = new FormData();
         dataform.append("ClassID", config.class_id);
@@ -2592,6 +2600,7 @@ var Lesson = (function () {
                     }
                 }
             }
+            //renderOldAnswer(data.exam.OldExamID);
         });
     }
 
@@ -2688,7 +2697,7 @@ var Lesson = (function () {
                             "class": "btn btn-primary m-2 lesson-action",
                             "onclick": "BeginExam(this)",
                             "style": "cursor: pointer"
-                        }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?');
+                        }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài 3. Thực hiện lại?');
                     }
                     else {
                         doButton = $('<div>', { class: "btn btn-danger m-2" }).append('<i class="fas fa-ban mr-2"></i>').append('Hết lượt làm bài</div>');
@@ -2696,11 +2705,13 @@ var Lesson = (function () {
                     }
                 }
                 else {
+                    //debugger
+                    
                     var doButton = $('<div>', {
                         "class": "btn btn-primary m-2 lesson-action",
-                        "onclick": "$(this).prop('disabled',true); Redo(this); ",
+                        "onclick": "$(this).prop('disabled',true); Redo(this,'" + data.OldExamID+"'); ",
                         "style": "cursor: pointer"
-                    }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài');
+                    }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài 4');
                 }
 
             lesson_action_holder.append(doButton)
@@ -2709,6 +2720,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+        //debugger
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2747,12 +2759,12 @@ var Lesson = (function () {
                     "onclick": 'Review(\'' + lastExam.ID + '\')',
                     "style": "cursor: pointer"
                 }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
-
+                
                 var doButton = $('<div>', {
                     "class": "btn btn-primary m-2 lesson-action",
-                    "onclick": "$(this).prop('disabled',true); DoLectureExam(this); ",
+                    "onclick": "$(this).prop('disabled',true); DoLectureExam(this,'" + data.ID + "'); ",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài");
+                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài 123");
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
@@ -2769,6 +2781,8 @@ var Lesson = (function () {
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
         }
+
+        renderOldAnswer(data.OldExamID);
     }
 
     var renderPreviewLectureExam = function (data, isContinue) {
@@ -2809,7 +2823,7 @@ var Lesson = (function () {
                     "class": "btn btn-primary m-2 lesson-action",
                     "onclick": "$(this).prop('disabled',true); DoLectureExam(this); ",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài");
+                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài 5");
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
@@ -2828,67 +2842,186 @@ var Lesson = (function () {
         }
     }
 
-    var doLectureExam = function (obj) {
+    var doLectureExam = function (obj, examID) {
+        //debugger
+        //if (examID) {
+        //    var dataform = new FormData();
+        //    dataform.append("examID", examID);
+        //    Ajax(config.url.oldAnswer, dataform, "POST", false)
+        //        .then(function (res) {
+        //            var data = JSON.parse(res);
+        //            //debugger
+        //        })
+        //        .catch(function (err) {
+        //            notification("error", err, 3000);
+        //        });
+        //}
         //$(obj).parent().remove();
         //console.log(_openingPart);
-        redoExam(obj);
+        redoExam(obj, examID);
         $('#rightCol').find('.tab-pane').hide();
     }
 
-    var startExam = function (obj) {
+    var startExam = function (obj, examID) {
+        //debugger
         if (obj != null)
             $(obj).prop("disabled", true);
-        console.log("Create Exam");
-        var dataform = new FormData();
-        dataform.append("LessonID", config.lesson_id);
-        dataform.append("ClassSubjectID", config.class_subject_id);
-        dataform.append("ClassID", config.class_id);
-        Ajax(config.url.start, dataform, "POST", false)
-            .then(function (res) {
-                var data = JSON.parse(res);
-                if (data.Error == null) {
-                    if (!$(obj).parent().hasClass('top-menu'))
-                        $(obj).parent().remove();
-                    else
-                        $(obj).parent().empty();
-                    //notification("success", "Bắt đầu làm bài", 1500);
-                    //console.log("NewID: " + data.Data.ID);
-                    $("#ExamID").val(data.Data.ID);
-                    setLocalData("CurrentExam", data.Data.ID);
+        //if (!examID) {
+            console.log("Create Exam");
+            var dataform = new FormData();
+            dataform.append("LessonID", config.lesson_id);
+            dataform.append("ClassSubjectID", config.class_subject_id);
+            dataform.append("ClassID", config.class_id);
+        dataform.append("OldExamID", examID);
+            Ajax(config.url.start, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    if (data.Error == null) {
+                        if (!$(obj).parent().hasClass('top-menu'))
+                            $(obj).parent().remove();
+                        else
+                            $(obj).parent().empty();
+                        //notification("success", "Bắt đầu làm bài", 1500);
+                        //console.log("NewID: " + data.Data.ID);
+                        $("#ExamID").val(data.Data.ID);
+                        setLocalData("CurrentExam", data.Data.ID);
 
-                    renderExamDetail();
+                        renderExamDetail(examID);
 
-                    //console.log(data);
-                    if (data.Data.Timer > 0) {
-                        var _minutes = data.Data.Timer;
-                        //console.log(_minutes);
-                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
-                        setLocalData("Timer", timer);
-                        //console.log($(".time-counter"));
+                        //console.log(data);
+                        if (data.Data.Timer > 0) {
+                            var _minutes = data.Data.Timer;
+                            //console.log(_minutes);
+                            var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                            setLocalData("Timer", timer);
+                            //console.log($(".time-counter"));
+                        }
+                    } else {
+                        notification("error", data.Error, 3000);
+                        if (obj != null)
+                            $(obj).prop("disabled", false);
                     }
-                } else {
-                    notification("error", data.Error, 3000);
-                    if (obj != null)
-                        $(obj).prop("disabled", false);
-                }
-            })
-            .catch(function (err) {
-                notification("error", err, 3000);
-            });
+                })
+                .catch(function (err) {
+                    notification("error", err, 3000);
+                });
+        //}
+        //else {
+        //    var dataform = new FormData();
+        //    dataform.append("examID", examID);
+        //    Ajax(config.url.oldExam, dataform, "POST", false)
+        //        .then(function (res) {
+        //            var data = JSON.parse(res);
+        //            if (data.Error == null) {
+        //                if (!$(obj).parent().hasClass('top-menu'))
+        //                    $(obj).parent().remove();
+        //                else
+        //                    $(obj).parent().empty();
+        //                //notification("success", "Bắt đầu làm bài", 1500);
+        //                //console.log("NewID: " + data.Data.ID);
+        //                $("#ExamID").val(data.Data.ID);
+        //                setLocalData("CurrentExam", data.Data.ID);
+
+        //                renderExamDetail();
+
+        //                //console.log(data);
+        //                if (data.Data.Timer > 0) {
+        //                    var _minutes = data.Data.Timer;
+        //                    //console.log(_minutes);
+        //                    var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+        //                    setLocalData("Timer", timer);
+        //                    //console.log($(".time-counter"));
+        //                }
+        //            } else {
+        //                notification("error", data.Error, 3000);
+        //                if (obj != null)
+        //                    $(obj).prop("disabled", false);
+        //            }
+        //        })
+        //        .catch(function (err) {
+        //            notification("error", err, 3000);
+        //        });
+        //}
     }
 
-    var renderExamDetail = function () {
-
+    var renderExamDetail = function (examID) {
+        //debugger
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
+        renderLessonData.prototype.examID = examID;
         loadLessonData({
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
+        //debugger
+        //renderLessonData(examID);
     }
 
+    //---- 14-10-2020
+    var renderOldAnswer = function (OldExamID) { //dạng điền từ
+        //debugger
+        if (OldExamID) {
+            var dataform = new FormData();
+            dataform.append("examID", OldExamID);
+            Ajax(config.url.oldAnswer, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    //debugger
+                    for (i = 0; i < data.Data.length; i++) {
+                        var item = data.Data[i];
+                        var quizID = item.QuestionID;
+                        var answerVal = item.AnswerValue;
+                        var _examid = item.ExamID;
+                        var lessonpartid = item.LessonPartID;
+                        var answerid = item.AnswerID;
+                        var point = item.Point;
+                        var _fillquiz = $("#" + quizID);
+                        var span = $(_fillquiz).find("span");
+                        //debugger
+                        if (point > 0) {
+                            if (answerid) {
+                                var input = $("input[id=" + answerid + "]");
+                                input.attr("checked", true);
+                                $("#" + answerid).css("color", "#28a745");
+                                $("#" + answerid).css("font-weight", "600");
+                                document.getElementById(answerid).parentElement.style.pointerEvents = "none";
+                                AnswerQuestion($(input)[0]);
+                            }
+                            else {
+                                span.html(answerVal);
+                                span.attr("contenteditable", "false");
+                                span.css("color", "#28a745");
+                                span.css("font-weight", "600");
+                                AnswerFillQuestion(span.attr("id"));
+                            }
+                        }
+                        else {
+                            if (answerid) {
+                                var input = $("input[id=" + answerid + "]");
+                                input.attr("checked", true);
+                                $("#" + answerid).css("color", "#dc3545");
+                                $("#" + answerid).css("font-weight", "600");
+                                AnswerQuestion($(input)[0]);
+                            }
+                            else {
+                                span.html(answerVal);
+                                span.attr("contenteditable", "true");
+                                span.css("color", "#dc3545");
+                                span.css("font-weight", "600");
+                                AnswerFillQuestion(span.attr("id"));
+                            }
+                        }
+                        //debugger
+                    }
+                    //debugger
+                })
+        }
+    }
+    //end
+
     var renderStudentPart = function (data, _defshow = true) {
+        //debugger
         //console.log(data);
         var mainContainer = $('#' + config.container);
         var leftCol = mainContainer.find('#leftCol');
@@ -3169,6 +3302,10 @@ var Lesson = (function () {
             $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
             startDragDrop();
         }
+        //debugger
+        //if (examID) {
+        //    alert(1)
+        //}
     }
 
     var renderExamQuestion = function (data, template) {
@@ -3524,6 +3661,7 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = async function () {
+        //debugger
         showLoading("Đang nộp bài...");
         $('.btnCompleteExam').hide();
         while (__answer_sending) {
@@ -3624,7 +3762,7 @@ var Lesson = (function () {
                         "class": "btn btn-primary m-2",
                         "onclick": "$(this).prop('disabled',true); BeginExam(this);",
                         "style": "cursor: pointer"
-                    }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?');
+                    }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài 1. Thực hiện lại?');
                 }
                 else {
                     doButton = $('<div>', { class: "btn btn-danger m-2" }).append('<i class="fas fa-ban mr-2"></i>').append('Hết lượt làm bài');
@@ -3632,11 +3770,12 @@ var Lesson = (function () {
                 }
             }
             else {
+                //debugger
                 var doButton = $('<div>', {
                     "class": "btn btn-primary m-2",
-                    "onclick": "$(this).prop('disabled',true); Redo(this);",
+                    "onclick": "$(this).prop('disabled',true); Redo(this,'" + data.id + "');",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài');
+                }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài 2');
             }
             console.log(doButton);
             $(lesson_action_holder).append(doButton);
@@ -3668,12 +3807,14 @@ var Lesson = (function () {
         document.location = "/student/Course/Modules/" + config.class_id;
     }
 
-    var redoExam = function (obj) {
+    var redoExam = function (obj,examID) {
+        //debugger
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
         lesson_action_holder.empty()
         console.log("Redo Exam");
         localStorage.clear();
-        startExam(obj);
+        startExam(obj, examID);
+        //renderOldAnswer(examID);
     }
 
     var review = function (examid) {
@@ -3749,6 +3890,7 @@ var Lesson = (function () {
     }
 
     var takeQ3Ans = function (obj, partId) {
+        //debugger
         var wrapper = $('#ans_wrapper_' + partId);
         var quizid = $('#ans_wrapper_' + partId + ' .quizid').val();
         var content = $(obj).siblings();
@@ -3760,118 +3902,122 @@ var Lesson = (function () {
     }
 
     var AnswerQuestion = function (_this, _that) {
+        //debugger
         __answer_sending = true;
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
         // dataset trên item
-        var dataset = _this.dataset;
-        //console.log(_this);
-        //loại câu hỏi
-        var type = dataset.type;
+        if (_this) {
+            var dataset = _this.dataset;
+            //console.log(_this);
+            //loại câu hỏi
+            var type = dataset.type;
 
-        //lessonPartID
-        var partID = "";
-        //questionID
-        var questionId = "";
-        // câu trả lời
-        var answerID = "";
-        //nội dung câu trả lời
-        var value = "";
-        //console.log(dataset);
-        switch (type) {
-            case "QUIZ1":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                answerID = dataset.id;
-                value = dataset.value;
-                break;
-            case "QUIZ4":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                answerID = '';
-                value = '';
-                $('#' + dataset.questionId).find('.answer-checkbox:checked').each(function (index, obj) {
-                    answerID = (answerID == '' ? '' : (answerID + ',')) + $(obj)[0].dataset.id;
-                    value = (value == '' ? '' : (value + ',')) + $(obj)[0].dataset.value;
-                })
-                break;
-            case "QUIZ2":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                //answerID = dataset.id;
-                // value là data động tự điền
-                value = _this.text;
-                break;
-            case "QUIZ3":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                if (!isMobileDevice()) {
-                    var item = _this.querySelector('fieldset');
-                    var label = item.querySelector('label');
-                    if (label == null) {
-                        label = item.querySelector("[src]").src;
+            //lessonPartID
+            var partID = "";
+            //questionID
+            var questionId = "";
+            // câu trả lời
+            var answerID = "";
+            //nội dung câu trả lời
+            var value = "";
+            //console.log(dataset);
+            switch (type) {
+                case "QUIZ1":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    answerID = dataset.id;
+                    value = dataset.value;
+                    break;
+                case "QUIZ4":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    answerID = '';
+                    value = '';
+                    $('#' + dataset.questionId).find('.answer-checkbox:checked').each(function (index, obj) {
+                        answerID = (answerID == '' ? '' : (answerID + ',')) + $(obj)[0].dataset.id;
+                        value = (value == '' ? '' : (value + ',')) + $(obj)[0].dataset.value;
+                    })
+                    break;
+                case "QUIZ2":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    //answerID = dataset.id;
+                    // value là data động tự điền
+                    value = _this.text;
+                    break;
+                case "QUIZ3":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    if (!isMobileDevice()) {
+                        var item = _this.querySelector('fieldset');
+                        var label = item.querySelector('label');
+                        if (label == null) {
+                            label = item.querySelector("[src]").src;
+                        }
+                        else {
+                            label = item.querySelector('label').innerHTML;
+                        }
+                        value = item == void 0 ? "" : label;
+                        answerID = item.id;
                     }
                     else {
-                        label = item.querySelector('label').innerHTML;
+                        partID = dataset.partId;
+                        answerID = dataset.id;
+                        questionId = dataset.questionId;
+                        value = dataset.value;
                     }
-                    value = item == void 0 ? "" : label;
-                    answerID = item.id;
-                }
-                else {
+                    break;
+                case "ESSAY":
                     partID = dataset.partId;
-                    answerID = dataset.id;
-                    questionId = dataset.questionId;
-                    value = dataset.value;
-                }
-                break;
-            case "ESSAY":
-                partID = dataset.partId;
-                value = _this.value;
-                questionId = _this.id;
-                break;
-            default:
-                break;
-        }
-        var dataform = new FormData();
-        dataform.append("ExamID", $("input[name=ExamID]").val());
-        //console.log($("input[name=ExamID]"));
-        //if (type != "ESSAY") {
-
-        dataform.append("LessonPartID", partID);
-        dataform.append("AnswerID", answerID);
-        dataform.append("QuestionID", questionId);
-        dataform.append("AnswerValue", value);
-        //debugger;
-        var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
-        if (files) {
-            for (var i = 0; i < files.length; i++) {
-                dataform.append("files", files[i]);
+                    value = _this.value;
+                    questionId = _this.id;
+                    break;
+                default:
+                    break;
             }
-        }
+            var dataform = new FormData();
+            dataform.append("ExamID", $("input[name=ExamID]").val());
+            //console.log($("input[name=ExamID]"));
+            //if (type != "ESSAY") {
 
-        //} else {
-        //    dataform.append("LessonPartID", partID);
-        //    dataform.append("AnswerValue", value);
-        //}
+            dataform.append("LessonPartID", partID);
+            dataform.append("AnswerID", answerID);
+            dataform.append("QuestionID", questionId);
+            dataform.append("AnswerValue", value);
+            //debugger;
+            var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
+            if (files) {
+                for (var i = 0; i < files.length; i++) {
+                    dataform.append("files", files[i]);
+                }
+            }
 
-        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
-            Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
-                __answer_sending = false;
+            //} else {
+            //    dataform.append("LessonPartID", partID);
+            //    dataform.append("AnswerValue", value);
+            //}
 
-            })
-                .catch(function (err) {
+            if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+                Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                     __answer_sending = false;
-                    notification("error", err, 3000);
-                });
-        }
-        if (value == "") {
-            delAnswerForStudent(questionId);
-        } else {
-            saveAnswerForStudent(questionId, answerID, value, type);
+
+                })
+                    .catch(function (err) {
+                        __answer_sending = false;
+                        notification("error", err, 3000);
+                    });
+            }
+            if (value == "") {
+                delAnswerForStudent(questionId);
+            } else {
+                saveAnswerForStudent(questionId, answerID, value, type);
+            }
         }
     }
 
     var AnswerFillQuestion = function (spanID) {
+        //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
@@ -4213,6 +4359,7 @@ var Lesson = (function () {
 
     window.SwitchMode = switchMode;
     window.ToggleQuizExplain = ToggleQuizExplain;
+    window.renderOldAnswer = renderOldAnswer;
     return LessonInstance;
 }());
 
