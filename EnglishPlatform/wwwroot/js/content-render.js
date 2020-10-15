@@ -2703,7 +2703,7 @@ var Lesson = (function () {
                             "class": "btn btn-primary m-2 lesson-action",
                             "onclick": "BeginExam(this)",
                             "style": "cursor: pointer"
-                        }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài 3. Thực hiện lại?');
+                        }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?');
                     }
                     else {
                         doButton = $('<div>', { class: "btn btn-danger m-2" }).append('<i class="fas fa-ban mr-2"></i>').append('Hết lượt làm bài</div>');
@@ -2717,7 +2717,7 @@ var Lesson = (function () {
                         "class": "btn btn-primary m-2 lesson-action",
                         "onclick": "$(this).prop('disabled',true); Redo(this,'" + data.OldExamID + "'); ",
                         "style": "cursor: pointer"
-                    }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài 4');
+                    }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài');
                 }
 
             lesson_action_holder.append(doButton)
@@ -2770,7 +2770,7 @@ var Lesson = (function () {
                     "class": "btn btn-primary m-2 lesson-action",
                     "onclick": "$(this).prop('disabled',true); DoLectureExam(this,'" + data.ID + "'); ",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài 123");
+                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài");
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
@@ -2829,7 +2829,7 @@ var Lesson = (function () {
                     "class": "btn btn-primary m-2 lesson-action",
                     "onclick": "$(this).prop('disabled',true); DoLectureExam(this); ",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài 5");
+                }).append('<i class="fas fa-play mr-2"></i>').append("Làm lại bài");
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
@@ -3772,7 +3772,7 @@ var Lesson = (function () {
                         "class": "btn btn-primary m-2",
                         "onclick": "$(this).prop('disabled',true); BeginExam(this);",
                         "style": "cursor: pointer"
-                    }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài 1. Thực hiện lại?');
+                    }).append('<i class="fas fa-play mr-2"></i>').append('Bạn còn <b>' + tryleft + '</b> lượt làm lại bài. Thực hiện lại?');
                 }
                 else {
                     doButton = $('<div>', { class: "btn btn-danger m-2" }).append('<i class="fas fa-ban mr-2"></i>').append('Hết lượt làm bài');
@@ -3785,7 +3785,7 @@ var Lesson = (function () {
                     "class": "btn btn-primary m-2",
                     "onclick": "$(this).prop('disabled',true); Redo(this,'" + data.id + "');",
                     "style": "cursor: pointer"
-                }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài 2');
+                }).append('<i class="fas fa-play mr-2"></i>').append('Làm lại bài');
             }
             console.log(doButton);
             $(lesson_action_holder).append(doButton);
