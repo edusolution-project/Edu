@@ -455,7 +455,7 @@ namespace BaseCustomerMVC.Globals
 
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
             {
-                var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
+                //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
                 // check câu trả lời đúng
                 bool isTrue = false;
                 var examDetail = listDetails[i];
@@ -659,6 +659,13 @@ namespace BaseCustomerMVC.Globals
                 .Replace(" ", " ");
         }
 
+        public bool IsOvertime(ExamEntity item)
+        {
+            if (item == null || item.Status) return true;//break if exam not found or completed
+            if (item.Timer == 0) return false;
+            double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
+            return count <= 0;
+        }
         public class CorrectAns
         {
             public string ID { get; set; }

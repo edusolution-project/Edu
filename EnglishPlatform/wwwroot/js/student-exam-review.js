@@ -139,7 +139,7 @@ var ExamReview = (function () {
             number = renderItemNavigation(ul, part, number);
         }
         if (config.isTeacher) {
-            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block;'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
+            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block; white-space:nowrap'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
         }
         root.appendChild(ul);
         var data = config.exam;
@@ -460,7 +460,6 @@ var ExamReview = (function () {
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
-                //debugger
                 if (_check) {
                     var content_answer = "";
                     var html = "";
@@ -472,11 +471,9 @@ var ExamReview = (function () {
                     var correct_answer = _answer.nextElementSibling;
                     var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
                     var listContent = content_correct_answer.split(' | ');
-                    debugger
                     for (i = 0; i < listContent.length; i++) {
-                        //debugger
                         if (listContent[i] == content_answer) {
-                        //if (data.Point>0) {
+                            //if (data.Point>0) {
                             html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
                         }
                         else {
@@ -484,7 +481,6 @@ var ExamReview = (function () {
                         }
                     }
                     $($(correct_answer).find(".text-success")[0]).html(html.substring(3));
-                    //debugger
                 }
                 else {
                     //$('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
@@ -504,7 +500,7 @@ var ExamReview = (function () {
 
                     var html = "";
                     var tile = "";
-                    
+
                     //for (i = 0; i < listContent.length; i++) {
                     //    debugger
                     //    if (listContent[i].length > content_answer.length) {

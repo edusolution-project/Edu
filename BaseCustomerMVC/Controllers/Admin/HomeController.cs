@@ -348,7 +348,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             //if (ex.ClassID != "5f60dd6b0dd2b41448907f26") continue;
                             if (ex.Marked) _lessonHelper.CompleteFull(ex, ls, out _, false);
                             else
-                                if (_examService.IsOver(ex.ID))
+                                if (_lessonHelper.IsOvertime(ex))
                                     _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
                         }
                     }

@@ -519,15 +519,6 @@ namespace BaseCustomerMVC.Controllers.Student
             var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
                 Part = result
-                //listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
-                //{
-                //    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                //        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                //        {
-                //            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                //            Description = o.Type == "QUIZ2" ? null : z.Description
-                //        }))?.ToList()
-                //})).ToList()
             });
 
             var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
@@ -549,7 +540,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (endtime < DateTime.UtcNow) // hết thời gian 
                     {
                         // => kết thúc bài kt
-                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _);
+                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _, false);
                         //throw new NotImplementedException();
                         //lastexam.Status = true;
                         ////TODO: Chấm điểm last exam

@@ -120,19 +120,34 @@ namespace BaseCustomerEntity.Database
             if (item == null || item.Status) return true;//break if exam not found or completed
             if (item.Timer == 0) return false;
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
-            if (count <= 0)
-            {
-                UpdateStatus(item);
-            }
+            //if (count <= 0)
+            //{
+            //    UpdateStatus(item);
+            //}
             return count <= 0;
         }
 
-        public Task UpdateStatus(ExamEntity exam)
+        //public Task UpdateStatus(ExamEntity exam)
+        //{
+        //    exam.Status = true;
+        //    exam.Updated = DateTime.Now;
+        //    CreateOrUpdate(exam);
+        //    return Task.CompletedTask;
+        //}
+
+        public bool IsLessonMarked(string LessonID, string StudentID)
         {
-            exam.Status = true;
-            exam.Updated = DateTime.Now;
-            CreateOrUpdate(exam);
-            return Task.CompletedTask;
+            return CreateQuery().CountDocuments(o => o.LessonID == LessonID && o.StudentID == StudentID && o.Marked) > 0;
+        }
+
+        public long CountByStudentAndLesson(string LessonID, string StudentID)
+        {
+            return CreateQuery().CountDocuments(o => o.LessonID == LessonID && o.StudentID == StudentID);
+        }
+
+        public ExamEntity GetLastestByLessonAndStudent(string LessonID, string StudentID)
+        {
+            return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).FirstOrDefault();
         }
 
         //public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
@@ -386,19 +401,15 @@ namespace BaseCustomerEntity.Database
             await Task.WhenAll(extask, edtask);
         }
 
-        public async Task ConvertClassSubject(ClassSubjectEntity classSubject)
+
+        public void IncreaseQuestionDone(string ID, long increment)
         {
-            await Collection.UpdateManyAsync(t => t.ClassID == classSubject.ClassID, Builders<ExamEntity>.Update.Set("ClassSubjectID", classSubject.ID));
+            CreateQuery().UpdateOne(t => t.ID == ID, Builders<ExamEntity>.Update.Set(t => t.Updated, DateTime.Now).Inc(t => t.QuestionsDone, increment));
         }
 
-        private string NormalizeSpecialApostrophe(string originStr)
+        public IEnumerable<ExamEntity> GetPreviousIncompletedExams(string LessonID, string StudentID, int Number = Int32.MaxValue)
         {
-            return originStr
-                .Replace("‘", "'")
-                .Replace("’", "'")
-                .Replace("“", "\"")
-                .Replace("”", "\"")
-                .Replace(" ", " ");
+            return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID && o.Status == false && o.Number < Number).SortBy(t => t.Number).ToEnumerable();
         }
     }
 }
