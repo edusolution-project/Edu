@@ -472,7 +472,7 @@ var ExamReview = (function () {
                     var correct_answer = _answer.nextElementSibling;
                     var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
                     var listContent = content_correct_answer.split(' | ');
-                    debugger
+                    //debugger
                     for (i = 0; i < listContent.length; i++) {
                         //debugger
                         if (listContent[i] == content_answer) {

@@ -321,7 +321,7 @@ var Lesson = (function () {
 
     }
 
-    var renderLessonData = function (isContinue = false) {
+    var renderLessonData = function () {
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
@@ -880,7 +880,7 @@ var Lesson = (function () {
         //if (!renderLessonData.prototype.IsTest) {
         //    renderOldAnswer(renderLessonData.prototye.examID);
         //}
-        renderOldAnswer(isContinue);
+        renderOldAnswer();
     }
 
     var switchUIMode = function (mode) {
@@ -2925,7 +2925,7 @@ var Lesson = (function () {
 
     //---- 14-10-2020
     //var renderOldAnswer = function (OldExamID) { //dạng điền từ
-    var renderOldAnswer = function (isContinue) { //dạng điền từ
+    var renderOldAnswer = function () { //dạng điền từ
         //debugger
         //if (OldExamID) {
         var dataform = new FormData();
@@ -2963,7 +2963,7 @@ var Lesson = (function () {
                             span.attr("contenteditable", "false");
                             span.css("color", "#28a745");
                             span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"));
+                            AnswerFillQuestion(span.attr("id"), false);
                             //}
                         }
                         else {
@@ -2975,11 +2975,12 @@ var Lesson = (function () {
                             //    AnswerQuestion($(input)[0]);
                             //}
                             //else {
+                            //debugger
                             span.html(answerVal);
                             span.attr("contenteditable", "true");
                             span.css("color", "#dc3545");
                             span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"));
+                            AnswerFillQuestion(span.attr("id"), false);
                             //}
                         }
                     }
@@ -3975,6 +3976,7 @@ var Lesson = (function () {
 
     //check ki tu dac biet
     var checkSpecialCharacters = function (chain) {
+        //function checkSpecialCharacters(chain) {
         //debugger
         chain = chain.trim();
         var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
@@ -4009,7 +4011,7 @@ var Lesson = (function () {
     }
 
     //dien cau hoi phan bai lam cua hoc vien
-    var AnswerFillQuestion = function (spanID) {
+    var AnswerFillQuestion = function (spanID, check = true) {
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
@@ -4017,7 +4019,13 @@ var Lesson = (function () {
         var questionId = dataset.questionId;
         //debugger
         var a = $('#' + spanID).text();
-        var value = checkSpecialCharacters(a);
+        var value = "";
+        if (check) {
+            value = checkSpecialCharacters(a);
+        }
+        else {
+            value = a;
+        }
         var dataform = new FormData();
 
         dataform.append("ExamID", $("input[name=ExamID]").val());
