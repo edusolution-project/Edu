@@ -1294,8 +1294,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(org)) return org;
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
-                org = org.Replace("  ", "");
-            return org;
+                org = org.Replace("  ", " ");
+            return ReplaceSpecialCharacters(org);
+            //return org;
         }
         //TODO: Need update later
         private double calculateLessonPoint(string lessonId)
@@ -1316,6 +1317,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
+        }
+
+        private string ReplaceSpecialCharacters(string str)
+        {
+            //dau ‘’
+            int[] beginning = { 24, 25, 96 };
+            //dau “”
+            int[] quotation = { 29, 28 };
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (beginning.Contains((byte)str[i]))
+                {
+                    str = str.Replace(str[i], '\'');
+                }
+                if (quotation.Contains((byte)str[i]))
+                {
+                    str = str.Replace(str[i], '\"');
+                }
+                if ((byte)str[i]==125 || (byte)str[i] == 141)
+                {
+                    str = str.Replace(str[i], '(');
+                }
+                if ((byte)str[i] == 126 || (byte)str[i] == 142)
+                {
+                    str = str.Replace(str[i], ')');
+                }
+            }
+            return str;
         }
     }
 

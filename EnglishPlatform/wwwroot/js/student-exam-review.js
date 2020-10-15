@@ -346,7 +346,6 @@ var ExamReview = (function () {
     }
 
     var renderLessonPart = function (data, index, type) {
-        //debugger
         //writeLog("renderLessonPart", data);
         var active = "";
         if (index != void 0 && index == 0) {
@@ -386,28 +385,43 @@ var ExamReview = (function () {
         return html;
     }
 
-    //loai bo dau cach - ki tu dac biet
+    //check ki tu dac biet
     var checkSpecialCharacters = function (chain) {
         //debugger
-        //var newchain = "";
-        var space = ["&nbsp;", "&shy;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;", "&lrm;", "&rlm;", "&#160;", "\00A0", "&#xa0;","\A0"];
-        for (i = 0; i < space.length; i++) {
-            //debugger
-            if (chain.includes(space[i])) {
-                chain = chain.replaceAll(space[i], "_");
+        chain = chain.trim();
+        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
+        var beginning = [8217, 8216, 180, 8216, 8242, 8219];//ki tu ‘’ trong word
+        var quotation = [8220, 8221, 8243];//check ki tu “” trong word
+
+        for (i = 0; i < chain.length; i++) {//check ki tu khoang trang dac biet
+            if (space.includes(chain[i].charCodeAt())) {
+                chain = chain.replace(chain[i], "_");
             }
         }
+
+        for (i = 0; i < chain.length; i++) {//check ki tu ‘’ trong word
+            if (beginning.includes(chain[i].charCodeAt())) {
+                //chain[i] = "'";
+                chain = chain.replace(chain[i], "'");
+            }
+        }
+
+        for (i = 0; i < chain.length; i++) {//check ki tu “” trong word
+            if (quotation.includes(chain[i].charCodeAt())) {
+                //chain[i] = "\"";
+                chain = chain.replace(chain[i], "\"");
+            }
+        }
+        //debugger
         return chain;
     }
 
     var renderAnswer = function (data, type) {
-        //debugger
         var quizId = data.QuestionID;
 
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
-        //debugger
         var _check = false;
         if (cautraloidung == cautraloi) { _check = true; }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
@@ -420,7 +434,6 @@ var ExamReview = (function () {
                     $('#' + quizId + ' .student-answer').append(_answer);
                     break;
                 case "QUIZ3":
-                    //debugger
                     var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
                     //if (!_check)//wrong answer                        
                     //    _answer.addClass("bg-danger");
@@ -444,7 +457,6 @@ var ExamReview = (function () {
 
         }
         else { //"QUIZ2"
-            //debugger
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
@@ -853,7 +865,6 @@ var ExamReview = (function () {
 
     //dien tu
     var renderQUIZ2 = function (data) {
-        //debugger
         //console.log(data);
         //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -874,7 +885,6 @@ var ExamReview = (function () {
             html += '<i>Trả lời: </i>';
             html += '</fieldset>';
             var content = "";
-            //debugger
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
                 content += content == "" ? answer.Content : " | " + answer.Content;
@@ -894,7 +904,6 @@ var ExamReview = (function () {
 
     //noi dap an
     var renderQUIZ3 = function (data) {
-        //debugger
         //writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -930,7 +939,6 @@ var ExamReview = (function () {
                 //if (!answer.IsCorrect) continue;
                 var media = renderMedia(answer.Media);
                 if (media == "") {
-                    //debugger
                     answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle' + (answer.IsCorrect ? " bg-success" : " d-none") + '" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
                 }
                 else {
@@ -1369,7 +1377,3 @@ var isMobileDevice = function () {
         return false;
     }
 };
-
-var test = function () {
-
-}
