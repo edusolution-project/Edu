@@ -110,5 +110,11 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(t => t.Center == CenterID && t.OriginID == ID).SortByDescending(t => t.ID).FirstOrDefault();
         }
+
+        public void ShareToCenter(string ID, string TargetID)
+        {
+            CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
+                .AddToSet(t => t.TargetCenters, TargetID));
+        }
     }
 }
