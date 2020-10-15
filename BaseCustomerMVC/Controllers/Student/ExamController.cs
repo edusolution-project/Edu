@@ -178,7 +178,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         }
 
-        public JsonResult GetDetailExam(string examID)
+        public JsonResult GetDetailExam(string LessonID,string ClassSubjectID, string ClassID)
         {
             try
             {
@@ -194,17 +194,49 @@ namespace BaseCustomerMVC.Controllers.Student
                     return new JsonResult(response);
                 }
 
-                if (string.IsNullOrEmpty(examID))
+                if (string.IsNullOrEmpty(LessonID))
                 {
                     var response = new Dictionary<string, object>
                     {
                         { "Data", null },
-                        {"Error","Bài luyện tập không tồn tại." }
+                        {"Error","Bài học không tồn tại" }
                     };
                     return new JsonResult(response);
                 }
 
-                var detailExam = _examDetailService.GetByExamID(examID);
+                if (string.IsNullOrEmpty(ClassSubjectID))
+                {
+                    var response = new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error","Bài học không tồn tại" }
+                    };
+                    return new JsonResult(response);
+                }
+
+                if (string.IsNullOrEmpty(ClassID))
+                {
+                    var response = new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error","Bài học không tồn tại" }
+                    };
+                    return new JsonResult(response);
+                }
+
+                var exam = _examService.CreateQuery().Find(x => x.LessonID == LessonID && x.ClassSubjectID == ClassSubjectID && x.ClassID == ClassID && x.StudentID == student.ID).SortByDescending(x => x.Number);
+                if (exam.CountDocuments() < 2)
+                {
+                    var response = new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Msg","Chưa làm lần nào"}
+                    };
+                    return new JsonResult(response);
+                }
+
+                var _exam = exam.ToList()[1];
+                var detailExam = _examDetailService.GetByExamID(_exam.ID);
                 var dataResponse = new List<ExamDetailViewModel>();
                 foreach (var detail in detailExam.ToList())
                 {
@@ -243,20 +275,21 @@ namespace BaseCustomerMVC.Controllers.Student
         [Obsolete]
         public JsonResult GetExam(string examID)
         {
-            var exam = _examService.GetItemByID(examID);
-            if (string.IsNullOrEmpty(examID) || exam == null)
-            {
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", null },
-                    {"Error","Bài kiếm tra không tồn tại" }
-                });
-            }
+            //var exam = _examService.GetItemByID(examID);
+            //if (string.IsNullOrEmpty(examID) || exam == null)
+            //{
+            //    return new JsonResult(new Dictionary<string, object>
+            //    {
+            //        { "Data", null },
+            //        {"Error","Bài kiếm tra không tồn tại" }
+            //    });
+            //}
 
-            return new JsonResult(new Dictionary<string, object>
-            {
-                { "Data", exam }
-            });
+            //return new JsonResult(new Dictionary<string, object>
+            //{
+            //    { "Data", exam }
+            //});
+            return null;
         }
 
         [HttpPost]

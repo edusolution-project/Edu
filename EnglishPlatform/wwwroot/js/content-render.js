@@ -321,15 +321,16 @@ var Lesson = (function () {
 
     }
 
-    var renderLessonData = function () {
+    var renderLessonData = function (isContinue = false) {
+        //debugger
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
         }
         var data = _data;
-        if (data.TemplateType == 2) {
-            renderLessonData.prototype.IsTest = true;
-        }
+        //if (data.TemplateType == 2) {
+        //    renderLessonData.prototype.IsTest = true;
+        //}
         //debugger
         var mainContainer = $('#' + config.container);
         var lessonHeader = mainContainer.find('.card-header');
@@ -645,6 +646,7 @@ var Lesson = (function () {
                                 renderLectureExam(exam, false);
                             }
                             else {
+                                //debugger
                                 //
                                 if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
                                 {
@@ -658,6 +660,7 @@ var Lesson = (function () {
                                         renderLectureExam(exam, true);
                                 }
                                 else {
+                                    //debugger
                                     console.log("Exam Continue")
                                     setLocalData("CurrentExam", exam.ID);
                                     $('#ExamID').val(exam.ID);
@@ -879,11 +882,12 @@ var Lesson = (function () {
                 $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
             }
         }
-        debugger
-        //alert(_UImode);
-        if (!renderLessonData.prototype.IsTest) {
-            renderOldAnswer(renderLessonData.prototye.examID);
-        }
+        //debugger
+        ////alert(_UImode);
+        //if (!renderLessonData.prototype.IsTest) {
+        //    renderOldAnswer(renderLessonData.prototye.examID);
+        //}
+        renderOldAnswer(isContinue);
     }
 
     var switchUIMode = function (mode) {
@@ -2568,6 +2572,7 @@ var Lesson = (function () {
                     }
                     else {
                         if (exam.Status) {
+                            //debugger
                             localStorage.clear();
                             console.log("New Exam");
                             //console.log(getLocalData("CurrentExam"))
@@ -2586,6 +2591,7 @@ var Lesson = (function () {
                             }
                             else {
                                 console.log("Exam Continue")
+                                //debugger
                                 setLocalData("CurrentExam", exam.ID);
                                 $('#ExamID').val(exam.ID);
                                 //render Exam
@@ -2782,7 +2788,7 @@ var Lesson = (function () {
             $('#rightCol').find('.tab-pane').hide();
         }
 
-        renderOldAnswer(data.OldExamID);
+        //renderOldAnswer();
     }
 
     var renderPreviewLectureExam = function (data, isContinue) {
@@ -2944,11 +2950,11 @@ var Lesson = (function () {
         //}
     }
 
-    var renderExamDetail = function (examID) {
+    var renderExamDetail = function () {
         //debugger
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
-        renderLessonData.prototype.examID = examID;
+        //renderLessonData.prototype.examID = examID;
         loadLessonData({
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
@@ -2959,15 +2965,20 @@ var Lesson = (function () {
     }
 
     //---- 14-10-2020
-    var renderOldAnswer = function (OldExamID) { //dạng điền từ
+    //var renderOldAnswer = function (OldExamID) { //dạng điền từ
+    var renderOldAnswer = function (isContinue) { //dạng điền từ
         //debugger
-        if (OldExamID) {
-            var dataform = new FormData();
-            dataform.append("examID", OldExamID);
-            Ajax(config.url.oldAnswer, dataform, "POST", false)
-                .then(function (res) {
-                    var data = JSON.parse(res);
-                    //debugger
+        //if (OldExamID) {
+        var dataform = new FormData();
+        //dataform.append("examID", OldExamID);
+        dataform.append("LessonID", config.lesson_id);
+        dataform.append("ClassSubjectID", config.class_subject_id);
+        dataform.append("ClassID", config.class_id);
+        Ajax(config.url.oldAnswer, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                //debugger
+                if (data.Data !== null) {
                     for (i = 0; i < data.Data.length; i++) {
                         var item = data.Data[i];
                         var quizID = item.QuestionID;
@@ -2980,43 +2991,42 @@ var Lesson = (function () {
                         var span = $(_fillquiz).find("span");
                         //debugger
                         if (point > 0) {
-                            if (answerid) {
-                                var input = $("input[id=" + answerid + "]");
-                                input.attr("checked", true);
-                                $("#" + answerid).css("color", "#28a745");
-                                $("#" + answerid).css("font-weight", "600");
-                                document.getElementById(answerid).parentElement.style.pointerEvents = "none";
-                                AnswerQuestion($(input)[0]);
-                            }
-                            else {
+                            //if (answerid) {
+                            //    var input = $("input[id=" + answerid + "]");
+                            //    input.attr("checked", true);
+                            //    $("#" + answerid).css("color", "#28a745");
+                            //    $("#" + answerid).css("font-weight", "600");
+                            //    document.getElementById(answerid).parentElement.style.pointerEvents = "none";
+                            //    AnswerQuestion($(input)[0]);
+                            //}
+                            //else {
                                 span.html(answerVal);
                                 span.attr("contenteditable", "false");
                                 span.css("color", "#28a745");
                                 span.css("font-weight", "600");
                                 AnswerFillQuestion(span.attr("id"));
-                            }
+                            //}
                         }
                         else {
-                            if (answerid) {
-                                var input = $("input[id=" + answerid + "]");
-                                input.attr("checked", true);
-                                $("#" + answerid).css("color", "#dc3545");
-                                $("#" + answerid).css("font-weight", "600");
-                                AnswerQuestion($(input)[0]);
-                            }
-                            else {
+                            //if (answerid) {
+                            //    var input = $("input[id=" + answerid + "]");
+                            //    input.attr("checked", true);
+                            //    $("#" + answerid).css("color", "#dc3545");
+                            //    $("#" + answerid).css("font-weight", "600");
+                            //    AnswerQuestion($(input)[0]);
+                            //}
+                            //else {
                                 span.html(answerVal);
                                 span.attr("contenteditable", "true");
                                 span.css("color", "#dc3545");
                                 span.css("font-weight", "600");
                                 AnswerFillQuestion(span.attr("id"));
-                            }
+                            //}
                         }
-                        //debugger
                     }
-                    //debugger
-                })
-        }
+                }
+            })
+        //}
     }
     //end
 
