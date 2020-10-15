@@ -1467,19 +1467,20 @@ var Lesson = (function () {
                 case "DOC":
                     console.log(data.Media);
                     if (!isMobileDevice()) {
-                        //if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
-                        //    data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
-                        //    data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")
-                        //) {
-                            if (data.Media.Path.startsWith("http"))
-                                mediaHolder.append($("<iframe>", { "src": replaceGooglePath(data.Media.Path) + "", "class": "embed-frame", "frameborder": "0" }));
-                            else
+                        if (data.Media.Path.startsWith("https://drive.google.com")) {
+                            mediaHolder.append($("<iframe>", { "src": replaceGooglePath(data.Media.Path) + "", "class": "embed-frame", "frameborder": "0" }));
+                        }
+                        else {
+                            if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
+                                data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")) {
                                 mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
-                        //}
-                        //else {
-                        //    if (data.Media != null)
-                        //        mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
-                        //}
+                            }
+                            else {
+                                if (data.Media != null)
+                                    mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                            }
+                        }
                     }
                     else {
                         mediaHolder.append($("<a>", { "href": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/"), "class": "btn btn-primary", "onclick": "ViewFile(this)", text: data.Media.OriginalName, "target": "_blank" }));
