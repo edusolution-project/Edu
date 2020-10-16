@@ -10,6 +10,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -58,6 +59,9 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly CalendarService _calendarService;
         private readonly LessonScheduleService _lessonScheduleService;
 
+        private readonly LessonPartAnswerService _lessonPartAnswerService;
+        private readonly LessonPartQuestionService _lessonPartQuestionService;
+
         private string host;
         private string staticPath;
         private string RootPath { get; }
@@ -97,7 +101,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                 IHostingEnvironment env,
                 ReferenceService referenceService,
                 CalendarService calendarService,
-                LessonScheduleService lessonScheduleService
+                LessonScheduleService lessonScheduleService,
+
+                LessonPartAnswerService lessonPartAnswerService,
+                LessonPartQuestionService lessonPartQuestionService
             )
         {
             _lessonService = lessonService;
@@ -139,6 +146,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
             RootPath = staticPath ?? _env.WebRootPath;
+
+            _lessonPartAnswerService = lessonPartAnswerService;
+            _lessonPartQuestionService = lessonPartQuestionService;
         }
 
         // GET: Home
@@ -763,6 +773,118 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         //    return Json("OK");
         //}
+
+        //Fix data answer
+        public JsonResult UpdateAnswer()
+        {
+            try
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+
+                var lessonparts = _lessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
+                var questions = _lessonPartQuestionService.CreateQuery().Find(x => lessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
+                var answers = _lessonPartAnswerService.CreateQuery().Find(x => questions.Contains(x.ParentID)).ToList();
+                foreach (var ans in answers)
+                {
+                    if (ans.Content != null || !string.IsNullOrEmpty(ans.Content))
+                    {
+                        ans.Content = NormalizeSpecialApostrophe(ans.Content);
+                        ans.Updated = DateTime.Now;
+                        //_lessonPartAnswerService.CreateOrUpdate(ans);
+                        _lessonPartAnswerService.CreateQuery().UpdateMany<LessonPartAnswerEntity>(t => t.ID == ans.ID, Builders<LessonPartAnswerEntity>.Update.Set(t => t.Content, ans.Content).Set(t => t.Updated, DateTime.Now));
+                    }
+                }
+
+                var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
+                var clonequestions = _clonequestionService.CreateQuery().Find(x => clonelessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
+                var cloneanswers = _cloneanswerService.CreateQuery().Find(x => clonequestions.Contains(x.ParentID)).ToList();
+                foreach (var cloneans in cloneanswers)
+                {
+                    if (cloneans.Content != null || !string.IsNullOrEmpty(cloneans.Content))
+                    {
+                        cloneans.Content = NormalizeSpecialApostrophe(cloneans.Content);
+                        cloneans.Updated = DateTime.Now;
+                        //_lessonPartAnswerService.CreateOrUpdate(cloneans);
+                        _cloneanswerService.CreateQuery().UpdateMany<CloneLessonPartAnswerEntity>(t => t.ID == cloneans.ID, Builders<CloneLessonPartAnswerEntity>.Update.Set(t => t.Content, cloneans.Content).Set(t => t.Updated, DateTime.Now));
+                    }
+                }
+
+                //var lessonparts = _lessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).ToList();
+                //foreach (var lesson in lessonparts.ToList())
+                //{
+                //    var questions = _lessonPartQuestionService.CreateQuery().Find(x => x.ParentID == lesson.ID);
+                //    foreach (var question in questions.ToList())
+                //    {
+                //        var answers = _lessonPartAnswerService.GetByQuestionID(question.ID);
+                //        foreach (var answer in answers.ToList())
+                //        {
+                //            if (answer.Content != null || !string.IsNullOrEmpty(answer.Content))
+                //            {
+                //                answer.Content = NormalizeSpecialApostrophe(answer.Content);
+                //                answer.Updated = DateTime.Now;
+                //                _lessonPartAnswerService.CreateOrUpdate(answer);
+                //            }
+                //        }
+                //    }
+                //}
+
+                //var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2"));
+                //foreach (var clonelesson in clonelessonparts.ToList())
+                //{
+                //    var clonequestions = _clonequestionService.CreateQuery().Find(x => x.ParentID == clonelesson.ID);
+                //    foreach (var clonequestion in clonequestions.ToList())
+                //    {
+                //        var cloneanswers = _cloneanswerService.GetByQuestionID(clonequestion.ID);
+                //        foreach (var cloneanswer in cloneanswers.ToList())
+                //        {
+                //            if (cloneanswer.Content != null || !string.IsNullOrEmpty(cloneanswer.Content))
+                //            {
+                //                cloneanswer.Content = NormalizeSpecialApostrophe(cloneanswer.Content);
+                //                _cloneanswerService.CreateOrUpdate(cloneanswer);
+                //            }
+                //        }
+                //    }
+                //}
+                stopWatch.Stop();
+                // Get the elapsed time as a TimeSpan value.
+                TimeSpan ts = stopWatch.Elapsed;
+
+                // Format and display the TimeSpan value.
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.Milliseconds / 10);
+
+                return Json($"ok - Time: {elapsedTime}");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        private string NormalizeSpecialApostrophe(string originStr)
+        {
+            while (originStr.IndexOf("  ") >= 0)
+            {
+                originStr = originStr.Replace("  ", " ");
+            }
+
+            foreach (var c in originStr)
+            {
+                if ((byte)c == 9)
+                {
+                    originStr = originStr.Replace(c, ' ');
+                }
+            }
+
+            return originStr
+                .Replace("‘", "'")
+                .Replace("’", "'")
+                .Replace("“", "\"")
+                .Replace("”", "\"")
+                .Replace(" ", " ");
+        }
 
         public JsonResult UpdateCourseName()
         {

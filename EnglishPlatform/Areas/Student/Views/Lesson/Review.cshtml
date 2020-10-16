@@ -242,11 +242,11 @@
         var config = {
             id: "exam-review",
             url: {
-                    exam: '@processUrl("Detail", "Lesson")',
-                    list: '@processUrl("Modules", "Course")',
-                },
+                exam: '@processUrl("Detail", "Lesson")',
+                list: '@processUrl("Modules", "Course")',
+            },
             lesson: @Html.Raw(Json.Serialize(currentLesson)),
-            exam: @Html.Raw(Json.Serialize(exam))
+            exam: @Html.Raw(Json.Serialize(exam)),
         }
         var widget = new ExamReview();
         //console.log(config.exam);

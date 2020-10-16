@@ -1312,6 +1312,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.IsParentCourse = item.ChapterID.Equals("0");
                     item.Updated = DateTime.Now;
                     item.Order = 0;
+                    item.Limit = item.TemplateType == 1 ? 0 : item.Limit;
                     _lessonService.CreateQuery().InsertOne(item);
 
                     ChangeLessonPosition(item, Int32.MaxValue);//move lesson to bottom of parent
@@ -1327,6 +1328,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Updated = DateTime.Now;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
+                    item.Limit = item.TemplateType == 1 ? 0 : item.Limit;
 
                     //update counter if type change
                     if (item.TemplateType != data.TemplateType)

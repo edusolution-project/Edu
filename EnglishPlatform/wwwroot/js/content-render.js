@@ -341,6 +341,7 @@ var Lesson = (function () {
         console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
+                //debugger
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
                 //lessonHeader.show().append(headerRow);
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
@@ -400,6 +401,7 @@ var Lesson = (function () {
 
                 break;
             case mod.TEACHERVIEW:
+                //debugger
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" });
                 //lessonHeader.show().append(headerRow);
 
@@ -437,6 +439,7 @@ var Lesson = (function () {
                 lesson_action_holder.prepend(lessonButton);
                 break;
             case mod.TEACHEREDIT:
+                //debugger
                 var headerRow = $("<div>", { "class": "d-flex justify-content-between" }).empty();
                 lessonHeader.show().append(headerRow);
 
@@ -484,6 +487,7 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
             case mod.STUDENT_REVIEW:
+                //debugger
                 lessonBody.css('top', 0);
                 //no header
                 break;
@@ -513,6 +517,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHERVIEW:
             case mod.TEACHEREDIT:
+                //debugger
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -547,6 +552,7 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
+                //debugger
                 console.log("studentexam");
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
@@ -581,6 +587,7 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
+                //debugger
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -699,6 +706,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHERVIEW:
             case mod.TEACHEREDIT:
+                //debugger
                 if (_UImode == UIMode.EXAM_ONLY) {
                     var lesson_action_holder = $('.top-menu[for=lesson-info]');
                     var nav_bottom = $('<div>', { "class": "row" });
@@ -735,6 +743,8 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEWEXAM:
             case mod.STUDENT_EXAM:
+                console.log("STUDENT_EXAM");
+                //debugger
                 var nav_bottom = lesson_action_holder
                 nav_bottom.empty();
 
@@ -771,8 +781,12 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
+                if (mod.STUDENT_EXAM) {
+                    renderOldAnswer();
+                }
                 break;
             case mod.REVIEW:
+                //debugger
                 var nav_bottom = lesson_action_holder
                 nav_bottom.empty();
 
@@ -814,6 +828,8 @@ var Lesson = (function () {
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
+                console.log("STUDENT_LECTURE");
+                //debugger
                 if (_UImode == UIMode.EXAM_ONLY) {
                     var nav_bottom = lesson_action_holder
                     nav_bottom.empty();
@@ -863,6 +879,9 @@ var Lesson = (function () {
                     $(".time-counter").html(getLocalData("Timer"));
                     //countdown(false);
                 }
+                if (mod.STUDENT_LECTURE) {
+                    renderOldAnswer();
+                }
                 break;
         }
         if (_openingPart == '') {
@@ -880,7 +899,7 @@ var Lesson = (function () {
         //if (!renderLessonData.prototype.IsTest) {
         //    renderOldAnswer(renderLessonData.prototye.examID);
         //}
-        renderOldAnswer();
+        //renderOldAnswer();
     }
 
     var switchUIMode = function (mode) {
@@ -2935,6 +2954,7 @@ var Lesson = (function () {
         dataform.append("ClassID", config.class_id);
         Ajax(config.url.oldAnswer, dataform, "POST", false)
             .then(function (res) {
+                //debugger
                 var data = JSON.parse(res);
                 //debugger
                 if (data.Data !== null) {
@@ -2950,38 +2970,38 @@ var Lesson = (function () {
                         var span = $(_fillquiz).find("span");
                         //debugger
                         if (point > 0) {
-                            //if (answerid) {
-                            //    var input = $("input[id=" + answerid + "]");
-                            //    input.attr("checked", true);
-                            //    $("#" + answerid).css("color", "#28a745");
-                            //    $("#" + answerid).css("font-weight", "600");
-                            //    document.getElementById(answerid).parentElement.style.pointerEvents = "none";
-                            //    AnswerQuestion($(input)[0]);
-                            //}
-                            //else {
-                            span.html(answerVal);
-                            span.attr("contenteditable", "false");
-                            span.css("color", "#28a745");
-                            span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"), false);
-                            //}
+                            if (!answerid) {
+                                //    var input = $("input[id=" + answerid + "]");
+                                //    input.attr("checked", true);
+                                //    $("#" + answerid).css("color", "#28a745");
+                                //    $("#" + answerid).css("font-weight", "600");
+                                //    document.getElementById(answerid).parentElement.style.pointerEvents = "none";
+                                //    AnswerQuestion($(input)[0]);
+                                //}
+                                //else {
+                                span.html(answerVal);
+                                span.attr("contenteditable", "false");
+                                span.css("color", "#28a745");
+                                span.css("font-weight", "600");
+                                AnswerFillQuestion(span.attr("id"), false);
+                            }
                         }
                         else {
-                            //if (answerid) {
-                            //    var input = $("input[id=" + answerid + "]");
-                            //    input.attr("checked", true);
-                            //    $("#" + answerid).css("color", "#dc3545");
-                            //    $("#" + answerid).css("font-weight", "600");
-                            //    AnswerQuestion($(input)[0]);
-                            //}
-                            //else {
-                            //debugger
-                            span.html(answerVal);
-                            span.attr("contenteditable", "true");
-                            span.css("color", "#dc3545");
-                            span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"), false);
-                            //}
+                            if (!answerid) {
+                                //    var input = $("input[id=" + answerid + "]");
+                                //    input.attr("checked", true);
+                                //    $("#" + answerid).css("color", "#dc3545");
+                                //    $("#" + answerid).css("font-weight", "600");
+                                //    AnswerQuestion($(input)[0]);
+                                //}
+                                //else {
+                                //debugger
+                                span.html(answerVal);
+                                span.attr("contenteditable", "true");
+                                span.css("color", "#dc3545");
+                                span.css("font-weight", "600");
+                                AnswerFillQuestion(span.attr("id"), false);
+                            }
                         }
                     }
                 }
@@ -3882,10 +3902,16 @@ var Lesson = (function () {
             //console.log(dataset);
             switch (type) {
                 case "QUIZ1":
+                    debugger
                     partID = dataset.partId;
                     questionId = dataset.questionId;
                     answerID = dataset.id;
-                    value = dataset.value;
+                    if (dataset.value) {
+                        value = dataset.value;
+                    }
+                    else {
+                        value = "";
+                    }
                     break;
                 case "QUIZ4":
                     partID = dataset.partId;
@@ -3943,7 +3969,7 @@ var Lesson = (function () {
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
             dataform.append("AnswerValue", value);
-            //debugger;
+            debugger;
             var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
             if (files) {
                 for (var i = 0; i < files.length; i++) {
@@ -3979,7 +4005,7 @@ var Lesson = (function () {
         //function checkSpecialCharacters(chain) {
         //debugger
         chain = chain.trim();
-        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
+        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207, 9];//khoang trang
         var beginning = [8217, 8216, 180, 8216, 8242, 8219];//ki tu ‘’ trong word
         var quotation = [8220, 8221, 8243];//check ki tu “” trong word
 
@@ -4012,6 +4038,7 @@ var Lesson = (function () {
 
     //dien cau hoi phan bai lam cua hoc vien
     var AnswerFillQuestion = function (spanID, check = true) {
+        //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
@@ -4426,15 +4453,15 @@ var submitForm = function (event, modalId, callback) {
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
-    else {
-        //replace ki tu dac biet
-        //var txt = CKEDITOR.instances.editor.getData();
-        //var description = checkSpecialCharacters(txt);
-        var description = CKEDITOR.instances.editor.getData();
-        formdata.delete("Description");
-        formdata.append("Description", description);
-        //debugger
-    }
+    //else {
+    //    //replace ki tu dac biet
+    //    //var txt = CKEDITOR.instances.editor.getData();
+    //    //var description = checkSpecialCharacters(txt);
+    //    var description = CKEDITOR.instances.editor.getData();
+    //    formdata.delete("Description");
+    //    formdata.append("Description", description);
+    //    //debugger
+    //}
 
 
     $('div.editorck').each(function (idx, obj) {
