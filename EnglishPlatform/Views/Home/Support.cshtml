@@ -1,9 +1,8 @@
 ﻿@inject Microsoft.Extensions.Configuration.IConfiguration _config
 @{
     ViewData["Title"] = "Support";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1>Support</h1>
-@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
 <script type="text/javascript" charset="utf-8">
     var currentEmail = '@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value';
     var currentUser = {
@@ -14,4 +13,7 @@
         isAdmin : '@_config.GetSection("IsAdmin")?.Value.Split(',').Contains(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)'
     };
 </script>
+<div class="support-customer">
+
+</div>
 
