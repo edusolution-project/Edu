@@ -88,7 +88,7 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<CenterEntity> GetActiveCenter(DateTime time)
         {
-            return Collection.Find(t => t.ExpireDate <= time).ToEnumerable();
+            return Collection.Find(t => t.ExpireDate >= time && t.Status == true).ToEnumerable();
         }
     }
 }
