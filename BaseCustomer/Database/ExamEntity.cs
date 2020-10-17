@@ -60,15 +60,6 @@ namespace BaseCustomerEntity.Database
     public class ExamService : ServiceBase<ExamEntity>
     {
         private ExamDetailService _examDetailService;
-        private CloneLessonPartService _cloneLessonPartService;
-        private CloneLessonPartQuestionService _cloneLessonPartQuestionService;
-        private CloneLessonPartAnswerService _cloneLessonPartAnswerService;
-
-        private LessonProgressService _lessonProgressService;
-        private ChapterProgressService _chapterProgressService;
-        private ClassSubjectProgressService _classSubjectProgressService;
-        private ClassProgressService _classProgressService;
-        //private LessonService _lessonService { get; set; }
 
         public ExamService(IConfiguration configuration) : base(configuration)
         {
@@ -98,16 +89,6 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
 
             _examDetailService = new ExamDetailService(configuration);
-            _cloneLessonPartService = new CloneLessonPartService(configuration);
-            _cloneLessonPartQuestionService = new CloneLessonPartQuestionService(configuration);
-            _cloneLessonPartAnswerService = new CloneLessonPartAnswerService(configuration);
-            _lessonProgressService = new LessonProgressService(configuration);
-
-            _chapterProgressService = new ChapterProgressService(configuration);
-            _classSubjectProgressService = new ClassSubjectProgressService(configuration);
-            _classProgressService = new ClassProgressService(configuration);
-
-            //_lessonService = new LessonService(configuration);
         }
         /// <summary>
         /// ID Exam

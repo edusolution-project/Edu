@@ -640,7 +640,6 @@ namespace BaseCustomerMVC.Controllers.Student
             });
         }
 
-
         public IActionResult Index(DefaultModel model)
         {
             ViewBag.Model = model;

@@ -24,7 +24,30 @@ namespace BaseCustomerEntity.Database
     {
         public GroupAndUserService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<ExamEntity>>
+            {
+                //ClassSubjectID_1_LessonID_1_StudentID_1_ID_-1
+                new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.ClassSubjectID)
+                    .Ascending(t=> t.LessonID)
+                    .Ascending(t=> t.StudentID)
+                    .Descending(t=> t.ID)),
+                //LessonID_1_StudentID_1_Status_-1
+                 new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.LessonID)
+                    .Ascending(t=> t.StudentID)
+                    .Descending(t=> t.Status)),
+                //LessonScheduleID_1_StudentID_1
+                new CreateIndexModel<ExamEntity>(
+                    new IndexKeysDefinitionBuilder<ExamEntity>()
+                    .Ascending(t=> t.LessonScheduleID)
+                    .Ascending(t=> t.StudentID)
+                    )
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
 

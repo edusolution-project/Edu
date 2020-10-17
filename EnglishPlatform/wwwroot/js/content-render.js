@@ -321,7 +321,7 @@ var Lesson = (function () {
 
     }
 
-    var renderLessonData = function (isContinue = false) {
+    var renderLessonData = function () {
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
@@ -771,6 +771,9 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
+                if (mod.STUDENT_EXAM) {
+                    renderOldAnswer();
+                }
                 break;
             case mod.REVIEW:
                 var nav_bottom = lesson_action_holder
@@ -863,6 +866,9 @@ var Lesson = (function () {
                     $(".time-counter").html(getLocalData("Timer"));
                     //countdown(false);
                 }
+                if (mod.STUDENT_LECTURE) {
+                    renderOldAnswer();
+                }
                 break;
         }
         if (_openingPart == '') {
@@ -880,7 +886,7 @@ var Lesson = (function () {
         //if (!renderLessonData.prototype.IsTest) {
         //    renderOldAnswer(renderLessonData.prototye.examID);
         //}
-        renderOldAnswer(isContinue);
+        //renderOldAnswer();
     }
 
     var switchUIMode = function (mode) {
@@ -2925,7 +2931,7 @@ var Lesson = (function () {
 
     //---- 14-10-2020
     //var renderOldAnswer = function (OldExamID) { //dạng điền từ
-    var renderOldAnswer = function (isContinue) { //dạng điền từ
+    var renderOldAnswer = function () { //dạng điền từ
         //debugger
         //if (OldExamID) {
         var dataform = new FormData();
@@ -2950,7 +2956,7 @@ var Lesson = (function () {
                         var span = $(_fillquiz).find("span");
                         //debugger
                         if (point > 0) {
-                            //if (answerid) {
+                            if (!answerid) {
                             //    var input = $("input[id=" + answerid + "]");
                             //    input.attr("checked", true);
                             //    $("#" + answerid).css("color", "#28a745");
@@ -2963,11 +2969,11 @@ var Lesson = (function () {
                             span.attr("contenteditable", "false");
                             span.css("color", "#28a745");
                             span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"));
-                            //}
+                            AnswerFillQuestion(span.attr("id"), false);
+                            }
                         }
                         else {
-                            //if (answerid) {
+                            if (!answerid) {
                             //    var input = $("input[id=" + answerid + "]");
                             //    input.attr("checked", true);
                             //    $("#" + answerid).css("color", "#dc3545");
@@ -2975,12 +2981,13 @@ var Lesson = (function () {
                             //    AnswerQuestion($(input)[0]);
                             //}
                             //else {
+                            //debugger
                             span.html(answerVal);
                             span.attr("contenteditable", "true");
                             span.css("color", "#dc3545");
                             span.css("font-weight", "600");
-                            AnswerFillQuestion(span.attr("id"));
-                            //}
+                            AnswerFillQuestion(span.attr("id"), false);
+                            }
                         }
                     }
                 }
@@ -3538,7 +3545,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "radio",
-                    "class": "input-checkbox answer-checkbox",
+                    "class": "input-checkbox answer-checkbox mr-1",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3559,7 +3566,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "checkbox",
-                    "class": "input-checkbox answer-checkbox",
+                    "class": "input-checkbox answer-checkbox mr-1",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3881,10 +3888,16 @@ var Lesson = (function () {
             //console.log(dataset);
             switch (type) {
                 case "QUIZ1":
+                    //debugger
                     partID = dataset.partId;
                     questionId = dataset.questionId;
                     answerID = dataset.id;
-                    value = dataset.value;
+                    if (dataset.value) {
+                        value = dataset.value;
+                    }
+                    else {
+                        value = "";
+                    }
                     break;
                 case "QUIZ4":
                     partID = dataset.partId;
@@ -4009,7 +4022,8 @@ var Lesson = (function () {
     }
 
     //dien cau hoi phan bai lam cua hoc vien
-    var AnswerFillQuestion = function (spanID) {
+    var AnswerFillQuestion = function (spanID, check = true) {
+        //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
@@ -4017,7 +4031,13 @@ var Lesson = (function () {
         var questionId = dataset.questionId;
         //debugger
         var a = $('#' + spanID).text();
-        var value = checkSpecialCharacters(a);
+        var value = "";
+        if (check) {
+            value = checkSpecialCharacters(a);
+        }
+        else {
+            value = a;
+        }
         var dataform = new FormData();
 
         dataform.append("ExamID", $("input[name=ExamID]").val());
@@ -4418,15 +4438,15 @@ var submitForm = function (event, modalId, callback) {
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
-    else {
-        //replace ki tu dac biet
-        //var txt = CKEDITOR.instances.editor.getData();
-        //var description = checkSpecialCharacters(txt);
-        var description = CKEDITOR.instances.editor.getData();
-        formdata.delete("Description");
-        formdata.append("Description", description);
-        //debugger
-    }
+    //else {
+    //    //replace ki tu dac biet
+    //    //var txt = CKEDITOR.instances.editor.getData();
+    //    //var description = checkSpecialCharacters(txt);
+    //    var description = CKEDITOR.instances.editor.getData();
+    //    formdata.delete("Description");
+    //    formdata.append("Description", description);
+    //    //debugger
+    //}
 
 
     $('div.editorck').each(function (idx, obj) {
