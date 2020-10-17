@@ -601,11 +601,12 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += " <span style='font-weight:600;border-bottom: 1px solid'>" + detail_Answer[i] + "</span> ";
+                                    chodung1 += " <span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                                     chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
+                                chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
                                 chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
                         }
@@ -618,7 +619,7 @@ var ExamReview = (function () {
                                 }
                                 else {
                                     chodung1 += "<span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid;color:'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
