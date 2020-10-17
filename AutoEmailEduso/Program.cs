@@ -146,8 +146,8 @@ namespace AutoEmailEduso
                                         <tr style='font-weight:bold;background-color: bisque'>
                                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
                                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 1.0 -> 4.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>0.0</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 2.0 -> 4.9</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 1.9</td>
                                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
                                             <!--
                                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chính quy</td>
@@ -166,12 +166,15 @@ namespace AutoEmailEduso
                     long totalStudent = 0, totalstChuaVaoLop = 0, totalActiveStudents = 0; ;
                     long tren8 = 0;
                     long tren5 = 0;
-                    long tren1 = 0;
-                    long diem0 = 0;
+                    long tren2 = 0;
+                    long tren0 = 0;
                     var lasttime1 = new Dictionary<string, string>();
                     var lasttime2 = new Dictionary<string, string>();
                     string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-
+                    if (classesActive.Count() == 0)
+                    {
+                        continue;
+                    }
                     foreach (var _class in classesActive.OrderBy(x => x.Name))
                     {
 
@@ -242,8 +245,8 @@ namespace AutoEmailEduso
                         //render ket qua hoc tap
                         var min8 = classResult.Count(t => t.AvgPoint >= 80);
                         var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                        var min0 = classResult.Count(t => t.AvgPoint > 0 && t.AvgPoint < 50);
-                        var equal0 = classResult.Count(t => t.AvgPoint == 0);
+                        var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+                        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
 
                         if (index % 2 == 0)
                         {
@@ -273,13 +276,13 @@ namespace AutoEmailEduso
 
                         var diemtren8 = min8 == 0 ? "--" : min8.ToString();
                         var diemtren5 = min5 == 0 ? "--" : min5.ToString();
-                        var diemtren1 = min0 == 0 ? "--" : min0.ToString();
-                        var diem_0 = equal0 == 0 ? "--" : equal0.ToString();
+                        var diemtren2 = min2 == 0 ? "--" : min2.ToString();
+                        var diemtren0 = min0 == 0 ? "--" : min0.ToString();
                         tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren8}</td>" +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren5}</td>" +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren1}</td>" +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diem_0}</td>" +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min0 - equal0}</td>";
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren2}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren0}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
                         //    +
                         //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>";
                         //foreach (var i in listInfo)
@@ -323,17 +326,17 @@ namespace AutoEmailEduso
                         //}
                         tren8 += min8;
                         tren5 += min5;
-                        tren1 += min0;
-                        diem0 += equal0;
+                        tren2 += min2;
+                        tren0 += min0;
                         index++;
                     }
 
                     double tilechuavaolop = ((double)totalstChuaVaoLop / totalStudent) * 100;
                     double tiletren8 = ((double)tren8 / totalStudent) * 100;
                     double tiletren5 = ((double)tren5 / totalStudent) * 100;
-                    double tiletren1 = ((double)tren1 / totalStudent) * 100;
-                    double tile0 = ((double)diem0 / totalStudent) * 100;
-                    double tilechualam = ((double)(totalStudent - tren8 - tren5 - tren1 - diem0) / totalStudent) * 100;
+                    double tiletren2 = ((double)tren2 / totalStudent) * 100;
+                    double tiletren0 = ((double)tren0 / totalStudent) * 100;
+                    double tilechualam = ((double)(totalStudent - tren8 - tren5 - tren2 - tren0) / totalStudent) * 100;
 
                     tbody += @"</td><tr style='font-weight: 600'>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
@@ -342,9 +345,9 @@ namespace AutoEmailEduso
                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop} (<span style='color:red'>{tilechuavaolop.ToString("#0.00")}%</span>)</td>" +
                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8} (<span style='color:red'>{tiletren8.ToString("#0.00")}%</span>)</td>" +
                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5} (<span style='color:red'>{tiletren5.ToString("#0.00")}%</span>)</td>" +
-                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren1} (<span style='color:red'>{tiletren1.ToString("#0.00")}%</span>)</td>" +
-                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{diem0} (<span style='color:red'>{tile0.ToString("#0.00")}%</span>)</td>" +
-                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent - tren8 - tren5 - tren1 - diem0}(<span style='color:red'>{tilechualam.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren2} (<span style='color:red'>{tiletren2.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren0} (<span style='color:red'>{tiletren0.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent - tren8 - tren5 - tren2 - tren0}(<span style='color:red'>{tilechualam.ToString("#0.00")}%</span>)</td>" +
                                //$"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
                                //$"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
                                @"</tr>
@@ -354,13 +357,15 @@ namespace AutoEmailEduso
                     body += tbody;
                     var PercentActiveStudent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100);
                     //percent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100).ToString("#0.00") + "%";
-                    var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% - Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren1 + tile0).ToString("#0.00")}% (điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br>" +
+                    var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% "+
+                        $"- Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren2 + tiletren0).ToString("#0.00")}% "+
+                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br>" +
                         body;
                     var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
-                    var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com" };
+                    var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
                     _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                     //isTest = true;
-                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
                     //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                 }
                 Console.WriteLine($"Send Weekly Report To {center.Name} Is Done!");
@@ -552,7 +557,7 @@ namespace AutoEmailEduso
             </div>
             <div style='padding-left: 30px;'>
                 <p style='padding-top: 5px;margin: 0;'>
-                    - Vào <b style='color: red;'>""Lớp học của tôi""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
+                    - Vào <b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
                     - Vào <b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
                     - Vào <b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
                     - Vào <b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học

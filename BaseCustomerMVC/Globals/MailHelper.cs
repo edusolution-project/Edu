@@ -44,7 +44,7 @@ namespace BaseCustomerMVC.Globals
             </div>
             <div style='padding-left: 30px;'>
                 <p style='padding-top: 5px;margin: 0;'>
-                    - Vào <b style='color: red;'>""Lớp học của tôi""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
+                    - Vào <b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
                     - Vào <b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
                     - Vào <b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
                     - Vào <b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học
