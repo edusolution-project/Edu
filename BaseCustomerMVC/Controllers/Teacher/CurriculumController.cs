@@ -2150,24 +2150,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        private string GetContentType(string fileName)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
-            string contentType;
-            if (!provider.TryGetContentType(fileName, out contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
-
         /// <summary>
         /// Using Spire.Doc v8.9.6
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        #region Import with Word
+        #region Word
         public IActionResult ExportQuestionTemplateWithWord(DefaultModel model)
         {
             try
@@ -2243,7 +2231,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //Create a new paragraph
                     //Lưu ý
                     Paragraph paragraph = doc.AddSection().AddParagraph();
-                    TextRange TR3=paragraph.AppendText("Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
+                    TextRange TR3 = paragraph.AppendText("Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
                     TR3.CharacterFormat.FontSize = 12;
                     TR3.CharacterFormat.TextColor = Color.Red;
 
@@ -2304,7 +2292,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var row = table.Rows[i];
                             var cells = row.Cells;
-                            if (cells[0].Paragraphs[0].Text.ToString()!="") { //question
+                            if (cells[0].Paragraphs[0].Text.ToString() != "")
+                            { //question
                                 pos++;
                                 var question = new QuestionViewModel
                                 {
@@ -2402,6 +2391,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return stringBuilder.ToString();
         }
         #endregion
+
+        private string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
 
         #region FIX RESOURCES
 

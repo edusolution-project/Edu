@@ -64,7 +64,7 @@ namespace EmailTemplate.Controllers
         }
         public IActionResult Index(DateTime currentTime)
         {
-            if(currentTime == null || currentTime <= DateTime.MinValue)
+            if (currentTime == null || currentTime <= DateTime.MinValue)
             {
                 currentTime = DateTime.Now;
             }
@@ -269,31 +269,159 @@ namespace EmailTemplate.Controllers
                 await SendWeeklyReport(center, currentTime, isTest);
             }
         }
-    }
-    public class StudentResult
-    {
-        public string StudentID { get; set; }
-        public long ExamCount { get; set; }
-        public double AvgPoint { get; set; }
-    }
 
-    public class ClassSubjectInfo
-    {
-        public string CourseName { get; set; }
-        public string LastLessonTitle { get; set; }
-        public DateTime LastTime { get; set; }
-        public int Type { get; set; }
-    }
-
-    public class ScheduleView : LessonScheduleEntity
-    {
-        public string LessonName { get; set; }
-
-        public ScheduleView(LessonScheduleEntity schedule)
+        public async Task SendMonthlyReport()
         {
-            LessonID = schedule.LessonID;
-            StartDate = schedule.StartDate;
-            EndDate = schedule.EndDate;
+            //var dateTime = DateTime.Now;
+            var dateTime = new DateTime(2020,11,01);
+            var day = dateTime.Day;
+            var month = dateTime.Month;
+            var year = dateTime.Year;
+
+            var currentTime = new DateTime(year, month, day, 0, 0, 0);
+            var startMonth = currentTime.AddMonths(-1);
+            var endMonth = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
+
+            var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
+            foreach(var center in centersActive)
+            {
+                var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                foreach(var @class in classesActive)
+                {
+                    var data = GetDataForReprot(@class,dateTime).Result;
+                }
+            }
+
+        }
+
+        private async Task<Dictionary<string, object>> GetDataForReprot(ClassEntity @class,DateTime dateTime)
+        {
+            var dataResponse = new Dictionary<string, object>();
+
+            //var dateTime = DateTime.Now;
+            var day = dateTime.Day;
+            var month = dateTime.Month;
+            var year = dateTime.Year;
+
+            var currentTime = new DateTime(year, month, day, 0, 0, 0).AddMonths(-1);//Lùi 1 tháng
+            var sw1 = currentTime;//Tuan 1
+            var ew1 = currentTime.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw2 = ew1.AddMinutes(1);//Tuan 2
+            var ew2 = sw2.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw3 = ew2.AddMinutes(1);//Tuan 3
+            var ew3 = sw3.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw4 = ew3.AddMinutes(1);//Tuan 4
+            var ew4 = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
+
+            var listDateTime = new List<dateTime>();
+            listDateTime.Add(new dateTime(sw1, ew1));
+            listDateTime.Add(new dateTime(sw2, ew2));
+            listDateTime.Add(new dateTime(sw3, ew3));
+            listDateTime.Add(new dateTime(sw4, ew4));
+
+            foreach (var item in listDateTime)
+            {
+                var data = GetDataInWeek(item.StartWeek,item.EndWeek,@class);
+                dataResponse.Add($"Từ {item.StartWeek.ToString("dd-MM-yyyy")} đến {item.EndWeek.ToString("dd-MM-yyyy")}", data);
+            };
+
+            return dataResponse;
+        }
+
+        private string[] GetDataInWeek(DateTime startWeek,DateTime endWeek,ClassEntity @class)
+        {
+            //data can lay
+            var min8 = 9;
+            var min5 = 0;
+            var min2 = 0;
+            var min0 = 0;
+            var chualam = 0;
+
+            //Lay danh sach ID hoc sinh trong lop
+            var studentIds = _studentService.GetStudentsByClassId(@class.ID).Select(t => t.ID).ToList();
+            var classStudent = studentIds.Count();
+
+            var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => new LessonScheduleEntity
+            {
+                LessonID = t.LessonID,
+                ClassSubjectID = t.ClassSubjectID,
+                StartDate = t.StartDate,
+                EndDate = t.EndDate
+            })?.ToList();
+            var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
+
+            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+            var activeProgress = _lessonProgressService.CreateQuery().Find(
+                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+            var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
+            var stChuaVaoLop = classStudent - activeStudents.Count();
+
+            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+            if (examIds.Count > 0) //co bai kiem tra
+            {
+                //ket qua lam bai cua hoc sinh trong lop
+                var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       ExamCount = g.Count(),
+                                       AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count
+                                   }).ToList();
+                //render ket qua hoc tap
+                min8 = classResult.Count(t => t.AvgPoint >= 80);
+                min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+                min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+                min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+                chualam = classStudent - (min0 + min2 + min5 + min8);
+            }
+
+            string[] data = {classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString() };
+            return data;
+        }
+
+        public class StudentResult
+        {
+            public string StudentID { get; set; }
+            public long ExamCount { get; set; }
+            public double AvgPoint { get; set; }
+        }
+
+        public class ClassSubjectInfo
+        {
+            public string CourseName { get; set; }
+            public string LastLessonTitle { get; set; }
+            public DateTime LastTime { get; set; }
+            public int Type { get; set; }
+        }
+
+        public class ScheduleView : LessonScheduleEntity
+        {
+            public string LessonName { get; set; }
+
+            public ScheduleView(LessonScheduleEntity schedule)
+            {
+                LessonID = schedule.LessonID;
+                StartDate = schedule.StartDate;
+                EndDate = schedule.EndDate;
+            }
+        }
+
+        public class dateTime
+        {
+            public DateTime StartWeek { get; set; }
+            public DateTime EndWeek { get; set; }
+
+            public dateTime(DateTime sw, DateTime ew)
+            {
+                this.StartWeek = sw;
+                this.EndWeek = ew;
+            }
         }
     }
 }

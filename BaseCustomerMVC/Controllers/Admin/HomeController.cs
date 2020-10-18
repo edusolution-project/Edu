@@ -782,33 +782,35 @@ namespace BaseCustomerMVC.Controllers.Admin
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                var lessonparts = _lessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
-                var questions = _lessonPartQuestionService.CreateQuery().Find(x => lessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
-                var answers = _lessonPartAnswerService.CreateQuery().Find(x => questions.Contains(x.ParentID)).ToList();
-                foreach (var ans in answers)
-                {
-                    if (ans.Content != null || !string.IsNullOrEmpty(ans.Content))
-                    {
-                        ans.Content = NormalizeSpecialApostrophe(ans.Content);
-                        ans.Updated = DateTime.Now;
-                        //_lessonPartAnswerService.CreateOrUpdate(ans);
-                        _lessonPartAnswerService.CreateQuery().UpdateMany<LessonPartAnswerEntity>(t => t.ID == ans.ID, Builders<LessonPartAnswerEntity>.Update.Set(t => t.Content, ans.Content).Set(t => t.Updated, DateTime.Now));
-                    }
-                }
+                var a = _lessonPartAnswerService.CreateQuery().Find(x => x.Content.Contains("&quot;")).ToList();
 
-                var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
-                var clonequestions = _clonequestionService.CreateQuery().Find(x => clonelessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
-                var cloneanswers = _cloneanswerService.CreateQuery().Find(x => clonequestions.Contains(x.ParentID)).ToList();
-                foreach (var cloneans in cloneanswers)
-                {
-                    if (cloneans.Content != null || !string.IsNullOrEmpty(cloneans.Content))
-                    {
-                        cloneans.Content = NormalizeSpecialApostrophe(cloneans.Content);
-                        cloneans.Updated = DateTime.Now;
-                        //_lessonPartAnswerService.CreateOrUpdate(cloneans);
-                        _cloneanswerService.CreateQuery().UpdateMany<CloneLessonPartAnswerEntity>(t => t.ID == cloneans.ID, Builders<CloneLessonPartAnswerEntity>.Update.Set(t => t.Content, cloneans.Content).Set(t => t.Updated, DateTime.Now));
-                    }
-                }
+                //var lessonparts = _lessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
+                //var questions = _lessonPartQuestionService.CreateQuery().Find(x => lessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
+                //var answers = _lessonPartAnswerService.CreateQuery().Find(x => questions.Contains(x.ParentID)).ToList();
+                //foreach (var ans in answers)
+                //{
+                //    if (ans.Content != null || !string.IsNullOrEmpty(ans.Content))
+                //    {
+                //        ans.Content = NormalizeSpecialApostrophe(ans.Content);
+                //        ans.Updated = DateTime.Now;
+                //        //_lessonPartAnswerService.CreateOrUpdate(ans);
+                //        _lessonPartAnswerService.CreateQuery().UpdateMany<LessonPartAnswerEntity>(t => t.ID == ans.ID, Builders<LessonPartAnswerEntity>.Update.Set(t => t.Content, ans.Content).Set(t => t.Updated, DateTime.Now));
+                //    }
+                //}
+
+                //var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).Project(x => x.ID).ToList();
+                //var clonequestions = _clonequestionService.CreateQuery().Find(x => clonelessonparts.Contains(x.ParentID)).Project(x => x.ID).ToList();
+                //var cloneanswers = _cloneanswerService.CreateQuery().Find(x => clonequestions.Contains(x.ParentID)).ToList();
+                //foreach (var cloneans in cloneanswers)
+                //{
+                //    if (cloneans.Content != null || !string.IsNullOrEmpty(cloneans.Content))
+                //    {
+                //        cloneans.Content = NormalizeSpecialApostrophe(cloneans.Content);
+                //        cloneans.Updated = DateTime.Now;
+                //        //_lessonPartAnswerService.CreateOrUpdate(cloneans);
+                //        _cloneanswerService.CreateQuery().UpdateMany<CloneLessonPartAnswerEntity>(t => t.ID == cloneans.ID, Builders<CloneLessonPartAnswerEntity>.Update.Set(t => t.Content, cloneans.Content).Set(t => t.Updated, DateTime.Now));
+                //    }
+                //}
 
                 //var lessonparts = _lessonPartService.CreateQuery().Find(x => x.Type.Equals("QUIZ2")).ToList();
                 //foreach (var lesson in lessonparts.ToList())

@@ -28,7 +28,7 @@
 <h1>Index</h1>
 <canvas id="myChart"></canvas>
 <img id="imagess" alt="Alternate Text" />
-@{ 
+@*@{ 
     int count = centers?.ToList() == null ? 0 : centers.Count();
     for(int i = 0; i < count; i++)
     {
@@ -321,4 +321,4 @@
         }
         await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
     } }
-}
+}*@
