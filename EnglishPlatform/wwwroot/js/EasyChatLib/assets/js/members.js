@@ -2,7 +2,7 @@
     "use strict";
     var __MEMBERS = [];
     var __TEXT = text;
-    var __DEFAULT_MEMBER = {id:g_EasyChatURL.SYSTEM_EDUSO,name:"Hệ thống EDUSO",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
+    var __DEFAULT_MEMBER = { id: g_EasyChatURL.SYSTEM_EDUSO, name:"Thông tin cập nhật hệ thống",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
     function Member(){
 
     }

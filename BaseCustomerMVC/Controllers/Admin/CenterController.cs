@@ -32,7 +32,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<StudentEntity, StudentViewModel> _mapping;
-
+        private readonly StudentService _studentService;
         private readonly StudentHelper _studentHelper;
         private readonly TeacherService _teacherService;
         private readonly FileProcess _fileProcess;
@@ -44,7 +44,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             TeacherService teacherService,
             StudentHelper studentHelper,
             FileProcess fileProcess,
-            IHostingEnvironment evn
+            IHostingEnvironment evn,
+            StudentService studentService
             )
         {
             _env = evn;
@@ -55,6 +56,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _fileProcess = fileProcess;
             _studentHelper = studentHelper;
             _mapping = new MappingEntity<StudentEntity, StudentViewModel>();
+            _studentService = studentService;
+
         }
         // GET: Home
 
@@ -96,10 +99,32 @@ namespace BaseCustomerMVC.Controllers.Admin
             //               {
             //                   AccountID = account.ID
             //               });
+            var _DataResponse = from d in DataResponse
+                    let totalStudens = _studentService.CountByCenter(d.ID)
+                    select new CenterVM
+                    {
+                        Name = d.Name,
+                        Code = d.Code,
+                        Description = d.Description,
+                        Abbr=d.Abbr,
+                        Image=d.Image,
+                        Status=d.Status,
+                        Limit=d.Limit,
+                        Created=d.Created,
+                        StartDate=d.StartDate,
+                        ExpireDate=d.ExpireDate,
+                        IsDefault=d.IsDefault,
+                        ID=d.ID,
+                        TotalStudent=totalStudens.ToString()
+                    };
+                  
+            //var a = new CenterVM();
+            //a = DataResponse;
+            //a.TotalStudent = _studentService.CountByCenter(CenterID);
 
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse },
+                { "Data", _DataResponse },
                 { "Model", model }
             };
             return new JsonResult(response);
@@ -256,6 +281,11 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _service.ChangeStatus(model.ArrID.Split(',').ToList(), false);
             return new JsonResult("UnPublish OK");
+        }
+
+        private class CenterVM : CenterEntity
+        {
+            public string TotalStudent { get; set; }
         }
     }
 }

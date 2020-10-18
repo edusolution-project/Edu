@@ -38,6 +38,7 @@
                                 <th class='text-center'>Ngày bắt đầu</th>
                                 <th class='text-center'>Ngày hết hạn</th>
                                 <th class='text-center'>Hạn mức tài khoản</th>
+                                <th class='text-center'>Đã sử dụng</th>
                                 <th class='text-center'>Trạng thái</th>
                                 <th class='text-center'>Thao tác</th>
                             </tr>
@@ -166,6 +167,7 @@
                 {
                     for (i = 0; i < data.Data.length; ++i) {
                         item = data.Data[i];
+                        //debugger
                         var active = "";
                         if (item.Status) {
                             active = "<td class='text-center'><button onclick=\"ExcuteOnlyItem('" + item.ID + "','@Url.Action("unpublish","Center")',LoadData)\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
@@ -185,6 +187,7 @@
                             "<td class='text-center'>" + fdate + "</td>" +
                             "<td class='text-center'>" + edate + "</td>" +
                             "<td class='text-center'>" + item.Limit + "</td>" +
+                            "<td class='text-center'>" + item.totalStudent + "</td>" +
                             //"<td class='text-center'>" + (item.Class == null ? "" : item.Class) + "</td>"
                             active +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","Center")','@Url.Action("create","Center")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +

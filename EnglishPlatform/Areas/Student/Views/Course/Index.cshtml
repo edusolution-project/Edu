@@ -267,8 +267,25 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 //var _data = response.data.Data;
-                                this.classes = response.data.Classes;
-                                this.classSubjects = response.data.Data;
+                                if (response.data.Classes.length == 0) {
+                                    swal({
+                                        title: "Bạn chưa có trong lớp học nào, liên hệ với giáo viên hoặc chuyển đến học liệu để thêm vào lớp cá nhân của bạn",
+                                        text: "Click tại đây để chuyển đến học liệu tương tác",
+                                        icon: "warning",
+                                        buttons: true,
+                                        dangerMode: true,
+                                    })
+                                        .then((willDelete) => {
+                                            if (willDelete) {
+                                                window.location.href="@processUrl("Index", "Reference")#docsinteractive"
+                                            }
+                                        });
+                                    //Swal.fire("Bạn chưa có trong lớp học nào, liên hệ với giáo viên hoặc chuyển đến học liệu để thêm vào lớp cá nhân của bạn", "Click tại đây để chuyển đến học liệu tương tác", "warning");
+                                }
+                                else {
+                                    this.classes = response.data.Classes;
+                                    this.classSubjects = response.data.Data;
+                                }
                                 //_data.forEach(function (item, k) {
                                 //    _that.classSubjects.push({
                                 //        ID: item.ID,
