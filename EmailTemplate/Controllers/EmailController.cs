@@ -270,28 +270,51 @@ namespace EmailTemplate.Controllers
             }
         }
 
-        public async Task SendMonthlyReport()
+        public async Task<JsonResult> SendMonthlyReport()
         {
-            //var dateTime = DateTime.Now;
-            var dateTime = new DateTime(2020,11,01);
-            var day = dateTime.Day;
-            var month = dateTime.Month;
-            var year = dateTime.Year;
-
-            var currentTime = new DateTime(year, month, day, 0, 0, 0);
-            var startMonth = currentTime.AddMonths(-1);
-            var endMonth = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
-
-            var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
-            foreach(var center in centersActive)
+            try
             {
-                var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
-                foreach(var @class in classesActive)
-                {
-                    var data = GetDataForReprot(@class,dateTime).Result;
-                }
-            }
+                //var dateTime = DateTime.Now;
+                var dateTime = new DateTime(2020, 11, 01);
+                var day = dateTime.Day;
+                var month = dateTime.Month;
+                var year = dateTime.Year;
 
+                var currentTime = new DateTime(year, month, day, 0, 0, 0);
+                var startMonth = currentTime.AddMonths(-1);
+                var endMonth = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
+
+                var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
+                var dataResponse = new Dictionary<string, object>();
+                foreach (var center in centersActive)
+                {
+                    var dataInClass = new Dictionary<string, object>();
+                    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
+                    {
+                        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                        var index = 0;
+                        foreach (var @class in classesActive.OrderBy(x => x.Name))
+                        {
+                            var data = GetDataForReprot(@class, dateTime).Result;
+                            if (!dataInClass.Keys.Contains(@class.Name))
+                            {
+                                dataInClass.Add($"{@class.Name}", data);
+                            }
+                            else
+                            {
+                                dataInClass.Add($"{@class.Name} - {index}", data);
+                            }
+                            index++;
+                        }
+                        dataResponse.Add($"{center.Name}", dataInClass);
+                    }
+                }
+                return Json(dataResponse);
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
 
         private async Task<Dictionary<string, object>> GetDataForReprot(ClassEntity @class,DateTime dateTime)
@@ -314,7 +337,7 @@ namespace EmailTemplate.Controllers
             var ew3 = sw3.AddDays(6).AddHours(23).AddMinutes(59);
 
             var sw4 = ew3.AddMinutes(1);//Tuan 4
-            var ew4 = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
+            var ew4 = new DateTime(year, month, day, 0, 0, 0).AddDays(-1);//Lui 1 ngay
 
             var listDateTime = new List<dateTime>();
             listDateTime.Add(new dateTime(sw1, ew1));
