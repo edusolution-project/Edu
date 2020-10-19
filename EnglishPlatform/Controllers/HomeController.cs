@@ -1245,21 +1245,21 @@ namespace EnglishPlatform.Controllers
                     ? data.ToList()
                     : data.Skip(1 * 30).Limit(30).ToList();
 
-                var std = (from o in DataResponse
-                           let progress = _classProgressService.GetStudentResult(o.ID, currentStudent.ID)
-                           let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
-                           let examCount = _scheduleService.CountClassExam(o.ID)
-                           select new
-                           {
-                               id = o.ID,
-                               //courseID = o.CourseID,
-                               title = o.Name,
-                               endDate = o.EndDate,
-                               per,
-                               max = o.TotalLessons,
-                               min = progress != null ? progress.Completed : 0,
-                               score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
-                           }).ToList();
+                //var std = (from o in DataResponse
+                //           let progress = _classProgressService.GetStudentResult(o.ID, currentStudent.ID)
+                //           let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
+                //           let examCount = _scheduleService.CountClassExam(o.ID)
+                //           select new
+                //           {
+                //               id = o.ID,
+                //               //courseID = o.CourseID,
+                //               title = o.Name,
+                //               endDate = o.EndDate,
+                //               per,
+                //               max = o.TotalLessons,
+                //               min = progress != null ? progress.Completed : 0,
+                //               score = (progress != null && examCount > 0) ? progress.TotalPoint / examCount : 0,
+                //           }).ToList();
                 return "OK";
             }
             catch(Exception ex)

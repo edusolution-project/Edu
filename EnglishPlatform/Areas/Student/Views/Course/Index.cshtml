@@ -136,7 +136,7 @@
                                             <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
                                         </a>
                                     </div>
-                                    <div class="flex-fill ml-2">
+                                    <div class="flex-fill ml-2 col-md-8">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
                                             {{csbj.CourseName}}
                                         </a>
@@ -153,6 +153,11 @@
                                             </template>
                                         </p>
                                     </div>
+                                    <template>
+                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
+                                        <button v-else type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
+                                    </template>
+                                    @*<button type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>*@
                                 </div>
                             </li>
                         </ul>
@@ -190,7 +195,7 @@
         .btn-outline-danger {
             position: absolute;
             right: 30px;
-            bottom: 10px;
+            /*bottom: 10px;*/
             display: none;
         }
 
@@ -219,7 +224,7 @@
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 //this.loadClassSubjects();
                 //console.log(this.list_grades_full);
-                this.changeSubject()
+                this.changeSubject();
                 //window.ChooseCalendar = this.chooseCalendar
                 //window.GetCourse = this.getCourse
                 //window.InitDate = this.initDate
@@ -233,6 +238,7 @@
                 //        InitDate();
                 //    }
                 //});
+                this.isMobileDevice();
             },
             data: {
                 list_course: [
@@ -423,21 +429,51 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ClassSubjectID', ID);
+                    //let _url = '@processUrl("RemoveCourse", "Class")';
                     let _url = '@processUrl("Remove", "Class")';
                     if (window.confirm("Bạn muốn xoá học liệu " + Name + " ?")) {
+
+                        Swal.fire({
+                            title: 'Wait ...',
+                            onBeforeOpen() {
+                                Swal.showLoading()
+                            },
+                            onAfterClose() {
+                                Swal.hideLoading()
+                            },
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            allowEnterKey: false
+                        });
+
                         axios.post(_url, _form)
                             .then(response => {
-                                if (!response.data.Status) {
+                                if (!response.data.Status) {//xoa khong thanh cong
                                     alert(response.data.Msg);
+                                    Swal.close()
                                 }
-                                else {
+                                else {//xoa thanh cong
                                     alert(response.data.Msg);
+                                    _that.changeSubject();
+                                    Swal.close();
                                 }
                             }).catch(e => {
                                 alert(e);
+                                Swal.close()
                             })
                     }
                     else return false;
+                },
+                isMobileDevice() {
+                    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                        // true for mobile device
+                        console.log("Mobile detected");
+                        return true;
+                    } else {
+                        // false for not mobile device
+                        console.log("Desktop detected");
+                        return false;
+                    }
                 }
             }
         });
