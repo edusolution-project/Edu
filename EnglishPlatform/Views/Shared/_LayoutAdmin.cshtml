@@ -63,5 +63,14 @@
     <script src="~/js/calendar/js/sweetalert.min.js"></script>
 
     @RenderSection("Scripts", required: false)
+    <script>
+        var searchTimeout = null;
+        var delaySearch = function () {
+            clearTimeout(searchTimeout)
+            searchTimeout = setTimeout(function () {
+                LoadData()
+            }, 500);
+        }
+    </script>
 </body>
 </html>

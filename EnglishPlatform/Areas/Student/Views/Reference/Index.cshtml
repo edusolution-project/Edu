@@ -100,8 +100,8 @@
                                     <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
                                 </div>*@
                         </div>
-                        <div class="pt-0 pb-2">
-                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                        <div class="pt-0 pb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
+                            <p class="m-0">{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                         </div>
                         <div>
                             <a href="javascript:;" title="Mở link" class="text-success font-weight-bold mr-2 act" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
@@ -118,14 +118,14 @@
                         <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
                         <img v-lazy="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
                     </a>
-                    <div class="entry p-0">
+                    <div class="entry p-0 w-100">
                         <div>
                             <div>
                                 <a href="javascript:;" v-on:click="showDocsInteractive(data)" :title="data.Name" class="title">{{data.Name}}</a>
                             </div>
                         </div>
-                        <div class="pt-0 pb-2">
-                            <p>{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
+                        <div class="pt-0 pb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
+                            <p class="m-0">{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
                         </div>
                         <div>
                             <a href="#docsinteractive" title="Xem chi tiết" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showDocsInteractive(data)"><i class="fas fa-cloud-download-alt"></i> Xem chi tiết</a>
@@ -167,9 +167,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="container-fluid">
-                            <b-col class="form-group">
-                                <span v-html="HTMLContent">
-                                </span>
+                            <b-col class="form-group h-100" v-html="HTMLContent">
                             </b-col>
                         </div>
                     </div>
@@ -213,6 +211,54 @@
 </section>
 
 @section Scripts{
+
+    <style>
+
+        .ellipsis {
+            overflow: hidden;
+            max-height: 100px;
+            line-height: 20px;
+        }
+
+            .ellipsis:before {
+                content: "";
+                float: left;
+                width: 5px;
+                height: 100px;
+            }
+
+            .ellipsis > *:first-child {
+                float: right;
+                width: 100%;
+                margin-left: -5px !important;
+            }
+
+            .ellipsis:after {
+                content: "\02026";
+                box-sizing: content-box;
+                -webkit-box-sizing: content-box;
+                -moz-box-sizing: content-box;
+                float: right;
+                position: relative;
+                top: -20px;
+                left: 100%;
+                width: 3em;
+                margin-left: -3em;
+                padding-right: 5px;
+                text-align: right;
+                background-size: 100% 100%;
+                /* 512x1 image, gradient for IE9. Transparent at 0% -> white at 50% -> white at 100%.*/
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAABCAMAAACfZeZEAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wDWRdwAAAP90Uk5TgsRjMZXhS30YrvDUP3Emow1YibnM9+ggOZxrBtpRRo94gxItwLOoX/vsHdA2yGgL8+TdKUK8VFufmHSGgAQWJNc9tk+rb5KMCA8aM0iwpWV6dwP9+fXuFerm3yMs0jDOysY8wr5FTldeoWKabgEJ8RATG+IeIdsn2NUqLjQ3OgBDumC3SbRMsVKsValZplydZpZpbJOQco2KdYeEe36BDAL8/vgHBfr2CvTyDu8R7esU6RcZ5ecc4+Af3iLcJSjZ1ivT0S/PMs3LNck4x8U7wz7Bv0G9RLtHuEq1TbJQr1OtVqqnWqRdoqBhnmSbZ5mXapRtcJGOc4t2eYiFfH9AS7qYlgAAARlJREFUKM9jqK9fEGS7VNrDI2+F/nyB1Z4Fa5UKN4TbbeLY7FW0Tatkp3jp7mj7vXzl+4yrDsYoVx+JYz7mXXNSp/a0RN25JMcLPP8umzRcTZW77tNyk63tdprzXdmO+2ZdD9MFe56Y9z3LUG96mcX02n/CW71JH6Qmf8px/cw77ZvVzB+BCj8D5vxhn/vXZh6D4uzf1rN+Cc347j79q/zUL25TPrJMfG/5LvuNZP8rixeZz/mf+vU+Vut+5NL5gPOeb/sd1dZbTs03hBuvmV5JuaRyMfk849nEM7qnEk6IHI8/qn049hB35QGHiv0yZXuMdkXtYC3ebrglcqvYxoj1muvC1nDlrzJYGbpcdHHIMo2FwYv+j3QAAOBSfkZYITwUAAAAAElFTkSuQmCC);
+                background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0)), to(white), color-stop(50%, white));
+                background: -moz-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: -o-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: -ms-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+            }
+        .container-fluid {
+            height: 100%;
+        }
+    </style>
     <script>
         new Vue({
             el: "#dashboard_content",
@@ -368,7 +414,7 @@
                         $("#modal_preview").modal();
                 },
                 doMainAct(obj) {
-                    
+
                     if (obj.Media != null && this.isDocType(obj.Media.Extension)) {
                         this.showPreview(obj)
                     }
@@ -401,16 +447,20 @@
                 renderContent(obj) {
                     var linkFile = obj.Media.Path;
                     var html = "";
-                    if (obj.Media.Extension.endsWith('.pdf') || linkFile.toLowerCase().endsWith('.pdf') ||  obj.Media.Name.toLowerCase().endsWith('.pdf'))
-                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
+                    if (obj.Media.Path.startsWith("https://drive.google.com")) {
+                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='" + this.replaceGooglePath(obj.Media.Path) + "' style='min-height:500px; height:100%; max-height:100%'></iframe>";
+                    }
                     else {
-                        if(!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
-                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
+                        if (obj.Media.Extension.endsWith('.pdf') || obj.Media.Path.toLowerCase().endsWith('.pdf') || obj.Media.Name.toLowerCase().endsWith('.pdf'))
+                            html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px; height:100%; max-height:100%''></embed>";
+                        else {
+                            if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
+                            html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px; height:100%; max-height:100%''></iframe>";
+                        }
                     }
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
                     return dom.body.innerHTML;
-
                 },
                 tabChange(a = 0) {
                     // có thể load data theo từng tab để tối ưu hiệu năng
@@ -496,6 +546,9 @@
                             this.isLoading = false;
                             this.hideModal();
                         })
+                },
+                replaceGooglePath(str) {
+                    return str.replace("https://drive.google.com/uc?export=view&id=", "https://drive.google.com/file/d/") + "/preview";
                 }
             }
         });

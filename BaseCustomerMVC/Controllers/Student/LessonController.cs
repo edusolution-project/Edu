@@ -519,15 +519,6 @@ namespace BaseCustomerMVC.Controllers.Student
             var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
             {
                 Part = result
-                //listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
-                //{
-                //    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                //        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                //        {
-                //            CloneAnswers = o.Type == "QUIZ2" ? null : _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                //            Description = o.Type == "QUIZ2" ? null : z.Description
-                //        }))?.ToList()
-                //})).ToList()
             });
 
             var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
@@ -549,7 +540,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (endtime < DateTime.UtcNow) // hết thời gian 
                     {
                         // => kết thúc bài kt
-                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _);
+                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _, false);
                         //throw new NotImplementedException();
                         //lastexam.Status = true;
                         ////TODO: Chấm điểm last exam
@@ -714,18 +705,18 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Msg","Học viên không có trong danh sách lớp" }
                     });
 
-            var course = _courseService.GetItemByID(currentCs.CourseID);
+            //var course = _courseService.GetItemByID(currentCs.CourseID);
 
-            if (course == null)
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error",model },
-                        {"Msg","Không có thông tin giáo trình" }
-                    });
-            }
+            //if (course == null)
+            //{
+            //    return new JsonResult(new Dictionary<string, object> {
+            //            {"Data",null },
+            //            {"Error",model },
+            //            {"Msg","Không có thông tin giáo trình" }
+            //        });
+            //}
 
-            var classSchedule = new ClassScheduleViewModel(course)
+            var classSchedule = new ClassScheduleViewModel()
             {
                 Chapters = _chapterService.GetSubChapters(currentCs.ID, ChapterID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()

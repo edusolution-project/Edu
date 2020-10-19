@@ -897,7 +897,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             new_course.SkillID = target_course.SkillID;
             new_course.Created = DateTime.Now;
             new_course.Updated = DateTime.Now;
-            new_course.IsActive = false;
+            new_course.IsActive = true;
             new_course.IsUsed = false;
             _service.Collection.InsertOne(new_course);
 

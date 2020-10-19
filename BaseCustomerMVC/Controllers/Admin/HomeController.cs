@@ -154,131 +154,131 @@ namespace BaseCustomerMVC.Controllers.Admin
             str += "Phase 0: ";
             //Clear orphan part: Run Once
 
-            var ids = _lessonService.GetAll().Project(t => t.ID).ToList();
+            //var ids = _lessonService.GetAll().Project(t => t.ID).ToList();
 
 
-            long delpart = 0;
-            var delIds = _lessonPartService.CreateQuery().Find(t => !ids.Contains(t.ParentID)).Project(t => t.ID).ToList();
+            //long delpart = 0;
+            //var delIds = _lessonPartService.CreateQuery().Find(t => !ids.Contains(t.ParentID)).Project(t => t.ID).ToList();
 
-            foreach (var partid in delIds)
-            {
-                var part = _lessonPartService.GetItemByID(partid);
-                if (_lessonService.GetItemByID(part.ParentID) == null)
-                {
-                    _lessonPartService.Remove(partid);
-                    var quizs = _questionService.GetByPartID(partid);
-                    if (quizs != null && quizs.Count() > 0)
-                    {
-                        foreach (var quiz in quizs)
-                        {
-                            _questionService.Remove(quiz.ID);
-                            await _answerService.CreateQuery().DeleteManyAsync<LessonPartAnswerEntity>(t => t.ParentID == quiz.ID);
-                        }
-                    }
-                    delpart++;
-                }
-            }
-
-            var cdelpart = 0;
-
-            var cids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
-            var delcIds = _clonelessonPartService.CreateQuery().Find(t => !cids.Contains(t.ParentID)).Project(t => t.ID).ToList();
-            
-            foreach (var partid in delcIds)
-            {
-                var part = _clonelessonPartService.GetItemByID(partid);
-                if (_clonelessonService.GetItemByID(part.ParentID) == null)
-                {
-                    _clonelessonPartService.Remove(partid);
-                    var quizs = _clonequestionService.GetByPartID(partid);
-                    if (quizs != null && quizs.Count() > 0)
-                    {
-                        foreach (var quiz in quizs)
-                        {
-                            _clonequestionService.Remove(quiz.ID);
-                            await _cloneanswerService.RemoveByParentAsync(quiz.ID);
-                        }
-                    }
-                    cdelpart++;
-                }
-            }
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
-            str += (" _ DEL " + delpart + "_" + cdelpart + "<DELDONE>");
-            str += "Phase 1: ";
-            _chapterService.CreateQuery().UpdateMany(t => true, Builders<ChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
-            _classSubjectService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
-            _classService.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
-            _courseChapterService.CreateQuery().UpdateMany(t => true, Builders<CourseChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
-            _courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
-
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
-
-            //calculate lesson maxpoint
-            var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
-
-            foreach (var clid in clids)
-            {
-                var cl = _lessonService.GetItemByID(clid);
-                calculateLessonPoint(cl);
-                IncreaseCourseCounter(cl);
-            }
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
-            str += " Phase 2: ";
-            //calculate clone lesson maxpoint
-            var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
-            //.Project(t => new LessonEntity
+            //foreach (var partid in delIds)
             //{
-            //    ID = t.ID,
-            //    ChapterID = t.ChapterID,
-            //    ClassSubjectID = t.ClassSubjectID,
-            //    TemplateType = t.TemplateType,
-            //    IsPractice = t.IsPractice,
-            //    Multiple = t.Multiple
-            //}).ToList();
-            foreach (var lid in lids)
-            {
-                var l = _clonelessonService.GetItemByID(lid);
-                calculateCloneLessonPoint(l);
-                await _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
-            }
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
-            str += " Phase 3: ";
-            //return Json(str);
-            //reapply exam maxpoint
-            var exams = _examService.GetAll().ToEnumerable();
+            //    var part = _lessonPartService.GetItemByID(partid);
+            //    if (_lessonService.GetItemByID(part.ParentID) == null)
+            //    {
+            //        _lessonPartService.Remove(partid);
+            //        var quizs = _questionService.GetByPartID(partid);
+            //        if (quizs != null && quizs.Count() > 0)
+            //        {
+            //            foreach (var quiz in quizs)
+            //            {
+            //                _questionService.Remove(quiz.ID);
+            //                await _answerService.CreateQuery().DeleteManyAsync<LessonPartAnswerEntity>(t => t.ParentID == quiz.ID);
+            //            }
+            //        }
+            //        delpart++;
+            //    }
+            //}
 
-            foreach (var e in exams)
-            {
-                var lesson = _clonelessonService.GetItemByID(e.LessonID);
-                if (lesson != null)
-                {
-                    if (e.MaxPoint == 0) e.MaxPoint = lesson.Point;
-                    _examService.Save(e);
-                }
-                else
-                {
-                    var parts = _clonelessonPartService.GetByLessonID(e.LessonID);//remove orphan parts
-                    foreach (var part in parts)
-                    {
-                        await _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
-                        var quizs = _clonequestionService.GetByPartID(part.ID);
-                        foreach (var quiz in quizs)
-                        {
-                            await _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
-                            await _clonequestionService.RemoveAsync(quiz.ID);
-                        }
-                        await _clonelessonPartService.RemoveAsync(part.ID);
-                    }
-                    await _examService.RemoveAsync(e.ID);
-                }
-            }
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
-            str += " Phase 4: ";
+            //var cdelpart = 0;
+
+            //var cids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
+            //var delcIds = _clonelessonPartService.CreateQuery().Find(t => !cids.Contains(t.ParentID)).Project(t => t.ID).ToList();
+
+            //foreach (var partid in delcIds)
+            //{
+            //    var part = _clonelessonPartService.GetItemByID(partid);
+            //    if (_clonelessonService.GetItemByID(part.ParentID) == null)
+            //    {
+            //        _clonelessonPartService.Remove(partid);
+            //        var quizs = _clonequestionService.GetByPartID(partid);
+            //        if (quizs != null && quizs.Count() > 0)
+            //        {
+            //            foreach (var quiz in quizs)
+            //            {
+            //                _clonequestionService.Remove(quiz.ID);
+            //                await _cloneanswerService.RemoveByParentAsync(quiz.ID);
+            //            }
+            //        }
+            //        cdelpart++;
+            //    }
+            //}
+            //str += (DateTime.Now - start).TotalSeconds;
+            //start = DateTime.Now;
+            //str += (" _ DEL " + delpart + "_" + cdelpart + "<DELDONE>");
+            //str += "Phase 1: ";
+            //_chapterService.CreateQuery().UpdateMany(t => true, Builders<ChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
+            //_classSubjectService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
+            //_classService.CreateQuery().UpdateMany(t => true, Builders<ClassEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
+            //_courseChapterService.CreateQuery().UpdateMany(t => true, Builders<CourseChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
+            //_courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
+
+            //str += (DateTime.Now - start).TotalSeconds;
+            //start = DateTime.Now;
+
+            ////calculate lesson maxpoint
+            //var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
+
+            //foreach (var clid in clids)
+            //{
+            //    var cl = _lessonService.GetItemByID(clid);
+            //    calculateLessonPoint(cl);
+            //    IncreaseCourseCounter(cl);
+            //}
+            //str += (DateTime.Now - start).TotalSeconds;
+            //start = DateTime.Now;
+            //str += " Phase 2: ";
+            ////calculate clone lesson maxpoint
+            //var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
+            ////.Project(t => new LessonEntity
+            ////{
+            ////    ID = t.ID,
+            ////    ChapterID = t.ChapterID,
+            ////    ClassSubjectID = t.ClassSubjectID,
+            ////    TemplateType = t.TemplateType,
+            ////    IsPractice = t.IsPractice,
+            ////    Multiple = t.Multiple
+            ////}).ToList();
+            //foreach (var lid in lids)
+            //{
+            //    var l = _clonelessonService.GetItemByID(lid);
+            //    calculateCloneLessonPoint(l);
+            //    await _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
+            //}
+            //str += (DateTime.Now - start).TotalSeconds;
+            //start = DateTime.Now;
+            //str += " Phase 3: ";
+            ////return Json(str);
+            ////reapply exam maxpoint
+            //var exams = _examService.GetAll().ToEnumerable();
+
+            //foreach (var e in exams)
+            //{
+            //    var lesson = _clonelessonService.GetItemByID(e.LessonID);
+            //    if (lesson != null)
+            //    {
+            //        if (e.MaxPoint == 0) e.MaxPoint = lesson.Point;
+            //        _examService.Save(e);
+            //    }
+            //    else
+            //    {
+            //        var parts = _clonelessonPartService.GetByLessonID(e.LessonID);//remove orphan parts
+            //        foreach (var part in parts)
+            //        {
+            //            await _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
+            //            var quizs = _clonequestionService.GetByPartID(part.ID);
+            //            foreach (var quiz in quizs)
+            //            {
+            //                await _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
+            //                await _clonequestionService.RemoveAsync(quiz.ID);
+            //            }
+            //            await _clonelessonPartService.RemoveAsync(part.ID);
+            //        }
+            //        await _examService.RemoveAsync(e.ID);
+            //    }
+            //}
+            //str += (DateTime.Now - start).TotalSeconds;
+            //start = DateTime.Now;
+            //str += " Phase 4: ";
             //reset progress
 
             _chapterProgressService.CreateQuery().UpdateMany(t => true, Builders<ChapterProgressEntity>.Update
@@ -322,7 +322,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             str += " Phase 5: ";
 
             var lessonProgresses = _lessonProgressService
-                //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26")
+                //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26" && t.StudentID == "5f60e2e90dd2b41448909d05")
                 .GetAll()
                 .Project(t => new LessonProgressEntity { ID = t.ID, LessonID = t.LessonID, StudentID = t.StudentID }).ToList();
             //recalculate point
@@ -345,10 +345,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                         var ex = _examService.GetItemByID(exid);
                         if (ex != null)
                         {
-                            //if (ex.ClassID != "5f60dd6b0dd2b41448907f26") continue;
                             if (ex.Marked) _lessonHelper.CompleteFull(ex, ls, out _, false);
                             else
-                                if (_examService.IsOver(ex.ID))
+                                if (_lessonHelper.IsOvertime(ex))
                                 _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
                         }
                     }
@@ -359,6 +358,15 @@ namespace BaseCustomerMVC.Controllers.Admin
             str += " End. ";
             return Json(str);
         }
+
+        public async Task<JsonResult> Remark(string ExamID)//Big fix
+        {
+            var exam = _examService.GetItemByID(ExamID);
+            var lesson = _clonelessonService.GetItemByID(exam.LessonID);
+            _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+            return Json("OK");
+        }
+
 
         public JsonResult FixFillquiz()
         {
@@ -500,13 +508,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             return point;
         }
 
-        private void IncreaseCourseCounter(CourseLessonEntity lesson)
-        {
-            if (lesson.ChapterID != "0")
-                _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-        }
+        //private void IncreaseCourseCounter(CourseLessonEntity lesson)
+        //{
+        //    if (lesson.ChapterID != "0")
+        //        _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+        //    else
+        //        _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+        //}
 
         #region Fix Region
         public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)
@@ -688,74 +696,74 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("DEL " + count);
         }
 
-        public JsonResult UpFileToDriver()
-        {
-            string[] type =
-            {
-                "DOC",
-                //"PDF",
-                //"PPT",
-                //"XLS",
-                //"IMG",
-                "VIDEO",
-                "AUDIO"
-            };
-            //var a = _lessonPartService.GetAll().Limit(10).ToList();
-            //var b = _lessonService.GetAll().Limit(10).ToList();
-            //var c = _courseChapterService.GetAll().Limit(10).ToList();
-            var listLessonPart = from lp in _lessonPartService.CreateQuery().Find(x => type.Contains(x.Type)).ToEnumerable()
-                                 where lp.Media != null && lp.Media.Path.Contains("drive.google.com") == false
-                                 select new
-                                 {
-                                     ID = lp.ID,
-                                     Update = lp.Updated,
-                                     FileMedia = lp.Media
-                                 };
+        //public JsonResult UpFileToDriver()
+        //{
+        //    string[] type =
+        //    {
+        //        "DOC",
+        //        //"PDF",
+        //        //"PPT",
+        //        //"XLS",
+        //        //"IMG",
+        //        "VIDEO",
+        //        "AUDIO"
+        //    };
+        //    //var a = _lessonPartService.GetAll().Limit(10).ToList();
+        //    //var b = _lessonService.GetAll().Limit(10).ToList();
+        //    //var c = _courseChapterService.GetAll().Limit(10).ToList();
+        //    var listLessonPart = from lp in _lessonPartService.CreateQuery().Find(x => type.Contains(x.Type)).ToEnumerable()
+        //                         where lp.Media != null && lp.Media.Path.Contains("drive.google.com") == false
+        //                         select new
+        //                         {
+        //                             ID = lp.ID,
+        //                             Update = lp.Updated,
+        //                             FileMedia = lp.Media
+        //                         };
 
-            var listLessonPartQuiz = from q in _questionService.GetAll().ToEnumerable()
-                                     where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
-                                     select new
-                                     {
-                                         ID = q.ID,
-                                         Update = q.Updated,
-                                         FileMedia = q.Media
-                                     };
+        //    var listLessonPartQuiz = from q in _questionService.GetAll().ToEnumerable()
+        //                             where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
+        //                             select new
+        //                             {
+        //                                 ID = q.ID,
+        //                                 Update = q.Updated,
+        //                                 FileMedia = q.Media
+        //                             };
 
 
-            var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
-                                       where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
-                                       select new
-                                       {
-                                           ID = a.ID,
-                                           Update = a.Updated,
-                                           FileMedia = a.Media,
-                                           Type = a.Media.Extension
-                                       };
+        //    var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
+        //                               where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
+        //                               select new
+        //                               {
+        //                                   ID = a.ID,
+        //                                   Update = a.Updated,
+        //                                   FileMedia = a.Media,
+        //                                   Type = a.Media.Extension
+        //                               };
 
-            var d = from x in _answerService.GetAll().ToEnumerable()
-                    where x.Media != null && x.Media.Path.Contains("drive.google.com") == true
-                    select new
-                    {
-                        ID = x.ID,
-                        Update = x.Updated,
-                        FileMedia = x.Media,
-                        Type = x.Media.Extension
-                    };
+        //    var d = from x in _answerService.GetAll().ToEnumerable()
+        //            where x.Media != null && x.Media.Path.Contains("drive.google.com") == true
+        //            select new
+        //            {
+        //                ID = x.ID,
+        //                Update = x.Updated,
+        //                FileMedia = x.Media,
+        //                Type = x.Media.Extension
+        //            };
 
-            //var r = listLessonPart.ToList();
-            //var u = listLessonPartQuiz.ToList();
-            var i = listLessonPartAnswer.ToList();
-            var o = d.ToList();
+        //    //var r = listLessonPart.ToList();
+        //    //var u = listLessonPartQuiz.ToList();
+        //    var i = listLessonPartAnswer.ToList();
+        //    var o = d.ToList();
 
-            foreach (var item in listLessonPart.ToList())
-            {
-                //if(item.FileMedia.)
-            }
+        //    foreach (var item in listLessonPart.ToList())
+        //    {
+        //        //if(item.FileMedia.)
+        //    }
 
-            return Json("OK");
-        }
+        //    return Json("OK");
+        //}
 
-        public JsonResult UpdateCourseName()
+        public JsonResult UpdateCourseInfo()
         {
             //var listClassSub = from lcs in _classSubjectService.GetAll().ToEnumerable();
             //let CourseName=_courseService.GetItemByID(lcs.CourseID)?.Name
@@ -772,6 +780,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     var course = _courseService.GetItemByID(item.CourseID);
                     item.CourseName = course == null ? "" : course.Name;
+                    item.Image = course == null ? "" : course.Image;
                     _classSubjectService.Save(item);
                 }
                 return Json("OK");

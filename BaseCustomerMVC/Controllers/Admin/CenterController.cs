@@ -181,7 +181,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (upload != null && upload.Length > 0)
             {
                 var fileName = item.Code + "_" + Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
-                item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", "", true, 200, 300);
+                item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", item.Code, true, 200, 300);
             }
 
             _service.Save(item);

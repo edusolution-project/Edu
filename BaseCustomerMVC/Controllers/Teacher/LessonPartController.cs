@@ -1294,7 +1294,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(org)) return org;
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
-                org = org.Replace("  ", "");
+                org = org.Replace("  ", " ");
             return ReplaceSpecialCharacters(org);
             //return org;
         }
@@ -1317,19 +1317,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
-        }
-
-        //chạy lại data cho phần điền từ
-        public async Task<JsonResult> UpdateAnswer()
-        {
-            try
-            {
-                return Json("OK");
-            }
-            catch(Exception ex)
-            {
-                return Json(ex.Message);
-            }
         }
 
         private string ReplaceSpecialCharacters(string str)

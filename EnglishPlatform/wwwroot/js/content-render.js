@@ -60,6 +60,7 @@ var Lesson = (function () {
     var _UImode = null;
 
     var exam_timeout = null;
+    var __answer_sending = false;
 
     var config = {
         container: "",
@@ -236,10 +237,8 @@ var Lesson = (function () {
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
-        //debugger
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
-                //debugger
                 _data = JSON.parse(res).Data;
                 switch (config.mod) {
                     case mod.PREVIEW: //curriculum view
@@ -328,6 +327,9 @@ var Lesson = (function () {
             throw "No data";
         }
         var data = _data;
+        //if (data.TemplateType == 2) {
+        //    renderLessonData.prototype.IsTest = true;
+        //}
 
         var mainContainer = $('#' + config.container);
         var lessonHeader = mainContainer.find('.card-header');
@@ -642,7 +644,6 @@ var Lesson = (function () {
                                 renderLectureExam(exam, false);
                             }
                             else {
-                                //
                                 if (isNull(getLocalData("CurrentExam")) || (getLocalData("CurrentExam") != exam.ID)) //display last result & render new exam
                                 {
                                     //console.log(data);
@@ -770,6 +771,9 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
+                if (mod.STUDENT_EXAM) {
+                    renderOldAnswer();
+                }
                 break;
             case mod.REVIEW:
                 var nav_bottom = lesson_action_holder
@@ -862,6 +866,9 @@ var Lesson = (function () {
                     $(".time-counter").html(getLocalData("Timer"));
                     //countdown(false);
                 }
+                if (mod.STUDENT_LECTURE) {
+                    renderOldAnswer();
+                }
                 break;
         }
         if (_openingPart == '') {
@@ -876,9 +883,10 @@ var Lesson = (function () {
                 $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
             }
         }
-
-        //alert(_UImode);
-
+        //if (!renderLessonData.prototype.IsTest) {
+        //    renderOldAnswer(renderLessonData.prototye.examID);
+        //}
+        //renderOldAnswer();
     }
 
     var switchUIMode = function (mode) {
@@ -1466,16 +1474,21 @@ var Lesson = (function () {
                     mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                     break;
                 case "DOC":
+                    console.log(data.Media);
                     if (!isMobileDevice()) {
-                        if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
-                            data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
-                            data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
-                        ) {
-                            mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
+                        if (data.Media.Path.startsWith("https://drive.google.com")) {
+                            mediaHolder.append($("<iframe>", { "src": replaceGooglePath(data.Media.Path) + "", "class": "embed-frame", "frameborder": "0" }));
                         }
                         else {
-                            if (data.Media != null)
-                                mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                            if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
+                                data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")) {
+                                mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
+                            }
+                            else {
+                                if (data.Media != null)
+                                    mediaHolder.append($("<embed>", { "src": data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH", "class": "embed-frame" }));
+                            }
                         }
                     }
                     else {
@@ -1642,7 +1655,6 @@ var Lesson = (function () {
 
     var modalEditLesson = function (ID) {
         var modal = $('#lessonModal');
-        //debugger
         $.ajax({
             type: "POST",
             url: config.url.load,
@@ -1672,7 +1684,6 @@ var Lesson = (function () {
     }
 
     var modalEditPart = function (id) {
-        //debugger
         stopAllMedia();
         var modalForm = window.partForm;
         $('#action').val(config.url.save_part);
@@ -1931,7 +1942,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "onclick": "AddNewQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm câu hỏi'));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -2036,7 +2047,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add question
                 if (data != null && data.Questions != null) {
@@ -2245,24 +2256,24 @@ var Lesson = (function () {
         }
     }
 
-    var downloadQuestionTemplate = function (obj,type) {
+    var downloadQuestionTemplate = function (obj, type) {
         if (type == 0) {//file excel
             window.open(config.url.export_quiztemp);
         }
         else {//file word
             window.open(config.url.export_quiztemp_with_word);
         }
-       
+
     }
 
-    var chooseQuestionFile = function (obj,type) {
+    var chooseQuestionFile = function (obj, type) {
         $(obj).siblings('input').unbind().change(function (e) {
-            uploadQuestionFile(e,type);
+            uploadQuestionFile(e, type);
         });
         $(obj).siblings('input').focus().click();
     }
 
-    var uploadQuestionFile = function (e,type) {
+    var uploadQuestionFile = function (e, type) {
         Swal.showLoading();
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
@@ -2622,6 +2633,7 @@ var Lesson = (function () {
                     }
                 }
             }
+            //renderOldAnswer(data.exam.OldExamID);
         });
     }
 
@@ -2763,7 +2775,7 @@ var Lesson = (function () {
                 renderQuizCounter();
             }
             else {
-                console.log(lastExam);
+                //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 lastExamResult =
@@ -2908,7 +2920,6 @@ var Lesson = (function () {
     }
 
     var renderExamDetail = function () {
-
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
         loadLessonData({
@@ -2917,6 +2928,73 @@ var Lesson = (function () {
             "ClassID": config.class_id
         }, renderLessonData);
     }
+
+    //---- 14-10-2020
+    //var renderOldAnswer = function (OldExamID) { //dạng điền từ
+    var renderOldAnswer = function () { //dạng điền từ
+        //debugger
+        //if (OldExamID) {
+        var dataform = new FormData();
+        //dataform.append("examID", OldExamID);
+        dataform.append("LessonID", config.lesson_id);
+        dataform.append("ClassSubjectID", config.class_subject_id);
+        dataform.append("ClassID", config.class_id);
+        Ajax(config.url.oldAnswer, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                //debugger
+                if (data.Data !== null) {
+                    for (i = 0; i < data.Data.length; i++) {
+                        var item = data.Data[i];
+                        var quizID = item.QuestionID;
+                        var answerVal = item.AnswerValue;
+                        var _examid = item.ExamID;
+                        var lessonpartid = item.LessonPartID;
+                        var answerid = item.AnswerID;
+                        var point = item.Point;
+                        var _fillquiz = $("#" + quizID);
+                        var span = $(_fillquiz).find("span");
+                        //debugger
+                        if (point > 0) {
+                            if (!answerid) {
+                            //    var input = $("input[id=" + answerid + "]");
+                            //    input.attr("checked", true);
+                            //    $("#" + answerid).css("color", "#28a745");
+                            //    $("#" + answerid).css("font-weight", "600");
+                            //    document.getElementById(answerid).parentElement.style.pointerEvents = "none";
+                            //    AnswerQuestion($(input)[0]);
+                            //}
+                            //else {
+                            span.html(answerVal);
+                            span.attr("contenteditable", "false");
+                            span.css("color", "#28a745");
+                            span.css("font-weight", "600");
+                            AnswerFillQuestion(span.attr("id"), false);
+                            }
+                        }
+                        else {
+                            if (!answerid) {
+                            //    var input = $("input[id=" + answerid + "]");
+                            //    input.attr("checked", true);
+                            //    $("#" + answerid).css("color", "#dc3545");
+                            //    $("#" + answerid).css("font-weight", "600");
+                            //    AnswerQuestion($(input)[0]);
+                            //}
+                            //else {
+                            //debugger
+                            span.html(answerVal);
+                            span.attr("contenteditable", "true");
+                            span.css("color", "#dc3545");
+                            span.css("font-weight", "600");
+                            AnswerFillQuestion(span.attr("id"), false);
+                            }
+                        }
+                    }
+                }
+            })
+        //}
+    }
+    //end
 
     var renderStudentPart = function (data, _defshow = true) {
         //console.log(data);
@@ -3326,7 +3404,6 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
@@ -3468,7 +3545,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "radio",
-                    "class": "input-checkbox answer-checkbox",
+                    "class": "input-checkbox answer-checkbox mr-1",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3489,7 +3566,7 @@ var Lesson = (function () {
                 form.append($("<input>", { "type": "hidden" }));
                 form.append($("<input>", {
                     "id": data.ID, "type": "checkbox",
-                    "class": "input-checkbox answer-checkbox",
+                    "class": "input-checkbox answer-checkbox mr-1",
                     "onclick": "AnswerQuestion(this)",
                     "data-part-id": partid,
                     "data-lesson-id": config.lesson_id,
@@ -3508,7 +3585,12 @@ var Lesson = (function () {
 
     }
 
-    var completeExam = function (isOvertime) {
+    var completeExam = async function (isOvertime) {
+        showLoading("Đang nộp bài...");
+        while (__answer_sending) {
+            console.log("wait for complete answering ...");
+            await new Promise(r => setTimeout(r, 500));
+        }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
         if ($('#QuizNav').hasClass("show"))
@@ -3537,10 +3619,6 @@ var Lesson = (function () {
             }
             else {
                 stopCountdown();
-                //if (isOvertime)
-                //    notification("success", "Thời gian làm bài đã hết", 1500);
-                //else
-                //    notification("success", "Đã nộp bài", 1500);
                 localStorage.clear();
                 renderCompleteExam({
                     maxPoint: 100, point: 1, limit: 0, number: 1,
@@ -3549,10 +3627,16 @@ var Lesson = (function () {
                 });
             }
         }
+        hideLoading();
     }
 
-    var completeLectureExam = function () {
+    var completeLectureExam = async function () {
+        showLoading("Đang nộp bài...");
         $('.btnCompleteExam').hide();
+        while (__answer_sending) {
+            console.log("wait for complete answering ...");
+            await new Promise(r => setTimeout(r, 500));
+        }
         if (config.mod != mod.TEACHERPREVIEW) {
             var dataform = new FormData();
             console.log("Complete :" + $('#ExamID').val());
@@ -3578,6 +3662,7 @@ var Lesson = (function () {
                 questionsTotal: document.querySelectorAll(".quiz-item").length
             });
         }
+        hideLoading();
     }
 
     var renderCompleteExam = function (data) {
@@ -3782,110 +3867,122 @@ var Lesson = (function () {
     }
 
     var AnswerQuestion = function (_this, _that) {
+        __answer_sending = true;
         //if (config.mod != mod.STUDENT_EXAM)
         //    return;
         // dataset trên item
-        var dataset = _this.dataset;
-        //console.log(_this);
-        //loại câu hỏi
-        var type = dataset.type;
+        if (_this) {
+            var dataset = _this.dataset;
+            //console.log(_this);
+            //loại câu hỏi
+            var type = dataset.type;
 
-        //lessonPartID
-        var partID = "";
-        //questionID
-        var questionId = "";
-        // câu trả lời
-        var answerID = "";
-        //nội dung câu trả lời
-        var value = "";
-        //console.log(dataset);
-        switch (type) {
-            case "QUIZ1":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                answerID = dataset.id;
-                value = dataset.value;
-                break;
-            case "QUIZ4":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                answerID = '';
-                value = '';
-                $('#' + dataset.questionId).find('.answer-checkbox:checked').each(function (index, obj) {
-                    answerID = (answerID == '' ? '' : (answerID + ',')) + $(obj)[0].dataset.id;
-                    value = (value == '' ? '' : (value + ',')) + $(obj)[0].dataset.value;
-                })
-                break;
-            case "QUIZ2":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                //answerID = dataset.id;
-                // value là data động tự điền
-                value = _this.text;
-                break;
-            case "QUIZ3":
-                partID = dataset.partId;
-                questionId = dataset.questionId;
-                if (!isMobileDevice()) {
-                    var item = _this.querySelector('fieldset');
-                    var label = item.querySelector('label');
-                    if (label == null) {
-                        label = item.querySelector("[src]").src;
+            //lessonPartID
+            var partID = "";
+            //questionID
+            var questionId = "";
+            // câu trả lời
+            var answerID = "";
+            //nội dung câu trả lời
+            var value = "";
+            //console.log(dataset);
+            switch (type) {
+                case "QUIZ1":
+                    //debugger
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    answerID = dataset.id;
+                    if (dataset.value) {
+                        value = dataset.value;
                     }
                     else {
-                        label = item.querySelector('label').innerHTML;
+                        value = "";
                     }
-                    value = item == void 0 ? "" : label;
-                    answerID = item.id;
-                }
-                else {
+                    break;
+                case "QUIZ4":
                     partID = dataset.partId;
-                    answerID = dataset.id;
                     questionId = dataset.questionId;
-                    value = dataset.value;
-                }
-                break;
-            case "ESSAY":
-                partID = dataset.partId;
-                value = _this.value;
-                questionId = _this.id;
-                break;
-            default:
-                break;
-        }
-        var dataform = new FormData();
-        dataform.append("ExamID", $("input[name=ExamID]").val());
-        //console.log($("input[name=ExamID]"));
-        //if (type != "ESSAY") {
-
-        dataform.append("LessonPartID", partID);
-        dataform.append("AnswerID", answerID);
-        dataform.append("QuestionID", questionId);
-        dataform.append("AnswerValue", value);
-        //debugger;
-        var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
-        if (files) {
-            for (var i = 0; i < files.length; i++) {
-                dataform.append("files", files[i]);
+                    answerID = '';
+                    value = '';
+                    $('#' + dataset.questionId).find('.answer-checkbox:checked').each(function (index, obj) {
+                        answerID = (answerID == '' ? '' : (answerID + ',')) + $(obj)[0].dataset.id;
+                        value = (value == '' ? '' : (value + ',')) + $(obj)[0].dataset.value;
+                    })
+                    break;
+                case "QUIZ2":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    //answerID = dataset.id;
+                    // value là data động tự điền
+                    value = _this.text;
+                    break;
+                case "QUIZ3":
+                    partID = dataset.partId;
+                    questionId = dataset.questionId;
+                    if (!isMobileDevice()) {
+                        var item = _this.querySelector('fieldset');
+                        var label = item.querySelector('label');
+                        if (label == null) {
+                            label = item.querySelector("[src]").src;
+                        }
+                        else {
+                            label = item.querySelector('label').innerHTML;
+                        }
+                        value = item == void 0 ? "" : label;
+                        answerID = item.id;
+                    }
+                    else {
+                        partID = dataset.partId;
+                        answerID = dataset.id;
+                        questionId = dataset.questionId;
+                        value = dataset.value;
+                    }
+                    break;
+                case "ESSAY":
+                    partID = dataset.partId;
+                    value = _this.value;
+                    questionId = _this.id;
+                    break;
+                default:
+                    break;
             }
-        }
+            var dataform = new FormData();
+            dataform.append("ExamID", $("input[name=ExamID]").val());
+            //console.log($("input[name=ExamID]"));
+            //if (type != "ESSAY") {
 
-        //} else {
-        //    dataform.append("LessonPartID", partID);
-        //    dataform.append("AnswerValue", value);
-        //}
+            dataform.append("LessonPartID", partID);
+            dataform.append("AnswerID", answerID);
+            dataform.append("QuestionID", questionId);
+            dataform.append("AnswerValue", value);
+            //debugger;
+            var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
+            if (files) {
+                for (var i = 0; i < files.length; i++) {
+                    dataform.append("files", files[i]);
+                }
+            }
 
-        if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
-            Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
-            })
-                .catch(function (err) {
-                    notification("error", err, 3000);
-                });
-        }
-        if (value == "") {
-            delAnswerForStudent(questionId);
-        } else {
-            saveAnswerForStudent(questionId, answerID, value, type);
+            //} else {
+            //    dataform.append("LessonPartID", partID);
+            //    dataform.append("AnswerValue", value);
+            //}
+
+            if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+                Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+                    __answer_sending = false;
+
+                })
+                    .catch(function (err) {
+                        __answer_sending = false;
+                        notification("error", err, 3000);
+                    });
+            }
+            if (value == "") {
+                delAnswerForStudent(questionId);
+            } else {
+                saveAnswerForStudent(questionId, answerID, value, type);
+            }
         }
     }
 
@@ -3899,8 +3996,12 @@ var Lesson = (function () {
 
         for (i = 0; i < chain.length; i++) {//check ki tu khoang trang dac biet
             if (space.includes(chain[i].charCodeAt())) {
-                chain = chain.replace(chain[i]," ");
+                chain = chain.replace(chain[i], " ");
             }
+        }
+
+        while (chain.indexOf("  ") >= 0) {
+            chain = chain.replace("  ", " ");
         }
 
         for (i = 0; i < chain.length; i++) {//check ki tu ‘’ trong word
@@ -3921,7 +4022,7 @@ var Lesson = (function () {
     }
 
     //dien cau hoi phan bai lam cua hoc vien
-    var AnswerFillQuestion = function (spanID) {
+    var AnswerFillQuestion = function (spanID, check = true) {
         //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
@@ -3930,17 +4031,26 @@ var Lesson = (function () {
         var questionId = dataset.questionId;
         //debugger
         var a = $('#' + spanID).text();
-        var value = checkSpecialCharacters(a);
+        var value = "";
+        if (check) {
+            value = checkSpecialCharacters(a);
+        }
+        else {
+            value = a;
+        }
         var dataform = new FormData();
 
         dataform.append("ExamID", $("input[name=ExamID]").val());
         dataform.append("LessonPartID", partID);
         dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
+        __answer_sending = true;
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
+                __answer_sending = false;
             })
                 .catch(function (err) {
+                    __answer_sending = false;
                     notification("error", err, 3000);
                 });
         }
@@ -4214,6 +4324,10 @@ var Lesson = (function () {
         $(cloneQuestion).find("[name^='" + question + "ID']").val("");
     }
 
+    var replaceGooglePath = function (str) {
+        return str.replace("https://drive.google.com/uc?export=view&id=", "https://drive.google.com/file/d/") + "/preview";
+    }
+
     window.LessonInstance = {} || Lesson;
 
     LessonInstance.onReady = onReady;
@@ -4263,7 +4377,7 @@ var Lesson = (function () {
 
     window.SwitchMode = switchMode;
     window.ToggleQuizExplain = ToggleQuizExplain;
-
+    window.renderOldAnswer = renderOldAnswer;
     window.checkSpecialCharacters = checkSpecialCharacters;
     return LessonInstance;
 }());
@@ -4324,15 +4438,15 @@ var submitForm = function (event, modalId, callback) {
         //formdata.append("Description", myEditor.getData())
         formdata.append("Description", CKEDITOR.instances.editor.getData())
     }
-    else {
-        //replace ki tu dac biet
-        //var txt = CKEDITOR.instances.editor.getData();
-        //var description = checkSpecialCharacters(txt);
-        var description = CKEDITOR.instances.editor.getData();
-        formdata.delete("Description");
-        formdata.append("Description", description);
-        //debugger
-    }
+    //else {
+    //    //replace ki tu dac biet
+    //    //var txt = CKEDITOR.instances.editor.getData();
+    //    //var description = checkSpecialCharacters(txt);
+    //    var description = CKEDITOR.instances.editor.getData();
+    //    formdata.delete("Description");
+    //    formdata.append("Description", description);
+    //    //debugger
+    //}
 
 
     $('div.editorck').each(function (idx, obj) {
@@ -4568,13 +4682,6 @@ var toggleExpand = function (obj) {
         $(obj).removeClass("fa-caret-up");
         _openingPart = '';
     }
-}
-
-var cacheStatic = function (src) {
-    //console.log(src);
-    if (src.startsWith("http"))
-        return src;
-    return "https://static.eduso.vn/" + src + "?&format=jpg";
 }
 
 var isMobileDevice = function () {

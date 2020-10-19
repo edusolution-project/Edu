@@ -242,7 +242,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std =
                 (from o in DataResponse
-                 let progress = _progressService.GetStudentResult(o.ID, userId)
+                 let progress = _progressService.GetItemByClassID(o.ID, userId)
                  //let course = _courseService.GetItemByID(o.CourseID)
                  //let subject = _subjectService.GetItemByID(o.SubjectID)
                  //let grade = _gradeService.GetItemByID(o.GradeID)
@@ -291,7 +291,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
 
             var std = (from o in data.ToList()
-                       let progress = _progressService.GetStudentResult(o.ID, userId)
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
                        select new
                        {
@@ -452,7 +452,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 : data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
 
             var std = (from o in DataResponse
-                       let progress = _progressService.GetStudentResult(o.ID, userId)
+                       let progress = _progressService.GetItemByClassID(o.ID, userId)
                        let per = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons
                        let examCount = _lessonScheduleService.CountClassExam(o.ID)
                        select new
@@ -689,7 +689,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 {
                                     ClassName = currentClass.Name,
                                     ClassStatus = "Đang học",
-                                    Progress = _progressService.GetStudentResult(currentClass.ID, r.ID),
+                                    Progress = _progressService.GetItemByClassID(currentClass.ID, r.ID),
                                 })).ToList();
 
             var response = new Dictionary<string, object>

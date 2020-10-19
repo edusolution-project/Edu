@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Globals
                "<p>Email này cùng các tệp tin đính kèm là các thông tin bảo mật của Eduso và chỉ có mục đích được gửi cho những người nhận được nêu tại email. Nếu Quý vị không phải là người nhận dự kiến của email này cùng các tập tin kèm theo, vui lòng không thực hiện bất cứ hành động nào trên cơ sở email và các tập tin này. Việc chia sẻ, phát tán bất cứ nội dung nào của email này cùng các tập tin đính kèm là hoàn toàn không được phép nếu không có sự đồng ý bằng văn bản của Eduso. Eduso không chịu trách nhiệm về sự truyền tải chính xác, đầy đủ và kịp thời của thông tin trong email và các tập tin này. Trường hợp Quý vị nhận được email này do có sự nhầm lẫn hoặc lỗi hệ thống, vui lòng thông báo cho Eduso qua email này và xóa email cùng các tập tin đính kèm khỏi hệ thống của Quý vị.Trân trọng cảm ơn.</p>" +
                "</div>";
 
-        private static readonly string extendTeacher = 
+        private static readonly string extendTeacher =
         @"<div style='color:#333;font-size: 90%;'>
             <div>
                 <i style='text-decoration: underline;'>Bạn có thể:</i>
@@ -213,10 +213,10 @@ namespace BaseCustomerMVC.Globals
             string subject = "";
             subject = "Chào mừng " + Name + " tham gia hệ thống EDUSO";
             string body = "Chào " + Name + ",";
-            
+
             if (!String.IsNullOrEmpty(VisiblePassword))//register
             {
-                body = "<p>Bạn vừa được đăng ký làm "+ type + " của <b>" + centerName + "</b>!</p>" +
+                body = "<p>Bạn vừa được đăng ký làm " + type + " của <b>" + centerName + "</b>!</p>" +
                 "<p>Thông tin đăng nhập như sau</p>" +
                 "<p>Tên đăng nhập: <b>" + Email + "</b></p>" +
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
@@ -260,7 +260,7 @@ namespace BaseCustomerMVC.Globals
             body += "<p>Bạn vừa được phân công dạy lớp <b>" + @class.Name + "</b> tại <b>" + CenterName + "</b><p>";
             body += "<p>Thời gian mở lớp từ: <b>" + @class.StartDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b> đến <b>" + @class.EndDate.ToLocalTime().ToString("dd/MM/yyyy") + "</b><p>";
             body += "<p>Các học liệu được phân công: <br/>";
-            
+
             if (TC.SubjectList == null || TC.SubjectList.Count == 0) return;
 
             foreach (var item in TC.SubjectList)
@@ -292,7 +292,7 @@ namespace BaseCustomerMVC.Globals
                 "<p>Mật khẩu: <b>" + VisiblePassword + "</b></p><br/>" +
                 "<p>Đăng nhập để bắt đầu trải nghiệm ngay trên <a href='https://eduso.vn' target='_blank'>Eduso.vn</a><p>" +
                 extendStudent;
-                
+
             }
             else
             {

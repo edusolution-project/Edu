@@ -28,7 +28,7 @@ namespace GoogleLib.Services
         /// <summary>
         /// link dung cho iframe google
         /// </summary>
-        public string URL_PREVIEW_FILE { get => "https://drive.google.com/file/d/{id}/view"; }
+        public string URL_PREVIEW_FILE { get => "https://drive.google.com/file/d/{id}/preview"; }
         /// <summary>
         /// xem anh nho 
         /// </summary>
@@ -124,7 +124,7 @@ namespace GoogleLib.Services
         }
 
 
-        public string UploadFileStatic(string fileName,string mimeType, Stream stream, string parents = "")
+        public string UploadFileStatic(string fileName, string mimeType, Stream stream, string parents = "")
         {
             if (!string.IsNullOrEmpty(fileName))
             {
@@ -241,7 +241,7 @@ namespace GoogleLib.Services
                 request.Fields = "id";
                 return request.Execute();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
@@ -349,7 +349,7 @@ namespace GoogleLib.Services
                 });
                 return service;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
@@ -375,12 +375,12 @@ namespace GoogleLib.Services
                     return await GetDriveService(file, user, appName, fileStorge);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return null;
             }
         }
-        
+
 
     }
 }
