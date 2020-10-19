@@ -51,71 +51,71 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task UpdateLastLearn(LessonProgressEntity item)
-        {
-            var progress = GetStudentResult(item.ClassID, item.StudentID);
-            if (progress == null)
-            {
-                progress = new ClassProgressEntity
-                {
-                    StudentID = item.StudentID,
-                    Completed = 1,
-                    ClassID = item.ClassID,
-                    LastDate = DateTime.Now,
-                    LastLessonID = item.LessonID
-                };
-                //create new progress
-                await Collection.InsertOneAsync(progress);
-            }
-            else
-            {
-                var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.Now)
-                     .Set(t => t.LastLessonID, item.LessonID);
-                if (item.TotalLearnt == 1) //new
-                    update = update.Inc(t => t.Completed, 1);
+        //public async Task UpdateLastLearn(LessonProgressEntity item)
+        //{
+        //    var progress = GetStudentResult(item.ClassID, item.StudentID);
+        //    if (progress == null)
+        //    {
+        //        progress = new ClassProgressEntity
+        //        {
+        //            StudentID = item.StudentID,
+        //            Completed = 1,
+        //            ClassID = item.ClassID,
+        //            LastDate = DateTime.Now,
+        //            LastLessonID = item.LessonID
+        //        };
+        //        //create new progress
+        //        await Collection.InsertOneAsync(progress);
+        //    }
+        //    else
+        //    {
+        //        var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+        //             .Set(t => t.LastDate, DateTime.Now)
+        //             .Set(t => t.LastLessonID, item.LessonID);
+        //        if (item.TotalLearnt == 1) //new
+        //            update = update.Inc(t => t.Completed, 1);
 
-                await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID, update);
-            }
-        }
+        //        await Collection.UpdateManyAsync(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID, update);
+        //    }
+        //}
 
-        public async Task UpdatePoint(LessonProgressEntity item, double pointchange = 0)
-        {
-            var progress = GetStudentResult(item.ClassID, item.StudentID);
-            if (progress == null)
-            {
-                return;
-            }
-            else
-            {
-                if (item.Tried == 1 || progress.ExamDone == 0)//new
-                    progress.ExamDone += (long)item.Multiple;
-                progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
-                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
-                if (progress.AvgPoint > 100)
-                    throw (new Exception(item.LessonID + " - " + item.ID));
-                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
-            }
-        }
+        //public async Task UpdatePoint(LessonProgressEntity item, double pointchange = 0)
+        //{
+        //    var progress = GetStudentResult(item.ClassID, item.StudentID);
+        //    if (progress == null)
+        //    {
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        if (item.Tried == 1 || progress.ExamDone == 0)//new
+        //            progress.ExamDone += (long)item.Multiple;
+        //        progress.TotalPoint += (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;//%
+        //        progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+        //        if (progress.AvgPoint > 100)
+        //            throw (new Exception(item.LessonID + " - " + item.ID));
+        //        await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+        //    }
+        //}
 
-        public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
-        {
-            var progress = GetStudentResult(item.ClassID, item.StudentID);
-            var change = (pointchange > 0 ? pointchange : item.PointChange);
-            if (progress == null)
-            {
-                return;
-            }
-            else
-            {
-                if (item.Tried == 1 || progress.PracticeDone == 0)//new
-                    progress.PracticeDone += (long)item.Multiple;
-                progress.LastLessonID = item.ID;
-                progress.PracticePoint += change;
-                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
-                await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
-            }
-        }
+        //public async Task UpdatePracticePoint(LessonProgressEntity item, double pointchange = 0)
+        //{
+        //    var progress = GetStudentResult(item.ClassID, item.StudentID);
+        //    var change = (pointchange > 0 ? pointchange : item.PointChange);
+        //    if (progress == null)
+        //    {
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        if (item.Tried == 1 || progress.PracticeDone == 0)//new
+        //            progress.PracticeDone += (long)item.Multiple;
+        //        progress.LastLessonID = item.ID;
+        //        progress.PracticePoint += change;
+        //        progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+        //        await Collection.ReplaceOneAsync(t => t.ID == progress.ID, progress);
+        //    }
+        //}
 
         //public async Task DecreaseCompleted(string ClassID, long decrease)
         //{
@@ -126,47 +126,47 @@ namespace BaseCustomerEntity.Database
         //}
 
 
-        public ClassProgressEntity GetStudentResult(string ClassID, string StudentID)
-        {
-            try
-            {
-                return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID)?.FirstOrDefault();
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        //public ClassProgressEntity GetStudentResult(string ClassID, string StudentID)
+        //{
+        //    try
+        //    {
+        //        return CreateQuery().Find(t => t.ClassID == ClassID && t.StudentID == StudentID)?.FirstOrDefault();
+        //    }
+        //    catch
+        //    {
+        //        return null;
+        //    }
+        //}
 
-        public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
-        {
-            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
-                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
-                     .Inc(t => t.Completed, 0 - clssbj.Completed)
-                     .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
-                     .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
-                     .Inc(t => t.PracticePoint, 0 - clssbj.PracticePoint)
-                     .Inc(t => t.PracticeDone, 0 - clssbj.PracticeDone);
-            await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
-        }
+        //public async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
+        //{
+        //    var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+        //             //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+        //             .Inc(t => t.Completed, 0 - clssbj.Completed)
+        //             .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
+        //             .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
+        //             .Inc(t => t.PracticePoint, 0 - clssbj.PracticePoint)
+        //             .Inc(t => t.PracticeDone, 0 - clssbj.PracticeDone);
+        //    await Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
+        //}
 
-        public long DecreasePoint(LessonProgressEntity item)
-        {
-            var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
-            var update = Builders<ClassProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
-            return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
-                update
-                ).ModifiedCount;
-        }
+        //public long DecreasePoint(LessonProgressEntity item)
+        //{
+        //    var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
+        //    var update = Builders<ClassProgressEntity>.Update.Inc(t => t.TotalPoint, 0 - item.LastPoint);
+        //    return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
+        //        update
+        //        ).ModifiedCount;
+        //}
 
-        public long DecreasePracticePoint(LessonProgressEntity item)
-        {
-            var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
-            var update = Builders<ClassProgressEntity>.Update.Inc(t => t.PracticePoint, 0 - item.LastPoint);
-            return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
-                update
-                ).ModifiedCount;
-        }
+        //public long DecreasePracticePoint(LessonProgressEntity item)
+        //{
+        //    var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.ClassID == item.ClassID && t.StudentID == item.StudentID);
+        //    var update = Builders<ClassProgressEntity>.Update.Inc(t => t.PracticePoint, 0 - item.LastPoint);
+        //    return Collection.UpdateMany(Builders<ClassProgressEntity>.Filter.And(filter),
+        //        update
+        //        ).ModifiedCount;
+        //}
 
         public ClassProgressEntity GetByClassID(string ClassID)
         {

@@ -1656,7 +1656,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var rank = -1;
             var results = _progressHelper.GetClassResults(ClassID).OrderByDescending(t => t.RankPoint).ToList();
             var avgpoint = 0.0;
-            var studentresult = _classProgressService.GetStudentResult(ClassID, StudentID);
+            var studentresult = _classProgressService.GetItemByClassID(ClassID, StudentID);
 
             if (studentresult != null)
             {
@@ -1695,7 +1695,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (@class == null) continue;
                     var total_students = _studentService.CountByClass(@class.ID);
                     var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
-                        .AutoOrtherType(_classProgressService.GetStudentResult(ClassID, StudentID) ?? new ClassProgressEntity
+                        .AutoOrtherType(_classProgressService.GetItemByClassID(ClassID, StudentID) ?? new ClassProgressEntity
                         {
                             ClassID = ClassID,
                             StudentID = StudentID,

@@ -348,7 +348,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             if (ex.Marked) _lessonHelper.CompleteFull(ex, ls, out _, false);
                             else
                                 if (_lessonHelper.IsOvertime(ex))
-                                    _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
+                                _lessonHelper.CompleteNoEssay(ex, ls, out _, false);
                         }
                     }
                 }
@@ -508,13 +508,13 @@ namespace BaseCustomerMVC.Controllers.Admin
             return point;
         }
 
-        private void IncreaseCourseCounter(CourseLessonEntity lesson)
-        {
-            if (lesson.ChapterID != "0")
-                _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-        }
+        //private void IncreaseCourseCounter(CourseLessonEntity lesson)
+        //{
+        //    if (lesson.ChapterID != "0")
+        //        _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+        //    else
+        //        _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+        //}
 
         #region Fix Region
         public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)
@@ -763,7 +763,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         //    return Json("OK");
         //}
 
-        public JsonResult UpdateCourseName()
+        public JsonResult UpdateCourseInfo()
         {
             //var listClassSub = from lcs in _classSubjectService.GetAll().ToEnumerable();
             //let CourseName=_courseService.GetItemByID(lcs.CourseID)?.Name
@@ -780,6 +780,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     var course = _courseService.GetItemByID(item.CourseID);
                     item.CourseName = course == null ? "" : course.Name;
+                    item.Image = course == null ? "" : course.Image;
                     _classSubjectService.Save(item);
                 }
                 return Json("OK");

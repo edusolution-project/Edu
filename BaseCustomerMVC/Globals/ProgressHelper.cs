@@ -95,10 +95,22 @@ namespace BaseCustomerMVC.Globals
             var subjectProgresses = _classSubjectProgressService.GetListOfCurrentSubject(ClassSubjectID);
             if (subjectProgresses != null)
                 foreach (var progress in subjectProgresses)
-                    await _classProgressService.DecreaseClassSubject(progress);//remove subject progress from class progress
+                    await DecreaseClassSubject(progress);//remove subject progress from class progress
             await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             await _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
             await _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+        }
+
+        private async Task DecreaseClassSubject(ClassSubjectProgressEntity clssbj)
+        {
+            var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+                     //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+                     .Inc(t => t.Completed, 0 - clssbj.Completed)
+                     .Inc(t => t.ExamDone, 0 - clssbj.ExamDone)
+                     .Inc(t => t.TotalPoint, 0 - clssbj.TotalPoint)
+                     .Inc(t => t.PracticePoint, 0 - clssbj.PracticePoint)
+                     .Inc(t => t.PracticeDone, 0 - clssbj.PracticeDone);
+            await _classProgressService.Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
         }
 
         public async Task UpdateLessonLastLearn(LearningHistoryEntity item)
@@ -330,15 +342,7 @@ namespace BaseCustomerMVC.Globals
             var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, item.StudentID);
             if (progress == null)//progress not found => create progress
             {
-                progress = new ChapterProgressEntity
-                {
-                    ChapterID = chapter.ID,
-                    StudentID = item.StudentID,
-                    ClassID = chapter.ClassID,
-                    ClassSubjectID = chapter.ClassSubjectID,
-                    LastLessonID = item.LessonID
-                };
-                _chapterProgressService.Save(progress);
+                _chapterProgressService.Save(_chapterProgressService.NewProgressEntity(chapter, item.StudentID));
                 //return;
             }
             //else

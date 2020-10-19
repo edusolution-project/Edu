@@ -167,9 +167,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="container-fluid">
-                            <b-col class="form-group">
-                                <span v-html="HTMLContent">
-                                </span>
+                            <b-col class="form-group h-100" v-html="HTMLContent">
                             </b-col>
                         </div>
                     </div>
@@ -257,6 +255,9 @@
                 background: -ms-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
                 background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
             }
+        .container-fluid {
+            height: 100%;
+        }
     </style>
     <script>
         new Vue({
@@ -446,16 +447,20 @@
                 renderContent(obj) {
                     var linkFile = obj.Media.Path;
                     var html = "";
-                    if (obj.Media.Extension.endsWith('.pdf') || linkFile.toLowerCase().endsWith('.pdf') ||  obj.Media.Name.toLowerCase().endsWith('.pdf'))
-                        html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px;'></embed>";
+                    if (obj.Media.Path.startsWith("https://drive.google.com")) {
+                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='" + this.replaceGooglePath(obj.Media.Path) + "' style='min-height:500px; height:100%; max-height:100%'></iframe>";
+                    }
                     else {
-                        if(!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
-                        html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px;'></iframe>";
+                        if (obj.Media.Extension.endsWith('.pdf') || obj.Media.Path.toLowerCase().endsWith('.pdf') || obj.Media.Name.toLowerCase().endsWith('.pdf'))
+                            html = "<embed class='embed-frame col-sm-12' frameborder='0' src='" + linkFile + "#toolbar=0&navpanes=0&scrollbar=0&view=FitH' style='min-height:500px; height:100%; max-height:100%''></embed>";
+                        else {
+                            if (!linkFile.startsWith("http")) linkFile = "https://eduso.vn" + linkFile;
+                            html = "<iframe class='embed-frame col-sm-12' frameborder='0' src='https://view.officeapps.live.com/op/embed.aspx?src=" + linkFile + "' style='min-height:500px; height:100%; max-height:100%''></iframe>";
+                        }
                     }
                     let parser = new DOMParser();
                     let dom = parser.parseFromString('<!doctype html><body>' + html, 'text/html');
                     return dom.body.innerHTML;
-
                 },
                 tabChange(a = 0) {
                     // có thể load data theo từng tab để tối ưu hiệu năng
@@ -541,6 +546,9 @@
                             this.isLoading = false;
                             this.hideModal();
                         })
+                },
+                replaceGooglePath(str) {
+                    return str.replace("https://drive.google.com/uc?export=view&id=", "https://drive.google.com/file/d/") + "/preview";
                 }
             }
         });
