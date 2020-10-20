@@ -550,11 +550,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Error", "Cơ sở không đúng" }
                     });
                     item.Center = center.ID;
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;
                     item.IsActive = false;
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.TeacherID = UserID;
                     item.TotalPractices = 0;
                     item.TotalLessons = 0;
@@ -571,7 +571,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
                         item.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
 
@@ -580,7 +580,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    olditem.Updated = DateTime.Now;
+                    olditem.Updated = DateTime.UtcNow;
                     olditem.Description = item.Description;
                     olditem.SubjectID = item.SubjectID;
                     olditem.GradeID = item.GradeID;
@@ -600,7 +600,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
                         olditem.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
                     _service.Save(olditem);
@@ -674,7 +674,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var new_lesson = _cloneCourseLessonMapping.Clone(o, new CourseLessonEntity());
                     new_lesson.CreateUser = _userCreate;
-                    new_lesson.Created = DateTime.Now;
+                    new_lesson.Created = DateTime.UtcNow;
                     new_lesson.CourseID = newCourseID;
                     new_lesson.OriginID = o.ID;
                     new_lesson.ChapterID = "0";
@@ -853,7 +853,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var file = files[0];
 
-                    var filename = currentCourse.ID + "_" + DateTime.Now.ToUniversalTime().ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                    var filename = currentCourse.ID + "_" + DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
                     currentCourse.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER", basis);
                 }
                 _service.CreateOrUpdate(currentCourse);
@@ -889,8 +889,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             new_course.CreateUser = _userCreate;
             new_course.Center = target_course.Center ?? org_course.Center;
             new_course.SkillID = target_course.SkillID;
-            new_course.Created = DateTime.Now;
-            new_course.Updated = DateTime.Now;
+            new_course.Created = DateTime.UtcNow;
+            new_course.Updated = DateTime.UtcNow;
             new_course.IsActive = true;
             new_course.IsUsed = false;
             _service.Collection.InsertOne(new_course);
@@ -927,17 +927,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var data = _chapterService.GetItemByID(item.ID);
                 if (data == null)
                 {
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.IsAdmin = true;
                     item.IsActive = false;
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.Order = int.MaxValue - 1;
                     _chapterService.Save(item);
                     ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     var oldParent = data.ParentID;
 
@@ -1018,7 +1018,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var new_lesson = lessonMapping.Clone(o, new CourseLessonEntity());
                             new_lesson.CreateUser = _userCreate;
-                            new_lesson.Created = DateTime.Now;
+                            new_lesson.Created = DateTime.UtcNow;
                             new_lesson.ChapterID = newChapter.ID;
                             new_lesson.OriginID = o.ID;
                             new_lesson.Order = currentLessonIndex++;
@@ -1030,7 +1030,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var clone_chap = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
                             clone_chap.OriginID = o.ID;
                             clone_chap.ParentID = newChapter.ID;
-                            clone_chap.Created = DateTime.Now;
+                            clone_chap.Created = DateTime.UtcNow;
                             clone_chap.CreateUser = _userCreate;
                             clone_chap.Order = currentChapIndex++;
                             await CloneChapter(clone_chap, _userCreate, rootChap.CourseID);
@@ -1074,7 +1074,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             //var clone_chap = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
                             //clone_chap.OriginID = o.ID;
                             //clone_chap.ParentID = rootChap.ID;
-                            //clone_chap.Created = DateTime.Now;
+                            //clone_chap.Created = DateTime.UtcNow;
                             //clone_chap.CreateUser = _userCreate;
                             //clone_chap.Order = currentChapIndex++;
                             //await CloneChapter(clone_chap, _userCreate, rootChap.CourseID);
@@ -1203,7 +1203,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     new_lesson.CourseID = item.CourseID;
                     new_lesson.ChapterID = item.ID;
                     new_lesson.CreateUser = _userCreate;
-                    new_lesson.Created = DateTime.Now;
+                    new_lesson.Created = DateTime.UtcNow;
                     new_lesson.OriginID = o.ID;
                     await CloneLesson(new_lesson, _userCreate);
                 }
@@ -1216,7 +1216,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 new_chapter.CourseID = item.CourseID;
                 new_chapter.ParentID = item.ID;
                 new_chapter.CreateUser = _userCreate;
-                new_chapter.Created = DateTime.Now;
+                new_chapter.Created = DateTime.UtcNow;
                 new_chapter.OriginID = o.ID;
                 await CloneChapter(new_chapter, _userCreate, orgCourseID);
             }
@@ -1305,12 +1305,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.IsParentCourse = item.ChapterID.Equals("0");
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.Order = 0;
                     _lessonService.CreateQuery().InsertOne(item);
 
@@ -1324,7 +1324,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
 
@@ -1453,7 +1453,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var new_lesson = _cloneCourseLessonMapping.Clone(orgLesson, new CourseLessonEntity());
             new_lesson.OriginID = orgLesson.ID;
             new_lesson.ChapterID = ChapterID;
-            new_lesson.Created = DateTime.Now;
+            new_lesson.Created = DateTime.UtcNow;
             new_lesson.Order = (int)_lessonService.CountChapterLesson(ChapterID);
             new_lesson.Title = string.IsNullOrEmpty(Title) ? (orgLesson.Title + (orgLesson.ChapterID == ChapterID ? " (copy)" : "")) : Title;
             await CloneLesson(new_lesson, orgLesson.CreateUser);
@@ -1551,8 +1551,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ParentID = item.ID,
                     Timer = _child.Timer,
                     Type = _child.Type,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID,
                 };
 
@@ -1576,8 +1576,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Point = _child.Point,
                     Order = _child.Order,
                     ParentID = item.ID,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID,
                 };
                 ////change Media path
@@ -1603,8 +1603,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Media = _child.Media,
                     Order = _child.Order,
                     ParentID = item.ID,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID
                 };
                 //if (_item.Media != null && _item.Media.Path != null)
@@ -1713,8 +1713,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     SubjectID = newcourse.SubjectID,
                     CreateUser = _userCreate,
                     SkillID = newcourse.SkillID,
-                    Created = DateTime.Now,
-                    Updated = DateTime.Now,
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
                     IsActive = true,
                     IsAdmin = false,
                     Order = course.Order,
@@ -1732,8 +1732,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ParentID = chapter.ParentID,
                         ParentType = chapter.ParentType,
                         CreateUser = _userCreate,
-                        Created = DateTime.Now,
-                        Updated = DateTime.Now,
+                        Created = DateTime.UtcNow,
+                        Updated = DateTime.UtcNow,
                         IsActive = true,
                         IsAdmin = false,
                         Order = chapter.Order
@@ -1758,8 +1758,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Title = o.Title,
                         TemplateType = o.TemplateType,
                         Order = o.Order,
-                        Created = DateTime.Now,
-                        Updated = DateTime.Now
+                        Created = DateTime.UtcNow,
+                        Updated = DateTime.UtcNow
                     }, _userCreate);
                 }
             }
@@ -1821,8 +1821,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Title = o.Title,
                     TemplateType = o.TemplateType,
                     Order = o.Order,
-                    Created = DateTime.Now,
-                    Updated = DateTime.Now
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow
                 }, _userCreate);
             }
 
@@ -1838,8 +1838,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ParentID = item.ID, //Edit by VietPhung 20190701
                     ParentType = o.ParentType,
                     CreateUser = _userCreate,
-                    Created = DateTime.Now,
-                    Updated = DateTime.Now,
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
                     IsActive = true,
                     IsAdmin = false,
                     Order = o.Order
@@ -1877,8 +1877,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ParentID = item.ID,
                     Timer = _child.Timer,
                     Type = _child.Type,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID
                 };
                 if (_item.Media != null && _item.Media.Path != null)
@@ -1904,8 +1904,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Point = _child.Point,
                     Order = _child.Order,
                     ParentID = item.ID,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID,
                 };
                 //change Media path
@@ -1931,8 +1931,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Media = _child.Media,
                     Order = _child.Order,
                     ParentID = item.ID,
-                    Updated = DateTime.Now,
-                    Created = DateTime.Now,
+                    Updated = DateTime.UtcNow,
+                    Created = DateTime.UtcNow,
                     CourseID = item.CourseID
                 };
                 if (_item.Media != null && _item.Media.Path != null)
@@ -2054,7 +2054,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var dirPath = "Upload\\Quiz";
             if (!Directory.Exists(Path.Combine(_env.WebRootPath, dirPath)))
                 Directory.CreateDirectory(Path.Combine(_env.WebRootPath, dirPath));
-            var filePath = Path.Combine(_env.WebRootPath, dirPath + "\\" + DateTime.Now.ToString("ddMMyyyyhhmmss") + file.FileName);
+            var filePath = Path.Combine(_env.WebRootPath, dirPath + "\\" + DateTime.UtcNow.ToString("ddMMyyyyhhmmss") + file.FileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -2257,7 +2257,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //public async Task<JsonResult> FixResourcesV3()
         //{
         //    Console.WriteLine("start");
-        //    var start = DateTime.Now;
+        //    var start = DateTime.UtcNow;
         //    //Run once
         //    //_chapterService.Collection.DeleteMany(t => true);
         //    //_lessonService.Collection.DeleteMany(t => true);
@@ -2301,7 +2301,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //            }
         //        }
         //    }
-        //    Console.WriteLine("Complete All subject : " + (start - DateTime.Now).TotalSeconds);
+        //    Console.WriteLine("Complete All subject : " + (start - DateTime.UtcNow).TotalSeconds);
 
         //    var classes = _classService.GetAll().ToList();
         //    foreach (var @class in classes)
@@ -2309,7 +2309,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //        @class.TotalLessons = await _classProgressService.RefreshTotalLessonForClass(@class.ID);
         //        _classService.Save(@class);
         //    }
-        //    Console.WriteLine("Complete All : " + (start - DateTime.Now).TotalSeconds);
+        //    Console.WriteLine("Complete All : " + (start - DateTime.UtcNow).TotalSeconds);
         //    return new JsonResult("Update done");
         //}
 

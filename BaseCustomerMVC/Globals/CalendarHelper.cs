@@ -65,7 +65,7 @@ namespace BaseCustomerMVC.Globals
             //{
             //    //trùng
             //}
-            item.Created = DateTime.Now;
+            item.Created = DateTime.UtcNow;
             if (item.Status == 5)
             {
                 var zoomScheduled = _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60);
@@ -115,7 +115,7 @@ namespace BaseCustomerMVC.Globals
             if (delItem != null)
             {
                 // neu event ko phai cua user hoac da het thoi gian thi ko the huy
-                if (delItem.StartDate <= DateTime.Now || delItem.CreateUser != user) return Task.FromResult(false);
+                if (delItem.StartDate <= DateTime.UtcNow || delItem.CreateUser != user) return Task.FromResult(false);
                 delItem.IsDel = true;
                 _calendarService.CreateOrUpdate(delItem);
                 return Task.FromResult(true);
@@ -181,7 +181,7 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                startDate = DateTime.Now;
+                startDate = DateTime.UtcNow;
                 endDate = startDate.AddMonths(1);
                 var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
                 var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
@@ -276,7 +276,7 @@ namespace BaseCustomerMVC.Globals
             {
                 calendar = new CalendarEntity()
                 {
-                    Created = DateTime.Now,
+                    Created = DateTime.UtcNow,
                     CreateUser = userCreate,
                     EndDate = item.StartDate,
                     StartDate = item.StartDate,

@@ -340,7 +340,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var media = new Media()
                             {
-                                Created = DateTime.Now,
+                                Created = DateTime.UtcNow,
                                 Extension = listFileUpload[i].Extends,
                                 Name = listFileUpload[i].Path,
                                 OriginalName = listFileUpload[i].Path,

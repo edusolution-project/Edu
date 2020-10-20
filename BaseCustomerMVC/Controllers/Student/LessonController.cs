@@ -467,7 +467,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ClassSubjectID = ClassSubjectID,
                 LessonID = LessonID,
                 ChapterID = lesson.ChapterID,
-                Time = DateTime.Now,
+                Time = DateTime.UtcNow,
                 StudentID = userId
             });
 

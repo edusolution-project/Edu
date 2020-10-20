@@ -137,7 +137,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     else
                         role = _roleService.GetItemByID(item.RoleID);
                     item.Type = role.Type;
-                    item.CreateDate = DateTime.Now;
+                    item.CreateDate = DateTime.UtcNow;
                     item.UserCreate = User.Claims.GetClaimByType("UserID").Value;
 
                     switch (item.Type)
@@ -147,7 +147,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             {
                                 Email = item.UserName,
                                 FullName = item.Name,
-                                CreateDate = DateTime.Now,
+                                CreateDate = DateTime.UtcNow,
                                 UserCreate = User.Identity.Name
                             };
                             _teacherService.CreateQuery().InsertOne(teacher);
@@ -158,7 +158,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                             {
                                 Email = item.UserName,
                                 FullName = item.Name,
-                                CreateDate = DateTime.Now,
+                                CreateDate = DateTime.UtcNow,
                                 UserCreate = User.Identity.Name
                             };
                             _studentService.CreateQuery().InsertOne(student);
@@ -266,7 +266,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"Account_List-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"Account_List-{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

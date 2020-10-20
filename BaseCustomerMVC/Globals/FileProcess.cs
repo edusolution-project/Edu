@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Globals
                 else folder = "OTHERS";
             if (!string.IsNullOrEmpty(center))
                 folder = center + "/" + folder;
-            folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
+            folder += ("/" + DateTime.UtcNow.ToString("yyyyMMdd"));
             string uploads = Path.Combine(RootPath, folder);
             if (!Directory.Exists(uploads))
             {

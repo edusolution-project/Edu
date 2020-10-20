@@ -246,7 +246,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     entity.OwnerID = UserID;
                     entity.OwnerName = User.Identity.Name;
-                    entity.CreateTime = DateTime.Now;
+                    entity.CreateTime = DateTime.UtcNow;
                     //insert
 
                     //if (entity.Media != null && entity.Media.Name == null) entity.Media = null;//valid Media
@@ -268,7 +268,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                 entity.Media = new Media();
                                 entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                                entity.Media.Created = DateTime.Now;
+                                entity.Media.Created = DateTime.UtcNow;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
                                 entity.Media.Path = mediarsp.Path;
@@ -276,7 +276,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
-                    entity.UpdateTime = DateTime.Now;
+                    entity.UpdateTime = DateTime.UtcNow;
                     _referenceService.Save(entity);
                 }
                 else
@@ -307,7 +307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //{
                         //    entity.Media = new Media();
                         //    entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                        //    entity.Media.Created = DateTime.Now;
+                        //    entity.Media.Created = DateTime.UtcNow;
                         //    entity.Media.Size = file.Length;
                         //    entity.Media.Path = await _fileProcess.SaveMediaAsync(file, entity.Media.OriginalName, "", basis);
                         //}
@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 entity.Media = new Media();
                                 entity.Media.Name = entity.Media.OriginalName = file.FileName;
-                                entity.Media.Created = DateTime.Now;
+                                entity.Media.Created = DateTime.UtcNow;
                                 entity.Media.Size = file.Length;
                                 entity.Media.Extension = extension;
                                 entity.Media.Path = mediarsp.Path;
@@ -349,7 +349,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (!string.IsNullOrEmpty(entity.Link))
                     if (!(entity.Link.ToLower().StartsWith("http://") || entity.Link.ToLower().StartsWith("https://")))
                         entity.Link = "http://" + host + "/" + entity.Link;
-                entity.UpdateTime = DateTime.Now;
+                entity.UpdateTime = DateTime.UtcNow;
                 _referenceService.Save(entity);
                 return new JsonResult(new Dictionary<string, object>
                 {

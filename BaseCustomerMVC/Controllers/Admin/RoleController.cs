@@ -125,7 +125,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     if (!string.IsNullOrEmpty(item.Name))
                     {
                         item.UserCreate = User.FindFirst("UserID")?.Value;
-                        item.CreateDate = DateTime.Now;
+                        item.CreateDate = DateTime.UtcNow;
                         string code = item.Name.ConvertUnicodeToCode("_", true);
                         item.Code = code.Replace(@" ", "_");
                         if (_service.GetItemByCode(code) == null)
@@ -162,7 +162,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         if (!string.IsNullOrEmpty(item.Name))
                         {
                             item.UserCreate = User.FindFirst("UserID")?.Value;
-                            item.CreateDate = DateTime.Now;
+                            item.CreateDate = DateTime.UtcNow;
                             string code = item.Name.ConvertUnicodeToCode("_", true);
                             item.Code = code.Replace(@" ", "_");
                             if (_service.GetItemByCode(code) == null)
@@ -296,7 +296,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         if (oldItem == null || oldItem.Count == 0)
                         {
                             item.UserCreate = User.FindFirst("UserID")?.Value;
-                            item.CreateDate = DateTime.Now;
+                            item.CreateDate = DateTime.UtcNow;
                             _accessesService.CreateOrUpdate(item);
                             success.Add(item);
                             if (item.IsActive)

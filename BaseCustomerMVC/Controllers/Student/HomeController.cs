@@ -84,14 +84,14 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var validCenters = (from r in student.Centers
                                     let ct = _centerService.GetItemByID(r)
-                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    where ct != null && ct.ExpireDate >= DateTime.UtcNow && ct.Status
                                     select ct).ToList();
                 if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
                     return Redirect("/logout");
                 ViewBag.AllCenters = validCenters;
 
             }
-            //ViewBag.AllCenters = student.Centers?.Select(t => _centerService.GetItemByID(t)).Where(t => t.ExpireDate >= DateTime.Now && t.Status)?.ToList();
+            //ViewBag.AllCenters = student.Centers?.Select(t => _centerService.GetItemByID(t)).Where(t => t.ExpireDate >= DateTime.UtcNow && t.Status)?.ToList();
             else
                 return Redirect("/logout");
 

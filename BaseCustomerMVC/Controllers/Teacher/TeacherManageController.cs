@@ -260,7 +260,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var teacher = new TeacherEntity
                 {
-                    CreateDate = DateTime.Now,
+                    CreateDate = DateTime.UtcNow,
                     Email = tc.Email,
                     FullName = tc.FullName,
                     Centers = new List<CenterMemberEntity>
@@ -285,7 +285,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var account = new AccountEntity()
                         {
-                            CreateDate = DateTime.Now,
+                            CreateDate = DateTime.UtcNow,
                             IsActive = true,
                             PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                             PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -404,7 +404,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var dirPath = Path.Combine(_env.WebRootPath, "Temp");
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);
-            var filePath = Path.Combine(dirPath, basis + "_" + DateTime.Now.ToString("ddMMyyyyhhmmss"));
+            var filePath = Path.Combine(dirPath, basis + "_" + DateTime.UtcNow.ToString("ddMMyyyyhhmmss"));
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -462,7 +462,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     teacher = new TeacherEntity
                                     {
-                                        CreateDate = DateTime.Now,
+                                        CreateDate = DateTime.UtcNow,
                                         Email = email,
                                         FullName = name,
                                         Centers = new List<CenterMemberEntity>
@@ -483,7 +483,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     _teacherService.CreateQuery().InsertOne(teacher);
                                     var account = new AccountEntity()
                                     {
-                                        CreateDate = DateTime.Now,
+                                        CreateDate = DateTime.UtcNow,
                                         IsActive = true,
                                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),

@@ -553,7 +553,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldItem.StartDate = entity.StartDate.ToUniversalTime();
                 oldItem.EndDate = entity.EndDate.ToUniversalTime();
 
-                if (oldItem.StartDate < DateTime.Now)
+                if (oldItem.StartDate < DateTime.UtcNow)
                     oldItem.IsOnline = false;
 
                 UpdateCalendar(oldItem, UserID);

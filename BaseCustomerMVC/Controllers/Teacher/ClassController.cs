@@ -367,7 +367,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 ClassName = currentClass.Name,
                 ClassStatus = "Đang học",
-                LastJoinDate = DateTime.Now
+                LastJoinDate = DateTime.UtcNow
             })).ToList();
 
             var response = new Dictionary<string, object>
@@ -523,7 +523,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            //subjectName = subject == null ? "" : subject.Name,
                            thumb = o.Image ?? "",
                            endDate = o.EndDate,
-                           //week = totalweek > 0 ? (DateTime.Now.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
+                           //week = totalweek > 0 ? (DateTime.UtcNow.Date - o.StartDate.Date).TotalDays / 7 / totalweek : 0,
                            students = studentCount
                        }).ToList();
             return Json(new { Data = std });
@@ -826,7 +826,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
                 item.ID = null;
-                item.Created = DateTime.Now;
+                item.Created = DateTime.UtcNow;
 
 
                 if (classSubjects == null || classSubjects.Count == 0)
@@ -917,7 +917,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Error", "Không tìm thấy lớp" }
                 });
 
-                oldData.Updated = DateTime.Now;
+                oldData.Updated = DateTime.UtcNow;
                 var mustUpdateName = false;
                 if (oldData.Name != item.Name)
                 {
@@ -1096,7 +1096,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var newData = new MappingEntity<ClassEntity, ClassEntity>().Clone(oldData, new ClassEntity());
             newData.ID = null;
             newData.OriginID = oldData.ID;
-            newData.Created = DateTime.Now;
+            newData.Created = DateTime.UtcNow;
             newData.Center = center.ID;
             if (!Name.Equals(oldData.Name))
                 newData.Name = Name;
@@ -1396,7 +1396,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var Course = _courseService.GetItemByID(CourseID);//Bài giảng
 
-                Class.Updated = DateTime.Now;
+                Class.Updated = DateTime.UtcNow;
                 var oldSubjects = _classSubjectService.GetByClassID(Class.ID);
                 var classSubject = new ClassSubjectEntity();
                 classSubject.CourseID = Course.ID;
@@ -1416,12 +1416,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var Course = _courseService.GetItemByID(CourseID);//Bài giảng
                 Course.OriginID = Course.ID;
                 Course.Center = center.ID;
-                Course.Created = DateTime.Now;
+                Course.Created = DateTime.UtcNow;
                 Course.CreateUser = teacher.ID;
                 Course.IsAdmin = true;
                 Course.IsPublic = false;
                 Course.IsActive = true;
-                Course.Updated = DateTime.Now;
+                Course.Updated = DateTime.UtcNow;
                 Course.TeacherID = teacher.ID;
                 Course.TotalPractices = 0;
                 Course.TotalLessons = 0;
@@ -1468,8 +1468,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 new_course.CreateUser = _userCreate;
                 new_course.Center = target_course.Center ?? org_course.Center;
                 new_course.SkillID = target_course.SkillID;
-                new_course.Created = DateTime.Now;
-                new_course.Updated = DateTime.Now;
+                new_course.Created = DateTime.UtcNow;
+                new_course.Updated = DateTime.UtcNow;
                 new_course.IsActive = true;
                 new_course.IsUsed = false;
                 new_course.IsPublic = false;
@@ -1529,7 +1529,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     new_chapter.CourseID = item.CourseID;
                     new_chapter.ParentID = item.ID;
                     new_chapter.CreateUser = _userCreate;
-                    new_chapter.Created = DateTime.Now;
+                    new_chapter.Created = DateTime.UtcNow;
                     new_chapter.OriginID = o.ID;
                     await CloneCourseChapter(new_chapter, _userCreate, orgCourseID);
                 }
@@ -1826,12 +1826,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.IsParentCourse = item.ChapterID.Equals("0");
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.Order = 0;
 
                     _lessonHelper.InitLesson(item);//insert + create schedule
@@ -1843,7 +1843,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     item.ClassID = data.ClassID;
@@ -2082,17 +2082,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var data = _chapterService.GetItemByID(item.ID);
                 if (data == null)
                 {
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.IsAdmin = true;
                     item.IsActive = false;
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.Order = int.MaxValue - 1;
                     _chapterService.Save(item);
                     ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     var oldParent = data.ParentID;
 
@@ -2307,7 +2307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var clone_chap = chapMap.Clone(o, new ChapterEntity());
                             clone_chap.OriginID = o.ID;
                             clone_chap.ParentID = newChapter.ID;
-                            clone_chap.Created = DateTime.Now;
+                            clone_chap.Created = DateTime.UtcNow;
                             clone_chap.CreateUser = _userCreate;
                             clone_chap.Order = currentChapIndex++;
                             await _classHelper.CloneChapter(clone_chap, _userCreate, rootChap.CourseID);

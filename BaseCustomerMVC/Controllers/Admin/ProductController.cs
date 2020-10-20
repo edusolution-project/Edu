@@ -109,7 +109,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
-                item.LastEdit = DateTime.Now;
+                item.LastEdit = DateTime.UtcNow;
 
                 var pos = 0;
                 var sameUrl = _serviceNews.GetItemByCode(item.Code);
@@ -245,7 +245,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             var new_product = new MappingEntity<NewsEntity, NewsEntity>().Clone(itemClone, new NewsEntity());
             new_product.OriginID = itemClone.ID;
-            new_product.CreateDate = DateTime.Now;
+            new_product.CreateDate = DateTime.UtcNow;
             new_product.Thumbnail = itemClone.Thumbnail;
             new_product.Type = itemClone.Type;
             new_product.CenterID = item.CenterID;

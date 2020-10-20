@@ -91,7 +91,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var @class = new ClassEntity();
                 @class.Name = $"Học liệu của {student.FullName}";
-                @class.Created = DateTime.Now;
+                @class.Created = DateTime.UtcNow;
                 @class.TeacherID = student.ID; // creator
                 @class.Skills = new List<string>();
                 @class.Subjects = new List<string>();
@@ -101,8 +101,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 @class.TotalExams = 0;
                 @class.IsActive = true;
                 @class.Center = center.ID;
-                @class.StartDate = DateTime.Now;
-                @class.EndDate = DateTime.Now.AddYears(99);
+                @class.StartDate = DateTime.UtcNow;
+                @class.EndDate = DateTime.UtcNow.AddYears(99);
                 @class.ClassMechanism = CLASS_MECHANISM.PERSONAL;
 
                 _classService.Save(@class);
@@ -152,7 +152,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         {"Error", "Không tìm thấy lớp" }
                     });
 
-                oldData.Updated = DateTime.Now;
+                oldData.Updated = DateTime.UtcNow;
 
                 oldData.Skills = new List<string>();
                 oldData.Subjects = new List<string>();

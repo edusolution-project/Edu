@@ -230,7 +230,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"CenterList-{DateTime.Now:yyyyMMddHHmmssfff}.xlsx";
+            string excelName = $"CenterList-{DateTime.UtcNow:yyyyMMddHHmmssfff}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

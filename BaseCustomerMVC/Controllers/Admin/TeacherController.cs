@@ -210,7 +210,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     };
                     var account = new AccountEntity()
                     {
-                        CreateDate = DateTime.Now,
+                        CreateDate = DateTime.UtcNow,
                         IsActive = true,
                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -322,7 +322,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, file.FileName + DateTime.Now.ToString("ddMMyyyyhhmmss"));
+            var filePath = Path.Combine(_env.WebRootPath + "/temp", file.FileName + DateTime.UtcNow.ToString("ddMMyyyyhhmmss"));
             List<TeacherEntity> importlist = null;
             List<TeacherEntity> Error = null;
             CenterMemberEntity centermember = null;
@@ -385,7 +385,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     DateBorn = date,
                                     Email = email,
                                     Phone = workSheet.Cells[i, 5].Value == null ? "" : workSheet.Cells[i, 5].Value.ToString(),
-                                    CreateDate = DateTime.Now,
+                                    CreateDate = DateTime.UtcNow,
                                     UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                     IsActive = true,
                                     Centers = centermember != null ? new List<CenterMemberEntity> { centermember
@@ -399,7 +399,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     importlist.Add(item);
                                     var account = new AccountEntity()
                                     {
-                                        CreateDate = DateTime.Now,
+                                        CreateDate = DateTime.UtcNow,
                                         IsActive = true,
                                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -501,7 +501,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"TeacherList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"TeacherList-{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

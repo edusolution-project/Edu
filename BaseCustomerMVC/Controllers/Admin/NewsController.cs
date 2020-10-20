@@ -222,7 +222,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
-                item.LastEdit = DateTime.Now;
+                item.LastEdit = DateTime.UtcNow;
 
                 var pos = 0;
                 var sameUrl = _serviceNews.GetItemByCode(item.Code);
@@ -362,7 +362,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public string urlThumbnail(IFormFile formFile)
         {
             string _fileName = formFile.FileName;
-            var timestamp = DateTime.Now.ToFileTime();
+            var timestamp = DateTime.UtcNow.ToFileTime();
             _fileName = timestamp + "_" + _fileName;
 
             var _dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload/News");

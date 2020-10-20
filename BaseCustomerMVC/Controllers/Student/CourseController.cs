@@ -292,7 +292,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var std = (from o in data.ToList()
                        let progress = _progressService.GetItemByClassID(o.ID, userId)
-                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.UtcNow)
                        select new
                        {
                            id = o.ID,
@@ -349,7 +349,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in lstSbj.ToList()
                        let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
                        let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
-                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.UtcNow)
                        //let skill = _skillService.GetItemByID(o.SkillID)
                        let course = _courseService.GetItemByID(o.CourseID)
                        select new
@@ -406,7 +406,7 @@ namespace BaseCustomerMVC.Controllers.Student
             var std = (from o in lstSbj.ToList()
                        let _class = lstClass.SingleOrDefault(t => t.ID == o.ClassID)
                        let progress = _classSubjectProgressService.GetItemByClassSubjectID(o.ID, userId)
-                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.Now)
+                       let examCount = _lessonScheduleService.CountClassExam(o.ID, end: DateTime.UtcNow)
                        let course = _courseService.GetItemByID(o.CourseID)
                        //let skill = _skillService.GetItemByID(o.SkillID)
                        select new
@@ -710,7 +710,7 @@ namespace BaseCustomerMVC.Controllers.Student
         //    var filter = new List<FilterDefinition<ClassEntity>>();
         //    var UserID = User.Claims.GetClaimByType("UserID").Value;
 
-        //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.Now.ToLocalTime().Date));
+        //    filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Students.Contains(UserID) && o.EndDate >= DateTime.UtcNow.ToLocalTime().Date));
 
         //    var activeClasses = _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)).ToList();
 

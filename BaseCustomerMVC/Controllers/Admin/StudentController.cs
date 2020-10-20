@@ -155,7 +155,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     };
                     var account = new AccountEntity()
                     {
-                        CreateDate = DateTime.Now,
+                        CreateDate = DateTime.UtcNow,
                         IsActive = true,
                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -287,7 +287,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     Email = email,
                                     Phone = phone,
                                     Skype = skype,
-                                    CreateDate = DateTime.Now,
+                                    CreateDate = DateTime.UtcNow,
                                     UserCreate = User.Claims.GetClaimByType("UserID") != null ? User.Claims.GetClaimByType("UserID").Value.ToString() : "0",
                                     IsActive = true,
                                     Centers = String.IsNullOrEmpty(Center) ? null : new List<string> { Center }
@@ -298,7 +298,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                                     studentList.Add(item);
                                     var account = new AccountEntity()
                                     {
-                                        CreateDate = DateTime.Now,
+                                        CreateDate = DateTime.UtcNow,
                                         IsActive = true,
                                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -392,7 +392,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"StudentList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"StudentList-{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

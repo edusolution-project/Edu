@@ -195,7 +195,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (left <= 0)
                         return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
 
-                    student.CreateDate = DateTime.Now;
+                    student.CreateDate = DateTime.UtcNow;
                     student.IsActive = true;
                     student.UserCreate = teacher.ID;
                     student.Centers = new List<string>() { center.ID };
@@ -207,7 +207,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     var account = new AccountEntity()
                     {
-                        CreateDate = DateTime.Now,
+                        CreateDate = DateTime.UtcNow,
                         IsActive = true,
                         PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                         PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
@@ -614,7 +614,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (form == null) return new JsonResult(null);
             if (form.Files == null || form.Files.Count <= 0) return new JsonResult(null);
             var file = form.Files[0];
-            var filePath = Path.Combine(_env.WebRootPath, @class.ID + "_" + DateTime.Now.ToString("ddMMyyyyhhmmss"));
+            var filePath = Path.Combine(_env.WebRootPath, @class.ID + "_" + DateTime.UtcNow.ToString("ddMMyyyyhhmmss"));
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
@@ -665,7 +665,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         Email = email,
                                         Phone = phone,
                                         //Skype = skype,
-                                        CreateDate = DateTime.Now,
+                                        CreateDate = DateTime.UtcNow,
                                         UserCreate = UserID,
                                         IsActive = true,
                                         Centers = new List<string> { center.ID },
@@ -681,7 +681,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         visiblePass = _defaultPass;
                                         var account = new AccountEntity()
                                         {
-                                            CreateDate = DateTime.Now,
+                                            CreateDate = DateTime.UtcNow,
                                             IsActive = true,
                                             PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
                                             PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
