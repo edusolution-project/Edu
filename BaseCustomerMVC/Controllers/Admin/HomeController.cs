@@ -703,7 +703,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             try
             {
-                var _learnHistories = _learningHistoryService.CreateQuery().Find(x => x.Time >= new DateTime(2020, 10, 19).ToUniversalTime() && x.Time <= new DateTime(2020, 10, 20).ToUniversalTime());
+                var _learnHistories = _learningHistoryService.CreateQuery().Find(x => x.Time >= new DateTime(2020, 10, 19).ToUniversalTime());
                 var learnHistories = (from lh in _learnHistories.ToList()
                                       group lh by new
                                       {
@@ -721,15 +721,23 @@ namespace BaseCustomerMVC.Controllers.Admin
                                           LastLessonID = g.ToList().OrderByDescending(x => x.Time).FirstOrDefault().LessonID
                                       }).ToList();
 
+                List<string> classIDs = new List<string>();
+                string a = "";
+                var b="";
+
                 foreach (var lh in learnHistories)
                 {
                     //if(lh.StudentID== "5f7e8382f197721750deb12c")
                     {
                         UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lh.LastLessonID, ClassSubjectID = lh.ClassSubjectID, ClassID = lh.ClassID, StudentID = lh.StudentID, LastDate = lh.LastTime });
+                        classIDs.Add(lh.ClassID);
+                        a += _studentService.GetItemByID(lh.StudentID).FullName.ToUpper() +" lớp "+ _classService.GetItemByID( lh.ClassID).Name + "; ";
                     }
                 }
 
-                return Json("OK");
+                
+
+                return Json($"OK - {a} - {b}");
             }
             catch (Exception ex)
             {

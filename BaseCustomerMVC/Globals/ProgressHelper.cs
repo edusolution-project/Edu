@@ -175,14 +175,14 @@ namespace BaseCustomerMVC.Globals
             }
 
             if (chapter.ParentID != "0")
-                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LessonID, ChapterID = item.ChapterID });
+                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LessonID, ChapterID = chapter.ParentID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
             else
-                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID });
+                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
         }
 
         public async Task UpdateParentChapterLastLearn(ChapterProgressEntity item)
         {
-            var chapter = _chapterService.GetItemByID(item.ParentID);
+            var chapter = _chapterService.GetItemByID(item.ChapterID);
             if (chapter == null)
                 return;
 
@@ -211,9 +211,9 @@ namespace BaseCustomerMVC.Globals
             }
 
             if (chapter.ParentID != "0")
-                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LastLessonID, ChapterID = item.ParentID });
+                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LastLessonID, ChapterID = chapter.ParentID, ClassID = item.ClassID, StudentID = item.StudentID });
             else
-                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LastLessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID });
+                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LastLessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
         }
 
         public async Task UpdateClassSubjectLastLearn(ClassSubjectProgressEntity item)
