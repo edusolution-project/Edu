@@ -392,7 +392,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             //Copy Class
             var newClass = new MappingEntity<ClassEntity, ClassEntity>().Clone(orgClass, new ClassEntity());
             newClass.Center = center.ID;
-            newClass.Created = DateTime.Now;
+            newClass.Created = DateTime.UtcNow;
             newClass.TeacherID = hc.ID;
             newClass.IsActive = false;
             newClass.Members = new List<ClassMemberEntity> {

@@ -149,7 +149,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public async Task<JsonResult> FixScoreData()//Big fix
         {
-            var start = DateTime.Now;
+            var start = DateTime.UtcNow;
             var str = "";
             str += "Phase 0: ";
             //Clear orphan part: Run Once
@@ -202,8 +202,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             //        cdelpart++;
             //    }
             //}
-            //str += (DateTime.Now - start).TotalSeconds;
-            //start = DateTime.Now;
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
             //str += (" _ DEL " + delpart + "_" + cdelpart + "<DELDONE>");
             //str += "Phase 1: ";
             //_chapterService.CreateQuery().UpdateMany(t => true, Builders<ChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
@@ -212,8 +212,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             //_courseChapterService.CreateQuery().UpdateMany(t => true, Builders<CourseChapterEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
             //_courseService.CreateQuery().UpdateMany(t => true, Builders<CourseEntity>.Update.Set(t => t.TotalExams, 0).Set(t => t.TotalLessons, 0).Set(t => t.TotalPractices, 0));
 
-            //str += (DateTime.Now - start).TotalSeconds;
-            //start = DateTime.Now;
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
 
             ////calculate lesson maxpoint
             //var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
@@ -224,8 +224,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             //    calculateLessonPoint(cl);
             //    IncreaseCourseCounter(cl);
             //}
-            //str += (DateTime.Now - start).TotalSeconds;
-            //start = DateTime.Now;
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
             //str += " Phase 2: ";
             ////calculate clone lesson maxpoint
             //var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
@@ -244,8 +244,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             //    calculateCloneLessonPoint(l);
             //    await _classHelper.IncreaseLessonCounter(l, 1, l.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, l.IsPractice ? 1 : 0);
             //}
-            //str += (DateTime.Now - start).TotalSeconds;
-            //start = DateTime.Now;
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
             //str += " Phase 3: ";
             ////return Json(str);
             ////reapply exam maxpoint
@@ -276,8 +276,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             //        await _examService.RemoveAsync(e.ID);
             //    }
             //}
-            //str += (DateTime.Now - start).TotalSeconds;
-            //start = DateTime.Now;
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
             //str += " Phase 4: ";
             //reset progress
 
@@ -317,8 +317,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 .Set(t => t.Tried, 0)
                 );
 
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
+            str += (DateTime.UtcNow - start).TotalSeconds;
+            start = DateTime.UtcNow;
             str += " Phase 5: ";
 
             var lessonProgresses = _lessonProgressService
@@ -353,8 +353,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     }
                 }
             }
-            str += (DateTime.Now - start).TotalSeconds;
-            start = DateTime.Now;
+            str += (DateTime.UtcNow - start).TotalSeconds;
+            start = DateTime.UtcNow;
             str += " End. ";
             return Json(str);
         }
@@ -650,7 +650,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             try
             {
                 var folder = "eduso/IMG";
-                folder += ("/" + DateTime.Now.ToString("yyyyMMdd"));
+                folder += ("/" + DateTime.UtcNow.ToString("yyyyMMdd"));
                 string uploads = Path.Combine(RootPath + "/Files", folder);
                 if (!Directory.Exists(uploads))
                 {

@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         //public string urlBanner(IFormFile Banner)
         //{
         //    string _fileName = Banner.FileName + f;
-        //    var timestamp = DateTime.Now.ToFileTime();
+        //    var timestamp = DateTime.UtcNow.ToFileTime();
         //    _fileName = timestamp + "_" + _fileName;
 
         //    var _dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload/Image_QC");

@@ -64,8 +64,8 @@ namespace BaseCustomerMVC.Globals
             new_course.TeacherID = target_course.CreateUser;
             new_course.CreateUser = target_course.CreateUser;
             new_course.Center = target_course.Center ?? org_course.Center;
-            new_course.Created = DateTime.Now;
-            new_course.Updated = DateTime.Now;
+            new_course.Created = DateTime.UtcNow;
+            new_course.Updated = DateTime.UtcNow;
             new_course.IsActive = false;
             new_course.IsUsed = false;
             new_course.IsPublic = false;
@@ -105,7 +105,7 @@ namespace BaseCustomerMVC.Globals
                     new_lesson.CourseID = item.CourseID;
                     new_lesson.ChapterID = item.ID;
                     new_lesson.CreateUser = item.CreateUser;
-                    new_lesson.Created = DateTime.Now;
+                    new_lesson.Created = DateTime.UtcNow;
                     new_lesson.OriginID = o.ID;
                     await _lessonHelper.CopyCourseLessonFromCourseLesson(o, new_lesson);
                 }
@@ -118,7 +118,7 @@ namespace BaseCustomerMVC.Globals
                 new_chapter.CourseID = item.CourseID;
                 new_chapter.ParentID = item.ID;
                 new_chapter.CreateUser = item.CreateUser;
-                new_chapter.Created = DateTime.Now;
+                new_chapter.Created = DateTime.UtcNow;
                 new_chapter.OriginID = o.ID;
                 await CloneCourseChapter(new_chapter, orgCourseID);
             }

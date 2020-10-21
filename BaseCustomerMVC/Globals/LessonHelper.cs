@@ -144,8 +144,8 @@ namespace BaseCustomerMVC.Globals
             var lesson = _courseLessonMapping.Clone(orgItem, new CourseLessonEntity());
             lesson.CreateUser = cloneItem.CreateUser;
             lesson.OriginID = orgItem.ID;
-            lesson.Created = DateTime.Now;
-            lesson.Updated = DateTime.Now;
+            lesson.Created = DateTime.UtcNow;
+            lesson.Updated = DateTime.UtcNow;
             lesson.CourseID = cloneItem.CourseID;
             lesson.ChapterID = cloneItem.ChapterID;
             lesson.Order = cloneItem.Order;
@@ -170,8 +170,8 @@ namespace BaseCustomerMVC.Globals
             item.ParentID = cloneItem.ParentID;
             item.CourseID = cloneItem.CourseID;
             item.OriginID = orgItem.ID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
 
             _lessonPartService.Collection.InsertOne(item);
 
@@ -196,8 +196,8 @@ namespace BaseCustomerMVC.Globals
             item.OriginID = orgItem.ID;
             item.ParentID = cloneItem.ParentID;
             item.CourseID = cloneItem.CourseID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
 
             _lessonPartQuestionService.Collection.InsertOne(item);
 
@@ -221,8 +221,8 @@ namespace BaseCustomerMVC.Globals
             var item = _lessonPartAnswerMapping.Clone(orgItem, new CloneLessonPartAnswerEntity());
             item.OriginID = orgItem.ID;
             item.ParentID = cloneItem.ParentID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
             item.CourseID = cloneItem.CourseID;
 
             _lessonPartAnswerService.Collection.InsertOne(item);
@@ -237,8 +237,8 @@ namespace BaseCustomerMVC.Globals
             lesson.OriginID = orgItem.ID;
             lesson.ClassID = cloneItem.ClassID;
             lesson.ClassSubjectID = cloneItem.ClassSubjectID;
-            lesson.Created = DateTime.Now;
-            lesson.Updated = DateTime.Now;
+            lesson.Created = DateTime.UtcNow;
+            lesson.Updated = DateTime.UtcNow;
             lesson.ID = null;
 
             lesson = InitLesson(lesson);
@@ -324,8 +324,8 @@ namespace BaseCustomerMVC.Globals
             item.ParentID = cloneItem.ParentID;
             item.ClassID = cloneItem.ClassID;
             item.ClassSubjectID = cloneItem.ClassSubjectID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
             item.ID = null;
 
             _cloneAnswerService.Collection.InsertOne(item);
@@ -341,8 +341,8 @@ namespace BaseCustomerMVC.Globals
             lesson.ClassID = string.IsNullOrEmpty(cloneItem.ClassID) ? orgLesson.ClassID : cloneItem.ClassID;
             lesson.ClassSubjectID = string.IsNullOrEmpty(cloneItem.ClassSubjectID) ? orgLesson.ClassSubjectID : cloneItem.ClassSubjectID;
             lesson.Title = string.IsNullOrEmpty(cloneItem.Title) ? orgLesson.Title : cloneItem.Title;
-            lesson.Created = DateTime.Now;
-            lesson.Updated = DateTime.Now;
+            lesson.Created = DateTime.UtcNow;
+            lesson.Updated = DateTime.UtcNow;
             lesson.Order = cloneItem.Order;
             lesson.ID = null;
 
@@ -372,8 +372,8 @@ namespace BaseCustomerMVC.Globals
             item.ID = null;
             item.OriginID = orgItem.ID;
             item.TeacherID = cloneItem.TeacherID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
             item.ClassID = cloneItem.ClassID;
             item.ClassSubjectID = cloneItem.ClassSubjectID;
 
@@ -405,8 +405,8 @@ namespace BaseCustomerMVC.Globals
             item.ClassID = cloneItem.ClassID;
             item.ClassSubjectID = cloneItem.ClassSubjectID;
             item.LessonID = cloneItem.LessonID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
 
             _cloneQuestionService.Collection.InsertOne(item);
 
@@ -432,8 +432,8 @@ namespace BaseCustomerMVC.Globals
             item.ParentID = cloneItem.ParentID;
             item.ClassID = cloneItem.ClassID;
             item.ClassSubjectID = cloneItem.ClassSubjectID;
-            item.Created = DateTime.Now;
-            item.Updated = DateTime.Now;
+            item.Created = DateTime.UtcNow;
+            item.Updated = DateTime.UtcNow;
 
             _cloneAnswerService.Collection.InsertOne(item);
         }
@@ -561,14 +561,14 @@ namespace BaseCustomerMVC.Globals
                     examDetail.RealAnswerValue = _correctanswer.Content;
                 }
                 if (updateTime)
-                    examDetail.Updated = DateTime.Now;
+                    examDetail.Updated = DateTime.UtcNow;
                 _examDetailService.Save(examDetail);
             }
 
             exam.QuestionsPass = pass;
             exam.Point = point;
             if (updateTime)
-                exam.Updated = DateTime.Now;
+                exam.Updated = DateTime.UtcNow;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
@@ -601,7 +601,7 @@ namespace BaseCustomerMVC.Globals
             exam.Point = point;
             exam.LastPoint = oldEx != null ? oldEx.Point : 0;
             if (updateTime)
-                exam.Updated = DateTime.Now;
+                exam.Updated = DateTime.UtcNow;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
 

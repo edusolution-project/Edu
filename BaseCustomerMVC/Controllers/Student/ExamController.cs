@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
                 {
 
-                    if (_schedule.StartDate.ToLocalTime() > DateTime.Now)
+                    if (_schedule.StartDate > DateTime.UtcNow)
                     {
                         return new JsonResult(new Dictionary<string, object>
                         {
@@ -341,7 +341,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     }
                 }
 
-                if (_schedule.EndDate.ToLocalTime() > new DateTime(1900, 1, 1) && _schedule.EndDate.ToLocalTime() <= DateTime.Now)
+                if (_schedule.EndDate > new DateTime(1900, 1, 1) && _schedule.EndDate <= DateTime.UtcNow)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -356,8 +356,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
-                item.Created = DateTime.Now;
-                item.CurrentDoTime = DateTime.Now;
+                item.Created = DateTime.UtcNow;
+                item.CurrentDoTime = DateTime.UtcNow;
                 item.Status = false;
 
                 item.QuestionsTotal = _cloneLessonPartQuestionService.CountByLessonID(item.LessonID);
@@ -368,7 +368,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 await _progressHelper.ResetLesssonPoint(_lesson, item.StudentID);
             }
 
-            item.Updated = DateTime.Now;
+            item.Updated = DateTime.UtcNow;
 
             _examService.Save(item);
 
@@ -392,11 +392,18 @@ namespace BaseCustomerMVC.Controllers.Student
             if (exam != null && !exam.Status)
             {
                 //if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.Now)
+                if (schedule != null && schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate <= DateTime.UtcNow)
                 {
                     _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
                 }
-            }
+                else
+                {
+                    if (_lessonHelper.IsOvertime(exam))
+                        _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                    else
+                        exam.CurrentDoTime = DateTime.UtcNow;
+                }
+            }           
             return new JsonResult(new { exam, schedule, limit = lesson.Limit });
         }
 
@@ -466,7 +473,7 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             if (item.ExamID == null)
             {
-                return new JsonResult("Access Denied");
+                return new JsonResult(new { error = "Không tìm thấy bài kiểm tra" });
             }
             var exam = _examService.GetItemByID(item.ExamID);
             if (!_lessonHelper.IsOvertime(exam))
@@ -479,7 +486,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    LessonID = exam.LessonID,
                 //    LessonPartID = item.LessonPartID,
                 //    QuestionID = item.QuestionID,
-                //    Time = DateTime.Now,
+                //    Time = DateTime.UtcNow,
                 //    StudentID = User.Claims.GetClaimByType("UserID").Value
                 //});
                 var files = HttpContext.Request.Form?.Files;
@@ -504,7 +511,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         {
                             var media = new Media()
                             {
-                                Created = DateTime.Now,
+                                Created = DateTime.UtcNow,
                                 Extension = GetContentType(listFiles[i].Path),
                                 Name = listFiles[i].Path,
                                 OriginalName = listFiles[i].Path,
@@ -517,13 +524,13 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (oldItem == null)
                     {
                         item.ID = null;
-                        item.Created = DateTime.Now;
-                        item.Updated = DateTime.Now;
+                        item.Created = DateTime.UtcNow;
+                        item.Updated = DateTime.UtcNow;
                         if (!String.IsNullOrEmpty(item.QuestionID))
                         {
                             var question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
                             if (question == null)
-                                return new JsonResult("Không tìm thấy câu hỏi");
+                                return new JsonResult(new { error = "Không tìm thấy câu hỏi" });
                             item.ClassID = exam.ClassID;
                             item.StudentID = exam.StudentID;
                             item.LessonPartID = question.ParentID;
@@ -552,7 +559,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                         else
                         {
-                            item.Updated = DateTime.Now;
+                            item.Updated = DateTime.UtcNow;
                             var xitem = map.Auto(oldItem, item);
                             _examDetailService.Save(xitem);
                             return Json(xitem);
@@ -562,16 +569,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                 }
                 _examDetailService.CreateOrUpdate(item);
-                exam.Updated = DateTime.Now;
+                exam.Updated = DateTime.UtcNow;
                 _examService.CreateOrUpdate(exam);
                 return Json(item);
             }
             else
             {
-                return Json("Access Denied");
+                return new JsonResult(new { error = "Bài kiểm tra đã kết thúc" });
             }
         }
 

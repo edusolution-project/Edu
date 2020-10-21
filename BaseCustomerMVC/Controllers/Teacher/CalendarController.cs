@@ -124,7 +124,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 // nguoi tao
                 item.CreateUser = User?.FindFirst("UserID").Value;
                 // ngay tao
-                item.Created = DateTime.Now;
+                item.Created = DateTime.UtcNow;
                 // check validate
             }
             // check validate

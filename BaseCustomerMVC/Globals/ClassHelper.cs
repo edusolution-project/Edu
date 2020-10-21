@@ -75,7 +75,7 @@ namespace BaseCustomerMVC.Globals
                 new_chapter.ClassSubjectID = item.ClassSubjectID;
                 new_chapter.ParentID = item.ID;
                 new_chapter.CreateUser = _userCreate;
-                new_chapter.Created = DateTime.Now;
+                new_chapter.Created = DateTime.UtcNow;
                 new_chapter.OriginID = o.ID;
                 await CloneChapter(new_chapter, _userCreate, orgClassSubjectID);
             }

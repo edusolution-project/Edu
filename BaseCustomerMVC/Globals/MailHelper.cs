@@ -110,7 +110,7 @@ namespace BaseCustomerMVC.Globals
                 var maillog = new MailLogEntity
                 {
                     ActionType = action_type,
-                    SendTime = DateTime.Now,
+                    SendTime = DateTime.UtcNow,
                     Sender = senderID,
                     Receiver = string.Join("; ", toAddresses),
                     Type = toAddresses.Count > 1 ? MailType.BULK : MailType.INDIVIDUAL,

@@ -53,7 +53,7 @@ namespace BaseCustomerMVC.Globals
         public async Task CreateHist(LearningHistoryEntity item)
         {
             var historycount = _learningHistoryService.CountHistory(item);
-            item.Time = DateTime.Now;
+            item.Time = DateTime.UtcNow;
             item.ViewCount = (int)historycount;
             _learningHistoryService.Save(item);
 
@@ -125,8 +125,8 @@ namespace BaseCustomerMVC.Globals
                     ChapterID = item.ChapterID,
                     LessonID = item.LessonID,
                     StudentID = item.StudentID,
-                    LastDate = DateTime.Now,
-                    FirstDate = DateTime.Now,
+                    LastDate = DateTime.UtcNow,
+                    FirstDate = DateTime.UtcNow,
                     TotalLearnt = 1,
                 };
                 await _lessonProgressService.Collection.InsertOneAsync(currentProgress);
@@ -136,7 +136,7 @@ namespace BaseCustomerMVC.Globals
                 await _lessonProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.LessonID == item.LessonID,
                      new UpdateDefinitionBuilder<LessonProgressEntity>()
                      .Inc(t => t.TotalLearnt, 1)
-                     .Set(t => t.LastDate, DateTime.Now)
+                     .Set(t => t.LastDate, DateTime.UtcNow)
                      );
             }
 
@@ -161,7 +161,7 @@ namespace BaseCustomerMVC.Globals
                     ChapterID = item.ChapterID,
                     StudentID = item.StudentID,
                     LastLessonID = item.LessonID,
-                    LastDate = DateTime.Now,
+                    LastDate = DateTime.UtcNow,
                 };
                 await _chapterProgressService.Collection.InsertOneAsync(currentProgress);
             }
@@ -169,7 +169,7 @@ namespace BaseCustomerMVC.Globals
             {
                 await _chapterProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID,
                      new UpdateDefinitionBuilder<ChapterProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.Now)
+                     .Set(t => t.LastDate, DateTime.UtcNow)
                      .Set(t => t.LastLessonID, item.LessonID)
                      );
             }
@@ -188,7 +188,7 @@ namespace BaseCustomerMVC.Globals
 
             var updated = await _chapterProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID,
                      new UpdateDefinitionBuilder<ChapterProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.Now)
+                     .Set(t => t.LastDate, DateTime.UtcNow)
                      .Set(t => t.LastLessonID, item.LastLessonID)
                      );
             if (updated.ModifiedCount == 0)// no match found => check & create progress
@@ -204,7 +204,7 @@ namespace BaseCustomerMVC.Globals
                         ChapterID = item.ParentID,
                         StudentID = item.StudentID,
                         LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.Now,
+                        LastDate = DateTime.UtcNow,
                     };
                     await _chapterProgressService.Collection.InsertOneAsync(currentProgress);
                 }
@@ -220,7 +220,7 @@ namespace BaseCustomerMVC.Globals
         {
             var updated = await _classSubjectProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID,
                      new UpdateDefinitionBuilder<ClassSubjectProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.Now)
+                     .Set(t => t.LastDate, DateTime.UtcNow)
                      .Set(t => t.LastLessonID, item.LastLessonID)
                      );
 
@@ -238,7 +238,7 @@ namespace BaseCustomerMVC.Globals
                         ClassSubjectID = item.ClassSubjectID,
                         StudentID = item.StudentID,
                         LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.Now,
+                        LastDate = DateTime.UtcNow,
                     };
                     await _classSubjectProgressService.Collection.InsertOneAsync(currentProgress);
                 }
@@ -252,7 +252,7 @@ namespace BaseCustomerMVC.Globals
 
             var updated = await _classProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassID == item.ClassID,
                     new UpdateDefinitionBuilder<ClassProgressEntity>()
-                    .Set(t => t.LastDate, DateTime.Now)
+                    .Set(t => t.LastDate, DateTime.UtcNow)
                     .Set(t => t.LastLessonID, item.LastLessonID)
                     );
 
@@ -269,7 +269,7 @@ namespace BaseCustomerMVC.Globals
                         ClassID = item.ClassID,
                         StudentID = item.StudentID,
                         LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.Now,
+                        LastDate = DateTime.UtcNow,
                     };
                     await _classProgressService.Collection.InsertOneAsync(currentProgress);
                 }
