@@ -721,23 +721,18 @@ namespace BaseCustomerMVC.Controllers.Admin
                                           LastLessonID = g.ToList().OrderByDescending(x => x.Time).FirstOrDefault().LessonID
                                       }).ToList();
 
-                List<string> classIDs = new List<string>();
                 string a = "";
-                var b="";
 
                 foreach (var lh in learnHistories)
                 {
                     //if(lh.StudentID== "5f7e8382f197721750deb12c")
                     {
                         UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lh.LastLessonID, ClassSubjectID = lh.ClassSubjectID, ClassID = lh.ClassID, StudentID = lh.StudentID, LastDate = lh.LastTime });
-                        classIDs.Add(lh.ClassID);
                         a += _studentService.GetItemByID(lh.StudentID).FullName.ToUpper() +" lớp "+ _classService.GetItemByID( lh.ClassID).Name + "; ";
                     }
-                }
+                } 
 
-                
-
-                return Json($"OK - {a} - {b}");
+                return Json($"OK - {a}");
             }
             catch (Exception ex)
             {

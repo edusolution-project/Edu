@@ -298,12 +298,42 @@ var ExamReview = (function () {
 
         bodyExam.append(content);
 
+        for (i = 0; i < data.Part.length; i++) {
+            var _data = data.Part[i];
+            if (_data.Type == "QUIZ1" || _data.Type == "QUIZ4") {
+                addCssAnswerQ14(_data);
+            }
+        }
+
         if ($('textarea[data-type=ESSAY]').length > 0) {
             $(document).ready(function () {
                 $('textarea[data-type=ESSAY]').each(function () {
                     CKEDITOR.replace($(this).attr('id'));
                 });
             });
+        }
+    }
+
+    var addCssAnswerQ14 = function (data) {
+        for (i = 0; i < data.Questions.length; i++) {
+            var cloneAnswers = data.Questions[i].CloneAnswers;
+            for (j = 0; j < cloneAnswers.length; j++) {
+                var id = cloneAnswers[j].ID;
+                var isCorrect = cloneAnswers[j].IsCorrect;
+                var answerWmedia = $("#" + id)[0];
+                if (isCorrect) {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #28a745");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+                else {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #dc3545");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+            }
         }
     }
 
@@ -359,13 +389,13 @@ var ExamReview = (function () {
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
         //console.log(data);
         switch (data.Type) {
-            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
+            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data); //chon 1 dap an dung
                 break;
             case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
             case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
-            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data); //chon 1/nhieu dap an dung
                 break;
             case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
@@ -842,17 +872,18 @@ var ExamReview = (function () {
             html += '</fieldset>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
-                //debugger
                 if (!answer.Content) {
                     answer.Content = "";
                 }
                 //if(!answer.IsCorrect) continue;
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
-                if (answer.IsCorrect)
+                if (answer.IsCorrect) {
                     html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
-                else
+                }
+                else {
                     html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + answer.Content + '</del></label>';
+                }
                 html += '</div>';
                 html += renderMedia(answer.Media);
                 html += '</fieldset>';
@@ -1128,6 +1159,7 @@ var ExamReview = (function () {
     }
 
     var renderMedia = function (data) {
+        //debugger
         if (data == null || data == void 0 || data == "") return "";
         var arr = data.Extension.split('/');
         if (arr.includes("video")) {
@@ -1367,6 +1399,7 @@ var ExamReview = (function () {
     window.uploadFile = uploadFile;
     window.togglePanelWidth = togglePanelWidth;
     window.validate = validate;
+    window.addCssAnswerQ14 = addCssAnswerQ14;
     return ExamReview;
 }());
 
