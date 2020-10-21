@@ -696,6 +696,11 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("DEL " + count);
         }
 
+        public JsonResult FixLastUpdate()
+        {
+            return Json("OK");
+        }
+
         //public JsonResult UpFileToDriver()
         //{
         //    string[] type =
