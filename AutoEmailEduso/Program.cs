@@ -629,10 +629,10 @@ namespace AutoEmailEduso
             </div>
             <div style='padding-left: 30px;'>
                 <p style='padding-top: 5px;margin: 0;'>
-                    - Vào <b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
-                    - Vào <b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
-                    - Vào <b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
-                    - Vào <b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học
+                    - Vào <b style='color: red;'><img src='https://static.eduso.vn//images/icons/QuanLyLopHoc.png?w=32&h=32&mode=crop&format=jpg' style='max-width:32px;max-height:32px'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
+                    - Vào <b style='color: red;'><img src='https://static.eduso.vn//images/icons/TaoBaiGiang.png?w=32&h=32&mode=crop&format=jpg' style='max-width:32px;max-height:32px'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
+                    - Vào <b style='color: red;'><img src='https://static.eduso.vn//images/icons/QuanLyLichDay.png?w=32&h=32&mode=crop&format=jpg' style='max-width:32px;max-height:32px'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
+                    - Vào <b style='color: red;'><img src='https://static.eduso.vn//images/icons/HocLieu.png?w=32&h=32&mode=crop&format=jpg' style='max-width:32px;max-height:32px'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học
                 </p>
             </div>
         </div>";

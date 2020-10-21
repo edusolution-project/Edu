@@ -2590,7 +2590,7 @@ var Lesson = (function () {
             } catch (e) {
                 Swal.fire({
                     title: 'Có lỗi',
-                    text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                    text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                     icon: 'error',
                     confirmButtonText: "Đóng"
                 }).then(() => {
@@ -3709,7 +3709,7 @@ var Lesson = (function () {
                     //alert("Có lỗi, vui lòng kiểm tra lại kết nối");
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: 'Có lỗi, vui lòng kiểm tra lại kết nối',
+                        text: 'Có lỗi, vui lòng kiểm tra lại kết nối mạng',
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
@@ -4052,11 +4052,13 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        if (value == "") {
-                            delAnswerForStudent(questionId);
-                        } else {
+                        //debugger
+                        console.log("line 4060 to fix");
+                        //if (value == "") {//??
+                        //    delAnswerForStudent(questionId);
+                        //} else {
                             saveAnswerForStudent(questionId, answerID, value, type);
-                        }
+                        //}
                     }
                 })
                     .catch(function (err) {
@@ -4064,7 +4066,7 @@ var Lesson = (function () {
                         console.log(err);
                         Swal.fire({
                             title: 'Có lỗi',
-                            text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                            text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
@@ -4135,6 +4137,7 @@ var Lesson = (function () {
         dataform.append("AnswerValue", value);
         __answer_sending = true;
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            //debugger
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                 __answer_sending = false;
                 //console.log(res);
@@ -4152,18 +4155,19 @@ var Lesson = (function () {
                     return false;
                 }
                 else {
-                    if (value == "") {
-                        delAnswerForStudent(questionId);
-                    } else {
+                    console.log("line 4161 to fix");
+                    //if (value == "") {
+                    //    delAnswerForStudent(questionId);
+                    //} else {
                         saveAnswerForStudent(questionId, "", value, type);
-                    }
+                    //}
                 }
             })
                 .catch(function (err) {
                     //alert();
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                        text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {

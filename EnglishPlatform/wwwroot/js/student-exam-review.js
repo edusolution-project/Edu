@@ -346,6 +346,7 @@ var ExamReview = (function () {
     }
 
     var renderLessonPart = function (data, index, type) {
+        //debugger
         //writeLog("renderLessonPart", data);
         var active = "";
         if (index != void 0 && index == 0) {
@@ -417,13 +418,16 @@ var ExamReview = (function () {
     }
 
     var renderAnswer = function (data, type) {
+        //debugger
         var quizId = data.QuestionID;
 
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var _check = false;
-        if (cautraloidung == cautraloi) { _check = true; }
+        if (cautraloidung == cautraloi) {
+            _check = true;
+        }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
         //console.log(type);
@@ -808,6 +812,7 @@ var ExamReview = (function () {
     }
 
     var renderQUIZ1 = function (data) {
+        //debugger
         //writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -837,6 +842,10 @@ var ExamReview = (function () {
             html += '</fieldset>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
+                //debugger
+                if (!answer.Content) {
+                    answer.Content = "";
+                }
                 //if(!answer.IsCorrect) continue;
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
