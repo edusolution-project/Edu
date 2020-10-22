@@ -1963,7 +1963,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "onclick": "AddNewQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm câu hỏi'));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -2068,7 +2068,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add question
                 if (data != null && data.Questions != null) {

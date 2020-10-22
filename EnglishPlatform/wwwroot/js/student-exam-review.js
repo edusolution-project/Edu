@@ -139,7 +139,7 @@ var ExamReview = (function () {
             number = renderItemNavigation(ul, part, number);
         }
         if (config.isTeacher) {
-            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block; white-space:nowrap'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
+            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block;'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
         }
         root.appendChild(ul);
         var data = config.exam;
@@ -518,7 +518,7 @@ var ExamReview = (function () {
                 }
                 else {
                     //$('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
-                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
+                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'>" + data.AnswerValue + "<span>");
 
                     var _answer = $("#quiz2-" + quizId)[0];
                     var a = $(_answer).find(".text-danger")[0].textContent;
@@ -614,8 +614,8 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                         }
@@ -627,12 +627,13 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += " <span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += " <span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += " <span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
-                                chodung2 += detail_CorrectAnswer[i];
+                                chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
+                                chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
                         }
                         else {//TH dap an dung ngan hon dap an hoc sinh dien
@@ -643,12 +644,12 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
-                                chodung1 += "<span style='font-weight:600'>" + detail_Answer[i] + "</span> ";
+                                chodung1 += "<span style='border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                             }
                         }
                         newlistContent = "";
@@ -1159,7 +1160,6 @@ var ExamReview = (function () {
     }
 
     var renderMedia = function (data) {
-        //debugger
         if (data == null || data == void 0 || data == "") return "";
         var arr = data.Extension.split('/');
         if (arr.includes("video")) {

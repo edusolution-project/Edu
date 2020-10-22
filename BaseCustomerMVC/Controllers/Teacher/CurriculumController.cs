@@ -2175,75 +2175,82 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 using (var stream = new MemoryStream())
                 {
                     Document doc = new Document();
-                    Section s = doc.AddSection();
-                    Table table = s.AddTable(true);
+                    for (var x = 0; x < 3; x++)
+                    {
+                        Section s = doc.AddSection();
+                        Table table = s.AddTable(true);
 
-                    //Create Header and Data
-                    String[] Header = { "STT", "Nội dung", "Hình ảnh", "Đúng/Sai", "Giải thích" };
-                    String[][] data = {
-                                  new String[]{"1"  , "Câu hỏi 1"                           , "Hình ảnh hoặc liên kết ảnh" , ""        ,"Giải thích đáp án"},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 1 (1)"  , "Hình ảnh hoặc liên kết ảnh" , "True"    ,""},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 1 (2)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 1 (3)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
-                                  new String[]{"2"  , "Câu hỏi 2"                           , "Hình ảnh hoặc liên kết ảnh" , ""        ,"Giải thích đáp án"},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 2 (1)"  , "Hình ảnh hoặc liên kết ảnh" , "True"    ,""},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 2 (2)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
-                                  new String[]{""   , "Nội dung câu trả lời câu hỏi 2 (3)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
+                        //Create Header and Data
+                        String[] Header = { "Kiểu nội dung (Chọn kiểu tương ứng)", "STT", "Nội dung", "Hình ảnh", "Đúng/Sai", "Giải thích" };
+                        String[][] data = {
+                                  new String[]{ "- QUIZ1 - QUIZ: Chọn 1 đáp án đúng"  ,  "1" , "Câu hỏi 1"                           , "Hình ảnh hoặc liên kết ảnh" , ""        ,"Giải thích đáp án"},
+                                  new String[]{ "- QUIZ4 - QUIZ: Chọn 1/nhiều đáp án" ,  ""  , "Nội dung câu trả lời câu hỏi 1 (1)"  , "Hình ảnh hoặc liên kết ảnh" , "True"    ,""},
+                                  new String[]{ "- QUIZ2 - QUIZ: Nối đáp án"          ,  ""  , "Nội dung câu trả lời câu hỏi 1 (2)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
+                                  new String[]{ "- ESSAY - QUIZ: Essay"               ,  ""  , "Nội dung câu trả lời câu hỏi 1 (3)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
+                                  new String[]{ "- QUIZ3 - QUIZ: Nối đáp án"          ,  "2" , "Câu hỏi 2"                           , "Hình ảnh hoặc liên kết ảnh" , ""        ,"Giải thích đáp án"},
+                                  new String[]{ ""                                    ,  ""  , "Nội dung câu trả lời câu hỏi 2 (1)"  , "Hình ảnh hoặc liên kết ảnh" , "True"    ,""},
+                                  new String[]{ ""                                    ,  ""  , "Nội dung câu trả lời câu hỏi 2 (2)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
+                                  new String[]{ ""                                    ,  ""  , "Nội dung câu trả lời câu hỏi 2 (3)"  , "Hình ảnh hoặc liên kết ảnh" , "False"   ,""},
                               };
-                    //Add Cells
-                    table.ResetCells(data.Length + 1, Header.Length);
+                        //Add Cells
+                        table.ResetCells(data.Length + 1, Header.Length);
 
-                    //Header Row
-                    TableRow FRow = table.Rows[0];
-                    FRow.IsHeader = true;
-                    //Row Height
-                    FRow.Height = 23;
-                    //Header Format
-                    FRow.RowFormat.BackColor = Color.AliceBlue;
-                    for (int i = 0; i < Header.Length; i++)
-                    {
-                        //Cell Alignment
-                        Paragraph p = FRow.Cells[i].AddParagraph();
-                        FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                        p.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                        //Data Format
-                        TextRange TR = p.AppendText(Header[i]);
-                        TR.CharacterFormat.FontName = "Calibri";
-                        TR.CharacterFormat.FontSize = 14;
-                        TR.CharacterFormat.TextColor = Color.Black;
-                        TR.CharacterFormat.Bold = true;
-                    }
-
-                    //Data Row
-                    for (int r = 0; r < data.Length; r++)
-                    {
-                        TableRow DataRow = table.Rows[r + 1];
-
+                        //Header Row
+                        TableRow FRow = table.Rows[0];
+                        FRow.IsHeader = true;
                         //Row Height
-                        DataRow.Height = 20;
-
-                        //C Represents Column.
-                        for (int c = 0; c < data[r].Length; c++)
+                        FRow.Height = 23;
+                        //Header Format
+                        FRow.RowFormat.BackColor = Color.AliceBlue;
+                        for (int i = 0; i < Header.Length; i++)
                         {
                             //Cell Alignment
-                            DataRow.Cells[c].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                            //Fill Data in Rows
-                            Paragraph p2 = DataRow.Cells[c].AddParagraph();
-                            TextRange TR2 = p2.AppendText(data[r][c]);
-                            //Format Cells
-                            p2.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                            TR2.CharacterFormat.FontName = "Calibri";
-                            TR2.CharacterFormat.FontSize = 12;
-                            TR2.CharacterFormat.TextColor = Color.Black;
+                            Paragraph p = FRow.Cells[i].AddParagraph();
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            //Data Format
+                            TextRange TR = p.AppendText(Header[i]);
+                            TR.CharacterFormat.FontName = "Calibri";
+                            TR.CharacterFormat.FontSize = 14;
+                            TR.CharacterFormat.TextColor = Color.Black;
+                            TR.CharacterFormat.Bold = true;
                         }
-                    }
 
-                    //Create a new paragraph
-                    //Lưu ý
-                    Paragraph paragraph = doc.AddSection().AddParagraph();
-                    TextRange TR3=paragraph.AppendText("Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
-                    TR3.CharacterFormat.FontSize = 12;
-                    TR3.CharacterFormat.TextColor = Color.Red;
+                        //Data Row
+                        for (int r = 0; r < data.Length; r++)
+                        {
+                            TableRow DataRow = table.Rows[r + 1];
+
+                            //Row Height
+                            DataRow.Height = 20;
+
+                            //C Represents Column.
+                            for (int c = 0; c < data[r].Length; c++)
+                            {
+                                //Cell Alignment
+                                DataRow.Cells[c].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                                //Fill Data in Rows
+                                Paragraph p2 = DataRow.Cells[c].AddParagraph();
+                                TextRange TR2 = p2.AppendText(data[r][c]);
+                                //Format Cells
+                                p2.Format.HorizontalAlignment = HorizontalAlignment.Left;
+                                TR2.CharacterFormat.FontName = "Calibri";
+                                TR2.CharacterFormat.FontSize = 12;
+                                TR2.CharacterFormat.TextColor = Color.Black;
+                            }
+                        }
+
+
+                        //Merge Cell
+                        table.ApplyVerticalMerge(0, 1, table.LastRow.GetRowIndex());
+
+                        //Create a new paragraph
+                        //Lưu ý
+                        Paragraph paragraph = s.AddParagraph();
+                        TextRange TR3 = paragraph.AppendText("\tLưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
+                        TR3.CharacterFormat.FontSize = 12;
+                        TR3.CharacterFormat.TextColor = Color.Red;
+                    }
 
                     //Save and Launch
                     //doc.SaveToFile("QuizTemplate.docx", FileFormat.Docx2013);
