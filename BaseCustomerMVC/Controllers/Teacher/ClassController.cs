@@ -1632,6 +1632,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 LearnCount = progress.Tried,
                                 LearnLast = progress.LastTry,
                                 Result = progress.LastPoint,
+                                LessonId = lesson.ID,
                             })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>
