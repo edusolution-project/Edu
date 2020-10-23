@@ -959,7 +959,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //move chapter to bottom of new parent chap
                         ChangeChapterPosition(data, int.MaxValue);
                     }
-                    else
+                    else if (data.Order != newOrder)
                         ChangeChapterPosition(data, newOrder);
                 }
 
@@ -1324,12 +1324,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    item.Updated = DateTime.UtcNow;
+                    var oldTemplate = data.TemplateType;
+                    data.TemplateType = item.TemplateType;
+                    data.Title = item.Title;
+                    data.Timer = item.Timer;
+                    data.Multiple = item.Multiple;
+                    data.Etype = item.Etype;
+                    data.Limit = item.Limit;
+
+                    if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
+                        data.Limit = 0;
+
+                    data.Updated = DateTime.UtcNow;
+
                     var newOrder = item.Order - 1;
-                    item.Order = data.Order;
 
                     //update counter if type change
-                    if (item.TemplateType != data.TemplateType)
+                    if (item.TemplateType != oldTemplate)
                     {
                         var examInc = 0;
                         var pracInc = 0;
@@ -1337,31 +1348,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (item.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
                         {
                             examInc = -1;
-                            item.IsPractice = pracInc == 1;
+                            data.IsPractice = pracInc == 1;
                         }
                         else
                         {
                             examInc = 1;
-                            item.IsPractice = false;
+                            data.IsPractice = false;
                             pracInc = pracInc == 1 ? -1 : 0;
                         }
-                        if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
-                            _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 0, examInc, pracInc);
+                        if (!string.IsNullOrEmpty(data.ChapterID) && data.ChapterID != "0")
+                            _ = _courseHelper.IncreaseCourseChapterCounter(data.ChapterID, 0, examInc, pracInc);
                         else
-                            _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 0, examInc, pracInc);
+                            _ = _courseHelper.IncreaseCourseCounter(data.CourseID, 0, examInc, pracInc);
                     }
 
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
 
-                    if (item.Order != newOrder)//change Position
+                    if (data.Order != newOrder)//change Position
                     {
-                        ChangeLessonPosition(item, newOrder);
+                        ChangeLessonPosition(data, newOrder);
                     }
                 }
 
                 return new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", item },
+                    { "Data", data },
                     {"Error",null }
                 });
             }

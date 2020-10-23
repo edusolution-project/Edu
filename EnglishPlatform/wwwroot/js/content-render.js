@@ -559,26 +559,26 @@ var Lesson = (function () {
                     var item = data.Part[i];
                     renderStudentPart(item);
                 }
-                if (_UImode == UIMode.EXAM_ONLY) {
-                    $('#rightCol .tab-pane').each(function () {
-                        var media = null;
-                        var html = null;
-                        if ($(this).find(".QUIZ3").length > 0) {
-                            if (!isMobileDevice()) {
-                                $(this).addClass("h-100");
-                                media = $(this).find(".Q3_absrow > .media-holder:first");
-                            }
-                        }
-                        else {
-                            media = $(this).find(".quiz-wrapper > .media-holder");
-                        }
-                        html = $(this).find(".part-description");
-                        $(this).addClass("m-0");
-                        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
-                            .appendTo('#leftCol')
-                    })
-                }
+                //if (_UImode == UIMode.EXAM_ONLY) {
+                //    $('#rightCol .tab-pane').each(function () {
+                //        var media = null;
+                //        var html = null;
+                //        if ($(this).find(".QUIZ3").length > 0) {
+                //            if (!isMobileDevice()) {
+                //                $(this).addClass("h-100");
+                //                media = $(this).find(".Q3_absrow > .media-holder:first");
+                //            }
+                //        }
+                //        else {
+                //            media = $(this).find(".quiz-wrapper > .media-holder");
+                //        }
+                //        html = $(this).find(".part-description");
+                //        $(this).addClass("m-0");
+                //        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                //            .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                //            .appendTo('#leftCol')
+                //    })
+                //}
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
@@ -598,24 +598,24 @@ var Lesson = (function () {
                 switch (_UImode) {
                     case UIMode.EXAM_ONLY:
                     case UIMode.BOTH:
-                        if (_UImode == UIMode.EXAM_ONLY) {
-                            $('#rightCol .tab-pane').each(function () {
-                                var media = null;
-                                var html = null;
-                                if ($(this).find(".QUIZ3").length > 0) {
-                                    $(this).addClass("h-100");
-                                    media = $(this).find(".Q3_absrow > .media-holder:first");
-                                }
-                                else {
-                                    media = $(this).find(".quiz-wrapper > .media-holder");
-                                }
-                                html = $(this).find(".part-description");
-                                $(this).addClass("m-0");
-                                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                                    .empty().append($(this).find('.part-box-header')).append(html).append(media)
-                                    .appendTo('#leftCol')
-                            });
-                        }
+                        //if (_UImode == UIMode.EXAM_ONLY) {
+                        //    $('#rightCol .tab-pane').each(function () {
+                        //        var media = null;
+                        //        var html = null;
+                        //        if ($(this).find(".QUIZ3").length > 0) {
+                        //            $(this).addClass("h-100");
+                        //            media = $(this).find(".Q3_absrow > .media-holder:first");
+                        //        }
+                        //        else {
+                        //            media = $(this).find(".quiz-wrapper > .media-holder");
+                        //        }
+                        //        html = $(this).find(".part-description");
+                        //        $(this).addClass("m-0");
+                        //        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                        //            .empty().append($(this).find('.part-box-header')).append(html).append(media)
+                        //            .appendTo('#leftCol')
+                        //    });
+                        //}
                         var dataform = new FormData();
                         dataform.append("ClassID", config.class_id);
                         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -773,7 +773,7 @@ var Lesson = (function () {
 
 
                 nav_bottom.prepend(timer).append(complete_btn);
-
+                console.log('counter');
                 renderQuizCounter();
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
@@ -878,18 +878,37 @@ var Lesson = (function () {
                 //}
                 break;
         }
+
+        if (_UImode == UIMode.EXAM_ONLY) {
+            $('#rightCol .tab-pane').each(function () {
+                var media = null;
+                var html = null;
+                if ($(this).find(".QUIZ3").length > 0) {
+                    if (!isMobileDevice()) {
+                        $(this).addClass("h-100");
+                        media = $(this).find(".Q3_absrow > .media-holder:first");
+                    }
+                }
+                else {
+                    media = $(this).find(".quiz-wrapper > .media-holder");
+                }
+                html = $(this).find(".part-description");
+                $(this).addClass("m-0");
+                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                    .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                    .appendTo('#leftCol')
+            })
+        }
+
         if (_openingPart == '') {
             $('#leftCol .fa-caret-down:first()').focus().click()
         }
         else {
             $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
         }
-        if (_UImode == UIMode.EXAM_ONLY) {
-            if ($('.tab-pane.show .QUIZ2').length > 0) {
-                $('#pills-tabContent>.scroll-wrapper:first').addClass('col-md-12');
-                $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
-            }
-        }
+
+
+
         //if (!renderLessonData.prototype.IsTest) {
         //    renderOldAnswer(renderLessonData.prototye.examID);
         //}
@@ -1489,7 +1508,10 @@ var Lesson = (function () {
                         else {
                             if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
                                 data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
-                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")) {
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
+                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                                data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
+                                data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")) {
                                 mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
                             }
                             else {
@@ -1512,7 +1534,10 @@ var Lesson = (function () {
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else {
-                            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                            if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
+                                data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
+                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
                                 data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                                 data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                             ) {
@@ -2453,16 +2478,30 @@ var Lesson = (function () {
         var _partid = _quiz.attr('data-part-id');
         var _part = $('.tab-pane#pills-part-' + _partid);
         var part = _part[0];
+        console.log(quizid);
+        //debugger;
         if (part != null) {
             var el = part.querySelector("[id='" + quizid + "']");
+
+            var isFillQuiz = $(_quiz).find('.fillquiz').length > 0;
+
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
             }
-            var select = part.querySelector(".selection");
-            if (select != null) {
-                select.classList.remove("selection");
+
+
+            if (isFillQuiz) {
+                el = $('.tab-pane-quiz#pills-part-' + _partid + " [id='" + quizid + "']")[0];
+                //console.log(el);
             }
+
+            $('.quiz-item.selection').removeClass('selection');
+
+            //var select = part.querySelector(".selection");
+            //if (select != null) {
+            //    select.classList.remove("selection");
+            //}
             var aSelect = $('#QuizNav')[0].querySelector('.selection');
             if (aSelect != null) {
                 aSelect.classList.remove("selection");
@@ -2470,13 +2509,18 @@ var Lesson = (function () {
             //console.log(getNavigationRoot());
             $('#' + quizid).addClass("selection");
             $(obj).addClass("selection");
+            //console.log(quizid);
             el.classList.add("selection");
             //console.log(el);
             el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
-            if (_part.hasClass('active')) {
-                return false;
-            }
+            //console.log(_part);
+
+            //if (_part.hasClass('active') && !isFillQuiz) {
+            //    return false;
+            //}
+
+            //alert(2);
 
             var panes = $('.tab-pane');
             var index = panes.index($('.tab-pane.active'));
@@ -2491,6 +2535,7 @@ var Lesson = (function () {
     }
 
     var goPartInx = function (idx) {
+        console.log(idx);
         stopAllMedia();
         var panes = $('.tab-pane');
         var quizpanes = $('.tab-pane-quiz');
@@ -2590,7 +2635,7 @@ var Lesson = (function () {
             } catch (e) {
                 Swal.fire({
                     title: 'Có lỗi',
-                    text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                    text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                     icon: 'error',
                     confirmButtonText: "Đóng"
                 }).then(() => {
@@ -3193,6 +3238,7 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ2":
+                //alert(1);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -3709,7 +3755,7 @@ var Lesson = (function () {
                     //alert("Có lỗi, vui lòng kiểm tra lại kết nối");
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: 'Có lỗi, vui lòng kiểm tra lại kết nối',
+                        text: 'Có lỗi, vui lòng kiểm tra lại kết nối mạng',
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
@@ -4052,11 +4098,7 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        if (value == "") {
-                            delAnswerForStudent(questionId);
-                        } else {
-                            saveAnswerForStudent(questionId, answerID, value, type);
-                        }
+                        saveAnswerForStudent(questionId, answerID, value, type);
                     }
                 })
                     .catch(function (err) {
@@ -4064,7 +4106,7 @@ var Lesson = (function () {
                         console.log(err);
                         Swal.fire({
                             title: 'Có lỗi',
-                            text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                            text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
@@ -4135,6 +4177,7 @@ var Lesson = (function () {
         dataform.append("AnswerValue", value);
         __answer_sending = true;
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            //debugger
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                 __answer_sending = false;
                 //console.log(res);
@@ -4163,7 +4206,7 @@ var Lesson = (function () {
                     //alert();
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: "Có lỗi, vui lòng kiểm tra lại kết nối",
+                        text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
@@ -4272,7 +4315,9 @@ var Lesson = (function () {
         var answerList = '';
         //writeLog("renderQuizCounter", listQuiz);
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
+
             var item = listQuiz[i];
+            //console.log(item);
             var answer = getLocalData(item.id);
             //console.log(item.id);
             var completed = "";
@@ -4332,8 +4377,7 @@ var Lesson = (function () {
             var btn = document.getElementById("btn-completed");
             if (btn != null) btn.style.display = "none!important";
         }
-        if (!isMobileDevice())
-            startDragDrop();
+
     }
 
     var rendAgain = function (value) {

@@ -298,12 +298,42 @@ var ExamReview = (function () {
 
         bodyExam.append(content);
 
+        for (var i = 0; i < data.Part.length; i++) {
+            var _data = data.Part[i];
+            if (_data.Type == "QUIZ1" || _data.Type == "QUIZ4") {
+                addCssAnswerQ14(_data);
+            }
+        }
+
         if ($('textarea[data-type=ESSAY]').length > 0) {
             $(document).ready(function () {
                 $('textarea[data-type=ESSAY]').each(function () {
                     CKEDITOR.replace($(this).attr('id'));
                 });
             });
+        }
+    }
+
+    var addCssAnswerQ14 = function (data) {
+        for (var i = 0; i < data.Questions.length; i++) {
+            var cloneAnswers = data.Questions[i].CloneAnswers;
+            for (var j = 0; j < cloneAnswers.length; j++) {
+                var id = cloneAnswers[j].ID;
+                var isCorrect = cloneAnswers[j].IsCorrect;
+                var answerWmedia = $("#" + id)[0];
+                if (isCorrect) {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #28a745");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+                else {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #dc3545");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+            }
         }
     }
 
@@ -346,6 +376,7 @@ var ExamReview = (function () {
     }
 
     var renderLessonPart = function (data, index, type) {
+        //debugger
         //writeLog("renderLessonPart", data);
         var active = "";
         if (index != void 0 && index == 0) {
@@ -358,13 +389,13 @@ var ExamReview = (function () {
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
         //console.log(data);
         switch (data.Type) {
-            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
+            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data); //chon 1 dap an dung
                 break;
             case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
             case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
-            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data); //chon 1/nhieu dap an dung
                 break;
             case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
@@ -417,13 +448,16 @@ var ExamReview = (function () {
     }
 
     var renderAnswer = function (data, type) {
+        //debugger
         var quizId = data.QuestionID;
 
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         var _check = false;
-        if (cautraloidung == cautraloi) { _check = true; }
+        if (cautraloidung == cautraloi) {
+            _check = true;
+        }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
         //console.log(type);
@@ -484,7 +518,7 @@ var ExamReview = (function () {
                 }
                 else {
                     //$('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
-                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
+                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'>" + data.AnswerValue + "<span>");
 
                     var _answer = $("#quiz2-" + quizId)[0];
                     var a = $(_answer).find(".text-danger")[0].textContent;
@@ -580,8 +614,8 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                         }
@@ -593,12 +627,13 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += " <span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += " <span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += " <span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
-                                chodung2 += detail_CorrectAnswer[i];
+                                chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
+                                chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
                         }
                         else {//TH dap an dung ngan hon dap an hoc sinh dien
@@ -609,12 +644,12 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
-                                chodung1 += "<span style='font-weight:600'>" + detail_Answer[i] + "</span> ";
+                                chodung1 += "<span style='border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                             }
                         }
                         newlistContent = "";
@@ -808,6 +843,7 @@ var ExamReview = (function () {
     }
 
     var renderQUIZ1 = function (data) {
+        //debugger
         //writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -837,13 +873,18 @@ var ExamReview = (function () {
             html += '</fieldset>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
+                if (!answer.Content) {
+                    answer.Content = "";
+                }
                 //if(!answer.IsCorrect) continue;
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
-                if (answer.IsCorrect)
+                if (answer.IsCorrect) {
                     html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
-                else
+                }
+                else {
                     html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + answer.Content + '</del></label>';
+                }
                 html += '</div>';
                 html += renderMedia(answer.Media);
                 html += '</fieldset>';
@@ -1358,6 +1399,7 @@ var ExamReview = (function () {
     window.uploadFile = uploadFile;
     window.togglePanelWidth = togglePanelWidth;
     window.validate = validate;
+    window.addCssAnswerQ14 = addCssAnswerQ14;
     return ExamReview;
 }());
 
