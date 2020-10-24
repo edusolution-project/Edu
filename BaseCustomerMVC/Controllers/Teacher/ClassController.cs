@@ -760,7 +760,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             model.TotalRecord = classResult.CountDocuments();
 
-            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList().OrderBy(x=>x.Name);
             var returndata = from o in classData
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
@@ -1632,6 +1632,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 LearnCount = progress.Tried,
                                 LearnLast = progress.LastTry,
                                 Result = progress.LastPoint,
+                                LessonId = lesson.ID,
                             })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
 
             var response = new Dictionary<string, object>

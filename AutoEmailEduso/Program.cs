@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -39,7 +40,8 @@ namespace AutoEmailEduso
         private static CourseService _courseService;
         private static LearningHistoryService _learningHistory;
         private static LessonProgressService _lessonProgressService;
-
+        private static ClassProgressService _classProgressService;
+        private static ExamService _examService;
 
         static async Task Main(string[] args)
         {
@@ -63,32 +65,32 @@ namespace AutoEmailEduso
             _courseService = new CourseService(configuration);
             _learningHistory = new LearningHistoryService(configuration);
             _lessonProgressService = new LessonProgressService(configuration);
+            _classProgressService = new ClassProgressService(configuration);
+            _examService = new ExamService(configuration);
 
             isTest = configuration["Test"] == "1";
-            isTest = true;
 
-            Console.WriteLine("Processing Schedule...");
-
-            if (!args.Any())
-            {
-                //default
-            }
-            else
-            {
-                switch (args[0])
-                {
-                    case "SendWeeklyReport":
-                        await SendWeeklyReport();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            //await SendIncomingLesson();
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            await SendWeeklyReport();
+            //if (!args.Any())
+            //{
+            //    Console.WriteLine("Processing Schedule...");
+            //    //default
+            //    await SendIncomingLesson();
+            //}
+            //else
+            //{
+            //    switch (args[0])
+            //    {
+            //        case "SendWeeklyReport":
+            //            Console.WriteLine("Processing Weekly Report ...");
+            //            await SendWeeklyReport();
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //}
+            await SendWeeklyReportToTeacher();
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
@@ -105,98 +107,124 @@ namespace AutoEmailEduso
                 eventLog.Source = "Application";
                 eventLog.WriteEntry(count + " mail Sent!", EventLogEntryType.Information, 101, 1);
             }
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         public static async Task SendWeeklyReport()
         {
-            //var currentTime = DateTime.Now;
-            var currentTime = new DateTime(2020, 10, 5);
-            //var startWeek = currentTime.AddDays(DayOfWeek.Sunday - currentTime.DayOfWeek).AddDays(1);
-            //var endWeek = startWeek.AddDays(7);
-            var startWeek = currentTime.AddDays(-7);
-            var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(59).AddMilliseconds(59);
-
-            var headRole = _roleService.GetItemByCode("head-teacher");
-
+            var currentTime = DateTime.Now;
+            var day = currentTime.Day;
+            var month = currentTime.Month;
+            var year = currentTime.Year;
+            var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-7).AddMinutes(1);
+            var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
             var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
             foreach (var center in centersActive)
             {
-                //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
-                //{
-                var headTeacher = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID && y.RoleID == headRole.ID) && x.Email != "huonghl@utc.edu.vn");
-
-                var subject = "";
-                subject += $"Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}";
-                var body = "";
-                var tbody = "";
-                tbody = @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
-                                <thead>
-                                    <tr style='font-weight:bold;background-color: bisque'>
-                                        <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
-                                        <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Lớp</td>
-                                        <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-                                        <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
-                                        <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
-                                        <td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>
-                                    </tr>
-                                    <tr style='font-weight:bold;background-color: bisque'>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>1.0 -> 4.9</td>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>0.0</td>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chính quy</td>
-                                        <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chuyên đề</td>
-                                    </tr>
-                                </thead>
-                                <tbody>";
-                var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
-                var index = 1;
-                long totalStudent = 0, totalstChuaVaoLop = 0; ;
-                long tren8 = 0;
-                long tren5 = 0;
-                long tren0 = 0;
-                long bang0 = 0;
-                string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-
-                foreach (var _class in classesActive.OrderBy(x => x.Name))
+                //var percent = "";
+                if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                 {
-                    //Lay danh sach ID hoc sinh trong lop
-                    var studentIds = _studentService.GetStudentsByClassId(_class.ID).Select(t => t.ID).ToList();
-
-                    var classStudent = studentIds.Count();
-                    totalStudent += classStudent;
-
-                    //Lay danh sach ID bai hoc duoc mo trong tuan
-                    var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonScheduleEntity
+                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).Select(x => x.Email).ToList();
+                    if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
                     {
-                        LessonID = t.LessonID,
-                        ClassSubjectID = t.ClassSubjectID,
-                        StartDate = t.StartDate,
-                        EndDate = t.EndDate
-                    }).ToList();
+                        listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                    }
 
-
-                    var activeLessonIds = activeSchedules.Select(t => t.LessonID).ToList();
-
-                    //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-                    var activeProgress = _lessonProgressService.CreateQuery().Find(
-                        x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                        && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-
-                    var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
-
-                    //danh sach bai kiem tra
-                    var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-                    var stChuaVaoLop = classStudent - activeStudents.Count();
-
-                    var dtren8 = "---";
-                    var dtren5 = "---";
-                    var dtren0 = "---";
-                    var dbang0 = "---";
-                    if (examIds.Count > 0) //co bai kiem tra
+                    var subject = "";
+                    //subject += $"Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}";
+                    subject += $"BÁO CÁO KẾT QUẢ HỌC TẬP";
+                    var body = "";
+                    body += $"Kính gửi Thầy/Cô !";
+                    body += $"<h3>Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}</h3>";
+                    body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
+                            <thead>
+                                        <tr style='font-weight:bold;background-color: bisque'>
+                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
+                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Lớp</td>
+                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
+                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
+                                            <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
+                                            <!--<td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>-->
+                                        </tr>
+                                        <tr style='font-weight:bold;background-color: bisque'>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 2.0 -> 4.9</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 1.9</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
+                                            <!--
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chính quy</td>
+                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chuyên đề</td>
+                                            -->
+                                        </tr>
+                                    </thead>
+                                    <tbody>";
+                    var tbody = "";
+                    tbody += "<tbody>";
+                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                    var index = 1;
+                    long totalStudent = 0, totalstChuaVaoLop = 0, totalActiveStudents = 0; ;
+                    long tren8 = 0;
+                    long tren5 = 0;
+                    long tren2 = 0;
+                    long tren0 = 0;
+                    var lasttime1 = new Dictionary<string, string>();
+                    var lasttime2 = new Dictionary<string, string>();
+                    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
+                    if (classesActive.Count() == 0)
                     {
+                        continue;
+                    }
+
+                    foreach (var _class in classesActive.OrderBy(x => x.Name))
+                    {
+                        //Lay danh sach ID hoc sinh trong lop
+                        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
+                        var studentIds = students.Select(t => t.ID).ToList();
+                        //totalStudent += studentIds.Count();
+
+                        var classStudent = studentIds.Count();
+                        totalStudent += classStudent;
+
+
+
+                        //Lay danh sach ID bai hoc duoc mo trong tuan
+
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+
+                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+                        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                        var activeProgress = _lessonProgressService.CreateQuery().Find(
+                            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+
+
+                        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                        //var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                        //    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                        //    && x.LastDate <= endWeek && x.LastDate>= startWeek).ToEnumerable();
+
+                        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                            x => studentIds.Contains(x.StudentID)).ToEnumerable();
+                        //totalActiveStudents += activeStudents.Count();
+
+                        var stChuaVaoLop = classStudent - activeStudents.Count();
+                        totalstChuaVaoLop += stChuaVaoLop;
+
+                        // danh sach bai kiem tra
+                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                        //var exams = _examService.CreateQuery().Find(x => examIds.Contains(x.ID)).ToList();
+
+                        //var exams = (from e in _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).ToList()
+                        //            group e by e.StudentID
+                        //            into ge
+                        //            select new
+                        //            {
+                        //                StudentID = ge.Key,
+                        //                AvgTimeDoExam = ((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours)==0?"":$"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours))} giờ ") + ((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes)==0?"0 phút": $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes))} phút")
+                        //            }).ToList();
+
                         //ket qua lam bai cua hoc sinh trong lop
                         var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                            group r by r.StudentID
@@ -205,107 +233,323 @@ namespace AutoEmailEduso
                                            {
                                                StudentID = g.Key,
                                                ExamCount = g.Count(),
-                                               AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count
+                                               AvgPoint = g.Average(t => t.LastPoint),
+                                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
                                            }).ToList();
+
                         //render ket qua hoc tap
+                        var min8 = classResult.Count(t => t.AvgPoint >= 80);
+                        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+                        var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+                        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
 
-                        var o8 = classResult.Count(t => t.AvgPoint >= 80);
-                        var o5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                        var o0 = classResult.Count(t => t.AvgPoint > 0 && t.AvgPoint < 50);
-                        var e0 = classResult.Count(t => t.AvgPoint == 0);
-
-                        tren8 += o8;
-                        tren5 += o5;
-                        tren0 += o0;
-                        bang0 += e0;
-
-                        dtren8 = o8.ToString();
-                        dtren5 = o5.ToString();
-                        dtren0 = o0.ToString();
-                        dbang0 = e0.ToString();
-                    }
-
-                    totalstChuaVaoLop += stChuaVaoLop;
-
-
-
-                    var groupedSchedule = (from r in activeSchedules
-                                           group r by r.ClassSubjectID into g
-                                           select g.OrderByDescending(t => t.StartDate).FirstOrDefault());
-
-                    var subjectsInfo = (from r in groupedSchedule
-                                        let lesson = _lessonService.GetItemByID(r.LessonID)
-                                        let classSbj = _classSubjectService.GetItemByID(r.ID)
-                                        select new ClassSubjectInfo
-                                        {
-                                            CourseName = classSbj.CourseName,
-                                            LastLessonTitle = lesson.Title,
-                                            Type = classSbj.TypeClass,
-                                            LastTime = r.StartDate
-                                        }).ToList();
-
-
-                    var standardSbj = "";
-                    var extendSbj = "";
-                    foreach (var sbj in subjectsInfo)
-                    {
-                        var content = "<table>" +
-                                "<tr>" +
-                                    $"<td style='text-align: left'>{sbj.CourseName} - Bài học cuối: {sbj.LastLessonTitle} ({sbj.LastTime.ToLocalTime().ToString("dd-MM-yyyy")})</td>" +
-                                "</tr>" +
-                                "</table>";
-                        if (sbj.Type == CLASS_TYPE.STANDARD)
-                            standardSbj += content;
+                        if (index % 2 == 0)
+                        {
+                            tbody += $"<tr style='{style[1]}'>";
+                        }
                         else
-                            extendSbj += content;
+                        {
+                            tbody += $"<tr style='{style[0]}'>";
+                        }
+
+                        tbody +=
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
+                        if (stChuaVaoLop == 0)
+                        {
+                            tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>--</td>";
+                        }
+                        else
+                        {
+                            tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{stChuaVaoLop}</td>";
+                        }
+
+
+                        List<double> points = new List<double>();
+                        var classSbjes_active = _classSubjectService.CreateQuery().Find(o => o.StartDate <= endWeek && o.EndDate >= startWeek && o.TotalExams > 0 && o.ClassID == _class.ID).ToEnumerable();//danh sach mon hoc trong lop dang hoat dong
+
+                        var diemtren8 = min8 == 0 ? "--" : min8.ToString();
+                        var diemtren5 = min5 == 0 ? "--" : min5.ToString();
+                        var diemtren2 = min2 == 0 ? "--" : min2.ToString();
+                        var diemtren0 = min0 == 0 ? "--" : min0.ToString();
+                        tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren8}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren5}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren2}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren0}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
+                        tren8 += min8;
+                        tren5 += min5;
+                        tren2 += min2;
+                        tren0 += min0;
+
+                        classResult.AddRange(from item in students
+                                             where !classResult.Any(x => x.StudentID == item.ID)
+                                             select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName, AvgTimeDoExam = "" });
+                        //var abc = await SendWeeklyReportToTeacher(_class,classResult,startWeek,endWeek);
+                        index++;
                     }
 
-                    if (index % 2 == 0)
+                    double tilechuavaolop = ((double)totalstChuaVaoLop / totalStudent) * 100;
+                    double tiletren8 = ((double)tren8 / totalStudent) * 100;
+                    double tiletren5 = ((double)tren5 / totalStudent) * 100;
+                    double tiletren2 = ((double)tren2 / totalStudent) * 100;
+                    double tiletren0 = ((double)tren0 / totalStudent) * 100;
+                    double tilechualam = ((double)(totalStudent - tren8 - tren5 - tren2 - tren0) / totalStudent) * 100;
+
+                    tbody += @"</td><tr style='font-weight: 600'>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;text-align: left;font-weight: 600'>Tổng</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent}</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop} (<span style='color:red'>{tilechuavaolop.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8} (<span style='color:red'>{tiletren8.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5} (<span style='color:red'>{tiletren5.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren2} (<span style='color:red'>{tiletren2.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren0} (<span style='color:red'>{tiletren0.ToString("#0.00")}%</span>)</td>" +
+                               $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent - tren8 - tren5 - tren2 - tren0}(<span style='color:red'>{tilechualam.ToString("#0.00")}%</span>)</td>" +
+                               @"</tr>
+                                <tbody>
+                                </table>" + extendTeacher;
+
+                    body += tbody;
+                    var PercentActiveStudent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100);
+                    //percent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100).ToString("#0.00") + "%";
+                    var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% "+
+                        $"- Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren2 + tiletren0).ToString("#0.00")}% "+
+                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br>" +
+                        body;
+                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
+                    //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    isTest = true;
+                    var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                }
+                Console.WriteLine($"Send Weekly Report To {center.Name} Is Done!");
+            }
+        }
+
+        public static async Task SendWeeklyReportToTeacher()
+        {
+            try
+            {
+                var currentTime = DateTime.Now;
+                var day = currentTime.Day;
+                var month = currentTime.Month;
+                var year = currentTime.Year;
+                var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-7).AddMinutes(1);
+                var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
+                var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
+                foreach (var center in centersActive)
+                {
+                    //var percent = "";
+                    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                     {
-                        tbody += $"<tr style='{style[1]}'>";
+                        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                        if (classesActive.Count() == 0)
+                        {
+                            continue;
+                        }
+
+                        foreach (var _class in classesActive.OrderBy(x => x.Name))
+                        {
+                            if (_class.Members == null)
+                            {
+                                continue;
+                            }
+                            //Lay danh sach ID hoc sinh trong lop
+                            var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
+                            var studentIds = students.Select(t => t.ID).ToList();
+                            //totalStudent += studentIds.Count();
+
+                            var classStudent = studentIds.Count();
+                            //totalStudent += classStudent;
+
+                            //Lay danh sach ID bai hoc duoc mo trong tuan
+                            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+                            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                            var activeProgress = _lessonProgressService.CreateQuery().Find(
+                                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+
+                            var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                                x => studentIds.Contains(x.StudentID)).ToEnumerable();
+
+                            // danh sach bai kiem tra
+                            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                            //var exams = _examService.CreateQuery().Find(x => examIds.Contains(x.ID)).ToList();
+
+                            var exams = (from e in _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).ToList()
+                                         group e by e.StudentID
+                                        into ge
+                                         select new
+                                         {
+                                             StudentID = ge.Key,
+                                             AvgTimeDoExam = ((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours) == 0 ? "" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours))} giờ ") + ((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes) == 0 ? "0 phút" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes))} phút")
+                                         }).ToList();
+
+                            //ket qua lam bai cua hoc sinh trong lop
+                            var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                                               group r by r.StudentID
+                                               into g
+                                               let _AvgTimeDoExam = exams.Count == 0 ? "" : exams.Where(x => x.StudentID == g.Key)?.FirstOrDefault().AvgTimeDoExam
+                                               select new StudentResult
+                                               {
+                                                   StudentID = g.Key,
+                                                   ExamCount = g.Count(),
+                                                   AvgPoint = g.Average(t => t.LastPoint),
+                                                   StudentName = _studentService.GetItemByID(g.Key)?.FullName,
+                                                   AvgTimeDoExam = _AvgTimeDoExam
+                                               }).ToList();
+
+                            classResult.AddRange(from item in students
+                                                 where !classResult.Any(x => x.StudentID == item.ID)
+                                                 select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName, AvgTimeDoExam = "0 phút" });
+
+                            await SendContent(_class, classResult, startWeek, endWeek);
+                            Console.WriteLine($"Send to class {_class.Name} - { center.Name} is done");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static async Task SendContent(ClassEntity @class, List<StudentResult> studentResults,DateTime startweek,DateTime endweek)
+        {
+            if (studentResults.Count > 0 && @class != null)
+            {
+                var members = @class.Members;
+                var listTeacher = new List<TeacherEntity>();
+                foreach (var mem in members.ToList())
+                {
+                    var _teacher = _teacherService.GetItemByID(mem.TeacherID);
+                    if(_teacher.Email== "huonghl@utc.edu.vn")
+                    {
+                        continue;
+                    }
+
+                    if (!listTeacher.Any(x=>x.Email==_teacher.Email))
+                    {
+                        listTeacher.Add(_teacher);
+                    }
+                }
+
+                var teacher = _teacherService.GetItemByID(@class.TeacherID);
+
+                var thead = @"<thead>
+                        <tr style='font-weight:bold;background-color:bisque'>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:10px'>STT</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:100px'>Họ và tên</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>8.0 - 10.0</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>5.0 - 7.9</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>2.0 - 4.9</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>0.0 - 1.9</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>Thời lượng trung bình</th>
+                        </tr>
+                    </thead>";
+                var tbody = "";
+
+                var _studentResults = studentResults.OrderBy(x => x.StudentName).ToList();
+                for (int i = 0; i < _studentResults.Count; i++)
+                {
+                    var student = _studentResults[i];
+                    var point = student.AvgPoint / 10;
+                    var avgTimeDoExam = student.AvgTimeDoExam;
+                    tbody += "<tr>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{i + 1}</td>" +
+                                $"<td style='text-align:left;border:solid 1px #333;border-collapse:collapse;vertical-align: middle'>{student.StudentName}</td>";
+                    if (point >= 8)
+                    {
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:lightgreen'>{point.ToString("#0.00")}</td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
+                    }
+                    else if (point < 8 && point >= 5)
+                    {
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:lightblue;'>{point.ToString("#0.00")}</td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
+                    }
+                    else if (point < 5 && point >= 2)
+                    {
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:#FFFF33;'>{point.ToString("#0.00")}</td>" +
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
+                    }
+                    else if (point < 2 && point >= 0)
+                    {
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #ff454d;'>{point.ToString("#0.00")}</td>";
                     }
                     else
                     {
-                        tbody += $"<tr style='{style[0]}'>";
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
                     }
-
-                    tbody +=
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{classStudent}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{(stChuaVaoLop > 0 ? stChuaVaoLop.ToString() : "---")}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren8}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren5}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren0}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dbang0}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{standardSbj}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{extendSbj}</td></tr>";
+                    tbody+= $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{avgTimeDoExam}</td>" +
+                            $"</tr>";
                 }
-                tbody += @"<tr style='font-weight: 600'>
-                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;text-align: left;font-weight: 600'>Tổng</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren0}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{bang0}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
-                    @"</tr>
-                    <tbody>
-                    </table>";
-                body += tbody;
 
-                var toAddress = headTeacher.Project(t => t.Email).ToList();
-                var bccAddress = new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                if (isTest)
+                var body = @"<body>
+                                <table style='margin-top:20px;width:100%;border:solid 1px #333;border-collapse:collapse'>" +
+                                thead +
+                                $"<tbody>{tbody}</tbody>"+
+                                @"</table>
+                            </body>";
+
+                var content = $"<p>Báo cáo học tập <span style='font-weight:600'>{@class.Name}</span> từ {startweek.ToString("dd-MM-yyyy")} đến {endweek.ToString("dd-MM-yyyy")}" +
+                                $"{body}" +
+                                $"{extendTeacher}";
+
+                var subject = "";
+                subject += $"BÁO CÁO KẾT QUẢ HỌC TẬP";
+
+                if (listTeacher.Count > 1)
                 {
-                    toAddress = new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" };
-                    bccAddress = null;
+                    foreach (var item in listTeacher)
+                    {
+                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : item.Email;
+                        //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+
+                        isTest = true;
+                        var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    }
                 }
-                _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                else if(listTeacher.Count==1)
+                {
+                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacher[0].Email;
+                    //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+
+                    isTest = true;
+                    var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com","buithihong98@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                }
+                else
+                {
+                    Console.WriteLine($"Lop {@class.Name} khong co member");
+                }
+                //return content;
             }
+            //else
+            //{
+            //    return null;
+            //}
         }
 
         public static async Task SendIncomingLesson()
@@ -449,21 +693,51 @@ namespace AutoEmailEduso
             if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
             return true;
         }
-    }
 
-    public class StudentResult
-    {
-        public string StudentID { get; set; }
-        public long ExamCount { get; set; }
-        public double AvgPoint { get; set; }
-    }
+        private class ClassSubjectInfo
+        {
+            public string Name { get; set; }
+            public string LessonName { get; set; }
+            public DateTime Start { get; set; }
+            public int Type { get; set; }
+        }
 
-    public class ClassSubjectInfo
-    {
-        public string CourseName { get; set; }
-        public string LastLessonTitle { get; set; }
-        public DateTime LastTime { get; set; }
-        public int Type { get; set; }
+        private class StudentResult
+        {
+            public string StudentID { get; set; }
+            public int ExamCount { get; set; }
+            public double AvgPoint { get; set; }
+            public string StudentName { get; set; }
+            public string AvgTimeDoExam { get; set; }
+        }
+
+        private static void WriteText()
+        {
+            string fileLPath = @"G:\New folder\listStudenID.txt";
+
+            List<string> lines = new List<string>();
+            var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
+            lines.AddRange(StudentsID);
+
+            System.IO.File.WriteAllLines(fileLPath, lines);
+        }
+
+        private static readonly string extendTeacher =
+        @"<br>
+        <div style='color:#333;font-size: 90%;'>
+            <div>
+                <i style='text-decoration: underline;'>Bạn có thể:</i>
+            </div>
+            <div style='padding-left: 30px;'>
+                <p style='padding-top: 5px;margin: 0;'>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> chọn <img src='https://static.eduso.vn//images/EditBaiGiang.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'> trong mục <span style='font-weight:600;color:black'>Tác vụ</span> để thêm bài giảng, xoá bài giảng</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/celendar.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/file.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học</div>
+                </p>
+            </div>
+        </div>";
     }
 
     public class ScheduleView : LessonScheduleEntity

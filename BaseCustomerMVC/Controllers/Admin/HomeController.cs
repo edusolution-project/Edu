@@ -57,6 +57,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ReferenceService _referenceService;
         private readonly CalendarService _calendarService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly LearningHistoryService _learningHistoryService;
 
         private string host;
         private string staticPath;
@@ -97,7 +98,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 IHostingEnvironment env,
                 ReferenceService referenceService,
                 CalendarService calendarService,
-                LessonScheduleService lessonScheduleService
+                LessonScheduleService lessonScheduleService,
+                LearningHistoryService learningHistoryService
             )
         {
             _lessonService = lessonService;
@@ -133,6 +135,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _referenceService = referenceService;
             _calendarService = calendarService;
             _lessonScheduleService = lessonScheduleService;
+            _learningHistoryService = learningHistoryService;
 
             _env = env;
 
@@ -712,72 +715,106 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("DEL " + count);
         }
 
-        //public JsonResult UpFileToDriver()
-        //{
-        //    string[] type =
-        //    {
-        //        "DOC",
-        //        //"PDF",
-        //        //"PPT",
-        //        //"XLS",
-        //        //"IMG",
-        //        "VIDEO",
-        //        "AUDIO"
-        //    };
-        //    //var a = _lessonPartService.GetAll().Limit(10).ToList();
-        //    //var b = _lessonService.GetAll().Limit(10).ToList();
-        //    //var c = _courseChapterService.GetAll().Limit(10).ToList();
-        //    var listLessonPart = from lp in _lessonPartService.CreateQuery().Find(x => type.Contains(x.Type)).ToEnumerable()
-        //                         where lp.Media != null && lp.Media.Path.Contains("drive.google.com") == false
-        //                         select new
-        //                         {
-        //                             ID = lp.ID,
-        //                             Update = lp.Updated,
-        //                             FileMedia = lp.Media
-        //                         };
+        public JsonResult FixLastUpdate()
+        {
+            try
+            {
+                var _learnHistories = _learningHistoryService.CreateQuery().Find(x => x.Time >= new DateTime(2020, 10, 19).ToUniversalTime());
+                var learnHistories = (from lh in _learnHistories.ToList()
+                                      group lh by new
+                                      {
+                                          lh.StudentID,
+                                          lh.ClassID,
+                                          lh.ClassSubjectID
+                                      }
+                                   into g
+                                      select new
+                                      {
+                                          StudentID = g.Key.StudentID,
+                                          ClassID = g.Key.ClassID,
+                                          ClassSubjectID = g.Key.ClassSubjectID,
+                                          LastTime = g.ToList().OrderByDescending(x => x.Time).FirstOrDefault().Time,
+                                          LastLessonID = g.ToList().OrderByDescending(x => x.Time).FirstOrDefault().LessonID
+                                      }).ToList();
 
-        //    var listLessonPartQuiz = from q in _questionService.GetAll().ToEnumerable()
-        //                             where q.Media != null && q.Media.Path.Contains("drive.google.com") == false
-        //                             select new
-        //                             {
-        //                                 ID = q.ID,
-        //                                 Update = q.Updated,
-        //                                 FileMedia = q.Media
-        //                             };
+                string a = "";
 
+                foreach (var lh in learnHistories)
+                {
+                    //if(lh.StudentID== "5f7e8382f197721750deb12c")
+                    {
+                        UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lh.LastLessonID, ClassSubjectID = lh.ClassSubjectID, ClassID = lh.ClassID, StudentID = lh.StudentID, LastDate = lh.LastTime });
+                        a += _studentService.GetItemByID(lh.StudentID).FullName.ToUpper() +" lớp "+ _classService.GetItemByID( lh.ClassID).Name + "; ";
+                    }
+                } 
 
-        //    var listLessonPartAnswer = from a in _answerService.GetAll().ToEnumerable()
-        //                               where a.Media != null && a.Media.Path.Contains("drive.google.com") == false
-        //                               select new
-        //                               {
-        //                                   ID = a.ID,
-        //                                   Update = a.Updated,
-        //                                   FileMedia = a.Media,
-        //                                   Type = a.Media.Extension
-        //                               };
+                return Json($"OK - {a}");
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
 
-        //    var d = from x in _answerService.GetAll().ToEnumerable()
-        //            where x.Media != null && x.Media.Path.Contains("drive.google.com") == true
-        //            select new
-        //            {
-        //                ID = x.ID,
-        //                Update = x.Updated,
-        //                FileMedia = x.Media,
-        //                Type = x.Media.Extension
-        //            };
+        private async Task UpdateClassSubjectLastLearn(ClassSubjectProgressEntity item)
+        {
+            var updated = await _classSubjectProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID,
+                     new UpdateDefinitionBuilder<ClassSubjectProgressEntity>()
+                     .Set(t => t.LastDate, item.LastDate)
+                     .Set(t => t.LastLessonID, item.LastLessonID)
+                     );
 
-        //    //var r = listLessonPart.ToList();
-        //    //var u = listLessonPartQuiz.ToList();
-        //    var i = listLessonPartAnswer.ToList();
-        //    var o = d.ToList();
+            if (updated.ModifiedCount == 0) // no match found => check & create progress
+            {
+                var currentProgress = _classSubjectProgressService.GetItemByClassSubjectID(item.ClassSubjectID, item.StudentID);
+                if (currentProgress == null)
+                {
+                    var currentSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
+                    if (currentSbj == null)
+                        return;
+                    currentProgress = new ClassSubjectProgressEntity
+                    {
+                        ClassID = item.ClassID,
+                        ClassSubjectID = item.ClassSubjectID,
+                        StudentID = item.StudentID,
+                        LastLessonID = item.LastLessonID,
+                        LastDate = item.LastDate,
+                    };
+                    await _classSubjectProgressService.Collection.InsertOneAsync(currentProgress);
+                }
+            }
 
-        //    foreach (var item in listLessonPart.ToList())
-        //    {
-        //        //if(item.FileMedia.)
-        //    }
+            await UpdateClassLastLearn(new ClassProgressEntity { ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate });
+        }
 
-        //    return Json("OK");
-        //}
+        private async Task UpdateClassLastLearn(ClassProgressEntity item)
+        {
+
+            var updated = await _classProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassID == item.ClassID,
+                    new UpdateDefinitionBuilder<ClassProgressEntity>()
+                    .Set(t => t.LastDate, item.LastDate)
+                    .Set(t => t.LastLessonID, item.LastLessonID)
+                    );
+
+            if (updated.ModifiedCount == 0) // no match found => check & create progress
+            {
+                var currentProgress = _classProgressService.GetItemByClassID(item.ClassID, item.StudentID);
+                if (currentProgress == null)
+                {
+                    var currentClass = _classService.GetItemByID(item.ClassID);
+                    if (currentClass == null)
+                        return;
+                    currentProgress = new ClassProgressEntity
+                    {
+                        ClassID = item.ClassID,
+                        StudentID = item.StudentID,
+                        LastLessonID = item.LastLessonID,
+                        LastDate = item.LastDate,
+                    };
+                    await _classProgressService.Collection.InsertOneAsync(currentProgress);
+                }
+            }
+        }
 
         public JsonResult UpdateCourseInfo()
         {

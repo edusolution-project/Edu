@@ -38,19 +38,21 @@ namespace BaseCustomerMVC.Globals
                "</div>";
 
         private static readonly string extendTeacher =
-        @"<div style='color:#333;font-size: 90%;'>
-            <div>
-                <i style='text-decoration: underline;'>Bạn có thể:</i>
-            </div>
-            <div style='padding-left: 30px;'>
-                <p style='padding-top: 5px;margin: 0;'>
-                    - Vào <b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh<br/>
-                    - Vào <b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng<br/>
-                    - Vào <b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến<br/>
-                    - Vào <b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học
-                </p>
-            </div>
-        </div>";
+            @"<br>
+                <div style='color:#333;font-size: 90%;'>
+                    <div>
+                        <i style='text-decoration: underline;'>Bạn có thể:</i>
+                    </div>
+                    <div style='padding-left: 30px;'>
+                        <p style='padding-top: 5px;margin: 0;'>
+                            <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh</div>
+                            <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> chọn <img src='https://static.eduso.vn//images/EditBaiGiang.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'> trong mục <span style='font-weight:600;color:black'>Tác vụ</span> để thêm bài giảng, xoá bài giảng</div>
+                            <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng</div>
+                            <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/celendar.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến</div>
+                            <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/file.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học</div>
+                        </p>
+                    </div>
+                </div>";
 
         private static readonly string extendStudent = "<div style='padding-top:20px; border-top:solid 1px #CCC; margin-top: 50px; font-size: 0.6rem; color: #999'>" +
                "<p>Email này cùng các tệp tin đính kèm là các thông tin bảo mật của Eduso và chỉ có mục đích được gửi cho những người nhận được nêu tại email. Nếu Quý vị không phải là người nhận dự kiến của email này cùng các tập tin kèm theo, vui lòng không thực hiện bất cứ hành động nào trên cơ sở email và các tập tin này. Việc chia sẻ, phát tán bất cứ nội dung nào của email này cùng các tập tin đính kèm là hoàn toàn không được phép nếu không có sự đồng ý bằng văn bản của Eduso. Eduso không chịu trách nhiệm về sự truyền tải chính xác, đầy đủ và kịp thời của thông tin trong email và các tập tin này. Trường hợp Quý vị nhận được email này do có sự nhầm lẫn hoặc lỗi hệ thống, vui lòng thông báo cho Eduso qua email này và xóa email cùng các tập tin đính kèm khỏi hệ thống của Quý vị.Trân trọng cảm ơn.</p>" +

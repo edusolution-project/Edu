@@ -70,7 +70,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _calendarHelper = calendarHelper;
         }
 
-        #region add to my personal class
+        #region My Personal Class
         public async Task<JsonResult> CreateClass(List<ClassSubjectEntity> classSubjects = null)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -262,37 +262,6 @@ namespace BaseCustomerMVC.Controllers.Student
             //return null;
         }
 
-        private async Task<Boolean> RemoveClassSubject(ClassSubjectEntity cs)
-        {
-            try
-            {
-
-                //remove old schedule
-                //remove calendar
-                var schids = _lessonScheduleService.GetByClassSubject(cs.ID).Select(t => t.ID).ToList();
-
-                _calendarHelper.RemoveManySchedules(schids);
-
-                var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
-                //remove chapter
-                var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
-                //remove clone lesson
-                var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
-                //remove progress: learning history => class progress, chapter progress, lesson progress
-                var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
-                //remove exam
-                var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
-                //remove classSubject
-                //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
-                await _classSubjectService.RemoveAsync(cs.ID);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
         private string CreateNewClassSubject(ClassSubjectEntity nSbj, ClassEntity @class, StudentEntity student, out ClassMemberEntity member, out long lessoncount, out long examcount, out long practicecount, bool notify = true)
         {
             member = new ClassMemberEntity();
@@ -443,6 +412,37 @@ namespace BaseCustomerMVC.Controllers.Student
             }
         }
 
+        private async Task<Boolean> RemoveClassSubject(ClassSubjectEntity cs)
+        {
+            try
+            {
+
+                //remove old schedule
+                //remove calendar
+                var schids = _lessonScheduleService.GetByClassSubject(cs.ID).Select(t => t.ID).ToList();
+
+                _calendarHelper.RemoveManySchedules(schids);
+
+                var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
+                //remove chapter
+                var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
+                //remove clone lesson
+                var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+                //remove progress: learning history => class progress, chapter progress, lesson progress
+                var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
+                //remove exam
+                var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
+                //remove classSubject
+                //await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
+                await _classSubjectService.RemoveAsync(cs.ID);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         public JsonResult Remove(string ClassSubjectID)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -462,7 +462,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json(new Dictionary<string, object>
                 {
                     {"Status",false },
-                    {"Msg","Không tìm thấy lớp tương ứng." }
+                    {"Msg","Bạn chưa có lớp cá nhân, vui lòng vào \"Học liệu\" - \"Học liệu tương tác\" và thực hiện tải về" }
                 });
             }
 
