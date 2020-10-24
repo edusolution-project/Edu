@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using BaseEasyRealTime.Entities;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using Google.Apis.Drive.v3.Data;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -760,7 +761,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             model.TotalRecord = classResult.CountDocuments();
 
-            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList().OrderBy(x=>x.Name);
+            var classData = classResult.SortByDescending(t => t.IsActive).ThenByDescending(t => t.StartDate).Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList().OrderBy(x => x.Name);
             var returndata = from o in classData
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
@@ -805,6 +806,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Vui lòng đăng nhập lại" }
                         });
             }
+
+
+
             var cm = _teacherService.GetItemByID(userId);
             if (cm == null)
             {
@@ -821,6 +825,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Cơ sở không đúng" }
                         });
             }
+
+            var isHeadTeacher = _teacherHelper.HasRole(userId, center.ID, "head-teacher");
+
             var tc_sj = new List<TeacherSubjectsViewModel>();
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
@@ -948,6 +955,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     foreach (var oSbj in oldSubjects)
                     {
                         var nSbj = classSubjects.Find(t => t.ID == oSbj.ID);
+                        if (!isHeadTeacher && oSbj.TeacherID != userId) //other teacher's class => skip
+                            nSbj = oSbj;
+
+                        var update = false;
+
                         if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
                         //delete oldSubject
                         {
@@ -965,6 +977,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                             if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                             {
+                                update = true;
                                 nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
                                 if (string.IsNullOrEmpty(nSbj.ID))//Error
                                     continue;
@@ -980,6 +993,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                                 if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
                                 {
+                                    update = true;
                                     oSbj.TeacherID = nSbj.TeacherID;
                                     var skill = _skillService.GetItemByID(oSbj.SkillID);
                                     if (skill == null) continue;
@@ -995,10 +1009,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         });
                                     else
                                         tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
+                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
                                 }
-                                //_ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
 
-                                _classSubjectService.Save(oSbj);
+                                if (isHeadTeacher || update) // head-teacher | owned classsubject => update
+                                    _classSubjectService.Save(oSbj);
+
                                 examcount = oSbj.TotalExams;
                                 lessoncount = oSbj.TotalLessons;
                                 practicecount = oSbj.TotalPractices;
@@ -1427,7 +1443,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //Course.TotalLessons = 0;
                 //Course.TotalExams = 0;
                 Course.Name = CourseName == "" ? Course.Name : CourseName;
-                
+
                 Course.ID = null;
 
                 var newID = await CopyCourse(_courseService.GetItemByID(CourseID), Course, userId);
