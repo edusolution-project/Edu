@@ -371,8 +371,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.TeacherID == UserID));
 
             if (!string.IsNullOrEmpty(model.SearchText))
-                //filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
-                filter.Add(Builders<CourseEntity>.Filter.Text(model.SearchText));
+                filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
+            //filter.Add(Builders<CourseEntity>.Filter.Text(model.SearchText));
 
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);

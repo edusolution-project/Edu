@@ -121,7 +121,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (isInteractive)
                 {
-                    var filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
+                    var listCenter = new List<string> { center.ID };
+
+                    if (basis != "eduso")
+                    {
+                        var edusoCt = _centerService.GetItemByCode("eduso");
+                        listCenter.Add(edusoCt.ID);
+                    }
+                    var filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive && listCenter.Contains(o.Center) && o.IsPublic && o.TargetCenters.Contains(center.ID)) };
                     if (!string.IsNullOrEmpty(defaultModel.SearchText))
                     {
                         filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));

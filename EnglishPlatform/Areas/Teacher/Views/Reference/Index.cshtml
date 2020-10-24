@@ -218,7 +218,7 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                this.getData();
+                //this.getData();
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.getMyClass();
@@ -339,8 +339,7 @@
                 subjectID: function () {
                     this.getData()
                 },
-                "docsInteractive.ClassID": function () {
-                    debugger
+                "docsInteractive.ClassID": function () {                    
                     if (this.docsInteractive.ClassID=="true") {
                         this.isCreateNewClass = true
                         //alert(this.docsInteractive.NewClass)

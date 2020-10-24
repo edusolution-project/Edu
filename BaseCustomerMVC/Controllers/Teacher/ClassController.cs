@@ -1414,21 +1414,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             else
             {
                 var Course = _courseService.GetItemByID(CourseID);//Bài giảng
-                Course.OriginID = Course.ID;
+                //Course.OriginID = Course.ID;
                 Course.Center = center.ID;
-                Course.Created = DateTime.UtcNow;
-                Course.CreateUser = teacher.ID;
-                Course.IsAdmin = true;
-                Course.IsPublic = false;
-                Course.IsActive = true;
-                Course.Updated = DateTime.UtcNow;
-                Course.TeacherID = teacher.ID;
-                Course.TotalPractices = 0;
-                Course.TotalLessons = 0;
-                Course.TotalExams = 0;
-                Course.TargetCenters = new List<string>();
+                //Course.Created = DateTime.UtcNow;
+                //Course.CreateUser = teacher.ID;
+                //Course.IsAdmin = true;
+                //Course.IsPublic = false;
+                //Course.IsActive = true;
+                //Course.Updated = DateTime.UtcNow;
+                //Course.TeacherID = teacher.ID;
+                //Course.TotalPractices = 0;
+                //Course.TotalLessons = 0;
+                //Course.TotalExams = 0;
                 Course.Name = CourseName == "" ? Course.Name : CourseName;
-
+                
                 Course.ID = null;
 
                 var newID = await CopyCourse(_courseService.GetItemByID(CourseID), Course, userId);
@@ -1460,19 +1459,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 new_course.OriginID = org_course.ID;
                 new_course.Name = target_course.Name;
-                new_course.Code = target_course.Code;
-                new_course.Description = target_course.Description;
-                new_course.GradeID = target_course.GradeID;
-                new_course.SubjectID = target_course.SubjectID;
+                //new_course.Code = target_course.Code;
+                //new_course.Description = target_course.Description;
+                //new_course.GradeID = target_course.GradeID;
+                //new_course.SubjectID = target_course.SubjectID;
                 new_course.TeacherID = _userCreate;
                 new_course.CreateUser = _userCreate;
                 new_course.Center = target_course.Center ?? org_course.Center;
-                new_course.SkillID = target_course.SkillID;
+                //new_course.SkillID = target_course.SkillID;
                 new_course.Created = DateTime.UtcNow;
                 new_course.Updated = DateTime.UtcNow;
                 new_course.IsActive = true;
                 new_course.IsUsed = false;
                 new_course.IsPublic = false;
+                new_course.TargetCenters = new List<string>();
+
                 _courseService.Collection.InsertOne(new_course);
 
                 //var a = _courseChapterService.CreateQuery().Find(o => o.CourseID == org_course.ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
