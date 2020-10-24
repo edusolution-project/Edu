@@ -1,0 +1,148 @@
+﻿@using BaseCustomerEntity.Database;
+@using BaseCustomerMVC.Globals;
+@using MongoDB.Driver;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var classCenter = ViewBag.Centers as Dictionary<string, string>;
+    var dataClass = ViewBag.Data as Dictionary<string, Dictionary<int, string[]>>;
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css" rel="stylesheet" />
+<div id="list-data"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+
+<script>
+    var root = document.getElementById("list-data");
+    var countSendMail = 0;
+</script>
+@{
+    List<string> classId = classCenter.Keys?.ToList();
+
+    for (int i = 0; i < 1; i++)
+    {
+        string id = classId[i];
+        string center = classCenter[id];
+        var data = dataClass[id]; //Dictionary<int,string[]
+        bool isHasW5 = data.Count > 4;
+        string[] w1 = data[0];
+        string[] w2 = data[1];
+        string[] w3 = data[2];
+        string[] w4 = data[3];
+        List<string> w5 = new List<string>() { "0", "0", "0", "0", "0", "0", "0" };
+        if (data.Count > 4)
+        {
+            w5 = data[4].ToList();
+        }
+        <script>
+        (function () {
+            var center = "@center";
+            var _class = '@id';
+            var div = document.createElement("canvas");
+            var id = "myChart_@id";
+            div.id = id;
+            root.appendChild(div);
+            var isW5 = '@isHasW5'.toLowerCase() == "true";
+            //console.log(isW5);
+            var ctx = document.getElementById(id).getContext('2d');
+            //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
+            var labels = isW5 ? ['tuần 1', 'tuần 2', 'tuần 3', 'tuần 4', 'tuần 5'] : ['tuần 1', 'tuần 2', 'tuần 3', 'tuần 4'];
+
+            var siso = isW5 ? [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]'), parseFloat('@w5[0]')] : [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]')];
+            var stChuaVaoLop = isW5 ? [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]'), parseFloat('@w5[1]')] : [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]')];
+            var min8 = isW5 ? [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]'), parseFloat('@w5[2]')] : [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]')]
+            var min5 = isW5 ? [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]'), parseFloat('@w5[3]')] : [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]')]
+            var min2 = isW5 ? [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]'), parseFloat('@w5[4]')] : [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]')]
+            var min0 = isW5 ? [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]'), parseFloat('@w5[5]')] : [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]')]
+            var chualam = isW5 ? [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]'), parseFloat('@w5[6]')] : [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]')]
+
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'bar', //'bar', //line , radar, Doughnut and Pie , Polar Area,bubble,scatter
+
+                // The data for our dataset
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Sĩ số',
+                            backgroundColor: 'black',
+                            borderColor: 'black',
+                            data: siso
+                        },
+                        {
+                            label: 'Học sinh chưa vào lớp',
+                            backgroundColor: 'pink',
+                            borderColor: 'pink',
+                            data: stChuaVaoLop
+                        },
+                        {
+                            label: '8.0 -> 10',
+                            backgroundColor: 'red',
+                            borderColor: 'red',
+                            data: min8
+                        },
+                        {
+                            label: '5.0 -> 7.9',
+                            backgroundColor: 'green',
+                            borderColor: 'green',
+                            data: min5
+                        },
+                        {
+                            label: '2.0 -> 4.9',
+                            backgroundColor: 'blue',
+                            borderColor: 'blue',
+                            data: min2
+                        },
+                        {
+                            label: '0.0 -> 1.9',
+                            backgroundColor: 'violet',
+                            borderColor: 'violet',
+                            data: min0
+                        },
+                        {
+                            label: 'Chưa làm',
+                            backgroundColor: 'yellow',
+                            borderColor: 'yellow',
+                            data: chualam
+                        }
+                    ]
+                },
+
+                // Configuration options go here
+                options: {
+                    title: {
+                        display: true,
+                        text: 'Báo cáo tháng ' + (new Date().getMonth() + 1)
+                    }
+                },
+                plugins: [{
+                    afterRender: function () {
+                        var x = chart.toBase64Image();
+
+                        //ajax =>  success => countSendMail++
+                        $.ajax({
+                            type: "POST",
+                            url: '/home/SendMonthlyReport',
+                            //url: 'https://beta.eduso.vn/home/SendMonthlyReport',
+                            data: { image: x },
+                            success: function (res) {
+                                console.log(res)
+                            }
+                        });
+                        countSendMail++;
+                        if (countSendMail == '@(classId.Count-1)') {
+
+                        }
+                    }
+                }]
+            });
+
+        }());
+
+        </script>
+    }
+}
+

@@ -22,6 +22,8 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
+using System.Text.RegularExpressions;
+using FileManagerCore.Interfaces;
 
 namespace EnglishPlatform.Controllers
 {
@@ -71,6 +73,10 @@ namespace EnglishPlatform.Controllers
         private readonly ExamService _examService;
         private readonly VocabularyService _vocabularyService;
 
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+        private readonly LessonScheduleService _lessonScheduleService;
+        private readonly LessonProgressService _lessonProgressService;
+
         public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
             , TeacherService teacherService
             , StudentService studentService
@@ -107,6 +113,9 @@ namespace EnglishPlatform.Controllers
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
             , ExamService examService
             , VocabularyService vocabularyService
+            , IRoxyFilemanHandler roxyFilemanHandler
+            , LessonScheduleService lessonScheduleService
+            , LessonProgressService lessonProgressService
             )
         {
             _accessesService = accessesService;
@@ -149,6 +158,10 @@ namespace EnglishPlatform.Controllers
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
             _examService = examService;
             _vocabularyService = vocabularyService;
+            _roxyFilemanHandler = roxyFilemanHandler;
+
+            _lessonScheduleService = lessonScheduleService;
+            _lessonProgressService = lessonProgressService;
         }
 
         public IActionResult Index()
@@ -1555,6 +1568,202 @@ namespace EnglishPlatform.Controllers
             //eturn result;
         }
         #endregion
+
+        #region Mail Report Monthly
+        private string GetBase64FromJavaScriptImage(string javaScriptBase64String)
+        {
+            return Regex.Match(javaScriptBase64String, @"data:image/(?<type>.+?),(?<data>.+)").Groups["data"].Value;
+        }
+        [HttpPost]
+        public async Task<JsonResult> SendMonthlyReport(string image)
+        {
+            try
+            {
+                //var dateTime = DateTime.Now;
+                var dateTime = new DateTime(2020, 11, 01);
+                var day = dateTime.Day;
+                var month = dateTime.Month;
+                var year = dateTime.Year;
+
+                var currentTime = new DateTime(year, month, day, 0, 0, 0);
+                var startMonth = currentTime.AddMonths(-1);
+                var endMonth = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
+
+                //var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
+                //foreach(var center in centersActive)
+                //{
+                //    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
+                //    {
+                //        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).Select(x => x.Email).ToList();
+                //        if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
+                //        {
+                //            listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                //        }
+                string base64 = GetBase64FromJavaScriptImage(image);
+                var bytes = Convert.FromBase64String(base64);
+                string link = "";
+                using (var memory = new MemoryStream(bytes))
+                {
+
+                    link = Program.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
+                }
+
+                var body = $"<div><img src='{link}' /></div>";
+                var subject = "div tesst";
+                //var isTest = true;
+                //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
+                //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com" };
+                //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                var isTest = true;
+                var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                try
+                {
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    return Json("ok");
+                }
+                catch (Exception ex)
+                {
+                    return Json(ex.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public IActionResult EmailTemp()
+        {
+            var currentTime = DateTime.Now;
+            if (currentTime == null || currentTime <= DateTime.MinValue)
+            {
+                currentTime = DateTime.Now;
+            }
+            IEnumerable<CenterEntity> centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
+            Dictionary<string, Dictionary<int, string[]>> dataClass = new Dictionary<string, Dictionary<int, string[]>>();
+            Dictionary<string, string> classCenter = new Dictionary<string, string>();
+            for (int i = 0; centersActive != null && i < centersActive.Count(); i++)
+            {
+                var center = centersActive.ElementAt(i);
+                var classesActive = _classService.GetActiveClass(currentTime, center.ID);
+                if (classesActive != null)
+                {
+                    foreach (var _class in classesActive)
+                    {
+                        classCenter.Add(_class.ID, center.ID);
+                        var data = GetDataForReprot(_class, currentTime);
+                        dataClass.Add(_class.ID, data);
+                    }
+                }
+            }
+
+            ViewBag.Centers = classCenter;
+            ViewBag.Data = dataClass;
+            return View();
+        }
+
+        private Dictionary<int, string[]> GetDataForReprot(ClassEntity @class, DateTime dateTime)
+        {
+            //[] => {}
+            var dataResponse = new Dictionary<int, string[]>();
+
+            //var dateTime = DateTime.Now;
+            var day = dateTime.Day;
+            var month = dateTime.Month;
+            var year = dateTime.Year;
+
+            var currentTime = new DateTime(year, month, day, 0, 0, 0).AddMonths(-1);//Lùi 1 tháng
+            var sw1 = currentTime;//Tuan 1
+            var ew1 = currentTime.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw2 = ew1.AddMinutes(1);//Tuan 2
+            var ew2 = sw2.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw3 = ew2.AddMinutes(1);//Tuan 3
+            var ew3 = sw3.AddDays(6).AddHours(23).AddMinutes(59);
+
+            var sw4 = ew3.AddMinutes(1);//Tuan 4
+            var ew4 = new DateTime(year, month, day, 0, 0, 0).AddDays(-1);//Lui 1 ngay
+
+            var listDateTime = new List<dateTime>
+            {
+                new dateTime(sw1, ew1),
+                new dateTime(sw2, ew2),
+                new dateTime(sw3, ew3),
+                new dateTime(sw4, ew4)
+            };
+
+            var key = 0;
+            foreach (var item in listDateTime)
+            {
+                var data = GetDataInWeek(item.StartWeek, item.EndWeek, @class);
+                dataResponse.Add(key, data);
+                key++;
+            };
+
+            return dataResponse;
+        }
+        /// <summary>
+        /// //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
+        /// </summary>
+        /// <param name="startWeek"></param>
+        /// <param name="endWeek"></param>
+        /// <param name="class"></param>
+        /// <returns></returns>
+        private string[] GetDataInWeek(DateTime startWeek, DateTime endWeek, ClassEntity @class)
+        {
+            //data can lay
+            var min8 = 9;
+            var min5 = 0;
+            var min2 = 0;
+            var min0 = 0;
+            var chualam = 0;
+
+            //Lay danh sach ID hoc sinh trong lop
+            var studentIds = _studentService.GetStudentsByClassId(@class.ID).Select(t => t.ID).ToList();
+            var classStudent = studentIds.Count();
+
+            var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => new LessonScheduleEntity
+            {
+                LessonID = t.LessonID,
+                ClassSubjectID = t.ClassSubjectID,
+                StartDate = t.StartDate,
+                EndDate = t.EndDate
+            })?.ToList();
+            var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
+
+            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+            var activeProgress = _lessonProgressService.CreateQuery().Find(
+                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+            var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
+            var stChuaVaoLop = classStudent - activeStudents.Count();
+
+            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+            if (examIds.Count > 0) //co bai kiem tra
+            {
+                //ket qua lam bai cua hoc sinh trong lop
+                var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       ExamCount = g.Count(),
+                                       AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count
+                                   }).ToList();
+                //render ket qua hoc tap
+                min8 = classResult.Count(t => t.AvgPoint >= 80);
+                min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+                min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+                min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+                chualam = classStudent - (min0 + min2 + min5 + min8);
+            }
+
+            string[] data = { classStudent.ToString(), stChuaVaoLop.ToString(), min8.ToString(), min5.ToString(), min2.ToString(), min0.ToString(), chualam.ToString() };
+            return data;
+        }
+        #endregion
     }
 
     public class UserModel
@@ -1571,5 +1780,23 @@ namespace EnglishPlatform.Controllers
 
         public string ID { get; set; }
         public string Name { get; set; }
+    }
+
+    public class StudentResult
+    {
+        public string StudentID { get; set; }
+        public long ExamCount { get; set; }
+        public double AvgPoint { get; set; }
+    }
+    public class dateTime
+    {
+        public DateTime StartWeek { get; set; }
+        public DateTime EndWeek { get; set; }
+
+        public dateTime(DateTime sw, DateTime ew)
+        {
+            this.StartWeek = sw;
+            this.EndWeek = ew;
+        }
     }
 }

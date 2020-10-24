@@ -435,7 +435,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-            }
+            }               
             if (!string.IsNullOrEmpty(GradeID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));

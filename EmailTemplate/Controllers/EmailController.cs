@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
+using FileManagerCore.Interfaces;
+using FileManagerCore.Services;
+using GoogleLib.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -69,8 +75,25 @@ namespace EmailTemplate.Controllers
                 currentTime = DateTime.Now;
             }
             IEnumerable<CenterEntity> centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
-            ViewBag.Centers = centersActive;
-            ViewBag.CurrentTime = currentTime;
+            Dictionary<string, Dictionary<int, string[]>> dataClass = new Dictionary<string, Dictionary<int, string[]>>();
+            Dictionary<string, string> classCenter = new Dictionary<string, string>();
+            for(int i = 0; centersActive != null && i < centersActive.Count(); i++)
+            {
+                var center = centersActive.ElementAt(i);
+                var classesActive = _classService.GetActiveClass(currentTime, center.ID);
+                if(classesActive != null)
+                {
+                    foreach(var _class in classesActive)
+                    {
+                        classCenter.Add(_class.ID, center.ID);
+                        var data = GetDataForReprot(_class, currentTime);
+                        dataClass.Add(_class.ID, data);
+                    }
+                }
+            }
+
+            ViewBag.Centers = classCenter;
+            ViewBag.Data = dataClass;
             // danh sach lop
             //var classesActive = _classService.GetActiveClass(currentTime, center.ID);
 
@@ -269,8 +292,12 @@ namespace EmailTemplate.Controllers
                 await SendWeeklyReport(center, currentTime, isTest);
             }
         }
-
-        public async Task<JsonResult> SendMonthlyReport()
+        private string GetBase64FromJavaScriptImage(string javaScriptBase64String)
+        {
+            return Regex.Match(javaScriptBase64String, @"data:image/(?<type>.+?),(?<data>.+)").Groups["data"].Value;
+        }
+        [HttpPost]
+        public async Task<JsonResult> SendMonthlyReport(string image)
         {
             try
             {
@@ -284,42 +311,91 @@ namespace EmailTemplate.Controllers
                 var startMonth = currentTime.AddMonths(-1);
                 var endMonth = currentTime.AddDays(-1).AddHours(23).AddMinutes(59);
 
-                var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
-                var dataResponse = new Dictionary<string, object>();
-                foreach (var center in centersActive)
+                //var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong trong thang
+                //foreach(var center in centersActive)
+                //{
+                //    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
+                //    {
+                //        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).Select(x => x.Email).ToList();
+                //        if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
+                //        {
+                //            listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                //        }
+                string base64 = GetBase64FromJavaScriptImage(image);
+                var bytes = Convert.FromBase64String(base64);
+                string link = "";
+                using(var memory = new MemoryStream(bytes))
                 {
-                    var dataInClass = new Dictionary<string, object>();
-                    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
-                    {
-                        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
-                        var index = 0;
-                        foreach (var @class in classesActive.OrderBy(x => x.Name))
-                        {
-                            var data = GetDataForReprot(@class, dateTime).Result;
-                            if (!dataInClass.Keys.Contains(@class.Name))
-                            {
-                                dataInClass.Add($"{@class.Name}", data);
-                            }
-                            else
-                            {
-                                dataInClass.Add($"{@class.Name} - {index}", data);
-                            }
-                            index++;
-                        }
-                        dataResponse.Add($"{center.Name}", dataInClass);
-                    }
+                    link = "";//Program.GoogleDriveApiService.CreateLinkPreViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
+                    //_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory);
                 }
-                return Json(dataResponse);
+
+                var body = $"<div><img src='{link}' /></div>";
+                StringBuilder test = new StringBuilder();
+                test.Append("<div data-image=\""+image+"\"><img src=");
+                test.Append(image);
+                test.Append("/></div>");
+                var subject = "div tesst";
+                //var isTest = true;
+                //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
+                //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com" };
+                //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                var isTest = true;
+                var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                try
+                {
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    return Json("ok");
+                }
+                catch (Exception ex)
+                {
+                    return Json(ex.Message);
+                }
+
+                //    }
+                //}
+                //return Json("OK");
+                //var dataResponse = new Dictionary<string, object>();
+                //foreach (var center in centersActive)
+                //{
+                //    var dataInClass = new Dictionary<string, object>();
+                //    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
+                //    {
+                //        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                //        var index = 0;
+                //        foreach (var @class in classesActive.OrderBy(x => x.Name))
+                //        {
+                //            var data = GetDataForReprot(@class, dateTime);
+                //            if (!dataInClass.Keys.Contains(@class.Name))
+                //            {
+                //                dataInClass.Add($"{@class.Name}", data);
+                //            }
+                //            else
+                //            {
+                //                dataInClass.Add($"{@class.Name} - {index}", data);
+                //            }
+                //            index++;
+                //        }
+                //        dataResponse.Add($"{center.Name}", dataInClass);
+                //    }
+                //}
+                //return Json(dataResponse);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }
         }
-
-        private async Task<Dictionary<string, object>> GetDataForReprot(ClassEntity @class,DateTime dateTime)
+        [HttpGet]
+        public Dictionary<int, string[]> GetDataReprot(ClassEntity @class, DateTime dateTime)
         {
-            var dataResponse = new Dictionary<string, object>();
+            return GetDataForReprot(@class, dateTime);
+        }
+
+        private Dictionary<int, string[]> GetDataForReprot(ClassEntity @class, DateTime dateTime)
+        {
+            //[] => {}
+            var dataResponse = new Dictionary<int, string[]>();
 
             //var dateTime = DateTime.Now;
             var day = dateTime.Day;
@@ -339,21 +415,31 @@ namespace EmailTemplate.Controllers
             var sw4 = ew3.AddMinutes(1);//Tuan 4
             var ew4 = new DateTime(year, month, day, 0, 0, 0).AddDays(-1);//Lui 1 ngay
 
-            var listDateTime = new List<dateTime>();
-            listDateTime.Add(new dateTime(sw1, ew1));
-            listDateTime.Add(new dateTime(sw2, ew2));
-            listDateTime.Add(new dateTime(sw3, ew3));
-            listDateTime.Add(new dateTime(sw4, ew4));
+            var listDateTime = new List<dateTime>
+            {
+                new dateTime(sw1, ew1),
+                new dateTime(sw2, ew2),
+                new dateTime(sw3, ew3),
+                new dateTime(sw4, ew4)
+            };
 
+            var key = 0;
             foreach (var item in listDateTime)
             {
-                var data = GetDataInWeek(item.StartWeek,item.EndWeek,@class);
-                dataResponse.Add($"Từ {item.StartWeek.ToString("dd-MM-yyyy")} đến {item.EndWeek.ToString("dd-MM-yyyy")}", data);
+                var data = GetDataInWeek(item.StartWeek, item.EndWeek, @class);
+                dataResponse.Add(key, data);
+                key++;
             };
 
             return dataResponse;
         }
-
+        /// <summary>
+        /// //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
+        /// </summary>
+        /// <param name="startWeek"></param>
+        /// <param name="endWeek"></param>
+        /// <param name="class"></param>
+        /// <returns></returns>
         private string[] GetDataInWeek(DateTime startWeek,DateTime endWeek,ClassEntity @class)
         {
             //data can lay
@@ -406,6 +492,16 @@ namespace EmailTemplate.Controllers
 
             string[] data = {classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString() };
             return data;
+        }
+
+        private bool HasRole(string userid, string center, string role)
+        {
+            var teacher = _teacherService.GetItemByID(userid);
+            if (teacher == null) return false;
+            var centerMember = teacher.Centers.Find(t => t.CenterID == center);
+            if (centerMember == null) return false;
+            if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
+            return true;
         }
 
         public class StudentResult
