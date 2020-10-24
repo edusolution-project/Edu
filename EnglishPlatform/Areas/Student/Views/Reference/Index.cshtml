@@ -42,45 +42,53 @@
                 </ul>
             </div>
         </div>
-        <div class="flex flex-wrap align-items-center" v-if="tab[0]">
-            <div class="box filter-box col-12 col-md-2 m-1">
-                <select v-model="subject">
-                    <option value="">Chọn chương trình</option>
-                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                </select>
-            </div>
-            <div class="box filter-box col-12 col-md-2 m-1">
-                <select v-model="grade">
-                    <option value="">Chọn cấp độ</option>
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                </select>
-            </div>
-            <div class="box filter-box col-12 col-md-2 m-1">
-                <select v-model="range">
-                    <option value="">-- Tất cả tài liệu --</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
-                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
-                    @*
-                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
-                </select>
-            </div>
-            <div class="box filter-box col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
-                <select v-model="target">
-                    <option value="">-- Chọn lớp --</option>
-                    @if (myClasses != null && myClasses.Count > 0)
-                    {
-                        foreach (var _class in myClasses)
+        <template v-if="tab[0]">
+            <div class="flex flex-wrap align-items-center">
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="subject">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="grade">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1">
+                    <select v-model="range">
+                        <option value="">-- Tất cả tài liệu --</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.ALL">Chung</option>
+                        <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASS">Lớp</option>
+                        @*
+                    <option value="@BaseCustomerEntity.Database.REF_RANGE.CLASSSUBJECT">Môn</option>*@
+                    </select>
+                </div>
+                <div class="box filter-box col-12 col-md-2 m-1" v-if="range=='@BaseCustomerEntity.Database.REF_RANGE.CLASS'">
+                    <select v-model="target">
+                        <option value="">-- Chọn lớp --</option>
+                        @if (myClasses != null && myClasses.Count > 0)
                         {
-                            <option value="@_class.ID">@_class.Name</option>
+                            foreach (var _class in myClasses)
+                            {
+                                <option value="@_class.ID">@_class.Name</option>
+                            }
                         }
-                    }
-                </select>
+                    </select>
+                </div>
+                <div class="search-box col-12 col-md-2 m-1">
+                    <button><i class="ic ic-find"></i></button>
+                    <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
+                </div>
             </div>
+        </template>
+        <template v-else>
             <div class="search-box col-12 col-md-2 m-1">
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên tài liệu">
             </div>
-        </div>
+        </template>
     </div>
     <div class="card-body" v-cloak>
         <div class="row ls-doc" v-if="tableData.length > 0">
@@ -326,8 +334,15 @@
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
+                    if (this.tab[1]) {
+                        fn1 = this.getData
+                    }
+                    else {
+                        fn1 = this.getData
+                    }
                     this.searchTimeout = setTimeout(function(){
-                        fn()
+                        fn();
+                        fn1()
                     }, 500)
                 },
                 subject: function () {
@@ -476,11 +491,13 @@
                             history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
                             this.isInteractive = false;
                             this.loadDocsNormal();
+                            this.searchTerm = '';
                             break;
                         case 1:
                             history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
                             this.isInteractive = true;
                             this.loadDocsInteractive();
+                            this.searchTerm = '';
                             break;
                     }
                     this.$forceUpdate()

@@ -72,25 +72,25 @@ namespace AutoEmailEduso
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            //if (!args.Any())
-            //{
-            //    Console.WriteLine("Processing Schedule...");
-            //    //default
-            //    await SendIncomingLesson();
-            //}
-            //else
-            //{
-            //    switch (args[0])
-            //    {
-            //        case "SendWeeklyReport":
-            //            Console.WriteLine("Processing Weekly Report ...");
-            //            await SendWeeklyReport();
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
-            await SendWeeklyReportToTeacher();
+            if (!args.Any())
+            {
+                Console.WriteLine("Processing Schedule...");
+                //default
+                await SendIncomingLesson();
+            }
+            else
+            {
+                switch (args[0])
+                {
+                    case "SendWeeklyReport":
+                        Console.WriteLine("Processing Weekly Report ...");
+                        await SendWeeklyReport();
+                        await SendWeeklyReportToTeacher();
+                        break;
+                    default:
+                        break;
+                }
+            }
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;
@@ -124,17 +124,17 @@ namespace AutoEmailEduso
                 //var percent = "";
                 if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                 {
-                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).Select(x => x.Email).ToList();
-                    if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
+                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
+                    if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
                     {
-                        listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                        listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
                     }
 
                     var subject = "";
                     //subject += $"Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}";
                     subject += $"BÁO CÁO KẾT QUẢ HỌC TẬP";
                     var body = "";
-                    body += $"Kính gửi Thầy/Cô !";
+                    //body += $"Kính gửi Thầy/Cô !";
                     body += $"<h3>Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}</h3>";
                     body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
                             <thead>
@@ -185,8 +185,6 @@ namespace AutoEmailEduso
 
                         var classStudent = studentIds.Count();
                         totalStudent += classStudent;
-
-
 
                         //Lay danh sach ID bai hoc duoc mo trong tuan
 
@@ -314,16 +312,35 @@ namespace AutoEmailEduso
                     body += tbody;
                     var PercentActiveStudent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100);
                     //percent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100).ToString("#0.00") + "%";
-                    var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% "+
-                        $"- Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren2 + tiletren0).ToString("#0.00")}% "+
-                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br>" +
-                        body;
-                    //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
-                    //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-                    isTest = true;
-                    var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% " +
+                        $"- Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren2 + tiletren0).ToString("#0.00")}% " +
+                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br> \t";
+
+                    if (listTeacherHeader.Count() > 1)
+                    {
+                        foreach (var item in listTeacherHeader)
+                        {
+                            //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { item.Email};
+                            //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                            //_ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                            isTest = true;
+                            var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                            _ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"Kính gửi Thầy/Cô {item.FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                        }
+                    }
+                    else if (listTeacherHeader.Count() == 1)
+                    {
+                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { listTeacherHeader[0].Email};
+                        //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô {listTeacherHeader[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        isTest = true;
+                        var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"Kính gửi Thầy/Cô {listTeacherHeader[0].FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{listTeacherHeader.Count()}");
+                    }
                 }
                 Console.WriteLine($"Send Weekly Report To {center.Name} Is Done!");
             }
@@ -375,7 +392,8 @@ namespace AutoEmailEduso
                                 && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
 
                             var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                                x => studentIds.Contains(x.StudentID)).ToEnumerable();
+                                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
 
                             // danh sach bai kiem tra
                             var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
@@ -387,7 +405,8 @@ namespace AutoEmailEduso
                                          select new
                                          {
                                              StudentID = ge.Key,
-                                             AvgTimeDoExam = ((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours) == 0 ? "" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours))} giờ ") + ((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes) == 0 ? "0 phút" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes))} phút")
+                                             AvgTimeDoExam = ((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours) == 0 ? "" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours))} giờ ") + ((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes) == 0 ? "0 phút" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes))} phút"),
+                                             CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count()
                                          }).ToList();
 
                             //ket qua lam bai cua hoc sinh trong lop
@@ -395,18 +414,21 @@ namespace AutoEmailEduso
                                                group r by r.StudentID
                                                into g
                                                let _AvgTimeDoExam = exams.Count == 0 ? "" : exams.Where(x => x.StudentID == g.Key)?.FirstOrDefault().AvgTimeDoExam
+                                               let _CompletedLesson = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedLesson
                                                select new StudentResult
                                                {
                                                    StudentID = g.Key,
-                                                   ExamCount = g.Count(),
+                                                   ExamCount = g.Count() == 0 ? 0 : g.Count(),
                                                    AvgPoint = g.Average(t => t.LastPoint),
-                                                   StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-                                                   AvgTimeDoExam = _AvgTimeDoExam
+                                                   StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                                   AvgTimeDoExam = _AvgTimeDoExam,
+                                                   CompletedLesson = _CompletedLesson,
+                                                   TotalLesson = activeLessonIds.Count
                                                }).ToList();
 
                             classResult.AddRange(from item in students
                                                  where !classResult.Any(x => x.StudentID == item.ID)
-                                                 select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName, AvgTimeDoExam = "0 phút" });
+                                                 select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName.Trim(), AvgTimeDoExam = "0 phút", CompletedLesson = 0, TotalLesson = activeLessonIds.Count() });
 
                             await SendContent(_class, classResult, startWeek, endWeek);
                             Console.WriteLine($"Send to class {_class.Name} - { center.Name} is done");
@@ -420,7 +442,7 @@ namespace AutoEmailEduso
             }
         }
 
-        private static async Task SendContent(ClassEntity @class, List<StudentResult> studentResults,DateTime startweek,DateTime endweek)
+        private static async Task SendContent(ClassEntity @class, List<StudentResult> studentResults, DateTime startweek, DateTime endweek)
         {
             if (studentResults.Count > 0 && @class != null)
             {
@@ -429,12 +451,8 @@ namespace AutoEmailEduso
                 foreach (var mem in members.ToList())
                 {
                     var _teacher = _teacherService.GetItemByID(mem.TeacherID);
-                    if(_teacher.Email== "huonghl@utc.edu.vn")
-                    {
-                        continue;
-                    }
 
-                    if (!listTeacher.Any(x=>x.Email==_teacher.Email))
+                    if (!listTeacher.Any(x => x.Email == _teacher.Email))
                     {
                         listTeacher.Add(_teacher);
                     }
@@ -444,23 +462,29 @@ namespace AutoEmailEduso
 
                 var thead = @"<thead>
                         <tr style='font-weight:bold;background-color:bisque'>
-                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:10px'>STT</th>
-                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:100px'>Họ và tên</th>
+                            <th rowspan='2' style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:10px'>STT</th>
+                            <th rowspan='2' style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:100px'>Họ và tên</th>
+                            <th colspan='6' style='text-align:center;border:solid 1px #333;border-collapse:collapse'>Kết quả luyện tập và kiểm tra</th>
+                        </tr>
+                        <tr style='font-weight:bold;background-color:bisque'>
                             <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>8.0 - 10.0</th>
                             <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>5.0 - 7.9</th>
                             <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>2.0 - 4.9</th>
                             <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>0.0 - 1.9</th>
-                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>Thời lượng trung bình</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>Bài đã làm</th>
+                            <th style='text-align:center;border:solid 1px #333;border-collapse:collapse;width:50px'>Thời lượng làm bài trung bình</th>
                         </tr>
                     </thead>";
                 var tbody = "";
 
-                var _studentResults = studentResults.OrderBy(x => x.StudentName).ToList();
+                var _studentResults = studentResults.OrderBy(x => x.StudentName.Split(" ")[x.StudentName.Split(" ").Length - 1]).ToList();
                 for (int i = 0; i < _studentResults.Count; i++)
                 {
                     var student = _studentResults[i];
                     var point = student.AvgPoint / 10;
                     var avgTimeDoExam = student.AvgTimeDoExam;
+                    var completedLesson = student.CompletedLesson;
+                    var totalLesson = student.TotalLesson;
                     tbody += "<tr>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{i + 1}</td>" +
                                 $"<td style='text-align:left;border:solid 1px #333;border-collapse:collapse;vertical-align: middle'>{student.StudentName}</td>";
@@ -499,14 +523,15 @@ namespace AutoEmailEduso
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
                     }
-                    tbody+= $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{avgTimeDoExam}</td>" +
+                    tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{completedLesson}/{totalLesson}</td>" +
+                            $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse'>{avgTimeDoExam}</td>" +
                             $"</tr>";
                 }
 
                 var body = @"<body>
                                 <table style='margin-top:20px;width:100%;border:solid 1px #333;border-collapse:collapse'>" +
                                 thead +
-                                $"<tbody>{tbody}</tbody>"+
+                                $"<tbody>{tbody}</tbody>" +
                                 @"</table>
                             </body>";
 
@@ -515,7 +540,7 @@ namespace AutoEmailEduso
                                 $"{extendTeacher}";
 
                 var subject = "";
-                subject += $"BÁO CÁO KẾT QUẢ HỌC TẬP";
+                subject += $"EDUSO GỬI BÁO CÁO KẾT QUẢ HỌC TẬP {@class.Name.ToUpper()}";
 
                 if (listTeacher.Count > 1)
                 {
@@ -526,18 +551,18 @@ namespace AutoEmailEduso
                         //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
                         isTest = true;
-                        var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                        var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "buihong9885@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
                         _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                     }
                 }
-                else if(listTeacher.Count==1)
+                else if (listTeacher.Count == 1)
                 {
                     //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacher[0].Email;
                     //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
                     //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
                     isTest = true;
-                    var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com","buithihong98@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                    var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "buihong9885@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
                     _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                 }
                 else
@@ -709,6 +734,8 @@ namespace AutoEmailEduso
             public double AvgPoint { get; set; }
             public string StudentName { get; set; }
             public string AvgTimeDoExam { get; set; }
+            public int CompletedLesson { get; set; }
+            public int TotalLesson { get; set; }
         }
 
         private static void WriteText()
@@ -730,11 +757,11 @@ namespace AutoEmailEduso
             </div>
             <div style='padding-left: 30px;'>
                 <p style='padding-top: 5px;margin: 0;'>
-                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh</div>
-                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'>""Quản lý lớp học""</b> chọn <img src='https://static.eduso.vn//images/EditBaiGiang.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'> trong mục <span style='font-weight:600;color:black'>Tác vụ</span> để thêm bài giảng, xoá bài giảng</div>
-                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Tạo bài giảng""</b> để thêm bài giảng</div>
-                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/celendar.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến</div>
-                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/file.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'>""Học liệu""</b>, chọn <b>Học liệu tương tác</b> để tải thêm xuống lớp học</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'> ""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'> ""Quản lý lớp học""</b> chọn <img src='https://static.eduso.vn//images/EditBaiGiang.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'> trong mục <span style='font-weight:600;color:black'>Tác vụ</span> để thêm bài giảng, xoá bài giảng</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Tạo bài giảng""</b> để soạn bài giảng mới</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/celendar.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/file.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Học liệu""</b>, chọn <span style='font-weight:600;color:black'>Học liệu tương tác</span> để tải thêm xuống lớp học</div>
                 </p>
             </div>
         </div>";

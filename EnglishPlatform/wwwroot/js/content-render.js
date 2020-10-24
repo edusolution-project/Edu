@@ -385,7 +385,8 @@ var Lesson = (function () {
                 }
 
 
-                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Thêm nội dung từ file");
                 lessonButton.append(btnExplain);
 
 
@@ -396,6 +397,7 @@ var Lesson = (function () {
                 //lessonButton.append(remove); //removeLesson
                 //remove.append(iconTrash);
                 //headerRow.append(lessonButton);
+                
 
                 lesson_action_holder.empty().prepend(lessonButton);
 
@@ -778,9 +780,10 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
-                //if (mod.STUDENT_EXAM) {
-                //    renderOldAnswer();
-                //}
+                //debugger
+                if (mod.STUDENT_EXAM == "studentexam") {
+                    renderOldAnswer();
+                }
                 break;
             case mod.REVIEW:
                 var nav_bottom = lesson_action_holder
@@ -873,9 +876,10 @@ var Lesson = (function () {
                     $(".time-counter").html(getLocalData("Timer"));
                     //countdown(false);
                 }
-                //if (mod.STUDENT_LECTURE) {
-                //    renderOldAnswer();
-                //}
+                //debugger
+                if (mod.STUDENT_LECTURE == "studentlecture") {
+                    renderOldAnswer();
+                }
                 break;
         }
         if (_openingPart == '') {
@@ -890,10 +894,6 @@ var Lesson = (function () {
                 $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
             }
         }
-        //if (!renderLessonData.prototype.IsTest) {
-        //    renderOldAnswer(renderLessonData.prototye.examID);
-        //}
-        //renderOldAnswer();
     }
 
     var switchUIMode = function (mode) {
@@ -2299,6 +2299,7 @@ var Lesson = (function () {
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
         formData.append('file', e.target.files[0]);
+        formData.append('ParentID', config.courselessonid);
         if (type == 0) {//file excel
             xhr.open('POST', config.url.import_quiz);
         }
@@ -2980,7 +2981,6 @@ var Lesson = (function () {
     }
 
     //---- 14-10-2020
-    //var renderOldAnswer = function (OldExamID) { //dạng điền từ
     var renderOldAnswer = function () { //dạng điền từ
         //debugger
         //if (OldExamID) {
@@ -2995,6 +2995,7 @@ var Lesson = (function () {
         dataform.append("ClassID", config.class_id);
         Ajax(config.url.oldAnswer, dataform, "POST", false)
             .then(function (res) {
+                //debugger
                 var data = JSON.parse(res);
                 //debugger
                 if (data.Data !== null) {
@@ -3640,7 +3641,9 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
-        showLoading("Đang nộp bài...");
+        if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
+            showLoading("Đang nộp bài...");
+        }
         while (__answer_sending) {
             console.log("wait for complete answering ...");
             await new Promise(r => setTimeout(r, 500));
@@ -3685,7 +3688,10 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = async function () {
-        showLoading("Đang nộp bài...");
+        debugger
+        if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
+            showLoading("Đang nộp bài...");
+        }
         $('.btnCompleteExam').hide();
         stopCountdown();
         localStorage.clear();
