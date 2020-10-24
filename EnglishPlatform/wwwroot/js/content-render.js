@@ -4888,6 +4888,7 @@ var submitQuizFill = function (event, modalId, callback) {
 }
 
 var toggleExpand = function (obj) {
+    stopAllMedia();
     $('.collapsable').addClass('collapse');
     $('.media-holder video').trigger('pause');
 
