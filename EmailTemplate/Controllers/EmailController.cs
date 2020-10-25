@@ -80,6 +80,7 @@ namespace EmailTemplate.Controllers
             IEnumerable<CenterEntity> centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
             Dictionary<string, Dictionary<int, string[]>> dataClass = new Dictionary<string, Dictionary<int, string[]>>();
             Dictionary<string, string> classCenter = new Dictionary<string, string>();
+            Dictionary<string, string> dataClassName = new Dictionary<string, string>();
             for(int i = 0; centersActive != null && i < centersActive.Count(); i++)
             {
                 var center = centersActive.ElementAt(i);
@@ -91,12 +92,14 @@ namespace EmailTemplate.Controllers
                         classCenter.Add(_class.ID, center.ID);
                         var data = GetDataForReprot(_class, currentTime);
                         dataClass.Add(_class.ID, data);
+                        dataClassName.Add(_class.ID, _class.Name);
                     }
                 }
             }
 
             ViewBag.Centers = classCenter;
             ViewBag.Data = dataClass;
+            ViewBag.ClassName = dataClassName;
 
             return View();
         }
@@ -300,47 +303,43 @@ namespace EmailTemplate.Controllers
         [HttpPost]
         public async Task<JsonResult> SendMonthlyReport(List<DataToSendMail> Data, string image = "")
         {
+            var Msg = "";
             try
             {
-                var dataToSend = Data.ToList().GroupBy(x => x.CenterID, (k, g) => new { CenterID = k, Images = g.Select(x=>x.Image).ToList() });
-                foreach(var d in dataToSend)
+                //var dataToSend = Data.ToList().GroupBy(x => x.CenterID, (k, g) => new { CenterID = k, Images = g.Select(x => x.Image).ToList(),ClassIDs=g.Select(x=>x.ClassID).ToList() });
+                var dataToSend = Data.ToList().GroupBy(x => x.CenterID, (k, g) => new { CenterID = k, Images = g.Select(x => x.Image).ToList(),ClassIDs=g.Select(x=>x.ClassID).ToList() });
+                foreach (var d in dataToSend)
                 {
                     var center = _centerService.GetItemByID(d.CenterID);
-                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).Select(x => x.Email).ToList();
-                    if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
+                    var hello = "";
+                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
+                    //if (listTeacherHeader.Contains("huonghl@utc.edu.vn"))
+                    //{
+                    //    listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                    //}
+                    List<string> listEmail = new List<string>();
+                    foreach(var t in listTeacherHeader)
                     {
-                        listTeacherHeader.Remove("huonghl@utc.edu.vn");
+                        if (t.Email != "huonghl@utc.edu.vn")
+                        {
+                            listEmail.Add(t.Email);
+                            hello += $"<p>Kính gửi Thầy/Cô {t.FullName}</p>";
+                        }
                     }
 
-                    var body = ContentToSendEmail(d.Images);
-                    var subject = $"BÁO CÁO KẾT QUẢ HỌC TẬP THÁNG {DateTime.Now.Month - 1}";
+                    var body = await ContentToSendEmail(d.Images,d.ClassIDs);
+                    var subject = $"BÁO CÁO KẾT QUẢ HỌC TẬP {center.Name.ToUpper()} THÁNG {DateTime.Now.Month - 1}";
+                    var content = $"{hello}{body}";
+                    //dBoolean isTest = true;
+                    //List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
+                    //List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com" };
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
+                    List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" };
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null);
+                    Msg += $"Send To {center.Name} is done, ";
                 }
-                string base64 = GetBase64FromJavaScriptImage(image);
-                var bytes = Convert.FromBase64String(base64);
-                string link = "";
-                using(var memory = new MemoryStream(bytes))
-                {
-                    link = Program.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
-                }
-
-                //var body = $"<div><img src='{link}' /></div
-                //var isTest = true;
-                //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : listTeacherHeader;
-                //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com" };
-                //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-                var isTest = true;
-                var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                try
-                {
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
-                    return Json("ok");
-                }
-                catch (Exception ex)
-                {
-                    return Json(ex.Message);
-                }
-
+                return Json(Msg);
             }
             catch (Exception ex)
             {
@@ -348,48 +347,112 @@ namespace EmailTemplate.Controllers
             }
         }
 
-        private string ContentToSendEmail(List<string> Images)
+        private async Task<string> ContentToSendEmail(List<string> Images,List<string> ClassIDs)
         {
             var body = "";
+            var index = 0;
+            foreach(var image in Images)
+            {
+                string base64 = GetBase64FromJavaScriptImage(image);
+                var bytes = Convert.FromBase64String(base64);
+                string link = "";
+                using (var memory = new MemoryStream(bytes))
+                {
+                    link = Program.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
+                }
+
+                var name = _classService.GetItemByID(ClassIDs[index])?.Name;
+                var className = name.Contains("Lớp") ? name.ToUpper() : $"LỚP {name.ToUpper()}";
+                body += $"<div>" +
+                    $"<h3 style='text-align: center;vertical-align: middle;width: 90%;'>Báo cáo học tập {className}</h3>" +
+                    $"<img src='{link}' style='width: 90%;height: 90%;' />" +
+                    $"</div>";
+                index++;
+            }
             return body;
         }
 
-        [HttpGet]
-        public Dictionary<int, string[]> GetDataReprot(ClassEntity @class, DateTime dateTime)
-        {
-            return GetDataForReprot(@class, dateTime);
-        }
-
+        /// <summary>
+        /// Lấy data cho báo cáo tuần
+        /// </summary>
+        /// <param name="class"></param>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
         private Dictionary<int, string[]> GetDataForReprot(ClassEntity @class, DateTime dateTime)
         {
             //[] => {}
             var dataResponse = new Dictionary<int, string[]>();
 
-            //var dateTime = DateTime.Now;
-            var day = dateTime.Day;
-            var month = dateTime.Month;
-            var year = dateTime.Year;
+            var currentMonth = new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0);
+            var firstDay = currentMonth.AddMonths(-1); //ngay dau tien cua thang 0h 0p 0s
+            var lastDay = currentMonth.AddDays(-1);//ngay cuoi cung cua thang 0h0p00s
 
-            var currentTime = new DateTime(year, month, day, 0, 0, 0).AddMonths(-1);//Lùi 1 tháng
-            var sw1 = currentTime;//Tuan 1
-            var ew1 = currentTime.AddDays(6).AddHours(23).AddMinutes(59);
+            var sw1 = firstDay.AddDays(DayOfWeek.Sunday - firstDay.DayOfWeek + 1);//tuần chứa ngày đầu tiên trong tháng
+            var ew1=firstDay.AddDays(6).AddHours(23).AddMinutes(59);//tuần chứa ngày đầu tiên trong tháng
 
-            var sw2 = ew1.AddMinutes(1);//Tuan 2
-            var ew2 = sw2.AddDays(6).AddHours(23).AddMinutes(59);
+            var sw2 = ew1.AddMinutes(1);
+            var ew2=sw2.AddDays(6).AddHours(23).AddMinutes(59);
 
-            var sw3 = ew2.AddMinutes(1);//Tuan 3
-            var ew3 = sw3.AddDays(6).AddHours(23).AddMinutes(59);
+            var sw3 = ew2.AddMinutes(1);
+            var ew3=sw3.AddDays(6).AddHours(23).AddMinutes(59);
 
-            var sw4 = ew3.AddMinutes(1);//Tuan 4
-            var ew4 = new DateTime(year, month, day, 0, 0, 0).AddDays(-1);//Lui 1 ngay
+            var sw4 = ew3.AddMinutes(1);
+            var ew4=sw4.AddDays(6).AddHours(23).AddMinutes(59);
 
-            var listDateTime = new List<dateTime>
+            var sw = lastDay.AddDays(DayOfWeek.Saturday - lastDay.DayOfWeek + 1);//tuần chứa ngày cuối cùng trong tháng
+            var ew=sw.AddDays(6).AddHours(23).AddMinutes(59);//tuần chứa ngày cuối cùng trong tháng
+
+            var listDateTime = new List<dateTime>();
+
+            DateTime sw5 = new DateTime(1900,1,1);
+            DateTime ew5 = new DateTime(1900, 1, 7);
+            if (ew4.AddMinutes(1) < sw)
             {
+                sw5 = ew4.AddMinutes(1);
+                ew5 = sw5.AddDays(6).AddHours(23).AddMinutes(59);
+                listDateTime = new List<dateTime> {
                 new dateTime(sw1, ew1),
                 new dateTime(sw2, ew2),
                 new dateTime(sw3, ew3),
-                new dateTime(sw4, ew4)
-            };
+                new dateTime(sw4, ew4),
+                new dateTime(sw5, ew5),
+                new dateTime(sw, ew)
+                };
+            }
+            else
+            {
+                listDateTime = new List<dateTime> {
+                new dateTime(sw1, ew1),
+                new dateTime(sw2, ew2),
+                new dateTime(sw3, ew3),
+                new dateTime(sw4, ew4),
+                new dateTime(sw, ew)
+                };
+            }
+
+            //var dateTime = DateTime.Now;
+            //var day = dateTime.Day;
+            //var month = dateTime.Month;
+            //var year = dateTime.Year;
+            //var currentTime = new DateTime(year, month, day, 0, 0, 0).AddMonths(-1);//Lùi 1 tháng
+            //var sw1 = currentTime;//Tuan 1
+            //var ew1 = currentTime.AddDays(6).AddHours(23).AddMinutes(59);
+
+            //var sw2 = ew1.AddMinutes(1);//Tuan 2
+            //var ew2 = sw2.AddDays(6).AddHours(23).AddMinutes(59);
+
+            //var sw3 = ew2.AddMinutes(1);//Tuan 3
+            //var ew3 = sw3.AddDays(6).AddHours(23).AddMinutes(59);
+
+            //var sw4 = ew3.AddMinutes(1);//Tuan 4
+            //var ew4 = new DateTime(year, month, day, 0, 0, 0).AddDays(-1);//Lui 1 ngay
+            //var listDateTime = new List<dateTime>
+            //{
+            //    new dateTime(sw1, ew1),
+            //    new dateTime(sw2, ew2),
+            //    new dateTime(sw3, ew3),
+            //    new dateTime(sw4, ew4)
+            //};
 
             var key = 0;
             foreach (var item in listDateTime)
@@ -515,6 +578,7 @@ namespace EmailTemplate.Controllers
         {
             public string CenterID { get; set; }
             public string Image { get; set; }
+            public string ClassID { get; set; }
         }
     }
 }
