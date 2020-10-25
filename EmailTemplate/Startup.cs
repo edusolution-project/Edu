@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
+using FileManagerCore.Interfaces;
+using FileManagerCore.Services;
 using GoogleLib.Interfaces;
 using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
@@ -63,6 +65,7 @@ namespace EmailTemplate
             services.AddSingleton<CourseService>();
             services.AddSingleton<LearningHistoryService>();
             services.AddSingleton<LessonProgressService>();
+            services.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

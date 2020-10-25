@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using BaseEasyRealTime.Globals;
 using GoogleLib.Interfaces;
 using GoogleLib.Services;
 using Microsoft.AspNetCore;
@@ -28,14 +29,17 @@ namespace EmailTemplate
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-             WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration((hostingContext, configBuilder) =>
-             {
-                 var config = configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-                 if (_googleDriveApiService == null && config != null)
+                 WebHost.CreateDefaultBuilder(args).ConfigureAppConfiguration((hostingContext, configBuilder) =>
                  {
-                     _googleDriveApiService = new GoogleDriveApiService(config.Build());
-                 }
-             })
+                     var config = configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                     if (_googleDriveApiService == null && config != null)
+                     {
+                         _googleDriveApiService = new GoogleDriveApiService(config.Build());
+                     }
+                 }).ConfigureServices(services =>
+                 {
+                     services.AddEasyRealTime(GoogleDriveApiService);
+                 })
                 .UseStartup<Startup>();
     }
 }

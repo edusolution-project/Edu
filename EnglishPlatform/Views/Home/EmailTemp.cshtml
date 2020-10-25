@@ -17,6 +17,20 @@
 <script>
     var root = document.getElementById("list-data");
     var countSendMail = 0;
+    var arrayData = [];
+    var sendData = function (arrayData,image) {
+        return $.ajax({
+            type: "POST",
+            url: '/home/SendMonthlyReport',
+            //url: 'https://beta.eduso.vn/home/SendMonthlyReport',
+            //data: { image: x },
+            data: { Data: arrayData, image: image },
+            success: function (res) {
+                console.log(res)
+            },
+            timeout: 3000
+        });
+    }
 </script>
 @{
     List<string> classId = classCenter.Keys?.ToList();
@@ -36,7 +50,7 @@
         {
             w5 = data[4].ToList();
         }
-        <script>
+    <script>
         (function () {
             var center = "@center";
             var _class = '@id';
@@ -119,30 +133,34 @@
                     }
                 },
                 plugins: [{
-                    afterRender: function () {
+                    //afterRender: function () {
+                    //    var x = chart.toBase64Image();
+
+                    //    //ajax =>  success => countSendMail++
+                    //    $.ajax({
+                    //        type: "POST",
+                    //        url: '/home/SendMonthlyReport',
+                    //        //url: 'https://beta.eduso.vn/home/SendMonthlyReport',
+                    //        data: { image: x },
+                    //        success: function (res) {
+                    //            console.log(res)
+                    //        },
+                    //        timeout: 3000
+                    //    });
+                    //}
+                    afterRender: async function () {
                         var x = chart.toBase64Image();
-
-                        //ajax =>  success => countSendMail++
-                        $.ajax({
-                            type: "POST",
-                            url: '/home/SendMonthlyReport',
-                            //url: 'https://beta.eduso.vn/home/SendMonthlyReport',
-                            data: { image: x },
-                            success: function (res) {
-                                console.log(res)
-                            }
-                        });
-                        countSendMail++;
-                        if (countSendMail == '@(classId.Count-1)') {
-
-                        }
+                        var centerID = '@center';
+                        arrayData.push([x, centerID]);
+                        console.log(countSendMail++);
+                        await sendData(arrayData);
                     }
                 }]
             });
 
         }());
 
-        </script>
+    </script>
     }
 }
 

@@ -1575,7 +1575,7 @@ namespace EnglishPlatform.Controllers
             return Regex.Match(javaScriptBase64String, @"data:image/(?<type>.+?),(?<data>.+)").Groups["data"].Value;
         }
         [HttpPost]
-        public async Task<JsonResult> SendMonthlyReport(string image)
+        public async Task<JsonResult> SendMonthlyReport(string[] data,string image)
         {
             try
             {

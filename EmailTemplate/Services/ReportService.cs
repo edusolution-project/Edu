@@ -1,4 +1,5 @@
 ﻿using BaseCustomerEntity.Database;
+using FileManagerCore.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace EmailTemplate.Services
         private static StudentService _studentService;
         private static TeacherService _teacherService;
         private static SkillService _skillService;
+        private static IRoxyFilemanHandler _roxyFilemanHandler;
         public ReportService(
             ClassService classService, 
             CenterService centerService,
@@ -25,7 +27,8 @@ namespace EmailTemplate.Services
             LessonScheduleService lessonScheduleService,
             AccountService accountService,
             StudentService studentService,
-            SkillService skillService
+            SkillService skillService,
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _classService = classService;
@@ -36,6 +39,7 @@ namespace EmailTemplate.Services
             _accountService = accountService;
             _studentService = studentService;
             _skillService = skillService;
+            _roxyFilemanHandler = roxyFilemanHandler;
         }
 
         public async Task<string> GetWeek()

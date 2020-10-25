@@ -367,15 +367,6 @@ namespace AutoEmailEduso
             }
         }
 
-        //public static async Task SendMonthlyReport()
-        //{
-        //    var subject = $"Cáo cáo học tập trong tháng";
-        //    var body = @"<iframe src='https://quickchart.io/chart?c={type:'bar',data:{labels:[2012,2013,2014,2015,2016],datasets:[{label:'Users',data:[120,60,50,180,120]}]}}' title='W3Schools Free Online Web Tutorials'></iframe>";
-
-        //    var toAddress = new List<string> { "nguyenhoa.dev@gmail.com" };
-        //    _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
-        //}
-
         public static async Task SendIncomingLesson()
         {
             var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
