@@ -316,8 +316,8 @@ namespace AutoEmailEduso
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
                         _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"{hello}{content}{body}", MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                         //isTest = true;
-                        //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com","vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"Kính gửi Thầy/Cô {item.FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                        //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content + body, MailPhase.WEEKLY_SCHEDULE);
                     }
                     else
                     {
@@ -347,7 +347,7 @@ namespace AutoEmailEduso
                     if (center.Abbr != "eduso")//bo truong eduso
                     //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                     {
-                        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                        var classesActive = _classService.GetActiveClass4Report(currentTime, center.ID);//lay danh sach lop dang hoat dong
                         if (classesActive.Count() == 0)
                         {
                             continue;
@@ -388,14 +388,14 @@ namespace AutoEmailEduso
                             var exams = (from e in _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).ToList()
                                          group e by e.StudentID
                                          into ge
-                                         let hours = (int)ge.Average(x => x.Updated.Subtract(x.Created).TotalHours)
-                                         let minutes = (int)ge.Average(x => x.Updated.Subtract(x.Created).TotalMinutes) - hours * 60
+                                         let hours = (int)ge.Average(x => x.Updated.Subtract(x.Created).Hours)
+                                         let minutes = (int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes)
+                                         let seconds = (int)ge.Average(x => x.Updated.Subtract(x.Created).Seconds)
                                          select new
                                          {
                                              StudentID = ge.Key,
-                                             AvgTimeDoExam = (hours == 0 ? "" : $"{hours} giờ ") + (minutes == 0 ? " 0 phút " : $"{minutes} phút"),
-                                             //AvgTimeDoExam = ((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours) == 0 ? "" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Hours))} giờ ") + ((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes) == 0 ? "0 phút" : $"{Math.Abs((int)ge.Average(x => x.Updated.Subtract(x.Created).Minutes))} phút"),
-                                             CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count()
+                                             AvgTimeDoExam = (hours == 0 ? "" : $"{hours} giờ ") + (minutes == 0 ? " " : $"{minutes} phút ") + (seconds == 0 ? " 0 giây " : $"{seconds} giây"),
+                                             CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
                                          }).ToList();
 
                             //ket qua lam bai cua hoc sinh trong lop
@@ -417,7 +417,7 @@ namespace AutoEmailEduso
 
                             classResult.AddRange(from item in students
                                                  where classResult.Find(x => x.StudentID == item.ID) == null
-                                                 select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName.Trim(), AvgTimeDoExam = "0 phút", CompletedLesson = 0, TotalLesson = activeLessonIds.Count() });
+                                                 select new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName.Trim(), AvgTimeDoExam = "--", CompletedLesson = 0, TotalLesson = activeLessonIds.Count() });
 
                             await SendContent(_class, classResult, startWeek, endWeek);
                             Console.WriteLine($"Send to class {_class.Name} - { center.Name} is done");
@@ -507,8 +507,15 @@ namespace AutoEmailEduso
                         {
                             tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #ff454d;'>{point.ToString("#0.00")}</td>";
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
+                            if (point == 0)
+                            {
+                                tbody+= $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #ff454d;'>--</td>";
+                            }
+                            else
+                            {
+                                tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #ff454d;'>{point.ToString("#0.00")}</td>";
+                            }
                         }
                         else
                         {
@@ -543,10 +550,9 @@ namespace AutoEmailEduso
                     var subject = "";
                     subject += $"EDUSO GỬI BÁO CÁO KẾT QUẢ HỌC TẬP {@class.Name.ToUpper()}";
 
-                    //    //isTest = true;
-                    //    //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                    //    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
-                    //}
+                    //isTest = true;
+                    //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE);
                     var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listTeacher.Select(x => x.Email).ToList();
                     var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
                     _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);

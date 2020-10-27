@@ -146,6 +146,11 @@ namespace BaseCustomerEntity.Database
                 return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
         }
 
+        public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime time, string Center)
+        {
+            return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time && t.IsActive == true).ToEnumerable();
+        }
+
         /// <summary>
         /// 
         /// </summary>
