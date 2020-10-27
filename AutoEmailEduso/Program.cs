@@ -161,7 +161,7 @@ namespace AutoEmailEduso
                     //                             <td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse'> Tài liệu chuyên đề </td>
                     var tbody = "";
                     tbody += "<tbody>";
-                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                    var classesActive = _classService.GetActiveClass4Report(currentTime, center.ID);//lay danh sach lop dang hoat dong
                     var index = 1;
                     long totalStudent = 0, totalstChuaVaoLop = 0, totalActiveStudents = 0; ;
                     long tren8 = 0;

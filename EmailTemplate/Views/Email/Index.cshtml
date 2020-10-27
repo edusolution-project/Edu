@@ -5,9 +5,9 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var classCenter = ViewBag.Centers as Dictionary<string, string>;
-    var dataClass = ViewBag.Data as Dictionary<string, Dictionary<int, string[]>>;
-    var dataClassName = ViewBag.ClassName as Dictionary<string, string>;
+
+    var dataCenter= ViewBag.DataCenter as Dictionary<string, Dictionary<int, double[]>>;
+    var centerName = ViewBag.CenterName as Dictionary<string,string>;
 }
 
 <div id="list-data"></div>
@@ -28,53 +28,52 @@
         });
     }
 </script>
-@{
-    List<string> classIds = classCenter.Keys?.ToList();
-    var totalClass = classIds.Count;
 
-    for (int i = 0; i < totalClass; i++)
+@{ 
+    List<string> centerIDs = dataCenter.Keys?.ToList();
+    var totalCenter = centerIDs.Count;
+    for(int i = 0; i < totalCenter; i++)
     {
-        string id = classIds[i];
-        string center = classCenter[id];
-        string className = dataClassName[id];
-        var data = dataClass[id]; //Dictionary<int,string[]
-        bool isHasW6 = data.Count > 4;
-        string[] w1 = data[0];
-        string[] w2 = data[1];
-        string[] w3 = data[2];
-        string[] w4 = data[3];
-        string[] w5 = data[4];
-        List<string> w6 = new List<string>() { "0", "0", "0", "0", "0", "0", "0" };
-        if (data.Count > 5)
+        string centerID = centerIDs[i];
+        string _centerName = centerName[centerID];
+        var data = dataCenter[centerID];
+
+        Boolean isHasW5 = data.Count > 4;
+        double[] w1 = data[0];
+        double[] w2 = data[1];
+        double[] w3 = data[2];
+        double[] w4 = data[3];
+
+        List<double> w5=new List<double>() { 0, 0, 0, 0, 0, 0, 0 };
+        if (isHasW5)
         {
-            w6 = data[5].ToList();
-        }
+            w5 = data[4].ToList();
+        };
     <script>
             var arrayData = [];
-        setTimeout(function () {
-            var center = "@center";
-            var _class = '@id';
-            var className = '@className';
+            setTimeout(function () {
+            var centerID = "@centerID";
+            @*var _class = '@id';*@
             var div = document.createElement("canvas");
-            var id = "myChart_@id";
+            var id = "myChart_@centerID";
             div.id = id;
             root.appendChild(div);
-            var isW6 = '@isHasW6'.toLowerCase() == "true";
+            var isW5 = '@isHasW5'.toLowerCase() == "true";
             var ctx = document.getElementById(id).getContext('2d');
             //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
-            var labels = isW6 ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5','Tuần 6'] : ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4','Tuần 5'];
+            var labels = isW5 ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'] : ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
 
-            var siso = isW6 ? [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]'), parseFloat('@w5[0]'), parseFloat('@w6[0]')] : [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]'), parseFloat('@w5[0]')];
-            var stChuaVaoLop = isW6 ? [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]'), parseFloat('@w5[1]'), parseFloat('@w6[1]')] : [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]'), parseFloat('@w5[1]')];
-            var min8 = isW6 ? [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]'), parseFloat('@w5[2]'), parseFloat('@w6[2]')] : [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]'), parseFloat('@w5[2]')]
-            var min5 = isW6 ? [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]'), parseFloat('@w5[3]'), parseFloat('@w6[3]')] : [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]'), parseFloat('@w5[3]')]
-            var min2 = isW6 ? [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]'), parseFloat('@w5[4]'), parseFloat('@w6[4]')] : [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]'), parseFloat('@w5[4]')]
-            var min0 = isW6 ? [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]'), parseFloat('@w5[5]'), parseFloat('@w6[5]')] : [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]'), parseFloat('@w5[5]')]
-            var chualam = isW6 ? [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]'), parseFloat('@w5[6]'), parseFloat('@w6[6]')] : [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]'), parseFloat('@w5[6]')]
+            var siso = isW5 ? [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]'), parseFloat('@w5[0]')] : [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]')];
+            var stChuaVaoLop = isW5 ? [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]'), parseFloat('@w5[1]')] : [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]')];
+            var min8 = isW5 ? [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]'), parseFloat('@w5[2]')] : [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]')]
+            var min5 = isW5 ? [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]'), parseFloat('@w5[3]')] : [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]')]
+            var min2 = isW5 ? [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]'), parseFloat('@w5[4]')] : [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]')]
+            var min0 = isW5 ? [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]'), parseFloat('@w5[5]')] : [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]')]
+            var chualam = isW5 ? [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]'), parseFloat('@w5[6]')] : [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]')]
 
             var chart = new Chart(ctx, {
                 // The type of chart we want to create
-                type: 'line', //'bar', //line , radar, Doughnut and Pie , Polar Area,bubble,scatter
+                type: 'bar', //'bar', //line , radar, Doughnut and Pie , Polar Area,bubble,scatter
 
                 // The data for our dataset
                 data: {
@@ -82,44 +81,51 @@
                     datasets: [
                         {
                             label: 'Sĩ số',
-                            //backgroundColor: 'black',
-                            borderColor: 'black',
+                            backgroundColor: '#8f00ff',
+                            borderColor: '#8f00ff',
+                            minBarLength: 1,//type=bar
                             data: siso
                         },
                         {
                             label: 'Học sinh chưa vào lớp',
-                            //backgroundColor: 'pink',
-                            borderColor: 'pink',
+                            backgroundColor: '#ff7f00',
+                            borderColor: '#ff7f00',
+                            minBarLength: 1,//type=bar
                             data: stChuaVaoLop
                         },
                         {
                             label: '8.0 -> 10',
-                            //backgroundColor: 'red',
-                            borderColor: 'red',
+                            backgroundColor: 'lightgreen',
+                            borderColor: 'green',
+                            minBarLength: 1,//type=bar
                             data: min8
                         },
                         {
                             label: '5.0 -> 7.9',
-                            //backgroundColor: 'green',
-                            borderColor: 'green',
+                            backgroundColor: 'lightblue',
+                            borderColor: 'blue',
+                            minBarLength: 1,//type=bar
                             data: min5
                         },
                         {
                             label: '2.0 -> 4.9',
-                            //backgroundColor: 'blue',
-                            borderColor: 'blue',
+                            backgroundColor: '#ffff33',
+                            borderColor: 'yellow',
+                            minBarLength: 1,//type=bar
                             data: min2
                         },
                         {
                             label: '0.0 -> 1.9',
-                            //backgroundColor: 'violet',
-                            borderColor: 'violet',
+                            backgroundColor: '#ff454d',
+                            borderColor: 'red',
+                            minBarLength: 1,//type=bar
                             data: min0
                         },
                         {
                             label: 'Chưa làm',
-                            //backgroundColor: 'yellow',
-                            borderColor: 'yellow',
+                            backgroundColor: '#4b0082',
+                            borderColor: '#4b0082',
+                            minBarLength: 1,//type=bar
                             data: chualam
                         }
                     ]
@@ -129,37 +135,30 @@
                 options: {
                     @*title: {
                         display: true,
-                        text: 'Báo cáo tháng kết quả học tập lớp ' + '@className.ToString()' + ' tháng ' + (new Date().getMonth() + 1)
+                        text: 'Báo cáo tháng kết quả học tập ' + '@_centerName.ToString()' + ' tháng ' + (new Date().getMonth() + 1)
                     }*@
                 },
                 plugins: [{
                     afterRender: async function () {
                         var x = chart.toBase64Image();
-                        var centerID = '@center';
-                        var classID = '@id';
+                        var centerID = '@centerID';
                         arrayData.push(
                             {
                                 Image: x,
-                                CenterID: centerID,
-                                ClassID: classID
+                                CenterID: centerID
                             }
                         );
-                        console.log(className + " " + countSendMail++);
-                        if (countSendMail == @totalClass) {
-                        //if (countSendMail == 10) {
+                        console.log(countSendMail++);
+                        if (countSendMail == @totalCenter) {
+                            //if (countSendMail == 1) {
+                            //debugger
                             //sendData(arrayData);
                         }
                     }
                 }]
             });
 
-            },5000);
+            }());
     </script>
     }
 }
-
-<script>
-    //if (countSendMail == 6) {
-    //    sendData(arrayData);
-    //}
-</script>

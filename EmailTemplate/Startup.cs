@@ -26,20 +26,7 @@ namespace EmailTemplate
         }
 
         public IConfiguration Configuration { get; }
-            //ClassService classService,
-            //CenterService centerService,
-            //ClassSubjectService classSubjectService,
-            //LessonService lessonService,
-            //LessonScheduleService scheduleService,
-            //AccountService accountService,
-            //StudentService studentService,
-            //TeacherService teacherService,
-            //SkillService skillService,
-            //LessonScheduleService lessonScheduleService,
-            //RoleService roleService,
-            //CourseService courseService,
-            //LearningHistoryService learningHistory,
-            //LessonProgressService lessonProgressService
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
