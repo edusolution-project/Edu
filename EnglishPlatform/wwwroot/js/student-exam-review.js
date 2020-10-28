@@ -534,31 +534,8 @@ var ExamReview = (function () {
 
                     var html = "";
                     var tile = "";
-
-                    //for (i = 0; i < listContent.length; i++) {
-                    //    debugger
-                    //    if (listContent[i].length > content_answer.length) {
-                    //        var test1 = 0;
-                    //        for (j = 0; j < listContent[i].length; j++) {
-                    //            if (listContent[i][j] == content_answer[j]) {
-                    //                test1++;
-                    //            }
-                    //        }
-                    //        tile += test1 + ",";
-                    //    }
-                    //    else {
-                    //        var test2 = 0;
-                    //        for (j = 0; j < content_answer.length; j++) {
-                    //            if (listContent[i][j] == content_answer[j]) {
-                    //                test2++;
-                    //            }
-                    //        }
-                    //        tile += test2 + ",";
-                    //    }
-                    //}
-
-                    //debugger
-                    for (i = 0; i < listContent.length; i++) {
+                   
+                    for (var i = 0; i < listContent.length; i++) {
                         var arrayTxt1 = listContent[i].split(" ");//dap an dung
                         var arrayTxt2 = content_answer.split(" ");//dap an hoc sinh dien
                         if (arrayTxt1.length > arrayTxt2.length) {
@@ -581,25 +558,24 @@ var ExamReview = (function () {
                         }
                     }
 
-
-                    //debugger
                     var tile = tile.split(",");
                     tile.pop();
-                    for (i = 0; i < tile.length; i++) {
+                    for ( var i = 0; i < tile.length; i++) {
                         tile[i] = parseInt(tile[i]);
                     }
                     var index = 0;
                     max = tile[0];
 
                     //debugger
-                    if (max != 0) {
-                        for (i = 0; i < tile.length; i++) {
-                            if (max < tile[i]) {
-                                max = tile[i];
-                                index = i;
-                            }
+                    for (var i = 0; i < tile.length; i++) {
+                        if (max < tile[i]) {
+                            max = tile[i];
+                            index = i;
                         }
+                    }
 
+                    //debugger
+                    if (max != 0) {
                         var chodung1 = "";//ben dap an hoc sinh tra loi
                         var chodung2 = "";//ben dap an dung
 
@@ -608,7 +584,7 @@ var ExamReview = (function () {
                         //debugger
                         if (detail_CorrectAnswer.length == detail_Answer.length) {//TH dap an dung = dap an hoc sinh dien
                             //debugger
-                            for (i = 0; i < detail_Answer.length; i++) {
+                            for ( var i = 0; i < detail_Answer.length; i++) {
                                 if (detail_CorrectAnswer[i] == detail_Answer[i]) {
                                     chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
@@ -621,7 +597,7 @@ var ExamReview = (function () {
                         }
                         else if (detail_CorrectAnswer.length > detail_Answer.length) {//TH dap an dung dai hon dap an hoc sinh dien
                             //debugger
-                            for (i = 0; i < detail_Answer.length; i++) {
+                            for (var i = 0; i < detail_Answer.length; i++) {
                                 if (detail_CorrectAnswer[i] == detail_Answer[i]) {
                                     chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
@@ -631,14 +607,14 @@ var ExamReview = (function () {
                                     chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
-                            for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
+                            for (var i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
                                 chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
                                 chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
                         }
                         else {//TH dap an dung ngan hon dap an hoc sinh dien
                             //debugger
-                            for (i = 0; i < detail_CorrectAnswer.length; i++) {
+                            for (var i = 0; i < detail_CorrectAnswer.length; i++) {
                                 if (detail_CorrectAnswer[i] == detail_Answer[i]) {
                                     chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
@@ -648,12 +624,12 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
-                            for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
+                            for (var i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
                                 chodung1 += "<span style='border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                             }
                         }
                         newlistContent = "";
-                        for (i = 0; i < listContent.length; i++) {
+                        for (var i = 0; i < listContent.length; i++) {
                             if (i == index) {
                                 listContent[i] = chodung2;
                             }

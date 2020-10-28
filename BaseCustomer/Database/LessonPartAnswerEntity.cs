@@ -36,6 +36,9 @@ namespace BaseCustomerEntity.Database
     }
     public class LessonPartAnswerService : ServiceBase<LessonPartAnswerEntity>
     {
+        private IConfiguration config;
+        private string dbName;
+
         public LessonPartAnswerService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<LessonPartAnswerEntity>>
@@ -51,6 +54,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public LessonPartAnswerService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public IEnumerable<LessonPartAnswerEntity> GetByQuestionID(string ID)

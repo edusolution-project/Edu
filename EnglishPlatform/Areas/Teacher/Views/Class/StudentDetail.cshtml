@@ -50,7 +50,6 @@
             <div class="flex rate" v-if="tab[1] || search_subject == ''">
                 <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
                 <span><i class="ic ic-award"></i>Xếp hạng: {{rank.pos + '/' + rank.total}}</span>
-
             </div>
         </div>
         <div class="flex j-between border-b" v-if="search_subject != ''">
@@ -90,7 +89,7 @@
                     <thead>
                         <tr>
                             <th>
-                                <select class="form-control" v-on:change="fillTypeExam($event.target.value)">
+                                <select class="form-control" v-on:change="loadResult()" id="examType">
                                     <option selected value="2">Bài kiểm tra</option>
                                     <option value="1">Bài luyện tập</option>
                                 </select>
@@ -99,10 +98,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-if="fillterResultData == null || fillterResultData.length <= 0">
+                        <tr v-if="resultData == null || resultData.length <= 0">
                             <td colspan="5">Chưa có kết quả</a></td>
                         </tr>
-                        <tr v-for="(item,k) in fillterResultData">
+                        <tr v-for="(item,k) in resultData">
                             <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                             <td>{{formatFullDate(item.LearnLast)}}</td>
@@ -150,7 +149,8 @@
                         <tr>
                             <th scope="col" class="text-center">#</th>
                             <th scope="col" class="text-center">Điểm</th>
-                            <th scope="col" class="text-center">Thời gian</th>
+                            <th scope="col" class="text-center">Giờ làm bài</th>
+                            <th scope="col" class="text-center">Thời gian làm</th>
                             <th scope="col" class="text-center">Trạng thái</th>
                             <th scope="col" class="text-center"></th>
                         </tr>
@@ -160,6 +160,7 @@
                             <td class="text-center">{{k+1}}</td>
                             <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
                             <td class="text-center">{{formatFullDate(item.Created)}}</td>
+                            <td class="text-center">{{getPeriod(item)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
                             <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
                         </tr>
@@ -339,21 +340,22 @@
                     _form.append('ClassSubjectID', _that.search_subject)
                     _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
                     _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
-
+                    _form.append('IsPractice', $("#examType").val() == '1')
                     let _url = '@processUrl("GetLearningResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
-                            //_that.avgPoint = 0;
+                            console.log(_that.resultData);
+                            _that.avgPoint = 0;
 
-                            //if (_that.resultData.length > 0) {
-                            //    _that.resultData.forEach(function (exam) {
-                            //        _that.avgPoint += exam.Result
-                            //    });
-                            //    _that.avgPoint = _that.avgPoint / _that.resultData.length
-                            //}
-                            this.fillTypeExam(2);
-                            console.log(_that.avgPoint)
+                            if (_that.resultData.length > 0) {
+                                _that.resultData.forEach(function (exam) {
+                                    _that.avgPoint += exam.Result
+                                });
+                                _that.avgPoint = _that.avgPoint / _that.resultData.length
+                            }
+                            //this.fillTypeExam();
+                            //console.log(_that.avgPoint)
                         }).catch(e => { })
                 },
                 loadHistory() {
@@ -436,6 +438,24 @@
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY hh:mm A")
                 },
+                getPeriod(obj) {
+                    var startms = moment(obj.Created);
+                    var endms = moment(obj.EndTime);
+                    console.log(startms);
+                    console.log(endms);
+                    var ret = "";
+                    if (endms.days() - startms.days() > 0)
+                        ret += (endms.days() - startms.days()) + "d ";
+                    if (endms.hours() - startms.hours() > 0)
+                        ret += (endms.hours() - startms.hours()) + "h ";
+                    if (endms.minutes() - startms.minutes() > 0)
+                        ret += (endms.minutes() - startms.minutes()) + "m ";
+                    if (endms.second() - startms.second() > 0)
+                        ret += (endms.second() - startms.second()) + "s ";
+                    if (ret.length == 0)
+                        ret = "0s";
+                    return ret;
+                },
                 showSkillSummary(classsubjectid) {
                     this.search_subject = classsubjectid;
                     console.log(classsubjectid);
@@ -461,16 +481,20 @@
                     let _that = this;
                     let _form = new FormData();
                     _form.append('ID', obj.LessonId);
+                    _form.append('StudentID','@currentStudent.ID');
                     _that.title = obj.Title;
                     var studentID = '@currentStudent.ID';
                     let _url = '@processUrl("GetLessonProgressList", "Exam")'
                     axios.post(_url, _form)
                         .then(response => {
                             var _data = response.data.Data;
-                            var a = _data.find(element => element.StudentID == studentID);
-                            //if (a.ListExam.length > 0) {
-                                _that.studentResult.history = a.ListExam;
-                            //}
+
+                            if (_data != null && _data[0].ListExam != null) {
+                                _that.studentResult.history = _data[0].ListExam;
+                                console.log(_data[0].ListExam);
+                            }
+                            else
+                                _that.studentResult.history = [];
                         }).catch(e => { })
                     _that.$bvModal.show('modal_history');
                 },
@@ -480,32 +504,33 @@
                     else
                         $('#' + id + ' .close').click();
                 },
-                fillTypeExam(type = 2)//mac dinh la bai kiem tra
+                fillTypeExam()//mac dinh la bai kiem tra
                 {
-                    this.fillterResultData = [];
-                    if (type == 2) {//bai kiem tra
-                        for (i = 0; i < this.resultData.length; i++) {
-                            if (this.resultData[i].TemplateType == 2 ) {
-                                this.fillterResultData.push(this.resultData[i]);
-                            }
-                        }
-                    }
-                    else {
-                        for (i = 0; i < this.resultData.length; i++) {
-                            if (this.resultData[i].IsPractice == true) {
-                                this.fillterResultData.push(this.resultData[i]);
-                            }
-                        }
-                    }
-                    let _that = this;
-                    _that.avgPoint = 0;
+                    //this.loadResult(type)
+                    //this.fillterResultData = [];
+                    //if (type == 2) {//bai kiem tra
+                    //    for (i = 0; i < this.resultData.length; i++) {
+                    //        if (this.resultData[i].TemplateType == 2 ) {
+                    //            this.fillterResultData.push(this.resultData[i]);
+                    //        }
+                    //    }
+                    //}
+                    //else {
+                    //    for (i = 0; i < this.resultData.length; i++) {
+                    //        if (this.resultData[i].IsPractice == true) {
+                    //            this.fillterResultData.push(this.resultData[i]);
+                    //        }
+                    //    }
+                    //}
+                    //let _that = this;
+                    //_that.avgPoint = 0;
 
-                    if (_that.fillterResultData.length > 0) {
-                        _that.fillterResultData.forEach(function (exam) {
-                            _that.avgPoint += exam.Result
-                        });
-                        _that.avgPoint = _that.avgPoint / _that.fillterResultData.length
-                    }
+                    //if (_that.fillterResultData.length > 0) {
+                    //    _that.fillterResultData.forEach(function (exam) {
+                    //        _that.avgPoint += exam.Result
+                    //    });
+                    //    _that.avgPoint = _that.avgPoint / _that.fillterResultData.length
+                    //}
                 }
             }
         });

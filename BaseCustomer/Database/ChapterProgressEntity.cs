@@ -49,6 +49,8 @@ namespace BaseCustomerEntity.Database
     {
         private ChapterService _chapterService;
         private LessonService _lessonService;
+        private IConfiguration config;
+        private string dbName;
 
         public ChapterProgressService(IConfiguration config
             //, ChapterService chapterService, LessonService lessonService
@@ -80,6 +82,10 @@ namespace BaseCustomerEntity.Database
                     .Ascending(t => t.ChapterID))
             };
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public ChapterProgressService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         //public async Task UpdateLastLearn(LessonProgressEntity item)

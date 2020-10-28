@@ -58,6 +58,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public ChapterService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+
+        }
+
         public async Task IncreaseLessonCounter(string ID, long lesInc, long examInc, long pracInc, List<string> listid = null)//prevent circular ref
         {
             var r = await CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<ChapterEntity>()

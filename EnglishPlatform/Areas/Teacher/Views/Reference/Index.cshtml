@@ -311,12 +311,13 @@
                 }
             },
             watch : {
-                searchTerm: function(){
+                searchTerm: function () {
+                    console.log("ádfadsfsdaf");
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
-                    if (this.tab[1])
-                        fn = this.getMyClass
+                    //if (this.tab[1])
+                    //    fn = function () { this.getData; }
                     this.searchTimeout = setTimeout(function(){
                         fn()
                     }, 500)

@@ -903,7 +903,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //Send email for each teacher
                     if (tc_sj.Count > 0)
                         foreach (var tc in tc_sj)
-                            _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+                            _ = Task.Run(() =>
+                            {
+                                _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+                            });
 
                     _service.Save(item);
                 }
@@ -1009,7 +1012,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         });
                                     else
                                         tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
-                                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                    _ = Task.Run(() =>
+                                    {
+                                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                    });
                                 }
 
                                 if (isHeadTeacher || update) // head-teacher | owned classsubject => update
@@ -1080,7 +1086,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (tc_sj.Count > 0)
                     foreach (var tc in tc_sj)
-                        _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+                        _ = Task.Run(() =>
+                        {
+                            _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
+                        });
 
                 if (mustUpdateName)
                 {
@@ -1253,7 +1262,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _courseHelper.CloneForClassSubject(nSbj);
 
                 if (notify)
-                    _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, nSbj.CourseName, @class.StartDate, @class.EndDate, center.Name);
+                    _ = Task.Run(() =>
+                    {
+                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, @class.Name, nSbj.CourseName, @class.StartDate, @class.EndDate, center.Name);
+                    });
                 return nSbj.ID;
             }
             catch (Exception e)
@@ -1605,7 +1617,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetLearningResult(DefaultModel model, string ClassID, string ClassSubjectID)
+        public JsonResult GetLearningResult(DefaultModel model, string ClassID, string ClassSubjectID, bool isPractice = false)
         {
             var StudentID = model.ID;
             if (!_studentService.IsStudentInClass(ClassID, StudentID))
@@ -1615,31 +1627,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (currentClass == null)
                 return null;
 
-            List<LessonProgressEntity> data;
-            List<LessonScheduleEntity> passExams;
-            if (string.IsNullOrEmpty(ClassSubjectID))
+
+            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentCs == null)
+                return null;
+
+            var data = new List<LessonProgressEntity>();
+            var passExams = new List<LessonEntity>();
+            if (!string.IsNullOrEmpty(ClassSubjectID))
+            //{
+            //passExams = isPractice ?  _lessonService.GetClassSubjectExams(ClassID) : _lessonService.GetClassSubjectPractices(ClassSubjectID);
+            //passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
+            //data = _lessonProgressService.GetByClassID_StudentID(ClassID, StudentID);
+            //}
+            //else
             {
-                passExams = _lessonScheduleService.GetClassExam(ClassID, model.StartDate, model.EndDate);
-                data = _lessonProgressService.GetByClassID_StudentID(ClassID, StudentID);
-            }
-            else
-            {
-                passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
+                passExams = (!isPractice ? _lessonService.GetClassSubjectExams(ClassSubjectID) : _lessonService.GetClassSubjectPractices(ClassSubjectID)).ToList();
+                //passExams = _lessonScheduleService.GetClassSubjectExam(ClassSubjectID, model.StartDate, model.EndDate);
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
             }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
 
             var lessons = (
-                            from schedule in passExams
-                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.ClassSubjectID == schedule.ClassSubjectID && t.LessonID == schedule.LessonID) ?? new LessonProgressEntity()
+                            from lesson in passExams
+                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
                             //from progress in data
                             //where progress.Tried > 0
                             //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
                             //where schedule != null
                             //let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
                             //where classsubject != null
-                            let lesson = _lessonService.GetItemByID(schedule.LessonID)
+                            let schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID)
+                            //let lesson = _lessonService.GetItemByID(schedule.LessonID)
                             select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
                             {
                                 ScheduleID = schedule.ID,

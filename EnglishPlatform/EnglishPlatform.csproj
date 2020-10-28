@@ -159,7 +159,6 @@
     <None Include="wwwroot\js\calendar\js\Calendar.js" />
     <None Include="wwwroot\js\calendar\js\jquery.timepicker.min.js" />
     <None Include="wwwroot\js\calendar\js\sweetalert.min.js" />
-    <None Include="wwwroot\js\content-render2.js" />
     <None Include="wwwroot\js\curriculum-lesson-frame.js" />
     <None Include="wwwroot\js\curriculum-lesson.js" />
     <None Include="wwwroot\js\custom.js" />

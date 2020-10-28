@@ -47,6 +47,9 @@ namespace BaseCustomerEntity.Database
     public class LessonProgressService : ServiceBase<LessonProgressEntity>
     {
         private LessonService _lessonService;
+        private IConfiguration config;
+        private string dbName;
+
         public LessonProgressService(IConfiguration config) : base(config)
         {
             _lessonService = new LessonService(config);
@@ -80,6 +83,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public LessonProgressService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public async Task<LessonProgressEntity> UpdatePoint(ExamEntity item)
