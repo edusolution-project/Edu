@@ -906,7 +906,7 @@ var Lesson = (function () {
         else {
             $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
         }
-
+        goPartInx(0);
 
 
         //if (!renderLessonData.prototype.IsTest) {
