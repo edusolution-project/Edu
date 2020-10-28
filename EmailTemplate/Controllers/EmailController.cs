@@ -35,6 +35,7 @@ namespace EmailTemplate.Controllers
         private readonly LearningHistoryService _learningHistory;
         private readonly LessonProgressService _lessonProgressService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+        private readonly ReportService _reportService;
         //private static bool isTest = false;
         public EmailController(ILogger<EmailController> logger, 
             MailHelper mailHelper,
@@ -52,7 +53,8 @@ namespace EmailTemplate.Controllers
             CourseService courseService,
             LearningHistoryService learningHistory,
             LessonProgressService lessonProgressService,
-            IRoxyFilemanHandler roxyFilemanHandler
+            IRoxyFilemanHandler roxyFilemanHandler,
+            ReportService reportService
         )
         {
             _logger = logger;
@@ -72,6 +74,7 @@ namespace EmailTemplate.Controllers
             _learningHistory = learningHistory;
             _lessonProgressService = lessonProgressService;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _reportService = reportService;
         }
         public IActionResult Index(DateTime currentTime)
         {
@@ -359,6 +362,8 @@ namespace EmailTemplate.Controllers
         private async Task<string> ContentToSendEmail(List<string> Images, string CenterName)
         {
             var body = "";
+            var chart = "";
+            var tableContent = "";
             var index = 0;
             foreach (var image in Images)
             {
@@ -369,12 +374,14 @@ namespace EmailTemplate.Controllers
                 {
                     link = Program.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
                 }
-                body += $"<div>" +
+                chart += $"<div>" +
                     $"<h3 style='text-align: center;;width: 90%;'>Kết quả học tập {CenterName.ToUpper()} tháng {DateTime.Now.Month - 1}<h3>".ToUpper() +
                     $"<img src='{link}' style='width: 90%;height: 90%;' />" +
                     $"</div>";
                 index++;
             }
+
+            var listT
             return body;
         }
 
@@ -509,7 +516,12 @@ namespace EmailTemplate.Controllers
                     var activeProgress = _lessonProgressService.CreateQuery().Find(
                         x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
                         && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-                    var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
+
+                    //var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
+                    var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                        x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                        && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+
                     var stChuaHoc = classStudent - activeStudents.Count();
                     totalStChuaHoc += stChuaHoc;
 
@@ -532,6 +544,23 @@ namespace EmailTemplate.Controllers
                         min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
                         min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
                         chualam = classStudent - (min0 + min2 + min5 + min8);
+
+                        //luu vao database
+                        var report = new ReportEntity()
+                        {
+                            CenterID = center.ID,
+                            ClassID = @class.ID,
+                            Students = classStudent,
+                            InactiveStudents = stChuaHoc,
+                            MinPoint8 = min8,
+                            MinPoint5 = min5,
+                            MinPoint2 = min2,
+                            MinPoint0 = min0,
+                            TimeExport = DateTime.UtcNow,
+                            StartDate = startWeek,
+                            EndDate = endWeek
+                        };
+                        _reportService.Save(report);
 
                         totalMin8 += min8;
                         totalMin5 += min5;
