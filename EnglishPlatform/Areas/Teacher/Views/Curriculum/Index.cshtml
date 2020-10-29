@@ -207,11 +207,13 @@
                     Init: false,
                     Image: '',
                     TeacherID: '',
-                    IsPublic: false,
+                    //IsPublic: false,
                     TargetCenters: [],
+                    StudentTargetCenters: [],
                     NameCenters: '',
+                    StudentNameCenters: '',
                     SelectAll: false,
-                    PublicWStudent: false
+                    SelectAllStudent: false
                 },
                 cloneItem: {
                     OriginID: '',
@@ -240,7 +242,8 @@
                 hPage: 1,
                 totalRec: 0,
                 componentKey: 0,
-                displaySelect: false
+                displaySelect: false,
+                displayStudentSelect: false
             },
             computed: {
                 page: {
@@ -288,6 +291,10 @@
                 },
                 "addItem.TargetCenters": function () {
                     this.checkToggle()
+                    //debugger
+                },
+                "addItem.StudentTargetCenters": function () {
+                    this.checkToggle(true)
                     //debugger
                 }
             },
@@ -356,6 +363,8 @@
                     console.log(obj);
                     //debugger
                     let _that = this;
+                    _that.displaySelect = false;
+                    _that.displayStudentSelect = false;
                     if (obj == null) {
                         _that.addItem.ID = '';
                         _that.addItem.SubjectID = '';
@@ -368,6 +377,7 @@
                         _that.addItem.IsPublic = false;
                         _that.addItem.PublicWStudent = false;
                         _that.addItem.TargetCenters = [];
+                        _that.addItem.StudentTargetCenters = [];
                     }
                     else {
                         _that.addItem.ID = obj.ID;
@@ -380,8 +390,8 @@
                         _that.addItem.SkillID = obj.SkillID == null ? '' : obj.SkillID;
                         _that.addItem.Image = obj.Image == null ? '' : obj.Image
                         _that.addItem.TeacherID = obj.TeacherID;
-                        _that.addItem.IsPublic = obj.IsPublic;
-                        _that.addItem.PublicWStudent = obj.PublicWStudent;
+                        //_that.addItem.IsPublic = obj.IsPublic;
+                        //_that.addItem.PublicWStudent = obj.PublicWStudent;
                         if (obj.TargetCenters != null) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
                             if (obj.TargetCenters.length == this.list_centers.length) {
@@ -394,6 +404,20 @@
                         else {
                             _that.addItem.TargetCenters = [];
                             _that.addItem.SelectAll = false;
+                        }
+
+                        if (obj.StudentTargetCenters != null) {
+                            _that.addItem.StudentTargetCenters = obj.StudentTargetCenters;
+                            if (obj.StudentTargetCenters.length == this.list_centers.length) {
+                                _that.addItem.StudentSelectAll = true;
+                            }
+                            else {
+                                _that.addItem.StudentSelectAll = false;
+                            }
+                        }
+                        else {
+                            _that.addItem.StudentTargetCenters = [];
+                            _that.addItem.StudentSelectAll = false;
                         }
                         //debugger
                     }
@@ -473,8 +497,8 @@
                     _form.append('Name', _that.addItem.Name)
                     _form.append('Description', _that.addItem.Description)
                     _form.append('TeacherID', _that.addItem.TeacherID)
-                    _form.append('IsPublic', _that.addItem.IsPublic)
-                    _form.append('PublicWStudent', _that.addItem.PublicWStudent)
+                    //_form.append('IsPublic', _that.addItem.IsPublic)
+                    //_form.append('PublicWStudent', _that.addItem.PublicWStudent)
 
                     var targetStr = _that.addItem.TargetCenters;
                     if (targetStr != null) {
@@ -484,6 +508,15 @@
                                 if (item != "") { _form.append('TargetCenters', item)}
                             });
                     }
+                    var targetStdStr = _that.addItem.StudentTargetCenters;
+                    if (targetStdStr != null) {
+                        var targets = targetStdStr.toString().split(',');
+                        if (targets.length > 0)
+                            targets.forEach(function (item, pos) {
+                                if (item != "") { _form.append('StudentTargetCenters', item) }
+                            });
+                    }
+
                     let _url = '@processUrl("CreateOrUpdate","Curriculum")'
                     _that.isLoading = true
                     axios.post(_url, _form)
@@ -701,29 +734,59 @@
                         reader.readAsDataURL(input.files[0]); // convert to base64 string
                     }
                 },
-                toggleSelect() {
-                    this.displaySelect = !this.displaySelect
+                toggleSelect(st = false) {
+                    if (st) {
+                        this.displayStudentSelect = !this.displayStudentSelect
+                        this.displaySelect = false;
+                    }
+                    else {
+                        this.displaySelect = !this.displaySelect
+                        this.displayStudentSelect = false;
+                    }
                 },
-                checkToggle() {
-                    this.addItem.SelectAll = (this.addItem.TargetCenters.length == this.list_centers.length)
-                    this.addItem.NameCenters = ''
-                    for (i = 0; i < this.list_centers.length; i++) {
-                        for (j = 0; j < this.addItem.TargetCenters.length; j++) {
-                            if (this.list_centers[i].ID == this.addItem.TargetCenters[j]) {
-                                this.addItem.NameCenters += this.list_centers[i].Name + '; '
+                checkToggle(st = false) {
+                    if (!st) {
+                        this.addItem.SelectAll = (this.addItem.TargetCenters.length == this.list_centers.length)
+                        this.addItem.NameCenters = ''
+                        for (i = 0; i < this.list_centers.length; i++) {
+                            for (j = 0; j < this.addItem.TargetCenters.length; j++) {
+                                if (this.list_centers[i].ID == this.addItem.TargetCenters[j]) {
+                                    this.addItem.NameCenters += this.list_centers[i].Name + '; '
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        this.addItem.StudentSelectAll = (this.addItem.StudentTargetCenters.length == this.list_centers.length)
+                        this.addItem.StudentNameCenters = ''
+                        for (i = 0; i < this.list_centers.length; i++) {
+                            for (j = 0; j < this.addItem.StudentTargetCenters.length; j++) {
+                                if (this.list_centers[i].ID == this.addItem.StudentTargetCenters[j]) {
+                                    this.addItem.StudentNameCenters += this.list_centers[i].Name + '; '
+                                }
                             }
                         }
                     }
                 },
-                checkToggleAll() {
+                checkToggleAll(st = false) {
                     var _that = this
-                    _that.addItem.TargetCenters = []
-                    if (_that.addItem.SelectAll) {
-                        _that.list_centers.forEach(function (item, pos) {
-                            _that.addItem.TargetCenters.push(item.ID)
-                        })
+                    if (!st) {
+                        _that.addItem.TargetCenters = []
+                        if (_that.addItem.SelectAll) {
+                            _that.list_centers.forEach(function (item, pos) {
+                                _that.addItem.TargetCenters.push(item.ID)
+                            })
+                        }
                     }
-                    _that.checkToggle()
+                    else {
+                        _that.addItem.StudentTargetCenters = []
+                        if (_that.addItem.StudentSelectAll) {
+                            _that.list_centers.forEach(function (item, pos) {
+                                _that.addItem.StudentTargetCenters.push(item.ID)
+                            })
+                        }
+                    }
+                    _that.checkToggle(st)
                 }
             }
         });
@@ -771,14 +834,13 @@
         <div class="d-flex">
             <b-col class="form-group col-md-2 col-sm-12" style="padding-left:0px">
                 <label for="" class="col-sm-6">Chia sẻ</label>
-                <input type="checkbox" style="margin:auto" v-model="addItem.IsPublic" />
             </b-col>
-            <b-col class="form-group col-md-6 col-sm-12" v-if="addItem.IsPublic">
+            <b-col class="form-group col-md-5 col-sm-12">
                 @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
                 <div class="col-sm-12 row" style="position:relative">
                     <div class="col-md-3 col-sm-12">
                         <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()">
-                            Chọn <span class="caret"></span>
+                            Giáo viên <span class="caret"></span>
                         </button>
                     </div>
                     <div class="col-md-9 col-sm-12" v-on:click="toggleSelect()">
@@ -802,10 +864,39 @@
                     </div>
                 </div>
             </b-col>
-            <b-col class="form-group col-md-3 col-sm-12" style="padding-left:0px" v-if="addItem.IsPublic">
-                <label for="" class="col-sm-10">Chia sẻ với học viên: </label>
-                <input type="checkbox" style="margin:auto" v-model="addItem.PublicWStudent" />
+            <b-col class="form-group col-md-5 col-sm-12">
+                @*<label for="" class="col-sm-2">Chọn cơ sở</label>*@
+                <div class="col-sm-12 row" style="position:relative">
+                    <div class="col-md-3 col-sm-12">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(true)">
+                            Học sinh <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="col-md-9 col-sm-12" v-on:click="toggleSelect(true)">
+                        <input type="text" class="form-control " v-model="addItem.StudentNameCenters" disabled />
+                    </div>
+                    <div class="col-md-9" style="position:absolute;right:0;top:40px;z-index:2" v-if="displayStudentSelect">
+                        <div id="selectCenters">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto; height:100px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                <li>
+                                    <a>
+                                        <input type="checkbox" v-model="addItem.StudentSelectAll" v-on:change="checkToggleAll(true)" /><span class="lbl"> Chọn tất cả </span>
+                                    </a>
+                                </li>
+                                <li v-for="(item,k) in list_centers">
+                                    <a>
+                                        <input type="checkbox" :value="item.ID" v-model="addItem.StudentTargetCenters" /><span class="lbl"> {{item.Name}} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </b-col>
+            @*<b-col class="form-group col-md-3 col-sm-12" style="padding-left:0px" v-if="addItem.IsPublic">
+                    <label for="" class="col-sm-10">Chia sẻ với học viên: </label>
+                    <input type="checkbox" style="margin:auto" v-model="addItem.PublicWStudent" />
+                </b-col>*@
         </div>
         <div>
             <b-col class="form-group">

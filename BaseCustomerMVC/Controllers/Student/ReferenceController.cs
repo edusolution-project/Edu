@@ -91,7 +91,6 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (entity != null)
             {
-
                 var _mapping = new MappingEntity<CourseEntity, CourseViewModel>();
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var center = _centerService.GetItemByCode(basis);
@@ -99,9 +98,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 if (isInteractive)
                 {
                     var _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive == true) };
-                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsPublic) };
-                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.TargetCenters.Contains(center.ID)) };
-                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.PublicWStudent) };
+                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.StudentTargetCenters.Contains(center.ID)) };
                     if (!string.IsNullOrEmpty(defaultModel.SearchText))
                     {
                         _filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));

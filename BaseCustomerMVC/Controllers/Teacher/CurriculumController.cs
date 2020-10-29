@@ -366,7 +366,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             if (_roleService.GetItemByID(memberEntity.RoleID).Code != "head-teacher")
-
                 //if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.TeacherID == UserID));
 
@@ -397,14 +396,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //var DataResponse = data;
 
                 var rsp = DataResponse.ToEnumerable().Select(o =>
-
-                        _courseViewMapping.AutoOrtherType(o, new CourseViewModel()
-                        {
-                            SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
-                            GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                            TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
-                        })).ToList();
+                    _courseViewMapping.AutoOrtherType(o, new CourseViewModel()
+                    {
+                        //SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
+                    })).ToList();
 
 
                 response = new Dictionary<string, object>
@@ -593,14 +591,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
-                    olditem.IsPublic = item.IsPublic;
-                    olditem.PublicWStudent = item.PublicWStudent;
+                    //olditem.IsPublic = item.IsPublic;
+                    //olditem.PublicWStudent = item.PublicWStudent;
                     //if (item.TargetCenters != null && item.TargetCenters[0] != null)
                     //{
                     //    var listCenters = item.TargetCenters[0].Split(',');
                     //    item.TargetCenters = listCenters.ToList();
                     //}
                     olditem.TargetCenters = item.TargetCenters;
+                    olditem.StudentTargetCenters = item.StudentTargetCenters;
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
                     {
@@ -2252,7 +2251,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //Create a new paragraph
                     //Lưu ý
                     Paragraph paragraph = doc.AddSection().AddParagraph();
-                    TextRange TR3=paragraph.AppendText("Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
+                    TextRange TR3 = paragraph.AppendText("Lưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
                     TR3.CharacterFormat.FontSize = 12;
                     TR3.CharacterFormat.TextColor = Color.Red;
 
@@ -2313,7 +2312,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var row = table.Rows[i];
                             var cells = row.Cells;
-                            if (cells[0].Paragraphs[0].Text.ToString()!="") { //question
+                            if (cells[0].Paragraphs[0].Text.ToString() != "")
+                            { //question
                                 pos++;
                                 var question = new QuestionViewModel
                                 {
