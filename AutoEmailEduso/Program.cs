@@ -176,13 +176,12 @@ namespace AutoEmailEduso
                     {
 
                         //Lay danh sach ID hoc sinh trong lop
-                        var studentIds = _studentService.GetStudentsByClassId(_class.ID).Select(t => t.ID).ToList();
+                        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
+                        var studentIds = students.Select(t => t.ID).ToList();
                         //totalStudent += studentIds.Count();
 
                         var classStudent = studentIds.Count();
                         totalStudent += classStudent;
-
-
 
                         //Lay danh sach ID bai hoc duoc mo trong tuan
 
@@ -208,26 +207,8 @@ namespace AutoEmailEduso
                         var stChuaVaoLop = classStudent - activeStudents.Count();
                         totalstChuaVaoLop += stChuaVaoLop;
 
-                        //lay cac hoc lieu co bai hoc trong tuan
-                        //var classSbjs = from r in activeLessons
-                        //                group r by r.ClassSubjectID
-                        //                into g
-                        //                select g.OrderByDescending(t => t.StartDate).FirstOrDefault();
-
-                        //var listInfo = from r in classSbjs
-                        //               let sbj = _classSubjectService.GetItemByID(r.ClassSubjectID)
-                        //               let lesson = _lessonService.GetItemByID(r.LessonID)
-                        //               select new ClassSubjectInfo
-                        //               {
-                        //                   Name = sbj.CourseName,
-                        //                   LessonName = lesson.Title,
-                        //                   Start = r.StartDate,
-                        //                   Type = sbj.TypeClass
-                        //               };
-
                         // danh sach bai kiem tra
                         var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
                         //ket qua lam bai cua hoc sinh trong lop
                         var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                            group r by r.StudentID

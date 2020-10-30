@@ -53,6 +53,8 @@ namespace EmailTemplate
             services.AddSingleton<LearningHistoryService>();
             services.AddSingleton<LessonProgressService>();
             services.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
+            services.AddSingleton<ReportService>();
+            services.AddSingleton<IndexService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }

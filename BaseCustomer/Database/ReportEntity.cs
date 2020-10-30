@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BaseCustomerEntity.Database
@@ -32,6 +33,9 @@ namespace BaseCustomerEntity.Database
         public DateTime StartDate { get; set; }//THời gian bắt đầu
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }//Thời gian kết thúc
+
+        [JsonProperty("ClassName")]
+        public String ClassName { get; set; }
     }
 
     public class ReportService : ServiceBase<ReportEntity>
@@ -42,6 +46,19 @@ namespace BaseCustomerEntity.Database
             _indexService = indexService;
             var indexs = new List<CreateIndexModel<ReportEntity>> { };
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public IEnumerable<ReportEntity> GetReport(DateTime TimeExport, String centerID, String classID = null)
+        {
+            if (String.IsNullOrEmpty(classID))
+            {
+                return CreateQuery().Find(x => x.CenterID == centerID && x.TimeExport == TimeExport).ToEnumerable();
+            }
+            else
+            {
+                return CreateQuery().Find(x => x.CenterID == centerID && x.ClassID == classID && x.TimeExport == TimeExport).ToEnumerable();
+            }
+            
         }
     }
 }
