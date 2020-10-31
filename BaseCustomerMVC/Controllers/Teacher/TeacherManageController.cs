@@ -59,6 +59,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassSubjectProgressService classSubjectProgressService,
             ScoreStudentService scoreStudentService,
             StudentService studentService,
+            StudentHelper studentHelper,
             CenterService centerService,
             TeacherHelper teacherHelper,
             MailHelper mailHelper,
@@ -87,7 +88,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _env = evn;
             _configuration = iConfig;
             _defaultPass = _configuration.GetValue<string>("SysConfig:DP");
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _studentHelper = studentHelper;
         }
 
         public IActionResult Index(DefaultModel model, string basis)
@@ -251,7 +252,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
                 _teacherService.Save(oldobj);
                 if (!exist)
-                    _ = _mailHelper.SendTeacherJoinCenterNotify(tc.FullName, tc.Email, "", center.Name);
+                    _ = Task.Run(() =>
+                    {
+                        _ = _mailHelper.SendTeacherJoinCenterNotify(tc.FullName, tc.Email, "", center.Name);
+                    });
             }
             else
             {
@@ -297,7 +301,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             RoleID = teacher.ID
                         };
                         _accountService.CreateQuery().InsertOne(account);
-                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                        _ = Task.Run(() =>
+                        {
+                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                        });
                     }
                 }
             }
@@ -373,7 +380,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new { error = "Thông tin không chính xác" });
             acc.PassWord = Core_v2.Globals.Security.Encrypt(Password);
             _accountService.Save(acc);
-            _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
+            _ = Task.Run(() =>
+            {
+                _ = _mailHelper.SendPasswordChangeNotify(acc, Password);
+            });
             return Json(new { msg = "Đã đổi mật khẩu" });
         }
 
@@ -456,7 +466,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     acc.Phone = teacher.Phone;
                                     _accountService.Save(acc);
                                     if (!exist)
-                                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, "", center.Name);
+                                        _ = Task.Run(() =>
+                                        {
+                                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, "", center.Name);
+                                        });
                                 }
                                 else
                                 {
@@ -495,7 +508,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         RoleID = teacher.ID
                                     };
                                     _accountService.CreateQuery().InsertOne(account);
-                                    _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                                    _ = Task.Run(() =>
+                                    {
+                                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                                    });
                                 }
                                 counter++;
                             }

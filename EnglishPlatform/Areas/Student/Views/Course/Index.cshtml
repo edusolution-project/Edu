@@ -154,10 +154,9 @@
                                         </p>
                                     </div>
                                     <template>
-                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
-                                        <button v-else type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
+                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
+                                        <button v-else type="button" class="btn btn-delete" v-on:click="removeCourse(csbj)"><i class="far fa-trash-alt"></i></button>
                                     </template>
-                                    @*<button type="button" class="btn btn-outline-danger" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>*@
                                 </div>
                             </li>
                         </ul>
@@ -192,15 +191,20 @@
                 height: auto;
             }
 
-        .btn-outline-danger {
+        .btn-delete {
             position: absolute;
             right: 30px;
             /*bottom: 10px;*/
             display: none;
         }
 
-        .ls-practice li:hover .btn-outline-danger {
+        .ls-practice li:hover .btn-delete {
             display: inline-block
+        }
+
+        .ls-practice .btn-delete:hover {
+            border: solid 1px #CCC;
+            border-radius: 2px;
         }
     </style>
     <script>
@@ -425,44 +429,58 @@
                 //    this.eDate = evalue;
                 //    this.sDate = svalue;
                 //},
-                removeCourse(ID,Name) {
-                    let _that = this
+                removeCourse(csbj) {
                     let _form = new FormData()
-                    _form.append('ClassSubjectID', ID);
+                    _form.append('ClassSubjectID', csbj.ID);
                     //let _url = '@processUrl("RemoveCourse", "Class")';
                     let _url = '@processUrl("Remove", "Class")';
-                    if (window.confirm("Bạn muốn xoá học liệu " + Name + " ?")) {
+                    Swal.fire({
+                        //title: "Xác nhận xoá học liệu " + csbj.CourseName + " ?",
+                        html: "Xác nhận xoá học liệu <br/><b>" + csbj.CourseName + "</b> ?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy',
+                    }).then(result => {
+                        if (result.value) {
+                            Swal.fire({
+                                title: 'Đang xóa học liệu ...',
+                                onBeforeOpen() {
+                                    Swal.showLoading()
+                                },
+                                onAfterClose() {
+                                    Swal.hideLoading()
+                                },
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                allowEnterKey: false
+                            });
+                            axios.post(_url, _form)
+                                .then(response => {
+                                    if (!response.data.Status) {//xoa khong thanh cong
+                                        Swal.fire(response.data.Msg, "warning")
+                                        //alert(response.data.Msg);
+                                    }
+                                    else {//xoa thanh cong
+                                        Swal.fire(response.data.Msg, "success");
+                                        //remove deleted course
 
-                        Swal.fire({
-                            title: 'Wait ...',
-                            onBeforeOpen() {
-                                Swal.showLoading()
-                            },
-                            onAfterClose() {
-                                Swal.hideLoading()
-                            },
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            allowEnterKey: false
-                        });
+                                        this.classSubjects.splice(this.classSubjects.indexOf(csbj), 1);
 
-                        axios.post(_url, _form)
-                            .then(response => {
-                                if (!response.data.Status) {//xoa khong thanh cong
-                                    alert(response.data.Msg);
+                                        //alert(response.data.Msg);
+                                        //_that.changeSubject();
+                                        //Swal.close();
+                                    }
+                                }).catch(e => {
+                                    console.log(e);
                                     Swal.close()
-                                }
-                                else {//xoa thanh cong
-                                    alert(response.data.Msg);
-                                    _that.changeSubject();
-                                    Swal.close();
-                                }
-                            }).catch(e => {
-                                alert(e);
-                                Swal.close()
-                            })
-                    }
-                    else return false;
+                                })
+                        }
+                        else {
+                            Swal.close();
+                            return false;
+                        }
+                    });
                 },
                 isMobileDevice() {
                     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {

@@ -56,6 +56,10 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public LessonScheduleService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+        }
+
         public IEnumerable<LessonScheduleEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)
         {
             return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();

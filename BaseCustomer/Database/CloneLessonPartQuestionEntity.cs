@@ -21,6 +21,9 @@ namespace BaseCustomerEntity.Database
     }
     public class CloneLessonPartQuestionService : ServiceBase<CloneLessonPartQuestionEntity>
     {
+        private IConfiguration config;
+        private string dbName;
+
         public CloneLessonPartQuestionService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<CloneLessonPartQuestionEntity>>
@@ -44,6 +47,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public CloneLessonPartQuestionService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public async Task RemoveManyAsync(List<string> Ids)

@@ -2459,41 +2459,41 @@ button, input, a {
     overflow: hidden
 }
 
-#ed_table{
-    table-layout:fixed;
+#ed_table {
+    table-layout: fixed;
 }
 
-#ed_table thead {
-    background: #D0DFE8
-}
-
-    #ed_table thead th {
-        text-align: center
+    #ed_table thead {
+        background: #D0DFE8
     }
 
-        #ed_table thead th ~ th {
-            border-left: 1px dashed #4E6774
+        #ed_table thead th {
+            text-align: center
         }
 
-#ed_table tbody {
-    background: #FAFAFA
-}
+            #ed_table thead th ~ th {
+                border-left: 1px dashed #4E6774
+            }
 
-    #ed_table tbody td {
-        text-align: center;
-        vertical-align: middle;
-        padding: 1rem .5rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    #ed_table tbody {
+        background: #FAFAFA
     }
 
-        #ed_table tbody td span {
-            display: block
+        #ed_table tbody td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 1rem .5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        #ed_table tbody td .title {
-            color: #000
-        }
+            #ed_table tbody td span {
+                display: block
+            }
+
+            #ed_table tbody td .title {
+                color: #000
+            }
 
 .btn-act {
     background: none;
@@ -2840,7 +2840,7 @@ fillquiz, fillquiz.quiz-item {
 }
 
 .quiz-item.selection {
-    background: #EEE;
+    background: #fbf3f9;
 }
 
 .fillquiz:empty::before {

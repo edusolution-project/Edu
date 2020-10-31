@@ -11,14 +11,28 @@ namespace BaseCustomerMVC.Globals
     {
         private readonly StudentService _studentService;
         private readonly AccountService _accountService;
+        private readonly ProgressHelper _progressHelper;
 
         public StudentHelper(
             StudentService studentService,
-            AccountService accountService
+            AccountService accountService,
+            ProgressHelper progressHelper
         )
         {
             _accountService = accountService;
             _studentService = studentService;
+            _progressHelper = progressHelper;
+        }
+
+        public bool LeaveClass(string ClassID, string StudentID)
+        {
+            if (_studentService.LeaveClass(ClassID, StudentID) > 0)
+            {
+                //remove history, exam, exam detail, progress...
+                _ = _progressHelper.RemoveClassStudentHistory(ClassID, StudentID);
+                return true;
+            }
+            return false;
         }
 
         public void ChangeStatus(string id, bool status)

@@ -54,6 +54,7 @@ namespace BaseCustomerMVC.Models
             Status = t.Status;
             Marked = t.Marked;
             MaxPoint = t.MaxPoint;
+            EndTime = t.Updated;
         }
 
         [JsonProperty("ExamID")]
@@ -74,6 +75,8 @@ namespace BaseCustomerMVC.Models
         public double MaxPoint { get; set; }
         [JsonProperty("Status")]
         public bool Status { get; set; }
+        [JsonProperty("EndTime")]
+        public DateTime EndTime { get; set; }
     }
 
 

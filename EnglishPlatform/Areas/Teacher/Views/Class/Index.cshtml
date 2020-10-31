@@ -539,7 +539,7 @@
                         .then(response => {
                             _that.tableData = response.data.Data;
                             _that.tableData.forEach(function (item, pos) {
-                                console.log(item);
+                                //console.log(item);
                                 item.IsOwner = item.Creator == '@userid';
                                 item.TeacherID = item.Creator;
                             });
@@ -657,14 +657,14 @@
                     axios.post(_url, _form)
                         .then(response => {
                             _that.isLoading = false;
-                            console.log(response.data);
+                            //console.log(response.data);
                             if (response.data.Error != null)
                                 alert(response.data.Error)
                             else {
 
                                 this.getData();
                                 _that.$bvModal.hide('modal_class');
-                                console.log(_that.class_info.ID);
+                                //console.log(_that.class_info.ID);
 
                                 if (_that.class_info.ID == null)//add
                                 {
@@ -766,6 +766,7 @@
                         }
                     }
                     else {
+
                         _that.class_info.ID = obj.ID;
                         _that.class_info.Description = obj.Description;
                         _that.class_info.Name = obj.Name;
@@ -778,7 +779,7 @@
                         }
                         _that.class_info.StartDate = this.formatDate(obj.StartDate);
                         _that.class_info.EndDate = this.formatDate(obj.EndDate);
-                        _that.class_info.IsOwner = obj.TeacherID == '@userid';
+                        _that.class_info.IsOwner = (obj.TeacherID == '@userid');
                         _that.class_info.subject = [];
                         let _form = new FormData()
                         _form.append('ClassID', obj.ID)
@@ -812,7 +813,7 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
-                                    _that.class_info.IsOwner = item.TeacherID == '@userid';
+                                    //_that.class_info.IsOwner = item.TeacherID == '@userid';
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
@@ -1259,8 +1260,6 @@
                     return item.SubjectID == obj.SubjectID && (item.IsActive || item.ID == obj.GradeID)
                 },
                 matchTeacher(obj, item) {
-                    //console.log(obj)
-                    //console.log(item);
                     return (item.SubjectID == obj.SubjectID)
                         && (item.IsActive || item.ID == obj.TeacherID)
                 },
@@ -1328,7 +1327,7 @@
                         <img v-on:error="errorImgUrl()" :src="class_info.thumbnail.src" alt="" />
                     </div>
                     <label for="class_thumbnail" class="label frm-upload" v-if="(isHeadTeacher || class_info.IsOwner)">
-                        <i class="ic ic-paper-clip"></i>Tải ảnh lên
+                        <i class="ic ic-paper-clip"></i>Tải ảnh lên {{class_info.IsOwner}}
                         <input type="file" id="class_thumbnail" :ref="`thumbnail`" v-on:change="previewThumb()">
                     </label>
                 </b-col>

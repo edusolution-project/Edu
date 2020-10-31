@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using Core_v2.Globals;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using Microsoft.AspNetCore.Razor.Language;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -23,6 +24,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
         private readonly CourseChapterService _courseChapterService;
+        private readonly LessonHelper _lessonHelper;
+        private readonly ClassHelper _classHelper;
+
 
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
@@ -36,17 +40,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionService _clonequestionService;
         private readonly CloneLessonPartAnswerService _cloneanswerService;
         private readonly VocabularyService _vocabularyService;
-
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public LessonController(
             GradeService gradeservice,
             SubjectService subjectService,
             TeacherService teacherService,
             ClassService classService,
+            ClassHelper classHelper,
             ClassSubjectService classSubjectService,
             CourseService courseService,
             ChapterService chapterService,
             LessonService lessonService,
+            LessonHelper lessonHelper,
             LessonPartService lessonPartService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
@@ -71,6 +77,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _answerService = answerService;
             _lessonScheduleService = lessonScheduleService;
             _centerService = centerService;
+            _classHelper = classHelper;
+            _lessonHelper = lessonHelper;
 
             _clonepartService = cloneLessonPartService;
             _clonequestionService = cloneLessonPartQuestionService;
@@ -458,24 +466,57 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _lessonService.CreateQuery().InsertOne(item);
                     //update total lesson to parent chapter
                     if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
-                    { 
+                    {
                         _ = _chapterService.IncreaseLessonCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                         //TODO: CAP NHAT LAI DIEM
                     }
                     else
-                    { 
+                    {
                         _ = _courseService.IncreaseLessonCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                         //TODO: CAP NHAT LAI DIEM
                     }
                 }
                 else
                 {
-                    item.Updated = DateTime.UtcNow;
-                    var newOrder = item.Order - 1;
-                    item.Order = data.Order;
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    var oldTemplate = data.TemplateType;
+                    data.TemplateType = item.TemplateType;
+                    data.Title = item.Title;
+                    data.Timer = item.Timer;
+                    data.Multiple = item.Multiple;
+                    data.Etype = item.Etype;
+                    data.Limit = item.Limit;
 
-                    if (item.Order != newOrder)//change Position
+                    if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
+                        data.Limit = 0;
+
+                    data.Updated = DateTime.UtcNow;
+                    var newOrder = item.Order - 1;
+                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, data);
+
+
+                    if (item.TemplateType != oldTemplate)
+                    {
+                        var examInc = 0;
+                        var pracInc = 0;
+                        if (_lessonHelper.IsQuizLesson(item.ID)) pracInc = 1;
+                        if (item.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
+                        {
+                            examInc = -1;
+                            data.IsPractice = pracInc == 1;
+                        }
+                        else
+                        {
+                            examInc = 1;
+                            data.IsPractice = false;
+                            pracInc = pracInc == 1 ? -1 : 0;
+                        }
+                        if (!string.IsNullOrEmpty(data.ChapterID) && data.ChapterID != "0")
+                            _ = _classHelper.IncreaseChapterCounter(data.ChapterID, 0, examInc, pracInc);
+                        else
+                            _ = _classHelper.IncreaseClassSubjectCounter(data.ClassSubjectID, 0, examInc, pracInc);
+                    }
+
+                    if (data.Order != newOrder)//change Position
                     {
                         ChangeLessonPosition(item, newOrder);
                     }

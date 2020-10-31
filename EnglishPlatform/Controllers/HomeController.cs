@@ -22,6 +22,7 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
+using com.wiris.util.ui;
 
 namespace EnglishPlatform.Controllers
 {
@@ -65,50 +66,58 @@ namespace EnglishPlatform.Controllers
         private readonly GradeService _gradeService;
         private readonly ReferenceService _referenceService;
         private readonly ProgressHelper _progressHelper;
+        private readonly ClassHelper _classHelper;
+        private readonly LessonHelper _lessonHelper;
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
         private readonly ExamService _examService;
         private readonly VocabularyService _vocabularyService;
+        private readonly IConfiguration _config;
 
-        public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService
-            , TeacherService teacherService
-            , StudentService studentService
-            , IAuthenService authenService
-            , AccessesService accessesService
-            , ClassService classService
-            , IOptions<DefaultConfigs> defaultvalue
-            , CalendarHelper calendarHelper
-            , MailHelper mailHelper
-            , UserAndRoleService userAndRoleService
-            , CenterService centerService
-            , LessonScheduleService scheduleService
-            , AuthorityService authorityService
-            , ILog log
-            , NewsService newsService
-            , NewsCategoryService newsCategoryService
-            , QCService QCService
-            , IConfiguration iConfig
-            , IHttpContextAccessor httpContextAccessor
+        public HomeController(AccountService accountService, RoleService roleService, AccountLogService logService,
+            TeacherService teacherService,
+            StudentService studentService,
+            IAuthenService authenService,
+            AccessesService accessesService,
+            ClassService classService,
+            IOptions<DefaultConfigs> defaultvalue,
+            CalendarHelper calendarHelper,
+            MailHelper mailHelper,
+            UserAndRoleService userAndRoleService,
+            CenterService centerService,
+            LessonScheduleService scheduleService,
+            AuthorityService authorityService,
+            ILog log,
+            NewsService newsService,
+            NewsCategoryService newsCategoryService,
+            QCService QCService,
+            IConfiguration iConfig,
+            IHttpContextAccessor httpContextAccessor,
 
-            , ClassProgressService classProgressService
-            , ClassSubjectService classSubjectService
-            , LessonService lessonService
-            , SkillService skillService
-            , SubjectService subjectService
-            , LearningHistoryService learningHistoryService
-            , ClassSubjectProgressService classSubjectProgressService
-            , CourseService courseService
-            , GradeService gradeService
-            , ReferenceService referenceService
-            , ProgressHelper progressHelper
-            , CloneLessonPartService cloneLessonPartService
-            , CloneLessonPartAnswerService cloneLessonPartAnswerService
-            , CloneLessonPartQuestionService cloneLessonPartQuestionService
-            , ExamService examService
-            , VocabularyService vocabularyService
+            ClassProgressService classProgressService,
+            ClassSubjectService classSubjectService,
+            LessonService lessonService,
+            SkillService skillService,
+            SubjectService subjectService,
+            LearningHistoryService learningHistoryService,
+            ClassSubjectProgressService classSubjectProgressService,
+            CourseService courseService,
+            GradeService gradeService,
+            ReferenceService referenceService,
+            ProgressHelper progressHelper,
+            ClassHelper classHelper,
+            LessonHelper lessonHelper,
+            StudentHelper studentHelper,
+
+            CloneLessonPartService cloneLessonPartService,
+            CloneLessonPartAnswerService cloneLessonPartAnswerService,
+            CloneLessonPartQuestionService cloneLessonPartQuestionService,
+            ExamService examService,
+            VocabularyService vocabularyService
             )
         {
+            _config = iConfig;
             _accessesService = accessesService;
             _authenService = authenService;
             _accountService = accountService;
@@ -117,7 +126,7 @@ namespace EnglishPlatform.Controllers
             _teacherService = teacherService;
             _studentService = studentService;
             _classService = classService;
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _studentHelper = studentHelper;
             _calendarHelper = calendarHelper;
             _log = log;
             _scheduleService = scheduleService;
@@ -143,7 +152,11 @@ namespace EnglishPlatform.Controllers
             _courseService = courseService;
             _gradeService = gradeService;
             _referenceService = referenceService;
+
             _progressHelper = progressHelper;
+            _classHelper = classHelper;
+            _lessonHelper = lessonHelper;
+
             _cloneLessonPartService = cloneLessonPartService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
@@ -211,10 +224,10 @@ namespace EnglishPlatform.Controllers
             }
             else
             {
-                //_authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                //HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                //return RedirectToAction("Login");
-                return View();
+                _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
+                HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                return RedirectToAction("Login");
+                //return View();
             }
         }
 
@@ -365,7 +378,7 @@ namespace EnglishPlatform.Controllers
                                 new Claim("UserID",defaultUser.ID),
                                 new Claim(ClaimTypes.Email, _username),
                                 new Claim(ClaimTypes.Name, defaultUser.Name),
-                                new Claim(ClaimTypes.Role,roleCode),
+                                new Claim(ClaimTypes.Role, roleCode),
                                 new Claim("Type", Type)};
 
 
@@ -475,7 +488,10 @@ namespace EnglishPlatform.Controllers
                             _teacherService.CreateQuery().InsertOne(teacher);
                             user.UserID = teacher.ID;
                             //send email for teacher
-                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
+                            _ = Task.Run(() =>
+                            {
+                                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
+                            });
                             break;
                         default: //temporary block
                             //create student
@@ -542,7 +558,10 @@ namespace EnglishPlatform.Controllers
                     _accountService.CreateOrUpdate(user);
 
                     var resetLink = $"https://{host}/forgot-password?code={OTP}";
-                    _ = _mailHelper.SendResetPassConfirm(user, resetLink, OTP);
+                    _ = Task.Run(() =>
+                    {
+                        _ = _mailHelper.SendResetPassConfirm(user, resetLink, OTP);
+                    });
                     Status = true;
                     Url = $"https://{host}/forgot-password";
                 }
@@ -626,7 +645,10 @@ namespace EnglishPlatform.Controllers
                         user.TimeOut = new DateTime(1990, 01, 01, 00, 00, 00);
                         user.VerificationCodes = "";
                         _accountService.CreateOrUpdate(user);
-                        _ = _mailHelper.SendPasswordChangeNotify(user, NewPassword);
+                        _ = Task.Run(() =>
+                        {
+                            _ = _mailHelper.SendPasswordChangeNotify(user, NewPassword);
+                        });
                         Message = "Thay đổi mật khẩu thành công! Đang điều hướng về trang đăng nhập...";
                         Url = $"https://{host}/login";
                         Status = true;
@@ -1016,6 +1038,169 @@ namespace EnglishPlatform.Controllers
             return Json("OK " + count + " - " + countdelete + " _ " + str);
         }
 
+        public IActionResult RestoreBak()
+        {
+            ClassSubjectService _classSubjectServiceBak = new ClassSubjectService(_config, "Backup");
+            LessonScheduleService _lessonScheduleServiceBak = new LessonScheduleService(_config, "Backup");
+            ChapterService _chapterServiceBak = new ChapterService(_config, "Backup");
+            LessonService _lessonServiceBak = new LessonService(_config, "Backup");
+            CloneLessonPartService _partServiceBak = new CloneLessonPartService(_config, dbName: "Backup");
+            CloneLessonPartQuestionService _questionServiceBak = new CloneLessonPartQuestionService(_config, dbName: "Backup");
+            CloneLessonPartAnswerService _answerServiceBak = new CloneLessonPartAnswerService(_config, dbName: "Backup");
+            ExamService _examServiceBak = new ExamService(_config, dbName: "Backup");
+            ExamDetailService _examDetailServiceBak = new ExamDetailService(_config, dbName: "Backup");
+            LearningHistoryService _historyServiceBak = new LearningHistoryService(_config, dbName: "Backup");
+            ClassSubjectProgressService _classSubjectProgressServiceBak = new ClassSubjectProgressService(_config, dbName: "Backup");
+            ChapterProgressService _chapterProgressServiceBak = new ChapterProgressService(_config, dbName: "Backup");
+            LessonProgressService _lessonProgressServiceBak = new LessonProgressService(_config, dbName: "Backup");
+
+            LessonScheduleService _lessonScheduleService = new LessonScheduleService(_config);
+            ChapterService _chapterService = new ChapterService(_config);
+            LessonService _lessonService = new LessonService(_config);
+            CloneLessonPartService _partService = new CloneLessonPartService(_config);
+            CloneLessonPartQuestionService _questionService = new CloneLessonPartQuestionService(_config);
+            CloneLessonPartAnswerService _answerService = new CloneLessonPartAnswerService(_config);
+            ExamService _examService = new ExamService(_config);
+            ExamDetailService _examDetailService = new ExamDetailService(_config);
+            LearningHistoryService _historyService = new LearningHistoryService(_config);
+            ClassSubjectProgressService _classSubjectProgressService = new ClassSubjectProgressService(_config);
+            ChapterProgressService _chapterProgressService = new ChapterProgressService(_config);
+            LessonProgressService _lessonProgressService = new LessonProgressService(_config);
+
+            var targetClassID = "5f64a23ed533d51c9013ea27";
+            var targetClass = _classService.GetItemByID(targetClassID);
+            var oldCSs = _classSubjectServiceBak.GetByClassID(targetClassID);
+            var newCSs = _classSubjectService.GetByClassID(targetClassID);
+            var studentIds = _studentService.GetStudentIdsByClassId(targetClassID);
+
+            foreach (var cs in oldCSs)
+            {
+                if (newCSs.Any(t => t.ID == cs.ID)) continue;
+                //restore classsubject
+                _classSubjectService.CreateQuery().InsertOneAsync(cs);
+                //add class counter
+                _ = _classHelper.IncreaseClassCounter(targetClassID, cs.TotalLessons, cs.TotalExams, cs.TotalPractices);
+                //add teacher to class
+                if (targetClass.Members.Count(t => t.TeacherID == cs.TeacherID && t.Type == ClassMemberType.TEACHER) == 0)
+                {
+                    targetClass.Members.Add(new ClassMemberEntity { Name = _teacherService.GetItemByID(cs.TeacherID).FullName, TeacherID = cs.TeacherID, Type = ClassMemberType.TEACHER });
+
+                }
+
+                //restore chapters
+                var oldChaps = _chapterServiceBak.GetByClassSubject(cs.ID);
+                if (oldChaps != null && oldChaps.Count() > 0)
+                {
+                    _chapterService.CreateQuery().InsertManyAsync(oldChaps);
+                }
+                //restore lessons
+                var oldLessons = _lessonServiceBak.GetClassSubjectLesson(cs.ID);
+                if (oldLessons != null && oldChaps.Count() > 0)
+                {
+                    _lessonService.CreateQuery().InsertManyAsync(oldLessons);
+                }
+                //restore parts
+                var oldParts = _partServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldParts != null && oldParts.Count() > 0)
+                {
+                    _partService.CreateQuery().InsertManyAsync(oldParts);
+                }
+                //restore question
+                var oldQuizs = _questionServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldQuizs != null && oldQuizs.Count() > 0)
+                {
+                    _questionService.CreateQuery().InsertManyAsync(oldQuizs);
+                }
+                //restore answer
+                var oldAns = _answerServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldAns != null && oldAns.Count() > 0)
+                {
+                    _answerService.CreateQuery().InsertManyAsync(oldAns);
+                }
+                //restore Exam
+                var oldExs = _examServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldExs != null && oldExs.Count() > 0)
+                {
+                    _examServiceBak.CreateQuery().InsertManyAsync(oldExs);
+                }
+                //restore ExamDetail
+                var oldEds = _examDetailServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldEds != null && oldEds.Count() > 0)
+                {
+                    _examDetailService.CreateQuery().InsertManyAsync(oldEds);
+                }
+                //restore History
+                var oldHistories = _historyServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldHistories != null && oldHistories.Count() > 0)
+                {
+                    _historyService.CreateQuery().InsertManyAsync(oldHistories);
+                }
+                //restore classSubjectProgress
+                var oldCsPrgs = _classSubjectProgressServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldCsPrgs != null && oldCsPrgs.Count() > 0)
+                {
+                    foreach (var prg in oldCsPrgs)
+                    {
+                        var update = new UpdateDefinitionBuilder<ClassProgressEntity>()
+                            //.AddToSet(t => t.CompletedLessons, item.ClassSubjectID)
+                            .Inc(t => t.Completed, prg.Completed)
+                            .Inc(t => t.ExamDone, prg.ExamDone)
+                            .Inc(t => t.TotalPoint, prg.TotalPoint)
+                            .Inc(t => t.PracticePoint, prg.PracticePoint)
+                            .Inc(t => t.PracticeDone, prg.PracticeDone);
+                        _ = _classProgressService.Collection.UpdateManyAsync(t => t.ClassID == targetClassID && t.StudentID == prg.StudentID, update, new UpdateOptions { IsUpsert = false });
+                    }
+
+                    _classSubjectProgressService.CreateQuery().InsertManyAsync(oldCsPrgs);
+                }
+                //restore chapterProgress
+                var oldChapPrgs = _chapterProgressServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldChapPrgs != null && oldChapPrgs.Count() > 0)
+                {
+                    _chapterProgressService.CreateQuery().InsertManyAsync(oldChapPrgs);
+                }
+                //restore lessonProgress
+                var oldLsPrgs = _lessonProgressServiceBak.CreateQuery().Find(t => t.ClassSubjectID == cs.ID).ToEnumerable();
+                if (oldLsPrgs != null && oldLsPrgs.Count() > 0)
+                {
+                    _lessonProgressService.CreateQuery().InsertManyAsync(oldLsPrgs);
+                }
+                //restore schedule
+                var oldSchedules = _lessonScheduleServiceBak.GetByClassSubject(cs.ID);
+                if (oldSchedules != null && oldSchedules.Count() > 0)
+                {
+                    _lessonScheduleService.CreateQuery().InsertManyAsync(oldSchedules);
+                }
+
+
+
+                //await _learningHistoryService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+                //var subjectProgresses = _classSubjectProgressService.GetListOfCurrentSubject(ClassSubjectID);
+                //if (subjectProgresses != null)
+                //    foreach (var progress in subjectProgresses)
+                //        await DecreaseClassSubject(progress);//remove subject progress from class progress
+                //await _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+                //await _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+                //await _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassSubjectID == ClassSubjectID);
+
+                //var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
+                ////remove chapter
+                //var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
+                ////remove clone lesson
+                //var LsTask = _lessonHelper.RemoveClassSubjectLesson(cs.ID);
+                ////remove progress: learning history => class progress, chapter progress, lesson progress
+                var LhTask = _progressHelper.RemoveClassSubjectHistory(cs.ID);
+                ////remove exam
+                //var ExTask = _examService.RemoveClassSubjectExam(cs.ID);
+                ////remove classSubject
+                ////await Task.WhenAll(CsTask, CtTask, LsTask, LhTask, ExTask, ExDetailTask);
+                //await _classSubjectService.RemoveAsync(cs.ID);
+
+            }
+            _classService.Save(targetClass);
+            return Json("OK");
+        }
+
         #endregion
         [HttpGet]
         public string CurrentUser()
@@ -1092,6 +1277,7 @@ namespace EnglishPlatform.Controllers
 
         }
 
+        
         //function
         private string getbeatstudent(CenterEntity center)
         {
@@ -1120,7 +1306,7 @@ namespace EnglishPlatform.Controllers
                 }
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
@@ -1224,7 +1410,7 @@ namespace EnglishPlatform.Controllers
                            }).ToList();
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
@@ -1232,7 +1418,8 @@ namespace EnglishPlatform.Controllers
 
         private string GetFinishList(StudentEntity currentStudent, CenterEntity center, DateTime today)
         {
-            try {
+            try
+            {
                 var filter = new List<FilterDefinition<ClassEntity>>();
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive && o.Center == center.ID));
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => currentStudent.JoinedClasses.Contains(o.ID)));
@@ -1262,11 +1449,11 @@ namespace EnglishPlatform.Controllers
                 //           }).ToList();
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
-            }
+        }
 
         private string GetClassSubjects(StudentEntity student, CenterEntity center, string SubjectID = "", string GradeID = "")
         {
@@ -1322,13 +1509,13 @@ namespace EnglishPlatform.Controllers
                 }
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
         }
 
-        private string GetList(ReferenceEntity entity, DefaultModel defaultModel, StudentEntity student,CenterEntity center)
+        private string GetList(ReferenceEntity entity, DefaultModel defaultModel, StudentEntity student, CenterEntity center)
         {
             try
             {
@@ -1347,7 +1534,7 @@ namespace EnglishPlatform.Controllers
                 var result1 = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(_filter)).ToList();
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
@@ -1400,7 +1587,7 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-        private string GetLesson(string LessonID, string ClassID, string ClassSubjectID,string userId)
+        private string GetLesson(string LessonID, string ClassID, string ClassSubjectID, string userId)
         {
             try
             {
@@ -1528,7 +1715,7 @@ namespace EnglishPlatform.Controllers
                 }
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
@@ -1548,12 +1735,14 @@ namespace EnglishPlatform.Controllers
                 }
                 return "OK";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
             //eturn result;
         }
+
+
         #endregion
     }
 

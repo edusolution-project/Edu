@@ -23,6 +23,9 @@ namespace BaseCustomerMVC.Globals
         private readonly ClassSubjectService _classSubjectService;
         private readonly ClassService _classService;
 
+        private readonly ExamService _examService;
+        private readonly ExamDetailService _examDetailService;
+
         public ProgressHelper(
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
@@ -33,7 +36,10 @@ namespace BaseCustomerMVC.Globals
             LessonService lessonService,
             ChapterService chapterService,
             ClassSubjectService classSubjectService,
-            ClassService classService
+            ClassService classService,
+
+            ExamService examService,
+            ExamDetailService examDetailService
         )
         {
             _learningHistoryService = learningHistoryService;
@@ -47,6 +53,9 @@ namespace BaseCustomerMVC.Globals
             _chapterService = chapterService;
             _classSubjectService = classSubjectService;
             _classService = classService;
+
+            _examService = examService;
+            _examDetailService = examDetailService;
         }
 
         #region Learning Progress
@@ -86,8 +95,14 @@ namespace BaseCustomerMVC.Globals
             _ = _chapterProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _classSubjectProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
             _ = _lessonProgressService.CreateQuery().DeleteManyAsync(t => t.ClassID == ClassID && t.StudentID == StudentID);
+
+            _ = _examService.RemoveClassStudentExam(ClassID, StudentID);
+
             return Task.CompletedTask;
         }
+
+
+
 
         public async Task RemoveClassSubjectHistory(string ClassSubjectID)
         {
