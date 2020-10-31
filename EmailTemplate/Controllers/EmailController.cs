@@ -333,7 +333,7 @@ namespace EmailTemplate.Controllers
                 //content.Add(body);
                 //content.Add(chart);
                 //return content;
-                return $"{body}</tbody></table></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table>{chart}";
+                return $"{body}</tbody></table></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table><tr><td colspan='5'>{chart}</td></tr></table>";
             }
             else
             {
