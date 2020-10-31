@@ -373,7 +373,6 @@ var Lesson = (function () {
                 //var iconEdit = $("<i>", { "class": "fas fa-edit mt-2 mb-2 mr-2" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square mt-2 mb-2 mr-2" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash mr-2" });
-                lessonButton.append(iconSort);
 
 
                 lessonButton.append(sort);
@@ -544,6 +543,7 @@ var Lesson = (function () {
                             .empty().append($(this).find('.part-box-header')).append(html).append(media)
                             .appendTo('#leftCol')
                     });
+                    goPartInx(0);
                 }
                 break;
             case mod.TEACHERPREVIEWEXAM:
@@ -730,7 +730,7 @@ var Lesson = (function () {
                     //_footerLeft.append(prevtab);
                     //var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
                     //var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
-                    var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                    //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
                     //_footerCenter.append(btnExplain);
 
                     lesson_action_holder.find("> button").remove();

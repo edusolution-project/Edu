@@ -4,7 +4,9 @@ using BaseCustomerMVC.Models;
 using Core_v2.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
@@ -44,6 +46,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ChapterProgressService _chapterProgressService;
         private readonly ChapterExtendService _chapterExtendService;
         private readonly CalendarHelper _calendarHelper;
+        private readonly CacheHelper _cacheHelper;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly CenterService _centerService;
 
@@ -88,6 +91,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , LessonProgressService lessonProgressService
             , LearningHistoryService learningHistoryService
             , CalendarHelper calendarHelper
+            , CacheHelper cacheHelper
             , CenterService centerService
             , NewsService newsService
             , NewsCategoryService newsCategoryService
@@ -124,10 +128,10 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentMapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _calendarHelper = calendarHelper;
+            _cacheHelper = cacheHelper;
             _centerService = centerService;
             _newsCategoryService = newsCategoryService;
             _newsService = newsService;
-
 
             _lessonPartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonPartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
@@ -496,69 +500,69 @@ namespace BaseCustomerMVC.Controllers.Student
             if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
                 return Json(new { });
 
+
+
+
             var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
+            if (classids == null || classids.Count == 0)
+                return Json(new { });
+            var cacheKey = string.Join(",", classids);
+            List<StudentLessonScheduleViewModel> listSchedule = _cacheHelper.GetCache(cacheKey) as List<StudentLessonScheduleViewModel>;
+            if (listSchedule == null)
+            {
+                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+                //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
 
-            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-            //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+                //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
 
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                if (data == null || data.Count == 0)
+                    return Json(new { });
 
-            var std = (from o in data
-                       let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                       where _lesson != null
-                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                       where _class != null
-                       let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-                       where _cs != null
-                       let skill = _skillService.GetItemByID(_cs.SkillID)
-                       let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                       where _subject != null
-                       let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID, o.ClassSubjectID) != null
-                       let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
-                       let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
-                       select new
-                       {
-                           id = o.ID,
-                           classID = _class.ID,
-                           className = _class.Name,
-                           classSubjectID = _cs.ID,
-                           subjectName = _subject.Name,
-                           title = _lesson.Title,
-                           lessonID = _lesson.ID,
-                           startDate = o.StartDate,
-                           endDate = o.EndDate,
-                           skill = skill,
-                           isLearnt = isLearnt,
-                           type = _lesson.TemplateType,
-                           onlineUrl = o.IsOnline ? onlineUrl : ""
-                       }).OrderBy(t => t.startDate).ToList();
-            //var std = (from o in data.ToList()
-            //           let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-            //           where _class != null
-            //           let skill = _skillService.GetItemByID(o.SkillID)
-            //           //let isLearnt = _learningHistoryService.GetLastLearnt(userId, o.LessonID) != null
-            //           select new
-            //           {
-            //               id = o.ID,
-            //               classID = _class.ID,
-            //               className = _class.Name,
-            //               endDate = o.EndDate,
-            //               students = _class.Students.Count,
-            //               skill = skill
-            //               //isLearnt = isLearnt
-            //           }).ToList();
-            return Json(new { Data = std });
-            //}
-            //catch (Exception e)
-            //{
-            //    return Json(new { Err = e.Message });
-            //}
+                listSchedule = (from o in data
+                                let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                                where _lesson != null
+                                let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                                where _class != null
+                                let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                                where _cs != null
+                                let skill = _skillService.GetItemByID(_cs.SkillID)
+                                let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                                where _subject != null
+                                let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
+                                let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
+                                select new StudentLessonScheduleViewModel
+                                {
+                                    id = o.ID,
+                                    classID = _class.ID,
+                                    className = _class.Name,
+                                    classSubjectID = _cs.ID,
+                                    subjectName = _subject.Name,
+                                    title = _lesson.Title,
+                                    lessonID = _lesson.ID,
+                                    startDate = o.StartDate,
+                                    endDate = o.EndDate,
+                                    skill = skill,
+                                    type = _lesson.TemplateType,
+                                    onlineUrl = o.IsOnline ? onlineUrl : ""
+                                }).OrderBy(t => t.startDate).ToList();
+
+                var expireDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0, DateTimeKind.Local);
+                _cacheHelper.SetCache(cacheKey, listSchedule, new DistributedCacheEntryOptions { AbsoluteExpiration = expireDate });
+            }
+            if (listSchedule != null && listSchedule.Count > 0)
+                foreach (var schedule in listSchedule)
+                {
+                    schedule.isLearnt = _learningHistoryService.GetLastLearnt(userId, schedule.lessonID, schedule.classSubjectID) != null;
+                }
+
+            return Json(new { Data = listSchedule });
+
         }
 
         [Obsolete]

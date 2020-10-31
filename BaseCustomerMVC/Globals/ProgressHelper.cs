@@ -412,7 +412,7 @@ namespace BaseCustomerMVC.Globals
             //}
         }
 
-        private async Task UpdateParentChapPoint(string ChapterID, string StudentID, double incPoint, long incCount, double incPracPoint, long incPracCount)
+        public async Task UpdateParentChapPoint(string ChapterID, string StudentID, double incPoint, long incCount, double incPracPoint, long incPracCount)
         {
             var chapter = _chapterService.GetItemByID(ChapterID);
             if (chapter == null)

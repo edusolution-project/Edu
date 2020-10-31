@@ -8,6 +8,7 @@ using System.Text;
 
 namespace BaseCustomerEntity.Database
 {
+    [Serializable]
     public class SkillEntity : EntityBase
     {
         [JsonProperty("Name_vn")]

@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
 using com.wiris.util.ui;
+using MongoDB.Driver.Linq;
 
 namespace EnglishPlatform.Controllers
 {
@@ -1229,17 +1230,22 @@ namespace EnglishPlatform.Controllers
         //[Route("/home/test/{id}")]
         public IActionResult Test(string ID)
         {
-            StudentEntity userST = null;
-            userST = _studentService.GetItemByID(ID);
+            StudentEntity userST = _studentService.CreateQuery().AsQueryable().Sample(1).FirstOrDefault();//get random
+            ViewBag.Student = userST;
+
             if (userST == null)
             {
                 return View("Test/Home");
             }
+            if (userST.Centers == null || userST.Centers.Count == 0)
+                return View("Test/Home");
             var center = _centerService.GetItemByID(userST.Centers[0]);
             if (userST.JoinedClasses == null || userST.JoinedClasses.Count() == 0)
             {
                 return View("Test/Home");
             }
+            if (userST.JoinedClasses == null || userST.JoinedClasses.Count == 0)
+                return View("Test/Home");
             var ClassID = userST.JoinedClasses[0];
             var classsb = _classSubjectService.GetByClassID(ClassID);
             if (classsb == null)
@@ -1257,6 +1263,11 @@ namespace EnglishPlatform.Controllers
             var d = GetFinishList(userST, center, DateTime.Now);
             var e = GetClassSubjects(userST, center);
             var f = GetList(new ReferenceEntity(), new DefaultModel(), userST, center);
+
+            if (classsb == null || classsb.Count == 0)
+            {
+                return View("Test/Home");
+            }
             var g = Modules(classsb[0].ID, userST, center);
             var lessons = _lessonService.CreateQuery().Find(x => x.ClassSubjectID == classsb[0].ID).ToEnumerable();
             var h = "";
@@ -1277,7 +1288,7 @@ namespace EnglishPlatform.Controllers
 
         }
 
-        
+
         //function
         private string getbeatstudent(CenterEntity center)
         {
