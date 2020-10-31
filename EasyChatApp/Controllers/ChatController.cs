@@ -22,6 +22,7 @@ namespace EasyChatApp.Controllers
     public class ChatController : Controller
     {
         const string SYSTEM_EDUSO = "sytem_eduso";
+        const string CSKH_EDUSO = "cskh_eduso";
         private readonly IHubContext<EasyChatHub> _hubContext;
         private readonly ILog _log;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -306,7 +307,7 @@ namespace EasyChatApp.Controllers
             string urlSend = host + "/Chat/SendMessage";
             string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
             string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&pageIndex={pageIndex}&pageSize={pageSize}";
-            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "','SYSTEM_EDUSO':'"+ SYSTEM_EDUSO + "'}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "','SYSTEM_EDUSO':'"+ SYSTEM_EDUSO + "','CSKH_EDUSO':'"+ CSKH_EDUSO + "'}";
             return value;
         }
         [HttpGet]

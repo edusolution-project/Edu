@@ -3,6 +3,7 @@
     var __MEMBERS = [];
     var __TEXT = text;
     var __DEFAULT_MEMBER = { id: g_EasyChatURL.SYSTEM_EDUSO, name:"Thông tin cập nhật hệ thống",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
+    var __CSKH_MEMBER = { id: g_EasyChatURL.CSKH_EDUSO, name:"Thông tin cập nhật hệ thống",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:false,isCSKH:true};
     function Member(){
 
     }
@@ -46,10 +47,14 @@
         if(id == __DEFAULT_MEMBER.id){
             return [__DEFAULT_MEMBER];
         }
+        if(id == __CSKH_MEMBER){
+            return [__CSKH_MEMBER];
+        }
         return __MEMBERS.filter(function(v){if(v.id == id) return v;});
     }
     Member.prototype.GetAll = function(){
         updateItem(__DEFAULT_MEMBER);
+        updateItem(__CSKH_MEMBER);
         return __MEMBERS;
     }
     Member.prototype.Search = function(textSearch){
