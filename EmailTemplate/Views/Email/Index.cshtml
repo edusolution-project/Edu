@@ -81,7 +81,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Kết quả học tập' + Khoi + ' tháng ' + parseInt(new Date().getMonth() + 1),
+                            text: 'Kết quả học tập' + Khoi + ' tháng ' + parseInt(new Date().getMonth() + 1) + ' năm ' + new Date().getFullYear(),
                             position: 'bottom',//top,left,bottom,right,
                             fontSize:15
                         },
@@ -102,8 +102,8 @@
                         datasets: [
                             {
                                 label: 'Điểm 8.0 -> 10',
-                                backgroundColor: 'rgba(34,139,34,1)',//darkgreen
-                                borderColor: 'rgb(0,100,0)',
+                                backgroundColor: 'rgb(200,247,200)',//darkgreen
+                                borderColor: 'rgb(200,247,200)',
                                 minBarLength: 1,
                                 data: minpoint8,
                                 fill: false,
@@ -111,8 +111,8 @@
                             },
                             {
                                 label: 'Điểm 5.0 -> 7.9',
-                                backgroundColor: 'rgba(0,255,0,1)',//limegreen
-                                borderColor: 'rgb(50,205,50)',
+                                backgroundColor: 'rgba(173,216,230,1)',//limegreen
+                                borderColor: 'rgb(173,216,230)',
                                 minBarLength: 1,
                                 data: minpoint5,
                                 fill: false,
@@ -120,8 +120,8 @@
                             },
                             {
                                 label: 'Điểm 2.0 -> 4.9',
-                                backgroundColor: 'rgba(240,128,128,1)',
-                                borderColor: 'rgb(240,128,128)',
+                                backgroundColor: 'rgba(230,216,173,1)',
+                                borderColor: 'rgb(230,216,173)',
                                 minBarLength: 1,
                                 data: minpoint2,
                                 fill: false,
@@ -129,8 +129,8 @@
                             },
                             {
                                 label: 'Điểm 0.0 -> 1.9',
-                                backgroundColor: 'rgba(255,0,0,1)',
-                                borderColor: 'rgb(255,0,0)',
+                                backgroundColor: 'rgba(230,173,188,1)',
+                                borderColor: 'rgb(230,173,188)',
                                 minBarLength: 1,
                                 data: minpoint0,
                                 fill: false,
@@ -139,8 +139,8 @@
                             {
                                 label: 'Chưa làm bài',
                                 //backgroundColor: 'rgba(238,130,238,1)',
-                                backgroundColor: '#4B0082',
-                                borderColor: 'rgb(238,130,238)',
+                                backgroundColor: 'rgb(210,210,226)',
+                                borderColor: 'rgb(210,210,226)',
                                 minBarLength: 1,
                                 data: chuahoc,
                                 fill: false,
@@ -149,8 +149,8 @@
                             {
                                 label: 'Chưa đăng nhập',
                                 //backgroundColor: 'rgba(147,112,219,1)',
-                                backgroundColor: '#9400D3',
-                                borderColor: 'rgb(147,112,219)',
+                                backgroundColor: 'rgb(194,194,216)',
+                                borderColor: 'rgb(194,194,216)',
                                 minBarLength: 1,
                                 data: chuavaolop,
                                 fill: false,

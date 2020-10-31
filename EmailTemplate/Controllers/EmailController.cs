@@ -81,8 +81,8 @@ namespace EmailTemplate.Controllers
         {
             if (currentTime == null || currentTime <= DateTime.MinValue)
             {
-                //currentTime = DateTime.Now;
-                currentTime = new DateTime(2020, 11, 1, 8, 00, 00);
+                currentTime = DateTime.Now;
+                //currentTime = new DateTime(2020, 11, 1, 8, 00, 00);
             }
             IEnumerable<CenterEntity> centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
 
