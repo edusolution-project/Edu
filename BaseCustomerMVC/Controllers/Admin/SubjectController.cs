@@ -105,8 +105,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 {
                     item.ID = null;
                     item.IsAdmin = false;
-                    item.Updated = DateTime.Now;
-                    item.Created = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
+                    item.Created = DateTime.UtcNow;
                     _service.CreateQuery().InsertOne(item);
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -133,7 +133,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (oldData == null) return new JsonResult(null);
                 item.Created = oldData.Created;
                 item.IsAdmin = false;
-                item.Updated = DateTime.Now;
+                item.Updated = DateTime.UtcNow;
                 _service.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
 
                 Dictionary<string, object> response = new Dictionary<string, object>()
@@ -201,7 +201,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"SubjectList-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.xlsx";
+            string excelName = $"SubjectList-{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

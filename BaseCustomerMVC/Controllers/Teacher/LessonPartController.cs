@@ -192,12 +192,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (item.ID == "0" || item.ID == null) //create
                     {
                         item.CourseID = parentLesson.CourseID;
-                        item.Created = DateTime.Now;
+                        item.Created = DateTime.UtcNow;
                         var maxItem = _lessonPartService.CreateQuery()
                             .Find(o => o.ParentID == item.ParentID)
                             .SortByDescending(o => o.Order).FirstOrDefault();
                         item.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                        item.Updated = DateTime.Now;
+                        item.Updated = DateTime.UtcNow;
 
                         if (item.Media == null || string.IsNullOrEmpty(item.Media.Name) || (!item.Media.Name.ToLower().StartsWith("http") && (files == null || !files.Any(f => f.Name == item.Media.Name))))
                         {
@@ -207,7 +207,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             //if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                             //{
-                            //    item.Media.Created = DateTime.Now;
+                            //    item.Media.Created = DateTime.UtcNow;
                             //    item.Media.Size = 0;
                             //    item.Media.Path = item.Media.Name.Trim();
                             //}
@@ -216,7 +216,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             //    var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
                             //    if (file != null)
                             //    {
-                            //        item.Media.Created = DateTime.Now;
+                            //        item.Media.Created = DateTime.UtcNow;
                             //        item.Media.Size = file.Length;
                             //        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                             //    }
@@ -225,7 +225,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                 {
-                                    item.Media.Created = DateTime.Now;
+                                    item.Media.Created = DateTime.UtcNow;
                                     item.Media.Size = 0;
                                     item.Media.Path = item.Media.Name.Trim();
                                     item.Media.Extension = "image/png";
@@ -235,7 +235,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
                                     if (file != null)
                                     {
-                                        item.Media.Created = DateTime.Now;
+                                        item.Media.Created = DateTime.UtcNow;
                                         item.Media.Size = file.Length;
                                         item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                                         item.Media.Extension = "image/png";
@@ -251,7 +251,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                                 item.Media = new Media();
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
-                                item.Media.Created = DateTime.Now;
+                                item.Media.Created = DateTime.UtcNow;
                                 item.Media.Size = file.Length;
                                 if(!typeImage.Contains(extension))
                                 {
@@ -299,7 +299,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             });
 
                             //var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();//update media
-                            //item.Media.Created = DateTime.Now;
+                            //item.Media.Created = DateTime.UtcNow;
                             //item.Media.Size = file.Length;
                             //item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
 
@@ -307,7 +307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
                                 {
-                                    item.Media.Created = DateTime.Now;
+                                    item.Media.Created = DateTime.UtcNow;
                                     item.Media.Size = 0;
                                     item.Media.Path = item.Media.Name.Trim();
                                     //item.Media.Extension = "image/png";
@@ -317,7 +317,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
                                     if (file != null)
                                     {
-                                        item.Media.Created = DateTime.Now;
+                                        item.Media.Created = DateTime.UtcNow;
                                         item.Media.Size = file.Length;
                                         item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                                         item.Media.Extension = "image/png";
@@ -333,7 +333,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                 item.Media = new Media();
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
-                                item.Media.Created = DateTime.Now;
+                                item.Media.Created = DateTime.UtcNow;
                                 item.Media.Size = file.Length;
                                 if (typeVideo.Contains(extension))
                                 {
@@ -353,7 +353,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                         }
 
-                        item.Updated = DateTime.Now;
+                        item.Updated = DateTime.UtcNow;
                         item.Created = olditem.Created;
                         item.Order = olditem.Order;
                         item.CourseID = parentLesson.CourseID;
@@ -751,7 +751,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 WordType = typeText,
                                 Pronunciation = pronunText,
                                 PronunAudioPath = pronunPath,
-                                Created = DateTime.Now,
+                                Created = DateTime.UtcNow,
                                 Description = string.Join(", ", listExp.Where(t => t.WordType == typeText).Select(t => t.Meaning))
                             };
                             listVocab.Add(vocabulary);
@@ -859,7 +859,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     WordType = typeTxt[0],
                                     Pronunciation = pronunText,
                                     PronunAudioPath = pronunPath,
-                                    Created = DateTime.Now,
+                                    Created = DateTime.UtcNow,
                                     Description = string.Join(", ", listExp.Where(t => t.WordType == typeTxt[0]).Select(t => t.Meaning))
                                 };
                                 listVocab.Add(vocabulary);
@@ -995,8 +995,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         .Find(o => o.ParentID == item.ID)
                         .SortByDescending(o => o.Order).FirstOrDefault();
                     quiz.Order = questionVM.Order;
-                    quiz.Created = DateTime.Now;
-                    quiz.Updated = DateTime.Now;
+                    quiz.Created = DateTime.UtcNow;
+                    quiz.Updated = DateTime.UtcNow;
                     quiz.CreateUser = createuser;
 
                     if (quiz.Media != null)
@@ -1012,7 +1012,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             if (quiz.Media.Name.ToLower().StartsWith("http"))
                             {
-                                quiz.Media.Created = DateTime.Now;
+                                quiz.Media.Created = DateTime.UtcNow;
                                 quiz.Media.Size = 0;
                                 quiz.Media.Path = quiz.Media.Name.Trim();
                                 item.Media.Extension = "image/png";
@@ -1033,7 +1033,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         if (typeImage.Contains(extension))
                                         {
 
-                                            quiz.Media.Created = DateTime.Now;
+                                            quiz.Media.Created = DateTime.UtcNow;
                                             quiz.Media.Size = file.Length;
                                             quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
                                             quiz.Media.Extension = "image/png";
@@ -1043,7 +1043,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                             quiz.Media = new Media();
                                             quiz.Media.Name = item.Media.OriginalName = file.FileName;
-                                            quiz.Media.Created = DateTime.Now;
+                                            quiz.Media.Created = DateTime.UtcNow;
                                             quiz.Media.Size = file.Length;
                                             if (typeVideo.Contains(extension))
                                             {
@@ -1086,7 +1086,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 if (typeImage.Contains(extension))
                                 {
-                                    quiz.Media.Created = DateTime.Now;
+                                    quiz.Media.Created = DateTime.UtcNow;
                                     quiz.Media.Size = file.Length;
                                     quiz.Media.Path = await _fileProcess.SaveMediaAsync(file, quiz.Media.OriginalName, "", basis);
                                     quiz.Media.Extension = "image/png";
@@ -1097,7 +1097,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                     quiz.Media = new Media();
                                     quiz.Media.Name = item.Media.OriginalName = file.FileName;
-                                    quiz.Media.Created = DateTime.Now;
+                                    quiz.Media.Created = DateTime.UtcNow;
                                     quiz.Media.Size = file.Length;
                                     if (typeVideo.Contains(extension))
                                     {
@@ -1120,7 +1120,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     quiz.Order = questionVM.Order;
                     quiz.Created = oldquiz.Created;
-                    quiz.Updated = DateTime.Now;
+                    quiz.Updated = DateTime.UtcNow;
                 }
 
                 //quiz:
@@ -1145,8 +1145,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var maxItem = _answerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
                             answer.Order = maxItem != null ? maxItem.Order + 1 : 0;
-                            answer.Created = DateTime.Now;
-                            answer.Updated = DateTime.Now;
+                            answer.Created = DateTime.UtcNow;
+                            answer.Updated = DateTime.UtcNow;
                             answer.CreateUser = quiz.CreateUser;
                             answer.CourseID = quiz.CourseID;
 
@@ -1161,7 +1161,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     if (answer.Media.Name.ToLower().StartsWith("http"))
                                     {
-                                        answer.Media.Created = DateTime.Now;
+                                        answer.Media.Created = DateTime.UtcNow;
                                         answer.Media.Size = 0;
                                         answer.Media.Path = answer.Media.Name.Trim();
                                     }
@@ -1180,7 +1180,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             {
                                                 if (typeImage.Contains(extension))
                                                 {
-                                                    answer.Media.Created = DateTime.Now;
+                                                    answer.Media.Created = DateTime.UtcNow;
                                                     answer.Media.Size = file.Length;
                                                     answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
                                                     answer.Media.Extension = "image/png";
@@ -1190,7 +1190,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                                     var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                                     answer.Media = new Media();
                                                     answer.Media.Name = item.Media.OriginalName = file.FileName;
-                                                    answer.Media.Created = DateTime.Now;
+                                                    answer.Media.Created = DateTime.UtcNow;
                                                     answer.Media.Size = file.Length;
                                                     if (typeVideo.Contains(extension))
                                                     {
@@ -1236,7 +1236,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     {
                                         if (typeImage.Contains(extension))
                                         {
-                                            answer.Media.Created = DateTime.Now;
+                                            answer.Media.Created = DateTime.UtcNow;
                                             answer.Media.Size = file.Length;
                                             answer.Media.Path = await _fileProcess.SaveMediaAsync(file, answer.Media.OriginalName, "", basis);
                                             answer.Media.Extension = "image/png";
@@ -1246,7 +1246,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                             var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                             answer.Media = new Media();
                                             answer.Media.Name = item.Media.OriginalName = file.FileName;
-                                            answer.Media.Created = DateTime.Now;
+                                            answer.Media.Created = DateTime.UtcNow;
                                             answer.Media.Size = file.Length;
                                             if (typeVideo.Contains(extension))
                                             {
@@ -1272,7 +1272,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             //}
                             answer.Order = oldanswer.Order;
                             answer.Created = oldanswer.Created;
-                            answer.Updated = DateTime.Now;
+                            answer.Updated = DateTime.UtcNow;
                         }
                         //_answerService.CreateOrUpdate(answer);
                         if (answer.ID != null)
@@ -1294,7 +1294,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (string.IsNullOrEmpty(org)) return org;
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
-                org = org.Replace("  ", "");
+                org = org.Replace("  ", " ");
             return ReplaceSpecialCharacters(org);
             //return org;
         }
@@ -1317,19 +1317,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
-        }
-
-        //chạy lại data cho phần điền từ
-        public async Task<JsonResult> UpdateAnswer()
-        {
-            try
-            {
-                return Json("OK");
-            }
-            catch(Exception ex)
-            {
-                return Json(ex.Message);
-            }
         }
 
         private string ReplaceSpecialCharacters(string str)

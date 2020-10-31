@@ -73,5 +73,15 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.ExamID == ExamID).ToEnumerable();
         }
+
+        public long RemoveAnswer(string ExamID, string QuestionID)
+        {
+            return CreateQuery().DeleteMany(o => o.ExamID == ExamID && o.QuestionID == QuestionID).DeletedCount;
+        }
+
+        public ExamDetailEntity GetByExamAndQuestion(string ExamID, string QuestionID)
+        {
+            return CreateQuery().Find(o => o.ExamID == ExamID && o.QuestionID == QuestionID).FirstOrDefault();
+        }
     }
 }

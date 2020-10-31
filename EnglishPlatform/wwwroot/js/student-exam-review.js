@@ -298,12 +298,42 @@ var ExamReview = (function () {
 
         bodyExam.append(content);
 
+        for (i = 0; i < data.Part.length; i++) {
+            var _data = data.Part[i];
+            if (_data.Type == "QUIZ1" || _data.Type == "QUIZ4") {
+                addCssAnswerQ14(_data);
+            }
+        }
+
         if ($('textarea[data-type=ESSAY]').length > 0) {
             $(document).ready(function () {
                 $('textarea[data-type=ESSAY]').each(function () {
                     CKEDITOR.replace($(this).attr('id'));
                 });
             });
+        }
+    }
+
+    var addCssAnswerQ14 = function (data) {
+        for (i = 0; i < data.Questions.length; i++) {
+            var cloneAnswers = data.Questions[i].CloneAnswers;
+            for (j = 0; j < cloneAnswers.length; j++) {
+                var id = cloneAnswers[j].ID;
+                var isCorrect = cloneAnswers[j].IsCorrect;
+                var answerWmedia = $("#" + id)[0];
+                if (isCorrect) {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #28a745");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+                else {
+                    if (answerWmedia) {
+                        $(answerWmedia).find("img").css("border", "1px solid #dc3545");
+                        $(answerWmedia).find("img").css("border-radius", "5px");
+                    }
+                }
+            }
         }
     }
 
@@ -359,13 +389,13 @@ var ExamReview = (function () {
         html += '<div class="part-box ' + data.Type + '" id="' + data.ID + '">';
         //console.log(data);
         switch (data.Type) {
-            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data);
+            case "QUIZ1": html += renderQUIZ1(data); //type == 2 ? renderQUIZ1(data) : renderQUIZ1_BG(data); //chon 1 dap an dung
                 break;
             case "QUIZ2": html += renderQUIZ2(data);//type == 2 ? renderQUIZ2(data) : renderQUIZ2_BG(data);
                 break;
             case "QUIZ3": html += renderQUIZ3(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
                 break;
-            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data);
+            case "QUIZ4": html += renderQUIZ4(data); //type == 2 ? renderQUIZ3(data) : renderQUIZ3_BG(data); //chon 1/nhieu dap an dung
                 break;
             case "ESSAY": html += renderESSAY(data); //type == 2 ? renderESSAY(data) : renderESSAY_BG(data);
                 break;
@@ -386,18 +416,35 @@ var ExamReview = (function () {
         return html;
     }
 
-    //loai bo dau cach - ki tu dac biet
+    //check ki tu dac biet
     var checkSpecialCharacters = function (chain) {
         //debugger
-        //var newchain = "";
-        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];
-        for (i = 0; i < chain.length; i++) {
-            //debugger
+        chain = chain.trim();
+        var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
+        var beginning = [8217, 8216, 180, 8216, 8242, 8219];//ki tu ‘’ trong word
+        var quotation = [8220, 8221, 8243];//check ki tu “” trong word
+
+        for (i = 0; i < chain.length; i++) {//check ki tu khoang trang dac biet
             if (space.includes(chain[i].charCodeAt())) {
-                chain = chain.replaceAll(chain[i], "_");
+                chain = chain.replace(chain[i], "_");
             }
         }
-        return chain.trim();
+
+        for (i = 0; i < chain.length; i++) {//check ki tu ‘’ trong word
+            if (beginning.includes(chain[i].charCodeAt())) {
+                //chain[i] = "'";
+                chain = chain.replace(chain[i], "'");
+            }
+        }
+
+        for (i = 0; i < chain.length; i++) {//check ki tu “” trong word
+            if (quotation.includes(chain[i].charCodeAt())) {
+                //chain[i] = "\"";
+                chain = chain.replace(chain[i], "\"");
+            }
+        }
+        //debugger
+        return chain;
     }
 
     var renderAnswer = function (data, type) {
@@ -407,9 +454,10 @@ var ExamReview = (function () {
         var cautraloidung = data.RealAnswerEssay == null ? '' : data.RealAnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
         console.log(cautraloidung);
         var cautraloi = data.AnswerValue//.replace(/[^a-z0-9\s]/gi, '').toLowerCase().trim();
-        //debugger
         var _check = false;
-        if (cautraloidung == cautraloi) { _check = true; }
+        if (cautraloidung == cautraloi) {
+            _check = true;
+        }
         if (data.AnswerID != null && data.AnswerID == data.RealAnswerID) { _check = true; }
         if (data.Point > 0) { _check = true; }
         //console.log(type);
@@ -420,7 +468,6 @@ var ExamReview = (function () {
                     $('#' + quizId + ' .student-answer').append(_answer);
                     break;
                 case "QUIZ3":
-                    //debugger
                     var _answer = $('#' + data.AnswerID).clone().removeClass("d-none");
                     //if (!_check)//wrong answer                        
                     //    _answer.addClass("bg-danger");
@@ -444,11 +491,9 @@ var ExamReview = (function () {
 
         }
         else { //"QUIZ2"
-            //debugger
             if (type == "ESSAY") {
                 $('#' + quizId + ' .student-answer').append(" <span class='text-dark'>" + data.AnswerValue + "</span>");
             } else {
-                //debugger
                 if (_check) {
                     var content_answer = "";
                     var html = "";
@@ -460,11 +505,9 @@ var ExamReview = (function () {
                     var correct_answer = _answer.nextElementSibling;
                     var content_correct_answer = $(correct_answer).find(".text-success")[0].textContent;
                     var listContent = content_correct_answer.split(' | ');
-                    debugger
                     for (i = 0; i < listContent.length; i++) {
-                        //debugger
                         if (listContent[i] == content_answer) {
-                        //if (data.Point>0) {
+                            //if (data.Point>0) {
                             html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
                         }
                         else {
@@ -472,11 +515,10 @@ var ExamReview = (function () {
                         }
                     }
                     $($(correct_answer).find(".text-success")[0]).html(html.substring(3));
-                    //debugger
                 }
                 else {
                     //$('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
-                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'><del>" + data.AnswerValue + "</del><span>");
+                    $('#' + quizId + ' .student-answer').append(" <span class='text-danger'>" + data.AnswerValue + "<span>");
 
                     var _answer = $("#quiz2-" + quizId)[0];
                     var a = $(_answer).find(".text-danger")[0].textContent;
@@ -492,7 +534,7 @@ var ExamReview = (function () {
 
                     var html = "";
                     var tile = "";
-                    
+
                     //for (i = 0; i < listContent.length; i++) {
                     //    debugger
                     //    if (listContent[i].length > content_answer.length) {
@@ -572,8 +614,8 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                         }
@@ -585,12 +627,13 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += " <span style='font-weight:600;text-decoration: underline'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += " <span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += " <span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
-                                chodung2 += detail_CorrectAnswer[i];
+                                chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
+                                chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
                         }
                         else {//TH dap an dung ngan hon dap an hoc sinh dien
@@ -601,12 +644,12 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                                 else {
-                                    chodung1 += "<span style='font-weight:600;text-decoration: underline;color:#dc3545'>" + detail_Answer[i] + "</span> ";
-                                    chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";
+                                    chodung1 += "<span style='font-weight:600;border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
+                                    chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
                             for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
-                                chodung1 += "<span style='font-weight:600'>" + detail_Answer[i] + "</span> ";
+                                chodung1 += "<span style='border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                             }
                         }
                         newlistContent = "";
@@ -800,6 +843,7 @@ var ExamReview = (function () {
     }
 
     var renderQUIZ1 = function (data) {
+        //debugger
         //writeLog("renderQUIZ1", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -829,13 +873,18 @@ var ExamReview = (function () {
             html += '</fieldset>';
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
+                if (!answer.Content) {
+                    answer.Content = "";
+                }
                 //if(!answer.IsCorrect) continue;
                 html += '<fieldset class="answer-item d-inline mr-3 align-top" id="' + answer.ID + '">';
                 html += '<div style="cursor: pointer; display:inline-block" class="form-check" data-part-id="' + data.ID + '" data-lesson-id="' + data.ParentID + '" data-question-id="' + item.ID + '" data-id="' + answer.ID + '" data-type="QUIZ1" data-value="' + answer.Content + '">';
-                if (answer.IsCorrect)
+                if (answer.IsCorrect) {
                     html += '<label class="answer-text form-check-label text-success" for="' + answer.ID + '">' + answer.Content + '</label>';
-                else
+                }
+                else {
                     html += '<label class="answer-text form-check-label text-danger" for="' + answer.ID + '"><del>' + answer.Content + '</del></label>';
+                }
                 html += '</div>';
                 html += renderMedia(answer.Media);
                 html += '</fieldset>';
@@ -853,7 +902,6 @@ var ExamReview = (function () {
 
     //dien tu
     var renderQUIZ2 = function (data) {
-        //debugger
         //console.log(data);
         //writeLog("renderQUIZ2", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
@@ -874,7 +922,6 @@ var ExamReview = (function () {
             html += '<i>Trả lời: </i>';
             html += '</fieldset>';
             var content = "";
-            //debugger
             for (var x = 0; item.CloneAnswers != null && x < item.CloneAnswers.length; x++) {
                 var answer = item.CloneAnswers[x];
                 content += content == "" ? answer.Content : " | " + answer.Content;
@@ -894,7 +941,6 @@ var ExamReview = (function () {
 
     //noi dap an
     var renderQUIZ3 = function (data) {
-        //debugger
         //writeLog("renderQUIZ3", data);
         var toggleButton = '<button class="btn-toggle-width btn btn-success" onclick="togglePanelWidth(this)"><i class="fas fa-arrows-alt-h"></i></button>';
         var html = '<div class="col-md-6 d-inline-block h-100 overflow-auto" style="border-right: dashed 1px #CCC"><div class="part-box-header part-column">';
@@ -930,7 +976,6 @@ var ExamReview = (function () {
                 //if (!answer.IsCorrect) continue;
                 var media = renderMedia(answer.Media);
                 if (media == "") {
-                    //debugger
                     answers += '<fieldset data-type="QUIZ3" class="answer-item ui-draggable ui-draggable-handle' + (answer.IsCorrect ? " bg-success" : " d-none") + '" id="' + answer.ID + '"><label class="answer-text">' + answer.Content + '</label></fieldset>';
                 }
                 else {
@@ -1354,6 +1399,7 @@ var ExamReview = (function () {
     window.uploadFile = uploadFile;
     window.togglePanelWidth = togglePanelWidth;
     window.validate = validate;
+    window.addCssAnswerQ14 = addCssAnswerQ14;
     return ExamReview;
 }());
 
@@ -1369,7 +1415,3 @@ var isMobileDevice = function () {
         return false;
     }
 };
-
-var test = function () {
-
-}

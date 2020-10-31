@@ -181,7 +181,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             if (upload != null && upload.Length > 0)
             {
                 var fileName = item.Code + "_" + Guid.NewGuid() + Path.GetExtension(upload.FileName).ToLower();
-                item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", "", true, 200, 300);
+                item.Image = await _fileProcess.SaveMediaAsync(upload, fileName, "center", item.Code, true, 200, 300);
             }
 
             _service.Save(item);
@@ -255,7 +255,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 package.Save();
             }
             stream.Position = 0;
-            string excelName = $"CenterList-{DateTime.Now:yyyyMMddHHmmssfff}.xlsx";
+            string excelName = $"CenterList-{DateTime.UtcNow:yyyyMMddHHmmssfff}.xlsx";
 
             //return File(stream, "application/octet-stream", excelName);  
             return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);

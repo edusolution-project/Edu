@@ -89,15 +89,21 @@
                 <table id="r_table" class="table">
                     <thead>
                         <tr>
+                            <th>
+                                <select class="form-control" v-on:change="fillTypeExam($event.target.value)">
+                                    <option selected value="2">Bài kiểm tra</option>
+                                    <option value="1">Bài luyện tập</option>
+                                </select>
+                            </th>
                             <th v-for="(field,k) in resultFields">{{field.label}}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-if="resultData == null || resultData.length <= 0">
+                        <tr v-if="fillterResultData == null || fillterResultData.length <= 0">
                             <td colspan="5">Chưa có kết quả</a></td>
                         </tr>
-                        <tr v-for="(item,k) in resultData">
-                            <td><a href="#" :title="item.Title" class="title">{{item.Title}}</a></td>
+                        <tr v-for="(item,k) in fillterResultData">
+                            <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                             <td>{{formatFullDate(item.LearnLast)}}</td>
                             <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
@@ -128,6 +134,44 @@
             </div>
         </template>
     </div>
+
+    <!--Modals-->
+    <b-modal :no-close-on-backdrop="true" id="modal_history" size="xl" centered :title="'Kết quả bài học '+studentResult.title" style="width:800px">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="flex border-b pb-3 justify-content-between">
+                    <div class="flex width-100">
+                        <label class="label"><b style="font-size:120%">Số lượt làm bài: {{studentResult.history.length}}</b></label>
+                        <input type="hidden" value="lesson_result.ID" />
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Điểm</th>
+                            <th scope="col" class="text-center">Thời gian</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                            <th scope="col" class="text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in studentResult.history" v-if="studentResult.history.length > 0">
+                            <td class="text-center">{{k+1}}</td>
+                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
+                            <td class="text-center">{{formatFullDate(item.Created)}}</td>
+                            <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
+                            <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <template v-slot:modal-footer>
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
 </section>
 
 @section Scripts {
@@ -203,10 +247,10 @@
                     },
                 ],
                 resultFields: [
-                    {
-                        key: 'lesson',
-                        label: 'Bài kiểm tra'
-                    },
+                    //{
+                    //    key: 'lesson',
+                    //    label: 'Bài kiểm tra'
+                    //},
                     {
                         key: 'schedule',
                         label: 'Lịch kiểm tra'
@@ -233,7 +277,12 @@
                 rank: { pos: 1, total: 1},
                 startdate: moment('@currentClass.StartDate.ToLocalTime().ToString("MM/dd/yyyy")'),
                 enddate: moment('@currentClass.EndDate.ToLocalTime().ToString("MM/dd/yyyy")'),
-                tab: [true, false]
+                tab: [true, false],
+                studentResult: {
+                    title: '',
+                    history:[]
+                },
+                fillterResultData:[],
             },
             watch: {
                 search_subject: function () {
@@ -295,15 +344,15 @@
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
-                            _that.avgPoint = 0;
+                            //_that.avgPoint = 0;
 
-                            if (_that.resultData.length > 0) {
-                                _that.resultData.forEach(function (exam) {
-                                    _that.avgPoint += exam.Result
-                                });
-                                _that.avgPoint = _that.avgPoint / _that.resultData.length
-                            }
-
+                            //if (_that.resultData.length > 0) {
+                            //    _that.resultData.forEach(function (exam) {
+                            //        _that.avgPoint += exam.Result
+                            //    });
+                            //    _that.avgPoint = _that.avgPoint / _that.resultData.length
+                            //}
+                            this.fillTypeExam(2);
                             console.log(_that.avgPoint)
                         }).catch(e => { })
                 },
@@ -407,6 +456,56 @@
                     console.log(this.search_subject);
                     history.replaceState({ sbj: this.search_subject }, '', '#' + this.search_subject);
                     this.loadData()
+                },
+                openHistory(obj) {
+                    let _that = this;
+                    let _form = new FormData();
+                    _form.append('ID', obj.LessonId);
+                    _that.title = obj.Title;
+                    var studentID = '@currentStudent.ID';
+                    let _url = '@processUrl("GetLessonProgressList", "Exam")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            var a = _data.find(element => element.StudentID == studentID);
+                            //if (a.ListExam.length > 0) {
+                                _that.studentResult.history = a.ListExam;
+                            //}
+                        }).catch(e => { })
+                    _that.$bvModal.show('modal_history');
+                },
+                hideModal(id) {
+                    if (id == null)
+                        $('.close').click();
+                    else
+                        $('#' + id + ' .close').click();
+                },
+                fillTypeExam(type = 2)//mac dinh la bai kiem tra
+                {
+                    this.fillterResultData = [];
+                    if (type == 2) {//bai kiem tra
+                        for (i = 0; i < this.resultData.length; i++) {
+                            if (this.resultData[i].TemplateType == 2 ) {
+                                this.fillterResultData.push(this.resultData[i]);
+                            }
+                        }
+                    }
+                    else {
+                        for (i = 0; i < this.resultData.length; i++) {
+                            if (this.resultData[i].IsPractice == true) {
+                                this.fillterResultData.push(this.resultData[i]);
+                            }
+                        }
+                    }
+                    let _that = this;
+                    _that.avgPoint = 0;
+
+                    if (_that.fillterResultData.length > 0) {
+                        _that.fillterResultData.forEach(function (exam) {
+                            _that.avgPoint += exam.Result
+                        });
+                        _that.avgPoint = _that.avgPoint / _that.fillterResultData.length
+                    }
                 }
             }
         });
@@ -414,8 +513,6 @@
 }
 
 @section Modals{
-
-
     <div class="modal fade edit-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="addStudentModal">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

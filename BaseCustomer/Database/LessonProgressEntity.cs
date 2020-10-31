@@ -82,34 +82,6 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public async Task UpdateLearn(LearningHistoryEntity item)
-        {
-            var currentProgress = GetByStudentID_LessonID(item.StudentID, item.LessonID);
-            if (currentProgress == null)
-            {
-                currentProgress = new LessonProgressEntity
-                {
-                    ClassID = item.ClassID,
-                    ClassSubjectID = item.ClassSubjectID,
-                    ChapterID = item.ChapterID,
-                    LessonID = item.LessonID,
-                    StudentID = item.StudentID,
-                    LastDate = DateTime.Now,
-                    FirstDate = DateTime.Now,
-                    TotalLearnt = 1,
-                };
-                await Collection.InsertOneAsync(currentProgress);
-            }
-            else
-            {
-                await Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.LessonID == item.LessonID,
-                     new UpdateDefinitionBuilder<LessonProgressEntity>()
-                     .Inc(t => t.TotalLearnt, 1)
-                     .Set(t => t.LastDate, DateTime.Now)
-                     );
-            }
-        }
-
         public async Task<LessonProgressEntity> UpdatePoint(ExamEntity item)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
@@ -172,7 +144,6 @@ namespace BaseCustomerEntity.Database
             }
             return currentProgress;
         }
-
 
         public LessonProgressEntity GetByStudentID_LessonID(string StudentID, string LessonID)
         {

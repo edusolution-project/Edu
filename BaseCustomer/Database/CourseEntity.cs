@@ -57,6 +57,8 @@ namespace BaseCustomerEntity.Database
         public string Center { get; set; }
         [JsonProperty("TargetCenters")]
         public List<string> TargetCenters { get; set; }
+        [JsonProperty("StudentTargetCenters")]
+        public List<string> StudentTargetCenters { get; set; }
         [JsonProperty("IsPublic")]
         public Boolean IsPublic { get; set; }
         [JsonProperty("PublicWStudent")]
@@ -102,6 +104,17 @@ namespace BaseCustomerEntity.Database
                 .Inc(t => t.TotalLessons, lesInc)
                 .Inc(t => t.TotalExams, examInc)
                 .Inc(t => t.TotalPractices, pracInc));
+        }
+
+        public CourseEntity GetCopiedItemInCenter(string ID, string CenterID)
+        {
+            return CreateQuery().Find(t => t.Center == CenterID && t.OriginID == ID).SortByDescending(t => t.ID).FirstOrDefault();
+        }
+
+        public void ShareToCenter(string ID, string TargetID)
+        {
+            CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
+                .AddToSet(t => t.TargetCenters, TargetID));
         }
     }
 }

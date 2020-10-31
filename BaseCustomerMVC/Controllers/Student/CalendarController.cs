@@ -98,7 +98,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 // nguoi tao
                 item.CreateUser = User?.FindFirst("UserID").Value;
                 // ngay tao
-                item.Created = DateTime.Now;
+                item.Created = DateTime.UtcNow;
                 // check validate
             }
             var data = _calendarHelper.CreateEvent(item).Result;

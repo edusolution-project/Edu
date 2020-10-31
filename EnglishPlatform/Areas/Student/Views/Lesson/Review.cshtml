@@ -244,6 +244,7 @@
             url: {
                     exam: '@processUrl("Detail", "Lesson")',
                     list: '@processUrl("Modules", "Course")',
+                    oldAnswer: '@processUrl("GetDetailExam", "Exam")'
                 },
             lesson: @Html.Raw(Json.Serialize(currentLesson)),
             exam: @Html.Raw(Json.Serialize(exam))

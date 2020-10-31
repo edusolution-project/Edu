@@ -25,7 +25,10 @@ namespace BaseCustomerMVC.Globals
         private readonly LessonHelper _lessonHelper;
         private readonly CalendarHelper _calendarHelper;
 
+        private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
+        private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
+        private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
 
 
@@ -50,13 +53,85 @@ namespace BaseCustomerMVC.Globals
             _lessonHelper = lessonHelper;
         }
 
+
+        public async Task<CourseEntity> CopyCourse(CourseEntity org_course, CourseEntity target_course)
+        {
+            var new_course = _cloneCourseMapping.Clone(org_course, new CourseEntity());
+
+            new_course.OriginID = org_course.ID;
+            if (!string.IsNullOrEmpty(target_course.Name))
+                new_course.Name = target_course.Name;
+            new_course.TeacherID = target_course.CreateUser;
+            new_course.CreateUser = target_course.CreateUser;
+            new_course.Center = target_course.Center ?? org_course.Center;
+            new_course.Created = DateTime.UtcNow;
+            new_course.Updated = DateTime.UtcNow;
+            new_course.IsActive = false;
+            new_course.IsUsed = false;
+            new_course.IsPublic = false;
+            new_course.PublicWStudent = false;
+            new_course.TargetCenters = new List<string>();
+            new_course.StudentTargetCenters = new List<string>();
+
+
+            _courseService.Collection.InsertOne(new_course);
+
+            await CloneCourseChapter(new CourseChapterEntity
+            {
+                OriginID = "0",
+                CourseID = new_course.ID,
+                CreateUser = new_course.CreateUser
+            }, org_course.ID);
+
+            return new_course;
+        }
+
+        private async Task<CourseChapterEntity> CloneCourseChapter(CourseChapterEntity item, string orgCourseID)
+        {
+            if (item.OriginID != "0")
+                _courseChapterService.Collection.InsertOne(item);
+            else
+            {
+                item.ID = "0";
+            }
+
+            var lessons = _courseLessonService.GetChapterLesson(orgCourseID, item.OriginID);
+
+            if (lessons != null && lessons.Count() > 0)
+            {
+                foreach (var o in lessons)
+                {
+                    var new_lesson = _cloneCourseLessonMapping.Clone(o, new CourseLessonEntity());
+                    new_lesson.CourseID = item.CourseID;
+                    new_lesson.ChapterID = item.ID;
+                    new_lesson.CreateUser = item.CreateUser;
+                    new_lesson.Created = DateTime.UtcNow;
+                    new_lesson.OriginID = o.ID;
+                    await _lessonHelper.CopyCourseLessonFromCourseLesson(o, new_lesson);
+                }
+            }
+
+            var subChapters = _courseChapterService.GetSubChapters(orgCourseID, item.OriginID);
+            foreach (var o in subChapters)
+            {
+                var new_chapter = _cloneCourseChapterMapping.Clone(o, new CourseChapterEntity());
+                new_chapter.CourseID = item.CourseID;
+                new_chapter.ParentID = item.ID;
+                new_chapter.CreateUser = item.CreateUser;
+                new_chapter.Created = DateTime.UtcNow;
+                new_chapter.OriginID = o.ID;
+                await CloneCourseChapter(new_chapter, orgCourseID);
+            }
+            return item;
+        }
+
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
         {
             _ = CloneChapterForClassSubject(classSubject);
             //_courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
-        internal long CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
+        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
         {
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
@@ -81,7 +156,7 @@ namespace BaseCustomerMVC.Globals
             {
                 foreach (var courselesson in lessons)
                 {
-                    _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
+                    await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
                         ChapterID = newID,
                         OriginID = courselesson.ID,
@@ -97,7 +172,7 @@ namespace BaseCustomerMVC.Globals
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
-                    lessoncounter += CloneChapterForClassSubject(classSubject, chap);
+                    lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
 
             return lessoncounter;

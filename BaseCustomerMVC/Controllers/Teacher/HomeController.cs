@@ -55,9 +55,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var validCenters = (from r in teacher.Centers
                                     let ct = _centerService.GetItemByID(r.CenterID)
-                                    where ct != null && ct.ExpireDate >= DateTime.Now && ct.Status
+                                    where ct != null && ct.ExpireDate >= DateTime.UtcNow && ct.Status
                                     select ct).ToList();
-                //teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+                //teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.UtcNow).ToList();
                 if (validCenters == null || validCenters.Count == 0 || !validCenters.Any(t => t.Code == basis))
                     return Redirect("/logout");
                ViewBag.AllCenters = validCenters;
@@ -86,7 +86,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (teacher == null)
                 return Redirect("/login");
             else
-                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.Now).ToList();
+                ViewBag.AllCenters = teacher.Centers.Where(t => _centerService.GetItemByID(t.CenterID).ExpireDate >= DateTime.UtcNow).ToList();
 
             var account = _teacherService.GetItemByID(_teacherid);
             if (account == null)

@@ -24,7 +24,21 @@ namespace BaseCustomerEntity.Database
     {
         public GroupAndUserService(IConfiguration configuration) : base(configuration)
         {
+            var indexs = new List<CreateIndexModel<GroupAndUserEntity>>
+            {
+                //ClassSubjectID_1_LessonID_1_StudentID_1_ID_-1
+                new CreateIndexModel<GroupAndUserEntity>(
+                    new IndexKeysDefinitionBuilder<GroupAndUserEntity>()
+                    .Ascending(t=> t.GroupID)
+                    .Ascending(t=> t.UserID)
+                    ),
+                new CreateIndexModel<GroupAndUserEntity>(
+                    new IndexKeysDefinitionBuilder<GroupAndUserEntity>()
+                    .Ascending(t=> t.UserID)
+                    )
+            };
 
+            Collection.Indexes.CreateManyAsync(indexs);
         }
 
 
@@ -32,7 +46,7 @@ namespace BaseCustomerEntity.Database
         public async Task CreateTimeJoin(string groupName, string userid)
         {
             var oldItem = CreateQuery().Find(o => o.GroupID == groupName && o.UserID == userid)?.FirstOrDefault();
-            if(oldItem != null)
+            if (oldItem != null)
             {
                 return;
             }

@@ -439,12 +439,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var data = string.IsNullOrEmpty(item.ID) ? null : _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
-                    item.Created = DateTime.Now;
+                    item.Created = DateTime.UtcNow;
                     item.CreateUser = UserID;
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.IsParentCourse = item.ChapterID.Equals("0");
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     item.Order = 0;
                     var maxItem = new LessonEntity();
                     if (item.IsParentCourse)
@@ -470,7 +470,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    item.Updated = DateTime.Now;
+                    item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
                     _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
@@ -685,8 +685,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ClassSubjectID = lesson.ClassSubjectID,
                 LessonID = lesson.ID,
                 ID = "",
-                Created = DateTime.Now,
-                CurrentDoTime = DateTime.Now,
+                Created = DateTime.UtcNow,
+                CurrentDoTime = DateTime.UtcNow,
                 LessonScheduleID = "",
                 Point = lesson.Point,
                 Timer = lesson.Timer
@@ -733,14 +733,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 item.TeacherID = _class.TeacherID;
                 item.ID = "TEMPLATE";
-                item.Created = DateTime.Now;
-                item.CurrentDoTime = DateTime.Now;
+                item.Created = DateTime.UtcNow;
+                item.CurrentDoTime = DateTime.UtcNow;
                 item.Status = false;
                 item.QuestionsTotal = _clonequestionService.CreateQuery().CountDocuments(o => o.LessonID == item.LessonID);
                 item.QuestionsDone = 0;
                 item.Marked = false;
             }
-            item.Updated = DateTime.Now;
+            item.Updated = DateTime.UtcNow;
             return new JsonResult(new Dictionary<string, object>
                     {
                        { "Data", item }
