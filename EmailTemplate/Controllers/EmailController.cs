@@ -97,8 +97,9 @@ namespace EmailTemplate.Controllers
             {
                 List<int> Block = new List<int>();
                 var center = centersActive.ElementAt(i);
-                //if (center.Abbr == "c3vyvp")
-                if (center.Abbr != "eduso")
+                if (center.Abbr == "c3vyvp")
+                //if (center.Abbr != "eduso")
+                //if(center.ID== "5f17bf6569926b0f6481b742")
                 {
                     var data = GetDataForReprot(center, currentTime);
                     //DataClass = data;
@@ -198,20 +199,18 @@ namespace EmailTemplate.Controllers
                     }
 
                     var body = await GetContent(d.Images,center.ID);
-                    //var body = await ContentToSendEmail(d.Images, d.ClassIDs, center);
                     var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1, 23, 59, 00);
-                    //var time = new DateTime(2020, 11, 1, 23, 59, 00);
                     var subject = $"Báo cáo học tập tháng {time.Month-1} - {center.Name}";
                     string note = $"<div>Kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd-MM-yyyy")}.</div>";
                     var content = $"{hello}{note}{body}";
 
-                    List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
-                    List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    //List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
+                    //List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
-                    //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com","huonghl@utc.edu.vn", "buihong9885@gmail.com","manhdv@utc.edu.vn" };
-                    //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com"  };
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null);
+                    List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com", "manhdv@utc.edu.vn" };
+                    //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com" };
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null);
                     Msg += $"Send To {center.Name} is done, ";
                 }
 
@@ -472,7 +471,8 @@ namespace EmailTemplate.Controllers
         private Dictionary<String, Double[]> GetDataInMonth(DateTime startWeek, DateTime endWeek, CenterEntity center)
         {
             Dictionary<String, Double[]> dataResponse = new Dictionary<string, double[]>();
-            var classesActive = _classService.GetActiveClass4Report(startWeek.AddDays(1), center.ID).OrderBy(x=>x.Name);
+            //var classesActive = _classService.GetActiveClass4Report(startWeek.AddDays(1), center.ID).OrderBy(x=>x.Name);
+            var classesActive = _classService.CreateQuery().Find(x => x.StartDate < endWeek && x.EndDate >= startWeek && x.Center == center.ID).ToEnumerable().OrderBy(x => x.Name);
             if (classesActive != null)
             {
                 double totalStudents = 0, totalStChuaHoc = 0, totalMin8 = 0, totalMin5 = 0, totalMin2 = 0, totalMin0 = 0, totalChuaLam = 0;
@@ -498,6 +498,7 @@ namespace EmailTemplate.Controllers
                         StartDate = t.StartDate,
                         EndDate = t.EndDate
                     })?.ToList();
+
                     var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
 
                     //Lay danh sach hoc sinh da hoc cac bai tren trong tuan

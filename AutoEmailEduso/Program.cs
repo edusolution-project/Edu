@@ -70,6 +70,7 @@ namespace AutoEmailEduso
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
+
             if (!args.Any())
             {
                 Console.WriteLine("Processing Schedule...");
@@ -88,7 +89,7 @@ namespace AutoEmailEduso
                         break;
                 }
             }
-            //await SendMonthlyReport();
+
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             TimeSpan ts = stopWatch.Elapsed;

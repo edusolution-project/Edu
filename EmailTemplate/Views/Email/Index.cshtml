@@ -33,8 +33,8 @@
         return $.ajax({
             type: "POST",
             url: '/email/SendMonthlyReport',
-            //data: { Data: arrayData, isTest: false },
-            data: { Data: arrayData },
+            data: { Data: arrayData, isTest: false },
+            //data: { Data: arrayData },
             success: function (res) {
                 console.log(res)
             },
@@ -45,7 +45,8 @@
     var renderChart = function (khoi, siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop, centerid, countblock) {
                     var div = document.createElement("canvas");
                     var Khoi = khoi == 99 ? "" : " khối " + khoi;
-                    var id = "myChart_" + khoi;
+                    var Thang = new Date().getMonth() == 0 ? " tháng 12 " : " tháng " + new Date().getMonth()+" "
+                    var id = "myChart_" + khoi + centerid;
                     div.id = id;
                     root.appendChild(div);
 
@@ -75,25 +76,42 @@
                                 scaleLabel: {
                                     display: true,
                                     labelString: 'Sĩ số',
-                                    fontSize: 14,
+                                    fontSize: 15,
+                                    fontColor:'black'
                                 }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontSize: 15,
+                                    fontColor: 'black'
+                                },
                             }]
                         },
                         title: {
                             display: true,
-                            text: 'Kết quả học tập' + Khoi + ' tháng ' + parseInt(new Date().getMonth() + 1) + ' năm ' + new Date().getFullYear(),
+                            text: 'Kết quả học tập' + Khoi + Thang + ' năm ' + new Date().getFullYear(),
                             position: 'bottom',//top,left,bottom,right,
                             fontSize:15
                         },
                         plugins: {
                             datalabels: {
                                 anchor: 'end',
-                                align: 'end'
+                                align: 'end',
+                                color: 'black',
+                                labels: {
+                                    title: {
+                                        font: {
+                                            //weight: '600',
+                                            size: 13,
+                                            //family: '"Times New Roman", Times, serif'
+                                        }
+                                    }
+                                }
                             },
                             labels: {
                                 render: 'image',
                                 textMargin: -60,
-                            }
+                            },
                         },
                     }
 
@@ -101,18 +119,29 @@
                         labels: labels,
                         datasets: [
                             {
+                                label: 'Sĩ số',
+                                backgroundColor: 'rgb(226,226,236)',
+                                borderColor: 'rgb(226,226,236)',
+                                minBarLength: 1,
+                                data: siso,
+                                fill: true,
+                                borderWidth: 1,
+                                order: 0,
+                                z:0
+                            },
+                            {
                                 label: 'Điểm 8.0 -> 10',
-                                backgroundColor: 'rgb(200,247,200)',//darkgreen
-                                borderColor: 'rgb(200,247,200)',
+                                backgroundColor: 'rgb(133,237,133)',
+                                borderColor: 'rgb(133,237,133)',
                                 minBarLength: 1,
                                 data: minpoint8,
-                                fill: false,
+                                fill: true,
                                 borderWidth: 1
                             },
                             {
                                 label: 'Điểm 5.0 -> 7.9',
-                                backgroundColor: 'rgba(173,216,230,1)',//limegreen
-                                borderColor: 'rgb(173,216,230)',
+                                backgroundColor: 'rgb(134,197,218)',
+                                borderColor: 'rgb(134,197,218)',
                                 minBarLength: 1,
                                 data: minpoint5,
                                 fill: false,
@@ -120,8 +149,8 @@
                             },
                             {
                                 label: 'Điểm 2.0 -> 4.9',
-                                backgroundColor: 'rgba(230,216,173,1)',
-                                borderColor: 'rgb(230,216,173)',
+                                backgroundColor: 'rgb(224,207,153)',
+                                borderColor: 'rgb(224,207,153)',
                                 minBarLength: 1,
                                 data: minpoint2,
                                 fill: false,
@@ -129,8 +158,8 @@
                             },
                             {
                                 label: 'Điểm 0.0 -> 1.9',
-                                backgroundColor: 'rgba(230,173,188,1)',
-                                borderColor: 'rgb(230,173,188)',
+                                backgroundColor: 'rgb(224,153,172)',
+                                borderColor: 'rgb(224,153,172)',
                                 minBarLength: 1,
                                 data: minpoint0,
                                 fill: false,
@@ -139,8 +168,8 @@
                             {
                                 label: 'Chưa làm bài',
                                 //backgroundColor: 'rgba(238,130,238,1)',
-                                backgroundColor: 'rgb(210,210,226)',
-                                borderColor: 'rgb(210,210,226)',
+                                backgroundColor: 'rgb(194,194,216)',
+                                borderColor: 'rgb(194,194,216)',
                                 minBarLength: 1,
                                 data: chuahoc,
                                 fill: false,
@@ -149,8 +178,8 @@
                             {
                                 label: 'Chưa đăng nhập',
                                 //backgroundColor: 'rgba(147,112,219,1)',
-                                backgroundColor: 'rgb(194,194,216)',
-                                borderColor: 'rgb(194,194,216)',
+                                backgroundColor: 'rgb(179,179,206)',
+                                borderColor: 'rgb(179,179,206)',
                                 minBarLength: 1,
                                 data: chuavaolop,
                                 fill: false,
@@ -167,7 +196,6 @@
                         plugins: [{
                             afterRender: async function () {
                                 var x = myBarChart.toBase64Image();
-                                //debugger
                                 arrayData.push(
                                     {
                                         Image: x,
@@ -177,7 +205,7 @@
                                 console.log(countSendMail++);
                                 console.log(@TotalBlock)
                                 if (countSendMail == @TotalBlock) {
-                                    sendData(arrayData);
+                                    //sendData(arrayData);
                                     setTimeout(function () { window.close(); }, 10000);
                                 }
                             }
