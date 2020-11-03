@@ -549,7 +549,6 @@ namespace BaseCustomerMVC.Globals
                         if (cr != null)
                             _correctanswer = _realAnwserQuiz2.FirstOrDefault(t => t.ID == cr.ID); //điền từ đúng, chấp nhận viết hoa viết thường
                     }
-
                 }
 
                 if (_correctanswer != null)
@@ -604,18 +603,8 @@ namespace BaseCustomerMVC.Globals
                 exam.Updated = DateTime.UtcNow;
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
-
-            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
-
-            var lessonProgress = _progressHelper.UpdateLessonPoint(exam).Result;
-
+            _ = _progressHelper.UpdateLessonPoint(exam);
             _examService.Save(exam);
-
-            if (lessonProgress.ChapterID != "0")
-                _ = _progressHelper.UpdateChapterPoint(lessonProgress, pointchange);
-            else
-                _ = _progressHelper.UpdateClassSubjectPoint(lessonProgress, pointchange);
-
             return exam;
         }
         #endregion

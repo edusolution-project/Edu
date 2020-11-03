@@ -146,29 +146,29 @@ namespace BaseCustomerMVC.Controllers.Student
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không có dữ liệu" });
-
-            var list = new List<StudentRankingViewModel>();
-
-            var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
-            var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            var cacheKey = "GetBestStudents_" + basis;
+            var rtn = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
+            if (rtn == null)
             {
-                StudentID = g.Key,
-                TotalPoint = g.Sum(t => t.TotalPoint),
-                PracticePoint = g.Sum(t => t.PracticePoint),
-            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
-
-            var rtn = new List<StudentRankingViewModel>();
-            foreach (var result in results)
-            {
-                var st = _studentService.GetItemByID(result.StudentID);
-                if (st != null)
+                rtn = new List<StudentRankingViewModel>();
+                var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+                var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
                 {
-                    result.StudentName = st.FullName;
-                    rtn.Add(result);
+                    StudentID = g.Key,
+                    TotalPoint = g.Sum(t => t.TotalPoint),
+                    PracticePoint = g.Sum(t => t.PracticePoint),
+                }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+                foreach (var result in results)
+                {
+                    var st = _studentService.GetItemByID(result.StudentID);
+                    if (st != null)
+                    {
+                        result.StudentName = st.FullName;
+                        rtn.Add(result);
+                    }
                 }
-
+                _cacheHelper.SetCache(cacheKey, rtn);
             }
-
             var response = new Dictionary<string, object>
             {
                 { "Data", rtn }
@@ -500,61 +500,16 @@ namespace BaseCustomerMVC.Controllers.Student
             if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
                 return Json(new { });
 
-
-
-
             var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
             if (classids == null || classids.Count == 0)
                 return Json(new { });
-            var cacheKey = string.Join(",", classids);
-            List<StudentLessonScheduleViewModel> listSchedule = _cacheHelper.GetCache(cacheKey) as List<StudentLessonScheduleViewModel>;
-            if (listSchedule == null)
-            {
-                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-                //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => classids.Contains(o.ClassID)));
 
-                //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            List<StudentLessonScheduleViewModel> listSchedule = new List<StudentLessonScheduleViewModel>();
 
-                //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
+            foreach (var classid in classids)
+                listSchedule.AddRange(GetThisWeekClassLesson(startWeek, endWeek, classid));
 
-                var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
-                if (data == null || data.Count == 0)
-                    return Json(new { });
-
-                listSchedule = (from o in data
-                                let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
-                                where _lesson != null
-                                let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                                where _class != null
-                                let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-                                where _cs != null
-                                let skill = _skillService.GetItemByID(_cs.SkillID)
-                                let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                                where _subject != null
-                                let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
-                                let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
-                                select new StudentLessonScheduleViewModel
-                                {
-                                    id = o.ID,
-                                    classID = _class.ID,
-                                    className = _class.Name,
-                                    classSubjectID = _cs.ID,
-                                    subjectName = _subject.Name,
-                                    title = _lesson.Title,
-                                    lessonID = _lesson.ID,
-                                    startDate = o.StartDate,
-                                    endDate = o.EndDate,
-                                    skill = skill,
-                                    type = _lesson.TemplateType,
-                                    onlineUrl = o.IsOnline ? onlineUrl : ""
-                                }).OrderBy(t => t.startDate).ToList();
-
-                var expireDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0, DateTimeKind.Local);
-                _cacheHelper.SetCache(cacheKey, listSchedule, new DistributedCacheEntryOptions { AbsoluteExpiration = expireDate });
-            }
             if (listSchedule != null && listSchedule.Count > 0)
                 foreach (var schedule in listSchedule)
                 {
@@ -563,6 +518,56 @@ namespace BaseCustomerMVC.Controllers.Student
 
             return Json(new { Data = listSchedule });
 
+        }
+
+        private List<StudentLessonScheduleViewModel> GetThisWeekClassLesson(DateTime startWeek, DateTime endWeek, string classid)
+        {
+            var cacheKey = "classschedule_" + classid;
+            var cacheClass = _cacheHelper.GetCache(cacheKey) as List<StudentLessonScheduleViewModel>;
+            if (cacheClass == null)
+            {
+
+                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.ClassID == classid));
+
+                var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+
+                if (data.Count > 0)
+                    cacheClass = (from o in data
+                                  let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
+                                  where _lesson != null
+                                  let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                                  where _class != null
+                                  let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                                  where _cs != null
+                                  let skill = _skillService.GetItemByID(_cs.SkillID)
+                                  let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                                  where _subject != null
+                                  let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
+                                  let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
+                                  select new StudentLessonScheduleViewModel
+                                  {
+                                      id = o.ID,
+                                      classID = _class.ID,
+                                      className = _class.Name,
+                                      classSubjectID = _cs.ID,
+                                      subjectName = _subject.Name,
+                                      title = _lesson.Title,
+                                      lessonID = _lesson.ID,
+                                      startDate = o.StartDate,
+                                      endDate = o.EndDate,
+                                      skill = skill,
+                                      type = _lesson.TemplateType,
+                                      onlineUrl = o.IsOnline ? onlineUrl : ""
+                                  }).OrderBy(t => t.startDate).ToList();
+                else
+                    cacheClass = new List<StudentLessonScheduleViewModel>();
+
+                var expireDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0, DateTimeKind.Local);
+                _cacheHelper.SetCache(cacheKey, cacheClass, new DistributedCacheEntryOptions { AbsoluteExpiration = expireDate });
+            }
+            return cacheClass;
         }
 
         [Obsolete]

@@ -383,7 +383,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json(str);
         }
 
-        public async Task<JsonResult> FixScoreDataV2()//Big fix
+        public async Task<JsonResult> FixScoreDataV2()
         {
             var start = DateTime.UtcNow;
             var str = "";
@@ -393,30 +393,36 @@ namespace BaseCustomerMVC.Controllers.Admin
             //reset progress
 
             _chapterProgressService.CreateQuery().UpdateMany(t => true, Builders<ChapterProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             _classSubjectProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             _classProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             //_lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
@@ -440,33 +446,38 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             foreach (var lprg in lessonProgresses)
             {
+                if (lprg.ChapterID != "0")
+                    await _progressHelper.UpdateChapterLastLearn(lprg, true);
+                else
+                    await _progressHelper.UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lprg.LessonID, ClassSubjectID = lprg.ClassSubjectID, ClassID = lprg.ClassID, LastDate = lprg.LastDate }, true);
+                
                 var lesson = _clonelessonService.GetItemByID(lprg.LessonID);
                 if (lesson.IsPractice)
                 {
                     if (lesson.ChapterID == "0")
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, 0, 0, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple);
+                    //});
                     else
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, 0, 0, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple);
+                    //});
                 }
-                else if(lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                else if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
                 {
                     if (lesson.ChapterID == "0")
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple, 0, 0);
+                    //});
                     else
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
-                        });
-                }    
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple, 0, 0);
+                    //});
+                }
             }
 
             str += (DateTime.UtcNow - start).TotalSeconds;

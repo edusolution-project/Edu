@@ -45,7 +45,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CenterService _centerService;
         private readonly IndexService _indexService;
 
-        private readonly CacheHelper _cache;
+        private readonly CacheHelper _cacheHelper;
 
         private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
@@ -76,7 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentHelper studentHelper,
             IndexService indexService,
             MailHelper mailHelper,
-            CacheHelper cache,
+            CacheHelper cacheHelper,
             IHostingEnvironment evn,
             IConfiguration iConfig
             )
@@ -100,7 +100,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _centerService = centerService;
-            _cache = cache;
+            _cacheHelper = cacheHelper;
             _env = evn;
             _mailHelper = mailHelper;
             _configuration = iConfig;
@@ -1021,7 +1021,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (center == null)
                 return Json(new { Err = "Không có dữ liệu" });
             var cacheKey = "GetBestStudents_" + basis;
-            var rtn = _cache.GetCache(cacheKey) as List<StudentRankingViewModel>;
+            var rtn = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
             if (rtn == null)
             {
                 rtn = new List<StudentRankingViewModel>();
@@ -1041,7 +1041,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         rtn.Add(result);
                     }
                 }
-                _cache.SetCache(cacheKey, rtn);
+                _cacheHelper.SetCache(cacheKey, rtn);
             }
             var response = new Dictionary<string, object>
             {

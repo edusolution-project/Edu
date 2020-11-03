@@ -654,11 +654,13 @@ var Lesson = (function () {
                                     localStorage.clear();
                                     console.log("New Exam");
                                     //console.log(getLocalData("CurrentExam"))    
-                                    if (config.mod == mod.STUDENT_LECTURE)
+                                    if (config.mod == mod.STUDENT_LECTURE) {
                                         renderLectureExam(exam, false);
+                                        renderOldAnswer();
+                                    }
                                     else
                                         renderLectureExam(exam, true);
-                                    renderOldAnswer();
+
                                 }
                                 else {
                                     console.log("Exam Continue")
@@ -690,7 +692,9 @@ var Lesson = (function () {
                                             countdown(false);
                                         }
                                         renderLectureExam(exam, true);
-                                        renderOldAnswer();
+                                        if (config.mod == mod.STUDENT_LECTURE) {
+                                            renderOldAnswer();
+                                        }
                                     }
                                 }
                             }
@@ -1620,14 +1624,19 @@ var Lesson = (function () {
                     }
                 }
 
-                //if (config.mod == mod.STUDENT_EXAM) {
-                var quiz = prevHolder.data("questionId");
-                if (quiz != null) {
-                    delAnswerForStudentNoRender(quiz);
-                }
+                //console.log(config.mod);
 
-                AnswerQuestion(this);
-                //}
+                switch (config.mod) {
+                    case mod.TEACHERVIEW:
+                    case mod.TEACHERPREVIEW:
+                    case mod.TEACHERPREVIEWEXAM:
+                        break;
+                    default:
+                        var quiz = prevHolder.data("questionId");
+                        if (quiz != null) { delAnswerForStudent(quiz); }
+                        AnswerQuestion(this);
+                        break;
+                }
 
                 $(this).find(".placeholder").hide();
             }
@@ -1641,9 +1650,15 @@ var Lesson = (function () {
                 $(this).find(".placeholder").hide();
                 var prevHolder = $(ui.helper).parent();
 
-                if (config.mod == mod.STUDENT_EXAM) {
-                    var quiz = prevHolder.data("questionId");
-                    if (quiz != null) { delAnswerForStudent(quiz); }
+                switch (config.mod) {
+                    case mod.TEACHERVIEW:
+                    case mod.TEACHERPREVIEW:
+                    case mod.TEACHERPREVIEWEXAM:
+                        break;
+                    default:
+                        var quiz = prevHolder.data("questionId");
+                        if (quiz != null) { delAnswerForStudent(quiz); }
+                        break;
                 }
                 prevHolder.remove($(ui.helper));
 
@@ -2851,11 +2866,13 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+        console.log(_UImode);
         if (_UImode == UIMode.EXAM_ONLY)
             if ($("input[name=ExamID]").val() == "") {
                 console.log("EXAM NOT START 2")
                 $('.top-menu[for=lesson-info]').empty();
-                $('#leftCol').parent().hide()
+                if (!isMobileDevice())
+                    $('#leftCol').parent().hide();
                 $('#rightCol').parent().removeClass("col-md-8").addClass("col-md-12");
             }
             else {
@@ -3726,10 +3743,13 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
-        showLoading("Đang nộp bài...");
-        while (__answer_sending) {
-            console.log("wait for complete answering ...");
-            await new Promise(r => setTimeout(r, 500));
+
+        if (config.mod != mod.TEACHERPREVIEWEXAM) {
+            showLoading("Đang nộp bài...");
+            while (__answer_sending) {
+                console.log("wait for complete answering ...");
+                await new Promise(r => setTimeout(r, 500));
+            }
         }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
@@ -3771,14 +3791,17 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = async function () {
-        showLoading("Đang nộp bài...");
-        $('.btnCompleteExam').hide();
+        if (config.mod != mod.TEACHERPREVIEW) {
+            showLoading("Đang nộp bài...");
+            $('.btnCompleteExam').hide();
+            while (__answer_sending) {
+                console.log("wait for complete answering ...");
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+
         stopCountdown();
         localStorage.clear();
-        while (__answer_sending) {
-            console.log("wait for complete answering ...");
-            await new Promise(r => setTimeout(r, 500));
-        }
         if (config.mod != mod.TEACHERPREVIEW) {
             var dataform = new FormData();
             console.log("Complete :" + $('#ExamID').val());

@@ -2,6 +2,7 @@
 using BaseCustomerMVC.Models;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -128,7 +129,7 @@ namespace BaseCustomerMVC.Globals
             await _classProgressService.Collection.UpdateManyAsync(t => t.ClassID == clssbj.ClassID && t.StudentID == clssbj.StudentID, update);
         }
 
-        public async Task UpdateLessonLastLearn(LearningHistoryEntity item)
+        public async Task UpdateLessonLastLearn(LearningHistoryEntity item, bool incComplete = false)
         {
             var currentProgress = _lessonProgressService.GetByStudentID_LessonID(item.StudentID, item.LessonID);
             if (currentProgress == null)
@@ -140,28 +141,29 @@ namespace BaseCustomerMVC.Globals
                     ChapterID = item.ChapterID,
                     LessonID = item.LessonID,
                     StudentID = item.StudentID,
-                    LastDate = DateTime.UtcNow,
-                    FirstDate = DateTime.UtcNow,
+                    LastDate = item.Time,
+                    FirstDate = item.Time,
                     TotalLearnt = 1,
                 };
                 await _lessonProgressService.Collection.InsertOneAsync(currentProgress);
             }
             else
             {
+                currentProgress.LastDate = DateTime.Now;
                 await _lessonProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.LessonID == item.LessonID,
                      new UpdateDefinitionBuilder<LessonProgressEntity>()
                      .Inc(t => t.TotalLearnt, 1)
-                     .Set(t => t.LastDate, DateTime.UtcNow)
+                     .Set(t => t.LastDate, item.Time)
                      );
             }
 
             if (item.ChapterID != "0")
-                await UpdateChapterLastLearn(item);
+                await UpdateChapterLastLearn(currentProgress, currentProgress.TotalLearnt == 1);
             else
-                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID });
+                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = currentProgress.LessonID, ClassSubjectID = currentProgress.ClassSubjectID, ClassID = currentProgress.ClassID, LastDate = currentProgress.LastDate }, currentProgress.TotalLearnt == 1);
         }
 
-        public async Task UpdateChapterLastLearn(LearningHistoryEntity item)
+        public async Task UpdateChapterLastLearn(LessonProgressEntity item, bool incComplete = false)
         {
             var currentProgress = _chapterProgressService.GetItemByChapterID(item.ChapterID, item.StudentID);
             var chapter = _chapterService.GetItemByID(item.ChapterID);
@@ -176,117 +178,190 @@ namespace BaseCustomerMVC.Globals
                     ChapterID = item.ChapterID,
                     StudentID = item.StudentID,
                     LastLessonID = item.LessonID,
-                    LastDate = DateTime.UtcNow,
+                    LastDate = item.LastDate,
+                    Completed = 1,
                 };
                 await _chapterProgressService.Collection.InsertOneAsync(currentProgress);
             }
             else
             {
-                await _chapterProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID,
-                     new UpdateDefinitionBuilder<ChapterProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.UtcNow)
-                     .Set(t => t.LastLessonID, item.LessonID)
-                     );
+                var needUpdate = false;
+                var update = Builders<ChapterProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ChapterProgressEntity>>();
+
+                if (currentProgress.LastDate < item.LastDate)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Set(t => t.LastDate, item.LastDate).Set(t => t.LastLessonID, item.LessonID));
+                }
+
+                if (item.TotalLearnt == 1 || incComplete)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Inc(t => t.Completed, 1));
+                }
+
+                if (needUpdate)
+                {
+                    var filter = Builders<ChapterProgressEntity>.Filter.Where(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID);
+                    await _chapterProgressService.Collection.UpdateManyAsync(filter, Builders<ChapterProgressEntity>.Update.Combine(updates));
+                }
+                else
+                    return; //No more update need
+
             }
 
             if (chapter.ParentID != "0")
-                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LessonID, ChapterID = chapter.ParentID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
+                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LessonID, ChapterID = chapter.ParentID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate }, incComplete);
             else
-                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
+                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate }, incComplete);
         }
 
-        public async Task UpdateParentChapterLastLearn(ChapterProgressEntity item)
+        public async Task UpdateParentChapterLastLearn(ChapterProgressEntity item, bool incComplete = false)
         {
             var chapter = _chapterService.GetItemByID(item.ChapterID);
             if (chapter == null)
                 return;
 
-            var updated = await _chapterProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID,
-                     new UpdateDefinitionBuilder<ChapterProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.UtcNow)
-                     .Set(t => t.LastLessonID, item.LastLessonID)
-                     );
-            if (updated.ModifiedCount == 0)// no match found => check & create progress
+            var currentProgress = _chapterProgressService.GetItemByChapterID(item.ChapterID, item.StudentID);
+            if (currentProgress == null)
             {
-                var currentProgress = _chapterProgressService.GetItemByChapterID(item.ChapterID, item.StudentID);
-
-                if (currentProgress == null)
+                currentProgress = new ChapterProgressEntity
                 {
-                    currentProgress = new ChapterProgressEntity
-                    {
-                        ClassID = item.ClassID,
-                        ClassSubjectID = item.ClassSubjectID,
-                        ChapterID = item.ParentID,
-                        StudentID = item.StudentID,
-                        LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.UtcNow,
-                    };
-                    await _chapterProgressService.Collection.InsertOneAsync(currentProgress);
+                    ClassID = item.ClassID,
+                    ClassSubjectID = item.ClassSubjectID,
+                    ChapterID = item.ParentID,
+                    StudentID = item.StudentID,
+                    LastLessonID = item.LastLessonID,
+                    LastDate = item.LastDate,
+                    Completed = 1
+                };
+                await _chapterProgressService.Collection.InsertOneAsync(currentProgress);
+            }
+            else
+            {
+                var needUpdate = false;
+                var update = Builders<ChapterProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ChapterProgressEntity>>();
+
+                if (currentProgress.LastDate < item.LastDate)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Set(t => t.LastDate, item.LastDate).Set(t => t.LastLessonID, item.LastLessonID));
                 }
+
+                if (incComplete)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Inc(t => t.Completed, 1));
+                }
+
+                if (needUpdate)
+                {
+                    var filter = Builders<ChapterProgressEntity>.Filter.Where(t => t.StudentID == item.StudentID && t.ChapterID == item.ChapterID);
+                    await _chapterProgressService.Collection.UpdateManyAsync(filter, Builders<ChapterProgressEntity>.Update.Combine(updates));
+                }
+                else
+                    return; //No more update need
             }
 
             if (chapter.ParentID != "0")
-                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LastLessonID, ChapterID = chapter.ParentID, ClassID = item.ClassID, StudentID = item.StudentID });
+                await UpdateParentChapterLastLearn(new ChapterProgressEntity { LastLessonID = item.LastLessonID, ChapterID = chapter.ParentID, ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate }, incComplete);
             else
-                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LastLessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID });
+                await UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = item.LastLessonID, ClassSubjectID = item.ClassSubjectID, ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate }, incComplete);
         }
 
-        public async Task UpdateClassSubjectLastLearn(ClassSubjectProgressEntity item)
+        public async Task UpdateClassSubjectLastLearn(ClassSubjectProgressEntity item, bool incComplete = false)
         {
-            var updated = await _classSubjectProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID,
-                     new UpdateDefinitionBuilder<ClassSubjectProgressEntity>()
-                     .Set(t => t.LastDate, DateTime.UtcNow)
-                     .Set(t => t.LastLessonID, item.LastLessonID)
-                     );
+            var currentSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
+            if (currentSbj == null)
+                return;
 
-            if (updated.ModifiedCount == 0) // no match found => check & create progress
+            var currentProgress = _classSubjectProgressService.GetItemByClassSubjectID(item.ClassSubjectID, item.StudentID);
+            if (currentProgress == null)
             {
-                var currentProgress = _classSubjectProgressService.GetItemByClassSubjectID(item.ClassSubjectID, item.StudentID);
-                if (currentProgress == null)
+                currentProgress = new ClassSubjectProgressEntity
                 {
-                    var currentSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
-                    if (currentSbj == null)
-                        return;
-                    currentProgress = new ClassSubjectProgressEntity
-                    {
-                        ClassID = item.ClassID,
-                        ClassSubjectID = item.ClassSubjectID,
-                        StudentID = item.StudentID,
-                        LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.UtcNow,
-                    };
-                    await _classSubjectProgressService.Collection.InsertOneAsync(currentProgress);
+                    ClassID = item.ClassID,
+                    ClassSubjectID = item.ClassSubjectID,
+                    StudentID = item.StudentID,
+                    LastLessonID = item.LastLessonID,
+                    LastDate = item.LastDate,
+                    Completed = 1
+                };
+                await _classSubjectProgressService.Collection.InsertOneAsync(currentProgress);
+            }
+            else
+            {
+                var needUpdate = false;
+                var update = Builders<ClassSubjectProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassSubjectProgressEntity>>();
+
+                if (currentProgress.LastDate < item.LastDate)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Set(t => t.LastDate, item.LastDate).Set(t => t.LastLessonID, item.LastLessonID));
                 }
+
+                if (incComplete)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Inc(t => t.Completed, 1));
+                }
+
+                if (needUpdate)
+                {
+                    var filter = Builders<ClassSubjectProgressEntity>.Filter.Where(t => t.StudentID == item.StudentID && t.ClassSubjectID == item.ClassSubjectID);
+                    await _classSubjectProgressService.Collection.UpdateManyAsync(filter, Builders<ClassSubjectProgressEntity>.Update.Combine(updates));
+                }
+                else
+                    return; //No more update need
             }
 
-            await UpdateClassLastLearn(new ClassProgressEntity { ClassID = item.ClassID, StudentID = item.StudentID });
+            await UpdateClassLastLearn(new ClassProgressEntity { ClassID = item.ClassID, StudentID = item.StudentID, LastDate = item.LastDate }, incComplete);
         }
 
-        public async Task UpdateClassLastLearn(ClassProgressEntity item)
+        public async Task UpdateClassLastLearn(ClassProgressEntity item, bool incComplete = false)
         {
+            var currentClass = _classService.GetItemByID(item.ClassID);
+            if (currentClass == null)
+                return;
 
-            var updated = await _classProgressService.Collection.UpdateManyAsync(t => t.StudentID == item.StudentID && t.ClassID == item.ClassID,
-                    new UpdateDefinitionBuilder<ClassProgressEntity>()
-                    .Set(t => t.LastDate, DateTime.UtcNow)
-                    .Set(t => t.LastLessonID, item.LastLessonID)
-                    );
-
-            if (updated.ModifiedCount == 0) // no match found => check & create progress
+            var currentProgress = _classProgressService.GetItemByClassID(item.ClassID, item.StudentID);
+            if (currentProgress == null)
             {
-                var currentProgress = _classProgressService.GetItemByClassID(item.ClassID, item.StudentID);
-                if (currentProgress == null)
+                currentProgress = new ClassProgressEntity
                 {
-                    var currentClass = _classService.GetItemByID(item.ClassID);
-                    if (currentClass == null)
-                        return;
-                    currentProgress = new ClassProgressEntity
-                    {
-                        ClassID = item.ClassID,
-                        StudentID = item.StudentID,
-                        LastLessonID = item.LastLessonID,
-                        LastDate = DateTime.UtcNow,
-                    };
-                    await _classProgressService.Collection.InsertOneAsync(currentProgress);
+                    ClassID = item.ClassID,
+                    StudentID = item.StudentID,
+                    LastLessonID = item.LastLessonID,
+                    LastDate = item.LastDate,
+                    Completed = 1
+                };
+                await _classProgressService.Collection.InsertOneAsync(currentProgress);
+            }
+            else
+            {
+                var needUpdate = false;
+                var update = Builders<ClassProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassProgressEntity>>();
+
+                if (currentProgress.LastDate < item.LastDate)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Set(t => t.LastDate, item.LastDate).Set(t => t.LastLessonID, item.LastLessonID));
+                }
+
+                if (incComplete)
+                {
+                    needUpdate = true;
+                    updates.Add(update.Inc(t => t.Completed, 1));
+                }
+
+                if (needUpdate)
+                {
+                    var filter = Builders<ClassProgressEntity>.Filter.Where(t => t.StudentID == item.StudentID && t.ClassID == item.ClassID);
+                    await _classProgressService.Collection.UpdateManyAsync(filter, Builders<ClassProgressEntity>.Update.Combine(updates));
                 }
             }
         }
@@ -337,9 +412,18 @@ namespace BaseCustomerMVC.Globals
             return result;
         }
 
-        public async Task<LessonProgressEntity> UpdateLessonPoint(ExamEntity item)
+        public async Task<LessonProgressEntity> UpdateLessonPoint(ExamEntity exam)
         {
-            return await _lessonProgressService.UpdatePoint(item);
+            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
+
+            var prg = await _lessonProgressService.UpdatePoint(exam);
+
+            if (prg.ChapterID != "0")
+                _ = UpdateChapterPoint(prg, pointchange);
+            else
+                _ = UpdateClassSubjectPoint(prg, pointchange);
+
+            return prg;
         }
 
         public async Task UpdateChapterPoint(LessonProgressEntity item, double pointchange = 0)
@@ -434,18 +518,19 @@ namespace BaseCustomerMVC.Globals
             }
             //else
             //{
+
+            var update = Builders<ChapterProgressEntity>.Update;
+            var updates = new List<UpdateDefinition<ChapterProgressEntity>>();
+
             if (incCount != 0 || incPoint != 0)
             {
                 progress.ExamDone += incCount;
                 progress.TotalPoint += incPoint;
                 progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
-                await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                    Builders<ChapterProgressEntity>.Update
-                    .Inc(t => t.ExamDone, incCount)
-                    .Inc(t => t.TotalPoint, incPoint)
-                    .Set(t => t.AvgPoint, progress.AvgPoint)
-                    );
+                updates.Add(update.Inc(t => t.ExamDone, incCount)
+                      .Inc(t => t.TotalPoint, incPoint)
+                      .Set(t => t.AvgPoint, progress.AvgPoint));
             }
 
             if (incPracCount != 0 || incPracPoint != 0)
@@ -455,18 +540,22 @@ namespace BaseCustomerMVC.Globals
 
                 progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
-                await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                    Builders<ClassSubjectProgressEntity>.Update
-                    .Inc(t => t.PracticeDone, incPracCount)
+                updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
                     .Inc(t => t.PracticePoint, incPracPoint)
                     .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
                     );
             }
 
-            if (chapter.ParentID != "0")
-                await UpdateParentChapPoint(chapter.ParentID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
-            else
-                await UpdateClassSubjectPoint(chapter.ClassSubjectID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            if (updates.Count > 0)
+            {
+                await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
+
+
+                if (chapter.ParentID != "0")
+                    await UpdateParentChapPoint(chapter.ParentID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+                else
+                    await UpdateClassSubjectPoint(chapter.ClassSubjectID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            }
             //}
         }
 
@@ -550,18 +639,26 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
+                var update = Builders<ClassSubjectProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassSubjectProgressEntity>>();
+
+
                 if (incCount != 0 || incPoint != 0)
                 {
                     progress.ExamDone += incCount;
                     progress.TotalPoint += incPoint;
                     progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
-                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                        Builders<ClassSubjectProgressEntity>.Update
-                        .Inc(t => t.ExamDone, incCount)
+                    updates.Add(update.Inc(t => t.ExamDone, incCount)
                         .Inc(t => t.TotalPoint, incPoint)
-                        .Set(t => t.AvgPoint, progress.AvgPoint)
-                        );
+                        .Set(t => t.AvgPoint, progress.AvgPoint));
+
+                    //await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    //    Builders<ClassSubjectProgressEntity>.Update
+                    //    .Inc(t => t.ExamDone, incCount)
+                    //    .Inc(t => t.TotalPoint, incPoint)
+                    //    .Set(t => t.AvgPoint, progress.AvgPoint)
+                    //    );
                 }
 
                 if (incPracCount != 0 || incPracPoint != 0)
@@ -571,15 +668,23 @@ namespace BaseCustomerMVC.Globals
 
                     progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
-                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                        Builders<ClassSubjectProgressEntity>.Update
-                        .Inc(t => t.PracticeDone, incPracCount)
+                    updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
                         .Inc(t => t.PracticePoint, incPracPoint)
                         .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
                         );
-                }
 
-                await UpdateClassPoint(classSbj.ClassID, StudentID, incPoint, incCount, incPracPoint, incPracCount);
+                    //await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    //    Builders<ClassSubjectProgressEntity>.Update
+                    //    .Inc(t => t.PracticeDone, incPracCount)
+                    //    .Inc(t => t.PracticePoint, incPracPoint)
+                    //    .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                    //    );
+                }
+                if (updates.Count > 0)
+                {
+                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
+                    await UpdateClassPoint(classSbj.ClassID, StudentID, incPoint, incCount, incPracPoint, incPracCount);
+                }
             }
         }
 
@@ -600,6 +705,9 @@ namespace BaseCustomerMVC.Globals
                 progress.PracticeDone += incPracCount;
                 progress.PracticePoint += incPracPoint;
 
+                var update = Builders<ClassProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassProgressEntity>>();
+
                 if (incCount != 0 || incPoint != 0)
                 {
                     progress.ExamDone += incCount;
@@ -607,12 +715,9 @@ namespace BaseCustomerMVC.Globals
 
                     progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
 
-                    await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                        Builders<ClassProgressEntity>.Update
-                        .Inc(t => t.ExamDone, incCount)
+                    updates.Add(update.Inc(t => t.ExamDone, incCount)
                         .Inc(t => t.TotalPoint, incPoint)
-                        .Set(t => t.AvgPoint, progress.AvgPoint)
-                        );
+                        .Set(t => t.AvgPoint, progress.AvgPoint));
                 }
                 if (incPracCount != 0 || incPracPoint != 0)
                 {
@@ -621,13 +726,13 @@ namespace BaseCustomerMVC.Globals
 
                     progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
 
-                    await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
-                        Builders<ClassProgressEntity>.Update
-                        .Inc(t => t.PracticeDone, incPracCount)
+                    updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
                         .Inc(t => t.PracticePoint, incPracPoint)
                         .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
                         );
                 }
+                if (updates.Count > 0)
+                    await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
             }
         }
 
