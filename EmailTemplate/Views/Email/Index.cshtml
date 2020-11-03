@@ -1,0 +1,629 @@
+﻿@using BaseCustomerEntity.Database;
+@using BaseCustomerMVC.Globals;
+@using MongoDB.Driver;
+@using EmailTemplate.Controllers;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var BlockCenter = ViewBag.BlockCenter as Dictionary<string, int[]>;
+    var BlockClass = ViewBag.BlockClass as Dictionary<string, int>;
+    var DataClass = ViewBag.DataClass as Dictionary<string, double[]>;
+    var ClassName = ViewBag.ClassName as Dictionary<string, string>;
+    var TotalBlock = ViewBag.CountBlock;
+    var ClassCenters = ViewBag.ClassCenters as Dictionary<string, string>;
+}
+
+<div id="list-data"></div>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> //khong dung-->
+@*<script src="~/lib/jquery/dist/jquery.min.js"></script>//khong dung*@
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>*@
+
+<script src="~/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/chartjs-plugin-datalabels.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/src/chartjs-plugin-labels.js"></script>
+<script>
+    var root = document.getElementById("list-data");
+    var countSendMail = 0;
+    var arrayData = [];
+    var sendData = function (arrayData) {
+        return $.ajax({
+            type: "POST",
+            url: '/email/SendMonthlyReport',
+            data: { Data: arrayData, isTest: false },
+            //data: { Data: arrayData },
+            success: function (res) {
+                console.log(res)
+            },
+            timeout: 5000
+        });
+    }
+
+    var renderChart = function (khoi, siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop, centerid, countblock) {
+                    var div = document.createElement("canvas");
+                    var Khoi = khoi == 99 ? "" : " khối " + khoi;
+                    var Thang = new Date().getMonth() == 0 ? " tháng 12 " : " tháng " + new Date().getMonth()+" "
+                    var id = "myChart_" + khoi + centerid;
+                    div.id = id;
+                    root.appendChild(div);
+
+                    var labels = tenlop;
+
+                    var options = {
+                        legend: {
+                            "display": true,
+                            labels: {
+                                fontColor: 'black',
+                                fontSize: 14,
+                            },
+                            position: 'right',//top,left,bottom,right,
+                            align: 'center'//center,start,end
+                        },
+                        tooltips: {
+                            "enabled": false
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    suggestedMin: 0,
+                                    suggestedMax: Math.max(...siso),
+                                    //stepSize: 1,
+                                    precision: 0
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Sĩ số',
+                                    fontSize: 15,
+                                    fontColor:'black'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontSize: 15,
+                                    fontColor: 'black'
+                                },
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: 'Kết quả học tập' + Khoi + Thang + ' năm ' + new Date().getFullYear(),
+                            position: 'bottom',//top,left,bottom,right,
+                            fontSize:15
+                        },
+                        plugins: {
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'end',
+                                color: 'black',
+                                labels: {
+                                    title: {
+                                        font: {
+                                            //weight: '600',
+                                            size: 13,
+                                            //family: '"Times New Roman", Times, serif'
+                                        }
+                                    }
+                                }
+                            },
+                            labels: {
+                                render: 'image',
+                                textMargin: -60,
+                            },
+                        },
+                    }
+
+                    var data = {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Sĩ số',
+                                backgroundColor: 'rgb(226,226,236)',
+                                borderColor: 'rgb(226,226,236)',
+                                minBarLength: 1,
+                                data: siso,
+                                fill: true,
+                                borderWidth: 1,
+                                order: 0,
+                                z:0
+                            },
+                            {
+                                label: 'Điểm 8.0 -> 10',
+                                backgroundColor: 'rgb(133,237,133)',
+                                borderColor: 'rgb(133,237,133)',
+                                minBarLength: 1,
+                                data: minpoint8,
+                                fill: true,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 5.0 -> 7.9',
+                                backgroundColor: 'rgb(134,197,218)',
+                                borderColor: 'rgb(134,197,218)',
+                                minBarLength: 1,
+                                data: minpoint5,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 2.0 -> 4.9',
+                                backgroundColor: 'rgb(224,207,153)',
+                                borderColor: 'rgb(224,207,153)',
+                                minBarLength: 1,
+                                data: minpoint2,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 0.0 -> 1.9',
+                                backgroundColor: 'rgb(224,153,172)',
+                                borderColor: 'rgb(224,153,172)',
+                                minBarLength: 1,
+                                data: minpoint0,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Chưa làm bài',
+                                //backgroundColor: 'rgba(238,130,238,1)',
+                                backgroundColor: 'rgb(194,194,216)',
+                                borderColor: 'rgb(194,194,216)',
+                                minBarLength: 1,
+                                data: chuahoc,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Chưa đăng nhập',
+                                //backgroundColor: 'rgba(147,112,219,1)',
+                                backgroundColor: 'rgb(179,179,206)',
+                                borderColor: 'rgb(179,179,206)',
+                                minBarLength: 1,
+                                data: chuavaolop,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                        ]
+                    }
+
+                    var ctx = document.getElementById(id).getContext('2d');
+                    var myBarChart = new Chart(ctx, {
+                        type: 'bar',//bar,horizontalBar
+                        data: data,
+                        options: options,
+                        plugins: [{
+                            afterRender: async function () {
+                                var x = myBarChart.toBase64Image();
+                                arrayData.push(
+                                    {
+                                        Image: x,
+                                        CenterID: centerid
+                                    }
+                                );
+                                console.log(countSendMail++);
+                                console.log(@TotalBlock)
+                                if (countSendMail == @TotalBlock) {
+                                    //sendData(arrayData);
+                                    setTimeout(function () { window.close(); }, 10000);
+                                }
+                            }
+                        }]
+                    });
+    }
+</script>
+
+@{
+    foreach (var item in BlockCenter)
+    {
+
+        var Blocks = item.Value;
+        var CenterID = item.Key;
+        for (int i = 0; i < Blocks.Length; i++)
+        {
+            <script>
+                var siso = [];
+                var chuavaolop = [];
+                var minpoint8 = [];
+                var minpoint5 = [];
+                var minpoint2 = [];
+                var minpoint0 = [];
+                var chuahoc = [];
+                var tenlop = [];
+            </script>
+
+            //List<double> Students = new List<double>();
+            //List<double> ChuaVaoLop = new List<double>();
+            //List<double> MinPoint8 = new List<double>();
+            //List<double> MinPoint5 = new List<double>();
+            //List<double> MinPoint2 = new List<double>();
+            //List<double> Minpoint0 = new List<double>();
+            //List<double> ChuaHoc = new List<double>();
+
+            var classinCenters = ClassCenters.Where(x => x.Value == CenterID).Select(x => x.Key).ToList();
+
+            var Classes = BlockClass.Where(x => x.Value == Blocks[i] && classinCenters.Contains(x.Key));
+            double[] Students = new double[Classes.Count()];
+            double[] ChuaVaoLop = new double[Classes.Count()];
+            double[] MinPoint8 = new double[Classes.Count()];
+            double[] MinPoint5 = new double[Classes.Count()];
+            double[] MinPoint2 = new double[Classes.Count()];
+            double[] Minpoint0 = new double[Classes.Count()];
+            double[] ChuaHoc = new double[Classes.Count()];
+            string[] _ClassName = new string[Classes.Count()];
+            for (int j = 0; j < Classes.Count(); j++)
+            {
+                var classID = Classes.ElementAt(j).Key;
+                var data = DataClass[classID];
+                Students[j] = data[0];
+                ChuaVaoLop[j] = data[1];
+                MinPoint8[j] = data[2];
+                MinPoint5[j] = data[3];
+                MinPoint2[j] = data[4];
+                Minpoint0[j] = data[5];
+                ChuaHoc[j] = data[6];
+                _ClassName[j] = ClassName[classID];
+                //Students.Add(data[0]);
+                //ChuaVaoLop.Add(data[1]);
+                //MinPoint8.Add(data[2]);
+                //MinPoint5.Add(data[3]);
+                //MinPoint2.Add(data[4]);
+                //Minpoint0.Add(data[5]);
+                //ChuaHoc.Add(data[6]);
+                //_ClassName.Add(ClassName[classID]);
+
+                <script>
+                    siso.push('@data[0]');
+                    chuavaolop.push('@data[1]');
+                    minpoint8.push('@data[2]');
+                    minpoint5.push('@data[3]');
+                    minpoint2.push('@data[4]');
+                    minpoint0.push('@data[5]');
+                    chuahoc.push('@data[6]');
+                    tenlop.push("@Html.Raw(ClassName[classID])");
+                </script>
+            }
+
+            <script>
+               renderChart('@Blocks[i]', siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop,'@CenterID')
+            </script>
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*@{
+    //var centers = classCenter.Values.Distinct();
+    //foreach (var center in centers)
+    //{
+    //    var a = classCenter.ToList().FindAll(x => x.Value.Contains(center)).Select(x => x.Key);
+    //    var c = blockClass.ToList().FindAll(x => a.Contains(x.Key));
+    var results = blockClass.GroupBy(b => b.Value, (key, b) => new { Block = key, ClassID = b.Select(x => x.Key).ToList() });
+
+    for (Int32 i = 0; i < results.Count(); i++)
+    {
+        var classIDs = results.ElementAt(i).ClassID;
+        int lenghtClassIDs = classIDs.Count();
+        var block = results.ElementAt(i).Block == 99 ? "" : $"khối {results.ElementAt(i).Block}";
+
+            <script>
+                var siso = [];
+                var chuavaolop = [];
+                var minpoint8 = [];
+                var minpoint5 = [];
+                var minpoint2 = [];
+                var minpoint0 = [];
+                var chuahoc = [];
+                var tenlop = [];
+            </script>
+
+            for (int j = 0; j < lenghtClassIDs; j++)
+            {
+                var classID = classIDs.ElementAt(j);
+                var data = dataClass[classID];
+                <script>
+                siso.push('@data[0]');
+                chuavaolop.push('@data[1]');
+                minpoint8.push('@data[2]');
+                minpoint5.push('@data[3]');
+                minpoint2.push('@data[4]');
+                minpoint0.push('@data[5]');
+                chuahoc.push('@data[6]');
+                tenlop.push("@Html.Raw(className[classID])");
+                </script>
+            }
+            <script>
+                debugger
+                setTimeout(function () {
+                    var div = document.createElement("canvas");
+                    var id = "myChart_@block";
+                    div.id = id;
+                    root.appendChild(div);
+                    var labels = tenlop;
+                    var options = {
+                        "hover": {
+                            "animationDuration": 0
+                        },
+                        "animation": {
+                            "duration": 1,
+                            "onComplete": function () {
+                                var chartInstance = this.chart,
+                                    ctx = chartInstance.ctx;
+
+                                ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+
+                                this.data.datasets.forEach(function (dataset, i) {
+                                    var meta = chartInstance.controller.getDatasetMeta(i);
+                                    meta.data.forEach(function (bar, index) {
+                                        var data = dataset.data[index];
+                                        ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                                    });
+                                });
+                            }
+                        },
+                        legend: {
+                            "display": true
+                        },
+                        tooltips: {
+                            "enabled": false
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    suggestedMin: 0,
+                                    suggestedMax: Math.max(...siso)
+                                }
+                            }]
+                        },
+                        title: {
+                            display: true,
+                            text: 'Kết quả trung bình tháng ' + new Date().getMonth() + ' @Html.Raw(block)'
+                        }
+                    }
+
+                    var data = {
+                        labels: labels,
+                        datasets: [
+                            //{
+                            //    label: 'Sĩ số',
+                            //    backgroundColor: 'rgba(147,112,219,1)',
+                            //    borderColor: 'rgb(147,112,219)',
+                            //    minBarLength: 1,
+                            //    data: chuavaolop
+                            //},
+                            {
+                                label: 'Điểm 8.0 -> 10',
+                                backgroundColor: 'rgba(0,100,0,1)',//darkgreen
+                                borderColor: 'rgb(0,100,0)',
+                                minBarLength: 1,
+                                data: minpoint8
+                            },
+                            {
+                                label: 'Điểm 5.0 -> 7.9',
+                                backgroundColor: 'rgba(50,205,50,1)',//limegreen
+                                borderColor: 'rgb(50,205,50)',
+                                minBarLength: 1,
+                                data: minpoint5
+                            },
+                            {
+                                label: 'Điểm 2.0 -> 4.9',
+                                backgroundColor: 'rgba(255,0,0,1)',
+                                borderColor: 'rgb(255,0,0)',
+                                minBarLength: 1,
+                                data: minpoint2
+                            },
+                            {
+                                label: 'Điểm 0.0 -> 1.9',
+                                backgroundColor: 'rgba(139,0,1)',
+                                borderColor: 'rgb(139,0,0)',
+                                minBarLength: 1,
+                                data: minpoint0
+                            },
+                            {
+                                label: 'Chưa làm bài',
+                                backgroundColor: 'rgba(238,130,238,1)',
+                                borderColor: 'rgb(238,130,238)',
+                                minBarLength: 1,
+                                data: chuahoc
+                            },
+                            {
+                                label: 'Chưa vào hệ thống',
+                                backgroundColor: 'rgba(147,112,219,1)',
+                                borderColor: 'rgb(147,112,219)',
+                                minBarLength: 1,
+                                data: chuavaolop
+                            },
+                        ]
+                    }
+
+                    var ctx = document.getElementById(id).getContext('2d');
+                    var myBarChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: options,
+                        plugins: [{
+                            afterRender: async function () {
+                                var x = myBarChart.toBase64Image();
+                                debugger
+                                arrayData.push(
+                                {
+                                    Image: x,
+                                    CenterID: '@center'
+                                }
+                            );
+                                console.log(countSendMail++);
+                                console.log(@CountBlock)
+                                if (countSendMail == @CountBlock) {
+                                //if (countSendMail == 1) {
+                                //debugger
+                                //sendData(arrayData);
+                                }
+                                }
+                                }]
+                                });
+                                },5000)
+                                </script>
+                                }
+                                }
+                                //}*@
+
+@*@{
+        List<string> centerIDs = dataCenter.Keys?.ToList();
+        var totalCenter = centerIDs.Count;
+        for(int i = 0; i < totalCenter; i++)
+        {
+            string centerID = centerIDs[i];
+            string _centerName = centerName[centerID];
+            var data = dataCenter[centerID];
+
+            Boolean isHasW5 = data.Count > 4;
+            double[] w1 = data[0];
+            double[] w2 = data[1];
+            double[] w3 = data[2];
+            double[] w4 = data[3];
+
+            List<double> w5=new List<double>() { 0, 0, 0, 0, 0, 0, 0 };
+            if (isHasW5)
+            {
+                w5 = data[4].ToList();
+            };
+            <script>
+                    var arrayData = [];
+                    setTimeout(function () {
+                    var centerID = "@centerID";-->
+                    var _class = '@id';
+                    <!--var div = document.createElement("canvas");
+                    var id = "myChart_@centerID";
+                    div.id = id;
+                    root.appendChild(div);
+                    var isW5 = '@isHasW5'.toLowerCase() == "true";
+                    var ctx = document.getElementById(id).getContext('2d');
+                    //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
+                    var labels = isW5 ? ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5'] : ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'];
+
+                    var siso = isW5 ? [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]'), parseFloat('@w5[0]')] : [parseFloat('@w1[0]'), parseFloat('@w2[0]'), parseFloat('@w3[0]'), parseFloat('@w4[0]')];
+                    var stChuaVaoLop = isW5 ? [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]'), parseFloat('@w5[1]')] : [parseFloat('@w1[1]'), parseFloat('@w2[1]'), parseFloat('@w3[1]'), parseFloat('@w4[1]')];
+                    var min8 = isW5 ? [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]'), parseFloat('@w5[2]')] : [parseFloat('@w1[2]'), parseFloat('@w2[2]'), parseFloat('@w3[2]'), parseFloat('@w4[2]')]
+                    var min5 = isW5 ? [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]'), parseFloat('@w5[3]')] : [parseFloat('@w1[3]'), parseFloat('@w2[3]'), parseFloat('@w3[3]'), parseFloat('@w4[3]')]
+                    var min2 = isW5 ? [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]'), parseFloat('@w5[4]')] : [parseFloat('@w1[4]'), parseFloat('@w2[4]'), parseFloat('@w3[4]'), parseFloat('@w4[4]')]
+                    var min0 = isW5 ? [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]'), parseFloat('@w5[5]')] : [parseFloat('@w1[5]'), parseFloat('@w2[5]'), parseFloat('@w3[5]'), parseFloat('@w4[5]')]
+                    var chualam = isW5 ? [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]'), parseFloat('@w5[6]')] : [parseFloat('@w1[6]'), parseFloat('@w2[6]'), parseFloat('@w3[6]'), parseFloat('@w4[6]')]
+
+                    var chart = new Chart(ctx, {
+                        // The type of chart we want to create
+                        type: 'bar', //'bar', //line , radar, Doughnut and Pie , Polar Area,bubble,scatter
+
+                        // The data for our dataset
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                //{
+                                //    label: 'Sĩ số',
+                                //    backgroundColor: '#8f00ff',
+                                //    borderColor: '#8f00ff',
+                                //    minBarLength: 1,//type=bar
+                                //    data: siso
+                                //},
+                                {
+                                    label: 'Học sinh chưa vào lớp',
+                                    backgroundColor: 'rgba(255,127,0,0.5)',
+                                    borderColor: '#ff7f00',
+                                    minBarLength: 1,//type=bar
+                                    data: stChuaVaoLop
+                                },
+                                {
+                                    label: '8.0 -> 10',
+                                    backgroundColor: 'rgba(144,238,144,0.5)',
+                                    borderColor: 'green',
+                                    minBarLength: 1,//type=bar
+                                    data: min8
+                                },
+                                {
+                                    label: '5.0 -> 7.9',
+                                    backgroundColor: 'rgba(173, 216, 230,0.5)',
+                                    borderColor: 'blue',
+                                    minBarLength: 1,//type=bar
+                                    data: min5
+                                },
+                                {
+                                    label: '2.0 -> 4.9',
+                                    backgroundColor: '#ffff33',
+                                    borderColor: 'yellow',
+                                    minBarLength: 1,//type=bar
+                                    data: min2
+                                },
+                                {
+                                    label: '0.0 -> 1.9',
+                                    backgroundColor: 'rgba(255,69,77,0.8)',
+                                    borderColor: 'red',
+                                    minBarLength: 1,//type=bar
+                                    data: min0
+                                },
+                                {
+                                    label: 'Chưa làm',
+                                    backgroundColor: 'rgba(75,0,130,0.8)',
+                                    borderColor: '#4b0082',
+                                    minBarLength: 1,//type=bar
+                                    data: chualam
+                                }
+                            ]
+                        },
+
+                        // Configuration options go here
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        suggestedMin: 0,
+                                        suggestedMax: Math.max(...siso)
+                                    }
+                                }]
+                            }
+                        },
+                        plugins: [{
+                            afterRender: async function () {
+                                var x = chart.toBase64Image();
+                                var centerID = '@centerID';
+                                arrayData.push(
+                                    {
+                                        Image: x,
+                                        CenterID: centerID
+                                    }
+                                );
+                                console.log(countSendMail++);
+                                if (countSendMail == @totalCenter) {
+                                    //if (countSendMail == 1) {
+                                    //debugger
+                                    //sendData(arrayData);
+                                }
+                            }
+                        }]
+                    });
+
+                    },3000);
+            </script>
+        }
+    }*@

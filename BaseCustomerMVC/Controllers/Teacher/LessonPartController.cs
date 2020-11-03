@@ -1344,6 +1344,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     str = str.Replace(str[i], ')');
                 }
             }
+
+            str.Replace("&quot;", "\"");
             return str;
         }
     }

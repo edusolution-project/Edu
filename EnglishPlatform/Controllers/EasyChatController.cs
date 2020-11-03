@@ -57,27 +57,32 @@ namespace EnglishPlatform.Controllers
                                 Center = o.Center
                             })?.ToList();
 
-                    if (listClass != null && listClass.Count > 0)
-                    {
-                        return listClass;
-                    }
-
-                    List<string> classIdList = _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
-                    if (classIdList != null)
+                    List<string> classIdList =  _studentService.GetItemByID(User.FindFirst("UserID").Value)?.JoinedClasses;
+                    if(classIdList != null)
                     {
                         //student
-                        return _classService.GetItemsByIDs(classIdList).Where(t => (t.IsActive == true && t.EndDate >= DateTime.Now)
-                        && (t.ClassMechanism != CLASS_MECHANISM.PERSONAL))?.ToList()
+                        var listClassStudent = _classService.GetItemsByIDs(classIdList)
                             ?.Select(o => new MemberInfo()
                             {
                                 ID = o.ID,
                                 Name = o.Name,
                                 Center = o.Center
                             })?.ToList();
+
+                        if(listClassStudent != null && listClassStudent.Count > 0)
+                        {
+                            if(listClass == null) 
+                            {
+                                listClass = listClassStudent;
+                            }
+                            else
+                            {
+                                listClass.AddRange(listClassStudent);
+                            }
+                        }
                     }
 
-
-
+                    return listClass?.ToHashSet()?.ToList();
                 }
 
             }

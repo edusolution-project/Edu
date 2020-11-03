@@ -69,23 +69,26 @@ namespace BaseCustomerMVC.Globals
             if (!String.IsNullOrEmpty(fromName)) senderName = fromName;
             try
             {
+                var cre = new System.Net.NetworkCredential(senderID, senderPassword);
                 SmtpClient smtp = new SmtpClient
                 {
                     Host = "smtp.gmail.com", // smtp server address here…
                     Port = 587,
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
-                    Credentials = new System.Net.NetworkCredential(senderID, senderPassword),
+                    Credentials = cre,
                     Timeout = 30000,
                 };
 
                 var fromAddress = new MailAddress(senderID, senderName);
-
+                var strBody = new StringBuilder();
+                strBody.Append(body);
+                strBody.Append(legalFooter);
                 MailMessage message = new MailMessage
                 {
                     From = fromAddress,
                     Subject = subject,
-                    Body = body + legalFooter,
+                    Body = strBody.ToString(),
                     IsBodyHtml = true,
                 };
 
