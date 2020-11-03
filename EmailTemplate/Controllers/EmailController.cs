@@ -97,8 +97,8 @@ namespace EmailTemplate.Controllers
             {
                 List<int> Block = new List<int>();
                 var center = centersActive.ElementAt(i);
-                if (center.Abbr == "c3vyvp")
-                //if (center.Abbr != "eduso")
+                //if (center.Abbr == "c3vyvp")
+                if (center.Abbr != "eduso")
                 //if(center.ID== "5f17bf6569926b0f6481b742")
                 {
                     var data = GetDataForReprot(center, currentTime);
@@ -178,7 +178,7 @@ namespace EmailTemplate.Controllers
                         continue;
                     }
                     var center = _centerService.GetItemByID(d.CenterID);
-                    var hello = "<div>EDUSO kính gửi Thầy/Cô ";
+                    var hello = "<div>Kính gửi Thầy/Cô: ";
                     var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
                     List<string> listEmail = new List<string>();
                     for(int i=0;i<listTeacherHeader.Count();i++)
@@ -201,16 +201,16 @@ namespace EmailTemplate.Controllers
                     var body = await GetContent(d.Images,center.ID);
                     var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1, 23, 59, 00);
                     var subject = $"Báo cáo học tập tháng {time.Month-1} - {center.Name}";
-                    string note = $"<div>Kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd-MM-yyyy")}.</div>";
+                    string note = $"<div>Eduso kính gửi thầy/cô kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd-MM-yyyy")}.</div>";
                     var content = $"{hello}{note}{body}";
 
-                    //List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
-                    //List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
+                    List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
+                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
-                    List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com", "manhdv@utc.edu.vn" };
+                    //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com", "manhdv@utc.edu.vn" };
                     //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null);
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null);
                     Msg += $"Send To {center.Name} is done, ";
                 }
 
@@ -328,10 +328,6 @@ namespace EmailTemplate.Controllers
                             $"</div>";
                 }
                 chart += "</div>";
-                //List<String> content = new List<string>();
-                //content.Add(body);
-                //content.Add(chart);
-                //return content;
                 return $"{body}</tbody></table></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table><tr><td colspan='5'>{chart}</td></tr></table>";
             }
             else
@@ -339,110 +335,6 @@ namespace EmailTemplate.Controllers
                 return "";
             }
         }
-
-        //private async Task<string> ContentToSendEmail(List<string> Images, List<string> ClassIDs, CenterEntity center)
-        //{
-        //    Double totalstChuaVaoLop = 0, totalStudent = 0, tren8 = 0, tren5 = 0, tren2 = 0, tren0 = 0;
-
-        //    var body = "";
-        //    var chart = $"<br>{Note}<br><div style='width:90%;text-align:center'>";
-        //    var thead = @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
-        //                    <thead>
-        //                                <tr style='font-weight:bold;background-color: bisque'>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Lớp</td>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
-        //                                    <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
-        //                                </tr>
-        //                                <tr style='font-weight:bold;background-color: bisque'>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 2.0 -> 4.9</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>0.0 -> 2.0</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
-        //                                </tr>
-        //                            </thead>
-        //                            <tbody>"; ;
-        //    var tbody = "";
-
-        //    List<String> ClassNames = new List<string>();
-
-        //    for (int i = 0; i < ClassIDs.Count; i++)
-        //    {
-        //        var _dataClass = _reportService.GetReport(new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0), center.ID, ClassIDs[i]).FirstOrDefault();
-        //        var item = _dataClass;
-        //        ClassNames.Add(item.ClassName);
-        //        tbody += "<tr>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>{i + 1}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>{item.ClassName}</td>";
-        //        //$"<td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{ite}</td>" +
-        //        //"</tr>";
-        //        //if (dataClass.Count() >= 1)
-        //        //{
-        //        //    foreach (var item in _dataClass)
-        //        //    {
-        //        tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.Students}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.InactiveStudents}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.MinPoint8}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.MinPoint5}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.MinPoint2}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.MinPoint0}</td>" +
-        //            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>{item.Students - item.MinPoint8 - item.MinPoint5 - item.MinPoint2 - item.MinPoint0}</td>" +
-        //            "</tr>";
-
-        //        totalStudent += item.Students;
-        //        totalstChuaVaoLop += item.InactiveStudents;
-        //        tren8 += item.MinPoint8;
-        //        tren5 += item.MinPoint5;
-        //        tren2 += item.MinPoint2;
-        //        tren0 += item.MinPoint0;
-        //        //    }
-        //        //}
-        //    }
-
-        //    double tilechuavaolop = ((double)totalstChuaVaoLop / totalStudent) * 100;
-        //    double tiletren8 = ((double)tren8 / totalStudent) * 100;
-        //    double tiletren5 = ((double)tren5 / totalStudent) * 100;
-        //    double tiletren1 = ((double)tren2 / totalStudent) * 100;
-        //    double tile0 = ((double)tren0 / totalStudent) * 100;
-        //    double tilechualam = ((double)(totalStudent - tren8 - tren5 - tren2 - tren0) / totalStudent) * 100;
-
-        //    tbody += $"<tr><td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>" +
-        //                    "<td style = 'text-align:center; border: solid 1px #333; border-collapse: collapse;text-align: left;font-weight: 600' > Tổng </ td > " +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent}</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop} (<span style='color:red'>{tilechuavaolop.ToString("#0.00")}%</span>)</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8} (<span style='color:red'>{tiletren8.ToString("#0.00")}%</span>)</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5} (<span style='color:red'>{tiletren5.ToString("#0.00")}%</span>)</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren2} (<span style='color:red'>{tiletren1.ToString("#0.00")}%</span>)</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren0} (<span style='color:red'>{tile0.ToString("#0.00")}%</span>)</td>" +
-        //                       $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent - tren8 - tren5 - tren2 - tren0}(<span style='color:red'>{tilechualam.ToString("#0.00")}%</span>)</td></tr>" +
-        //                        "</tbody>" +
-        //               "</table>";
-
-        //    var index = 0;
-        //    foreach (var image in Images)
-        //    {
-        //        string base64 = GetBase64FromJavaScriptImage(image);
-        //        var bytes = Convert.FromBase64String(base64);
-        //        string link = "";
-        //        using (var memory = new MemoryStream(bytes))
-        //        {
-        //            link = Program.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive("eduso", "admin", memory));
-        //        }
-        //        chart += $"<div style='width:50%;float:left'>" +
-        //                    $"<img src='{link}' style='width: 100%' />" +
-        //                    $"<h3 style='text-align: center'>{ClassNames.ElementAt(index).ToUpper()}<h3>" +
-        //                $"</div>";
-
-        //        index++;
-        //    }
-        //    chart += "</div>" +
-        //        "<div style='clear:both'></div>";
-
-        //    body += $"{thead}{tbody}<br>{chart}";
-        //    return body;
-        //}
 
         /// <summary>
         /// Lấy data cho báo cáo tuần
@@ -464,15 +356,15 @@ namespace EmailTemplate.Controllers
         /// <summary>
         /// //classStudent.ToString(),stChuaVaoLop.ToString(),min8.ToString(),min5.ToString(),min2.ToString(),min0.ToString(),chualam.ToString()
         /// </summary>
-        /// <param name="startWeek"></param>
-        /// <param name="endWeek"></param>
-        /// <param name="class"></param>
+        /// <param name="startWeek"></param>Ngày đầu tháng
+        /// <param name="endWeek"></param>//ngày cuối tháng
+        /// <param name="center"></param>//cơ sở
         /// <returns></returns>
         private Dictionary<String, Double[]> GetDataInMonth(DateTime startWeek, DateTime endWeek, CenterEntity center)
         {
             Dictionary<String, Double[]> dataResponse = new Dictionary<string, double[]>();
-            //var classesActive = _classService.GetActiveClass4Report(startWeek.AddDays(1), center.ID).OrderBy(x=>x.Name);
-            var classesActive = _classService.CreateQuery().Find(x => x.StartDate < endWeek && x.EndDate >= startWeek && x.Center == center.ID).ToEnumerable().OrderBy(x => x.Name);
+            //var classesActive = _classService.CreateQuery().Find(x => x.StartDate < endWeek && x.EndDate >= startWeek && x.Center == center.ID).ToEnumerable().OrderBy(x => x.Name);
+            var classesActive = _classService.GetActiveClass4Report(startWeek,endWeek,center.ID).OrderBy(x => x.Name);
             if (classesActive != null)
             {
                 double totalStudents = 0, totalStChuaHoc = 0, totalMin8 = 0, totalMin5 = 0, totalMin2 = 0, totalMin0 = 0, totalChuaLam = 0;

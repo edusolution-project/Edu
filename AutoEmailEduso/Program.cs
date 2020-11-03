@@ -136,10 +136,8 @@ namespace AutoEmailEduso
                     }
 
                     var subject = "";
-                    //subject += $"Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}";
                     subject += $"Báo cáo kết quả học tập {center.Name}";
                     var body = "";
-                    //body += $"Kính gửi Thầy/Cô !";
                     body += $"<h3>Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}</h3>" +
                                 $"<p>Kết quả học tập là điểm trung bình các bài kiểm tra & luyện tập trong tuần được giáo viên lên lịch.</p>" +
                                 $"<p>Kết quả được cập nhập lần cuối lúc {endWeek.ToString("HH:mm dd-MM-yyyy")}.</p>";
@@ -306,7 +304,9 @@ namespace AutoEmailEduso
                     var PercentActiveStudent = ((double)(totalStudent - totalstChuaVaoLop) / totalStudent * 100);
                     var content = $"<p style='display: none'> Học sinh hoạt động: {PercentActiveStudent.ToString("#0.00")}% " +
                         $"- Hoàn thành kiểm tra: {(tiletren8 + tiletren5 + tiletren2 + tiletren0).ToString("#0.00")}% " +
-                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br> \t";
+                        $"(điểm trên 8: {tiletren8.ToString("#0.00")}%, điểm trên 5: {tiletren5.ToString("#0.00")}%)</p> <br> \t" +
+                        $"<p>Eduso gửi thầy/cô báo cáo tuần của <span style='font-weight:600'>{center.Name}</span> từ {startWeek.ToString("dd-MM-yyyy")} đến hết ngày {endWeek.ToString("dd-MM-yyyy")}" +
+                        $"<p>Kết quả học tập là điểm trung bình các bài kiểm tra & luyện tập trong tuần mà thầy/cô lên lịch giao cho Học sinh làm trong tuần.</p>";
 
                     if (listTeacherHeader.Count() > 1)
                     {
@@ -314,21 +314,21 @@ namespace AutoEmailEduso
                         {
                             var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { item.Email };
                             var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                            _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"EDUSO kính gửi Thầy/Cô {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                            _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                             
                             //isTest = true;
                             //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                            //_ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"EDUSO kính gửi Thầy/Cô {item.FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                            //_ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"Kính gửi Thầy/Cô: {item.FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                         }
                     }
                     else if (listTeacherHeader.Count() == 1)
                     {
                         var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { listTeacherHeader[0].Email };
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"EDUSO kính gửi Thầy/Cô {listTeacherHeader[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: {listTeacherHeader[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                         //isTest = true;
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com","buihong9885@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"EDUSO kính gửi Thầy/Cô {listTeacherHeader[0].FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject,content + $"Kính gửi Thầy/Cô: {listTeacherHeader[0].FullName}" + body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                     }
                     else
                     {
@@ -559,14 +559,10 @@ namespace AutoEmailEduso
                                 @"</table>
                             </body>";
 
-                var content = $"<p>Báo cáo học tập <span style='font-weight:600'>{@class.Name}</span> từ {startweek.ToString("dd-MM-yyyy")} đến {endweek.ToString("dd-MM-yyyy")}" +
-                                $"<p>Kết quả học tập là điểm trung bình các bài kiểm tra & luyện tập trong tuần được giáo viên lên lịch.</p>" +
-                                $"<p>Kết quả được cập nhập lần cuối lúc {endweek.ToString("HH:mm dd-MM-yyyy")}.</p>" +
+                var content = $"<p>Eduso gửi thầy/cô báo cáo tuần của <span style='font-weight:600'>{@class.Name}</span> từ {startweek.ToString("dd-MM-yyyy")} đến hết ngày {endweek.ToString("dd-MM-yyyy")}" +
+                                $"<p>Kết quả học tập là điểm trung bình các bài kiểm tra & luyện tập trong tuần mà thầy/cô lên lịch giao cho Học sinh làm trong tuần.</p>" +
                                 $"{body}" +
                                 $"{extendTeacher}";
-
-                //var subject = "";
-                //subject += $"EDUSO GỬI BÁO CÁO KẾT QUẢ HỌC TẬP {@class.Name.ToUpper()}";
 
                 if (listTeacher.Count > 1)
                 {
@@ -574,22 +570,22 @@ namespace AutoEmailEduso
                     {
                         var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { item.Email };
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                        _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName,@class.Name,centerName), $"EDUSO kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName,@class.Name,centerName), $"Kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
                         //isTest = true;
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "buihong9885@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                        //_ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName,@class.Name,centerName), $"EDUSO kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName,@class.Name,centerName), $"Kính gửi Thầy/Cô: {item.FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                     }
                 }
                 else if (listTeacher.Count == 1)
                 {
                     var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" } : new List<string> { listTeacher[0].Email };
                     var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName), $"EDUSO kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    _ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName), $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
                     //isTest = true;
                     //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "buihong9885@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                    //_ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName), $"EDUSO kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName), $"Kính gửi Thầy/Cô: {listTeacher[0].FullName}" + content, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
                 }
                 else
                 {
