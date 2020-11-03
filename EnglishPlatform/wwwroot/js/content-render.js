@@ -559,26 +559,27 @@ var Lesson = (function () {
                     var item = data.Part[i];
                     renderStudentPart(item);
                 }
-                //if (_UImode == UIMode.EXAM_ONLY) {
-                //    $('#rightCol .tab-pane').each(function () {
-                //        var media = null;
-                //        var html = null;
-                //        if ($(this).find(".QUIZ3").length > 0) {
-                //            if (!isMobileDevice()) {
-                //                $(this).addClass("h-100");
-                //                media = $(this).find(".Q3_absrow > .media-holder:first");
-                //            }
-                //        }
-                //        else {
-                //            media = $(this).find(".quiz-wrapper > .media-holder");
-                //        }
-                //        html = $(this).find(".part-description");
-                //        $(this).addClass("m-0");
-                //        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                //            .empty().append($(this).find('.part-box-header')).append(media).append(html)
-                //            .appendTo('#leftCol')
-                //    })
-                //}
+                if (_UImode == UIMode.EXAM_ONLY) {
+                    $('#rightCol .tab-pane').each(function () {
+                        var media = null;
+                        var html = null;
+                        if ($(this).find(".QUIZ3").length > 0) {
+                            if (!isMobileDevice()) {
+                                $(this).addClass("h-100");
+                                media = $(this).find(".Q3_absrow > .media-holder:first");
+                            }
+                        }
+                        else {
+                            media = $(this).find(".quiz-wrapper > .media-holder");
+                        }
+                        html = $(this).find(".part-description");
+                        $(this).addClass("m-0");
+                        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                            .appendTo('#leftCol')
+                    })
+                    goPartInx(0);
+                }
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:

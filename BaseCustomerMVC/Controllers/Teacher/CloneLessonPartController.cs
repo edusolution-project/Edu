@@ -21,22 +21,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
 {
     public class CloneLessonPartController : TeacherController
     {
-        private readonly GradeService _gradeService;
-        private readonly SubjectService _subjectService;
-        private readonly TeacherService _teacherService;
+        //private readonly GradeService _gradeService;
+        //private readonly SubjectService _subjectService;
+        //private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
         private readonly ClassHelper _classHelper;
         private readonly ClassSubjectService _classSubjectService;
-        private readonly CourseService _courseService;
-        private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _lessonScheduleService;
 
-        private readonly LessonPartService _lessonPartService;
-        private readonly LessonPartAnswerService _lessonPartAnswerService;
-        private readonly LessonPartQuestionService _lessonPartQuestionService;
 
-        private readonly CloneLessonPartService _service;
+        private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
         private readonly CloneLessonPartQuestionService _cloneQuestionService;
 
@@ -50,19 +44,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
         public CloneLessonPartController(
-            GradeService gradeservice,
-            SubjectService subjectService,
-            TeacherService teacherService,
+            //GradeService gradeservice,
+            //SubjectService subjectService,
+            //TeacherService teacherService,
             ClassService classService,
             ClassHelper classHelper,
             ClassSubjectService classSubjectService,
-            CourseService courseService,
-            ChapterService chapterService,
+            //CourseService courseService,
+            //ChapterService chapterService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
-            LessonPartService lessonPartService,
-            LessonPartQuestionService lessonPartQuestionService,
-            LessonPartAnswerService lessonPartAnswerService,
+            //LessonScheduleService lessonScheduleService,
+            //LessonPartService lessonPartService,
+            //LessonPartQuestionService lessonPartQuestionService,
+            //LessonPartAnswerService lessonPartAnswerService,
             CloneLessonPartService service,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
@@ -70,21 +64,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             VocabularyService vocabularyService
             )
         {
-            _gradeService = gradeservice;
-            _subjectService = subjectService;
-            _teacherService = teacherService;
-            _courseService = courseService;
+            //_gradeService = gradeservice;
+            //_subjectService = subjectService;
+            //_teacherService = teacherService;
+            //_courseService = courseService;
             _classSubjectService = classSubjectService;
             _classService = classService;
             _classHelper = classHelper;
-            _chapterService = chapterService;
+            //_chapterService = chapterService;
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
-            _lessonPartService = lessonPartService;
-            _lessonPartQuestionService = lessonPartQuestionService;
-            _lessonPartAnswerService = lessonPartAnswerService;
+            //_lessonPartService = lessonPartService;
+            //_lessonPartQuestionService = lessonPartQuestionService;
+            //_lessonPartAnswerService = lessonPartAnswerService;
 
-            _service = service;
+            _cloneLessonPartService = service;
             _cloneAnswerService = cloneLessonPartAnswerService;
             _cloneQuestionService = cloneLessonPartQuestionService;
 
@@ -115,7 +108,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (root != null && currentClass != null)
             {
-                var listCloneLessonPart = _service.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassSubjectID == currentCs.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                var listCloneLessonPart = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == LessonID && o.ClassSubjectID == currentCs.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                 if (listCloneLessonPart != null && listCloneLessonPart.Count > 0)
                 {
                     var result = new List<CloneLessonPartViewModel>();
@@ -161,7 +154,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult GetDetail(string ID)
         {
-            var part = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            var part = _cloneLessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
             if (part == null) return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", null },
@@ -218,7 +211,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 item.Created = DateTime.UtcNow;
                 item.TeacherID = currentCs.TeacherID;
-                var maxItem = _service.CreateQuery()
+                var maxItem = _cloneLessonPartService.CreateQuery()
                     .Find(o => o.ParentID == item.ParentID)
                     .SortByDescending(o => o.Order).FirstOrDefault();
                 item.Order = maxItem != null ? maxItem.Order + 1 : 0;
@@ -240,7 +233,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else // Update
             {
-                var olditem = _service.GetItemByID(item.ID);
+                var olditem = _cloneLessonPartService.GetItemByID(item.ID);
                 if (olditem == null)
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -274,7 +267,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             item.CourseID = currentCs.CourseID;
 
             var lessonpart = item.ToEntity();
-            _service.Save(lessonpart);
+            _cloneLessonPartService.Save(lessonpart);
 
 
 
@@ -323,7 +316,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (item.Questions == null || item.Questions.Count == 0)
                             item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
                         lessonpart.Description = newdescription;
-                        _lessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                        _cloneLessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
                     }
                     else
                     {
@@ -418,13 +411,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                var item = _cloneLessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
                 if (item == null) return;
 
                 var questionIds = _cloneQuestionService.CreateQuery().Find(o => o.ParentID == ID).Project(t => t.ID).ToList();
                 for (int i = 0; questionIds != null && i < questionIds.Count; i++)
                     await RemoveQuestion(questionIds[i]);
-                await _service.RemoveAsync(ID);
+                await _cloneLessonPartService.RemoveAsync(ID);
 
                 var parentLesson = _lessonService.GetItemByID(item.ParentID);
                 if (parentLesson != null)
@@ -435,7 +428,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
-                            var quizPartCount = _service.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
+                            var quizPartCount = _cloneLessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
                             if (quizPartCount == 0)//no quiz part
                             {
                                 parentLesson.IsPractice = false;
@@ -472,7 +465,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [HttpPost]
         public JsonResult ChangePosition(string ID, int pos, string ClassID)
         {
-            var item = _service.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+            var item = _cloneLessonPartService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
             if (item == null) return new JsonResult(new Dictionary<string, object>
                     {
                         { "Data", null },
@@ -484,7 +477,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (parentLesson != null)
             {
-                var parts = _service.CreateQuery().Find(o => o.ParentID == parentLesson.ID && o.ClassID == ClassID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
+                var parts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == parentLesson.ID && o.ClassID == ClassID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList();
                 var ids = parts.Select(o => o.ID).ToList();
 
                 var oldPos = ids.IndexOf(ID);
@@ -498,7 +491,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Order = pos;
                 var filter = Builders<CloneLessonPartEntity>.Filter.Where(o => o.ID == item.ID);
                 var update = Builders<CloneLessonPartEntity>.Update.Set("Order", pos);
-                var publish = _service.Collection.UpdateMany(filter, update);
+                var publish = _cloneLessonPartService.Collection.UpdateMany(filter, update);
                 int entry = -1;
                 foreach (var part in parts)
                 {
@@ -509,7 +502,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     part.Order = entry;
                     var filterX = Builders<CloneLessonPartEntity>.Filter.Where(o => o.ID == part.ID);
                     var updateX = Builders<CloneLessonPartEntity>.Update.Set("Order", part.Order);
-                    var publishX = _service.Collection.UpdateMany(filterX, updateX);
+                    var publishX = _cloneLessonPartService.Collection.UpdateMany(filterX, updateX);
                 }
                 return new JsonResult(new Dictionary<string, object>
                     {
@@ -529,7 +522,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         //private void CloneLessonPart(CloneLessonPartEntity item)
         //{
-        //    _service.Collection.InsertOne(item);
+        //    _cloneLessonPartService.Collection.InsertOne(item);
         //    var list = _lessonPartQuestionService.CreateQuery().Find(o => o.ParentID == item.OriginID).ToList();
         //    if (list != null)
         //    {
@@ -991,12 +984,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", "");
-            return org;
+            return StringHelper.ReplaceSpecialCharacters(org);
         }
+
         private double calculateLessonPoint(string lessonId)
         {
             var point = 0.0;
-            var parts = _service.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
             foreach (var part in parts)
             {
                 if (part.Type == "ESSAY")
@@ -1011,66 +1005,5 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
-
-        //public async Task<JsonResult> ConvertFillQuestion()
-        //{
-        //    try
-        //    {
-        //        var fillparts = _lessonPartService.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-        //        if (fillparts != null && fillparts.Count > 0)
-        //        {
-        //            foreach (var part in fillparts)
-        //            {
-        //                if (part.Description == null)
-        //                    part.Description = "";
-        //                var questions = _lessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-        //                if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
-        //                    continue;//No question
-
-        //                if (questions == null || questions.Count == 0)//lost Question
-        //                {
-        //                    var newdes = "";
-        //                    var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
-        //                    if (vQuiz == null || vQuiz.Count == 0)
-        //                        continue;//no valid fillquiz
-        //                    part.Description = newdes;
-        //                    await SaveQuestionFromView(new LessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
-        //                    _lessonPartService.Save(part);
-        //                }
-        //            }
-        //        }
-        //        var clonefillparts = _service.CreateQuery().Find(p => p.Type == "QUIZ2").ToList();
-        //        if (clonefillparts != null && clonefillparts.Count > 0)
-        //        {
-        //            foreach (var part in clonefillparts)
-        //            {
-        //                if (part.Description == null)
-        //                    part.Description = "";
-        //                var questions = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == part.ID).ToList();
-        //                if (String.IsNullOrEmpty(part.Description) && (questions == null || questions.Count == 0))
-        //                    continue;//No question
-
-        //                if (questions == null || questions.Count == 0)//lost Question
-        //                {
-        //                    var newdes = "";
-        //                    var vQuiz = ExtractFillQuestionList(part, "auto", out newdes);
-        //                    if (vQuiz == null || vQuiz.Count == 0)
-        //                        continue;//no valid fillquiz
-        //                    part.Description = newdes;
-        //                    await SaveQuestionFromView(new CloneLessonPartViewModel { ID = part.ID, CourseID = part.CourseID, Questions = vQuiz });
-        //                    _service.Save(part);
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return new JsonResult(new { Error = e.Message });
-        //    }
-
-        //    return new JsonResult("Convert Done");
-        //}
-
-
     }
 }
