@@ -56,6 +56,14 @@
             Nam = currentTime.getFullYear();
         }
 
+        var titleChart = "";
+        if (khoi == 99) {
+            titleChart = 'Kết quả học tập các khối lớp khác';
+        }
+        else {
+            titleChart = 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam;
+        }
+
         var id = "myChart_" + khoi + centerid;
         div.id = id;
         root.appendChild(div);
@@ -99,7 +107,8 @@
             },
             title: {
                 display: true,
-                text: 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam,
+                //text: 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam,
+                text: titleChart,
                 position: 'bottom',//top,left,bottom,right,
                 fontSize: 14
             },

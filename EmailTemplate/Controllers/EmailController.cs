@@ -187,22 +187,16 @@ namespace EmailTemplate.Controllers
                         if (t.Email != "huonghl@utc.edu.vn")
                         {
                             listEmail.Add(t.Email);
-                            if (i < listTeacherHeader.Count() - 1)
-                            {
-                                hello += $"{t.FullName}, ";
-                            }
-                            else
-                            {
-                                hello += $"{t.FullName}.</div>";
-                            }
+                            hello += $"<span style='font-weight:600'>{t.FullName}</span>, ";
+
                         }
                     }
 
                     var body = await GetContent(d.Images,center.ID);
                     var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1, 23, 59, 00);
                     var subject = $"Báo cáo học tập tháng {time.Month-1} - {center.Name}";
-                    string note = $"<div>Eduso kính gửi thầy/cô kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd-MM-yyyy")}.</div>";
-                    var content = $"{hello}{note}{body}";
+                    string note = $"<div>Eduso kính gửi thầy/cô kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div style='font-style:italic;font-size:12px'>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd/MM/yyyy")}.</div>";
+                    var content = $"{hello}<p></p>{note}{body}";
 
                     List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
                     List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
@@ -297,7 +291,7 @@ namespace EmailTemplate.Controllers
                     persentChuaHoc = 0;
                 }
 
-                tbody += $"<tr>" +
+                tbody += $"<tr style='font-weight: 600'>" +
                     $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'></td>" +
                     $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Tổng</td>" +
                     $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>{totalStudent} <span style='color:red'>(100%)</span></td>" +
@@ -328,7 +322,7 @@ namespace EmailTemplate.Controllers
                             $"</div>";
                 }
                 chart += "</div>";
-                return $"{body}</tbody></table></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><table><tr><td colspan='5'>{chart}</td></tr></table>";
+                return $"{body}</tbody></table></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table><br><table><tr><td colspan='5'>{chart}</td></tr></table><br><table><tr><td colspan='5'>{extendTeacher}</td></tr></table>";
             }
             else
             {
@@ -501,7 +495,24 @@ namespace EmailTemplate.Controllers
             return true;
         }
 
-        private readonly static String Note = "<div>Kết quả luyện tập & kiểm tra là điểm trung bình các bài luyện tập và kiểm tra trong tháng.</div>";
+        private readonly static String Note = "<div style='font-style:italic;font-size:12px'>Kết quả luyện tập & kiểm tra là điểm trung bình các bài luyện tập và kiểm tra được các thầy/cô lên lịch giao cho Học sinh làm trong tháng.</div>";
+
+        private static readonly string extendTeacher =
+        @"<br>
+        <div style='color:#333;font-size: 90%;'>
+            <div>
+                <i style='text-decoration: underline;'>Bạn có thể:</i>
+            </div>
+            <div style='padding-left: 30px;'>
+                <p style='padding-top: 5px;margin: 0;'>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'> ""Quản lý lớp học""</b> để tạo lớp, đặt lịch dạy, theo dõi điểm và tiến độ của học sinh</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book-pen.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'><b style='color: red;'> ""Quản lý lớp học""</b> chọn <img src='https://static.eduso.vn//images/EditBaiGiang.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle;'> trong mục <span style='font-weight:600;color:black'>Tác vụ</span> để thêm bài giảng, xoá bài giảng</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/book.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Tạo bài giảng""</b> để soạn bài giảng mới</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/celendar.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Quản lý lịch dạy""</b> để xem thời khóa biểu và vào lớp học trực tuyến</div>
+                    <div style='line-height: 30px;'>- Vào <img src='https://static.eduso.vn//images/file.png?w=20&h=20&mode=crop&format=jpg' style='max-width:20px;max-height:20px;vertical-align: middle'><b style='color: red;'> ""Học liệu""</b>, chọn <span style='font-weight:600;color:black'>Học liệu tương tác</span> để tải thêm xuống lớp học</div>
+                </p>
+            </div>
+        </div>";
 
         public class StudentResult
         {
