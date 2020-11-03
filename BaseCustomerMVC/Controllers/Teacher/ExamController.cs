@@ -326,6 +326,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
                     var point = 0.0;
                     var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                    currentExam.LastPoint = currentExam.Point;
                     currentExam.Point = point;
                     currentExam.Marked = true;
                     currentExam = _lessonHelper.CompleteFull(currentExam, lesson, out point);
@@ -338,7 +339,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     //Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
                     List<MediaResponseModel> listFileUpload = _roxyFilemanHandler.UploadFileWithGoogleDrive(basis, User.FindFirst("UserID").Value, HttpContext);
-                    if (listFileUpload.Count > 0)
+                    if (listFileUpload != null && listFileUpload.Count > 0)
                     {
                         var listMedia = new List<Media>();
                         for (int i = 0; i < listFileUpload.Count; i++)

@@ -1707,7 +1707,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 rank = results.FindIndex(t => t.TotalPoint == studentresult.TotalPoint) + 1;
             var response = new Dictionary<string, object>
             {
-                { "Result", new { pos =  1, total = total_students, avg = avgpoint } },
+                { "Result", new { pos = rank, total = total_students, avg = avgpoint } },
                 { "Data", GetClassSubjectSummary(currentClass, StudentID, total_students)},
                 { "Model", model }
             };

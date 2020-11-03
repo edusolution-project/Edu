@@ -25,7 +25,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@processUrl("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
+            <h2 class="title"><a href="@processUrl("Detail", "Class")/@currentClass.ID#score" title="Bảng điểm"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -49,7 +49,7 @@
             </div>
             <div class="flex rate" v-if="tab[1] || search_subject == ''">
                 <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
-                <span><i class="ic ic-award"></i>Xếp hạng: {{rank.pos + '/' + rank.total}}</span>
+                <span><i class="ic ic-award"></i>Xếp hạng: {{ checkrank() + '/' + rank.total}}</span>
             </div>
         </div>
         <div class="flex j-between border-b" v-if="search_subject != ''">
@@ -345,7 +345,7 @@
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
-                            console.log(_that.resultData);
+                            //console.log(_that.resultData);
                             _that.avgPoint = 0;
 
                             if (_that.resultData.length > 0) {
@@ -354,6 +354,7 @@
                                 });
                                 _that.avgPoint = _that.avgPoint / _that.resultData.length
                             }
+
                             //this.fillTypeExam();
                             //console.log(_that.avgPoint)
                         }).catch(e => { })
@@ -531,6 +532,13 @@
                     //    });
                     //    _that.avgPoint = _that.avgPoint / _that.fillterResultData.length
                     //}
+                },
+                checkrank() {
+                    if (this.search_subject == "")
+                        return this.rank.pos;
+                    var rank = this.summaryData.filter(t => t.ClassSubjectID == this.search_subject)[0].Rank;
+                    if (rank > 0) return rank;
+                    return '-';
                 }
             }
         });

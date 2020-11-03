@@ -3392,7 +3392,7 @@ var Lesson = (function () {
                     CKEDITOR.replace(esid);
                     itembox.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", onclick: "AddAttachment(this)" }));
                     itembox.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", onclick: "SaveEssay('" + data.Questions[0].ID + "',this)" }));
-                    itembox.append($("<input>", { type: "file", name: "ESF_" + data.Questions[0].ID, class: "hide", accept: " audio/*, .doc, .docx", onchange: "UpdateFilename(this)" }));
+                    itembox.append($("<input>", { type: "file", name: "ESF_" + data.Questions[0].ID, class: "hide", accept: ".mp3, .mp4, .doc, .docx", onchange: "UpdateFilename(this)" }));
                 }
 
                 //for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {

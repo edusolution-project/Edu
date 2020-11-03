@@ -446,7 +446,7 @@ namespace BaseCustomerMVC.Globals
             }
             //else
             //{
-            var point = (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;
+            var point = (pointchange != 0 ? pointchange : item.PointChange) * item.Multiple;
 
             var incPoint = 0.0;
             long incCount = 0;
@@ -578,7 +578,7 @@ namespace BaseCustomerMVC.Globals
             }
             else
             {
-                var point = (pointchange > 0 ? pointchange : item.PointChange) * item.Multiple;
+                var point = (pointchange != 0 ? pointchange : item.PointChange) * item.Multiple;
 
                 var incPoint = 0.0;
                 long incCount = 0;
