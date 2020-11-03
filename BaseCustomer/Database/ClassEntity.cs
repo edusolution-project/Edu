@@ -114,9 +114,11 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<string> GetMultipleClassName(List<string> IDs, string StudentID = "", string CenterID = "")
         {
-            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID)!=null)
+            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID) != null)
             {
-                IDs.RemoveAt(IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID));
+                var index = IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID);
+                if (index >= 0)
+                    IDs.RemoveAt(index);
             }
             if (string.IsNullOrEmpty(CenterID))
                 return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();

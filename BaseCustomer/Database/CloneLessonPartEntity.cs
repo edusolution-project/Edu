@@ -21,6 +21,9 @@ namespace BaseCustomerEntity.Database
 
     public class CloneLessonPartService : ServiceBase<CloneLessonPartEntity>
     {
+        private IConfiguration config;
+        private string dbName;
+
         public CloneLessonPartService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<CloneLessonPartEntity>>
@@ -36,6 +39,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public CloneLessonPartService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public IEnumerable<CloneLessonPartEntity> GetByLessonID(string LessonID)

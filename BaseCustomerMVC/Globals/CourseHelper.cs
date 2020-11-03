@@ -20,10 +20,7 @@ namespace BaseCustomerMVC.Globals
         private readonly CourseChapterService _courseChapterService;
         private readonly CourseLessonService _courseLessonService;
         private readonly ChapterService _chapterService;
-        private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonHelper _lessonHelper;
-        private readonly CalendarHelper _calendarHelper;
 
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
         private readonly MappingEntity<CourseChapterEntity, CourseChapterEntity> _cloneCourseChapterMapping = new MappingEntity<CourseChapterEntity, CourseChapterEntity>();
@@ -37,7 +34,6 @@ namespace BaseCustomerMVC.Globals
             CourseChapterService courseChapterService,
             CourseLessonService courseLessonService,
 
-            LessonService lessonService,
             ChapterService chapterService,
 
             LessonHelper lessonHelper
@@ -47,7 +43,6 @@ namespace BaseCustomerMVC.Globals
             _courseChapterService = courseChapterService;
             _courseLessonService = courseLessonService;
 
-            _lessonService = lessonService;
             _chapterService = chapterService;
 
             _lessonHelper = lessonHelper;
@@ -137,10 +132,9 @@ namespace BaseCustomerMVC.Globals
             var newID = "0";
 
             long lessoncounter = 0;
-            ChapterEntity newchapter = null;
             if (originChapter != null)
             {
-                newchapter = _chapterMapping.AutoOrtherType(originChapter, new ChapterEntity());
+                ChapterEntity newchapter = _chapterMapping.AutoOrtherType(originChapter, new ChapterEntity());
                 newchapter.OriginID = originChapter.ID;
                 newchapter.ClassID = classSubject.ClassID;
                 newchapter.ClassSubjectID = classSubject.ID;
