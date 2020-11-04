@@ -58,7 +58,7 @@
 
         var titleChart = "";
         if (khoi == 99) {
-            titleChart = 'Kết quả học tập các khối lớp khác';
+            titleChart = 'Kết quả học tập các khối lớp khác ' + Thang + ' năm ' + Nam;
         }
         else {
             titleChart = 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam;
@@ -101,7 +101,20 @@
                 xAxes: [{
                     ticks: {
                         fontSize: 14,
-                        fontColor: 'black'
+                        fontColor: 'black',
+                        //maxRotation: 0,
+                        //callback: function (label) {
+                        //    if (label.split(" ").length > 2) {
+                        //        if (/\s/.test(label)) {
+                        //            return label.split(" ");
+                        //        } else {
+                        //            return label;
+                        //        }
+                        //    }
+                        //    else {
+                        //        return label;
+                        //    }
+                        //}
                     },
                 }]
             },

@@ -194,7 +194,7 @@ namespace EmailTemplate.Controllers
 
                     var body = await GetContent(d.Images,center.ID);
                     var time = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1, 23, 59, 00);
-                    var subject = $"Báo cáo học tập tháng {time.Month-1} - {center.Name}";
+                    var subject = $"Báo cáo tháng {time.Month-1} - {center.Name}";
                     string note = $"<div>Eduso kính gửi thầy/cô kết quả học tập trong tháng {time.AddMonths(-1).Month} của các lớp.</div>{Note}<div style='font-style:italic;font-size:12px'>Số liệu được cập nhật lần cuối lúc {time.AddDays(-1).ToString("HH:mm - dd/MM/yyyy")}.</div>";
                     var content = $"{hello}<p></p>{note}{body}";
 
