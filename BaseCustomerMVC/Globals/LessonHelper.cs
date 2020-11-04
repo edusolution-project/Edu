@@ -577,10 +577,10 @@ namespace BaseCustomerMVC.Globals
 
             _examService.Save(exam);
 
-            if (lessonProgress.ChapterID != "0")
-                _ = _progressHelper.UpdateChapterPoint(lessonProgress);
-            else
-                _ = _progressHelper.UpdateClassSubjectPoint(lessonProgress);
+            //if (lessonProgress.ChapterID != "0")
+            //    _ = _progressHelper.UpdateChapterPoint(lessonProgress);
+            //else
+            //    _ = _progressHelper.UpdateClassSubjectPoint(lessonProgress);
 
             return exam;
         }

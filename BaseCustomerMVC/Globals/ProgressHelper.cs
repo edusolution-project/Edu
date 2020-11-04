@@ -550,7 +550,6 @@ namespace BaseCustomerMVC.Globals
             {
                 await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
 
-
                 if (chapter.ParentID != "0")
                     await UpdateParentChapPoint(chapter.ParentID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
                 else
