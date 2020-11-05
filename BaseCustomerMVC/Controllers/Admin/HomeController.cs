@@ -10,6 +10,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -487,6 +488,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public JsonResult FixFillquiz()
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
             foreach (var pid in partIDs)
             {
@@ -528,8 +531,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                     }
                 }
             }
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts = stopWatch.Elapsed;
 
-            return Json("OK");
+            // Format and display the TimeSpan value.
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            return Json($"OK - {elapsedTime}");
         }
 
         private string validateFill(string org)
@@ -538,8 +549,20 @@ namespace BaseCustomerMVC.Controllers.Admin
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", "");
+
+            for (int i = 0; i < KyTuDacBiet.Length; i++)
+            {
+                if (org.Contains(KyTuDacBiet[i]))
+                {
+                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
+                }
+            }
             return org;
         }
+
+        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
+                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
+        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
 
         private double calculateLessonPoint(CourseLessonEntity lesson)
         {
