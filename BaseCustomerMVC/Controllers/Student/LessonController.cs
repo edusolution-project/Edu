@@ -3,6 +3,7 @@ using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -361,39 +362,55 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var ExamTypes = quizType;
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
-            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
-            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-            var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
+            var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
+            var isHideAnswer = schedule.IsHideAnswer;
+            if (schedule.EndDate < DateTime.UtcNow)
+                isHideAnswer = false;
+            ViewBag.IsHideAnswer = isHideAnswer;
 
-            var examview = mapExam.AutoOrtherType(exam, new ExamReviewViewModel()
+            if (!isHideAnswer)
             {
-                Details = _examDetailService.Collection.Find(t => t.ExamID == exam.ID).ToList()
-            });
+                var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
-            var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
-            {
-                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+                var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
+
+                var examview = mapExam.AutoOrtherType(exam, new ExamReviewViewModel()
                 {
-                    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                        {
-                            CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                            AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
-                            Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
-                            TypeAnswer = o.Type,
-                            RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
-                            PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
-                            ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
-                            MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                            MaxPoint = z.Point
-                        }))?.ToList()
-                })).ToList()
-            });
+                    Details = _examDetailService.Collection.Find(t => t.ExamID == exam.ID).ToList()
+                });
 
-            ViewBag.Lesson = lessonview;
+                var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                {
+                    Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                    {
+                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                            .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                                AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
+                                TypeAnswer = o.Type,
+                                RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
+                                ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
+                                MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
+                                MaxPoint = z.Point
+                            }))?.ToList()
+                    })).ToList()
+                });
+                ViewBag.Lesson = lessonview;
+                ViewBag.Exam = examview;
+            }
+            else
+            {
+                ViewBag.Lesson = new StudentLessonViewModel { Title = lesson.Title, ID = lesson.ID };
+            }
+
+
             ViewBag.Class = currentClass;
             if (string.IsNullOrEmpty(currentCs.CourseName))
                 currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
@@ -401,7 +418,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
-            ViewBag.Exam = examview;
+
 
             return View();
         }

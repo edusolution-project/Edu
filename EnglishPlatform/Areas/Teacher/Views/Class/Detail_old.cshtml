@@ -346,14 +346,14 @@
             overflow: visible;
         }
 
-        /*.ls-practice .date {
+        .ls-practice .date {
             width: 160px;
             padding: 2px 12px;
-        }*/
-
-        .ls-practice .date::after {
-            top: 7px;
         }
+
+            .ls-practice .date::after {
+                top: 7px;
+            }
 
         .ls-practice .sub-practice .status {
             padding: 10px
@@ -403,114 +403,30 @@
         .chapSelect .lbl {
             white-space: nowrap;
         }
-
-        .chap-item .chap-row {
-            position: relative;
-        }
-
-            .chap-item .chap-row .row-action {
-                position: absolute;
-                top: 0;
-                right: 0;
-                padding: 3px 7px;
-                background: #FFF;
-            }
-
-                .chap-item .chap-row .row-action .act_ic {
-                    display: none;
-                }
-
-                .chap-item .chap-row .row-action .indicator {
-                    display: block;
-                    color: #CCC;
-                    font-size: 12px;
-                }
-
-                .chap-item .chap-row:hover .row-action .indicator,
-                .chap-item .chap-row .row-action.active .indicator {
-                    display: none;
-                }
-
-                .chap-item .chap-row:hover .row-action .act_ic,
-                .chap-item .chap-row .row-action.active .act_ic {
-                    display: contents;
-                }
-
-        .ic-ac {
-            color: #CCC;
-            cursor: pointer;
-        }
-
-            .ic-ac.active, .ic-ac:hover {
-                color: #333;
-                cursor: pointer;
-            }
-
-        .chap-item .chap-row .chap-info i {
-            font-size: 75%;
-            font-weight: 500;
-            color: #333;
-            border-radius: 20px;
-            padding: 2px 5px;
-        }
-
-            .chap-item .chap-row .chap-info i span {
-                font-size: 100%;
-                font-family: 'Be Vietnam',sans-serif;
-            }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
         <li class="pr-0 ml-3 chap-item">
             <div class="inner pt-2 pb-2">
-                <div class="chap-row mt-1" onmouseover="$('.row-action.active').removeClass('active')">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
-                        <div class="align-self-center mb-1" style="line-height:24px">
-                            <i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}
-                            <i class="ic ic-collapse"></i>
-                        </div>
+                        <span class="align-self-center" style="line-height:24px;"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
                     </a>
-                    <div>
-                        <div class="d-flex justify-content-between align-items-start align-items-md-center">
-                            <div class="chap-info ml-3" style="color:#999; white-space: nowrap">
-                                <i class="ti-link" style="background-color: #bee4ef;" v-for="(chap,j) in listchaps" v-if="(data.ConditionChapter != '') && (chap.ID == data.ConditionChapter)"><span class="pl-1">Điều kiện: {{chap.Title}}</span></i>
-                                <i class="ti-target ml-2" v-if="data.BasePoint > 0" style="background-color: #ffe38d"><span class="pl-1">Mục tiêu: {{data.BasePoint}}</span></i>
-                                <i class="ti-control-play ml-2" style="background-color: #c3e2c3" v-if="moment(data.StartDate) > moment(new Date(1900,1,1))"><span class="pl-1">bắt đầu {{formatTime(data.StartDate)}}</span></i>
-                                <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
-                            </div>
-
-                            <div class="row-action d-flex align-items-start align-items-md-center" for="{{data.ID}}" v-if="owner == '@currentuser'">
-                                <i class="fas fa-ellipsis-h indicator"></i>
-                                <div class="act_ic">
-                                    <i class="ic-ac fas fa-link ml-2" style="font-size:16px;" title="Chọn nội dung điều kiện" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
-                                    <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 24px; margin:2px; display:none" v-on:change="updateChapCondition(data)" onblur="$(this).hide()" onfocus="$(this).show()">
-                                        <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
-                                        <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
-                                            <option :value='chap.ID'>{{chap.Title}}</option>
-                                        </template>
-                                    </select>
-                                </div>
-                                <div class="act_ic">
-                                    <i class="ic-ac far fa-play-circle ml-2" style="font-size:18px;" title="Chọn ngày bắt đầu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
-                                    <datepickerV2 :date="data.StartDate" :idx="0" :obj="data" class="st" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
-                                </div>
-                                <div class="act_ic">
-                                    <i class="ic-ac far fa-stop-circle ml-2" style="font-size:18px;" title="Chọn ngày hết hạn" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
-                                    <datepickerV2 :date="data.EndDate" :idx="1" :obj="data" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
-                                </div>
-                                <div class="act_ic">
-                                    <i class="ic-ac far fa-dot-circle ml-2" style="font-size:18px;" title="Đặt mục tiêu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
-                                    <input type="text" class="form-control bg-light text-right basepoint" style="margin: 0 3px;padding: 2px; width: 52px; height:24px; display:none;" onblur="$(this).hide()" onfocus="$(this).show()" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
-                                </div>
-                                <div class="act_ic">
-                                    <i class="ic-ac fas fa-redo ml-2" style="font-size:16px;" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
-                                </div>
-                            </div>
+                    <div class="d-flex" v-if="owner == '@currentuser'">
+                        <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 31px; margin-top: 2px;" v-on:change="updateChapCondition(data)">
+                            <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
+                            <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
+                                <option :value='chap.ID'>{{chap.Title}}</option>
+                            </template>
+                        </select>
+                        <div class="picker-schedule d-flex">
+                            <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
+                            <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
                         </div>
+                        <input type="text" class="form-control bg-light text-right basepoint" style="margin: 2px 13.5px; width: 60px;" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
                     </div>
                 </div>
-
-
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
                     <b-card-body class="pr-0">
                         <ul class="list">
@@ -546,15 +462,13 @@
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
-                    <i class="fas fa-redo ic-ac d-flex align-items-center ml-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
-                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}" title="Ẩn đáp án" v-on:click="toggleHideAnswer(data)"></i>
-                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
+                    <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" v-bind:class="{active: data.IsOnline == true}" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
                 </div>
                 <div class="d-flex picker-schedule" v-else>
-                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
-                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
-                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" title="Ẩn đáp án" v-bind:class="{active: data.IsHideAnswer == true}"></i>
-                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
+                    <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
                 </div>
                 @*<div class="status" v-if="owner == '@currentuser'">
                         <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
@@ -699,7 +613,7 @@
         var datepickerComponent = Vue.extend({
           //v-el:select
           template: `<div class="input-group date" ref="inputgroup">` +
-            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly" style="font-size:95%">` +
+            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly">` +
             `</div>`,
             props: {
                 obj: '',
@@ -768,80 +682,7 @@
             }
         })
 
-        var datepickerComponentV2 = Vue.extend({
-            //v-el:select
-            template: `<div class="date" ref="inputgroup">` +
-                `<input type="text" v-model="dateVal" readonly="readonly" style="width:0px;height:0px; border:none !important; outline:none !important">` +
-                `</div>`,
-            props: {
-                obj: '',
-                idx: '0',
-                date: '2015-01-01'
-            },
-            data: function () {
-                return {};
-            },
-            computed:
-            {
-                dateVal: {
-                    get() {
-                        //var _date = moment(this.date);
-
-                        //if (!_date._isValid || _date <= moment(new Date(1900, 1, 1)))
-                        //    return '';
-                        //return _date.format("DD/MM/YYYY HH:mm");
-                        return formatTime(this.date);
-                    },
-                    set(value) {
-                        var _date = moment(value, "DD/MM/YYYY HH:mm");
-                        if (_date._isValid)
-                            this.date = _date.format();
-                        else
-                            this.date = '';
-                    }
-                }
-            },
-            mounted: function () {
-                let _that = this
-                Vue.nextTick(function () {
-                    //console.log($(_that.$refs.inputgroup))
-                    $($(_that.$refs.inputgroup).find('input')).datetimepicker({
-                        formatTime: 'H:i',
-                        formatDate: 'd/m/Y',
-                        timepickerScrollbar: true,
-                        scrollMonth: false,
-                        defaultTime: '08:00',
-                        step: 15,
-                        onChangeDateTime: function (dp, $input) {
-                            //console.log($input.val())
-                            _that.dateVal = $input.val()
-                            if (moment($input.val(), "DD/MM/YYYY HH:mm").format() == "Invalid date") {
-                                //console.log('false');
-                                return false;
-                            }
-
-                            if (_that.idx == '0') {
-                                if (_that.obj.StartDate != _that.date) {
-                                    _that.obj.StartDate = _that.date
-                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
-                                    _that.$emit('input')
-                                }
-                            }
-                            else {
-                                if (_that.obj.EndDate != _that.date) {
-                                    _that.obj.EndDate = _that.date
-                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
-                                    _that.$emit('input')
-                                }
-                            }
-                        }
-                    })
-                })
-            }
-        })
-
         Vue.component('datepicker', datepickerComponent);
-        Vue.component('datepickerV2', datepickerComponentV2);
 
         var mainInstance = new Vue({
             el: "#main_content",
@@ -858,7 +699,6 @@
                 window.clearChapSchedule = this.clearChapSchedule
                 window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
-                window.toggleHideAnswer = this.toggleHideAnswer
                 window.filterChap = this.filterChap
                 window.filterLesson = this.filterLesson
                 window.filterResult = this.filterResult
@@ -1171,8 +1011,7 @@
                                     EndDate: moment(lesson.EndDate) > moment(new Date(1900, 1, 1)) ? lesson.EndDate : "",
                                     IsActive: lesson.IsActive,
                                     IsUpdating: false,
-                                    IsOnline: lesson.IsOnline,
-                                    IsHideAnswer: lesson.IsHideAnswer
+                                    IsOnline: lesson.IsOnline
                                 })
 
                             })
@@ -1279,8 +1118,8 @@
                                 _that.scoreSbjStudent = response.data.Student;
                                 var result = response.data.Result;
                                 if (_that.scoreSbjChap.length > 0) {
-                                    for (i = 0; i < _that.scoreSbjChap.length; i++) {
-                                        if(i < 2) this.filterChap.TargetChaps.push(_that.scoreSbjChap[i].ID);
+                                    for (i = 0; i < _that.scoreSbjChap.length && i < 2; i++) {
+                                        this.filterChap.TargetChaps.push(_that.scoreSbjChap[i].ID);
                                         if (result != null)
                                             _that.scoreSbjChap[i].Result = result[i];
                                     }
@@ -1521,7 +1360,6 @@
                 filterLesson(obj) {
                     var filter = this.list_lessons.filter((p) => {
                         return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
-                        console.log(1);
                     })
                     return filter;
                 },
@@ -1586,42 +1424,6 @@
                         }).catch(e => { })
                 },
 
-                toggleHideAnswer(obj) {
-                    let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
-                    let _form = new FormData()
-                    _form.append('ID', obj.ScheduleID);
-                    axios.post(_url, _form)
-                        .then(response => {
-                            if (response.data.error == null) {
-                                console.log(response.data);
-                                obj.IsHideAnswer = response.data.isHideAnswer;
-                                if (response.data.isHideAnswer == true) {                                    
-                                    Swal.fire({
-                                        title: "Thông báo",
-                                        text: "Đã bật chế độ ẩn đáp án",
-                                        icon: 'info',
-                                    });
-                                }
-                                else {
-                                    Swal.fire({
-                                        title: "Thông báo",
-                                        text: "Đã tắt chế độ ẩn đáp án",
-                                        icon: 'info',
-                                    });
-                                }
-                            }
-                            else {
-                                Swal.fire({
-                                    title: "Có lỗi",
-                                    text: response.error,
-                                    icon: 'warning',
-                                });
-                            }
-
-                            //item.IsActive = !item.IsActive;
-                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
-                        }).catch(e => { })
-                },
                 //REF
                 showRefModal(obj) {
                     let _that = this;
@@ -1677,7 +1479,7 @@
                     let _that = this;
                     let _url = '@processUrl("GetDetail", "Exam")'
                     let _form = new FormData()
-                    //_form.append('ID', obj);
+                    _form.append('ID', obj);
                     _form.append('CheckPoint', true);
                     axios.post(_url, _form)
                         .then(response => {
@@ -1918,6 +1720,7 @@
                         });
                     }
                 },
+
                 openLessonResult(obj) {
                     let _that = this;
                     this.hideModal();

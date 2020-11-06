@@ -529,6 +529,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
+        public JsonResult ToggleHideAnswer(string ID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var schedule = _lessonScheduleService.GetItemByID(ID);
+            if (schedule == null)
+            {
+                return Json(new { error = "Thông tin không đúng" });
+            }
+            schedule.IsHideAnswer = !schedule.IsHideAnswer;
+            _lessonScheduleService.Save(schedule);
+            return Json(new { schedule.IsHideAnswer });
+        }
+
+
+        [HttpPost]
+        [Obsolete]
         public JsonResult Update(LessonScheduleEntity entity)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
