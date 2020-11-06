@@ -1,0 +1,326 @@
+﻿@using BaseCustomerEntity.Database;
+@using BaseCustomerMVC.Globals;
+@using MongoDB.Driver;
+@using EmailTemplate.Controllers;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var BlockCenter = ViewBag.BlockCenter as Dictionary<string, int[]>;
+    var BlockClass = ViewBag.BlockClass as Dictionary<string, int>;
+    var DataClass = ViewBag.DataClass as Dictionary<string, double[]>;
+    var ClassName = ViewBag.ClassName as Dictionary<string, string>;
+    var TotalBlock = ViewBag.CountBlock;
+    var ClassCenters = ViewBag.ClassCenters as Dictionary<string, string>;
+}
+
+<div id="list-data"></div>
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>*@
+
+<script src="~/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/chartjs-plugin-datalabels.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/src/chartjs-plugin-labels.js"></script>
+<script>
+    var root = document.getElementById("list-data");
+    var countSendMail = 0;
+    var arrayData = [];
+    var sendData = function (arrayData) {
+        return $.ajax({
+            type: "POST",
+            url: '/email/SendMonthlyReport',
+            //data: { Data: arrayData, isTest: false },
+            data: { Data: arrayData },
+            success: function (res) {
+                console.log(res)
+            },
+            timeout: 5000
+        });
+    }
+
+    var renderChart = function (khoi, siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop, centerid, countblock) {
+        var div = document.createElement("canvas");
+        var Khoi = khoi == 99 ? "" : " khối " + khoi;
+
+        var currentTime = new Date();
+        var Thang = "";
+        var Nam = "";
+        if (currentTime.getMonth() == 0) {
+            Thang = "tháng 12";
+            Nam = currentTime.getFullYear() - 1;
+        }
+        else {
+            Thang = "tháng " + currentTime.getMonth();
+            Nam = currentTime.getFullYear();
+        }
+
+        var titleChart = "";
+        if (khoi == 99) {
+            titleChart = 'Kết quả học tập các khối lớp khác ' + Thang + ' năm ' + Nam;
+        }
+        else {
+            titleChart = 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam;
+        }
+
+        var id = "myChart_" + khoi + centerid;
+        div.id = id;
+        root.appendChild(div);
+
+        var labels = tenlop;
+
+        var options = {
+            legend: {
+                "display": true,
+                labels: {
+                    fontColor: 'black',
+                    fontSize: 14,
+                },
+                position: 'right',//top,left,bottom,right,
+                align: 'center'//center,start,end
+            },
+            tooltips: {
+                "enabled": false
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: Math.max(...siso),
+                        //stepSize: 1,
+                        precision: 0
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Sĩ số',
+                        fontSize: 15,
+                        fontColor: 'black'
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 14,
+                        fontColor: 'black',
+                        //maxRotation: 0,
+                        //callback: function (label) {
+                        //    if (label.split(" ").length > 2) {
+                        //        if (/\s/.test(label)) {
+                        //            return label.split(" ");
+                        //        } else {
+                        //            return label;
+                        //        }
+                        //    }
+                        //    else {
+                        //        return label;
+                        //    }
+                        //}
+                    },
+                }]
+            },
+            title: {
+                display: true,
+                //text: 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam,
+                text: titleChart,
+                position: 'bottom',//top,left,bottom,right,
+                fontSize: 14
+            },
+            plugins: {
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    color: 'black',
+                    labels: {
+                        title: {
+                            font: {
+                                //weight: '600',
+                                size: 13,
+                                //family: '"Times New Roman", Times, serif'
+                            }
+                        }
+                    }
+                },
+                labels: {
+                    render: 'image',
+                    textMargin: -60,
+                },
+            },
+        }
+
+        var data = {
+            labels: labels,
+            datasets: [
+                //{
+                //    label: 'Sĩ số',
+                //    backgroundColor: 'rgb(226,226,236)',
+                //    borderColor: 'rgb(226,226,236)',
+                //    minBarLength: 1,
+                //    data: siso,
+                //    fill: true,
+                //    borderWidth: 1,
+                //    order: 0,
+                //    z:0
+                //},
+                {
+                    label: 'Điểm 8.0 -> 10',
+                    backgroundColor: 'rgb(133,237,133)',
+                    borderColor: 'rgb(133,237,133)',
+                    minBarLength: 1,
+                    data: minpoint8,
+                    fill: true,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 5.0 -> 7.9',
+                    backgroundColor: 'rgb(134,197,218)',
+                    borderColor: 'rgb(134,197,218)',
+                    minBarLength: 1,
+                    data: minpoint5,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 2.0 -> 4.9',
+                    backgroundColor: 'rgb(224,207,153)',
+                    borderColor: 'rgb(224,207,153)',
+                    minBarLength: 1,
+                    data: minpoint2,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 0.0 -> 1.9',
+                    backgroundColor: 'rgb(224,153,172)',
+                    borderColor: 'rgb(224,153,172)',
+                    minBarLength: 1,
+                    data: minpoint0,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Chưa làm bài',
+                    //backgroundColor: 'rgba(238,130,238,1)',
+                    backgroundColor: 'rgb(194,194,216)',
+                    borderColor: 'rgb(194,194,216)',
+                    minBarLength: 1,
+                    data: chuahoc,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Chưa đăng nhập',
+                    //backgroundColor: 'rgba(147,112,219,1)',
+                    backgroundColor: 'rgb(179,179,206)',
+                    borderColor: 'rgb(179,179,206)',
+                    minBarLength: 1,
+                    data: chuavaolop,
+                    fill: false,
+                    borderWidth: 1
+                },
+            ]
+        }
+
+        var ctx = document.getElementById(id).getContext('2d');
+        var myBarChart = new Chart(ctx, {
+            type: 'bar',//bar,horizontalBar
+            data: data,
+            options: options,
+            plugins: [{
+                afterRender: async function () {
+                    var x = myBarChart.toBase64Image();
+                    arrayData.push(
+                        {
+                            Image: x,
+                            CenterID: centerid
+                        }
+                    );
+                    console.log(countSendMail++);
+                    console.log(@TotalBlock)
+                     if (countSendMail == @TotalBlock) {
+                         sendData(arrayData);
+                         setTimeout(function () { window.close(); }, 20000);
+                     }
+                }
+            }]
+        });
+    }
+</script>
+
+@{
+    foreach (var item in BlockCenter)
+    {
+
+        var Blocks = item.Value;
+        var CenterID = item.Key;
+        for (int i = 0; i < Blocks.Length; i++)
+        {
+            <script>
+                var siso = [];
+                var chuavaolop = [];
+                var minpoint8 = [];
+                var minpoint5 = [];
+                var minpoint2 = [];
+                var minpoint0 = [];
+                var chuahoc = [];
+                var tenlop = [];
+            </script>
+
+            //List<double> Students = new List<double>();
+            //List<double> ChuaVaoLop = new List<double>();
+            //List<double> MinPoint8 = new List<double>();
+            //List<double> MinPoint5 = new List<double>();
+            //List<double> MinPoint2 = new List<double>();
+            //List<double> Minpoint0 = new List<double>();
+            //List<double> ChuaHoc = new List<double>();
+
+            var classinCenters = ClassCenters.Where(x => x.Value == CenterID).Select(x => x.Key).ToList();
+
+            var Classes = BlockClass.Where(x => x.Value == Blocks[i] && classinCenters.Contains(x.Key));
+            double[] Students = new double[Classes.Count()];
+            double[] ChuaVaoLop = new double[Classes.Count()];
+            double[] MinPoint8 = new double[Classes.Count()];
+            double[] MinPoint5 = new double[Classes.Count()];
+            double[] MinPoint2 = new double[Classes.Count()];
+            double[] Minpoint0 = new double[Classes.Count()];
+            double[] ChuaHoc = new double[Classes.Count()];
+            string[] _ClassName = new string[Classes.Count()];
+            for (int j = 0; j < Classes.Count(); j++)
+            {
+                var classID = Classes.ElementAt(j).Key;
+                var data = DataClass[classID];
+                Students[j] = data[0];
+                ChuaVaoLop[j] = data[1];
+                MinPoint8[j] = data[2];
+                MinPoint5[j] = data[3];
+                MinPoint2[j] = data[4];
+                Minpoint0[j] = data[5];
+                ChuaHoc[j] = data[6];
+                _ClassName[j] = ClassName[classID];
+                //Students.Add(data[0]);
+                //ChuaVaoLop.Add(data[1]);
+                //MinPoint8.Add(data[2]);
+                //MinPoint5.Add(data[3]);
+                //MinPoint2.Add(data[4]);
+                //Minpoint0.Add(data[5]);
+                //ChuaHoc.Add(data[6]);
+                //_ClassName.Add(ClassName[classID]);
+
+                <script>
+                    siso.push('@data[0]');
+                    chuavaolop.push('@data[1]');
+                    minpoint8.push('@data[2]');
+                    minpoint5.push('@data[3]');
+                    minpoint2.push('@data[4]');
+                    minpoint0.push('@data[5]');
+                    chuahoc.push('@data[6]');
+                    tenlop.push("@Html.Raw(ClassName[classID])");
+                </script>
+            }
+
+            <script>
+               renderChart('@Blocks[i]', siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop,'@CenterID')
+            </script>
+        }
+
+    }
+}

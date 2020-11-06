@@ -5,6 +5,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Spire.Pdf.OPC;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -139,5 +140,77 @@ namespace BaseCustomerMVC.Globals
                 File.Delete(item);
             }
         }
+
+        //public async Task<string> SaveMediaAsyncWithDraw(Image image, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
+        //{
+        //    string extension = "image/jpge";
+        //    string type = "JPEG";
+
+        //    if (string.IsNullOrEmpty(folder))
+        //        if (_imageType.Contains(type)) folder = "IMG";
+        //        else if (_videoType.Contains(type)) folder = "VIDEO";
+        //        else if (_audioType.Contains(type)) folder = "AUDIO";
+        //        else folder = "OTHERS";
+        //    if (!string.IsNullOrEmpty(center))
+        //        folder = center + "/" + folder;
+        //    folder += ("/" + DateTime.UtcNow.ToString("yyyyMMdd"));
+        //    string uploads = Path.Combine(RootPath, folder);
+        //    if (!Directory.Exists(uploads))
+        //    {
+        //        Directory.CreateDirectory(uploads);
+        //    }
+        //    //Resize from stream
+        //    var fileName = Guid.NewGuid().ToString() + "_" + Path.GetExtension(string.IsNullOrEmpty(filename) ? new DateTime().ToUniversalTime().ToString() : filename);
+        //    /***************************/
+        //    //Neu la anh thi resize
+        //    if (_imageType.Contains(type))
+        //    {
+        //        if (!Directory.Exists(uploads))
+        //            Directory.CreateDirectory(uploads);
+        //        //if (stat_width == 0 || stat_height == 0)
+        //        //{
+        //        //    stat_width = 512;
+        //        //    stat_height = 384;
+        //        //}
+        //        var standardSize = new SixLabors.Primitives.Size(stat_width, stat_height);
+
+        //        using (Stream inputStream = image.)
+        //        {
+        //            using (var _image = Image.Load<Rgba32>(image))
+        //            {
+        //                var imageEncoder = new JpegEncoder()
+        //                {
+        //                    Quality = 90,
+        //                    Subsample = JpegSubsample.Ratio444
+        //                };
+
+        //                int width = image.Width;
+        //                int height = image.Height;
+        //                if ((width > standardSize.Width) || (height > standardSize.Height))
+        //                {
+        //                    ResizeOptions options = new ResizeOptions
+        //                    {
+        //                        Mode = ResizeMode.Max,
+        //                        Size = standardSize,
+        //                    };
+        //                    image.Mutate(x => x
+        //                     .Resize(options));
+
+        //                    //.Grayscale());
+        //                }
+        //                //image.Save($"/Files/{folder}/{fileName}"); // Automatic encoder selected based on extension.
+        //                using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
+        //                {
+        //                    image.Save(fileStream, imageEncoder);
+        //                    //await formFile.CopyToAsync(fileStream);
+        //                    //return "/Files/" + folder + "/" + fileName;
+        //                    return $"{"/Files"}/{folder}/{fileName}";
+        //                }
+        //            }
+        //        }
+        //    }
+        //    /*********************************/
+        //    return "";
+        //}
     }
 }

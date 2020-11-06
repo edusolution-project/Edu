@@ -1295,8 +1295,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", " ");
-            return StringHelper.ReplaceSpecialCharacters(org);
-            //return org;
+
+            //dau ‘’
+            int[] beginning = { 24, 25, 96 };
+            //dau “”
+            int[] quotation = { 29, 28 };
+            for (int i = 0; i < org.Length; i++)
+            {
+                if (beginning.Contains((byte)org[i]))
+                {
+                    org = org.Replace(org[i], '\'');
+                }
+                if (quotation.Contains((byte)org[i]))
+                {
+                    org = org.Replace(org[i], '\"');
+                }
+                if ((byte)org[i] == 125 || (byte)org[i] == 141)
+                {
+                    org = org.Replace(org[i], '(');
+                }
+                if ((byte)org[i] == 126 || (byte)org[i] == 142)
+                {
+                    org = org.Replace(org[i], ')');
+                }
+            }
+
+            for (int i = 0; i < KyTuDacBiet.Length; i++)
+            {
+                if (org.Contains(KyTuDacBiet[i]))
+                {
+                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
+                }
+            }
+
+            //return ReplaceSpecialCharacters(org.Trim());
+            return org;
         }
         //TODO: Need update later
         private double calculateLessonPoint(string lessonId)
@@ -1318,6 +1351,46 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
+
+        //private string ReplaceSpecialCharacters(string str)
+        //{
+        //    //dau ‘’
+        //    int[] beginning = { 24, 25, 96 };
+        //    //dau “”
+        //    int[] quotation = { 29, 28 };
+        //    for (int i = 0; i < str.Length; i++)
+        //    {
+        //        if (beginning.Contains((byte)str[i]))
+        //        {
+        //            str = str.Replace(str[i], '\'');
+        //        }
+        //        if (quotation.Contains((byte)str[i]))
+        //        {
+        //            str = str.Replace(str[i], '\"');
+        //        }
+        //        if ((byte)str[i]==125 || (byte)str[i] == 141)
+        //        {
+        //            str = str.Replace(str[i], '(');
+        //        }
+        //        if ((byte)str[i] == 126 || (byte)str[i] == 142)
+        //        {
+        //            str = str.Replace(str[i], ')');
+        //        }
+        //    }
+
+        //    for(int i = 0; i < KyTuDacBiet.Length; i++)
+        //    {
+        //        if (str.Contains(KyTuDacBiet[i]))
+        //        {
+        //            str = str.Replace(KyTuDacBiet[i],KyTuThuong[i]);
+        //        }
+        //    }
+        //    return str;
+        //}
+
+        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
+                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
+        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
     }
 
     public class PronunExplain

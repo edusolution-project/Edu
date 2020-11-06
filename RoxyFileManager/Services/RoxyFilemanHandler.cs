@@ -900,6 +900,37 @@ namespace FileManagerCore.Services
         /// <param name="context"></param>
         /// <returns>List fileId</returns>
 
+        public string UploadFileWithGoogleDrive(string center, string user,MemoryStream memoryStream)
+        {
+            
+            string folderId = GetFolder(center, user);
+            string path = Path.Combine("", $"{center}/{user}");
+
+            //if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+            MediaResponseModel response = new MediaResponseModel();
+            string filename = Guid.NewGuid().ToString()+".png";
+            string dest = Path.Combine(path, filename);
+            string fileId = "";
+            using (System.IO.MemoryStream stream = memoryStream)
+            {
+                fileId = Startup.GoogleDrive.UploadFileStatic(filename, Startup.GoogleDrive.GetMimeType(dest), stream, folderId);
+                stream.Close();
+            }
+            response = new MediaResponseModel() { FileId = fileId, Path = fileId, Extends = ".png" };
+
+            _fileManagerService.Collection.InsertOne(new FileManagerEntity()
+            {
+                Extends = ".png",
+                FileID = fileId,
+                FolderID = folderId,
+                Name = "abc",
+                Center = center,
+                UserID = user
+            });
+            return response.FileId;
+        }
+
         public List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context)
         {
             var listFile = context.Request.Form.Files;

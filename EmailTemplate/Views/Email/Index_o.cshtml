@@ -1,0 +1,139 @@
+﻿@using BaseCustomerEntity.Database;
+@using BaseCustomerMVC.Globals;
+@using MongoDB.Driver;
+@using EmailTemplate.Controllers;
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var dataClass = ViewBag.Data as Dictionary<string, Double[]>;
+    var classCenter = ViewBag.Centers as Dictionary<string, string>;
+}
+
+<div id="list-data"></div>
+@*<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>*@
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.4.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    var root = document.getElementById("list-data");
+    var countSendMail = 0;
+    var sendData = function (arrayData) {
+        return $.ajax({
+            type: "POST",
+            url: '/email/SendMonthlyReport',
+            data: { Data: arrayData },
+            success: function (res) {
+                console.log(res)
+            },
+            timeout: 5000
+        });
+    }
+</script>
+
+@{
+    List<String> classIDs = dataClass.Keys?.ToList();
+    var totalClass = classIDs.Count;
+    for (int i = 0; i < totalClass; i++)
+    {
+        String classID = classIDs[i];
+        Double[] data = dataClass[classID];
+        String centerID = classCenter[classID];
+        Double siso = data[0];
+        Double chuavaohethong = (data[1] / siso) * 100;
+        Double min8 = (data[2] / siso) * 100;
+        Double min5 = (data[3] / siso) * 100;
+        Double min2 = (data[4] / siso) * 100;
+        Double min0 = (data[5] / siso) * 100;
+        Double chualam = 100 - Math.Round(min0,2) - Math.Round(min2,2) - Math.Round(min5,2) - Math.Round(min8,2);
+    <script>
+            var arrayData = [];
+        setTimeout(function () {
+                @*var centerID = "@centerID";*@
+                @*var _class = '@id';*@
+                var div = document.createElement("canvas");
+                var id = "myChart_@classID";
+                div.id = id;
+                root.appendChild(div);
+            var ctx = document.getElementById(id).getContext('2d');
+            //var labels = ['Chưa vào hệ thống','Điểm 8 -> 10', 'Điểm 5 -> 7', 'Điểm 2 -> 5', 'Điểm 0'];
+            var labels = ['Chưa làm','Điểm 8 -> 10', 'Điểm 5 -> 7', 'Điểm 2 -> 5', 'Điểm 0'];
+
+                    @*data = {
+                        datasets: [{
+                            data: ['@chuavaohethong','@min8', '@min5','@min2','@min0'],
+                            borderColor: ['gray', 'lightgreen', 'lightblue', 'orange', 'red'],
+                            backgroundColor: ['rgba(169,169,169,0.7)', 'rgba(144,238,144,0.7)', 'rgba(173,216,230,0.7)', 'rgba(255,165,0,0.7)', 'rgba(255,0,0,0.7)'],
+                        }],
+                        //labels: labels
+                        borderColor: "#fff"
+            }*@
+
+            var data = [{
+                //data: ['@chuavaohethong','@min8', '@min5','@min2','@min0'],
+                data: ['@chualam','@min8', '@min5','@min2','@min0'],
+                //labels: labels
+                backgroundColor: ['rgba(169,169,169,0.7)', 'rgba(144,238,144,0.7)', 'rgba(173,216,230,0.7)', 'rgba(255,165,0,0.7)', 'rgba(255,0,0,0.7)'],
+                borderColor: "#fff"
+            }];
+
+            var options = {
+                tooltips: {
+                    enabled: false
+                },
+                plugins: {
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            //debugger
+                            //let sum = 0;
+                            //let dataArr = ctx.chart.data.datasets[0].data;
+                            //dataArr.map(data => {
+                            //    sum += data;
+                            //});
+                            let percentage = (value * 1 / 1).toFixed(2) + "%";
+                            if (percentage == "0.00%") {
+                                return "";
+                            }
+                            else {
+                                return percentage;
+                            }
+                        },
+                        font: {
+                            weight: '600',
+                            size: 24,
+                            color: 'black'
+                        }
+                    }
+                },
+            };
+
+            var chart = new Chart(ctx, {
+                type: 'pie', //'bar', //line , radar, Doughnut and Pie , polarArea,bubble,scatter
+                data: {
+                    datasets: data
+                },
+                options: options,
+                plugins: [{
+                        afterRender: async function () {
+                            var x = chart.toBase64Image();
+                            @*var centerID = '@centerID';*@
+                            arrayData.push(
+                                {
+                                    Image: x,
+                                    CenterID: '@centerID',
+                                    ClassID: '@classID',
+                                }
+                            );
+                            console.log(countSendMail++);
+                            if (countSendMail == @totalClass) {
+                                //if (countSendMail == 1) {
+                                //debugger
+                                //sendData(arrayData);
+                            }
+                        }
+                    }]
+                });
+
+                },3000);
+    </script>
+    }
+}

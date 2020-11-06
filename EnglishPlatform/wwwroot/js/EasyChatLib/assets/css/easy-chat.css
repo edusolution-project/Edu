@@ -546,6 +546,9 @@ div[data-status="offline"]::before{
 .data-image:hover .view-full {
     display: block;
 }
+.content--left__header .box-text>.icon-search::before{
+    content: "";
+}
 /**mobile*/
 
 @media screen and (max-width: 992px) {
@@ -562,7 +565,8 @@ div[data-status="offline"]::before{
     .content--right__body {
         height: calc(100% - 140px);
     }
-    ..content--left__body{
+    .content--left__body{
         height:80vh;
     }
 }
+
