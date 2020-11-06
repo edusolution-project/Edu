@@ -1296,40 +1296,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", " ");
 
-            //dau ‘’
-            int[] beginning = { 24, 25, 96 };
-            //dau “”
-            int[] quotation = { 29, 28 };
-            for (int i = 0; i < org.Length; i++)
-            {
-                if (beginning.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\'');
-                }
-                if (quotation.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\"');
-                }
-                if ((byte)org[i] == 125 || (byte)org[i] == 141)
-                {
-                    org = org.Replace(org[i], '(');
-                }
-                if ((byte)org[i] == 126 || (byte)org[i] == 142)
-                {
-                    org = org.Replace(org[i], ')');
-                }
-            }
-
-            for (int i = 0; i < KyTuDacBiet.Length; i++)
-            {
-                if (org.Contains(KyTuDacBiet[i]))
-                {
-                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
-                }
-            }
-
-            //return ReplaceSpecialCharacters(org.Trim());
-            return org;
+            return StringHelper.ReplaceSpecialCharacters(org);
         }
         //TODO: Need update later
         private double calculateLessonPoint(string lessonId)
@@ -1388,9 +1355,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    return str;
         //}
 
-        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
-                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
-        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
+
     }
 
     public class PronunExplain
