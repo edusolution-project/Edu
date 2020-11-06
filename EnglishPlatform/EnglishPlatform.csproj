@@ -131,7 +131,7 @@
     <None Include="Areas\Teacher\Views\Schedule\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
+    <None Include="Areas\Teacher\Views\Class\Detail_old.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
