@@ -1015,7 +1015,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 quiz.Media.Created = DateTime.UtcNow;
                                 quiz.Media.Size = 0;
                                 quiz.Media.Path = quiz.Media.Name.Trim();
-                                item.Media.Extension = "image/png";
+                                quiz.Media.Extension = "image/png";
                             }
                             else
                             {
@@ -1288,7 +1288,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-
         private string validateFill(string org)
         {
             if (string.IsNullOrEmpty(org)) return org;
@@ -1351,42 +1350,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
-
-        //private string ReplaceSpecialCharacters(string str)
-        //{
-        //    //dau ‘’
-        //    int[] beginning = { 24, 25, 96 };
-        //    //dau “”
-        //    int[] quotation = { 29, 28 };
-        //    for (int i = 0; i < str.Length; i++)
-        //    {
-        //        if (beginning.Contains((byte)str[i]))
-        //        {
-        //            str = str.Replace(str[i], '\'');
-        //        }
-        //        if (quotation.Contains((byte)str[i]))
-        //        {
-        //            str = str.Replace(str[i], '\"');
-        //        }
-        //        if ((byte)str[i]==125 || (byte)str[i] == 141)
-        //        {
-        //            str = str.Replace(str[i], '(');
-        //        }
-        //        if ((byte)str[i] == 126 || (byte)str[i] == 142)
-        //        {
-        //            str = str.Replace(str[i], ')');
-        //        }
-        //    }
-
-        //    for(int i = 0; i < KyTuDacBiet.Length; i++)
-        //    {
-        //        if (str.Contains(KyTuDacBiet[i]))
-        //        {
-        //            str = str.Replace(KyTuDacBiet[i],KyTuThuong[i]);
-        //        }
-        //    }
-        //    return str;
-        //}
 
         private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
                                                             "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};

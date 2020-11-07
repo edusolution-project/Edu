@@ -358,7 +358,8 @@ namespace AutoEmailEduso
                     if (center.Abbr != "eduso")//test truong Vinh Yen
                     //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                     {
-                        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                        //var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
+                        var classesActive = _classService.GetActiveClass4Report(startWeek,endWeek, center.ID);//lay danh sach lop dang hoat dong
                         if (classesActive.Count() == 0)
                         {
                             continue;

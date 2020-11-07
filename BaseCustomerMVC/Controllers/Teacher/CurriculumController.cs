@@ -2301,6 +2301,78 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
+                //var courseLesson = _lessonService.GetItemByID("5db92529ab30e73154d7ed56");//lesson 1 b1
+                //var lessonPart = _lessonPartService.GetByLessonID(courseLesson.ID);
+
+                //var full_item = new LessonPartViewModel()
+                //{
+                //    Questions = new List<QuestionViewModel>()
+                //};
+                //int pos = -1;
+
+                //foreach (var item in lessonPart)
+                //{
+                //    var lessonPartQuiz = _lessonPartQuestionService.GetByPartID(item.ID);
+                //    foreach (var quiz in lessonPartQuiz)
+                //    {
+                //        if (lessonPartQuiz != null)
+                //        {
+                //            if (item.Type.Equals("QUIZ1") || item.Type.Equals("QUIZ3") || item.Type.Equals("QUIZ4"))
+                //            {
+                //                pos++;
+                //                var question = new QuestionViewModel
+                //                {
+                //                    Content = quiz.Content,
+                //                    Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi
+                //                    Description = quiz.Description//giai thich dap an
+                //                };
+
+                //                if (quiz.Media != null)
+                //                {
+                //                    var media = quiz.Media.Path;
+                //                    if (media != "")
+                //                        question.Media = new Media
+                //                        {
+                //                            OriginalName = media,
+                //                            Name = media,
+                //                            Path = media,
+                //                            Extension = GetContentType(media)
+                //                        };
+                //                }
+                //                full_item.Questions.Add(question);
+
+                //                var answers = _lessonPartAnswerService.GetByQuestionID(quiz.ID);
+                //                foreach(var ans in answers)
+                //                {
+                //                    var answer = new LessonPartAnswerEntity
+                //                    {
+                //                        Content = ans.Content,
+                //                        IsCorrect = ans.IsCorrect,
+                //                    };
+                //                    if (ans.Media != null)
+                //                    {
+                //                        var media = ans.Media.Path;
+                //                        if (media != "")
+                //                            answer.Media = new Media
+                //                            {
+                //                                OriginalName = media,
+                //                                Name = media,
+                //                                Path = media,
+                //                                Extension = GetContentType(media)
+                //                            };
+                //                    }
+                //                    full_item.Questions[pos].Answers.Add(answer);
+                //                }
+                //            }
+                //            //if (item.Type.Equals("QUIZ2"))
+                //            //{
+                //            //    pos++;
+                //            //}
+                //        }
+                //    }
+                //}
+
+
                 byte[] toArray = null;
                 using (var stream = new MemoryStream())
                 {
@@ -2319,25 +2391,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     String[] File = { "File", "Ảnh | link file đính kèm" };
                     String[] Point = { "Điểm", "(0 - 100: chỉ áp dụng cho bài tự luận - các nội dung khác có trắc nghiệm, điền từ tự động tính mỗi câu hỏi | vị trí điền từ 1 điểm)" };
                     String[] Header = { "STT","Thông tin câu hỏi"};
-                    String[][] Data =
+                    string[][] Data =
                     {
-                        new String[]{"1","Tiêu đề","Tiêu đề câu hỏi"},
-                        new String[]{"","Mô tả","Nội dung câu hỏi, gợi ý..."},
-                        new String[]{"", "File đính kèm", @"- Hình ảnh
-                                                            - Link file đính kèm (audio, video, văn bản)
-                                                            "},
-                        new String[]{"", "Đáp án", "STT","Nội dung","Hình ảnh","Đúng/Sai"},
-                        new String[]{"", "", "1","Đáp án 1", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", "x"},
-                        new String[]{"", "", "2","Đáp án 2", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", ""},
-                        new String[]{"", "", "3","Đáp án 3", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", ""},
-                        new String[]{"", "", "4","Đáp án 4", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", ""},
-                        new String[]{"", "", "5","Đáp án 5", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", ""},
-                        new String[]{"", "", "6","Đáp án 6", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)", ""},
-                        new String[]{ "", "Giải thích đáp án",""}
+                        new string[]{"1","Tiêu đề","","Tiêu đề câu hỏi","","","","","","",""},
+                        new string[]{"","Mô tả","","Nội dung câu hỏi, gợi ý...","","","","","","",""},
+                        new string[]{"", "File đính kèm","", "- Hình ảnh \n- Link file đính kèm (audio, video, văn bản)","","","","","","",""},
+                        new string[]{"", "Đáp án", "", "STT","Nội dung","","","Hình ảnh","","","Đúng/sai"},
+                        new string[]{"", "", "", "1","Đáp án 1","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", "x"},
+                        new string[]{"", "", "", "2","Đáp án 2","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "3","Đáp án 3","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "4","Đáp án 4","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "5","Đáp án 5","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "6","Đáp án 6","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "Giải thích đáp án", "", "","","","","", "", "", "" },
+
+                        new string[]{"2","Tiêu đề","","Tiêu đề câu hỏi","","","","","","",""},
+                        new string[]{"","Mô tả","","Nội dung câu hỏi, gợi ý...","","","","","","",""},
+                        new string[]{"", "File đính kèm","", "- Hình ảnh \n- Link file đính kèm (audio, video, văn bản)","","","","","","",""},
+                        new string[]{"", "Đáp án", "", "STT","Nội dung","","","Hình ảnh","","","Đúng/sai"},
+                        new string[]{"", "", "", "1","Đáp án 1","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", "x"},
+                        new string[]{"", "", "", "2","Đáp án 2","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "3","Đáp án 3","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "4","Đáp án 4","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "5","Đáp án 5","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "", "", "6","Đáp án 6","","", "File ảnh | link file ảnh đính kèm (kích cỡ ảnh)","","", ""},
+                        new string[]{"", "Giải thích đáp án", "", "","","","","", "", "", "" }
                     };
 
                     //Add Cells
-                    table.ResetCells(22, Type.Length);
+                    table.ResetCells(8 + Data.Length, Type.Length);
 
                     #region Title Row
                     TableRow TitleRow = table.Rows[0];
@@ -2513,10 +2595,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     #region ContentQuiz
 
-                    for(int r = 0; r < Data.Length; r++)
+                    for (int r = 0; r < Data.Length; r++)
                     {
                         var indexRow = r + 8;
 
+                        TableRow dataRow = table.Rows[indexRow];
+                        //C Represents Column.
+                        for (int c = 0; c < Data[r].Length; c++)
+                        {
+                            //var a = Data[r];
+                            //Cell Alignment
+                            dataRow.Cells[c].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            //Fill Data in Rows
+                            Paragraph p2 = dataRow.Cells[c].AddParagraph();
+                            TextRange TR2 = p2.AppendText(Data[r][c]);
+                            //Format Cells
+                            p2.Format.HorizontalAlignment = HorizontalAlignment.Left;
+                            TR2.CharacterFormat.FontName = "Calibri";
+                            TR2.CharacterFormat.FontSize = 12;
+                            TR2.CharacterFormat.TextColor = Color.Black;
+
+                            var text = Data[r][c].Trim();
+                            table.ApplyHorizontalMerge(indexRow, 1, 2);
+                            if (text.Equals("Tiêu đề") || text.Equals("Mô tả") || text.Contains("File đính kèm") || text.Equals("Giải thích đáp án"))
+                            {
+                                table.ApplyHorizontalMerge(indexRow, 3, Data[r].Length - 1);
+                            }
+
+                            if (!String.IsNullOrEmpty(Data[r][0]))
+                            {
+                                table.ApplyVerticalMerge(0, indexRow, indexRow + Data.Length / 2 - 2);
+                                table.ApplyVerticalMerge(1, indexRow + 3, indexRow + Data.Length / 2 - 2);
+                            }
+                            if( String.IsNullOrEmpty(Data[r][1]) || Data[r][3].Contains("STT"))
+                            {
+                                table.ApplyHorizontalMerge(indexRow, 4, 6);
+                                table.ApplyHorizontalMerge(indexRow, 7, 9);
+                            }
+                        }
+
+                        //Row Height
+                        dataRow.Height = 20;
                     }
 
                     #endregion
@@ -2558,14 +2677,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Directory.CreateDirectory(Path.Combine(_env.WebRootPath, dirPath));
                 var filePath = Path.Combine(_env.WebRootPath, dirPath + "\\" + DateTime.Now.ToString("ddMMyyyyhhmmss") + file.FileName);
 
-                var full_item = new LessonPartViewModel()
-                {
-                    Questions = new List<QuestionViewModel>(),
-                    ParentID = ParentID
-                };
+                //var full_item = new LessonPartViewModel()
+                //{
+                //    Questions = new List<QuestionViewModel>(),
+                //    ParentID = ParentID
+                //};
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
+                    String Msg = "";
                     await file.CopyToAsync(stream);
                     stream.Close();
                     using (var readStream = new FileStream(filePath, FileMode.Open))
@@ -2575,111 +2695,89 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         //Get the first session
                         var sw = document.Sections[0];
-
+                        Int32 countTable = sw.Body.Tables.Count;
                         for (int indexTable = 0; indexTable < sw.Body.Tables.Count; indexTable++)
                         {
                             //Get the first table in the textbox
                             Table table = sw.Body.Tables[indexTable] as Table;
 
-                            //Loop through the paragraphs of the table and extract text to a .txt file
-                            var pos = -1;
+                            //var parentLesson = _lessonService.GetItemByID(ParentID);
+                            //var isPractice = parentLesson.IsPractice;
 
-                            //Title - Tiêu đề
-                            var rowTitle = table.Rows[0];
-                            var title = rowTitle.Cells[1].Paragraphs[0].Text.ToString().Trim();
+                            LessonPartViewModel item = new LessonPartViewModel();
+                            
+                            String title = table.Rows[0].Cells[1].Paragraphs[0].Text?.ToString().Trim();
+                            String description = table.Rows[3].Cells[1].Paragraphs[0].Text?.ToString().Trim();
+                            String point= table.Rows[5].Cells[1].Paragraphs[0].Text?.ToString().Trim();
+                            item.Title = title;
+                            item.Created = DateTime.UtcNow;
+                            item.Updated = DateTime.UtcNow;
+                            item.Description = description;
+                            Int32.TryParse(point, out Int32 _point);
+                            item.Point = _point;//mac dinh la 0 diem
+                            item.ParentID = ParentID;
 
-                            for (var i = 2; i < table.Rows.Count; i++)
+                            var maxItem = _lessonPartService.CreateQuery()
+                            .Find(o => o.ParentID == item.ParentID)
+                            .SortByDescending(o => o.Order).FirstOrDefault();
+                            item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+
+                            //check type
+                            var type = "";
+                            var typeRow = table.Rows[2];
+                            for(int indexCell = 1; indexCell < typeRow.Cells.Count; indexCell++)
                             {
-                                var row = table.Rows[i];
-                                var cells = row.Cells;
-
-                                //check type Quiz1,Quiz2,Quiz3,Quiz4
-                                //---------------------
-                                if (cells[1].Paragraphs[0].Text.ToString() != "")
-                                { //question
-                                    pos++;
-                                    var question = new QuestionViewModel
-                                    {
-                                        Content = cells[2].Paragraphs[0].Text,//cau hoi
-                                        Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi
-                                        Description = cells[5].Paragraphs[0].Text.ToString() == "" ? "" : cells[5].Paragraphs[0].Text.ToString()//giai thich dap an
-                                    };
-                                    full_item.Questions.Add(question);
-                                }
-                                else //answer
+                                var txtCell = typeRow.Cells[indexCell].Paragraphs[0].Text.ToString().ToUpper();
+                                if(txtCell.Contains("x")|| txtCell.Contains("X"))
                                 {
-                                    var answer = new LessonPartAnswerEntity
-                                    {
-                                        Content = FilterSpecialCharacters(cells[2].Paragraphs[0].Text.ToString().Trim()),
-                                        IsCorrect = cells[4].Paragraphs[0].Text.ToString().Trim().ToLower() == "true",
-                                    };
-                                    if (string.IsNullOrEmpty(cells[3].Paragraphs[0].Text.ToString()) || cells[3].Paragraphs[0].Text.ToString() == "")
-                                    {
-                                        continue;
-                                    }
-                                    else if (cells[3].Paragraphs[0].Text.ToString().StartsWith("http") || cells[3].Paragraphs[0].Text.ToString().StartsWith("https"))
-                                    {
-                                        var media = cells[3].Paragraphs[0].Text.ToString();
-                                        if (media != "")
-                                            answer.Media = new Media
-                                            {
-                                                OriginalName = media,
-                                                Name = media,
-                                                Path = media,
-                                                Extension = GetContentType(media)
-                                            };
-                                    }
-                                    else
-                                    {
-                                        var para = cells[3].Paragraphs[0];
-                                        foreach (DocumentObject docObject in para.ChildObjects)
-                                        {
-                                            if (docObject.DocumentObjectType == DocumentObjectType.Picture)
-                                            {
-                                                DocPicture picture = docObject as DocPicture;
-                                                string fileName = string.Format($"Image{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}.png");
-                                                var pathImage = SaveImageByByteArray(picture.ImageBytes, fileName, basis);
-                                                answer.Media = new Media
-                                                {
-                                                    OriginalName = fileName,
-                                                    Name = fileName,
-                                                    Path = pathImage,
-                                                    Extension = "image/jpg"
-                                                };
-                                            }
-                                        }
-                                    }
-                                    full_item.Questions[pos].Answers.Add(answer);
-                                }
-                                if (cells[0].Paragraphs[0].Text.ToString().ToUpper().Contains("QUIZ1"))//type=QUIZ1
-                                {
-                                    full_item.Type = "QUIZ1";
-                                }
-                                else if (cells[0].Paragraphs[0].Text.ToString().ToUpper().Contains("QUIZ2"))//type=QUIZ2=điền từ
-                                {
-                                    full_item.Type = "QUIZ2";
-                                }
-                                else if (cells[0].Paragraphs[0].Text.ToString().ToUpper().Contains("QUIZ3"))//type=QUIZ3
-                                {
-                                    full_item.Type = "QUIZ3";
-                                }
-                                else if (cells[0].Paragraphs[0].Text.ToString().ToUpper().Contains("QUIZ4"))//type=QUIZ4
-                                {
-                                    full_item.Type = "QUIZ4";
-                                }
-                                else//type=ESSAY
-                                {
-                                    full_item.Type = "ESSAY";
+                                    type = table.Rows[1].Cells[indexCell].Paragraphs[0].Text.ToString().ToUpper();
+                                    item.Type = type;
                                 }
                             }
-                            await CreateOrUpdateLessonPart(basis, full_item);
+
+                            switch (type)
+                            {
+                                case "VĂN BẢN":
+                                    item.Type = "TEXT";
+                                    break;
+                                case "AUDIO":
+                                    item.Type = "AUDIO";
+                                    break;
+                                case "VIDEO":
+                                    item.Type = "VIDEO";
+                                    break;
+                                case "HÌNH ẢNH":
+                                    item.Type = "IMG";
+                                    Msg += await GetContentIMG(table, type, basis, item);
+                                    break;
+                                case "TỪ VỰNG":
+                                    item.Type = "VOCAB";
+                                    break;
+                                case "QUIZ1":
+                                    Msg += await GetContentQUIZ(table,type,basis,item);
+                                    break;
+                                case "QUIZ2":
+                                    Msg += await GetContentQuiz2andVocab(table, type, basis, item);
+                                    break;
+                                case "QUIZ3":
+                                    Msg += await GetContentQUIZ(table, type, basis, item);
+                                    break;
+                                case "QUIZ4":
+                                    Msg += await GetContentQUIZ(table, type, basis, item);
+                                    break;
+                                case "ESSAY":
+                                    item.Type = "ESSAY";
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                     System.IO.File.Delete(filePath);
                     return new JsonResult(new Dictionary<string, object>
                     {
-                        { "Data", full_item },
-                        {"Error", null }
+                        //{ "Data", full_item },
+                        {"Error", Msg }
                     });
                 }
             }
@@ -2689,7 +2787,247 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private string SaveImageByByteArray(byte[] byteArrayIn, string fileName, string center = "")
+        private async Task<String> GetContentQUIZ(Table table,String type, String basis, LessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
+                Int32 pos = -1;
+
+                var totalRows = table.Rows.Count;
+                for (int indexRow = 8; indexRow < totalRows; indexRow++)
+                {
+                    var contentRow = table.Rows[indexRow];
+                    String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
+                    String contentCell1 = contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim().ToLower();
+                    String contentCell2 = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim().ToLower().ToLower();
+                    if (contentCell0 != "" || !String.IsNullOrEmpty(contentCell0))
+                    {
+                        pos++;
+                        //var question = new QuestionViewModel();
+                        var question = new QuestionViewModel
+                        {
+                            ParentID = item.ID,
+                            CourseID = item.CourseID,
+                            Order = item.Order,
+                            Created = DateTime.UtcNow,
+                            Updated = DateTime.UtcNow,
+                            CreateUser = createUser,
+                            Point = 1,
+                            Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi,
+                            Media = new Media(),
+                            Content = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim()
+                        };
+                        Quiz.Add(question);
+                    }
+
+                    else if ((contentCell0 == "" && contentCell1 == "" || String.IsNullOrEmpty(contentCell0) && String.IsNullOrEmpty(contentCell1)) && (contentCell2 != "" || !String.IsNullOrEmpty(contentCell2))) //answer
+                    {
+                        if (contentCell2.Equals("stt")) continue;
+                        else
+                        {
+                            var answer = new LessonPartAnswerEntity
+                            {
+                                CourseID = item.CourseID,
+                                CreateUser = createUser,
+                                Created = DateTime.UtcNow,
+                                Updated = DateTime.UtcNow,
+                                Media = new Media()
+                            };
+                            String contentCell3 = contentRow.Cells[3].Paragraphs[0].Text?.ToString().Trim();
+                            String contentCell4 = contentRow.Cells[4].Paragraphs[0].Text?.ToString().Trim().ToLower();
+                            String contentCell5 = contentRow.Cells[5].Paragraphs[0].Text?.ToString().Trim().ToLower();
+
+                            answer.Content = contentCell3;
+                            answer.IsCorrect = contentCell5.Equals("x");
+
+                            if (String.IsNullOrEmpty(contentCell4))
+                            {
+                                var contentFile = GetContentFile(contentRow.Cells[4].Paragraphs, basis);
+                                if (contentFile.Count > 0)
+                                {
+                                    answer.Media.Created = DateTime.Now;
+                                    answer.Media.Name = contentFile["FileName"];
+                                    answer.Media.Path = contentFile["FilePath"];
+                                    answer.Media.Extension = "image/png";
+                                }
+                            }
+                            else if(contentCell4.StartsWith("https")|| contentCell4.StartsWith("http"))
+                            {
+                                answer.Media.Created = DateTime.Now;
+                                answer.Media.Name = contentCell4;
+                                answer.Media.Path = contentCell4;
+                                answer.Media.Extension = "image/png";
+                            }
+
+                            //_lessonPartAnswerService.CreateOrUpdate(answer);
+                            Quiz[pos].Answers.Add(answer);
+                        }
+                    }
+                    else if ((contentCell0 != null || contentCell0 != "") && (contentCell1!=null || contentCell1!=""))//Question
+                    {
+                        if (contentCell1.Contains("tiêu đề"))
+                        {
+                            Quiz[pos].Content = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim();
+                        }
+                        else if (contentCell1.Contains("mô tả"))
+                        {
+                            Quiz[pos].Description = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim();
+                        }
+                        else if (contentCell1.Contains("file đính kèm"))
+                        {
+                            if (String.IsNullOrEmpty(contentCell2))
+                            {
+                                var contentFileQuiz = GetContentFile(contentRow.Cells[2].Paragraphs,basis);
+                                if (contentFileQuiz.Count > 0)
+                                {
+                                    Quiz[pos].Media.Created = DateTime.Now;
+                                    Quiz[pos].Media.Name = contentFileQuiz["FileName"];
+                                    Quiz[pos].Media.Path = contentFileQuiz["FilePath"];
+                                    Quiz[pos].Media.Extension = "image/png";
+                                }
+                            }
+                            else if (contentCell2.StartsWith("http") || contentCell2.StartsWith("https"))
+                            {
+                                Quiz[pos].Media.Created = DateTime.Now;
+                                Quiz[pos].Media.Name = contentCell2;
+                                Quiz[pos].Media.Path = contentCell2;
+                                Quiz[pos].Media.Extension = "image/png";
+                            }
+                        }
+                        else if (contentCell1.Contains("giải thích đáp án"))
+                        {
+
+                        }
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+
+                item.Questions = Quiz;
+                await CreateOrUpdateLessonPart(basis, item);
+
+                return "Type QUIZ 134 is OK";
+            }
+            catch (Exception ex)
+            {
+                return "Type QUIZ 134 has error: " + ex.Message;
+            }
+        }
+
+        private async Task<String> GetContentIMG(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                var totalRows = table.Rows.Count;
+                for (int indexRow = 0; indexRow < totalRows; indexRow++)
+                {
+                    var contentRow = table.Rows[indexRow];
+                    String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
+
+                    if (contentCell0.Equals("file"))
+                    {
+                        item.Media = new Media();
+                        var contentFileImage = GetContentFile(contentRow.Cells[1].Paragraphs, basis);
+                        if (contentFileImage.Count > 0)
+                        {
+                            item.Media.Created = DateTime.Now;
+                            item.Media.Name = contentFileImage["FileName"];
+                            item.Media.Path = contentFileImage["FilePath"];
+                            item.Media.Extension = "image/png";
+                        }
+                        else
+                        {
+                            item.Media = new Media();
+                        }
+                        break;
+                    }
+                    else continue;
+                }
+                _lessonPartService.CreateOrUpdate(item);
+                return "Type IMG is OK";
+            }
+            catch(Exception ex)
+            {
+                return "Type IMG has error: " + ex.Message;
+            }
+        }
+
+        private async Task<String> GetContentQuiz2andVocab(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                if (type.Equals("VOCAB"))
+                {
+                    return $"{type} is OK";
+                }
+                else
+                {
+                    List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
+                    Int32 pos = -1;
+
+                    var totalRows = table.Rows.Count;
+                    for (int indexRow = 0; indexRow < totalRows; indexRow++)
+                    {
+                        var contentRow = table.Rows[indexRow];
+                        String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
+
+                        if (contentCell0.Equals("nội dung"))
+                        {
+                            Int32 countPara = contentRow.Cells[1].Paragraphs.Count;
+                            var txt = contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim().ToLower();
+                            for (int indexPara = 0; indexPara < countPara; indexPara++)
+                            {
+                                String contentQUIZ2= contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim();
+                                String _question = "";
+                                List<String> _listAns = new List<String>();
+                                while (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
+                                {
+                                    Int32 startIndex = contentQUIZ2.IndexOf("{{") + 2;
+                                    Int32 lenghtStr = contentQUIZ2.IndexOf("}}") - startIndex;
+                                    String str = contentQUIZ2.Substring(startIndex, lenghtStr);
+                                    _listAns.Add(str);
+                                    if (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
+                                        //contentQUIZ2 = contentQUIZ2.Remove(startIndex - 2, contentQUIZ2.IndexOf("}}") + 1);
+                                        contentQUIZ2 = contentQUIZ2.Replace("{{" + str + "}}", "");
+                                    else _question = contentQUIZ2;
+                                }
+
+                                //item.Questions
+                            }
+                        }
+                        else continue;
+                    }
+                    return $"{type} is OK";
+                }
+            }
+            catch(Exception ex)
+            {
+                return $"{type} has error {ex.Message}";
+            }
+        }
+
+        private Dictionary<String, String> GetContentFile(Spire.Doc.Collections.ParagraphCollection documentObject, String basis)
+        {
+            Dictionary<String, String> dataResponse = new Dictionary<String, String>();
+            foreach (DocumentObject docObject in documentObject[0].ChildObjects)
+            {
+                if (docObject.DocumentObjectType == DocumentObjectType.Picture)
+                {
+                    DocPicture picture = docObject as DocPicture;
+                    string fileName = string.Format($"Image{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}.png");
+                    var pathImage = SaveImageByByteArray(picture.ImageBytes, fileName, basis);
+                    dataResponse.Add("FileName", fileName);
+                    dataResponse.Add("FilePath", pathImage);
+                }
+            }
+            return dataResponse;
+        }
+
+        private String SaveImageByByteArray(byte[] byteArrayIn, string fileName, string center = "")
         {
             try
             {
@@ -2724,10 +3062,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var parentLesson = _lessonService.GetItemByID(item.ParentID);
-                var isPractice = parentLesson.IsPractice;
                 var createduser = User.Claims.GetClaimByType("UserID").Value;
                 if (parentLesson != null)
                 {
+                    var isPractice = parentLesson.IsPractice;
                     var maxItem = _lessonPartService.CreateQuery()
                             .Find(o => o.ParentID == item.ParentID)
                             .SortByDescending(o => o.Order).FirstOrDefault();
@@ -2788,14 +3126,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //calculateLessonPoint(item.ParentID);
 
                 }
-                else//update
+                else
                 {
 
                 }
             }
             catch (Exception ex)
             {
-
+                String msg = ex.Message;
             }
         }
 
@@ -3271,7 +3609,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return str.Replace("‘", "'")
                 .Replace("’", "'")
                 .Replace("“", "\"")
-                .Replace("”", "\"");
+                .Replace("”", "\"")
+                .Replace("&quot;","\"");
         }
         #endregion
     }

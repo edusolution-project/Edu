@@ -126,7 +126,7 @@ namespace EnglishPlatform.Controllers
             _teacherService = teacherService;
             _studentService = studentService;
             _classService = classService;
-            _studentHelper = new StudentHelper(studentService, accountService);
+            _studentHelper = new StudentHelper(studentService, accountService,progressHelper);
             _calendarHelper = calendarHelper;
             _log = log;
             _scheduleService = scheduleService;
