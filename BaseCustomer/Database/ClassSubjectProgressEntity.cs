@@ -44,6 +44,8 @@ namespace BaseCustomerEntity.Database
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>
     {
         private ClassSubjectService _classSubjectService;
+        private IConfiguration config;
+        private string dbName;
 
         public ClassSubjectProgressService(IConfiguration config
             ) : base(config)
@@ -68,6 +70,10 @@ namespace BaseCustomerEntity.Database
                     .Ascending(t => t.ClassSubjectID))
             };
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public ClassSubjectProgressService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         //public async Task UpdateLastLearn(LessonProgressEntity item)

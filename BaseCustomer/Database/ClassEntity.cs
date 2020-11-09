@@ -114,9 +114,11 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<string> GetMultipleClassName(List<string> IDs, string StudentID = "", string CenterID = "")
         {
-            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID)!=null)
+            if (!string.IsNullOrEmpty(StudentID) && GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID) != null)
             {
-                IDs.RemoveAt(IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID));
+                var index = IDs.IndexOf(GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID).ID);
+                if (index >= 0)
+                    IDs.RemoveAt(index);
             }
             if (string.IsNullOrEmpty(CenterID))
                 return Collection.Find(t => IDs.Contains(t.ID)).Project(t => t.Name).ToEnumerable();
@@ -146,9 +148,9 @@ namespace BaseCustomerEntity.Database
                 return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
         }
 
-        public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime time, string Center)
+        public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime,DateTime lastTime,String centerID )
         {
-            return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time && t.IsActive == true).ToEnumerable();
+                return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime).ToEnumerable();
         }
 
         /// <summary>

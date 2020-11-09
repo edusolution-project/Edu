@@ -57,6 +57,9 @@ namespace BaseCustomerEntity.Database
 
     public class LessonService : ServiceBase<LessonEntity>
     {
+        private IConfiguration config;
+        private string v;
+
         public LessonService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<LessonEntity>>
@@ -80,6 +83,10 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public LessonService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+        }
+
         public long CountClassLesson(string ClassID)
         {
             return Collection.CountDocumentsAsync(t => t.ClassID == ClassID).Result;
@@ -100,10 +107,25 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
 
-
         public long CountChapterLesson(string ChapterID)
         {
             return Collection.CountDocumentsAsync(t => t.ChapterID == ChapterID).Result;
         }
+
+        public IEnumerable<LessonEntity> GetClassSubjectLesson(string ClassSubjectID)
+        {
+            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID).ToEnumerable();
+        }
+
+        public IEnumerable<LessonEntity> GetClassSubjectExams(string ClassSubjectID)
+        {
+            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.TemplateType == LESSON_TEMPLATE.EXAM).ToEnumerable();
+        }
+
+        public IEnumerable<LessonEntity> GetClassSubjectPractices(string ClassSubjectID)
+        {
+            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.IsPractice).ToEnumerable();
+        }
+
     }
 }

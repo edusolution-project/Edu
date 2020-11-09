@@ -5,6 +5,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
+    [Serializable]
     public class StudentRankingViewModel
     {
         [JsonProperty("Rank")]

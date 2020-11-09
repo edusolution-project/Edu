@@ -83,6 +83,8 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<TransactionService>();
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();
+
+            services.AddSingleton<ReportService>();
             return services;
         }
     }

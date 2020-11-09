@@ -28,6 +28,8 @@ namespace BaseCustomerEntity.Database
         public string ClassSubjectID { get; set; }
         [JsonProperty("IsOnline")]
         public bool IsOnline { get; set; }
+        [JsonProperty("IsHideAnswer")]
+        public bool IsHideAnswer { get; set; }
     }
 
     public class SCHEDULE_TYPE
@@ -54,6 +56,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public LessonScheduleService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public IEnumerable<LessonScheduleEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)

@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -70,6 +71,10 @@ namespace EnglishPlatform
             services.AddSingleton<StudentHelper>();
             services.AddSingleton<LessonHelper>();
             services.AddSingleton<TeacherHelper>();
+            services.AddDistributedMemoryCache();
+            services.AddMemoryCache();
+            services.AddSingleton<CacheHelper>();
+
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddMvc(options =>
             {
@@ -88,7 +93,6 @@ namespace EnglishPlatform
                 x.ValueLengthLimit = int.MaxValue;
                 x.MultipartBodyLengthLimit = int.MaxValue; // In case of multipart
             });
-            services.AddDistributedMemoryCache();
             services.AddSignalR();
             services.AddEasyZoom(Configuration);
         }
@@ -108,7 +112,6 @@ namespace EnglishPlatform
             }
 
             app.UseEndpointRouting();
-
             app.UseCookiePolicy();
             app.UseSession();
             app.UseAuthentication();

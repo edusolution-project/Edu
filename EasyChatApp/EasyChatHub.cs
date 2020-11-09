@@ -55,7 +55,8 @@ namespace EasyChatApp
             }
             _userMapping.Add(user, connectionId);
             _connectIdToUser.Add(connectionId, user);
-            await Clients.Others.SendAsync("Online", user, connectionId);
+            await Clients.Others.SendAsync("Online", user);
+            await Clients.Caller.SendAsync("UsersOnline", _userMapping.GetKeys());
         }
         public async Task UpdateInfoUser(string userId,string name,string email)
         {
@@ -83,6 +84,7 @@ namespace EasyChatApp
                 {
                     // update time life cho user
                     _ = _groupAndUserService.UpdateTimeLife(user);
+                    Clients.All.SendAsync("Offline", user);
                 }
             }
             return base.OnDisconnectedAsync(exception);
@@ -93,6 +95,16 @@ namespace EasyChatApp
     {
         private readonly Dictionary<T, HashSet<string>> _connections = new Dictionary<T, HashSet<string>>();
 
+        public List<T> GetKeys()
+        {
+            try{
+                return _connections.Keys?.ToList();
+            }
+            catch
+            {
+                return null;
+            }
+        }
         public int Count
         {
             get

@@ -1,84 +1,10 @@
 ﻿@{
 
-    //Layout = "~/Views/Shared/_LayoutTeacher_NewUI.cshtml";
-    //Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    string center = ViewContext.RouteData.Values["basis"]?.ToString();
-    center = ViewBag.Center;
-    string processUrl(string act, string ctrl, Object param = null)
-    {
-        string url = Url.Action(act, ctrl, param);
-
-        return $"/{center}{url}";
-    }
+    var student = ViewBag.Student as BaseCustomerEntity.Database.StudentEntity;
 }
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
 <section class="module" id="test" style="margin-left:300px;margin-top:100px">
-    <a onclick="myClass()">Lớp học của tôi</a> </br>
-    <a onclick="myClass()">Lich hoc cua toi</a> </br>
+    @student.FullName @student.ID
+    <a href="/home/test">Repeat</a> </br>
+
 </section>
-
-@*<script>
-    $(document).ready(function () {
-        //GetClassSubjects();
-        GetBestStudents();
-        GetThisWeekLesson();
-        GetMyCourse();
-    });
-
-    var GetClassSubjects = function () {
-        //debugger
-        $.ajax({
-        type: "POST",
-        url: 'https://test.eduso.vn/@center/student/ClassSubject/GetClassSubjects',
-       // success: success
-    });
-    }
-
-    var GetBestStudents = function () {
-        //debugger
-        $.ajax({
-        type: "POST",
-            url: 'https://test.eduso.vn/@center/student/Course/GetBestStudents',
-       // success: success
-    });
-    }
-
-    var GetThisWeekLesson = function () {
-        //debugger
-        $.ajax({
-        type: "POST",
-            url: 'https://test.eduso.vn/@center/student/Course/GetThisWeekLesson',
-       // success: success
-    });
-    }
-
-    var GetMyCourse = function () {
-        //debugger
-        $.ajax({
-        type: "POST",
-            url: 'https://test.eduso.vn/@center/student/Course/GetMyCourse',
-       // success: success
-    });
-    }
-
-    var GetListCalendar = function () {
-        $.ajax({
-            type: "POST",
-            url: 'https://test.eduso.vn/@center/student/Calendar/GetList',
-            //data: { start: '', end:''}
-        })
-    }
-
-    var myClass = function () {
-        GetClassSubjects();
-        GetBestStudents();
-    }
-
-        var myCalendar = function () {
-            GetListCalendar();
-    }
-
-</script>*@
-

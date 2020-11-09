@@ -477,12 +477,12 @@ namespace BaseCustomerMVC.Controllers.Student
                     var a = RemoveClassSubject(csj);
                     if (a.Result)
                     {
-                        msg = "Xoá thành công.";
+                        msg = "Đã xóa học liệu";
                         stt = true;
                     }
                     else
                     {
-                        msg = "Xoá không thành công.";
+                        msg = "Học liệu không tồn tại hoặc đã bị xóa";
                         stt = false;
                     }
                 }

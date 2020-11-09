@@ -49,6 +49,9 @@ namespace BaseCustomerEntity.Database
     }
     public class ExamDetailService : ServiceBase<ExamDetailEntity>
     {
+        private IConfiguration config;
+        private string dbName;
+
         public ExamDetailService(IConfiguration configuration) : base(configuration)
         {
             var indexs = new List<CreateIndexModel<ExamDetailEntity>>
@@ -62,6 +65,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public ExamDetailService(IConfiguration config, string dbName) : base(config, dbName)
+        {
         }
 
         public async Task ConvertClassSubject(ClassSubjectEntity classSubject)

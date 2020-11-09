@@ -25,7 +25,7 @@ namespace BaseCustomerEntity.Database
         //[JsonProperty("IsExam")]
         //public bool IsExam { get; set; }
         [JsonProperty("Point")]
-         public double Point { get; set; }
+        public double Point { get; set; }
         [JsonProperty("Created")]
         public DateTime Created { get; set; }
         [JsonProperty("Updated")]
@@ -40,6 +40,9 @@ namespace BaseCustomerEntity.Database
 
     public class LessonPartService : ServiceBase<LessonPartEntity>
     {
+        private IConfiguration config;
+        private string dbName;
+
         public LessonPartService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<LessonPartEntity>>
@@ -57,6 +60,10 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public LessonPartService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+        }
+
         public IEnumerable<LessonPartEntity> GetByLessonID(string LessonID)
         {
             return CreateQuery().Find(o => o.ParentID == LessonID)
@@ -64,6 +71,6 @@ namespace BaseCustomerEntity.Database
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
 
-        
+
     }
 }

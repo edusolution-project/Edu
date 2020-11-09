@@ -256,13 +256,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public JsonResult GetLessonProgressList(string ID)
+        public JsonResult GetLessonProgressList(string ID, string StudentID = "")
         {
             var result = new List<StudentLessonResultViewModel>();
             var lesson = _lessonService.GetItemByID(ID);
             if (lesson == null)
                 return Json("No data");
-            var listStudent = _studentService.GetStudentsByClassId(lesson.ClassID);
+            var listStudent = new List<StudentEntity>();
+            if (!string.IsNullOrEmpty(StudentID))
+                listStudent.Add(_studentService.GetItemByID(StudentID));
+            else
+                listStudent = _studentService.GetStudentsByClassId(lesson.ClassID).ToList();
+
             if (listStudent != null && listStudent.Count() > 0)
             {
                 foreach (var student in listStudent)

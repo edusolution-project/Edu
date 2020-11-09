@@ -60,6 +60,8 @@ namespace BaseCustomerEntity.Database
     public class ExamService : ServiceBase<ExamEntity>
     {
         private ExamDetailService _examDetailService;
+        private IConfiguration config;
+        private string dbName;
 
         public ExamService(IConfiguration configuration) : base(configuration)
         {
@@ -90,6 +92,11 @@ namespace BaseCustomerEntity.Database
 
             _examDetailService = new ExamDetailService(configuration);
         }
+
+        public ExamService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+        }
+
         /// <summary>
         /// ID Exam
         /// </summary>

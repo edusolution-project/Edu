@@ -66,6 +66,14 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+
+        public ClassSubjectService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+            
+        }
+
+
+
         public List<ClassSubjectEntity> GetByClassID(string ClassID)
         {
             return Collection.Find(t => t.ClassID == ClassID).ToList();

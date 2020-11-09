@@ -33,14 +33,15 @@ namespace BaseCustomerEntity.Database
     }
     public class LearningHistoryService : ServiceBase<LearningHistoryEntity>
     {
+        private IConfiguration config;
+        private string dbName;
 
         //private LessonProgressService _lessonProgressService;
         //private ChapterProgressService _chapterProgressService;
         //private ClassSubjectProgressService _classSubjectProgressService;
         //private ClassProgressService _classProgressService;
 
-        public LearningHistoryService(IConfiguration config
-            ) : base(config)
+        public LearningHistoryService(IConfiguration config) : base(config)
         {
 
             var indexs = new List<CreateIndexModel<LearningHistoryEntity>>
@@ -69,6 +70,10 @@ namespace BaseCustomerEntity.Database
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
+        }
+
+        public LearningHistoryService(IConfiguration config, string dbName):base(config, dbName)
+        {
         }
 
         public List<LearningHistoryEntity> SearchHistory(LearningHistoryEntity item)
