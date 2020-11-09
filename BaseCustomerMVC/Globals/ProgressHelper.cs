@@ -412,21 +412,21 @@ namespace BaseCustomerMVC.Globals
             return result;
         }
 
-        public async Task<LessonProgressEntity> UpdateLessonPoint(ExamEntity exam)
+        public async Task<LessonProgressEntity> UpdateLessonPoint(ExamEntity exam, bool incCounter = false)
         {
-            var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
+            //var pointchange = exam.MaxPoint > 0 ? (exam.Point - exam.LastPoint) * 100 / exam.MaxPoint : 0;
 
             var prg = await _lessonProgressService.UpdatePoint(exam);
 
             if (prg.ChapterID != "0")
-                _ = UpdateChapterPoint(prg, pointchange);
+                _ = UpdateChapterPoint(prg, incCounter: incCounter);
             else
-                _ = UpdateClassSubjectPoint(prg, pointchange);
+                _ = UpdateClassSubjectPoint(prg, incCounter: incCounter);
 
             return prg;
         }
 
-        public async Task UpdateChapterPoint(LessonProgressEntity item, double pointchange = 0)
+        public async Task UpdateChapterPoint(LessonProgressEntity item, double pointchange = 0, bool incCounter = false)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null)
@@ -457,7 +457,7 @@ namespace BaseCustomerMVC.Globals
             {
                 incPoint = point;
 
-                if (item.Tried == 1 || progress.ExamDone == 0)//new
+                if (incCounter)//new
                     incCount = (long)item.Multiple;
 
                 progress.ExamDone += incCount;
@@ -474,7 +474,7 @@ namespace BaseCustomerMVC.Globals
             else
             {
                 incPracPoint = point;
-                if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                if (incCounter)//new
                     incPracCount = (long)item.Multiple;
 
                 progress.PracticeDone += incPracCount;
@@ -558,7 +558,7 @@ namespace BaseCustomerMVC.Globals
             //}
         }
 
-        public async Task UpdateClassSubjectPoint(LessonProgressEntity item, double pointchange = 0)
+        public async Task UpdateClassSubjectPoint(LessonProgressEntity item, double pointchange = 0, bool incCounter = false)
         {
             var lesson = _lessonService.GetItemByID(item.LessonID);
             if (lesson == null)
@@ -588,7 +588,8 @@ namespace BaseCustomerMVC.Globals
                 {
                     incPoint = point;
 
-                    if (item.Tried == 1 || progress.ExamDone == 0)//new
+                    //if (item.Tried == 1 || progress.ExamDone == 0)//new
+                    if (incCounter)
                         incCount = (long)item.Multiple;
 
                     progress.ExamDone += incCount;
@@ -605,7 +606,8 @@ namespace BaseCustomerMVC.Globals
                 else
                 {
                     incPracPoint = point;
-                    if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    //if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    if (incCounter)
                         incPracCount = (long)item.Multiple;
 
                     progress.PracticeDone += incPracCount;

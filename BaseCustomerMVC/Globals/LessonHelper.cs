@@ -563,7 +563,6 @@ namespace BaseCustomerMVC.Globals
                     examDetail.Updated = DateTime.UtcNow;
                 _examDetailService.Save(examDetail);
             }
-
             exam.QuestionsPass = pass;
             exam.Point = point;
             if (updateTime)

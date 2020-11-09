@@ -21,32 +21,45 @@ namespace BaseCustomerMVC.Globals
             return orgStr;
         }
         
-        public static string ReplaceSpecialCharacters(string str)
+        public static string ReplaceSpecialCharacters(string org)
         {
+
             //dau ‘’
             int[] beginning = { 24, 25, 96 };
             //dau “”
             int[] quotation = { 29, 28 };
-            for (int i = 0; i < str.Length; i++)
+            for (int i = 0; i < org.Length; i++)
             {
-                if (beginning.Contains((byte)str[i]))
+                if (beginning.Contains((byte)org[i]))
                 {
-                    str = str.Replace(str[i], '\'');
+                    org = org.Replace(org[i], '\'');
                 }
-                if (quotation.Contains((byte)str[i]))
+                if (quotation.Contains((byte)org[i]))
                 {
-                    str = str.Replace(str[i], '\"');
+                    org = org.Replace(org[i], '\"');
                 }
-                if ((byte)str[i]==125 || (byte)str[i] == 141)
+                if ((byte)org[i] == 125 || (byte)org[i] == 141)
                 {
-                    str = str.Replace(str[i], '(');
+                    org = org.Replace(org[i], '(');
                 }
-                if ((byte)str[i] == 126 || (byte)str[i] == 142)
+                if ((byte)org[i] == 126 || (byte)org[i] == 142)
                 {
-                    str = str.Replace(str[i], ')');
+                    org = org.Replace(org[i], ')');
                 }
             }
-            return str;
+
+            for (int i = 0; i < KyTuDacBiet.Length; i++)
+            {
+                if (org.Contains(KyTuDacBiet[i]))
+                {
+                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
+                }
+            }
+            return org;
         }
+
+        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
+                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
+        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
     }
 }

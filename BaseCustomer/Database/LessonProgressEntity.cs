@@ -132,19 +132,18 @@ namespace BaseCustomerEntity.Database
                     currentProgress.LastPoint = point;
                     currentProgress.AvgPoint = (avg + point) / currentProgress.Tried;
                 }
-                else
+                else //mark for existed exam
                 {
                     var pointchange = item.MaxPoint > 0 ? (item.Point - item.LastPoint) * 100 / item.MaxPoint : 0;
                     if (item.Number == currentProgress.Tried)//lastest 
                     {
-                        currentProgress.PointChange += pointchange;
+                        currentProgress.PointChange = pointchange;
                         currentProgress.LastPoint = point;
                     }
                     currentProgress.AvgPoint = (avg + pointchange) / currentProgress.Tried; //lastest && old exam
+                    if (point > currentProgress.MaxPoint) currentProgress.MaxPoint = point;
+                    if (point < currentProgress.MinPoint) currentProgress.MinPoint = point;
                 }
-
-                if (point > currentProgress.MaxPoint) currentProgress.MaxPoint = point;
-                if (point < currentProgress.MinPoint) currentProgress.MinPoint = point;
 
                 currentProgress.Multiple = lesson.Multiple;
                 await Collection.ReplaceOneAsync(t => t.ID == currentProgress.ID, currentProgress);
