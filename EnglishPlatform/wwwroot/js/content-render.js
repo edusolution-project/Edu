@@ -386,7 +386,7 @@ var Lesson = (function () {
 
 
                 //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Thêm nội dung từ file");
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Thêm nội dung từ file Word");
                 lessonButton.append(btnExplain);
 
 
@@ -1963,7 +1963,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "onclick": "AddNewQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm câu hỏi'));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -2068,7 +2068,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add question
                 if (data != null && data.Questions != null) {
@@ -2309,28 +2309,55 @@ var Lesson = (function () {
         xhr.send(formData);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.Error != null && data.Error != "") {
-                    Swal.hideLoading();
-                    Swal.clickConfirm();
-                    Swal.fire({
-                        title: 'Thông báo',
-                        icon: 'error',
-                        text: data.Error
-                    }).then(() => {
-                        showCloneQuestion();
-                    })
+                if (type == 0) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.Error != null && data.Error != "") {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Error
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
+                    else {
+                        var dt = data.Data;
+                        if (dt != null && dt.Questions != null) {
+                            for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
+                                var quiz = dt.Questions[i];
+                                addNewQuestion(quiz);
+                            }
+                        }
+                        Swal.hideLoading();
+                        Swal.clickConfirm()
+                    }
                 }
                 else {
-                    var dt = data.Data;
-                    if (dt != null && dt.Questions != null) {
-                        for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
-                            var quiz = dt.Questions[i];
-                            addNewQuestion(quiz);
-                        }
+                    var data = JSON.parse(xhr.responseText);
+                    debugger
+                    if (data.Stt == true) {
+                        Swal.hideLoading();
+                        //Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thêm thành công',
+                            icon: 'success',
+                        }).then(() => {
+                            location.reload();;
+                        })
                     }
-                    Swal.hideLoading();
-                    Swal.clickConfirm()
+                    else {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Msg
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
                 }
             }
         }

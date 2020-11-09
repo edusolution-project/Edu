@@ -27,6 +27,7 @@ using Spire.Doc.Fields;
 using Spire.Doc.Fields.OMath;
 using System.Drawing.Imaging;
 using Microsoft.AspNetCore.Http.Internal;
+using HtmlAgilityPack;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -2664,6 +2665,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         public async Task<JsonResult> ImportQuestionWithWord(string basis = "", string ParentID = "")
         {
+            Boolean Status = false;
             try
             {
                 var form = HttpContext.Request.Form;
@@ -2739,35 +2741,71 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 case "VĂN BẢN":
                                     item.Type = "TEXT";
-                                    break;
+                                    return new JsonResult(new Dictionary<string, object>
+                                        {
+                                            //{ "Data", full_item },
+                                            {"Msg", "Dạng văn bản đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
+                                            {"Stt",false }
+                                        });
+                                    //break;
                                 case "AUDIO":
                                     item.Type = "AUDIO";
-                                    break;
+                                    return new JsonResult(new Dictionary<string, object>
+                                        {
+                                            //{ "Data", full_item },
+                                            {"Msg", "Dạng Audio đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
+                                            {"Stt",false }
+                                        });
+                                //break;
                                 case "VIDEO":
                                     item.Type = "VIDEO";
-                                    break;
+                                    return new JsonResult(new Dictionary<string, object>
+                                        {
+                                            //{ "Data", full_item },
+                                            {"Msg", "Dạng Video đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
+                                            {"Stt",false }
+                                        });
+                                //break;
                                 case "HÌNH ẢNH":
                                     item.Type = "IMG";
                                     Msg += await GetContentIMG(table, type, basis, item);
+                                    Status = true;
                                     break;
                                 case "TỪ VỰNG":
                                     item.Type = "VOCAB";
-                                    break;
+                                    return new JsonResult(new Dictionary<string, object>
+                                        {
+                                            //{ "Data", full_item },
+                                            {"Msg", "Dạng Từ vựng đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
+                                            {"Stt",false }
+                                        });
+                                //break;
                                 case "QUIZ1":
                                     Msg += await GetContentQUIZ(table,type,basis,item);
+                                    Status = true;
                                     break;
                                 case "QUIZ2":
+                                    item.Description = "";
                                     Msg += await GetContentQuiz2andVocab(table, type, basis, item);
+                                    Status = true;
                                     break;
                                 case "QUIZ3":
                                     Msg += await GetContentQUIZ(table, type, basis, item);
+                                    Status = true;
                                     break;
                                 case "QUIZ4":
                                     Msg += await GetContentQUIZ(table, type, basis, item);
+                                    Status = true;
                                     break;
                                 case "ESSAY":
                                     item.Type = "ESSAY";
-                                    break;
+                                    return new JsonResult(new Dictionary<string, object>
+                                        {
+                                            //{ "Data", full_item },
+                                            {"Msg", "Dạng Essay đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
+                                            {"Stt",false }
+                                        });
+                                    //break;
                                 default:
                                     break;
                             }
@@ -2777,13 +2815,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return new JsonResult(new Dictionary<string, object>
                     {
                         //{ "Data", full_item },
-                        {"Error", Msg }
+                        {"Msg", Msg },
+                        {"Stt",Status }
                     });
                 }
             }
             catch (Exception ex)
             {
-                return new JsonResult(new Dictionary<string, object> { { "Error", ex.Message } });
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        //{ "Data", full_item },
+                        {"Msg", ex.Message },
+                        {"Stt",false }
+                    });
             }
         }
 
@@ -2966,9 +3010,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
-                    Int32 pos = -1;
-
                     var totalRows = table.Rows.Count;
                     for (int indexRow = 0; indexRow < totalRows; indexRow++)
                     {
@@ -2981,26 +3022,49 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var txt = contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim().ToLower();
                             for (int indexPara = 0; indexPara < countPara; indexPara++)
                             {
-                                String contentQUIZ2= contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim();
-                                String _question = "";
-                                List<String> _listAns = new List<String>();
+                                List<LessonPartAnswerEntity> listAns = new List<LessonPartAnswerEntity>();
+                                String contentQUIZ2 = contentRow.Cells[1].Paragraphs[indexPara].Text?.ToString().Trim();
                                 while (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
                                 {
                                     Int32 startIndex = contentQUIZ2.IndexOf("{{") + 2;
                                     Int32 lenghtStr = contentQUIZ2.IndexOf("}}") - startIndex;
                                     String str = contentQUIZ2.Substring(startIndex, lenghtStr);
-                                    _listAns.Add(str);
+                                    var answer = new LessonPartAnswerEntity
+                                    {
+                                        CourseID = item.CourseID,
+                                        CreateUser = createUser,
+                                        Created = DateTime.UtcNow,
+                                        Updated = DateTime.UtcNow,
+                                        Media = new Media(),
+                                        Content = str,
+                                        IsCorrect = true,
+                                    };
+                                    listAns.Add(answer);
                                     if (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
-                                        //contentQUIZ2 = contentQUIZ2.Remove(startIndex - 2, contentQUIZ2.IndexOf("}}") + 1);
-                                        contentQUIZ2 = contentQUIZ2.Replace("{{" + str + "}}", "");
-                                    else _question = contentQUIZ2;
+                                    {
+                                        contentQUIZ2 = contentQUIZ2.Replace($"{{{{{str}}}}}", str);
+                                    }
                                 }
 
-                                //item.Questions
+                                //String formatDes = "";
+
+                                foreach (var ans in listAns)
+                                {
+                                    String str = ans.Content;
+                                    String formatDes = $"<fillquiz contenteditable='false' readonly='readonly' title=''><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{str}' placeholder='{str}' readonly='readonly' type='text' value='{str}' /></fillquiz>";
+                                    contentQUIZ2 = contentQUIZ2.Replace(str, formatDes);
+                                }
+                                item.Description += $"<p>{contentQUIZ2}</p>\n\n";
                             }
                         }
                         else continue;
                     }
+
+                    var newdescription = "";
+                    item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
+                    item.Description = newdescription;
+                    await CreateOrUpdateLessonPart(basis, item);
+
                     return $"{type} is OK";
                 }
             }
@@ -3192,6 +3256,104 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             stringBuilder.AppendLine();
             return stringBuilder.ToString();
+        }
+
+        private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)
+        {
+            Description = item.Description;
+            var questionList = new List<QuestionViewModel>();
+            //extract Question from Description
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(item.Description);
+            var fillquizs = doc.DocumentNode.SelectNodes(".//fillquiz[*[contains(@class,\"fillquiz\")]]");
+            if (fillquizs == null || fillquizs.Count() == 0)
+                return questionList;
+
+            for (int i = 0; i < fillquizs.Count(); i++)
+            {
+                var quiz = fillquizs[i];
+
+                var inputNode = quiz.SelectSingleNode(".//*[contains(@class,\"fillquiz\")]");
+                if (inputNode == null)
+                {
+                    continue;
+                }
+
+                //move text behind fillQuiz
+                var textNode = quiz.SelectSingleNode(".//text()");
+                if (textNode != null)
+                {
+                    var cloneNode = textNode.Clone();
+                    textNode.Remove();
+                    quiz.ParentNode.InsertAfter(cloneNode, quiz);
+                }
+
+                var ans = inputNode.GetAttributeValue("ans", null);
+                if (ans == null)
+                    ans = inputNode.GetAttributeValue("placeholder", null);
+                if (string.IsNullOrEmpty(ans))
+                {
+                    inputNode.Remove();
+                    continue;
+                }
+                var Question = new QuestionViewModel
+                {
+                    ParentID = item.ID,
+                    CourseID = item.CourseID,
+                    CreateUser = creator,
+                    Order = i,
+                    Point = 1,
+                    Content = inputNode.GetAttributeValue("dsp", null),//phần hiển thị cho học viên
+                    Description = quiz.GetAttributeValue("title", null),//phần giải thích đáp án
+                    Answers = new List<LessonPartAnswerEntity>
+                    {
+
+                    }
+
+                };
+
+                var ansArr = ans.Split('|');
+                foreach (var answer in ansArr)
+                {
+                    //var validAns = validateFill(answer);
+                    var validAns = answer;
+                    if (!string.IsNullOrEmpty(validAns))
+                    {
+                        Question.Answers.Add(new LessonPartAnswerEntity
+                        {
+                            CourseID = item.CourseID,
+                            CreateUser = creator,
+                            IsCorrect = true,
+                            Content = validAns
+                        });
+                    }
+                }
+
+                questionList.Add(Question);
+                //var clearnode = HtmlNode.CreateNode("<input></input>");
+                //clearnode.AddClass("fillquiz");
+                inputNode.Attributes.Remove("contenteditable");
+                inputNode.Attributes.Remove("readonly");
+                inputNode.Attributes.Remove("title");
+                inputNode.Attributes.Remove("value");
+                inputNode.Attributes.Remove("dsp");
+                inputNode.Attributes.Remove("ans");
+                inputNode.Attributes.Remove("placeholder");
+                inputNode.Attributes.Remove("size");
+
+                quiz.Attributes.Remove("contenteditable");
+                quiz.Attributes.Remove("readonly");
+                quiz.Attributes.Remove("title");
+                //quiz.ChildNodes.Add(clearnode);
+            }
+
+            var removeNodes = doc.DocumentNode.SelectNodes(".//fillquiz[not(input)]");
+            if (removeNodes != null && removeNodes.Count() > 0)
+                foreach (var node in removeNodes)
+                    node.Remove();
+
+            Description = doc.DocumentNode.OuterHtml.ToString();
+            return questionList;
         }
         #endregion
 
