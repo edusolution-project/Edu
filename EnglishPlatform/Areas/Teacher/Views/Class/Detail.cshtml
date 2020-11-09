@@ -140,7 +140,7 @@
             <div class="form-group">
                 <h3 style="font-size:15px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
@@ -1234,7 +1234,7 @@
                             this.list_lessons = _that.list_lessons
                             //_that.$forceUpdate()
                             Vue.nextTick(function () {
-                                console.log('.row-action[for=' + subject + ']');
+                                console.log($('.ls-practice [for=' + subject + ']'));
                                 this.toggleTooltips($('.ls-practice [for=' + subject + ']'));
                             })
                         }).catch(e => { })
@@ -2141,6 +2141,7 @@
 
         var toggleTooltips = function(obj)
         {
+            console.log($(obj));
             $(obj).find('i').tooltip({
                 position: {
                     my: "center bottom-10",
