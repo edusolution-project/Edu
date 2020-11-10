@@ -15,10 +15,6 @@ using Microsoft.AspNetCore.Hosting;
 using OfficeOpenXml;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
-using RestSharp;
-using System.Data;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 //Word
 using System.Drawing;
 using Spire.Doc;
@@ -26,7 +22,6 @@ using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using Spire.Doc.Fields.OMath;
 using System.Drawing.Imaging;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -310,7 +305,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Redirect($"/{basis}{Url.Action("Index")}");
 
             ViewBag.Course = currentCourse;
-            ViewBag.CourseLessonID = Data.ID;
+            //ViewBag.CourseLessonID = Data.ID;??????????
             ViewBag.Data = Data;
             if (frameview == 1)
                 return View("LessonFrame");
@@ -371,13 +366,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             if (_roleService.GetItemByID(memberEntity.RoleID).Code != "head-teacher")
-
                 //if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.TeacherID == UserID));
 
             if (!string.IsNullOrEmpty(model.SearchText))
-                //filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
-                filter.Add(Builders<CourseEntity>.Filter.Text(model.SearchText));
+                filter.Add(Builders<CourseEntity>.Filter.Text("\"" + model.SearchText + "\""));
+            //filter.Add(Builders<CourseEntity>.Filter.Text(model.SearchText));
 
 
             var data = (filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll()).SortByDescending(t => t.ID);
@@ -402,14 +396,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //var DataResponse = data;
 
                 var rsp = DataResponse.ToEnumerable().Select(o =>
-
-                        _courseViewMapping.AutoOrtherType(o, new CourseViewModel()
-                        {
-                            SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
-                            GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                            TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
-                        })).ToList();
+                    _courseViewMapping.AutoOrtherType(o, new CourseViewModel()
+                    {
+                        //SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
+                        GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                        SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                        TeacherName = _teacherService.GetItemByID(o.TeacherID)?.FullName
+                    })).ToList();
 
 
                 response = new Dictionary<string, object>
@@ -598,14 +591,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
-                    olditem.IsPublic = item.IsPublic;
-                    olditem.PublicWStudent = item.PublicWStudent;
+                    //olditem.IsPublic = item.IsPublic;
+                    //olditem.PublicWStudent = item.PublicWStudent;
                     //if (item.TargetCenters != null && item.TargetCenters[0] != null)
                     //{
                     //    var listCenters = item.TargetCenters[0].Split(',');
                     //    item.TargetCenters = listCenters.ToList();
                     //}
                     olditem.TargetCenters = item.TargetCenters;
+                    olditem.StudentTargetCenters = item.StudentTargetCenters;
                     var files = HttpContext.Request.Form != null && HttpContext.Request.Form.Files.Count > 0 ? HttpContext.Request.Form.Files : null;
                     if (files != null && files.Count > 0)
                     {
@@ -970,7 +964,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //move chapter to bottom of new parent chap
                         ChangeChapterPosition(data, int.MaxValue);
                     }
-                    else
+                    else if (data.Order != newOrder)
                         ChangeChapterPosition(data, newOrder);
                 }
 
@@ -1336,12 +1330,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    item.Updated = DateTime.UtcNow;
+                    var oldTemplate = data.TemplateType;
+                    data.TemplateType = item.TemplateType;
+                    data.Title = item.Title;
+                    data.Timer = item.Timer;
+                    data.Multiple = item.Multiple;
+                    data.Etype = item.Etype;
+                    data.Limit = item.Limit;
+
+                    if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
+                        data.Limit = 0;
+
+                    data.Updated = DateTime.UtcNow;
+
                     var newOrder = item.Order - 1;
-                    item.Order = data.Order;
 
                     //update counter if type change
-                    if (item.TemplateType != data.TemplateType)
+                    if (item.TemplateType != oldTemplate)
                     {
                         var examInc = 0;
                         var pracInc = 0;
@@ -1349,31 +1354,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (item.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
                         {
                             examInc = -1;
-                            item.IsPractice = pracInc == 1;
+                            data.IsPractice = pracInc == 1;
                         }
                         else
                         {
                             examInc = 1;
-                            item.IsPractice = false;
+                            data.IsPractice = false;
                             pracInc = pracInc == 1 ? -1 : 0;
                         }
-                        if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
-                            _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 0, examInc, pracInc);
+                        if (!string.IsNullOrEmpty(data.ChapterID) && data.ChapterID != "0")
+                            _ = _courseHelper.IncreaseCourseChapterCounter(data.ChapterID, 0, examInc, pracInc);
                         else
-                            _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 0, examInc, pracInc);
+                            _ = _courseHelper.IncreaseCourseCounter(data.CourseID, 0, examInc, pracInc);
                     }
 
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
 
-                    if (item.Order != newOrder)//change Position
+                    if (data.Order != newOrder)//change Position
                     {
-                        ChangeLessonPosition(item, newOrder);
+                        ChangeLessonPosition(data, newOrder);
                     }
                 }
 
                 return  new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", item },
+                    { "Data", data },
                     {"Error",null }
                 });
             }
