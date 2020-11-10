@@ -12,6 +12,8 @@ namespace BaseCustomerMVC.Models
         public int Rank { get; set; }
         [JsonProperty("StudentName")]
         public string StudentName { get; set; }
+        [JsonProperty("ClassName")]
+        public string ClassName { get; set; }
         [JsonProperty("StudentID")]
         public string StudentID { get; set; }
         [JsonProperty("AvgPoint")]

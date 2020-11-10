@@ -98,7 +98,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 if (isInteractive)
                 {
                     var _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.IsActive == true) };
-                    _filter = new List<FilterDefinition<CourseEntity>> { Builders<CourseEntity>.Filter.Where(o => o.StudentTargetCenters.Contains(center.ID)) };
+                    _filter.Add(Builders<CourseEntity>.Filter.Where(o => o.StudentTargetCenters.Contains(center.ID)));
                     if (!string.IsNullOrEmpty(defaultModel.SearchText))
                     {
                         _filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));

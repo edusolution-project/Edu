@@ -353,7 +353,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
                 item.MaxPoint = _lesson.Point;
-
                 item.TeacherID = _class.TeacherID;
                 item.ID = null;
                 item.Created = DateTime.UtcNow;
@@ -365,7 +364,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.QuestionsDone = 0;
                 item.Marked = false;
 
-                await _progressHelper.ResetLesssonPoint(_lesson, item.StudentID);
+                await _progressHelper.UpdateLessonPoint(item, item.Number == 1);//increase counter for first exam only
             }
 
             item.Updated = DateTime.UtcNow;
@@ -403,7 +402,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     else
                         exam.CurrentDoTime = DateTime.UtcNow;
                 }
-            }           
+            }
             return new JsonResult(new { exam, schedule, limit = lesson.Limit });
         }
 

@@ -727,14 +727,13 @@
     function AddLessonCallback(res) {
         if (res != null) {
             var result = $.parseJSON(res);
-            if (result.Error != null) {
+            if (result.Error != null && result.Error != "") {
                 alert(result.Error);
                 return false;
             }
             else {
                 lesson = result.Data;
                 RenderLesson(lesson);
-
                 hideModal();
             }
         }

@@ -1332,6 +1332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _ = _courseHelper.IncreaseCourseChapterCounter(item.ChapterID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
                     else
                         _ = _courseHelper.IncreaseCourseCounter(item.CourseID, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+                    data = item;
                 }
                 else
                 {
@@ -1370,7 +1371,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
 
-                return new JsonResult(new Dictionary<string, object>
+                return  new JsonResult(new Dictionary<string, object>
                 {
                     { "Data", item },
                     {"Error",null }
