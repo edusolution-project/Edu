@@ -1037,6 +1037,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var st = _studentService.GetItemByID(result.StudentID);
                     if (st != null)
                     {
+                        var firstClassID = classIDs.FirstOrDefault(t => st.JoinedClasses.Contains(t));
+                        result.ClassName = firstClassID != null ? _classService.GetItemByID(firstClassID)?.Name : null;
                         result.StudentName = st.FullName;
                         rtn.Add(result);
                     }

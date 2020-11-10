@@ -163,6 +163,8 @@ namespace BaseCustomerMVC.Controllers.Student
                     var st = _studentService.GetItemByID(result.StudentID);
                     if (st != null)
                     {
+                        var firstClassID = classIDs.FirstOrDefault(t => st.JoinedClasses.Contains(t));
+                        result.ClassName = firstClassID != null ? _service.GetItemByID(firstClassID)?.Name : null;
                         result.StudentName = st.FullName;
                         rtn.Add(result);
                     }
