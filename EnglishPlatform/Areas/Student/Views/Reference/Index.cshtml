@@ -15,7 +15,7 @@
 }
 
 <!--Lazy load-->
-<script src="~/js/vue-lazyload.js"></script>
+@*<script src="~/js/vue-lazyload.js"></script>*@
 
 <script>
     setActiveMenu("reference");
@@ -571,14 +571,14 @@
         });
 
         //lazy load
-        Vue.use(VueLazyload, {
-            preLoad: 1.3,
-            error: '~/pictures/book.jpg',
-            //loading: '~/img/Spin-1.8s-200px.gif',
-            attempt: 1,
-            // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
-            //listenEvents: ['scroll']
-        })
+        //Vue.use(VueLazyload, {
+        //    preLoad: 1.3,
+        //    error: '~/pictures/book.jpg',
+        //    //loading: '~/img/Spin-1.8s-200px.gif',
+        //    attempt: 1,
+        //    // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
+        //    //listenEvents: ['scroll']
+        //})
     </script>
 }
 
