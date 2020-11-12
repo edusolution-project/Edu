@@ -1015,7 +1015,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 quiz.Media.Created = DateTime.UtcNow;
                                 quiz.Media.Size = 0;
                                 quiz.Media.Path = quiz.Media.Name.Trim();
-                                item.Media.Extension = "image/png";
+                                quiz.Media.Extension = "image/png";
                             }
                             else
                             {
@@ -1287,7 +1287,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
         }
-
 
         private string validateFill(string org)
         {

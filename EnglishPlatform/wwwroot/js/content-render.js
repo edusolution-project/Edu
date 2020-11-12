@@ -2361,28 +2361,55 @@ var Lesson = (function () {
         xhr.send(formData);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.Error != null && data.Error != "") {
-                    Swal.hideLoading();
-                    Swal.clickConfirm();
-                    Swal.fire({
-                        title: 'Thông báo',
-                        icon: 'error',
-                        text: data.Error
-                    }).then(() => {
-                        showCloneQuestion();
-                    })
+                if (type == 0) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.Error != null && data.Error != "") {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Error
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
+                    else {
+                        var dt = data.Data;
+                        if (dt != null && dt.Questions != null) {
+                            for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
+                                var quiz = dt.Questions[i];
+                                addNewQuestion(quiz);
+                            }
+                        }
+                        Swal.hideLoading();
+                        Swal.clickConfirm()
+                    }
                 }
                 else {
-                    var dt = data.Data;
-                    if (dt != null && dt.Questions != null) {
-                        for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
-                            var quiz = dt.Questions[i];
-                            addNewQuestion(quiz);
-                        }
+                    var data = JSON.parse(xhr.responseText);
+                    debugger
+                    if (data.Stt == true) {
+                        Swal.hideLoading();
+                        //Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thêm thành công',
+                            icon: 'success',
+                        }).then(() => {
+                            location.reload();;
+                        })
                     }
-                    Swal.hideLoading();
-                    Swal.clickConfirm()
+                    else {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Msg
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
                 }
             }
         }

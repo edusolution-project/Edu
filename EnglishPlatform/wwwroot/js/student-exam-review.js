@@ -507,7 +507,7 @@ var ExamReview = (function () {
                     var listContent = content_correct_answer.split(' | ');
                     for (i = 0; i < listContent.length; i++) {
                         if (listContent[i] == content_answer) {
-                            //if (data.Point>0) {
+                        //if (data.Point>0) {
                             html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
                         }
                         else {
@@ -1375,7 +1375,6 @@ var ExamReview = (function () {
     window.uploadFile = uploadFile;
     window.togglePanelWidth = togglePanelWidth;
     window.validate = validate;
-    window.addCssAnswerQ14 = addCssAnswerQ14;
     return ExamReview;
 }());
 
