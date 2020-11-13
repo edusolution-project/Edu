@@ -1,7 +1,10 @@
 ﻿@inject Microsoft.Extensions.Configuration.IConfiguration _configuration
 @{ 
     string email = _configuration.GetSection("IsCSKH")?.Value;
+    bool isCSKH = email.Contains(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value);
 }
+@if (isCSKH)
+{
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,7 +39,7 @@
                 email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
                 name: "@User.Identity.Name",
                 type: '@User.FindFirst("Type")?.Value',
-                id: "@User.FindFirst("UserID")?.Value",
+                id: "cskh_eduso",
                 isAdmin: "huonghl@utc.edu.vn" == "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
                 isCSKH: "@email".split(',').indexOf("@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value")>-1
             }
@@ -46,3 +49,4 @@
     @await Html.PartialAsync("_EasyChat")
 </body>
 </html>
+}
