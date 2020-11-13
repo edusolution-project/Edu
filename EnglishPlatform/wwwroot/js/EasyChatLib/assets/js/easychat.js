@@ -244,11 +244,26 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 renderHTML();
                 ConnectHub();
                 getNoti();
+                cskh_gotoTop();
             });
         });
     }
     EasyChat.prototype.Destroy = function () {
 
+    }
+    var cskh_gotoTop = function(){
+        var root = getRoot();
+        if(root){
+            var listContact = root.querySelector('.list-contact');
+            if(listContact){
+                var user_cskh = __MEMBER.GetSupportCustomer();
+                var cskh_box = listContact.querySelector('[data-id="'+user_cskh.id+'"]');
+                if(cskh_box){
+                    listContact.insertBefore(cskh_box,listContact.childNodes[1]);
+                    cskh_box.setAttribute('style','background:#cd2e2e');
+                }
+            }
+        }
     }
     var getRoot = function () {
         return document.getElementById(__defaulConfig.id);

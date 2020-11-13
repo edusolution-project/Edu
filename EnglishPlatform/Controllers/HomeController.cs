@@ -22,7 +22,6 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Routing;
-using com.wiris.util.ui;
 
 namespace EnglishPlatform.Controllers
 {
@@ -1223,7 +1222,11 @@ namespace EnglishPlatform.Controllers
                 return ex.Message;
             }
         }
-
+        [Route("/CSKH")]
+        public IActionResult CSKH()
+        {
+            return View();
+        }
         #region Test
         //[HttpPost]
         //[Route("/home/test/{id}")]
