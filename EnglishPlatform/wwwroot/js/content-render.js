@@ -385,9 +385,12 @@ var Lesson = (function () {
                 }
 
 
-                //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Thêm nội dung từ file Word");
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word"></i>').append("Thêm nội dung từ file Word");
+                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word"></i>').append("Xuất file Word");
                 lessonButton.append(btnExplain);
+                lessonButton.append(btnAddFileFromWord);
+                lessonButton.append(btnExportFileToWord);
 
 
                 //lessonButton.append(edit);
@@ -2287,6 +2290,10 @@ var Lesson = (function () {
 
     }
 
+    var downloadFileWordWitdData = function () {
+        window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
+    }
+
     var chooseQuestionFile = function (obj, type) {
         $(obj).siblings('input').unbind().change(function (e) {
             uploadQuestionFile(e, type);
@@ -2299,7 +2306,7 @@ var Lesson = (function () {
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
         formData.append('file', e.target.files[0]);
-        formData.append('ParentID', config.courselessonid);
+        formData.append('ParentID', config.lesson_id);
         if (type == 0) {//file excel
             xhr.open('POST', config.url.import_quiz);
         }
@@ -4573,6 +4580,7 @@ var Lesson = (function () {
     window.checkSpecialCharacters = checkSpecialCharacters;
     window.fillquizFocus = fillquizFocus;
     window.fillquizBlur = fillquizBlur;
+    window.downloadFileWordWitdData = downloadFileWordWitdData;
     return LessonInstance;
 }());
 
