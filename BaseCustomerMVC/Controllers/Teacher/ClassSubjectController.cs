@@ -87,7 +87,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                           where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
                           let subject = _subjectService.GetItemByID(r.SubjectID)
                           let grade = _gradeService.GetItemByID(r.GradeID)
-                          let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
+                          let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}
                           let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
                           select new ClassSubjectViewModel
