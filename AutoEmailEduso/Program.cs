@@ -530,8 +530,9 @@ namespace AutoEmailEduso
 
                     //render ti le %
                     Double percentPoint0To49 = Math.Round((((Double)point0to49 / siso) * 100), 2);
+                    Double percentChualam = Math.Round((((Double)chualam / siso) * 100), 2);
 
-                    if (chualam > 0)
+                    if (percentChualam > 30)
                     {
                         ClassName4ReportInactive += $"{@class.Name}, ";
                     }
@@ -739,14 +740,14 @@ namespace AutoEmailEduso
                                 <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Tổng số học sinh</td>
                                 <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Tổng số học sinh chưa đăng nhập</td>
                                 <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Kết quả luyện tập & kiểm tra</td>
-                                <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Lớp có tỉ lệ điểm 0 -> 4.9 > 30%</td>
-                                <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Lớp có số học sinh chưa làm > 10</td>
+                                <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Lớp có tỉ lệ điểm dưới 5 lớn hơn 30%</td>
+                                <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Lớp có số học sinh chưa làm lớn hơn 30%</td>
                             </tr>
                             <tr style='font-weight:bold;background-color: bisque'>
-                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>8.0 -> 10</td>
-                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>5.0 -> 7.9</td>
-                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>2.0 -> 4.9</td>
-                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>0 -> 1.9</td>
+                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>8.0 đến 10</td>
+                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>5.0 đến 7.9</td>
+                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>2.0 đến 4.9</td>
+                                <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>0 đến 1.9</td>
                                 <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;'>Chưa làm</td>
                             </tr>
                         </thead>";
@@ -764,12 +765,12 @@ namespace AutoEmailEduso
                 tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>{indexRow}</td>" +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>{data.CenterName}</td> " +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.TotalStudents}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.TotalInactiveStudents}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.MinPoint8}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.MinPoint5}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.MinPoint2}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.MinPoint0}</td> " +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px'>{data.TotalDontWork}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:rgb(179,179,206)'>{data.TotalInactiveStudents}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:lightgreen'>{data.MinPoint8}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:lightblue'>{data.MinPoint5}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:#ffff33'>{data.MinPoint2}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:#ff454d'>{data.MinPoint0}</td> " +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:75px;background-color:rgb(194,194,216)'>{data.TotalDontWork}</td> " +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:25%'>{data.ClassName4ReportPoint}</td> " +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:25%'>{data.ClassName4ReportInactive}</td> " +
                         $"</tr>";

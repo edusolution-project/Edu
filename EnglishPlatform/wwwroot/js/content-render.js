@@ -382,11 +382,14 @@ var Lesson = (function () {
                     $(sort).prop("disabled", true);
                 }
 
-		var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word"></i>').append("Thêm nội dung từ file Word");
+                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word"></i>').append("Xuất file Word");
                 lessonButton.append(btnExplain);
-                
-                var btnWordImport = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus-square mr-2"></i>').append("Thêm từ Word");
-                lessonButton.append(btnWordImport);
+                lessonButton.append(btnAddFileFromWord);
+                lessonButton.append(btnExportFileToWord);
+
 
                  //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
@@ -735,7 +738,7 @@ var Lesson = (function () {
                     //_footerLeft.append(prevtab);
                     //var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
                     //var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
-                    //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                    var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
                     //_footerCenter.append(btnExplain);
 
                     lesson_action_holder.find("> button").remove();
@@ -2331,6 +2334,10 @@ var Lesson = (function () {
             window.open(config.url.export_quiztemp_with_word);
         }
 
+    }
+
+    var downloadFileWordWitdData = function () {
+        window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
     }
 
     var chooseQuestionFile = function (obj, type) {
@@ -4629,6 +4636,7 @@ var Lesson = (function () {
     window.checkSpecialCharacters = checkSpecialCharacters;
     window.fillquizFocus = fillquizFocus;
     window.fillquizBlur = fillquizBlur;
+    window.downloadFileWordWitdData = downloadFileWordWitdData;
     return LessonInstance;
 }());
 
