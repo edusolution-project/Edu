@@ -828,6 +828,9 @@
 
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
+
+                                    console.log(_that.courseSource);
+
                                     var r = setTimeout(function () {
                                         if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
                                             _that.courseSource.push({
@@ -838,6 +841,7 @@
                                                 GradeID: item.GradeID,
                                                 IsActive: false
                                             })
+                                            this.courseSource = _that.courseSource
                                         }
                                     }, 200);
                                 })
@@ -923,7 +927,15 @@
                 changeAddGrade(obj, reset = false) {
 
                     let _that = this;
-                    if (obj.GradeID == '') return;
+                    if (obj.GradeID == '') {
+                        _that.class_info.subject.forEach(function (sbj) {
+                            if (sbj.UID == obj.UID) {
+                                sbj.CourseID = ''
+                                return
+                            }
+                        });
+                        return;
+                    }
                     let key = obj.SubjectID + "_" + obj.GradeID
                     if (!_that.loaded_course.includes(key)) {
                         //load course
