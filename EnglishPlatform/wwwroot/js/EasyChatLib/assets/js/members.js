@@ -43,7 +43,9 @@
         var ajax = createAjax();
         return ajax.proccessWithDataHeader("GET", url, {classNames:listClass} , false).then(function(data){
             //console.log(data);
-            __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
+            if(data){
+                __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
+            }
         });
     }
     Member.prototype.GetItemByID = function(id){
@@ -62,6 +64,18 @@
     }
     Member.prototype.Search = function(textSearch){
         return search(textSearch);
+    }
+    Member.prototype.UpdateWithAjax = function(url){
+        var ajax = createAjax();
+        return ajax.proccessWithDataHeader("GET", url, {classNames:""} , false).then(function(data){
+            //console.log(data);
+            if(data){
+                var jsonData = typeof(data) == "string" ? JSON.parse(data) : data;
+                if(jsonData != null){
+                    updateItem(jsonData);
+                }
+            }
+        });
     }
     Member.prototype.Update = updateItem;
     var updateItem = function(members){

@@ -9,7 +9,7 @@ var ui = new UI({
     navigation: urlBase + "assets/Icon/Fill/navigation-2.svg"
 });
 var connectionHubChat = new signalR.HubConnectionBuilder()
-    .withUrl("https://easychat.eduso.vn/chathub")
+    .withUrl("https://local.easychat.eduso.vn/chathub")
     .build();
 (function (message, member, group, signalR, UI) {
     "use strict";
@@ -76,12 +76,12 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     contentBox.setAttribute('style', 'z-index:999999999999');
                 }
                 else {
-                    contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
+                    if(__CURRENTUSER.isCSKH != true) contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
                 }
                
             }
             var left = root.querySelector('.easy-chat__content--left');
-            if (left) {
+            if (left && __CURRENTUSER.isCSKH != true) {
                 left.style.display = 'none';
             }
         }
@@ -230,23 +230,31 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     EasyChat.prototype.Create = function (obj) {
         _mergeConfig(obj);
         __CURRENTUSER = __defaulConfig.currentUser;
-        __GROUP.Create(__defaulConfig.url.group.getlist).then(function () {
-
-            var array = __GROUP.GetAll();
-            var listString = [];
-            for (var i = 0; i < array.length; i++) {
-                var item = array[i];
-                if (item) {
-                    listString.push(item.id);
-                }
-            }
-            __MEMBER.Create(__defaulConfig.url.member.getlist, listString).then(function () {
+        if(__CURRENTUSER.isCSKH == true){
+            __MEMBER.Create(__defaulConfig.extendsUrl.GetContact.replace("{user}",__CURRENTUSER.id), [__CURRENTUSER.id]).then(function () {
                 renderHTML();
                 ConnectHub();
                 getNoti();
-                cskh_gotoTop();
             });
-        });
+        }
+        else{
+            __GROUP.Create(__defaulConfig.url.group.getlist).then(function () {
+                var array = __GROUP.GetAll();
+                var listString = [];
+                for (var i = 0; i < array.length; i++) {
+                    var item = array[i];
+                    if (item) {
+                        listString.push(item.id);
+                    }
+                }
+                __MEMBER.Create(__defaulConfig.url.member.getlist, listString).then(function () {
+                    renderHTML();
+                    ConnectHub();
+                    getNoti();
+                    cskh_gotoTop();
+                });
+            });
+        }
     }
     EasyChat.prototype.Destroy = function () {
 

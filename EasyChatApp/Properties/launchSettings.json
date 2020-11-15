@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://easychat.eduso.vn",
+      "applicationUrl": "https://local.easychat.eduso.vn",
       "sslPort": 0
     },
     "iisExpress": {
