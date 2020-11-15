@@ -667,9 +667,32 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
         if (data.sender != __defaulConfig.currentUser.id) {
+            var member = __MEMBER.GetItemByID(data.sender);
+            if(member.length == 0 && __CURRENTUSER.isCSKH == true && __CURRENTUSER.id !=  g_EasyChatURL.SYSTEM_EDUSO){
+                __MEMBER.UpdateWithAjax(__defaulConfig.extendsUrl.getMember.replace("user={user}","id="+data.sender)).then(function(){
+                    member = __MEMBER.GetItemByID(data.sender);
+                    if(member.length > 0){
+                        UpdateContactUI(member);
+                    }
+                    
+                });
+            }
             showNoti([id]);
         }
     });
+    var UpdateContactUI = function(data){
+        if(data){
+            var uiData = data.length > 0 ? data[0] : data;
+            var root = getRoot();
+            if(root){
+                var listContact = root.querySelector('.list-contact');
+                if(listContact){
+                    var el = UI.CreateItemContact(uiData,false,"EasyChat.OpenMessageBox(this)");
+                    listContact.insertBefore(el,listContact.childNodes[0]);
+                }
+            }
+        }
+    }
     var getNoti = function () {
         var ajax = new Ajax();
         //"https://localhost:44374/Chat/GetNotifications?user={user}&groupNames={groupNames}"
