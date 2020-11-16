@@ -185,6 +185,17 @@ namespace AutoEmailEduso
 
                     foreach (var _class in classesActive.OrderBy(x => x.Name))
                     {
+                        //lay danh sach giao vien trong lop
+                        var members = _class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                        var listNameTeachers = "";
+                        foreach(var mem in members)
+                        {
+                            var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
+                            var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
+                            listNameTeachers += $"{teacherName}, ";
+                        }
+                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
+
                         //Lay danh sach ID hoc sinh trong lop
                         var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
                         var studentIds = students.Select(t => t.ID).ToList();
@@ -249,7 +260,7 @@ namespace AutoEmailEduso
 
                         tbody +=
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name} - thầy/cô {listNameTeachers}</td>" +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
                         if (stChuaVaoLop == 0)
                         {
@@ -583,7 +594,7 @@ namespace AutoEmailEduso
                         $"<div style='font-style: italic;font-size: 12px'>Kết quả được cập nhật lần cuối lúc {endWeek.ToString("HH:mm - dd/MM/yyyy")}</div>" +
                         $"{body}";
 
-            List<String> toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com", "kchidinh@gmail.com","buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
+            List<String> toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<String> { "nguyenhoa.dev@gmail.com", "kchidinh@gmail.com", "buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE);
             Console.WriteLine("Send To Team Customer Care is Done");
         }
