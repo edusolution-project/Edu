@@ -2189,7 +2189,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         /// <returns></returns>
         public IActionResult DownloadFileWordWitdData(String basis, String LessonID)
         {
-            var lessonPart = _lessonPartService.GetByLessonID(LessonID);
+            var lessonPart = _lessonPartService.GetByLessonID("5fa8faf886ea9d09d4a948b0");
             var lessonPartIDs = lessonPart.Select(x => x.ID);
             var lessonPartQuestion = _lessonPartQuestionService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ParentID)).ToEnumerable();
             var lessonPartQuestionIDs = lessonPartQuestion.Select(x => x.ID);
@@ -2217,7 +2217,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             var listIDs = lessonPartQuestion.ToList().FindAll(o => o.ParentID == _lessonPart.ID).Select(o => o.ID);
                             var listAns = lessonPartAnswer.ToList().FindAll(o => listIDs.Contains(o.ParentID)).ToList();
-                            _contentDesciption = ConvertHtmlToDoc(_lessonPart.Description, basis, UserID, _lessonPart.Type, listAns);
+                            _contentDesciption = ConvertHtmlToDoc(_lessonPart.Description, basis, UserID, _lessonPart.Type, listIDs.ToList(), listAns);
                         }
                         else
                         {
@@ -2225,7 +2225,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         String[] Content = { "Nội dung", _contentDesciption };
                         //String[] Content = { "Nội dung", _lessonPart.Description };
-                        String[] File = { "File", _lessonPart.Media?.Path };
+                        String[] File = { "File", _lessonPart.Media == null ? "" : _lessonPart.Media.Path };
                         String[] Point = { "Điểm", "(0 - 100: chỉ áp dụng cho bài tự luận - các nội dung khác có trắc nghiệm, điền từ tự động tính mỗi câu hỏi | vị trí điền từ 1 điểm)" };
                         String[] Header = { "STT", "Thông tin câu hỏi" };
                         String[] type = { "QUIZ1", "QUIZ3", "QUIZ4" };
@@ -2336,7 +2336,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Paragraph p = FileRow.Cells[i].AddParagraph();
                                 FileRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                                 p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                                if (File[i].StartsWith("http") || File[i].StartsWith("htpps"))
+                                if(File[i]==""||String.IsNullOrEmpty(File[i]))
+                                {
+                                    TextRange TR = p.AppendText("");
+                                    TR.CharacterFormat.FontSize = 12;
+                                    TR.CharacterFormat.TextColor = Color.Black;
+                                }
+                                else if (File[i].StartsWith("http") || File[i].StartsWith("htpps"))
                                 {
                                     TextRange TR = p.AppendText(File[i]);
                                     TR.CharacterFormat.FontSize = 12;
@@ -3259,7 +3265,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     Int32 startIndex = contentQUIZ2.IndexOf("{{") + 2;
                                     Int32 lenghtStr = contentQUIZ2.IndexOf("}}") - startIndex;
-                                    String str = contentQUIZ2.Substring(startIndex, lenghtStr);
+                                    String oldStr = contentQUIZ2.Substring(startIndex, lenghtStr);
+                                    String newStr = validateFill(oldStr);
                                     var answer = new LessonPartAnswerEntity
                                     {
                                         CourseID = item.CourseID,
@@ -3267,17 +3274,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         Created = DateTime.UtcNow,
                                         Updated = DateTime.UtcNow,
                                         Media = new Media(),
-                                        Content = str,
+                                        Content = newStr,
                                         IsCorrect = true,
                                     };
                                     listAns.Add(answer);
                                     if (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
                                     {
-                                        contentQUIZ2 = contentQUIZ2.Replace($"{{{{{str}}}}}", str);
+                                        contentQUIZ2 = contentQUIZ2.Replace($"{{{{{oldStr}}}}}", newStr);
                                     }
                                 }
-
-                                //String formatDes = "";
 
                                 foreach (var ans in listAns)
                                 {
@@ -3489,18 +3494,46 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
             return test;
         }
 
-        private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<LessonPartAnswerEntity> lessonPartAnswers = null)
+        private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
         {
             try
             {
+                if (String.IsNullOrEmpty(html)) return "";
+                String _html = "";
                 if (type.Equals("QUIZ2"))
                 {
-                    //html = html.Replace("\"", "'");
-                    //foreach(var item in lessonPartAnswers)
-                    //{
-                    //    html = html.Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", item.Content);
-                    //}
+                    if (lessonQuestionIDs == null || lessonPartAnswers == null) return "";
+
+                    var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
+                    Int32 indexStr = 0;
+                    foreach (var questionID in lessonQuestionIDs)
+                    {
+                        var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
+                        if (_listAns.Count() > 1)
+                        {
+                            String contentAns = "";
+                            foreach (var item in _listAns)
+                            {
+                                contentAns += $"{item.Content}|";
+                            }
+                            contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
+                            if (indexStr + 1 != str.Length)
+                                _html+=$"{str[indexStr]}{{{{{contentAns}}}}}";
+                            if (indexStr + 1 == str.Length)
+                                _html += str[indexStr + 1];
+                        }
+                        else
+                        {
+                            if (indexStr + 1 != str.Length)
+                                _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
+                            if (indexStr + 1 == str.Length)
+                                _html += str[indexStr + 1];
+                        }
+                        indexStr++;
+                    }
                 }
+
+                html = String.IsNullOrEmpty(_html) ? html : _html;
                 String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
                 String folder = $"/Temp/{basis}/{user}/";
                 string uploads = $"{RootPath}{folder}";
@@ -3508,10 +3541,6 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
                 {
                     Directory.CreateDirectory(uploads);
                 }
-
-                //if (!Directory.Exists(Path.Combine(_env.WebRootPath, uploads)))
-                //    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, uploads));
-                //var filePath = Path.Combine(_env.WebRootPath, uploads + fileName);
                 String strDoc = "";
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -3906,6 +3935,53 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
                 return ms.ToArray();
             }
         }
+
+        private string validateFill(string org)
+        {
+            if (string.IsNullOrEmpty(org)) return org;
+            org = org.Trim();
+            while (org.IndexOf("  ") >= 0)
+                org = org.Replace("  ", " ");
+
+            //dau ‘’
+            int[] beginning = { 24, 25, 96 };
+            //dau “”
+            int[] quotation = { 29, 28 };
+            for (int i = 0; i < org.Length; i++)
+            {
+                if (beginning.Contains((byte)org[i]))
+                {
+                    org = org.Replace(org[i], '\'');
+                }
+                if (quotation.Contains((byte)org[i]))
+                {
+                    org = org.Replace(org[i], '\"');
+                }
+                if ((byte)org[i] == 125 || (byte)org[i] == 141)
+                {
+                    org = org.Replace(org[i], '(');
+                }
+                if ((byte)org[i] == 126 || (byte)org[i] == 142)
+                {
+                    org = org.Replace(org[i], ')');
+                }
+            }
+
+            for (int i = 0; i < KyTuDacBiet.Length; i++)
+            {
+                if (org.Contains(KyTuDacBiet[i]))
+                {
+                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
+                }
+            }
+
+            //return ReplaceSpecialCharacters(org.Trim());
+            return org;
+        }
+
+        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
+                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
+        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
         #endregion
 
         #region FIX RESOURCES
