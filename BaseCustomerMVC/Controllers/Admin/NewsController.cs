@@ -435,5 +435,12 @@ namespace BaseCustomerMVC.Controllers.Admin
                             });
         }
         #endregion
+
+        #region New functions
+        public IActionResult NewFunctions()
+        {
+            return View();
+        }
+        #endregion
     }
 }

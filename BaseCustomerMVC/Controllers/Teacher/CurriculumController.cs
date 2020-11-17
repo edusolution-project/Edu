@@ -2184,7 +2184,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         /// <returns></returns>
         public IActionResult DownloadFileWordWitdData(String basis, String LessonID)
         {
-            var lessonPart = _lessonPartService.GetByLessonID("5fa8faf886ea9d09d4a948b0");
+            var lessonPart = _lessonPartService.GetByLessonID(LessonID);
             var lessonPartIDs = lessonPart.Select(x => x.ID);
             var lessonPartQuestion = _lessonPartQuestionService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ParentID)).ToEnumerable();
             var lessonPartQuestionIDs = lessonPartQuestion.Select(x => x.ID);
@@ -2230,7 +2230,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var lessonQinPart = lessonPartQuestion.ToList().FindAll(o => o.ParentID == _lessonPart.ID);
                         var lessonAinPart = lessonPartAnswer.ToList().FindAll(o => lessonQinPart.Select(a => a.ID).Contains(o.ParentID));
                         Int32 leghtData = lessonAinPart.Count() + 5 * lessonQinPart.Count();
-                        table.ResetCells(type.Contains(_lessonPart.Type) ? leghtData : 6, Type.Length);
+                        //table.ResetCells(type.Contains(_lessonPart.Type) ? leghtData : 6, Type.Length);
+                        table.ResetCells(100, Type.Length);
 
                         #region Title Row
                         TableRow TitleRow = table.Rows[0];
@@ -2337,7 +2338,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     TR.CharacterFormat.FontSize = 12;
                                     TR.CharacterFormat.TextColor = Color.Black;
                                 }
-                                else if (File[i].StartsWith("http") || File[i].StartsWith("htpps"))
+                                else if (File[i].StartsWith("http") || File[i].StartsWith("https"))
                                 {
                                     TextRange TR = p.AppendText(File[i]);
                                     TR.CharacterFormat.FontSize = 12;
@@ -2345,7 +2346,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 }
                                 else
                                 {
-                                    DocPicture Pic = p.AppendPicture(ImageToByteArray(Image.FromFile(File[i])));
+                                    String filepath = (RootPath.Replace("/Files", "") + File[i]);
+                                    //if()
+                                    //DocPicture Pic = p.AppendPicture(ImageToByteArray(Image.FromFile(Path.Combine(RootPath, File[i]))));
+                                    DocPicture Pic = p.AppendPicture(ImageToByteArray(Image.FromFile(filepath)));
                                     Pic.Width = 300;
                                     Pic.Height = 30;
                                 }
