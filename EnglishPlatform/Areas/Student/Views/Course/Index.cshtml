@@ -154,7 +154,7 @@
                                         </p>
                                     </div>
                                     <template>
-                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn" v-on:click="removeCourse(csbj.ID,csbj.CourseName)"><i class="far fa-trash-alt"></i></button>
+                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn" v-on:click="removeCourse(csbj)"><i class="far fa-trash-alt"></i></button>
                                         <button v-else type="button" class="btn btn-delete" v-on:click="removeCourse(csbj)"><i class="far fa-trash-alt"></i></button>
                                     </template>
                                 </div>

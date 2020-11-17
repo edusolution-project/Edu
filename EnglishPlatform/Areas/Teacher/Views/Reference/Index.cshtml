@@ -23,7 +23,7 @@
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
 
 <!--Lazy load-->
-<script src="~/js/vue-lazyload.js"></script>
+@*<script src="~/js/vue-lazyload.js"></script>*@
 
 <script>
     setActiveMenu("reference");
@@ -94,7 +94,8 @@
 
                     <template v-if="tab[0]">
                         <a href="javascript:;" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
-                            <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                            @* <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">*@
+                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
                             <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                         </a>
                         <div class="entry p-0">
@@ -218,7 +219,7 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                //this.getData();
+                this.getData();
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.getMyClass();
@@ -311,8 +312,7 @@
                 }
             },
             watch : {
-                searchTerm: function () {
-                    console.log("ádfadsfsdaf");
+                searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     //debugger
@@ -348,7 +348,8 @@
                 subjectID: function () {
                     this.getData()
                 },
-                "docsInteractive.ClassID": function () {                    
+                "docsInteractive.ClassID": function () {
+                    debugger
                     if (this.docsInteractive.ClassID=="true") {
                         this.isCreateNewClass = true
                         //alert(this.docsInteractive.NewClass)
@@ -786,14 +787,14 @@
         });
 
         //lazy load
-        Vue.use(VueLazyload, {
-            preLoad: 1.3,
-            error: '~/pictures/book.jpg',
-            //loading: '~/img/Spin-1.8s-200px.gif',
-            attempt: 1,
-            // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
-            //listenEvents: ['scroll']
-        })
+        //Vue.use(VueLazyload, {
+        //    preLoad: 1.3,
+        //    error: '~/pictures/book.jpg',
+        //    //loading: '~/img/Spin-1.8s-200px.gif',
+        //    attempt: 1,
+        //    // the default is ['scroll', 'wheel', 'mousewheel', 'resize', 'animationend', 'transitionend']
+        //    //listenEvents: ['scroll']
+        //})
     </script>
 }
 

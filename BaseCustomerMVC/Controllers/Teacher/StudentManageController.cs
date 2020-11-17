@@ -14,6 +14,9 @@ using OfficeOpenXml;
 using System.Globalization;
 using Microsoft.Extensions.Configuration;
 using OfficeOpenXml.Style;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -41,6 +44,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
         private readonly IndexService _indexService;
+
+        private readonly CacheHelper _cache;
 
         private readonly MailHelper _mailHelper;
         private readonly IHostingEnvironment _env;
@@ -71,6 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentHelper studentHelper,
             IndexService indexService,
             MailHelper mailHelper,
+            CacheHelper cache,
             IHostingEnvironment evn,
             IConfiguration iConfig
             )
@@ -94,6 +100,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _centerService = centerService;
+            _cache = cache;
             _env = evn;
             _mailHelper = mailHelper;
             _configuration = iConfig;
@@ -1013,35 +1020,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không có dữ liệu" });
-
-            var list = new List<StudentRankingViewModel>();
-
-            var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
-            var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            var cacheKey = "GetBestStudents_" + basis;
+            var rtn = _cache.GetCache(cacheKey) as List<StudentRankingViewModel>;
+            if (rtn == null)
             {
-                StudentID = g.Key,
-                TotalPoint = g.Sum(t => t.TotalPoint),
-                PracticePoint = g.Sum(t => t.PracticePoint),
-            }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
-
-            var rtn = new List<StudentRankingViewModel>();
-            foreach (var result in results)
-            {
-                var st = _studentService.GetItemByID(result.StudentID);
-                if (st != null)
+                rtn = new List<StudentRankingViewModel>();
+                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+                var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
                 {
-                    result.StudentName = st.FullName;
-                    rtn.Add(result);
+                    StudentID = g.Key,
+                    TotalPoint = g.Sum(t => t.TotalPoint),
+                    PracticePoint = g.Sum(t => t.PracticePoint),
+                }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+                foreach (var result in results)
+                {
+                    var st = _studentService.GetItemByID(result.StudentID);
+                    if (st != null)
+                    {
+                        result.StudentName = st.FullName;
+                        rtn.Add(result);
+                    }
                 }
+                _cache.SetCache(cacheKey, rtn);
             }
-
             var response = new Dictionary<string, object>
             {
                 { "Data", rtn }
             };
             return new JsonResult(response);
         }
-
 
         //public async Task<JsonResult> ConvertStudent()
         //{

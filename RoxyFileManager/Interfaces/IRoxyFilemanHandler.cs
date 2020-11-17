@@ -13,7 +13,7 @@ namespace FileManagerCore.Interfaces
         IGoogleDriveApiService GoogleDriveApiService { get; }
         List<MediaResponseModel> UploadFileWithGoogleDrive(string center, string user, HttpContext context);
         MediaResponseModel UploadSingleFileWithGoogleDrive(string center, string user, IFormFile file);
-
+        string UploadFileWithGoogleDrive(string center, string user, MemoryStream memoryStream,string extension = "");
         bool DeleteFileWithGoogleDrive(string fileId, string center, string user);
 
         List<DIRLIST> ListDirTree(string type);

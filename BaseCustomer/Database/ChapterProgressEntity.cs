@@ -195,6 +195,12 @@ namespace BaseCustomerEntity.Database
                 ChapterID = chapter.ID,
                 ParentID = chapter.ParentID,
                 LastDate = DateTime.Now,
+                ExamDone = 0,
+                AvgPoint = 0,
+                TotalPoint = 0,
+                PracticeAvgPoint = 0,
+                PracticeDone = 0,
+                PracticePoint = 0
             };
         }
 

@@ -385,9 +385,12 @@ var Lesson = (function () {
                 }
 
 
-                //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Thêm nội dung từ file");
+                var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word"></i>').append("Thêm nội dung từ file Word");
+                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word"></i>').append("Xuất file Word");
                 lessonButton.append(btnExplain);
+                lessonButton.append(btnAddFileFromWord);
+                lessonButton.append(btnExportFileToWord);
 
 
                 //lessonButton.append(edit);
@@ -561,26 +564,26 @@ var Lesson = (function () {
                     var item = data.Part[i];
                     renderStudentPart(item);
                 }
-                //if (_UImode == UIMode.EXAM_ONLY) {
-                //    $('#rightCol .tab-pane').each(function () {
-                //        var media = null;
-                //        var html = null;
-                //        if ($(this).find(".QUIZ3").length > 0) {
-                //            if (!isMobileDevice()) {
-                //                $(this).addClass("h-100");
-                //                media = $(this).find(".Q3_absrow > .media-holder:first");
-                //            }
-                //        }
-                //        else {
-                //            media = $(this).find(".quiz-wrapper > .media-holder");
-                //        }
-                //        html = $(this).find(".part-description");
-                //        $(this).addClass("m-0");
-                //        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                //            .empty().append($(this).find('.part-box-header')).append(media).append(html)
-                //            .appendTo('#leftCol')
-                //    })
-                //}
+                if (_UImode == UIMode.EXAM_ONLY) {
+                    $('#rightCol .tab-pane').each(function () {
+                        var media = null;
+                        var html = null;
+                        if ($(this).find(".QUIZ3").length > 0) {
+                            if (!isMobileDevice()) {
+                                $(this).addClass("h-100");
+                                media = $(this).find(".Q3_absrow > .media-holder:first");
+                            }
+                        }
+                        else {
+                            media = $(this).find(".quiz-wrapper > .media-holder");
+                        }
+                        html = $(this).find(".part-description");
+                        $(this).addClass("m-0");
+                        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                            .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                            .appendTo('#leftCol')
+                    })
+                }
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
@@ -600,24 +603,24 @@ var Lesson = (function () {
                 switch (_UImode) {
                     case UIMode.EXAM_ONLY:
                     case UIMode.BOTH:
-                        //if (_UImode == UIMode.EXAM_ONLY) {
-                        //    $('#rightCol .tab-pane').each(function () {
-                        //        var media = null;
-                        //        var html = null;
-                        //        if ($(this).find(".QUIZ3").length > 0) {
-                        //            $(this).addClass("h-100");
-                        //            media = $(this).find(".Q3_absrow > .media-holder:first");
-                        //        }
-                        //        else {
-                        //            media = $(this).find(".quiz-wrapper > .media-holder");
-                        //        }
-                        //        html = $(this).find(".part-description");
-                        //        $(this).addClass("m-0");
-                        //        $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                        //            .empty().append($(this).find('.part-box-header')).append(html).append(media)
-                        //            .appendTo('#leftCol')
-                        //    });
-                        //}
+                        if (_UImode == UIMode.EXAM_ONLY) {
+                            $('#rightCol .tab-pane').each(function () {
+                                var media = null;
+                                var html = null;
+                                if ($(this).find(".QUIZ3").length > 0) {
+                                    $(this).addClass("h-100");
+                                    media = $(this).find(".Q3_absrow > .media-holder:first");
+                                }
+                                else {
+                                    media = $(this).find(".quiz-wrapper > .media-holder");
+                                }
+                                html = $(this).find(".part-description");
+                                $(this).addClass("m-0");
+                                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                                    .empty().append($(this).find('.part-box-header')).append(html).append(media)
+                                    .appendTo('#leftCol')
+                            });
+                        }
                         var dataform = new FormData();
                         dataform.append("ClassID", config.class_id);
                         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -682,16 +685,14 @@ var Lesson = (function () {
                                         setLocalData("CurrentExam", exam.ID);
                                         $('#ExamID').val(exam.ID);
                                         //render Exam
-                                        if (exam.Timer > 0) {
-                                            var _sec = 59 - moment(timer).second();
-                                            var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                                            var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                                            setLocalData("Timer", _timer);
-                                            $(".time-counter").text(_timer);
-                                            console.log(_timer);
-                                            countdown(false);
-                                        }
+                                        var _sec = 59 - moment(timer).second();
+                                        var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                        setLocalData("Timer", _timer);
+                                        $(".time-counter").text(_timer);
+                                        console.log(_timer);
                                         renderLectureExam(exam, true);
+                                        countdown(false);
                                         renderOldAnswer();
                                     }
                                 }
@@ -777,7 +778,7 @@ var Lesson = (function () {
 
 
                 nav_bottom.prepend(timer).append(complete_btn);
-                console.log('counter');
+
                 renderQuizCounter();
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
@@ -830,12 +831,6 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 if (_UImode == UIMode.EXAM_ONLY) {
-                    if ($("input[name=ExamID]").val() == "") {
-                        console.log("EXAM NOT START 1")
-                    }
-                    else {
-                        console.log("RENDER EXAM");
-                    }
                     var nav_bottom = lesson_action_holder
                     nav_bottom.empty();
 
@@ -873,20 +868,12 @@ var Lesson = (function () {
                     countdown();
                     nav_bottom.append(nexttab);
                 }
-
-
-                //TODO: CHECK
-                //if (data.Timer > 0) {
-                //    var nav_bottom = lesson_action_holder
-                //    nav_bottom.empty();
-                //    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
-                //        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
-                //        .append($("<span>", { class: "time-counter " }));
-
-                //    nav_bottom.prepend(timer);
-                //    $(".time-counter").html(getLocalData("Timer"));
-                //    //countdown(false);
-                //}
+                if (data.Timer > 0) {
+                    var nav_bottom = lesson_action_holder
+                    nav_bottom.empty();
+                    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
+                        .append($("<span>", { class: "time-counter " }));
 
                     nav_bottom.prepend(timer);
                     $(".time-counter").html(getLocalData("Timer"));
@@ -898,28 +885,6 @@ var Lesson = (function () {
                 }
                 break;
         }
-
-        if (_UImode == UIMode.EXAM_ONLY) {
-            $('#rightCol .tab-pane').each(function () {
-                var media = null;
-                var html = null;
-                if ($(this).find(".QUIZ3").length > 0) {
-                    if (!isMobileDevice()) {
-                        $(this).addClass("h-100");
-                        media = $(this).find(".Q3_absrow > .media-holder:first");
-                    }
-                }
-                else {
-                    media = $(this).find(".quiz-wrapper > .media-holder");
-                }
-                html = $(this).find(".part-description");
-                $(this).addClass("m-0");
-                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                    .empty().append($(this).find('.part-box-header')).append(media).append(html)
-                    .appendTo('#leftCol')
-            })
-        }
-
         if (_openingPart == '') {
             $('#leftCol .fa-caret-down:first()').focus().click()
         }
@@ -1527,10 +1492,7 @@ var Lesson = (function () {
                         else {
                             if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
                                 data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
-                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
-                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
-                                data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
-                                data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")) {
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")) {
                                 mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
                             }
                             else {
@@ -1553,10 +1515,7 @@ var Lesson = (function () {
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else {
-                            if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
-                                data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
-                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
-                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
                                 data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                                 data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                             ) {
@@ -2007,7 +1966,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "onclick": "AddNewQuestion(this)" }).append('<i class="fas fa-plus"></i>').append(' Thêm câu hỏi'));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add First Question
                 if (data != null && data.Questions != null) {
@@ -2112,7 +2071,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "part_content " + type }));
                 contentholder.append($("<input>", { "type": "button", "class": "btn btnAddQuestion btn-primary", "value": "Thêm câu hỏi", "onclick": "AddNewQuestion(this)", "tabindex": -1 }));
                 contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,0)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Excel'));
-                contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
+                //contentholder.append($("<button>", { "type": "button", "class": "btn btnCloneQuestion btn-primary ml-2", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="fas fa-plus"></i>').append(' Thêm từ file Word'));
 
                 //Add question
                 if (data != null && data.Questions != null) {
@@ -2331,6 +2290,10 @@ var Lesson = (function () {
 
     }
 
+    var downloadFileWordWitdData = function () {
+        window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
+    }
+
     var chooseQuestionFile = function (obj, type) {
         $(obj).siblings('input').unbind().change(function (e) {
             uploadQuestionFile(e, type);
@@ -2343,7 +2306,7 @@ var Lesson = (function () {
         var xhr = new XMLHttpRequest();
         var formData = new FormData();
         formData.append('file', e.target.files[0]);
-        formData.append('ParentID', config.courselessonid);
+        formData.append('ParentID', config.lesson_id);
         if (type == 0) {//file excel
             xhr.open('POST', config.url.import_quiz);
         }
@@ -2353,28 +2316,55 @@ var Lesson = (function () {
         xhr.send(formData);
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                if (data.Error != null && data.Error != "") {
-                    Swal.hideLoading();
-                    Swal.clickConfirm();
-                    Swal.fire({
-                        title: 'Thông báo',
-                        icon: 'error',
-                        text: data.Error
-                    }).then(() => {
-                        showCloneQuestion();
-                    })
+                if (type == 0) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.Error != null && data.Error != "") {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Error
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
+                    else {
+                        var dt = data.Data;
+                        if (dt != null && dt.Questions != null) {
+                            for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
+                                var quiz = dt.Questions[i];
+                                addNewQuestion(quiz);
+                            }
+                        }
+                        Swal.hideLoading();
+                        Swal.clickConfirm()
+                    }
                 }
                 else {
-                    var dt = data.Data;
-                    if (dt != null && dt.Questions != null) {
-                        for (var i = 0; dt.Questions != null && i < dt.Questions.length; i++) {
-                            var quiz = dt.Questions[i];
-                            addNewQuestion(quiz);
-                        }
+                    var data = JSON.parse(xhr.responseText);
+                    debugger
+                    if (data.Stt == true) {
+                        Swal.hideLoading();
+                        //Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thêm thành công',
+                            icon: 'success',
+                        }).then(() => {
+                            location.reload();;
+                        })
                     }
-                    Swal.hideLoading();
-                    Swal.clickConfirm()
+                    else {
+                        Swal.hideLoading();
+                        Swal.clickConfirm();
+                        Swal.fire({
+                            title: 'Thông báo',
+                            icon: 'error',
+                            text: data.Msg
+                        }).then(() => {
+                            showCloneQuestion();
+                        })
+                    }
                 }
             }
         }
@@ -2498,30 +2488,16 @@ var Lesson = (function () {
         var _partid = _quiz.attr('data-part-id');
         var _part = $('.tab-pane#pills-part-' + _partid);
         var part = _part[0];
-        console.log(quizid);
-        //debugger;
         if (part != null) {
             var el = part.querySelector("[id='" + quizid + "']");
-
-            var isFillQuiz = $(_quiz).find('.fillquiz').length > 0;
-
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
             }
-
-
-            if (isFillQuiz) {
-                el = $('.tab-pane-quiz#pills-part-' + _partid + " [id='" + quizid + "']")[0];
-                //console.log(el);
+            var select = part.querySelector(".selection");
+            if (select != null) {
+                select.classList.remove("selection");
             }
-
-            $('.quiz-item.selection').removeClass('selection');
-
-            //var select = part.querySelector(".selection");
-            //if (select != null) {
-            //    select.classList.remove("selection");
-            //}
             var aSelect = $('#QuizNav')[0].querySelector('.selection');
             if (aSelect != null) {
                 aSelect.classList.remove("selection");
@@ -2529,18 +2505,13 @@ var Lesson = (function () {
             //console.log(getNavigationRoot());
             $('#' + quizid).addClass("selection");
             $(obj).addClass("selection");
-            //console.log(quizid);
             el.classList.add("selection");
             //console.log(el);
             el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
-            //console.log(_part);
-
-            //if (_part.hasClass('active') && !isFillQuiz) {
-            //    return false;
-            //}
-
-            //alert(2);
+            if (_part.hasClass('active')) {
+                return false;
+            }
 
             var panes = $('.tab-pane');
             var index = panes.index($('.tab-pane.active'));
@@ -2555,7 +2526,6 @@ var Lesson = (function () {
     }
 
     var goPartInx = function (idx) {
-        //console.log(idx);
         stopAllMedia();
         var panes = $('.tab-pane');
         var quizpanes = $('.tab-pane-quiz');
@@ -2739,48 +2709,37 @@ var Lesson = (function () {
         $('#' + config.container).append($(wrapper));
 
         var doButton;
+        var endDate = moment(schedule.EndDate);
+        var startDate = moment(schedule.StartDate);
+        var now = moment();
         var isOverdue = false;
-
-        if (schedule != null) {
-            var endDate = moment(schedule.EndDate);
-            var startDate = moment(schedule.StartDate);
-            var now = moment();
-
-            if (endDate > moment(new Date(1900, 1, 1)) && endDate <= now) {
-                console.log("Over due")
+        if (endDate > moment(new Date(1900, 1, 1)) && endDate <= now) {
+            console.log("Over due")
+            doButton = $('<div>', {
+                "class": "btn btn-danger m-2",
+                "style": "cursor: pointer",
+                "disabled": "disabled"
+            }).append('<i class="fas fa-ban mr-2"></i>').append("Quá hạn (" + endDate.format("DD/MM/YYYY hh:mm A") + ")");
+            isOverdue = true;
+        }
+        else {
+            if (startDate >= now) {
+                console.log("Early")
                 doButton = $('<div>', {
-                    "class": "btn btn-danger m-2",
+                    "class": "btn btn-danger m-2 lesson-action",
                     "style": "cursor: pointer",
                     "disabled": "disabled"
-                }).append('<i class="fas fa-ban mr-2"></i>').append("Quá hạn (" + endDate.format("DD/MM/YYYY hh:mm A") + ")");
-                isOverdue = true;
+                }).append('<i class="fas fa-ban mr-2"></i>').append("Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")");
+                isOverdue = true
             }
             else {
-                if (startDate >= now) {
-                    console.log("Early")
-                    doButton = $('<div>', {
-                        "class": "btn btn-danger m-2 lesson-action",
-                        "style": "cursor: pointer",
-                        "disabled": "disabled"
-                    }).append('<i class="fas fa-ban mr-2"></i>').append("Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")");
-                    isOverdue = true
-                }
-                else {
-                    console.log("In due")
-                    doButton = $('<div>', {
-                        "class": "btn btn-primary m-2 lesson-action",
-                        "onclick": "BeginExam(this)",
-                        "style": "cursor: pointer",
-                    }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
-                }
+                console.log("In due")
+                doButton = $('<div>', {
+                    "class": "btn btn-primary m-2 lesson-action",
+                    "onclick": "BeginExam(this)",
+                    "style": "cursor: pointer",
+                }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
             }
-        } else {
-            console.log("In due")
-            doButton = $('<div>', {
-                "class": "btn btn-primary m-2 lesson-action",
-                "onclick": "BeginExam(this)",
-                "style": "cursor: pointer",
-            }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
         }
         if (isNull(data) || config.mod == mod.TEACHERPREVIEWEXAM) {
             //var backButton = $('<div>', {
@@ -2801,7 +2760,6 @@ var Lesson = (function () {
             wrapper.append(lastExamResult);
         }
         else {
-
             var lastExam = data;
             this.exam_id = lastExam.ID;
             var tried = lastExam.Number;
@@ -2853,25 +2811,10 @@ var Lesson = (function () {
 
             lesson_action_holder.append(doButton)
                 .append(reviewButton);
-
-            goPartInx(0);
         }
     }
 
     var renderLectureExam = function (data, isContinue) {
-        if (_UImode == UIMode.EXAM_ONLY)
-            if ($("input[name=ExamID]").val() == "") {
-                console.log("EXAM NOT START 2")
-                $('.top-menu[for=lesson-info]').empty();
-                $('#leftCol').parent().hide()
-                $('#rightCol').parent().removeClass("col-md-8").addClass("col-md-12");
-            }
-            else {
-                console.log("RENDER EXAM");
-                goPartInx(0);
-                return;
-            }
-
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -3073,12 +3016,11 @@ var Lesson = (function () {
 
     //---- 14-10-2020
     var renderOldAnswer = function () { //dạng điền từ
-        var currentEx = $("input[name=ExamID]").val();
-        if (currentEx == "") {
-            return;
-        }
-
+        //debugger
+        //if (OldExamID) {
         console.log("Load easy part....");
+        var currentEx = $("input[name=ExamID]").val();
+        if (currentEx == "") return;
 
         var dataform = new FormData();
         //dataform.append("examID", OldExamID);
@@ -3286,7 +3228,6 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ2":
-                //alert(1);
                 var itemBody = $("<div>", { "class": "quiz-wrapper" });
                 itemtitle.prepend($("<i>", { "class": "fab fa-leanpub" }));
                 itembox.append(itemBody);
@@ -4151,7 +4092,13 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        saveAnswerForStudent(questionId, answerID, value, type);
+                        //debugger
+                        console.log("line 4060 to fix");
+                        //if (value == "") {//??
+                        //    delAnswerForStudent(questionId);
+                        //} else {
+                            saveAnswerForStudent(questionId, answerID, value, type);
+                        //}
                     }
                 })
                     .catch(function (err) {
@@ -4248,11 +4195,12 @@ var Lesson = (function () {
                     return false;
                 }
                 else {
-                    if (value == "") {
-                        delAnswerForStudent(questionId);
-                    } else {
+                    console.log("line 4161 to fix");
+                    //if (value == "") {
+                    //    delAnswerForStudent(questionId);
+                    //} else {
                         saveAnswerForStudent(questionId, "", value, type);
-                    }
+                    //}
                 }
             })
                 .catch(function (err) {
@@ -4368,9 +4316,7 @@ var Lesson = (function () {
         var answerList = '';
         //writeLog("renderQuizCounter", listQuiz);
         for (var i = 0; listQuiz != null && i < listQuiz.length; i++) {
-
             var item = listQuiz[i];
-            //console.log(item);
             var answer = getLocalData(item.id);
             //console.log(item.id);
             var completed = "";
@@ -4430,7 +4376,8 @@ var Lesson = (function () {
             var btn = document.getElementById("btn-completed");
             if (btn != null) btn.style.display = "none!important";
         }
-
+        if (!isMobileDevice())
+            startDragDrop();
     }
 
     var rendAgain = function (value) {
@@ -4462,9 +4409,9 @@ var Lesson = (function () {
                     var quiz = document.getElementById(quizID);
                     var content = quiz.querySelector('[data-question-id="' + quizID + '"]');
                     var answer = document.getElementById(answerID);
-                    var answerHTML = answer.outerHTML;
+                    var abc = answer.outerHTML;
                     answer.remove();
-                    content.innerHTML = answerHTML;
+                    content.innerHTML = abc;
                 }
                 break;
             case "ESSAY":
@@ -4633,6 +4580,7 @@ var Lesson = (function () {
     window.checkSpecialCharacters = checkSpecialCharacters;
     window.fillquizFocus = fillquizFocus;
     window.fillquizBlur = fillquizBlur;
+    window.downloadFileWordWitdData = downloadFileWordWitdData;
     return LessonInstance;
 }());
 
@@ -4941,7 +4889,6 @@ var submitQuizFill = function (event, modalId, callback) {
 }
 
 var toggleExpand = function (obj) {
-    stopAllMedia();
     $('.collapsable').addClass('collapse');
     $('.media-holder video').trigger('pause');
 

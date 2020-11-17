@@ -10,6 +10,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -30,6 +31,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ClassHelper _classHelper;
         private readonly CourseHelper _courseHelper;
         private readonly LessonHelper _lessonHelper;
+        private readonly ProgressHelper _progressHelper;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -90,6 +92,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 ClassHelper classHelper,
                 CourseHelper courseHelper,
                 LessonHelper lessonHelper,
+                ProgressHelper progressHelper,
 
                 CenterService centerService,
                 StudentService studentService,
@@ -128,6 +131,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _classHelper = classHelper;
             _courseHelper = courseHelper;
             _lessonHelper = lessonHelper;
+            _progressHelper = progressHelper;
 
             _centerService = centerService;
             _studentService = studentService;
@@ -228,13 +232,13 @@ namespace BaseCustomerMVC.Controllers.Admin
                 var oldpoint = cl.Point;
                 //if (oldpoint == 0)
                 //{
-                    var point = calculateLessonPoint(cl);
-                    if (oldpoint != point)
-                    {
-                        if (!listclass.Contains(cl.CourseID))
-                            listclass.Add(cl.CourseID);
-                        change++;
-                    }
+                var point = calculateLessonPoint(cl);
+                if (oldpoint != point)
+                {
+                    if (!listclass.Contains(cl.CourseID))
+                        listclass.Add(cl.CourseID);
+                    change++;
+                }
                 //}
                 //IncreaseCourseCounter(cl);
             }
@@ -380,6 +384,99 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json(str);
         }
 
+        public async Task<JsonResult> FixScoreDataV2()//Big fix
+        {
+            var start = DateTime.UtcNow;
+            var str = "";
+            str += "Phase 0: ";
+            var change = 0;
+
+            //reset progress
+
+            _chapterProgressService.CreateQuery().UpdateMany(t => true, Builders<ChapterProgressEntity>.Update
+                .Set(t => t.TotalPoint, 0)
+                .Set(t => t.PracticePoint, 0)
+                .Set(t => t.PracticeAvgPoint, 0)
+                .Set(t => t.AvgPoint, 0)
+                .Set(t => t.ExamDone, 0)
+                .Set(t => t.PracticeDone, 0)
+                );
+
+            _classSubjectProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectProgressEntity>.Update
+                .Set(t => t.TotalPoint, 0)
+                .Set(t => t.PracticePoint, 0)
+                .Set(t => t.PracticeAvgPoint, 0)
+                .Set(t => t.AvgPoint, 0)
+                .Set(t => t.ExamDone, 0)
+                .Set(t => t.PracticeDone, 0)
+                );
+
+            _classProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassProgressEntity>.Update
+                .Set(t => t.TotalPoint, 0)
+                .Set(t => t.PracticePoint, 0)
+                .Set(t => t.PracticeAvgPoint, 0)
+                .Set(t => t.AvgPoint, 0)
+                .Set(t => t.ExamDone, 0)
+                .Set(t => t.PracticeDone, 0)
+                );
+
+            //_lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
+            //    .Set(t => t.AvgPoint, 0)
+            //    .Set(t => t.LastPoint, 0)
+            //    .Set(t => t.LastTry, DateTime.MinValue)
+            //    .Set(t => t.MaxPoint, 0)
+            //    .Set(t => t.MinPoint, 0)
+            //    .Set(t => t.Tried, 0)
+            //    );
+
+            //str += (DateTime.UtcNow - start).TotalSeconds;
+            //start = DateTime.UtcNow;
+            //str += " Phase 5: ";
+
+            var lessonProgresses = _lessonProgressService
+                //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26" && t.StudentID == "5f60e2e90dd2b41448909d05")
+                .GetAll().SortBy(t => t.LessonID).ThenBy(t => t.Tried)
+                //.Project(t => new LessonProgressEntity { ID = t.ID, LessonID = t.LessonID, StudentID = t.StudentID })
+                .ToList();
+
+            foreach (var lprg in lessonProgresses)
+            {
+                var lesson = _clonelessonService.GetItemByID(lprg.LessonID);
+                if (lesson.IsPractice)
+                {
+                    if (lesson.ChapterID == "0")
+                        Task.Run(() =>
+                        {
+                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
+                        });
+                    else
+                        Task.Run(() =>
+                        {
+                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
+                        });
+                }
+                else if(lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    if (lesson.ChapterID == "0")
+                        Task.Run(() =>
+                        {
+                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
+                        });
+                    else
+                        Task.Run(() =>
+                        {
+                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
+                        });
+                }    
+            }
+
+            str += (DateTime.UtcNow - start).TotalSeconds;
+            start = DateTime.UtcNow;
+            str += " End. ";
+            return Json(str);
+        }
+
+
         public async Task<JsonResult> Remark(string ExamID)//Big fix
         {
             var exam = _examService.GetItemByID(ExamID);
@@ -391,6 +488,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public JsonResult FixFillquiz()
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
             var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
             foreach (var pid in partIDs)
             {
@@ -432,8 +531,16 @@ namespace BaseCustomerMVC.Controllers.Admin
                     }
                 }
             }
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts = stopWatch.Elapsed;
 
-            return Json("OK");
+            // Format and display the TimeSpan value.
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            return Json($"OK - {elapsedTime}");
         }
 
         private string validateFill(string org)
@@ -442,8 +549,20 @@ namespace BaseCustomerMVC.Controllers.Admin
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", "");
+
+            for (int i = 0; i < KyTuDacBiet.Length; i++)
+            {
+                if (org.Contains(KyTuDacBiet[i]))
+                {
+                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
+                }
+            }
             return org;
         }
+
+        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
+                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
+        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
 
         private double calculateLessonPoint(CourseLessonEntity lesson)
         {
@@ -744,9 +863,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //if(lh.StudentID== "5f7e8382f197721750deb12c")
                     {
                         UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lh.LastLessonID, ClassSubjectID = lh.ClassSubjectID, ClassID = lh.ClassID, StudentID = lh.StudentID, LastDate = lh.LastTime });
-                        a += _studentService.GetItemByID(lh.StudentID).FullName.ToUpper() +" lớp "+ _classService.GetItemByID( lh.ClassID).Name + "; ";
+                        a += _studentService.GetItemByID(lh.StudentID).FullName.ToUpper() + " lớp " + _classService.GetItemByID(lh.ClassID).Name + "; ";
                     }
-                } 
+                }
 
                 return Json($"OK - {a}");
             }

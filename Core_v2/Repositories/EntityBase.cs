@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 
 namespace Core_v2.Repositories
 {
+    [Serializable]
     public abstract class EntityBase
     {
         [BsonId]

@@ -317,7 +317,7 @@ var ExamReview = (function () {
     var addCssAnswerQ14 = function (data) {
         for (var i = 0; i < data.Questions.length; i++) {
             var cloneAnswers = data.Questions[i].CloneAnswers;
-            for (var j = 0; j < cloneAnswers.length; j++) {
+            for (j = 0; j < cloneAnswers.length; j++) {
                 var id = cloneAnswers[j].ID;
                 var isCorrect = cloneAnswers[j].IsCorrect;
                 var answerWmedia = $("#" + id)[0];
@@ -507,7 +507,7 @@ var ExamReview = (function () {
                     var listContent = content_correct_answer.split(' | ');
                     for (i = 0; i < listContent.length; i++) {
                         if (listContent[i] == content_answer) {
-                            //if (data.Point>0) {
+                        //if (data.Point>0) {
                             html += " | <span style='font-weight:600'>" + listContent[i] + "</span>";
                         }
                         else {
@@ -607,7 +607,7 @@ var ExamReview = (function () {
                                     chodung2 += " <span style='font-weight:600;border-bottom: 1px solid;'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
-                            for (i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
+                            for (var i = detail_Answer.length; i < detail_CorrectAnswer.length; i++) {
                                 chodung1 += " <span style='font-weight:600;color:#dc3545'>-</span> ";
                                 chodung2 += "<span style='border-bottom: 1px solid;color:#28a745'>" + detail_CorrectAnswer[i] + "</span> ";
                             }
@@ -624,7 +624,7 @@ var ExamReview = (function () {
                                     chodung2 += "<span style='font-weight:600;border-bottom: 1px solid'>" + detail_CorrectAnswer[i] + "</span> ";
                                 }
                             }
-                            for (i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
+                            for (var i = detail_CorrectAnswer.length; i < detail_Answer.length; i++) {
                                 chodung1 += "<span style='border-bottom: 1px solid;color:#dc3545'>" + detail_Answer[i] + "</span> ";
                             }
                         }
@@ -1375,7 +1375,6 @@ var ExamReview = (function () {
     window.uploadFile = uploadFile;
     window.togglePanelWidth = togglePanelWidth;
     window.validate = validate;
-    window.addCssAnswerQ14 = addCssAnswerQ14;
     return ExamReview;
 }());
 

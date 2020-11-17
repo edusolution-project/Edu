@@ -5,320 +5,322 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var centers = ViewBag.Centers as IEnumerable<CenterEntity>;
-    DateTime currentTime = ViewBag.CurrentTime;
-    var startWeek = currentTime.AddDays(-7);
-    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(59).AddMilliseconds(59);
+
+    var BlockCenter = ViewBag.BlockCenter as Dictionary<string, int[]>;
+    var BlockClass = ViewBag.BlockClass as Dictionary<string, int>;
+    var DataClass = ViewBag.DataClass as Dictionary<string, double[]>;
+    var ClassName = ViewBag.ClassName as Dictionary<string, string>;
+    var TotalBlock = ViewBag.CountBlock;
+    var ClassCenters = ViewBag.ClassCenters as Dictionary<string, string>;
 }
-@inject MailHelper _mailHelper
-@inject RoleService _roleService
-@inject TeacherService _teacherService
-@inject ClassService _classService
-@inject CenterService _centerService
-@inject LessonService _lessonService
-@inject ClassSubjectService _classSubjectService
-@inject LessonScheduleService _scheduleService
-@inject AccountService _accountService
-@inject StudentService _studentService
-@inject TeacherService _teacherService
-@inject SkillService _skillService
-@inject CourseService _courseService
-@inject LessonScheduleService _lessonScheduleService
-@inject LessonProgressService _lessonProgressService
-<h1>Index</h1>
-<canvas id="myChart"></canvas>
-<img id="imagess" alt="Alternate Text" />
-@{ 
-    int count = centers?.ToList() == null ? 0 : centers.Count();
-    for(int i = 0; i < count; i++)
-    {
-        var center = centers.ElementAt(i);
-        var classesActive = _classService.GetActiveClass(currentTime, center.ID);
-        for(int j = 0; classesActive != null && j < classesActive.Count(); j++)
-        {
-            var dtren8 = "---";
-            var dtren5 = "---";
-            var dtren0 = "---";
-            var dbang0 = "---";
-            var currentClass = classesActive.ElementAt(j);
 
-            var studentIds = _studentService.GetStudentsByClassId(currentClass.ID).Select(t => t.ID).ToList();
-            var classStudent = studentIds.Count();
-            var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == currentClass.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => new LessonScheduleEntity
-            {
-                LessonID = t.LessonID,
-                ClassSubjectID = t.ClassSubjectID,
-                StartDate = t.StartDate,
-                EndDate = t.EndDate
-            })?.ToList();
-            var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
-            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-            var activeProgress = _lessonProgressService.CreateQuery().Find(
-                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-            var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
-            var stChuaVaoLop = classStudent - activeStudents.Count();
+<div id="list-data"></div>
 
-            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-            var chualam = 0;
-            if (examIds.Count > 0) //co bai kiem tra
-            {
-                //ket qua lam bai cua hoc sinh trong lop
-                var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                                   group r by r.StudentID
-                                   into g
-                                   select new StudentResult
-                                   {
-                                       StudentID = g.Key,
-                                       ExamCount = g.Count(),
-                                       AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count
-                                   }).ToList();
-                //render ket qua hoc tap
-                var o8 = classResult.Count(t => t.AvgPoint >= 80);
-                var o5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                var o0 = classResult.Count(t => t.AvgPoint > 0 && t.AvgPoint < 50);
-                var e0 = classResult.Count(t => t.AvgPoint == 0);
-                dtren8 = o8.ToString();
-                dtren5 = o5.ToString();
-                dtren0 = o0.ToString();
-                dbang0 = e0.ToString();
-                chualam = classStudent - (o0 + e0 + o5 + o8);
-            }
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emn178/chartjs-plugin-labels/src/chartjs-plugin-labels.js"></script>*@
 
-    <script>
-        var siso = '@classStudent';
-        var hsch = '@stChuaVaoLop';
-        var p8_10 = '@dtren8';
-        var p5_7 = '@dtren5';
-        var p2_5 = '@dtren0';
-        var p0_2 = '@dbang0';
-        var chualam = '@chualam';
+<script src="~/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/chartjs-plugin-datalabels.js"></script>
+<script src="~/Chart.js/chartjs-plugin-datalabels/src/chartjs-plugin-labels.js"></script>
+<script>
+    var root = document.getElementById("list-data");
+    var countSendMail = 0;
+    var arrayData = [];
+    var sendData = function (arrayData) {
+        return $.ajax({
+            type: "POST",
+            url: '/email/SendMonthlyReport',
+            //data: { Data: arrayData, isTest: false },
+            data: { Data: arrayData },
+            success: function (res) {
+                console.log(res)
+            },
+            timeout: 5000
+        });
+    }
+
+    var renderChart = function (khoi, siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop, centerid, countblock) {
         var div = document.createElement("canvas");
-        var id = "myChart_@i@j";
-        div.id = id;
-        document.body.appendChild(div);
-        var ctx = document.getElementById(id).getContext('2d');
-        var chart = new Chart(ctx, {
-            // The type of chart we want to create
-            type: 'line',
+        var Khoi = khoi == 99 ? "" : " khối " + khoi;
 
-            // The data for our dataset
-            data: {
-                labels: ['1', '2', '3', '4'],
-                datasets: [{
-                    label: 'ddiem 5',
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: [0, 10, 5, 2]
+        var currentTime = new Date();
+        var Thang = "";
+        var Nam = "";
+        if (currentTime.getMonth() == 0) {
+            Thang = "tháng 12";
+            Nam = currentTime.getFullYear() - 1;
+        }
+        else {
+            Thang = "tháng " + currentTime.getMonth();
+            Nam = currentTime.getFullYear();
+        }
+
+        var titleChart = "";
+        if (khoi == 99) {
+            titleChart = 'Kết quả học tập các khối lớp khác ' + Thang + ' năm ' + Nam;
+        }
+        else {
+            titleChart = 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam;
+        }
+
+        var id = "myChart_" + khoi + centerid;
+        div.id = id;
+        root.appendChild(div);
+
+        var labels = tenlop;
+
+        var options = {
+            legend: {
+                "display": true,
+                labels: {
+                    fontColor: 'black',
+                    fontSize: 14,
                 },
-                {
-                    label: 'diem 8',
-                    backgroundColor: 'rgb(0, 0, 0)',
-                    borderColor: 'rgb(0, 99, 0)',
-                    data: [0, 100, 5, 2]
-                },
-                {
-                    label: 'so hoc sinh',
-                    backgroundColor: 'rgb(55, 99, 32)',
-                    borderColor: 'rgb(55, 99, 32)',
-                    data: [0, 0, 15, 2]
-                },
-                {
-                    label: 'so hoc sinh chua tham gia',
-                    backgroundColor: 'rgb(10,10, 10)',
-                    borderColor: 'rgb(0, 99, 10)',
-                    data: [10, 100, 15, 12]
+                position: 'right',//top,left,bottom,right,
+                align: 'center'//center,start,end
+            },
+            tooltips: {
+                "enabled": false
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: Math.max(...siso),
+                        //stepSize: 1,
+                        precision: 0
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Sĩ số',
+                        fontSize: 15,
+                        fontColor: 'black'
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontSize: 14,
+                        fontColor: 'black',
+                        //maxRotation: 0,
+                        //callback: function (label) {
+                        //    if (label.split(" ").length > 2) {
+                        //        if (/\s/.test(label)) {
+                        //            return label.split(" ");
+                        //        } else {
+                        //            return label;
+                        //        }
+                        //    }
+                        //    else {
+                        //        return label;
+                        //    }
+                        //}
+                    },
                 }]
             },
+            title: {
+                display: true,
+                //text: 'Kết quả học tập' + Khoi + " " + Thang + ' năm ' + Nam,
+                text: titleChart,
+                position: 'bottom',//top,left,bottom,right,
+                fontSize: 14
+            },
+            plugins: {
+                datalabels: {
+                    anchor: 'end',
+                    align: 'end',
+                    color: 'black',
+                    labels: {
+                        title: {
+                            font: {
+                                //weight: '600',
+                                size: 13,
+                                //family: '"Times New Roman", Times, serif'
+                            }
+                        }
+                    }
+                },
+                labels: {
+                    render: 'image',
+                    textMargin: -60,
+                },
+            },
+        }
 
-            // Configuration options go here
-            options: {},
+        var data = {
+            labels: labels,
+            datasets: [
+                //{
+                //    label: 'Sĩ số',
+                //    backgroundColor: 'rgb(226,226,236)',
+                //    borderColor: 'rgb(226,226,236)',
+                //    minBarLength: 1,
+                //    data: siso,
+                //    fill: true,
+                //    borderWidth: 1,
+                //    order: 0,
+                //    z:0
+                //},
+                {
+                    label: 'Điểm 8.0 -> 10',
+                    backgroundColor: 'rgb(133,237,133)',
+                    borderColor: 'rgb(133,237,133)',
+                    minBarLength: 1,
+                    data: minpoint8,
+                    fill: true,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 5.0 -> 7.9',
+                    backgroundColor: 'rgb(134,197,218)',
+                    borderColor: 'rgb(134,197,218)',
+                    minBarLength: 1,
+                    data: minpoint5,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 2.0 -> 4.9',
+                    backgroundColor: 'rgb(224,207,153)',
+                    borderColor: 'rgb(224,207,153)',
+                    minBarLength: 1,
+                    data: minpoint2,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Điểm 0.0 -> 1.9',
+                    backgroundColor: 'rgb(224,153,172)',
+                    borderColor: 'rgb(224,153,172)',
+                    minBarLength: 1,
+                    data: minpoint0,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Chưa làm bài',
+                    //backgroundColor: 'rgba(238,130,238,1)',
+                    backgroundColor: 'rgb(194,194,216)',
+                    borderColor: 'rgb(194,194,216)',
+                    minBarLength: 1,
+                    data: chuahoc,
+                    fill: false,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Chưa đăng nhập',
+                    //backgroundColor: 'rgba(147,112,219,1)',
+                    backgroundColor: 'rgb(179,179,206)',
+                    borderColor: 'rgb(179,179,206)',
+                    minBarLength: 1,
+                    data: chuavaolop,
+                    fill: false,
+                    borderWidth: 1
+                },
+            ]
+        }
+
+        var ctx = document.getElementById(id).getContext('2d');
+        var myBarChart = new Chart(ctx, {
+            type: 'bar',//bar,horizontalBar
+            data: data,
+            options: options,
             plugins: [{
-                afterRender: function () {
-                    var x = chart.toBase64Image();
-
-                    //callajax => sendimage vao server
-
-                    var image = document.getElementById("imagess");
-                    image.setAttribute("src", x);
-                    // send image to email
+                afterRender: async function () {
+                    var x = myBarChart.toBase64Image();
+                    arrayData.push(
+                        {
+                            Image: x,
+                            CenterID: centerid
+                        }
+                    );
+                    console.log(countSendMail++);
+                    console.log(@TotalBlock)
+                     if (countSendMail == @TotalBlock) {
+                         sendData(arrayData);
+                         setTimeout(function () { window.close(); }, 20000);
+                     }
                 }
             }]
         });
-
-    </script>
-
-        }
     }
-}
-@functions{
-    public async Task SendWeeklyReport(CenterEntity center, DateTime currentTime, bool isTest)
+</script>
+
+@{
+    foreach (var item in BlockCenter)
     {
-        var startWeek = currentTime.AddDays(-7);
-        var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(59).AddMilliseconds(59);
-        var headRole = _roleService.GetItemByCode("head-teacher");
 
-        var headTeacher = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID && y.RoleID == headRole.ID) && x.Email != "huonghl@utc.edu.vn");
-        var subject = "";
-        subject += $"Báo cáo kết quả học tập của {center.Name} từ ngày {startWeek.ToString("dd-MM-yyyy")} đến ngày {endWeek.ToString("dd-MM-yyyy")}";
-        var body = "";
-        var tbody = "";
-        tbody = @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
-            <thead>
-            <tr style='font-weight:bold;background-color: bisque'>
-            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
-            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Lớp</td>
-            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
-            <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
-            <td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>
-            </tr>
-            <tr style='font-weight:bold;background-color: bisque'>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>1.0 -> 4.9</td>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>0.0</td>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chính quy</td>
-            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:150px'>Học liệu chuyên đề</td>
-            </tr>
-            </thead>
-            <tbody>";
-        var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
-        var index = 1;
-        long totalStudent = 0, totalstChuaVaoLop = 0; ;
-        long tren8 = 0;
-        long tren5 = 0;
-        long tren0 = 0;
-        long bang0 = 0;
-        string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-
-        foreach (var _class in classesActive.OrderBy(x => x.Name))
+        var Blocks = item.Value;
+        var CenterID = item.Key;
+        for (int i = 0; i < Blocks.Length; i++)
         {
-            //Lay danh sach ID hoc sinh trong lop
-            var studentIds = _studentService.GetStudentsByClassId(_class.ID).Select(t => t.ID).ToList();
-            var classStudent = studentIds.Count();
-            totalStudent += classStudent;
-            //Lay danh sach ID bai hoc duoc mo trong tuan
-            var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => new LessonScheduleEntity
-            {
-                LessonID = t.LessonID,
-                ClassSubjectID = t.ClassSubjectID,
-                StartDate = t.StartDate,
-                EndDate = t.EndDate
-            })?.ToList();
-            var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
-            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-            var activeProgress = _lessonProgressService.CreateQuery().Find(
-                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-            var activeStudents = activeProgress.Select(t => t.StudentID).Distinct();
-            //danh sach bai kiem tra
-            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-            var stChuaVaoLop = classStudent - activeStudents.Count();
-            var dtren8 = "---";
-            var dtren5 = "---";
-            var dtren0 = "---";
-            var dbang0 = "---";
-            if (examIds.Count > 0) //co bai kiem tra
-            {
-                //ket qua lam bai cua hoc sinh trong lop
-                var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                                   group r by r.StudentID
-                                   into g
-                                   select new StudentResult
-                                   {
-                                       StudentID = g.Key,
-                                       ExamCount = g.Count(),
-                                       AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count
-                                   }).ToList();
-                //render ket qua hoc tap
-                var o8 = classResult.Count(t => t.AvgPoint >= 80);
-                var o5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                var o0 = classResult.Count(t => t.AvgPoint > 0 && t.AvgPoint < 50);
-                var e0 = classResult.Count(t => t.AvgPoint == 0);
-                tren8 += o8;
-                tren5 += o5;
-                tren0 += o0;
-                bang0 += e0;
-                dtren8 = o8.ToString();
-                dtren5 = o5.ToString();
-                dtren0 = o0.ToString();
-                dbang0 = e0.ToString();
-            }
-            totalstChuaVaoLop += stChuaVaoLop;
-            var groupedSchedule = (from r in activeSchedules
-                                   group r by r.ClassSubjectID into g
-                                   select g.OrderByDescending(t => t.StartDate).FirstOrDefault());
+            <script>
+                var siso = [];
+                var chuavaolop = [];
+                var minpoint8 = [];
+                var minpoint5 = [];
+                var minpoint2 = [];
+                var minpoint0 = [];
+                var chuahoc = [];
+                var tenlop = [];
+            </script>
 
-            var subjectsInfo = (from r in groupedSchedule
-                                let lesson = _lessonService.GetItemByID(r.LessonID)
-                                let classSbj = _classSubjectService.GetItemByID(r.ID)
-                                select new ClassSubjectInfo
-                                {
-                                    CourseName = classSbj.CourseName,
-                                    LastLessonTitle = lesson.Title,
-                                    Type = classSbj.TypeClass,
-                                    LastTime = r.StartDate
-                                })?.ToList();
-            var standardSbj = "";
-            var extendSbj = "";
-            foreach (var sbj in subjectsInfo)
+            //List<double> Students = new List<double>();
+            //List<double> ChuaVaoLop = new List<double>();
+            //List<double> MinPoint8 = new List<double>();
+            //List<double> MinPoint5 = new List<double>();
+            //List<double> MinPoint2 = new List<double>();
+            //List<double> Minpoint0 = new List<double>();
+            //List<double> ChuaHoc = new List<double>();
+
+            var classinCenters = ClassCenters.Where(x => x.Value == CenterID).Select(x => x.Key).ToList();
+
+            var Classes = BlockClass.Where(x => x.Value == Blocks[i] && classinCenters.Contains(x.Key));
+            double[] Students = new double[Classes.Count()];
+            double[] ChuaVaoLop = new double[Classes.Count()];
+            double[] MinPoint8 = new double[Classes.Count()];
+            double[] MinPoint5 = new double[Classes.Count()];
+            double[] MinPoint2 = new double[Classes.Count()];
+            double[] Minpoint0 = new double[Classes.Count()];
+            double[] ChuaHoc = new double[Classes.Count()];
+            string[] _ClassName = new string[Classes.Count()];
+            for (int j = 0; j < Classes.Count(); j++)
             {
-                var content = "<table>" +
-                        "<tr>" +
-                            $"<td style='text-align: left'>{sbj.CourseName} - Bài học cuối: {sbj.LastLessonTitle} ({sbj.LastTime.ToLocalTime().ToString("dd-MM-yyyy")})</td>" +
-                        "</tr>" +
-                        "</table>";
-                if (sbj.Type == CLASS_TYPE.STANDARD)
-                    standardSbj += content;
-                else
-                    extendSbj += content;
+                var classID = Classes.ElementAt(j).Key;
+                var data = DataClass[classID];
+                Students[j] = data[0];
+                ChuaVaoLop[j] = data[1];
+                MinPoint8[j] = data[2];
+                MinPoint5[j] = data[3];
+                MinPoint2[j] = data[4];
+                Minpoint0[j] = data[5];
+                ChuaHoc[j] = data[6];
+                _ClassName[j] = ClassName[classID];
+                //Students.Add(data[0]);
+                //ChuaVaoLop.Add(data[1]);
+                //MinPoint8.Add(data[2]);
+                //MinPoint5.Add(data[3]);
+                //MinPoint2.Add(data[4]);
+                //Minpoint0.Add(data[5]);
+                //ChuaHoc.Add(data[6]);
+                //_ClassName.Add(ClassName[classID]);
+
+                <script>
+                    siso.push('@data[0]');
+                    chuavaolop.push('@data[1]');
+                    minpoint8.push('@data[2]');
+                    minpoint5.push('@data[3]');
+                    minpoint2.push('@data[4]');
+                    minpoint0.push('@data[5]');
+                    chuahoc.push('@data[6]');
+                    tenlop.push("@Html.Raw(ClassName[classID])");
+                </script>
             }
 
-            if (index % 2 == 0)
-            {
-                tbody += $"<tr style='{style[1]}'>";
-            }
-            else
-            {
-                tbody += $"<tr style='{style[0]}'>";
-            }
-
-            tbody +=
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{classStudent}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{(stChuaVaoLop > 0 ? stChuaVaoLop.ToString() : "---")}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren8}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren5}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dtren0}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{dbang0}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{standardSbj}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{extendSbj}</td></tr>";
+            <script>
+               renderChart('@Blocks[i]', siso, chuavaolop, minpoint8, minpoint5, minpoint2, minpoint0, chuahoc, tenlop,'@CenterID')
+            </script>
         }
-        tbody += @"<tr style='font-weight: 600'>
-<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
-<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;text-align: left;font-weight: 600'>Tổng</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren0}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{bang0}</td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
-                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'></td>" +
-            @"</tr>
-<tbody>
-</table>";
-        body += tbody;
 
-        var toAddress = headTeacher.Project(t => t.Email).ToList();
-        var bccAddress = new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-        if (isTest)
-        {
-            toAddress = new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com" };
-            bccAddress = null;
-        }
-        await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-    } }
+    }
 }

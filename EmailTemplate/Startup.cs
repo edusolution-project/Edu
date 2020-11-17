@@ -4,6 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
+using FileManagerCore.Interfaces;
+using FileManagerCore.Services;
+using GoogleLib.Interfaces;
+using GoogleLib.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,20 +26,7 @@ namespace EmailTemplate
         }
 
         public IConfiguration Configuration { get; }
-            //ClassService classService,
-            //CenterService centerService,
-            //ClassSubjectService classSubjectService,
-            //LessonService lessonService,
-            //LessonScheduleService scheduleService,
-            //AccountService accountService,
-            //StudentService studentService,
-            //TeacherService teacherService,
-            //SkillService skillService,
-            //LessonScheduleService lessonScheduleService,
-            //RoleService roleService,
-            //CourseService courseService,
-            //LearningHistoryService learningHistory,
-            //LessonProgressService lessonProgressService
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -61,6 +52,9 @@ namespace EmailTemplate
             services.AddSingleton<CourseService>();
             services.AddSingleton<LearningHistoryService>();
             services.AddSingleton<LessonProgressService>();
+            services.AddSingleton<IRoxyFilemanHandler, RoxyFilemanHandler>();
+            services.AddSingleton<ReportService>();
+            services.AddSingleton<IndexService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
