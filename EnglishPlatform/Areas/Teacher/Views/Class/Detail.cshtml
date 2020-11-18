@@ -2037,7 +2037,25 @@
                 formatTime(time) {
                     var _time = moment(time);
                     if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
-                    return _time.format("DD/MM/YYYY HH:mm")
+                    return _time.format("DD/MM/YYYY hh:mm A")
+                },
+                getPeriod(obj) {
+                    var startms = moment(obj.Created);
+                    var endms = moment(obj.EndTime);
+                    console.log(startms);
+                    console.log(endms);
+                    var ret = "";
+                    if (endms.days() - startms.days() > 0)
+                        ret += (endms.days() - startms.days()) + "d ";
+                    if (endms.hours() - startms.hours() > 0)
+                        ret += (endms.hours() - startms.hours()) + "h ";
+                    if (endms.minutes() - startms.minutes() > 0)
+                        ret += (endms.minutes() - startms.minutes()) + "m ";
+                    if (endms.second() - startms.second() > 0)
+                        ret += (endms.second() - startms.second()) + "s ";
+                    if (ret.length == 0)
+                        ret = "0s";
+                    return ret;
                 },
                 domDecoder(str) {
                     if (str == null)
@@ -2353,18 +2371,22 @@
                 <table id="st_table" class="table">
                     <thead>
                         <tr class="text-center">
-                            <th class="align-middle">STT</th>
-                            <th class="align-middle">Thời gian làm</th>
-                            <th>Điểm </th>
-                            <th>Trạng thái </th>
-                            <th></th>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Điểm</th>
+                            <th scope="col" class="text-center">Giờ bắt đầu</th>
+                            <th scope="col" class="text-center">Giờ kết thúc</th>
+                            <th scope="col" class="text-center">Thời gian làm</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                            <th scope="col" class="text-center"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in student_result.History">
                             <td class="text-center">{{k+1}}</td>
-                            <td>{{formatTime(item.Created)}}</td>
-                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
+                            <td class="text-center">{{(item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
+                            <td class="text-center">{{formatTime(item.Created)}}</td>
+                            <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
+                            <td class="text-center">{{getPeriod(item)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
                             <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
                         </tr>

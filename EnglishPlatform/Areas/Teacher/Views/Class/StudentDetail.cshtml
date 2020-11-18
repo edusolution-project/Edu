@@ -78,7 +78,7 @@
                         <tr v-for="(item,k) in progressData" v-else>
                             <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                            <td>{{formatFullDate(item.LearnLast)}}</td>
+                            <td>{{formatTime(item.LearnLast)}}</td>
                             <td>{{item.LearnCount}}</td>
                         </tr>
                     </tbody>
@@ -104,7 +104,7 @@
                         <tr v-for="(item,k) in resultData">
                             <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                            <td>{{formatFullDate(item.LearnLast)}}</td>
+                            <td>{{formatTime(item.LearnLast)}}</td>
                             <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
                             <td>{{item.LearnCount}}</td>
                         </tr>
@@ -149,7 +149,8 @@
                         <tr>
                             <th scope="col" class="text-center">#</th>
                             <th scope="col" class="text-center">Điểm</th>
-                            <th scope="col" class="text-center">Giờ làm bài</th>
+                            <th scope="col" class="text-center">Giờ bắt đầu</th>
+                            <th scope="col" class="text-center">Giờ kết thúc</th>
                             <th scope="col" class="text-center">Thời gian làm</th>
                             <th scope="col" class="text-center">Trạng thái</th>
                             <th scope="col" class="text-center"></th>
@@ -159,7 +160,8 @@
                         <tr v-for="(item,k) in studentResult.history" v-if="studentResult.history.length > 0">
                             <td class="text-center">{{k+1}}</td>
                             <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
-                            <td class="text-center">{{formatFullDate(item.Created)}}</td>
+                            <td class="text-center">{{formatTime(item.Created)}}</td>
+                            <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
                             <td class="text-center">{{getPeriod(item)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
                             <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
@@ -435,9 +437,10 @@
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
-                formatFullDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY hh:mm A")
+                formatTime(time) {
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY hh:mm A")
                 },
                 getPeriod(obj) {
                     var startms = moment(obj.Created);
