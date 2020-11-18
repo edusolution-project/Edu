@@ -32,6 +32,7 @@ using System.Data.OleDb;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using RestSharp.Extensions;
 using MongoDB.Bson.Serialization.Serializers;
+using System.Security.Cryptography;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -3211,7 +3212,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (type.Equals("VOCAB"))
                 {
-                    var vocabArr = item.Description.Split('|');
+                    var desc = descriptionCell.FirstParagraph.Text;
+
+                    var vocabArr = desc.Split('|');
                     if (vocabArr != null && vocabArr.Length > 0)
                     {
                         foreach (var vocab in vocabArr)
@@ -3220,6 +3223,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _ = GetVocabByCambridge(vocabulary);
                         }
                     }
+                    item.Description = desc;
+
                     await CreateOrUpdateLessonPart(basis, item);
                     return $"{type} is OK";
                 }
@@ -3412,10 +3417,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             var link = obj as Field;
                             if (link.Type == FieldType.FieldHyperlink)
                             {
-                            item.Media = new Media
+                                item.Media = new Media
                                 {
                                     Created = DateTime.UtcNow,
-                                    Path = link.Value.Replace("\"",""),
+                                    Path = link.Value.Replace("\"", ""),
                                     OriginalName = link.FieldText,
                                     Name = link.FieldText,
                                     Extension = GetContentType(link.FieldText)
@@ -3459,9 +3464,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 linkfile = str.Trim();
                                 var contentType = GetContentType(linkfile);
-                                if(contentType == "application/octet-stream")//unknown type
+                                if (contentType == "application/octet-stream")//unknown type
                                 {
-                                    switch(item.Type)
+                                    switch (item.Type)
                                     {
                                         case "AUDIO":
                                             contentType = "audio/mp3";
@@ -3475,8 +3480,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                         case "IMAGE":
                                             contentType = "image/jpeg";
                                             break;
-                                    }    
-                                }    
+                                    }
+                                }
                                 item.Media = new Media()
                                 {
                                     Created = DateTime.UtcNow,
@@ -3832,7 +3837,7 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
             //    {
             String typeFile = Ole.ObjectType.ToUpper();
             String packageFileName = Ole.PackageFileName.ToString().Trim();
-            
+
 
             var filename = packageFileName.Replace("\\", "#").Split('#').Last();
             String extension = Path.GetExtension(filename);
