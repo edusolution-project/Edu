@@ -253,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
                                 item.Media.Created = DateTime.UtcNow;
                                 item.Media.Size = file.Length;
-                                if(!typeImage.Contains(extension))
+                                if (!typeImage.Contains(extension))
                                 {
                                     var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                     item.Media.Path = mediarsp.Path;
@@ -429,7 +429,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             isPractice = true;
                             break;
-                        default://QUIZ1,3,4
+                        case "QUIZ1":
+                        case "QUIZ3":
+                        case "QUIZ4":
                             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
                             {
                                 _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
@@ -449,6 +451,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 await SaveQuestionFromView(item, createduser, files, UserID);
                             }
                             isPractice = true;
+                            break;
+                        default://lecture type
+
+                            return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
                             break;
                     }
 

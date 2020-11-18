@@ -384,14 +384,14 @@ var Lesson = (function () {
 
 
                 var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word"></i>').append("Thêm nội dung từ file Word");
-                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word"></i>').append("Xuất file Word");
+                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word mr-2"></i>').append("Thêm nội dung từ Word");
+                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word mr-2"></i>').append("Xuất ra Word");
                 lessonButton.append(btnExplain);
                 lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
 
 
-                 //lessonButton.append(edit);
+                //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
                 lessonButton.append(create);
                 create.prepend(iconCreate).append("Thêm nội dung");
@@ -583,6 +583,7 @@ var Lesson = (function () {
                     })
                     goPartInx(0);
                 }
+                renderOldAnswer();
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
@@ -2317,7 +2318,7 @@ var Lesson = (function () {
                 title: '<strong>Chọn thao tác</strong>',
                 icon: 'question',
                 html:
-                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,1)"><i class="fas fa-upload"></i> Chọn file câu hỏi </button>' +
+                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,1)"><i class="fas fa-upload"></i> Chọn file Word</button>' +
                     '<input type="file" class="d-none" accept=".docx, .doc"/>' +
                     '<button type="button" class="btn btn-secondary mr-2" onclick="DownloadQuestionTemplate(this,1)"><i class="fas fa-file-download"></i> Tải file mẫu </button>',
                 //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
@@ -4153,7 +4154,7 @@ var Lesson = (function () {
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
                         //} else {
-                            saveAnswerForStudent(questionId, answerID, value, type);
+                        saveAnswerForStudent(questionId, answerID, value, type);
                         //}
                     }
                 })
@@ -4255,7 +4256,7 @@ var Lesson = (function () {
                     //if (value == "") {
                     //    delAnswerForStudent(questionId);
                     //} else {
-                        saveAnswerForStudent(questionId, "", value, type);
+                    saveAnswerForStudent(questionId, "", value, type);
                     //}
                 }
             })

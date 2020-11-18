@@ -269,8 +269,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var lessonpart = item.ToEntity();
             _cloneLessonPartService.Save(lessonpart);
 
-
-
             item.ID = lessonpart.ID;
 
             switch (lessonpart.Type)
@@ -331,7 +329,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     isPractice = true;
                     break;
-                default:
+                case "QUIZ1":
+                case "QUIZ3":
+                case "QUIZ4":
                     if (RemovedQuestions != null & RemovedQuestions.Count > 0)
                     {
                         _cloneQuestionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
@@ -352,6 +352,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     isPractice = true;
                     break;
+                default:
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
+                    break;
             }
 
             if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)
@@ -365,11 +372,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
             calculateLessonPoint(item.ParentID);
-            IDictionary<string, object> valuePairs = new Dictionary<string, object>
-                        {
-                            { "Data", item },
-                            //{ "LessonPartExtends", files }
-                        };
 
             return new JsonResult(new Dictionary<string, object>
                             {
