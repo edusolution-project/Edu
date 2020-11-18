@@ -67,5 +67,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.Email == email).SingleOrDefault();
         }
+
+        public IEnumerable<TeacherEntity> GetByCenterID(String centerID)
+        {
+            return Collection.Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == centerID)).ToEnumerable();
+        }
     }
 }

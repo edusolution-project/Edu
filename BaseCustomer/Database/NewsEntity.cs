@@ -46,9 +46,6 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Discount")]
         public double Discount { get; set; }
 
-        //[JsonProperty("PriceSale")]
-        //public double PriceSale { get; set; }
-
         [JsonProperty("Type")]
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
@@ -59,6 +56,8 @@ namespace BaseCustomerEntity.Database
         public List<string> Targets { get; set; }
         [JsonProperty("Limit")]
         public int Limit { get; set; }
+        [JsonProperty("CreateUser")]
+        public String CreateUser { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
