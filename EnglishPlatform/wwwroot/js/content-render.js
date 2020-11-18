@@ -259,6 +259,7 @@ var Lesson = (function () {
     }
 
     var loadLessonParts = function (param, callback) {
+        console.log(262)
         //console.log(param);
         var formData = new FormData();
         if (param != null)
@@ -342,6 +343,7 @@ var Lesson = (function () {
         console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
+                console.log(346);
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
                 //lessonHeader.show().append(headerRow);
                 var title_wrapper = $("<div>", { "class": "lesson-header-title" });
@@ -519,6 +521,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHERVIEW:
             case mod.TEACHEREDIT:
+                console.log(524)
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
@@ -783,7 +786,6 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
-                //debugger
                 if (mod.STUDENT_EXAM == "studentexam") {
                     renderOldAnswer();
                 }
@@ -879,7 +881,6 @@ var Lesson = (function () {
                     $(".time-counter").html(getLocalData("Timer"));
                     //countdown(false);
                 }
-                //debugger
                 if (mod.STUDENT_LECTURE == "studentlecture") {
                     renderOldAnswer();
                 }
@@ -1180,9 +1181,6 @@ var Lesson = (function () {
                         $(this).append($(ui.draggable));
                     }
                 });
-                //console.log(itemBody);
-                //console.log(tabsitem);
-                //console.log(container);
                 container.append(tabsitem);
                 //Render Question
                 totalQuiz = data.Questions.length;
@@ -1259,10 +1257,10 @@ var Lesson = (function () {
         $('.Q3_absrow .answer-wrapper').addClass('h-100').addClass('scrollbar-outer').scrollbar();
 
         //renderMath
-
         startDragDrop();
     }
 
+    //--------------------
     var showFullScreen = function (obj) {
         $(obj).parent().siblings('iframe,embed,video')[0].webkitRequestFullscreen();
     }
@@ -1309,7 +1307,6 @@ var Lesson = (function () {
                 }
                 break;
             case "QUIZ3":
-
                 var container = $("#" + data.ParentID + " .quiz-wrapper");
                 //console.log(container);
                 var quizitem = $("<div>", { "class": "quiz-item", "id": data.ID, "data-part-id": data.ParentID });
@@ -1424,7 +1421,8 @@ var Lesson = (function () {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                //placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": data.Content, "style":"background-color: #4e73df;color:white" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
 
                 if (data.Content != null)
@@ -1435,7 +1433,8 @@ var Lesson = (function () {
                 }
                 else
                     answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
-                container.append(answer);
+                //container.append(answer);
+                console.log(1437)
                 break;
             case "QUIZ1":
                 //console.log(answer);
@@ -1476,7 +1475,6 @@ var Lesson = (function () {
                         $("<img>", { "class": "img-fluid lazy", "src": cacheStatic(data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/")) }));
                     break;
                 case "VIDEO":
-                    //debugger
                     //mediaHolder.append("<video controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the video tag</video>");
                     mediaHolder.append("<video controls><source src='" + data.Media.Path + "' type='video/mp4' />Your browser does not support the video tag</video>");
                     break;
@@ -2151,7 +2149,6 @@ var Lesson = (function () {
 
     //fix hien thi ckeditor 18-08-2020
     var ToggleQuizExplain = function (obj) {
-        //debugger
         var parent = obj.parentElement;
         var cke = $(parent).find(".editorck");
         var status = $(parent).find('.chkToggleExplain').prop('checked');
@@ -2253,7 +2250,6 @@ var Lesson = (function () {
     }
 
     var showCloneQuestion = function (obj, type) {
-        //debugger
         if (type == 0) {//file excel
             Swal.fire({
                 title: '<strong>Chọn thao tác</strong>',
@@ -2343,7 +2339,6 @@ var Lesson = (function () {
                 }
                 else {
                     var data = JSON.parse(xhr.responseText);
-                    debugger
                     if (data.Stt == true) {
                         Swal.hideLoading();
                         //Swal.clickConfirm();
@@ -2374,7 +2369,6 @@ var Lesson = (function () {
 
     //Fix lỗi xóa câu hỏi
     var removeQuestion = function (obj) {
-        //debugger
         Swal.fire({
             title: 'Xác nhận xóa câu hỏi?',
             icon: 'warning',
@@ -2397,7 +2391,6 @@ var Lesson = (function () {
                 });
                 $(listFieldQuestion[i]).find("[class=fieldset_title]").text("Câu hỏi " + i);
             }
-            //debugger
             if (result.value) {
                 var id = $(obj).siblings("[name$='.ID']").val();
                 var quizHolder = $(obj).parent();
@@ -3016,7 +3009,6 @@ var Lesson = (function () {
 
     //---- 14-10-2020
     var renderOldAnswer = function () { //dạng điền từ
-        //debugger
         //if (OldExamID) {
         console.log("Load easy part....");
         var currentEx = $("input[name=ExamID]").val();
@@ -3029,9 +3021,7 @@ var Lesson = (function () {
         dataform.append("ClassID", config.class_id);
         Ajax(config.url.oldAnswer, dataform, "POST", false)
             .then(function (res) {
-                //debugger
                 var data = JSON.parse(res);
-                //debugger
                 if (data.Data !== null) {
                     for (i = 0; i < data.Data.length; i++) {
                         var item = data.Data[i];
@@ -3043,17 +3033,8 @@ var Lesson = (function () {
                         var point = item.Point;
                         var _fillquiz = $("#" + quizID);
                         var span = $(_fillquiz).find("span");
-                        //debugger
                         if (point > 0) {
                             if (!answerid) {
-                                //    var input = $("input[id=" + answerid + "]");
-                                //    input.attr("checked", true);
-                                //    $("#" + answerid).css("color", "#28a745");
-                                //    $("#" + answerid).css("font-weight", "600");
-                                //    document.getElementById(answerid).parentElement.style.pointerEvents = "none";
-                                //    AnswerQuestion($(input)[0]);
-                                //}
-                                //else {
                                 span.html(answerVal);
                                 span.attr("contenteditable", "false");
                                 span.css("color", "#28a745");
@@ -3063,14 +3044,6 @@ var Lesson = (function () {
                         }
                         else {
                             if (!answerid) {
-                                //    var input = $("input[id=" + answerid + "]");
-                                //    input.attr("checked", true);
-                                //    $("#" + answerid).css("color", "#dc3545");
-                                //    $("#" + answerid).css("font-weight", "600");
-                                //    AnswerQuestion($(input)[0]);
-                                //}
-                                //else {
-                                //debugger
                                 span.html(answerVal);
                                 span.attr("contenteditable", "true");
                                 span.css("color", "#dc3545");
@@ -3722,7 +3695,6 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = async function () {
-        debugger
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
         }
@@ -3993,7 +3965,6 @@ var Lesson = (function () {
             //console.log(dataset);
             switch (type) {
                 case "QUIZ1":
-                    //debugger
                     partID = dataset.partId;
                     questionId = dataset.questionId;
                     answerID = dataset.id;
@@ -4060,7 +4031,6 @@ var Lesson = (function () {
             dataform.append("AnswerID", answerID);
             dataform.append("QuestionID", questionId);
             dataform.append("AnswerValue", value);
-            //debugger;
             var files = _that != void 0 && _that.parentElement && _that.parentElement.querySelector("input[type='file']") != null ? _that.parentElement.querySelector("input[type='file']").files : null;
             if (files) {
                 for (var i = 0; i < files.length; i++) {
@@ -4092,7 +4062,7 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        //debugger
+
                         console.log("line 4060 to fix");
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
@@ -4119,7 +4089,6 @@ var Lesson = (function () {
 
     //check ki tu dac biet
     var checkSpecialCharacters = function (chain) {
-        //debugger
         chain = chain.trim();
         var space = [160, 173, 8194, 8195, 8201, 8204, 8205, 8206, 8207];//khoang trang
         var beginning = [8217, 8216, 180, 8216, 8242, 8219];//ki tu ‘’ trong word
@@ -4148,19 +4117,16 @@ var Lesson = (function () {
                 chain = chain.replace(chain[i], "\"");
             }
         }
-        //debugger
         return chain;
     }
 
     //dien cau hoi phan bai lam cua hoc vien
     var AnswerFillQuestion = function (spanID, check = true) {
-        //debugger
         var _this = $('#' + spanID)[0];
         var dataset = _this.dataset;
         var partID = dataset.partId;
         var type = dataset.type;
         var questionId = dataset.questionId;
-        //debugger
         var a = $('#' + spanID).text();
         var value = "";
         if (check) {
@@ -4177,7 +4143,6 @@ var Lesson = (function () {
         dataform.append("AnswerValue", value);
         __answer_sending = true;
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
-            //debugger
             Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                 __answer_sending = false;
                 //console.log(res);
@@ -4496,7 +4461,6 @@ var Lesson = (function () {
         $(cloneQuestion).find("[class=fieldset_title]").text("Câu hỏi " + (parseInt(currentpos) + 1).toString());
 
         //new File([file], cloneQuestion.children[5].children[1].children[1].value);
-        //debugger
         $(_this).parent().after(cloneQuestion);
         var listFieldQuestion = $(container).find(".fieldQuestion");
         for (var i = parseInt(index) + 1; i < listFieldQuestion.length; i++) {
@@ -4634,7 +4598,6 @@ var submitForm = function (event, modalId, callback) {
 
 
     //console.log(formdata);
-    //debugger
     if ($('textarea[name="Description"]').length > 0) {
         formdata.delete("Description");
         //formdata.append("Description", myEditor.getData())
