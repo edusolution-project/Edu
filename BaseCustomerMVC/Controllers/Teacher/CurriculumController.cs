@@ -2958,7 +2958,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             item.Order = maxItem != null ? maxItem.Order + 1 : 0;
 
                             //check type
-                            var type = "";
                             var typeRow = table.Rows[2];
 
                             for (int indexCell = 1; indexCell < typeRow.Cells.Count; indexCell++)
@@ -2978,26 +2977,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 case "AUDIO":
                                 case "VIDEO":
                                 case "DOC":
-                                    await GetContentOther(table, type, basis, item, UserID);
+                                    await GetContentOther(table, item.Type, basis, item, UserID);
                                     Status = true;
                                     break;
                                 case "IMAGE":
-                                    Msg += await GetContentIMG(table, type, basis, item);
+                                    Msg += await GetContentIMG(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "VOCAB":
-                                    await GetContentQuiz2andVocab(table, type, basis, item);
+                                    await GetContentQuiz2andVocab(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "QUIZ1":
                                 case "QUIZ3":
                                 case "QUIZ4":
-                                    Msg += await GetContentQUIZ(table, type, basis, item);
+                                    Msg += await GetContentQUIZ(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "QUIZ2":
                                     item.Description = "";
-                                    Msg += await GetContentQuiz2andVocab(table, type, basis, item);
+                                    Msg += await GetContentQuiz2andVocab(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "ESSAY":
@@ -3207,6 +3206,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
+                var descriptionCell = table.Rows[3].Cells[1];
+
+
                 if (type.Equals("VOCAB"))
                 {
                     var vocabArr = item.Description.Split('|');
