@@ -384,7 +384,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json(str);
         }
 
-        public async Task<JsonResult> FixScoreDataV2()//Big fix
+        public async Task<JsonResult> FixScoreDataV2()
         {
             var start = DateTime.UtcNow;
             var str = "";
@@ -394,30 +394,36 @@ namespace BaseCustomerMVC.Controllers.Admin
             //reset progress
 
             _chapterProgressService.CreateQuery().UpdateMany(t => true, Builders<ChapterProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             _classSubjectProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassSubjectProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             _classProgressService.CreateQuery().UpdateMany(t => true, Builders<ClassProgressEntity>.Update
+                .Set(t => t.Completed, 0)
                 .Set(t => t.TotalPoint, 0)
                 .Set(t => t.PracticePoint, 0)
                 .Set(t => t.PracticeAvgPoint, 0)
                 .Set(t => t.AvgPoint, 0)
                 .Set(t => t.ExamDone, 0)
                 .Set(t => t.PracticeDone, 0)
+                .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
             //_lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
@@ -441,33 +447,38 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             foreach (var lprg in lessonProgresses)
             {
+                if (lprg.ChapterID != "0")
+                    await _progressHelper.UpdateChapterLastLearn(lprg, true);
+                else
+                    await _progressHelper.UpdateClassSubjectLastLearn(new ClassSubjectProgressEntity { LastLessonID = lprg.LessonID, ClassSubjectID = lprg.ClassSubjectID, ClassID = lprg.ClassID, LastDate = lprg.LastDate }, true);
+                
                 var lesson = _clonelessonService.GetItemByID(lprg.LessonID);
                 if (lesson.IsPractice)
                 {
                     if (lesson.ChapterID == "0")
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, 0, 0, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple);
+                    //});
                     else
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, 0, 0, lprg.LastPoint, 1);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, 0, 0, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple);
+                    //});
                 }
-                else if(lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                else if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
                 {
                     if (lesson.ChapterID == "0")
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
-                        });
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateClassSubjectPoint(lesson.ClassSubjectID, lprg.StudentID, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple, 0, 0);
+                    //});
                     else
-                        Task.Run(() =>
-                        {
-                            _ = _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, lprg.LastPoint, 1, 0, 0);
-                        });
-                }    
+                        //Task.Run(() =>
+                        //{
+                        await _progressHelper.UpdateParentChapPoint(lesson.ChapterID, lprg.StudentID, lprg.LastPoint * lesson.Multiple, (long)lesson.Multiple, 0, 0);
+                    //});
+                }
             }
 
             str += (DateTime.UtcNow - start).TotalSeconds;
@@ -477,92 +488,13 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
 
-        public async Task<JsonResult> Remark(string ExamID)//Big fix
-        {
-            var exam = _examService.GetItemByID(ExamID);
-            var lesson = _clonelessonService.GetItemByID(exam.LessonID);
-            _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
-            return Json("OK");
-        }
-
-
-        public JsonResult FixFillquiz()
-        {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
-            foreach (var pid in partIDs)
-            {
-                var qids = _questionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
-                if (qids != null && qids.Count() > 0)
-                {
-                    foreach (var qid in qids)
-                    {
-                        var ans = _answerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
-                        if (ans != null && ans.Count() > 0)
-                        {
-                            foreach (var answer in ans)
-                            {
-                                answer.Content = validateFill(answer.Content);
-                                _answerService.Save(answer);
-                            }
-                        }
-                    }
-                }
-            }
-
-            var partIDs2 = _clonelessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
-            foreach (var pid in partIDs2)
-            {
-                var qids = _clonequestionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
-                if (qids != null && qids.Count() > 0)
-                {
-                    foreach (var qid in qids)
-                    {
-                        var ans = _cloneanswerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
-                        if (ans != null && ans.Count() > 0)
-                        {
-                            foreach (var answer in ans)
-                            {
-                                answer.Content = validateFill(answer.Content);
-                                _cloneanswerService.Save(answer);
-                            }
-                        }
-                    }
-                }
-            }
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            TimeSpan ts = stopWatch.Elapsed;
-
-            // Format and display the TimeSpan value.
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-
-            return Json($"OK - {elapsedTime}");
-        }
-
-        private string validateFill(string org)
-        {
-            if (string.IsNullOrEmpty(org)) return org;
-            org = org.Trim();
-            while (org.IndexOf("  ") >= 0)
-                org = org.Replace("  ", "");
-
-            for (int i = 0; i < KyTuDacBiet.Length; i++)
-            {
-                if (org.Contains(KyTuDacBiet[i]))
-                {
-                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
-                }
-            }
-            return org;
-        }
-
-        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
-                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
-        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
+        //public async Task<JsonResult> Remark(string ExamID)//Big fix
+        //{
+        //    var exam = _examService.GetItemByID(ExamID);
+        //    var lesson = _clonelessonService.GetItemByID(exam.LessonID);
+        //    _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+        //    return Json("OK");
+        //}
 
         private double calculateLessonPoint(CourseLessonEntity lesson)
         {
@@ -646,15 +578,74 @@ namespace BaseCustomerMVC.Controllers.Admin
             return point;
         }
 
-        private void IncreaseCourseCounter(CourseLessonEntity lesson)
+        #region Fix Region
+        public JsonResult FixFillquiz()
         {
-            if (lesson.ChapterID != "0")
-                _ = _courseHelper.IncreaseCourseChapterCounter(lesson.ChapterID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
-            else
-                _ = _courseHelper.IncreaseCourseCounter(lesson.CourseID, 1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, lesson.IsPractice ? 1 : 0);
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var partIDs = _lessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs)
+            {
+                var qids = _questionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _answerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _answerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+
+            var partIDs2 = _clonelessonPartService.CreateQuery().Find(t => t.Type == "QUIZ2").Project(t => t.ID).ToList();
+            foreach (var pid in partIDs2)
+            {
+                var qids = _clonequestionService.CreateQuery().Find(t => t.ParentID == pid).Project(t => t.ID).ToList();
+                if (qids != null && qids.Count() > 0)
+                {
+                    foreach (var qid in qids)
+                    {
+                        var ans = _cloneanswerService.CreateQuery().Find(t => t.ParentID == qid).ToList();
+                        if (ans != null && ans.Count() > 0)
+                        {
+                            foreach (var answer in ans)
+                            {
+                                answer.Content = validateFill(answer.Content);
+                                _cloneanswerService.Save(answer);
+                            }
+                        }
+                    }
+                }
+            }
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts = stopWatch.Elapsed;
+
+            // Format and display the TimeSpan value.
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+
+            return Json($"OK - {elapsedTime}");
         }
 
-        #region Fix Region
+        private string validateFill(string org)
+        {
+            if (string.IsNullOrEmpty(org)) return org;
+            org = org.Trim();
+            while (org.IndexOf("  ") >= 0)
+                org = org.Replace("  ", "");
+
+            return StringHelper.ReplaceSpecialCharacters(org);
+        }
+
         public JsonResult ChangeCenter(string _ClassID, string oldCenter, string newCenter)
         {
             try

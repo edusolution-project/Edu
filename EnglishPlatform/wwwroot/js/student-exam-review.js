@@ -139,7 +139,7 @@ var ExamReview = (function () {
             number = renderItemNavigation(ul, part, number);
         }
         if (config.isTeacher) {
-            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block;'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
+            root.innerHTML = "<div class='number-reivew-point' style='width:100px;display:inline-block; white-space:nowrap'>(Đã chấm " + daCham + "/" + (number - 1) + ")</div>";
         }
         root.appendChild(ul);
         var data = config.exam;
@@ -317,7 +317,7 @@ var ExamReview = (function () {
     var addCssAnswerQ14 = function (data) {
         for (var i = 0; i < data.Questions.length; i++) {
             var cloneAnswers = data.Questions[i].CloneAnswers;
-            for (j = 0; j < cloneAnswers.length; j++) {
+            for (var j = 0; j < cloneAnswers.length; j++) {
                 var id = cloneAnswers[j].ID;
                 var isCorrect = cloneAnswers[j].IsCorrect;
                 var answerWmedia = $("#" + id)[0];
@@ -534,7 +534,7 @@ var ExamReview = (function () {
 
                     var html = "";
                     var tile = "";
-                   
+
                     for (var i = 0; i < listContent.length; i++) {
                         var arrayTxt1 = listContent[i].split(" ");//dap an dung
                         var arrayTxt2 = content_answer.split(" ");//dap an hoc sinh dien
@@ -560,7 +560,7 @@ var ExamReview = (function () {
 
                     var tile = tile.split(",");
                     tile.pop();
-                    for ( var i = 0; i < tile.length; i++) {
+                    for (var i = 0; i < tile.length; i++) {
                         tile[i] = parseInt(tile[i]);
                     }
                     var index = 0;
@@ -584,7 +584,7 @@ var ExamReview = (function () {
                         //debugger
                         if (detail_CorrectAnswer.length == detail_Answer.length) {//TH dap an dung = dap an hoc sinh dien
                             //debugger
-                            for ( var i = 0; i < detail_Answer.length; i++) {
+                            for (var i = 0; i < detail_Answer.length; i++) {
                                 if (detail_CorrectAnswer[i] == detail_Answer[i]) {
                                     chodung1 += "<span style='color:#28a745'>" + detail_Answer[i] + "</span> ";
                                     chodung2 += "<span style='font-weight:600'>" + detail_CorrectAnswer[i] + "</span> ";

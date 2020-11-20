@@ -57,6 +57,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
         private readonly MailHelper _mailHelper;
+
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
@@ -91,6 +92,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseService courseService,
             CourseHelper courseHelper,
             ClassHelper classHelper,
+
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ProgressHelper progressHelper,
@@ -577,9 +579,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -603,6 +602,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
             //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
@@ -616,9 +617,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
                        let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
+                       where _sbj != null
                        let skill = _skillService.GetItemByID(_sbj.SkillID)
-                       let studentCount = //_classStudentService.GetClassStudents(_class.ID).Count
-                       _studentService.CountByClass(_class.ID)
+                       let studentCount = _studentService.CountByClass(_class.ID)
                        select new
                        {
                            id = o.ID,
@@ -1706,7 +1707,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 rank = results.FindIndex(t => t.TotalPoint == studentresult.TotalPoint) + 1;
             var response = new Dictionary<string, object>
             {
-                { "Result", new { pos =  1, total = total_students, avg = avgpoint } },
+                { "Result", new { pos = rank, total = total_students, avg = avgpoint } },
                 { "Data", GetClassSubjectSummary(currentClass, StudentID, total_students)},
                 { "Model", model }
             };

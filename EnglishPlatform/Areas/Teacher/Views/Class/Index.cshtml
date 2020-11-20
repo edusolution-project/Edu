@@ -139,7 +139,7 @@
                     Đang gửi dữ liệu ...
                 </li>
                 <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
-                    {{ result.Name }}
+                    {{ result.Name + " (" + result.Email + ")" }}
                 </li>
             </ul>
 
@@ -468,7 +468,7 @@
                             ID: '',
                             SubjectID: '',
                             GradeID: '',
-                            SkillID: '',
+                            //SkillID: '',
                             TeacherID: '',
                             CourseID: '',
                             TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
@@ -630,7 +630,7 @@
                     var notify = false
                     if (_that.class_info.subject != null) {
                         _that.class_info.subject.forEach(function (item, k) {
-                            if (item.Skill == '' || item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
+                            if (item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
                                 alert("Vui lòng nhập đầy đủ thông tin cho môn học " + (k + 1));
                                 valid = false
                                 return false;
@@ -754,7 +754,7 @@
                             subject: [
                                 {
                                     ID: '',
-                                    SkillID: '',
+                                    //SkillID: '',
                                     SubjectID: '',
                                     GradeID: '',
                                     TeacherID: '',
@@ -766,7 +766,6 @@
                         }
                     }
                     else {
-
                         _that.class_info.ID = obj.ID;
                         _that.class_info.Description = obj.Description;
                         _that.class_info.Name = obj.Name;
@@ -788,7 +787,6 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
-
                                 _data.forEach(function (item, k) {
                                     var lock = false
                                     var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
@@ -813,11 +811,12 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
+
                                     //_that.class_info.IsOwner = item.TeacherID == '@userid';
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
-                                        SkillID: item.SkillID,
+                                        //SkillID: item.SkillID,
                                         SubjectID: item.SubjectID,
                                         GradeID: item.GradeID,
                                         TeacherID: item.TeacherID,
@@ -830,18 +829,23 @@
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
 
-                                    if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
-                                        _that.courseSource.push({
-                                            ID: item.CourseID,
-                                            SkillID: item.SkillID,
-                                            Name: item.CourseName,
-                                            SubjectID: item.SubjectID,
-                                            GradeID: item.GradeID,
-                                            IsActive: false
-                                        })
-                                    }
+                                    console.log(_that.courseSource);
+
+                                    var r = setTimeout(function () {
+                                        if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
+                                            _that.courseSource.push({
+                                                ID: item.CourseID,
+                                                //SkillID: item.SkillID,
+                                                Name: item.CourseName,
+                                                SubjectID: item.SubjectID,
+                                                GradeID: item.GradeID,
+                                                IsActive: false
+                                            })
+                                            this.courseSource = _that.courseSource
+                                        }
+                                    }, 200);
                                 })
-                                //_that.$forceUpdate()
+
                             }).catch(e => { })
                     }
                     //debugger
@@ -873,7 +877,7 @@
                                 sbj.GradeID = ''
                                 sbj.CourseID = ''
                                 sbj.TeacherID = ''
-                                sbj.SkillID = ''
+                                //sbj.SkillID = ''
                                 return
                             }
                         });
@@ -920,41 +924,70 @@
                         }
                     }
                 },
-                changeAddGrade(obj) {
-                    let _that = this;
-                    if (obj.GradeID == '') return;
-                    let key = obj.SubjectID + "_" + obj.GradeID
-                    if (_that.loaded_course.includes(key)) return;
-                    //load course
-                    let _form = new FormData()
-                    _form.append('SubjectID', obj.SubjectID)
-                    _form.append('GradeID', obj.GradeID)
-                    _form.append('Center', '@center')
-                    let _url = '@processUrl("GetActiveList", "Curriculum")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            var _data = response.data.Data;
-                            _data.forEach(function (item, k)
-                            {
-                                var oldIdx = _that.courseSource.findIndex(i => i.ID == item.ID)
-                                if (oldIdx == -1) {
-                                    _that.courseSource.push({
-                                        ID: item.ID,
-                                        Name: item.Name,
-                                        SubjectID: obj.SubjectID,
-                                        GradeID: obj.GradeID,
-                                        SkillID: item.SkillID,
-                                        IsActive: true
-                                    })
-                                }
-                                else {
-                                    _that.courseSource[oldIdx].IsActive = true
-                                }
-                                //console.log(_that.courseSource);
-                            })
+                changeAddGrade(obj, reset = false) {
 
-                            _that.loaded_course.push(key);
-                        }).catch(e => { })
+                    let _that = this;
+                    if (obj.GradeID == '') {
+                        _that.class_info.subject.forEach(function (sbj) {
+                            if (sbj.UID == obj.UID) {
+                                sbj.CourseID = ''
+                                return
+                            }
+                        });
+                        return;
+                    }
+                    let key = obj.SubjectID + "_" + obj.GradeID
+                    if (!_that.loaded_course.includes(key)) {
+                        //load course
+                        let _form = new FormData()
+                        _form.append('SubjectID', obj.SubjectID)
+                        _form.append('GradeID', obj.GradeID)
+                        _form.append('Center', '@center')
+                        let _url = '@processUrl("GetActiveList", "Curriculum")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var _data = response.data.Data;
+                                //console.log(_that.courseSource);
+                                _data.forEach(function (item, k) {
+                                    var oldIdx = _that.courseSource.findIndex(i => i.ID == item.ID)
+
+                                    if (oldIdx == -1) {
+                                        _that.courseSource.push({
+                                            ID: item.ID,
+                                            Name: item.Name,
+                                            SubjectID: obj.SubjectID,
+                                            GradeID: obj.GradeID,
+                                            //SkillID: item.SkillID,
+                                            IsActive: true
+                                        })
+                                    }
+                                    else {
+                                        _that.courseSource[oldIdx].IsActive = true
+                                    }
+
+                                    //console.log(_that.courseSource);
+                                })
+                                if (reset) {
+                                    _that.class_info.subject.forEach(function (sbj) {
+                                        if (sbj.UID == obj.UID) {
+                                            sbj.CourseID = ''
+                                            return
+                                        }
+                                    });
+                                }
+                                _that.loaded_course.push(key);
+                            }).catch(e => { })
+                    }
+                    else {
+                        if (reset) {
+                            _that.class_info.subject.forEach(function (sbj) {
+                                if (sbj.UID == obj.UID) {
+                                    sbj.CourseID = ''
+                                    return
+                                }
+                            });
+                        }
+                    }
                 },
                 changeAddSkill(obj) {
                    obj.CourseID = ''
@@ -965,7 +998,7 @@
                     let _subject = {
                         UID: moment().format("DDMMYYYYhhmmssSSS"),
                         ID: '',
-                        SkillID: '',
+                        //SkillID: '',
                         SubjectID: '',
                         GradeID: '',
                         TeacherID: '',
@@ -1168,7 +1201,7 @@
                                 alert(response.data.msg)
                                 this.search_class_id = _that.add_student.class_id
                                 this.search_grade_id = ''
-                                this.search_skill_id = ''
+                                //this.search_skill_id = ''
                                 this.search_subject_id = ''
                                 this.loadStudent()
                                 this.$bvModal.hide('modal_student_add')
@@ -1265,7 +1298,9 @@
                 },
                 matchCourse(obj, item) {
                     //console.log(this.courseSource)
-                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
+                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID
+                        //&& item.SkillID == obj.SkillID
+                        && (item.IsActive || (item.ID == obj.CourseID))
                 },
                 domDecoder(str) {
                     if (str == null)
@@ -1344,18 +1379,18 @@
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn môn học</option>
-                                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
+                        @*<div class="width-100 mr-2 d-none">
+                                <label for="">Môn học</label>
+                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn môn học</option>
+                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>*@
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
                             <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
@@ -1397,18 +1432,18 @@
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
-                                <option value="">Chọn môn học</option>
-                                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
+                        @*<div class="width-100 mr-2">
+                                <label for="">Môn học</label>
+                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                                    <option value="">Chọn môn học</option>
+                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>*@
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
                             <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">

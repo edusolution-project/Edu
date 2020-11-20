@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,12 @@ namespace BaseCustomerMVC.Globals
         {
             key = cachePrefix + "_" + key;
             _cache.SetAsync(key, ObjectToByteArray(obj), opt);
+        }
+
+        public void ClearCache(string key)
+        {
+            key = cachePrefix + "_" + key;
+            _cache.RemoveAsync(key);
         }
 
         public Object GetCache(string key)

@@ -20,14 +20,18 @@ namespace BaseCustomerMVC.Controllers.Admin
     public class SubjectController : AdminController
     {
         private readonly SubjectService _service;
+        private readonly TeacherService _teacherService;
         private readonly IHostingEnvironment _env;
-        public SubjectController(SubjectService service
-            , RoleService roleService
-            , AccountService accountService
-            , IHostingEnvironment evn)
+        public SubjectController(
+            SubjectService service,
+            //RoleService roleService,
+            //AccountService accountService,
+            TeacherService teacherService,
+            IHostingEnvironment evn)
         {
             _env = evn;
             _service = service;
+            _teacherService = teacherService;
         }
         // GET: Home
 
@@ -108,6 +112,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                     item.Updated = DateTime.UtcNow;
                     item.Created = DateTime.UtcNow;
                     _service.CreateQuery().InsertOne(item);
+                    //add for super account: huonghl@utc.edu.vn
+                    _ = _teacherService.CreateQuery().UpdateOneAsync<TeacherEntity>(
+                        t => t.Email == "huonghl@utc.edu.vn",
+                        Builders<TeacherEntity>.Update.AddToSet(s => s.Subjects, item.ID)
+                        );
                     Dictionary<string, object> response = new Dictionary<string, object>()
                     {
                         {"Data",item },
@@ -156,17 +165,18 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
+                var listIDs = new List<string> { model.ArrID };
                 if (model.ArrID.Contains(","))
-                {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
-                    return new JsonResult(delete);
-                }
-                else
-                {
-                    var delete = _service.Collection.DeleteMany(o => model.ArrID == o.ID);
-                    return new JsonResult(delete);
-                }
+                    listIDs = model.ArrID.Split(',').ToList();
 
+
+                var delete = _service.Collection.DeleteMany(o => listIDs.Contains(o.ID));
+                if (delete.DeletedCount > 0)
+                {
+                    _teacherService.CreateQuery().UpdateMany(t => true,
+                        Builders<TeacherEntity>.Update.PullAll(t => t.Subjects, listIDs));
+                }
+                return new JsonResult(delete);
 
             }
         }

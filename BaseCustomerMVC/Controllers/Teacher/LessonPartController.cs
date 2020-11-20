@@ -253,7 +253,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
                                 item.Media.Created = DateTime.UtcNow;
                                 item.Media.Size = file.Length;
-                                if(!typeImage.Contains(extension))
+                                if (!typeImage.Contains(extension))
                                 {
                                     var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
                                     item.Media.Path = mediarsp.Path;
@@ -429,7 +429,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             isPractice = true;
                             break;
-                        default://QUIZ1,3,4
+                        case "QUIZ1":
+                        case "QUIZ3":
+                        case "QUIZ4":
                             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
                             {
                                 _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
@@ -449,6 +451,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 await SaveQuestionFromView(item, createduser, files, UserID);
                             }
                             isPractice = true;
+                            break;
+                        default://lecture type
+
+                            return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
                             break;
                     }
 
@@ -1294,41 +1304,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", " ");
-
-            //dau ‘’
-            int[] beginning = { 24, 25, 96 };
-            //dau “”
-            int[] quotation = { 29, 28 };
-            for (int i = 0; i < org.Length; i++)
-            {
-                if (beginning.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\'');
-                }
-                if (quotation.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\"');
-                }
-                if ((byte)org[i] == 125 || (byte)org[i] == 141)
-                {
-                    org = org.Replace(org[i], '(');
-                }
-                if ((byte)org[i] == 126 || (byte)org[i] == 142)
-                {
-                    org = org.Replace(org[i], ')');
-                }
-            }
-
-            for (int i = 0; i < KyTuDacBiet.Length; i++)
-            {
-                if (org.Contains(KyTuDacBiet[i]))
-                {
-                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
-                }
-            }
-
-            //return ReplaceSpecialCharacters(org.Trim());
-            return org;
+            return StringHelper.ReplaceSpecialCharacters(org);
+            //return org;
         }
         //TODO: Need update later
         private double calculateLessonPoint(string lessonId)
@@ -1350,10 +1327,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
-
-        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
-                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
-        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
     }
 
     public class PronunExplain

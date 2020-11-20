@@ -219,7 +219,7 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                this.getData();
+                //this.getData();
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.getMyClass();
@@ -315,18 +315,10 @@
                 searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
-                    //debugger
-                    //var fn = this.getData
-                    if (this.tab[1]) {
-                        fn1 = this.getData
-                    }
-                    else {
-                        fn1 = this.getData
-                    }
-                    if (this.tab[1])
-                        fn = this.getMyClass
+                    var fn = this.getData
+                    //if (this.tab[1])
+                    //    fn = function () { this.getData; }
                     this.searchTimeout = setTimeout(function(){
-                        fn1();
                         fn()
                     }, 500)
                 },
@@ -348,8 +340,7 @@
                 subjectID: function () {
                     this.getData()
                 },
-                "docsInteractive.ClassID": function () {
-                    debugger
+                "docsInteractive.ClassID": function () {                    
                     if (this.docsInteractive.ClassID=="true") {
                         this.isCreateNewClass = true
                         //alert(this.docsInteractive.NewClass)
@@ -678,13 +669,13 @@
                             history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
                             this.isInteractive = false;
                             this.loadDocsNormal();
-                            this.searchTerm = '';
+                            //this.searchTerm = '';
                             break;
                         case 1:
                             history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
                             this.isInteractive = true;
                             this.loadDocsInteractive();
-                            this.searchTerm = '';
+                            //this.searchTerm = '';
                             break;
                     }
                     this.$forceUpdate()
