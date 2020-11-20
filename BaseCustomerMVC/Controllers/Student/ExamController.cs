@@ -579,7 +579,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
                 if(lastestEx.ID != exam.ID)
-                    return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên nhiều cửa sổ khác nhau!" });
+                    return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!" });
                 return new JsonResult(new { error = "Bài kiểm tra đã kết thúc" });
             }
         }
