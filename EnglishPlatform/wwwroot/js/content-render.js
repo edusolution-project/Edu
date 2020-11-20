@@ -1454,8 +1454,15 @@ var Lesson = (function () {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                //placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
+                //debugger
+                //if (data.IsCorrect == true) {
+                //    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
+                //}
+                //else {
+                //    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                //}
 
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
@@ -1463,9 +1470,16 @@ var Lesson = (function () {
                 if (data.Media != null) {
                     renderMediaContent(data, answer);
                 }
-                else
-                    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                else {
+                    if (!data.IsCorrect) {
+                        answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                    }
+                }
                 container.append(answer);
+                if (data.IsCorrect == true) {
+                    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
+                    document.getElementById(data.ID).style.display = "none";
+                }
                 break;
             case "QUIZ1":
                 //console.log(answer);

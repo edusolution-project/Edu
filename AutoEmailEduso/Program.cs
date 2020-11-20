@@ -131,7 +131,7 @@ namespace AutoEmailEduso
             var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-7).AddMinutes(1);
             var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
             var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
-
+            
             foreach (var center in centersActive)
             {
                 //var percent = "";
@@ -185,6 +185,33 @@ namespace AutoEmailEduso
 
                     foreach (var _class in classesActive.OrderBy(x => x.Name))
                     {
+                        //lay danh sach giao vien trong lop
+                        var listNameTeachers = "";
+                        if (_class.Members != null)
+                        {
+                            var members = _class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                            if (members.Count() > 0)
+                            {
+                                foreach (var mem in members)
+                                {
+                                    var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
+                                    //var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
+                                    var str = teacherFName.Split(" ");
+                                    var teacherName = str[str.Length - 1];
+                                    listNameTeachers += $"{teacherName}, ";
+                                }
+                                listNameTeachers = " - thầy/cô: " + listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
+                            }
+                            else
+                            {
+                                listNameTeachers = "";
+                            }
+                        }
+                        else
+                        {
+                            listNameTeachers = "";
+                        }
+
                         //Lay danh sach ID hoc sinh trong lop
                         var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
                         var studentIds = students.Select(t => t.ID).ToList();
@@ -249,7 +276,7 @@ namespace AutoEmailEduso
 
                         tbody +=
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
-                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}</td>" +
+                            $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}{listNameTeachers}</td>" +
                             $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
                         if (stChuaVaoLop == 0)
                         {
@@ -478,103 +505,109 @@ namespace AutoEmailEduso
             var centersActive = _centerService.GetActiveCenter(currentTime);
             foreach (var center in centersActive)
             {
-                Int32 TotalStudents = 0, TotalInactiveStudents = 0, TotalMinPoint8 = 0, TotalMinPoint5 = 0, TotalMinPoint2 = 0, TotalMinPoint0 = 0, TotalDontWork = 0;
-                String ClassName4ReportPoint = "";//Ten lop co ti le hoc sinh dat diem 0 -> 4.9 > 30%
-                String ClassName4ReportInactive = "";//ten lop co so hoc sinh chua lam > 10
-                var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-                if (classesActive.Count() == 0)
+                if (center.Abbr.Equals("utc2"))
                 {
-                    continue;
-                }
-
-                foreach (var @class in classesActive)
-                {
-                    //Lay danh sach ID hoc sinh trong lop
-                    var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
-                    var studentIds = students.Select(t => t.ID).ToList();
-                    //Lay danh sach ID bai hoc duoc mo trong tuan
-                    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-                    var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-                    //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-                    var activeProgress = _lessonProgressService.CreateQuery().Find(
-                        x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                        && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-                    var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                            x => studentIds.Contains(x.StudentID)).ToEnumerable();
-                    // danh sach bai kiem tra
-                    var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-                    //ket qua lam bai cua hoc sinh trong lop
-                    var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                                       group r by r.StudentID
-                                       into g
-                                       select new StudentResult
-                                       {
-                                           StudentID = g.Key,
-                                           ExamCount = g.Count(),
-                                           AvgPoint = g.Average(t => t.LastPoint),
-                                           StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-                                       }).ToList();
-
-                    //render ket qua hoc tap
-                    var min8 = classResult.Count(t => t.AvgPoint >= 80);
-                    var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                    var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
-                    var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
-
-                    //render nhung thu can lay
-                    Int32 siso = studentIds.Count();
-                    Int32 hocsinhchuahoc = siso - activeStudents.Count();
-                    Int32 point0to49 = min0 + min2;
-                    Int32 chualam = siso - min0 - min2 - min5 - min8;
-
-                    //render ti le %
-                    Double percentPoint0To49 = Math.Round((((Double)point0to49 / siso) * 100), 2);
-                    Double percentChualam = Math.Round((((Double)chualam / siso) * 100), 2);
-
-                    if (percentChualam > 30)
+                    Int32 TotalStudents = 0, TotalInactiveStudents = 0, TotalMinPoint8 = 0, TotalMinPoint5 = 0, TotalMinPoint2 = 0, TotalMinPoint0 = 0, TotalDontWork = 0;
+                    String ClassName4ReportPoint = "";//Ten lop co ti le hoc sinh dat diem 0 -> 4.9 > 30%
+                    String ClassName4ReportInactive = "";//ten lop co so hoc sinh chua lam > 10
+                    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
+                    if (classesActive.Count() == 0)
                     {
-                        ClassName4ReportInactive += $"{@class.Name}, ";
-                    }
-                    if (percentPoint0To49 > 30)
-                    {
-                        ClassName4ReportPoint += $"{@class.Name}, ";
+                        continue;
                     }
 
-                    TotalStudents += siso;
-                    TotalInactiveStudents += hocsinhchuahoc;
-                    TotalMinPoint8 += min8;
-                    TotalMinPoint5 += min5;
-                    TotalMinPoint2 += min2;
-                    TotalMinPoint0 += min0;
-                    TotalDontWork += chualam;
+                    var totalstd = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).CountDocuments();
 
+                    foreach (var @class in classesActive)
+                    {
+                        //Lay danh sach ID hoc sinh trong lop
+                        var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+                        var studentIds = students.Select(t => t.ID).ToList();
+                        //Lay danh sach ID bai hoc duoc mo trong tuan
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                        var activeProgress = _lessonProgressService.CreateQuery().Find(
+                            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                                x => studentIds.Contains(x.StudentID)).ToEnumerable();
+                        // danh sach bai kiem tra
+                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+
+                        //ket qua lam bai cua hoc sinh trong lop
+                        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                                           group r by r.StudentID
+                                           into g
+                                           select new StudentResult
+                                           {
+                                               StudentID = g.Key,
+                                               ExamCount = g.Count(),
+                                               AvgPoint = g.Average(t => t.LastPoint),
+                                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
+                                           }).ToList();
+
+                        //render ket qua hoc tap
+                        var min8 = classResult.Count(t => t.AvgPoint >= 80);
+                        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+                        var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+                        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+
+                        //render nhung thu can lay
+                        Int32 siso = studentIds.Count();
+                        Int32 hocsinhchuahoc = siso - activeStudents.Count();
+                        Int32 point0to49 = min0 + min2;
+                        Int32 chualam = siso - min0 - min2 - min5 - min8;
+
+                        //render ti le %
+                        Double percentPoint0To49 = Math.Round((((Double)point0to49 / siso) * 100), 2);
+                        Double percentChualam = Math.Round((((Double)chualam / siso) * 100), 2);
+
+                        if (percentChualam > 30)
+                        {
+                            ClassName4ReportInactive += $"{@class.Name}, ";
+                        }
+                        if (percentPoint0To49 > 30)
+                        {
+                            ClassName4ReportPoint += $"{@class.Name}, ";
+                        }
+
+                        TotalStudents += siso;
+                        TotalInactiveStudents += hocsinhchuahoc;
+                        TotalMinPoint8 += min8;
+                        TotalMinPoint5 += min5;
+                        TotalMinPoint2 += min2;
+                        TotalMinPoint0 += min0;
+                        TotalDontWork += chualam;
+
+                    }
+
+                    if (!String.IsNullOrEmpty(ClassName4ReportPoint))
+                    {
+                        ClassName4ReportPoint = ClassName4ReportPoint.Remove(ClassName4ReportPoint.LastIndexOf(",")) + ".";
+                    }
+                    if (!String.IsNullOrEmpty(ClassName4ReportInactive))
+                    {
+                        ClassName4ReportInactive = ClassName4ReportInactive.Remove(ClassName4ReportInactive.LastIndexOf(",")) + ".";
+                    }
+
+                    ReportViewModal data = new ReportViewModal
+                    {
+                        CenterName = center.Name,
+                        //TotalStudents = TotalStudents,
+                        TotalStudents = (int)totalstd,
+                        TotalInactiveStudents = TotalInactiveStudents,
+                        MinPoint8 = TotalMinPoint8,
+                        MinPoint5 = TotalMinPoint5,
+                        MinPoint2 = TotalMinPoint2,
+                        MinPoint0 = TotalMinPoint0,
+                        TotalDontWork = TotalDontWork,
+                        ClassName4ReportPoint = ClassName4ReportPoint,
+                        ClassName4ReportInactive = ClassName4ReportInactive
+                    };
+
+                    listReport.Add(data);
                 }
-
-                if (!String.IsNullOrEmpty(ClassName4ReportPoint))
-                {
-                    ClassName4ReportPoint = ClassName4ReportPoint.Remove(ClassName4ReportPoint.LastIndexOf(",")) + ".";
-                }
-                if (!String.IsNullOrEmpty(ClassName4ReportInactive))
-                {
-                    ClassName4ReportInactive = ClassName4ReportInactive.Remove(ClassName4ReportInactive.LastIndexOf(",")) + ".";
-                }
-
-                ReportViewModal data = new ReportViewModal
-                {
-                    CenterName = center.Name,
-                    TotalStudents = TotalStudents,
-                    TotalInactiveStudents = TotalInactiveStudents,
-                    MinPoint8 = TotalMinPoint8,
-                    MinPoint5 = TotalMinPoint5,
-                    MinPoint2 = TotalMinPoint2,
-                    MinPoint0 = TotalMinPoint0,
-                    TotalDontWork = TotalDontWork,
-                    ClassName4ReportPoint = ClassName4ReportPoint,
-                    ClassName4ReportInactive = ClassName4ReportInactive
-                };
-
-                listReport.Add(data);
             }
 
             String body = await SendContentToCustomerCare(listReport);
@@ -583,8 +616,8 @@ namespace AutoEmailEduso
                         $"<div style='font-style: italic;font-size: 12px'>Kết quả được cập nhật lần cuối lúc {endWeek.ToString("HH:mm - dd/MM/yyyy")}</div>" +
                         $"{body}";
 
-            List<String> toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com", "kchidinh@gmail.com","buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
-            _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE);
+            List<String> toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<String> { "nguyenhoa.dev@gmail.com", "kchidinh@gmail.com", "buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
+            //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE);
             Console.WriteLine("Send To Team Customer Care is Done");
         }
 

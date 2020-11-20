@@ -17,6 +17,8 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using System.Threading.Tasks;
+using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
@@ -30,12 +32,19 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<NewsCategoryEntity, NewsCategoryViewModel> _mapping;
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mappings;
+        private readonly TeacherService _teacherService;
+        private static MailHelper _mailHelper;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         public NewsController(
             NewsCategoryService newsCategoryService, 
             NewsService newsService,
             CenterService centerService, 
             ClassService classService,
-            IHostingEnvironment evn)
+            IHostingEnvironment evn,
+            TeacherService teacherService,
+            MailHelper mailHelper,
+            IRoxyFilemanHandler roxyFilemanHandler
+            )
         {
             _serviceNewCate = newsCategoryService;
             _serviceNews = newsService;
@@ -44,6 +53,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<NewsCategoryEntity, NewsCategoryViewModel>();
             _mappings = new MappingEntity<NewsEntity, NewsViewModel>();
             _env = evn;
+            _teacherService = teacherService;
+            _mailHelper = mailHelper;
+            _roxyFilemanHandler = roxyFilemanHandler;
         }
 
         public ActionResult Index()
@@ -433,6 +445,51 @@ namespace BaseCustomerMVC.Controllers.Admin
                                 { "Data", data.ToList() },
                                 {"Error", null }
                             });
+        }
+        #endregion
+
+        #region New functions
+        public IActionResult NewFunctions()
+        {
+            var centers = _serviceCenter.GetAll();
+            ViewBag.Centers = centers.ToList();
+            return View();
+        }
+
+        public async Task<JsonResult> SendMail(NewsEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var category = _serviceNewCate.GetItemByCode("gioi-thieu");
+                item.CategoryID = category == null ? "" : category.ID;
+                item.IsActive = false;
+                item.IsHot = false;
+                item.IsPublic = false;
+                item.IsTop = false;
+                item.CreateDate = DateTime.UtcNow;
+                item.CreateUser = UserID;
+
+                _serviceNews.CreateOrUpdate(item);
+                if (item.Targets != null)
+                    foreach (var centerID in item.Targets)
+                    {
+                        var center = _serviceCenter.CreateQuery().Find(x => x.ID == centerID && x.ExpireDate >= DateTime.Now).FirstOrDefault();
+                        if (center != null)
+                        {
+                            //danh sach giao vien trong co so
+                            var listTeacher = _teacherService.GetByCenterID(center.ID);
+                            List<String> emails = listTeacher.Select(x => x.Email).ToList();
+                            var toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com" };
+                            _ = await _mailHelper.SendBaseEmail(toAddress, item.Title, item.Content, MailPhase.NEW_FUNCTION);
+                        }
+                    }
+                return Json("Gửi thành công");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
         #endregion
     }
