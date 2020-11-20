@@ -2382,6 +2382,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     aGrp.AppendHTML(answer);
                     break;
                 case "ESSAY":
+                    html = $"<p>[Des]</p>{html}";
+                    var lessonPartQuestion = _lessonPartQuestionService.GetByPartID(_lessonPart.ID).FirstOrDefault();
+                    if (lessonPartQuestion != null)
+                    {
+                        html += $"<p>[Ex]</p>{lessonPartQuestion.Description}";
+                        html += $"<p>[p]</p><p>{lessonPartQuestion.Point}</p>";
+                    }
+                    descriptionRow_Cel2_Content.AppendHTML(html);
                     break;
                 default:
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
@@ -2451,10 +2459,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //break part
             s.AddParagraph();
-
-
-
-
         }
 
         private string RenderTQuizForWord(LessonPartEntity lessonPart, out string answer)
@@ -2472,15 +2476,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 returnHtml += "<p>[Q" + i + "] " + RenderHtmlContent(quiz.Content, quiz.Media) + "</p>";
                 var ans = _lessonPartAnswerService.GetByQuestionID(quiz.ID);
 
+                answer += "<p>";
+
                 if (ans != null && ans.Count() > 0)
                 {
                     answer += "[A" + i + "] ";
                     answer += string.Join(" | ", ans.Select(t => RenderHtmlContent(t.Content, t.Media) + (t.IsCorrect ? " (x)" : "")));
                 }
+                answer += "</p>";
                 if (!string.IsNullOrEmpty(quiz.Description))
-                    answer += (" [Ex" + i + "] " + quiz.Description);
-                answer += "<br/>";
-
+                    answer += ("<p>[Ex" + i + "] " + quiz.Description + "</p>");
 
             }
 
@@ -2506,19 +2511,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 i++;
                 var quiz = questions.First();
                 returnHtml += description.Substring(0, firstOccurIndex) + "_Q" + i + "";
-                if (!string.IsNullOrEmpty(quiz.Content))
-                    returnHtml += (":" + quiz.Content);
+                //if (!string.IsNullOrEmpty(quiz.Content))
+                //    returnHtml += (":" + quiz.Content);
                 returnHtml += "_";
                 var ans = _lessonPartAnswerService.GetByQuestionID(quiz.ID);
 
                 if (ans != null && ans.Count() > 0)
                 {
-                    answer += "[A" + i + "] ";
+                    answer += "<p>[A" + i + "] ";
                     answer += string.Join(" | ", ans.Select(t => t.Content));
                 }
+                answer += "</p></p>";
+                if (!string.IsNullOrEmpty(quiz.Content))
+                    answer += ($"[H{i}]" + quiz.Content);
+                answer += "</p><p>";
                 if (!string.IsNullOrEmpty(quiz.Description))
                     answer += (" [Ex" + i + "]" + quiz.Description);
-                answer += "<br/>";
+                answer += "</p>";
 
 
                 description = description.Substring(description.IndexOf(quizClose) + quizClose.Length);
@@ -2543,7 +2552,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return returnHTML;
         }
-
 
         public IActionResult ExportWordTemplate()
         {
@@ -2986,7 +2994,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     Status = true;
                                     break;
                                 case "VOCAB":
-                                    await GetContentQuiz2andVocab(table, item.Type, basis, item);
+                                    await GetContentVocab(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "QUIZ1":
@@ -2997,18 +3005,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     break;
                                 case "QUIZ2":
                                     item.Description = "";
-                                    Msg += await GetContentQuiz2andVocab(table, item.Type, basis, item);
+                                    Msg += await GetContentQuiz2(table, item.Type, basis, item);
                                     Status = true;
                                     break;
                                 case "ESSAY":
                                     item.Type = "ESSAY";
-                                    return new JsonResult(new Dictionary<string, object>
-                                        {
-                                            //{ "Data", full_item },
-                                            {"Msg", "Dạng Essay đang trong quá trình hoàn thiện, vui lòng quay lại sau." },
-                                            {"Stt",false }
-                                        });
-                                //break;
+                                    await GetContentEssay(table, item.Type, basis, item, UserID);
+                                    Status = true;
+                                    break;
                                 default:
                                     break;
                             }
@@ -3034,24 +3038,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        //Doan nay moi viet thi phai
         private async Task<String> GetContentQUIZ(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
         {
             try
             {
-                List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
+                //List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
+                Dictionary<String, QuestionViewModel> Quiz = new Dictionary<string, QuestionViewModel>();
+                Dictionary<String, List<AnswerViewModel>> listAns = new Dictionary<string, List<AnswerViewModel>>();
                 Int32 pos = -1;
+                Int32 indexQuiz = 1;
+                Int32 indexAns = 1;
+                Int32 indexEx = 1;
 
-                var totalRows = table.Rows.Count;
-                for (int indexRow = 8; indexRow < totalRows; indexRow++)
+                var paragraphs = table.Rows[3].Cells[1].Paragraphs;
+                foreach (Paragraph para in paragraphs)
                 {
-                    var contentRow = table.Rows[indexRow];
-                    String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
-                    String contentCell1 = contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim().ToLower();
-                    String contentCell2 = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim().ToLower().ToLower();
-                    if (contentCell0 != "" || !String.IsNullOrEmpty(contentCell0))
+                    var content = para.Text.Trim();
+                    if (content.Contains($"[Q{indexQuiz}]"))//cau hoi
                     {
-                        pos++;
-                        //var question = new QuestionViewModel();
                         var question = new QuestionViewModel
                         {
                             ParentID = item.ID,
@@ -3062,99 +3067,97 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             CreateUser = createUser,
                             Point = 1,
                             Answers = new List<LessonPartAnswerEntity>() { },//danh sach cau tra loi,
-                            Media = new Media(),
-                            Content = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim()
                         };
-                        Quiz.Add(question);
-                    }
-
-                    else if ((contentCell0 == "" && contentCell1 == "" || String.IsNullOrEmpty(contentCell0) && String.IsNullOrEmpty(contentCell1)) && (contentCell2 != "" || !String.IsNullOrEmpty(contentCell2))) //answer
-                    {
-                        if (contentCell2.Equals("stt")) continue;
-                        else
+                        foreach (DocumentObject obj in para.ChildObjects)
                         {
-                            var answer = new LessonPartAnswerEntity
+                            if (obj is TextRange)
+                            {
+                                question.Content += (obj as TextRange).Text.Replace($"[Q{indexQuiz}]", "");
+                            }
+                            else if (obj is DocPicture)
+                            {
+                                var pic = obj as DocPicture;
+                                var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
+
+                                question.Media = new Media()
+                                {
+                                    Created = DateTime.UtcNow,
+                                    Path = path,
+                                    OriginalName = filename,
+                                    Name = filename,
+                                    Extension = "image/jpg"
+                                };
+                            }
+                        }
+                        Quiz.Add($"[Q{indexQuiz}]", question);
+                        pos++;
+                        indexQuiz++;
+                    }
+                    else if (content.Contains($"[A{indexAns}]"))
+                    {
+                        var lstAns = para.Text.Replace($"[Đáp án]\v[A{indexAns}]", "").Replace($"[A{indexAns}]", "").Trim().Split('|');
+                        foreach (var _ans in lstAns)
+                        {
+                            var ans = new LessonPartAnswerEntity
                             {
                                 CourseID = item.CourseID,
                                 CreateUser = createUser,
                                 Created = DateTime.UtcNow,
                                 Updated = DateTime.UtcNow,
-                                Media = new Media()
+                                //Media = null,
+                                Content = _ans.Replace("(x)", "").Replace("(X)", "").Trim(),
+                                IsCorrect = _ans.Trim().ToUpper().Contains("X") ? true : false,
                             };
-                            String contentCell3 = contentRow.Cells[3].Paragraphs[0].Text?.ToString().Trim();
-                            String contentCell4 = contentRow.Cells[4].Paragraphs[0].Text?.ToString().Trim().ToLower();
-                            String contentCell5 = contentRow.Cells[5].Paragraphs[0].Text?.ToString().Trim().ToLower();
-
-                            answer.Content = contentCell3;
-                            answer.IsCorrect = contentCell5.Equals("x");
-
-                            if (String.IsNullOrEmpty(contentCell4))
+                            Quiz[$"[Q{indexAns}]"].Answers.Add(ans);
+                        }
+                        foreach (DocumentObject obj in para.ChildObjects)
+                        {
+                            if (obj is DocPicture)
                             {
-                                var contentFile = GetContentFile(contentRow.Cells[4].Paragraphs, basis);
-                                if (contentFile.Count > 0)
+                                var pic = obj as DocPicture;
+                                var previousSibling = (obj.PreviousSibling as TextRange).Text.Replace($"[A{indexAns}]", "").Replace($"[Ex{indexAns}]", "").Replace("|", "").Replace("(X)", "").Replace("(x)", "").Trim();
+                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmss")}_ans{previousSibling}.jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, basis);
+                                var _test = lstAns.Contains(previousSibling);
+                                var ansWmedia = Quiz[$"[Q{indexAns}]"].Answers.Find(x => x.Content.Contains(previousSibling));
+                                ansWmedia.Media = new Media
                                 {
-                                    answer.Media.Created = DateTime.Now;
-                                    answer.Media.Name = contentFile["FileName"];
-                                    answer.Media.Path = contentFile["FilePath"];
-                                    answer.Media.Extension = "image/png";
-                                }
+                                    Name = fileName,
+                                    OriginalName = fileName,
+                                    Path = path,
+                                    Extension = "image/jpg",
+                                    //Extension = System.IO.Path.GetExtension(path),
+                                    Created = DateTime.Now,
+                                    Size = pic.Size.Width * pic.Size.Height
+                                };
                             }
-                            else if (contentCell4.StartsWith("https") || contentCell4.StartsWith("http"))
-                            {
-                                answer.Media.Created = DateTime.Now;
-                                answer.Media.Name = contentCell4;
-                                answer.Media.Path = contentCell4;
-                                answer.Media.Extension = "image/png";
-                            }
-
-                            //_lessonPartAnswerService.CreateOrUpdate(answer);
-                            Quiz[pos].Answers.Add(answer);
                         }
+                        indexAns++;
                     }
-                    else if ((contentCell0 != null || contentCell0 != "") && (contentCell1 != null || contentCell1 != ""))//Question
+                    else if (content.Contains($"[Ex{indexEx}]"))
                     {
-                        if (contentCell1.Contains("tiêu đề"))
+                        var str = content.Replace($"[Ex{indexEx}]", "").Trim();
+                        if (!String.IsNullOrEmpty(str))
                         {
-                            Quiz[pos].Content = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim();
+                            Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
                         }
-                        else if (contentCell1.Contains("mô tả"))
+                        while (!(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
                         {
-                            Quiz[pos].Description = contentRow.Cells[2].Paragraphs[0].Text?.ToString().Trim();
+                            Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
+                            paragraphs.Remove(para.NextSibling as Paragraph);
                         }
-                        else if (contentCell1.Contains("file đính kèm"))
-                        {
-                            if (String.IsNullOrEmpty(contentCell2))
-                            {
-                                var contentFileQuiz = GetContentFile(contentRow.Cells[2].Paragraphs, basis);
-                                if (contentFileQuiz.Count > 0)
-                                {
-                                    Quiz[pos].Media.Created = DateTime.Now;
-                                    Quiz[pos].Media.Name = contentFileQuiz["FileName"];
-                                    Quiz[pos].Media.Path = contentFileQuiz["FilePath"];
-                                    Quiz[pos].Media.Extension = "image/png";
-                                }
-                            }
-                            else if (contentCell2.StartsWith("http") || contentCell2.StartsWith("https"))
-                            {
-                                Quiz[pos].Media.Created = DateTime.Now;
-                                Quiz[pos].Media.Name = contentCell2;
-                                Quiz[pos].Media.Path = contentCell2;
-                                Quiz[pos].Media.Extension = "image/png";
-                            }
-                        }
-                        else if (contentCell1.Contains("giải thích đáp án"))
-                        {
-
-                        }
-
-                    }
-                    else
-                    {
-
+                        indexEx++;
                     }
                 }
 
-                item.Questions = Quiz;
+                List<QuestionViewModel> lpq = new List<QuestionViewModel>();
+                foreach (var quiz in Quiz)
+                {
+                    lpq.Add(quiz.Value);
+                }
+
+                item.Questions = lpq;
                 await CreateOrUpdateLessonPart(basis, item);
 
                 return "Type QUIZ 134 is OK";
@@ -3203,89 +3206,159 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task<String> GetContentQuiz2andVocab(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
+        private async Task<String> GetContentVocab(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
+        {
+            var descriptionCell = table.Rows[3].Cells[1];
+            var desc = descriptionCell.FirstParagraph.Text;
+
+            var vocabArr = desc.Split('|');
+            if (vocabArr != null && vocabArr.Length > 0)
+            {
+                foreach (var vocab in vocabArr)
+                {
+                    var vocabulary = vocab.Trim().ToLower();
+                    _ = GetVocabByCambridge(vocabulary);
+                }
+            }
+            item.Description = desc;
+
+            await CreateOrUpdateLessonPart(basis, item);
+            return $"{type} is OK";
+        }
+        private async Task<String> GetContentQuiz2(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
         {
             try
             {
-                var descriptionCell = table.Rows[3].Cells[1];
-
-
-                if (type.Equals("VOCAB"))
+                Dictionary<String, String> _listAns = new Dictionary<String, String>();
+                Dictionary<String, String> _listH = new Dictionary<String, String>();
+                Dictionary<String, String> _listEx = new Dictionary<String, String>();
+                var descCell = table.Rows[3].Cells[1];
+                var paragraphs = descCell.Paragraphs;
+                Int32 indexquiz = 1, indexans = 1, indexH = 1, indexEx = 1;
+                Paragraph nextPrg = paragraphs[0];
+                //foreach (Paragraph para in paragraphs)
+                while (nextPrg != null)
                 {
-                    var desc = descriptionCell.FirstParagraph.Text;
+                    Paragraph para = nextPrg;
+                    nextPrg = para.NextSibling as Paragraph;
+                    //if (para.Text.ToUpper().Contains("[ĐÁP ÁN]"))
+                    //{
 
-                    var vocabArr = desc.Split('|');
-                    if (vocabArr != null && vocabArr.Length > 0)
+                    //    var Ans = para.Text.Trim().Replace("\v", "|").Split('|');
+                    //    foreach (var a in Ans)
+                    //    {
+                    //        if (a.Contains($"[A{indexans}]"))
+                    //        {
+                    //            String str = a.Replace($"[A{indexans}]", "").Trim();
+                    //            _listAns.Add($"[A{indexans}]", str);
+                    //            indexans++;
+                    //        }
+                    //    }
+                    //    table.Rows[3].Cells[1].Paragraphs.Remove(para);
+                    //}
+                    //if (para.Text.ToUpper().Contains("[CÂU HỎI]")) table.Rows[3].Cells[1].Paragraphs.Remove(para);
+                    var content = para.Text.Trim();
+                    String ex = "";
+                    String h = "";
+                    if (para.Text.ToUpper().Contains("[CÂU HỎI]")) descCell.Paragraphs.Remove(para);
+                    else if (para.Text.Trim().Contains($"[A{indexans}]"))
                     {
-                        foreach (var vocab in vocabArr)
-                        {
-                            var vocabulary = vocab.Trim().ToLower();
-                            _ = GetVocabByCambridge(vocabulary);
-                        }
+                        //var Ans = content.Split('|');
+                        //foreach (var a in Ans)
+                        //{
+                        //    if (a.Contains($"[A{indexans}]"))
+                        //    {
+                        //        string str = a.Replace($"[A{indexans}]", "").Trim();
+                        //        _listAns.Add($"[A{indexans}]", str);
+                        //        indexans++;
+                        //    };
+                        //}
+                        String str = content.Replace($"[A{indexans}]", "").Trim();
+                        _listAns.Add($"[A{indexans}]", str);
+                        indexans++;
+                        descCell.Paragraphs.Remove(para);
                     }
-                    item.Description = desc;
+                    else if (para.Text.Trim().Contains($"[H{indexH}]"))
+                    {
+                        var str = content.Replace($"[H{indexH}]", "").Trim();
+                        h += str;
+                        while (para.NextSibling != null && (
+                            !(para.NextSibling as Paragraph).Text.Contains($"[A{indexH + 1}]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex{indexH + 1}]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex{indexH}]")))
+                        {
+                            h += (para.NextSibling as Paragraph)?.Text + " ";
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                        }
+                        _listH.Add($"H{indexH}", h);
+                        indexH++;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.Trim().Contains($"[Ex{indexEx}]"))
+                    {
+                        var str = content.Replace($"[Ex{indexEx}]", "").Trim();
+                        ex += str;
+                        while (para.NextSibling != null && (!(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]") && !(para.NextSibling as Paragraph).Text.Contains($"[H{indexEx + 1}]")))
+                        {
+                            ex += (para.NextSibling as Paragraph)?.Text + " ";
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                        }
+                        _listEx.Add($"Ex{indexEx}", ex);
+                        indexEx++;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.ToUpper().Contains("[ĐÁP ÁN]")) descCell.Paragraphs.Remove(para);
 
-                    await CreateOrUpdateLessonPart(basis, item);
-                    return $"{type} is OK";
                 }
-                else
+
+                //for (Int32 i = 0; i < paragraphs.Count; i++)
+                //{
+                //    var paraText = descCell.Paragraphs[i].Text.Trim();
+                //    for (Int32 j = 0; j < _listAns.Count(); j++)
+                //    {
+                //        var a = _listAns[$"[A{j + 1}]"];
+                //        var ex = _listEx[$"Ex{j + 1}"];
+                //        var h = _listH[$"H{j + 1}"];
+                //        var str = a.Replace($"[A{j + 1}]", "").Trim();
+                //        var replace1 = $"_Q{j + 1}_";
+                //        var replace2 = $"<fillquiz contenteditable='false' readonly='readonly' title='{ex}'><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{h}' placeholder='{ex}' readonly='readonly' type='text' value='{str}'/></fillquiz>";
+
+                //        if (paraText.Contains(replace1))
+                //        {
+                //            descCell.Paragraphs[i].Replace(replace1, replace2, false, true);
+                //        }
+                //    }
+                //}
+
+                for (Int32 i = 0; i < paragraphs.Count; i++)
                 {
-                    var totalRows = table.Rows.Count;
-                    for (int indexRow = 0; indexRow < totalRows; indexRow++)
+                    var paraText = descCell.Paragraphs[i].Text.Trim();
+                    if (paraText.StartsWith($"_Q{i + 1}_"))
                     {
-                        var contentRow = table.Rows[indexRow];
-                        String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
-
-                        if (contentCell0.Equals("nội dung"))
-                        {
-                            Int32 countPara = contentRow.Cells[1].Paragraphs.Count;
-                            var txt = contentRow.Cells[1].Paragraphs[0].Text?.ToString().Trim().ToLower();
-                            for (int indexPara = 0; indexPara < countPara; indexPara++)
-                            {
-                                List<LessonPartAnswerEntity> listAns = new List<LessonPartAnswerEntity>();
-                                String contentQUIZ2 = contentRow.Cells[1].Paragraphs[indexPara].Text?.ToString().Trim();
-                                while (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
-                                {
-                                    Int32 startIndex = contentQUIZ2.IndexOf("{{") + 2;
-                                    Int32 lenghtStr = contentQUIZ2.IndexOf("}}") - startIndex;
-                                    String oldStr = contentQUIZ2.Substring(startIndex, lenghtStr);
-                                    String newStr = validateFill(oldStr);
-                                    var answer = new LessonPartAnswerEntity
-                                    {
-                                        CourseID = item.CourseID,
-                                        CreateUser = createUser,
-                                        Created = DateTime.UtcNow,
-                                        Updated = DateTime.UtcNow,
-                                        Media = new Media(),
-                                        Content = newStr,
-                                        IsCorrect = true,
-                                    };
-                                    listAns.Add(answer);
-                                    if (contentQUIZ2.Contains("{{") && contentQUIZ2.Contains("}}"))
-                                    {
-                                        contentQUIZ2 = contentQUIZ2.Replace($"{{{{{oldStr}}}}}", newStr);
-                                    }
-                                }
-
-                                foreach (var ans in listAns)
-                                {
-                                    String str = ans.Content;
-                                    String formatDes = $"<fillquiz contenteditable='false' readonly='readonly' title=''><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{str}' placeholder='{str}' readonly='readonly' type='text' value='{str}' /></fillquiz>";
-                                    contentQUIZ2 = contentQUIZ2.Replace(str, formatDes);
-                                }
-                                item.Description += $"<p>{contentQUIZ2}</p>\n\n";
-                            }
-                        }
-                        else continue;
+                        descCell.Paragraphs[i].Replace($"_Q{i + 1}_", $"EDUSOQUIZ2_Q{i + 1}_", false, true);
                     }
-
-                    var newdescription = "";
-                    item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
-                    item.Description = newdescription;
-                    await CreateOrUpdateLessonPart(basis, item);
-
-                    return $"{type} is OK";
                 }
+
+                String description = await ConvertDocToHtml(table, basis, createUser);
+                foreach (var a in _listAns)
+                {
+                    var ex = _listEx[$"Ex{indexquiz}"];
+                    var h = _listH[$"H{indexquiz}"];
+                    var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
+                    String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
+                    String replace1 = $"_Q{indexquiz}_";
+                    String replace2 = $"<fillquiz contenteditable='false' readonly='readonly' title='{ex}'><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{h}' placeholder='{ex}' readonly='readonly' type='text' value='{str}'/></fillquiz>";
+                    description = description.Replace(replace3, replace2).Replace(replace1, replace2);
+                    indexquiz++;
+                }
+                item.Description = description;
+
+                var newdescription = "";
+                item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
+                item.Description = newdescription;
+                await CreateOrUpdateLessonPart(basis, item);
+
+                return $"{type} is OK";
             }
             catch (Exception ex)
             {
@@ -3405,123 +3478,96 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var linkcell = table.Rows[4].Cells[1];
 
                 var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
 
-                foreach (Paragraph prg in linkcell.Paragraphs)
-                {
-
-                    foreach (DocumentObject obj in prg.ChildObjects)
-                    {
-
-                        if (obj is Field)
-                        {
-                            var link = obj as Field;
-                            if (link.Type == FieldType.FieldHyperlink)
-                            {
-                                item.Media = new Media
-                                {
-                                    Created = DateTime.UtcNow,
-                                    Path = link.Value.Replace("\"", ""),
-                                    OriginalName = link.FieldText,
-                                    Name = link.FieldText,
-                                    Extension = GetContentType(link.FieldText)
-                                };
-                                break;
-                            }
-                        }
-                        else if (obj is DocPicture)
-                        {
-                            var pic = obj as DocPicture;
-                            var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
-                            var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
-
-                            item.Media = new Media()
-                            {
-                                Created = DateTime.UtcNow,
-                                Path = path,
-                                OriginalName = filename,
-                                Name = filename,
-                                Extension = "image/jpg"
-                            };
-                            break;
-                        }
-                        else if (obj is DocOleObject)
-                        {
-                            Dictionary<String, String> pathFileOLE = await GetPathFileOLE(obj as DocOleObject, basis, createUser);
-                            item.Media = new Media()
-                            {
-                                Created = DateTime.UtcNow,
-                                Path = pathFileOLE["pathFileOLE"],
-                                OriginalName = pathFileOLE["packageFileName"],
-                                Name = pathFileOLE["packageFileName"],
-                                Extension = GetContentType(pathFileOLE["extension"])
-                            };
-                            break;
-                        }
-                        else if (obj is TextRange)
-                        {
-                            var str = (obj as TextRange).Text;
-                            if (str.ToLower().StartsWith("http"))
-                            {
-                                linkfile = str.Trim();
-                                var contentType = GetContentType(linkfile);
-                                if (contentType == "application/octet-stream")//unknown type
-                                {
-                                    switch (item.Type)
-                                    {
-                                        case "AUDIO":
-                                            contentType = "audio/mp3";
-                                            break;
-                                        case "VIDEO":
-                                            contentType = "video/mpeg";
-                                            break;
-                                        case "DOC":
-                                            contentType = "application/pdf";
-                                            break;
-                                        case "IMAGE":
-                                            contentType = "image/jpeg";
-                                            break;
-                                    }
-                                }
-                                item.Media = new Media()
-                                {
-                                    Created = DateTime.UtcNow,
-                                    Path = linkfile,
-                                    OriginalName = linkfile,
-                                    Name = linkfile,
-                                    Extension = contentType
-                                };
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                //if (!String.IsNullOrEmpty(filePath))
+                //foreach (Paragraph prg in linkcell.Paragraphs)
                 //{
-                //    if (filePath.StartsWith("http") || filePath.StartsWith("https"))
+
+                //    foreach (DocumentObject obj in prg.ChildObjects)
                 //    {
-                //        item.Media = new Media()
+
+                //        if (obj is Field)
                 //        {
-                //            Created = DateTime.UtcNow,
-                //            Path = filePath,
-                //            OriginalName = filePath,
-                //            Name = filePath,
-                //            Extension = GetContentType(filePath)
-                //        };
+                //            var link = obj as Field;
+                //            if (link.Type == FieldType.FieldHyperlink)
+                //            {
+                //                item.Media = new Media
+                //                {
+                //                    Created = DateTime.UtcNow,
+                //                    Path = link.Value.Replace("\"", ""),
+                //                    OriginalName = link.FieldText,
+                //                    Name = link.FieldText,
+                //                    Extension = GetContentType(link.FieldText)
+                //                };
+                //                break;
+                //            }
+                //        }
+                //        else if (obj is DocPicture)
+                //        {
+                //            var pic = obj as DocPicture;
+                //            var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
+                //            var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
+
+                //            item.Media = new Media()
+                //            {
+                //                Created = DateTime.UtcNow,
+                //                Path = path,
+                //                OriginalName = filename,
+                //                Name = filename,
+                //                Extension = "image/jpg"
+                //            };
+                //            break;
+                //        }
+                //        else if (obj is DocOleObject)
+                //        {
+                //            Dictionary<String, String> pathFileOLE = await GetPathFileOLE(obj as DocOleObject, basis, createUser);
+                //            item.Media = new Media()
+                //            {
+                //                Created = DateTime.UtcNow,
+                //                Path = pathFileOLE["pathFileOLE"],
+                //                OriginalName = pathFileOLE["packageFileName"],
+                //                Name = pathFileOLE["packageFileName"],
+                //                Extension = GetContentType(pathFileOLE["extension"])
+                //            };
+                //            break;
+                //        }
+                //        else if (obj is TextRange)
+                //        {
+                //            var str = (obj as TextRange).Text;
+                //            if (str.ToLower().StartsWith("http"))
+                //            {
+                //                linkfile = str.Trim();
+                //                var contentType = GetContentType(linkfile);
+                //                if (contentType == "application/octet-stream")//unknown type
+                //                {
+                //                    switch (item.Type)
+                //                    {
+                //                        case "AUDIO":
+                //                            contentType = "audio/mp3";
+                //                            break;
+                //                        case "VIDEO":
+                //                            contentType = "video/mpeg";
+                //                            break;
+                //                        case "DOC":
+                //                            contentType = "application/pdf";
+                //                            break;
+                //                        case "IMAGE":
+                //                            contentType = "image/jpeg";
+                //                            break;
+                //                    }
+                //                }
+                //                item.Media = new Media()
+                //                {
+                //                    Created = DateTime.UtcNow,
+                //                    Path = linkfile,
+                //                    OriginalName = linkfile,
+                //                    Name = linkfile,
+                //                    Extension = contentType
+                //                };
+                //                break;
+                //            }
+                //        }
                 //    }
-                //}
-                //else
-                //{
-                //    Paragraph para = table.Rows[4].Cells[1].Paragraphs[0];
-                //    Dictionary<String, String> pathFileOLE = await GetPathFileOLE(para, basis, createUser);
-                //    item.Media = new Media()
-                //    {
-                //        Created = DateTime.UtcNow,
-                //        Path = pathFileOLE["pathFileOLE"],
-                //        OriginalName = pathFileOLE["packageFileName"],
-                //        Name = pathFileOLE["packageFileName"],
-                //        Extension = pathFileOLE["extension"]
-                //    };
                 //}
 
                 await CreateOrUpdateLessonPart(basis, item);
@@ -3530,6 +3576,97 @@ namespace BaseCustomerMVC.Controllers.Teacher
             catch (Exception ex)
             {
                 return $"{type} is error {ex.Message}";
+            }
+        }
+
+        private async Task<String> GetContentEssay(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                String descriptionLessonPart = "";
+                String descriptionQUIZ = "";
+                Double point = 0;
+
+                var descCell = table.Rows[3].Cells[1];
+                var paragraphs = descCell.Paragraphs;
+                DocumentObject nextPrg = paragraphs[0];
+
+                //lay mo ta
+                while (nextPrg != null)
+                {
+                    if (!(nextPrg is Paragraph))
+                    {
+                        nextPrg = nextPrg.NextSibling as DocumentObject;
+                        continue;
+                    }
+                    Paragraph para = nextPrg as Paragraph;
+                    nextPrg = para.NextSibling as DocumentObject;
+
+                    var content = para.Text.Trim();
+                    if (para.Text.ToUpper().Contains("[DES]"))
+                        descCell.Paragraphs.Remove(para);
+                    else if (para.Text.Trim().ToUpper().Contains($"[EX]"))
+                    {
+                        var str = content.Replace($"[Ex]", "").Trim();
+                        descriptionQUIZ += str;
+                        while (para.NextSibling != null && (
+                            !(para.NextSibling as Paragraph).Text.Contains($"[Des]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[P]")))
+                        {
+                            descriptionQUIZ += (para.NextSibling as Paragraph)?.Text + " ";
+                            //if (!(para.NextSibling as Paragraph).Text.Trim().Contains("[P]"))
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                        }
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.Trim().ToUpper().Contains($"[P]"))
+                    {
+                        var str = content.Replace($"[P]", "").Trim();
+                        if (!String.IsNullOrEmpty(str))
+                        {
+                            Double.TryParse(str, out point);
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            descCell.Paragraphs.Remove(para);
+                        }
+                        else
+                        {
+                            Double.TryParse((para.NextSibling as Paragraph)?.Text.Trim(), out point);
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            descCell.Paragraphs.Remove(para);
+                        }
+                    }
+                }
+
+
+                descriptionLessonPart = await ConvertDocToHtml(table, basis, createUser);
+                descriptionQUIZ = $"<p>{descriptionQUIZ}</p>";
+
+                item.Description = descriptionLessonPart;
+                item.Point = point;
+                var question = new QuestionViewModel
+                {
+                    Created = DateTime.UtcNow,
+                    CreateUser = createUser,
+                    Description = descriptionQUIZ,
+                    Point = point,
+                    MaxPoint = point
+                };
+                item.Questions = new List<QuestionViewModel>();
+                item.Questions.Add(question);
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
+                await CreateOrUpdateLessonPart(basis, item);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
             }
         }
 
@@ -3581,20 +3718,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
             }
 
-            String strToReplace1 = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'><html xmlns='http://www.w3.org/1999/xhtml'><head><meta http-equiv='Content-Type' content='application/xhtml+xml; charset=utf-8' /><title></title><style type='text/css'>body{ font-family:'Times New Roman'; font-size:1em; }
-ul, ol{ margin-top: 0; margin-bottom: 0; }
-.Normal{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:0pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-.List-Paragraph{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:14.5pt;text-indent:-6.95pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:11pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-.Body-Text{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-</style></head><body style='pagewidth:595.35pt;pageheight:841.95pt;'><div class='Section0'><div style='min-height:20pt' /><p class='Normal'><span style='color:#FF0000;font-size:12pt;'>Evaluation Warning: The document was created with Spire.Doc for .NET.</span></p>";
+            //            String strToReplace1 = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'><html xmlns='http://www.w3.org/1999/xhtml'><head><meta http-equiv='Content-Type' content='application/xhtml+xml; charset=utf-8' /><title></title><style type='text/css'>body{ font-family:'Times New Roman'; font-size:1em; }
+            //ul, ol{ margin-top: 0; margin-bottom: 0; }
+            //.Normal{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:0pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
+            //.List-Paragraph{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:14.5pt;text-indent:-6.95pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:11pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
+            //.Body-Text{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
+            //</style></head><body style='pagewidth:595.35pt;pageheight:841.95pt;'><div class='Section0'><div style='min-height:20pt' /><p class='Normal'><span style='color:#FF0000;font-size:12pt;'>Evaluation Warning: The document was created with Spire.Doc for .NET.</span></p>";
             String strToReplace2 = @"</div></body></html>";
-            string test = content.Replace(strToReplace1, "")
+            String strToreplace3 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"application/xhtml+xml; charset=utf-8\" /><title></title></head><body style=\"pagewidth:595.35pt;pageheight:841.95pt;\"><div class=\"Section0\"><div style=\"min-height:20pt\" /><p class=\"Normal\"><span style=\"color:#FF0000;font-size:12pt;\"></span></p>";
+            string test = content
+                //.Replace(strToReplace1, "")
                 .Replace("Evaluation Warning: The document was created with Spire.Doc for .NET.", "")
                 .Replace(strToReplace2, "")
                 .Replace(temp + "_images/", "/Files/" + basis + "/" + user + "/" + temp + "_images/")
-                .Replace("<link href=\"" + temp + "_styles.css\" type=\"text/css\" rel=\"stylesheet\"/>", "");
+                .Replace("<link href=\"" + temp + "_styles.css\" type=\"text/css\" rel=\"stylesheet\"/>", "")
+                .Replace(strToreplace3, "");
 
-            return test;
+            return test.Trim();
         }
 
         private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
@@ -3762,9 +3902,6 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
             }
         }
 
-
-
-
         private async Task<Dictionary<String, String>> GetPathFileOLE(Paragraph para, String basis, String createUser)
         {
             Dictionary<String, String> dataResponse = new Dictionary<String, String>();
@@ -3914,6 +4051,101 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
             return dataResponse;
         }
 
+        private async Task<string> GetContentFile(string basis, LessonPartViewModel item, string createUser, TableCell linkcell, string linkfile)
+        {
+            foreach (Paragraph prg in linkcell.Paragraphs)
+            {
+
+                foreach (DocumentObject obj in prg.ChildObjects)
+                {
+
+                    if (obj is Field)
+                    {
+                        var link = obj as Field;
+                        if (link.Type == FieldType.FieldHyperlink)
+                        {
+                            item.Media = new Media
+                            {
+                                Created = DateTime.UtcNow,
+                                Path = link.Value.Replace("\"", ""),
+                                OriginalName = link.FieldText,
+                                Name = link.FieldText,
+                                Extension = GetContentType(link.FieldText)
+                            };
+                            break;
+                        }
+                    }
+                    else if (obj is DocPicture)
+                    {
+                        var pic = obj as DocPicture;
+                        var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
+                        var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
+
+                        item.Media = new Media()
+                        {
+                            Created = DateTime.UtcNow,
+                            Path = path,
+                            OriginalName = filename,
+                            Name = filename,
+                            Extension = "image/jpg"
+                        };
+                        break;
+                    }
+                    else if (obj is DocOleObject)
+                    {
+                        Dictionary<String, String> pathFileOLE = await GetPathFileOLE(obj as DocOleObject, basis, createUser);
+                        item.Media = new Media()
+                        {
+                            Created = DateTime.UtcNow,
+                            Path = pathFileOLE["pathFileOLE"],
+                            OriginalName = pathFileOLE["packageFileName"],
+                            Name = pathFileOLE["packageFileName"],
+                            Extension = GetContentType(pathFileOLE["extension"])
+                        };
+                        break;
+                    }
+                    else if (obj is TextRange)
+                    {
+                        var str = (obj as TextRange).Text;
+                        if (str.ToLower().StartsWith("http"))
+                        {
+                            linkfile = str.Trim();
+                            var contentType = GetContentType(linkfile);
+                            if (contentType == "application/octet-stream")//unknown type
+                            {
+                                switch (item.Type)
+                                {
+                                    case "AUDIO":
+                                        contentType = "audio/mp3";
+                                        break;
+                                    case "VIDEO":
+                                        contentType = "video/mpeg";
+                                        break;
+                                    case "DOC":
+                                        contentType = "application/pdf";
+                                        break;
+                                    case "IMAGE":
+                                        contentType = "image/jpeg";
+                                        break;
+                                }
+                            }
+                            item.Media = new Media()
+                            {
+                                Created = DateTime.UtcNow,
+                                Path = linkfile,
+                                OriginalName = linkfile,
+                                Name = linkfile,
+                                Extension = contentType
+                            };
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return linkfile;
+        }
+
         private String SaveImageByByteArray(byte[] byteArrayIn, string fileName, string center = "")
         {
             try
@@ -3967,21 +4199,6 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
 
                     switch (lessonpart.Type)
                     {
-                        //case "ESSAY":
-                        //    _questionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
-                        //    var question = new LessonPartQuestionEntity
-                        //    {
-                        //        CourseID = lessonpart.CourseID,
-                        //        Content = "",
-                        //        Description = item.Questions == null ? "" : item.Questions[0].Description,
-                        //        ParentID = lessonpart.ID,
-                        //        CreateUser = createduser,
-                        //        Point = lessonpart.Point,
-                        //        Created = lessonpart.Created,
-                        //    };
-                        //    _questionService.Save(question);
-                        //    isPractice = true;
-                        //    break;
                         case "QUIZ2": //remove all previous question
                             item.CourseID = parentLesson.CourseID;
 
@@ -4146,7 +4363,7 @@ ul, ol{ margin-top: 0; margin-bottom: 0; }
                             CourseID = item.CourseID,
                             CreateUser = creator,
                             IsCorrect = true,
-                            Content = validAns
+                            Content = StringHelper.ReplaceSpecialCharacters(validAns)
                         });
                     }
                 }
