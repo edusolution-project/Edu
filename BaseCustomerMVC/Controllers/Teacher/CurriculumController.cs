@@ -2239,7 +2239,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
 
                     Paragraph paragraph = s.AddParagraph();
-                    TextRange TR4 = paragraph.AppendText("\nLưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
+                    TextRange TR4 = paragraph.AppendText(Note);
                     TR4.CharacterFormat.FontSize = 12;
                     TR4.CharacterFormat.TextColor = Color.Red;
 
@@ -2382,12 +2382,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     aGrp.AppendHTML(answer);
                     break;
                 case "ESSAY":
-                    html = $"<p>[Des]</p>{html}";
+                    //html = $"<p>[Des]</p>{html}";
                     var lessonPartQuestion = _lessonPartQuestionService.GetByPartID(_lessonPart.ID).FirstOrDefault();
                     if (lessonPartQuestion != null)
                     {
-                        html += $"<p>[Ex]</p>{lessonPartQuestion.Description}";
-                        html += $"<p>[p]</p><p>{lessonPartQuestion.Point}</p>";
+                        html += $"<p>[E]</p>{lessonPartQuestion.Description}";
+                        html += $"<p>[P]</p><p>{lessonPartQuestion.Point}</p>";
                     }
                     descriptionRow_Cel2_Content.AppendHTML(html);
                     break;
@@ -2488,7 +2488,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 answer += "</p>";
                 if (!string.IsNullOrEmpty(quiz.Description))
-                    answer += ("<p>[Ex" + i + "] " + quiz.Description + "</p>");
+                    answer += ("<p>[E" + i + "] " + quiz.Description + "</p>");
 
             }
 
@@ -2529,7 +2529,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     answer += ($"[H{i}]" + quiz.Content);
                 answer += "</p><p>";
                 if (!string.IsNullOrEmpty(quiz.Description))
-                    answer += (" [Ex" + i + "]" + quiz.Description);
+                    answer += (" [E" + i + "]" + quiz.Description);
                 answer += "</p>";
 
 
@@ -2945,6 +2945,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //Get the first session
                         var sw = document.Sections[0];
                         Int32 countTable = sw.Body.Tables.Count;
+
                         for (int indexTable = 0; indexTable < sw.Body.Tables.Count; indexTable++)
                         {
                             //Get the first table in the textbox
@@ -2989,31 +2990,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 case "AUDIO":
                                 case "VIDEO":
                                 case "DOC":
-                                    await GetContentOther(table, item.Type, basis, item, UserID);
+                                    Msg += (await GetContentOther(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 case "IMAGE":
-                                    Msg += await GetContentIMG(table, item.Type, basis, item);
+                                    Msg += (await GetContentIMG(table, item.Type, basis, item));
                                     Status = true;
                                     break;
                                 case "VOCAB":
-                                    await GetContentVocab(table, item.Type, basis, item);
+                                    Msg += (await GetContentVocab(table, item.Type, basis, item));
                                     Status = true;
                                     break;
                                 case "QUIZ1":
                                 case "QUIZ3":
                                 case "QUIZ4":
-                                    Msg += await GetContentQUIZ(table, item.Type, basis, item);
+                                    Msg += (await GetContentQUIZ(table, item.Type, basis, item));
                                     Status = true;
                                     break;
                                 case "QUIZ2":
                                     item.Description = "";
-                                    Msg += await GetContentQuiz2(table, item.Type, basis, item);
+                                    Msg += (await GetContentQuiz2(table, item.Type, basis, item));
                                     Status = true;
                                     break;
                                 case "ESSAY":
                                     item.Type = "ESSAY";
-                                    await GetContentEssay(table, item.Type, basis, item, UserID);
+                                    Msg += (await GetContentEssay(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 default:
@@ -3026,7 +3027,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         //{ "Data", full_item },
                         {"Msg", Msg },
-                        {"Stt",Status }
+                        {"Stt",Status == string.IsNullOrEmpty(Msg) }
                     });
                 }
             }
@@ -3054,6 +3055,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 Int32 indexEx = 1;
 
                 var paragraphs = table.Rows[3].Cells[1].Paragraphs;
+                var objs = table.Rows[3].Cells[1].ChildObjects;
                 foreach (Paragraph para in paragraphs)
                 {
                     var content = para.Text.Trim();
@@ -3118,7 +3120,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             if (obj is DocPicture)
                             {
                                 var pic = obj as DocPicture;
-                                var previousSibling = (obj.PreviousSibling as TextRange).Text.Replace($"[A{indexAns}]", "").Replace($"[Ex{indexAns}]", "").Replace("|", "").Replace("(X)", "").Replace("(x)", "").Trim();
+                                var previousSibling = (obj.PreviousSibling as TextRange).Text.Replace($"[A{indexAns}]", "").Replace($"[E{indexAns}]", "").Replace("|", "").Replace("(X)", "").Replace("(x)", "").Trim();
                                 var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmss")}_ans{previousSibling}.jpg";
                                 var path = SaveImageByByteArray(pic.ImageBytes, fileName, basis);
                                 var _test = lstAns.Contains(previousSibling);
@@ -3137,14 +3139,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         indexAns++;
                     }
-                    else if (content.Contains($"[Ex{indexEx}]"))
+                    else if (content.Contains($"[E{indexEx}]"))
                     {
-                        var str = content.Replace($"[Ex{indexEx}]", "").Trim();
+                        var str = content.Replace($"[E{indexEx}]", "").Trim();
                         if (!String.IsNullOrEmpty(str))
                         {
                             Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
                         }
-                        while (para.NextSibling != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
+                        while ((para.NextSibling as Paragraph) != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
                         {
                             Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
                             paragraphs.Remove(para.NextSibling as Paragraph);
@@ -3152,6 +3154,55 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         indexEx++;
                     }
                 }
+
+                //desription
+                //foreach (Paragraph _para in paragraphs)
+                //{
+                //    //var _para = paragraphs[0];
+                //    while (_para != null && (_para.Text.Trim().ToUpper().Contains("[CÂU HỎI]") || _para.Text.Trim().ToUpper().Contains("[ĐÁP ÁN]")))
+                //    {
+                //        if (_para.NextSibling != null)
+                //        {
+                //            paragraphs.Remove((_para.NextSibling as Paragraph));
+                //        }
+                //        else
+                //        {
+                //            paragraphs.Remove(_para);
+                //        }
+                //    }
+                //}
+
+                Paragraph nextPrg = paragraphs[0];
+                //foreach (Paragraph para in paragraphs)
+                while (nextPrg != null)
+                {
+                    Paragraph para = nextPrg;
+                    var content = para.Text.Trim();
+                    if (content.ToUpper().Contains("[CÂU HỎI]") || content.ToUpper().Contains("[ĐÁP ÁN]"))
+                    {
+                        var nextObj = para.NextSibling;
+                        while (nextObj != null)
+                        {
+                            var next = nextObj.NextSibling;
+                            objs.Remove(nextObj);
+                            nextObj = next;
+                        }
+                        paragraphs.Remove(para);
+                        break;
+                    }
+                    else
+                    {
+                        nextPrg = nextPrg.NextSibling as Paragraph;
+                    }
+                }
+
+                item.Description = await ConvertDocToHtml(table, basis, createUser);
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
 
                 List<QuestionViewModel> lpq = new List<QuestionViewModel>();
                 foreach (var quiz in Quiz)
@@ -3162,7 +3213,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.Questions = lpq;
                 await CreateOrUpdateLessonPart(basis, item);
 
-                return "Type QUIZ 134 is OK";
+                return "";
             }
             catch (Exception ex)
             {
@@ -3200,7 +3251,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     else continue;
                 }
                 _lessonPartService.CreateOrUpdate(item);
-                return "Type IMG is OK";
+                return "";
             }
             catch (Exception ex)
             {
@@ -3210,22 +3261,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private async Task<String> GetContentVocab(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
         {
-            var descriptionCell = table.Rows[3].Cells[1];
-            var desc = descriptionCell.FirstParagraph.Text;
-
-            var vocabArr = desc.Split('|');
-            if (vocabArr != null && vocabArr.Length > 0)
+            try
             {
-                foreach (var vocab in vocabArr)
-                {
-                    var vocabulary = vocab.Trim().ToLower();
-                    _ = GetVocabByCambridge(vocabulary);
-                }
-            }
-            item.Description = desc;
+                var descriptionCell = table.Rows[3].Cells[1];
+                var desc = descriptionCell.FirstParagraph.Text;
 
-            await CreateOrUpdateLessonPart(basis, item);
-            return $"{type} is OK";
+                var vocabArr = desc.Split('|');
+                if (vocabArr != null && vocabArr.Length > 0)
+                {
+                    foreach (var vocab in vocabArr)
+                    {
+                        var vocabulary = vocab.Trim().ToLower();
+                        _ = GetVocabByCambridge(vocabulary);
+                    }
+                }
+                item.Description = desc;
+
+                await CreateOrUpdateLessonPart(basis, item);
+                return $"";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         private async Task<String> GetContentQuiz2(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
@@ -3266,6 +3324,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (para.Text.ToUpper().Contains("[CÂU HỎI]")) descCell.Paragraphs.Remove(para);
                     else if (para.Text.Trim().Contains($"[A{indexans}]"))
                     {
+                        indexH = indexans;
+                        indexEx = indexans;
                         //var Ans = content.Split('|');
                         //foreach (var a in Ans)
                         //{
@@ -3283,12 +3343,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     else if (para.Text.Trim().Contains($"[H{indexH}]"))
                     {
+                        indexEx = indexH;
                         var str = content.Replace($"[H{indexH}]", "").Trim();
                         h += str;
                         while (para.NextSibling != null && (
                             !(para.NextSibling as Paragraph).Text.Contains($"[A{indexH + 1}]")
-                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex{indexH + 1}]")
-                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex{indexH}]")))
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[E{indexH + 1}]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[E{indexH}]")))
                         {
                             h += (para.NextSibling as Paragraph)?.Text + " ";
                             descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
@@ -3297,16 +3358,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         indexH++;
                         descCell.Paragraphs.Remove(para);
                     }
-                    else if (para.Text.Trim().Contains($"[Ex{indexEx}]"))
+                    else if (para.Text.Trim().Contains($"[E{indexEx}]"))
                     {
-                        var str = content.Replace($"[Ex{indexEx}]", "").Trim();
+                        var str = content.Replace($"[E{indexEx}]", "").Trim();
                         ex += str;
                         while (para.NextSibling != null && (!(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]") && !(para.NextSibling as Paragraph).Text.Contains($"[H{indexEx + 1}]")))
                         {
                             ex += (para.NextSibling as Paragraph)?.Text + " ";
                             descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
                         }
-                        _listEx.Add($"Ex{indexEx}", ex);
+                        _listEx.Add($"E{indexEx}", ex);
                         indexEx++;
                         descCell.Paragraphs.Remove(para);
                     }
@@ -3320,7 +3381,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //    for (Int32 j = 0; j < _listAns.Count(); j++)
                 //    {
                 //        var a = _listAns[$"[A{j + 1}]"];
-                //        var ex = _listEx[$"Ex{j + 1}"];
+                //        var ex = _listEx[$"E{j + 1}"];
                 //        var h = _listH[$"H{j + 1}"];
                 //        var str = a.Replace($"[A{j + 1}]", "").Trim();
                 //        var replace1 = $"_Q{j + 1}_";
@@ -3345,23 +3406,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 String description = await ConvertDocToHtml(table, basis, createUser);
                 foreach (var a in _listAns)
                 {
-                    var ex = _listEx.Count > indexquiz ? _listEx[$"Ex{indexquiz}"] : "";
-                    var h = _listH.Count > indexquiz ? _listH[$"H{indexquiz}"] : "";
+                    var ex = _listEx.ContainsKey($"E{indexquiz}") ? _listEx[$"E{indexquiz}"] : "";
+                    var h = _listH.ContainsKey($"H{indexquiz}") ? _listH[$"H{indexquiz}"] : "";
                     var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
                     String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
                     String replace1 = $"_Q{indexquiz}_";
-                    String replace2 = $"<fillquiz contenteditable='false' readonly='readonly' title='{ex}'><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{h}' placeholder='{ex}' readonly='readonly' type='text' value='{str}'/></fillquiz>";
-                    description = description.Replace(replace3, replace2).Replace(replace1, replace2);
+                    String replace2 = $"<fillquiz contenteditable=\"false\" readonly=\"readonly\" title=\"{ex}\"><input ans=\"{str}\" class=\"fillquiz\" contenteditable=\"false\" dsp=\"{h}\" placeholder=\"{ex}\" readonly=\"readonly\" type=\"text\" value=\"{str}\"/></fillquiz>";
+                    //String replace4 = "<br></div></body></html>";
+                    description = description.ToString().Replace(replace3, replace2).Replace(replace1, replace2);
                     indexquiz++;
                 }
                 item.Description = description;
 
                 var newdescription = "";
                 item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
-                item.Description = newdescription;
+                for (int i = 0; i < 1; i++)
+                {
+                    Int32 lastIndex = newdescription.IndexOf("</p>");
+                    newdescription = newdescription.ToString().Remove(0, lastIndex + 4);
+                }
+                String replace4 = "<br></div></body></html>";
+                item.Description = newdescription.ToString().Replace(replace4, "");
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
                 await CreateOrUpdateLessonPart(basis, item);
 
-                return $"{type} is OK";
+                return $"";
             }
             catch (Exception ex)
             {
@@ -3606,21 +3681,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     nextPrg = para.NextSibling as DocumentObject;
 
                     var content = para.Text.Trim();
-                    if (para.Text.ToUpper().Contains("[DES]"))
-                        descCell.Paragraphs.Remove(para);
-                    else if (para.Text.Trim().ToUpper().Contains($"[EX]"))
+                    //if (para.Text.ToUpper().Contains("[DES]"))
+                    //    descCell.Paragraphs.Remove(para);
+                    //else if (para.Text.Trim().ToUpper().Contains($"[EX]"))
+                    if (para.Text.Trim().ToUpper().Contains($"[E]"))
                     {
-                        var str = content.Replace($"[Ex]", "").Trim();
+                        var str = content.Replace($"[E]", "").Trim();
                         descriptionQUIZ += str;
                         while (para.NextSibling != null && (
-                            !(para.NextSibling as Paragraph).Text.Contains($"[Des]")
-                            && !(para.NextSibling as Paragraph).Text.Contains($"[Ex]")
+                            !(para.NextSibling as Paragraph).Text.Contains($"[E]")
                             && !(para.NextSibling as Paragraph).Text.Contains($"[P]")))
                         {
                             descriptionQUIZ += (para.NextSibling as Paragraph)?.Text + " ";
-                            //if (!(para.NextSibling as Paragraph).Text.Trim().Contains("[P]"))
-                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            if (!(para.NextSibling as Paragraph).Text.Trim().Contains("[P]"))
+                            {
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            }
                         }
+                        nextPrg = para.NextSibling as DocumentObject;
                         descCell.Paragraphs.Remove(para);
                     }
                     else if (para.Text.Trim().ToUpper().Contains($"[P]"))
@@ -3629,13 +3707,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (!String.IsNullOrEmpty(str))
                         {
                             Double.TryParse(str, out point);
-                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            while (para.NextSibling != null)
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
                             descCell.Paragraphs.Remove(para);
                         }
                         else
                         {
                             Double.TryParse((para.NextSibling as Paragraph)?.Text.Trim(), out point);
-                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            while (para.NextSibling != null)
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
                             descCell.Paragraphs.Remove(para);
                         }
                     }
@@ -4418,6 +4498,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             org = StringHelper.ReplaceSpecialCharacters(org.Trim());
             return org;
         }
+
+        private static String Note = $"\nGiải thích kí hiệu" +
+            $"\n[Câu hỏi] : Bắt đầu câu hỏi" +
+            $"\n[Đáp án] : Bắt đầu đáp án" +
+            $"\n1. [Qxxx] : Nội dung câu hỏi (Đối với các dạng câu hỏi trắc nghiệm)." +
+            $"\n2. _Qxxx_ : Nội dung câu hỏi (Đối với dạng điền từ - đánh dấu vị trí điền từ)." +
+            $"\n3. [Axxx] : Nội dung câu trả lời." +
+            $"\n4. (x) : Đánh dấu vi trí câu trả lời đúng(Đối với các dạng trắc nghiệm)." +
+            $"\n5. [Exx] : Giải thích cho đáp án." +
+            $"\n6. [Hxxx] : Phần hiển thị của học viên" +
+            $"\n7. [P] : Điểm (Đối với dạng essay)" +
+            $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
+            $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";
 
         #endregion
     }
