@@ -2416,7 +2416,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (_lessonPart.Media.Path.ToLower().StartsWith("http"))//external
                 {
-                    attachmentRow_Cel2_Content.AppendHyperlink(_lessonPart.Media.Path, _lessonPart.Media.OriginalName + " - " + _lessonPart.Media.Path, HyperlinkType.WebLink);
+                    attachmentRow_Cel2_Content.AppendHyperlink(_lessonPart.Media.Path, _lessonPart.Media.OriginalName
+                        //+ " - " + _lessonPart.Media.Path
+                        , HyperlinkType.WebLink
+                        );
                 }
                 else
                 {
@@ -3038,7 +3041,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        //Doan nay moi viet thi phai
         private async Task<String> GetContentQUIZ(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
         {
             try
@@ -3142,7 +3144,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {
                             Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
                         }
-                        while (!(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
+                        while (para.NextSibling != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
                         {
                             Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
                             paragraphs.Remove(para.NextSibling as Paragraph);
@@ -3225,6 +3227,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             await CreateOrUpdateLessonPart(basis, item);
             return $"{type} is OK";
         }
+
         private async Task<String> GetContentQuiz2(Table table, String type, String basis, LessonPartViewModel item, String createUser = null)
         {
             try
@@ -3342,8 +3345,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 String description = await ConvertDocToHtml(table, basis, createUser);
                 foreach (var a in _listAns)
                 {
-                    var ex = _listEx[$"Ex{indexquiz}"];
-                    var h = _listH[$"H{indexquiz}"];
+                    var ex = _listEx.Count > indexquiz ? _listEx[$"Ex{indexquiz}"] : "";
+                    var h = _listH.Count > indexquiz ? _listH[$"H{indexquiz}"] : "";
                     var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
                     String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
                     String replace1 = $"_Q{indexquiz}_";

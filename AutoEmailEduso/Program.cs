@@ -505,7 +505,7 @@ namespace AutoEmailEduso
             var centersActive = _centerService.GetActiveCenter(currentTime);
             foreach (var center in centersActive)
             {
-                if (center.Abbr.Equals("utc2"))
+                //if (center.Abbr.Equals("utc2"))
                 {
                     Int32 TotalStudents = 0, TotalInactiveStudents = 0, TotalMinPoint8 = 0, TotalMinPoint5 = 0, TotalMinPoint2 = 0, TotalMinPoint0 = 0, TotalDontWork = 0;
                     String ClassName4ReportPoint = "";//Ten lop co ti le hoc sinh dat diem 0 -> 4.9 > 30%
@@ -616,8 +616,8 @@ namespace AutoEmailEduso
                         $"<div style='font-style: italic;font-size: 12px'>Kết quả được cập nhật lần cuối lúc {endWeek.ToString("HH:mm - dd/MM/yyyy")}</div>" +
                         $"{body}";
 
-            List<String> toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<String> { "nguyenhoa.dev@gmail.com", "kchidinh@gmail.com", "buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
-            //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE);
+            List<String> toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com", "kchidinh@gmail.com","buihong9885@gmail.com", "huonghl@utc.edu.vn", "vietphung.it@gmail.com" };
+            _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT);
             Console.WriteLine("Send To Team Customer Care is Done");
         }
 
