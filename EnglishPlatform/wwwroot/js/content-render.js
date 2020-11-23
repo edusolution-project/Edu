@@ -109,7 +109,10 @@ var Lesson = (function () {
                 renderStandardLayout();
                 renderPreview();
                 break;
+            case mod.TEACHERPREVIEW:
             case mod.TEACHERPREVIEWEXAM:
+                redoExam();
+                break;
             case mod.STUDENT_EXAM:
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
@@ -127,7 +130,6 @@ var Lesson = (function () {
                 else
                     renderExam();
                 break;
-            case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 renderStandardLayout();
                 var hash = window.location.hash;
@@ -154,17 +156,6 @@ var Lesson = (function () {
         window.getLocalData = getLocalData
         window.ShowFullScreen = showFullScreen;
         window.openPreview = openPreview;
-        //var hash = window.location.hash;
-        //if (hash.startsWith('#')) {
-        //    hash = hash.split('#')[1]
-        //    //console.log(hash)
-        //    switch (hash) {
-        //        case 'redo':
-        //            redoExam();
-        //            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
-        //            break;
-        //    }
-        //}
     }
 
     var reloadData = function () {
@@ -583,7 +574,9 @@ var Lesson = (function () {
                     })
                     goPartInx(0);
                 }
-                renderOldAnswer();
+                if (config.mod == mod.STUDENT_EXAM) {
+                    renderOldAnswer();
+                }
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
@@ -3748,10 +3741,10 @@ var Lesson = (function () {
     var completeExam = async function (isOvertime) {
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
-        }
-        while (__answer_sending) {
-            console.log("wait for complete answering ...");
-            await new Promise(r => setTimeout(r, 500));
+            while (__answer_sending) {
+                console.log("wait for complete answering ...");
+                await new Promise(r => setTimeout(r, 500));
+            }
         }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
