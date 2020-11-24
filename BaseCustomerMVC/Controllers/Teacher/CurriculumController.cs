@@ -102,7 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly List<string> quizTypes = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
         private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
-        private readonly List<string> partDSP = new List<string> { "Văn bản", "File văn bản", "Audio", "Video", "Ảnh", "Từ vựng", "Single Choice", "Điền từ", "Nối đáp án", "Multiple Choice", "Essay" };
+        private readonly List<string> partDSP = new List<string> { "Văn bản", "File văn bản", "Audio", "Video", "Ảnh", "Từ vựng tiếng anh", "Chọn 1 đáp án đúng", "Điền từ", "Nối đáp án", "Chọn 1/nhiều đáp án đúng", "Essay" };
 
 
 
@@ -2205,8 +2205,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             var lesson = _lessonService.GetItemByID(LessonID);
             if (lesson == null)
-                return Content("Bài học không tồn tại!");
+                return Json(new Dictionary<String, object> {
+                    {"Stt",false },
+                    {"Msg","Không tìm thấy bài học." }
+                });
             var lessonPart = _lessonPartService.GetByLessonID(LessonID);
+            if (lessonPart.Count() == 0)
+                return Json(new Dictionary<String, object> {
+                    {"Stt",false },
+                    {"Msg","Nội dung bài học chưa có." }
+                });
             var lessonPartIDs = lessonPart.Select(x => x.ID);
             var lessonPartQuestion = _lessonPartQuestionService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ParentID)).ToEnumerable();
             var lessonPartQuestionIDs = lessonPartQuestion.Select(x => x.ID);
@@ -2220,7 +2228,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Document doc = new Document();
                     Section s = doc.AddSection();
                     s.PageSetup.Orientation = PageOrientation.Landscape;
-
 
                     var defStyle = doc.AddParagraphStyle("DefStyle");
                     defStyle.CharacterFormat.FontName = "Calibri";
@@ -2263,10 +2270,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             table.PreferredWidth = new PreferredWidth(WidthType.Percentage, 100);
             table.ResetCells(1, partTypes.Count + 1);
-
-            //var partList = s.AddParagraph();
-            //partList.AppendText(_lessonPart.Title);
-            //partList.ListFormat.ApplyBulletStyle();
 
             var titleRow = table.Rows[0];
             var typeRow = table.AddRow();
@@ -2555,15 +2558,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public IActionResult ExportWordTemplate()
         {
-
-            // var courseLesson = _courseLessonService.GetItemByID("5fa8faf886ea9d09d4a948b0");
-            //var lessonPart = _lessonPartService.GetByLessonID("5d9beac76e12e70238eff186");
-            var lessonPart = _lessonPartService.GetByLessonID("5fa8faf886ea9d09d4a948b0");
-            var lessonPartIDs = lessonPart.Select(x => x.ID);
-            var lessonPartQuestion = _lessonPartQuestionService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ParentID)).ToEnumerable();
-            var lessonPartQuestionIDs = lessonPartQuestion.Select(x => x.ID);
-            var lessonPartAnswer = _lessonPartAnswerService.CreateQuery().Find(x => lessonPartQuestionIDs.Contains(x.ParentID)).ToEnumerable();
-
             try
             {
                 byte[] toArray = null;
@@ -2571,330 +2565,144 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     Document doc = new Document();
                     Section s = doc.AddSection();
-                    //for (int x = 0; x < 10; x++)
-                    for (int x = 0; x < lessonPart.Count(); x++)
+                    s.PageSetup.Orientation = PageOrientation.Landscape;
+
+                    var defStyle = doc.AddParagraphStyle("DefStyle");
+                    defStyle.CharacterFormat.FontName = "Calibri";
+                    defStyle.CharacterFormat.FontSize = 13;
+
+                    var defStyleCenter = doc.AddParagraphStyle("DefStyleCenter");
+                    defStyleCenter.ApplyBaseStyle(defStyle.Name);
+                    defStyleCenter.ParagraphFormat.HorizontalAlignment = HorizontalAlignment.Center;
+
+                    //Add Cells
+                    for (Int32 indexTable = 0; indexTable < partTypes.Count; indexTable++)
                     {
-                        var _lessonPart = lessonPart.ElementAtOrDefault(x);
-                        if (_lessonPart.Type.Equals("DOC") || _lessonPart.Type.Equals("0")) continue;
                         Table table = s.AddTable(true);
+                        table.ResetCells(5, 12);
 
-                        //Create Title, Header and Data
-                        String[] Title = { "Tiêu đề", _lessonPart.Title };
-                        String[] Type = { "Kiểu (Đánh X)", "Văn bản", "Audio", "Video", "Hình ảnh", "Từ vựng", "Quiz1", "Quiz2", "Quiz3", "Quiz4", "Essay" };
-                        String[] Content = { "Nội dung", _lessonPart.Description };
-                        String[] File = { "File", "" };
-                        String[] Point = { "Điểm", "(0 - 100: chỉ áp dụng cho bài tự luận - các nội dung khác có trắc nghiệm, điền từ tự động tính mỗi câu hỏi | vị trí điền từ 1 điểm)" };
-                        String[] Header = { "STT", "Thông tin câu hỏi" };
-                        String[] type = { "QUIZ1", "QUIZ3", "QUIZ4" };
+                        //Title Row
+                        TableRow titleRow = table.Rows[0];
+                        Paragraph p_titleRow_cell0 = titleRow.Cells[0].AddParagraph();
+                        titleRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_titleRow_cell0.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                        p_titleRow_cell0.AppendText("Tiêu đề");
 
-                        //Add Cells
-                        //table.ResetCells(16, Type.Length);
-                        var lessonQinPart = lessonPartQuestion.ToList().FindAll(o => o.ParentID == _lessonPart.ID);
-                        var lessonAinPart = lessonPartAnswer.ToList().FindAll(o => lessonQinPart.Select(a => a.ID).Contains(o.ParentID));
-                        Int32 leghtData = lessonAinPart.Count() + 5 * lessonQinPart.Count();
-                        //table.ResetCells(type.Contains(_lessonPart.Type) ? leghtData : 6, Type.Length);
-                        table.ResetCells(30, Type.Length);
-                        table.ResetCells(30, Type.Length);
+                        Paragraph p_titleRow_cell1 = titleRow.Cells[1].AddParagraph();
+                        titleRow.Cells[1].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_titleRow_cell1.Format.HorizontalAlignment = HorizontalAlignment.Left;
+                        p_titleRow_cell1.AppendText("Gõ tiêu đề tại đây.");
+                        table.ApplyHorizontalMerge(0, 1, partDSP.Count);
 
-                        #region Title Row
-                        TableRow TitleRow = table.Rows[0];
-
-
-
-                        //TitleRow.IsHeader = true;
-                        TitleRow.Height = 23;//row height
-                        TitleRow.RowFormat.BackColor = Color.AliceBlue;
-                        for (int i = 0; i < 2; i++)
+                        //Type Row
+                        TableRow typeRow = table.Rows[1];
+                        Paragraph p_typeRow_cell0 = typeRow.Cells[0].AddParagraph();
+                        typeRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_typeRow_cell0.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                        p_typeRow_cell0.AppendText("Kiểu ND \n(x)");
+                        table.ApplyVerticalMerge(0, 1, 2);
+                        for (int i = 1; i <= partDSP.Count; i++)
                         {
-                            //Cell Alignment
-                            Paragraph p = TitleRow.Cells[i].AddParagraph();
-                            TitleRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-
-                            p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                            TextRange TR = p.AppendText(Title[i]);
-                            TR.CharacterFormat.Bold = false;
-                        }
-                        //Merge Cell
-                        table.ApplyHorizontalMerge(0, 1, Type.Length - 1);//ghep cac o canh nhau
-                        #endregion
-
-                        #region Type Row
-                        TableRow TypeRow = table.Rows[1];
-                        //TitleRow.IsHeader = true;
-                        TitleRow.Height = 23;//row height
-                        TitleRow.RowFormat.BackColor = Color.AliceBlue;
-                        for (int i = 0; i < Type.Length; i++)
-                        {
-                            //Cell Alignment
-                            Paragraph p = TypeRow.Cells[i].AddParagraph();
-                            TypeRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                            p.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                            //Data Format
-                            TextRange TR = p.AppendText(Type[i]);
+                            var item = partDSP[i - 1];
+                            Paragraph p_typeRow_cell = typeRow.Cells[i].AddParagraph();
+                            typeRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p_typeRow_cell.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            p_typeRow_cell.AppendText(item);
                         }
 
-                        TableRow CheckRow = table.Rows[2];
-                        CheckRow.Height = 23;//row height
-                        CheckRow.RowFormat.BackColor = Color.AliceBlue;
-                        String[] type1 = { "TEXT", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
-                        for (Int32 indexType = 0; indexType < type1.Length; indexType++)
+                        TableRow checkType = table.Rows[2];
+                        Paragraph p_typeRow_cell1 = checkType.Cells[indexTable + 1].AddParagraph();
+                        checkType.Cells[indexTable + 1].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_typeRow_cell1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                        p_typeRow_cell1.AppendText("x").CharacterFormat.Bold = true;
+
+
+                        //Content Row
+                        TableRow contentRow = table.Rows[3];
+                        Paragraph p_contentRow_cell0 = contentRow.Cells[0].AddParagraph();
+                        contentRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_contentRow_cell0.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                        //if (indexTable >= 6 && indexTable <= partTypes.Count)
+                        //    p_contentRow_cell0.AppendText("Nội dung");
+                        //else if(indexTable==5)
+                        //    p_contentRow_cell0.AppendText("Danh sách từ");
+                        //else
+                        //    p_contentRow_cell0.AppendText("Mô tả");
+
+                        Paragraph p_contentRow_cell1 = contentRow.Cells[1].AddParagraph();
+                        contentRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_contentRow_cell1.Format.HorizontalAlignment = HorizontalAlignment.Left;
+
+                        if (indexTable >= 6 && indexTable <= partTypes.Count)
                         {
-                            if (type1[indexType] == _lessonPart.Type)
+                            p_contentRow_cell0.AppendText("Nội dung");
+                            p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
+                            p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                            if (indexTable == 6 || indexTable == 8 || indexTable == 9)
                             {
-                                CheckRow.Cells[indexType + 1].AddParagraph().AppendText("x");
-                                CheckRow.Cells[indexType + 1].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                CheckRow.Cells[indexType + 1].AddParagraph().Format.HorizontalAlignment = HorizontalAlignment.Center;
+                                p_contentRow_cell1.AppendText("[Câu hỏi]").CharacterFormat.Bold = true;
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[Q1] Nội dung câu hỏi");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[Đáp án]").CharacterFormat.Bold = true;
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[A1] A. Đáp án 1 | B. Đáp án 2(x) | C. Đáp án 3");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[E1] Giải thích đáp án");
                             }
-                        }
-                        //CheckRow.Cells[x + 1].AddParagraph().AppendText("x");
-                        //CheckRow.Cells[x + 1].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                        //CheckRow.Cells[x + 1].AddParagraph().Format.HorizontalAlignment = HorizontalAlignment.Center;
-
-                        table.ApplyVerticalMerge(0, 1, 2);//ghep cac o tren duoi lien nhau
-                        #endregion
-
-                        #region Content + File +Point Row
-                        TableRow ContentRow = table.Rows[3];
-                        //TitleRow.IsHeader = true;
-                        ContentRow.Height = 23;//row height
-                        ContentRow.RowFormat.BackColor = Color.AliceBlue;
-                        for (int i = 0; i < 2; i++)
-                        {
-                            //Cell Alignment
-                            Paragraph p = ContentRow.Cells[i].AddParagraph();
-                            ContentRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                            p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                            //Data Format
-                            //if (_lessonPart.Type.ToLower().Equals("QUIZ2") && i == 1)
-                            //{
-                            //    Content[i] = ConvertHmltToWord(_lessonPart);
-                            //}
-                            TextRange TR = p.AppendText(Content[i]);
-                            TR.CharacterFormat.FontName = "Calibri";
-                            TR.CharacterFormat.FontSize = 14;
-                            TR.CharacterFormat.TextColor = Color.Black;
-                            TR.CharacterFormat.Bold = true;
-                        }
-                        //Merge Cell
-                        table.ApplyHorizontalMerge(3, 1, Type.Length - 1);//ghep cac o canh nhau
-
-                        TableRow FileRow = table.Rows[4];
-                        //TitleRow.IsHeader = true;
-                        FileRow.Height = 23;//row height
-                        FileRow.RowFormat.BackColor = Color.AliceBlue;
-                        for (int i = 0; i < 2; i++)
-                        {
-                            if (i == 0)
+                            else if (indexTable == 7)
                             {
-                                Paragraph p = FileRow.Cells[i].AddParagraph();
-                                FileRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-
-                                //Data Format
-                                TextRange TR = p.AppendText(File[i]);
-                                TR.CharacterFormat.FontName = "Calibri";
-                                TR.CharacterFormat.FontSize = 13;
-                                TR.CharacterFormat.TextColor = Color.Black;
-                                TR.CharacterFormat.Bold = true;
+                                p_contentRow_cell1.AppendText("[Câu hỏi]").CharacterFormat.Bold = true;
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("Nội dung phần điền từ _Q1_");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[H1] Hiển thị phần học viên");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[E1] Giải thích đáp án");
                             }
                             else
                             {
-                                //Cell Alignment
-                                Paragraph p = FileRow.Cells[i].AddParagraph();
-                                FileRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                                DocPicture Pic = p.AppendPicture(ImageToByteArray(Image.FromFile(Path.Combine(RootPath, "quiz_example.png"))));
-                                var scale = 100;
-                                if (Pic.Width > 160)
-                                {
-                                    scale = (int)(160.0 * 100 / Pic.Width);
-                                }
-                                Pic.WidthScale = scale;
-                                Pic.HeightScale = scale;
+                                p_contentRow_cell1.RemoveFrame();
+                                p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[E] Giải thích đáp án");
+                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
+                                p_contentRow_cell1.AppendText("[P] Điểm");
                             }
                         }
-                        //Merge Cell
-                        table.ApplyHorizontalMerge(4, 1, Type.Length - 1);//ghep cac o canh nhau
-
-                        TableRow PointRow = table.Rows[5];
-                        //TitleRow.IsHeader = true;
-                        PointRow.Height = 23;//row height
-                        PointRow.RowFormat.BackColor = Color.AliceBlue;
-                        for (int i = 0; i < 2; i++)
+                        else if (indexTable == 5)
                         {
-                            //Cell Alignment
-                            Paragraph p = PointRow.Cells[i].AddParagraph();
-                            PointRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                            p.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                            //Data Format
-                            TextRange TR = p.AppendText(Point[i]);
+                            p_contentRow_cell0.AppendText("Danh sách từ");
+                            p_contentRow_cell1.AppendText("Các từ cách nhau bởi dấu \"|\" .");
                         }
-                        //Merge Cell
-                        table.ApplyHorizontalMerge(5, 1, Type.Length - 1);//ghep cac o canh nhau
-                        #endregion
-
-                        #region Quiz1,3,4
-                        //if (x + 1 == 6 || x + 1 == 8 || x + 1 == 9)
-                        if (type.Contains(_lessonPart.Type))
+                        else
                         {
-                            #region Câu hỏi trắc nghiệm (áp dụng với Quiz1, Quiz 3, Quiz 4)
-                            TableRow NoteQuiz = table.Rows[6];
-                            //TitleRow.IsHeader = true;
-                            NoteQuiz.Height = 23;//row height
-                            NoteQuiz.RowFormat.BackColor = Color.AliceBlue;
-                            for (int i = 0; i < 1; i++)
-                            {
-                                //Cell Alignment
-                                Paragraph p = NoteQuiz.Cells[i].AddParagraph();
-                                NoteQuiz.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                p.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                //Data Format
-                                TextRange TR = p.AppendText("Câu hỏi trắc nghiệm (áp dụng với Quiz1, Quiz 3, Quiz 4)");
-                                TR.CharacterFormat.FontName = "Calibri";
-                                TR.CharacterFormat.FontSize = 13;
-                                TR.CharacterFormat.TextColor = Color.Black;
-                                TR.CharacterFormat.Bold = true;
-                            }
-                            //Merge Cell
-                            table.ApplyHorizontalMerge(6, 0, Type.Length - 1);//ghep cac o canh nhau
-                            #endregion
-
-                            #region Header Quiz Row
-                            TableRow HeaderQuiz = table.Rows[7];
-                            HeaderQuiz.IsHeader = true;
-                            //Row Height
-                            HeaderQuiz.Height = 23;
-                            //Header Format
-                            HeaderQuiz.RowFormat.BackColor = Color.AliceBlue;
-                            for (int i = 0; i < 2; i++)
-                            {
-                                //Cell Alignment
-                                Paragraph p = HeaderQuiz.Cells[i].AddParagraph();
-                                HeaderQuiz.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                p.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                //Data Format
-                                TextRange TR = p.AppendText(Header[i]);
-                                TR.CharacterFormat.FontName = "Calibri";
-                                TR.CharacterFormat.FontSize = 13;
-                                TR.CharacterFormat.TextColor = Color.Black;
-                                TR.CharacterFormat.Bold = true;
-                            }
-                            table.ApplyHorizontalMerge(7, 1, Type.Length - 1);//ghep cac o canh nhau
-                            #endregion
-
-                            #region ContentQuiz
-                            var index = 8;
-                            Int32 indexQuestion = 1;
-                            foreach (var question in lessonQinPart.ToList())
-                            {
-                                //continue;
-                                //Boolean isQuestion = true;
-                                //var listAns = lessonPartAnswer.ToList().FindAll(o => o.ParentID == question.ID);
-                                //if (isQuestion)
-                                //{
-                                //    indexQuestion++;
-                                //    isQuestion = false;
-                                TableRow row8 = table.Rows[index];
-                                Paragraph pr81 = row8.Cells[0].AddParagraph();
-                                TextRange trr81 = pr81.AppendText(indexQuestion.ToString());
-                                Paragraph pr82 = row8.Cells[1].AddParagraph();
-                                TextRange trr82 = pr82.AppendText("Tiêu đề");
-                                Paragraph pr83 = row8.Cells[3].AddParagraph();
-                                TextRange trr83 = pr83.AppendText(question.Content);
-                                table.ApplyHorizontalMerge(index, 1, 2);
-                                table.ApplyHorizontalMerge(index, 3, 10);
-                                indexQuestion++;
-
-                                TableRow row9 = table.Rows[index + 1];
-                                Paragraph pr92 = row9.Cells[1].AddParagraph();
-                                TextRange trr92 = pr92.AppendText("Mô tả");
-                                Paragraph pr93 = row9.Cells[3].AddParagraph();
-                                TextRange trr93 = pr93.AppendText(question.Description);
-                                table.ApplyHorizontalMerge(index + 1, 1, 2);
-                                table.ApplyHorizontalMerge(index + 1, 3, 10);
-
-                                TableRow row10 = table.Rows[index + 2];
-                                Paragraph pr102 = row10.Cells[1].AddParagraph();
-                                TextRange trr102 = pr102.AppendText("File đính kèm");
-                                Paragraph pr103 = row10.Cells[3].AddParagraph();
-                                TextRange trr103 = pr103.AppendText(question.Media?.Path);
-                                //DocPicture PicQ = pr103.AppendPicture(ImageToByteArray(Image.FromFile(@"H:/Template/example.png")));
-                                //PicQ.Width = 50;
-                                //PicQ.Height = 20;
-                                table.ApplyHorizontalMerge(index + 2, 1, 2);
-                                table.ApplyHorizontalMerge(index + 2, 3, 10);
-
-                                TableRow row11 = table.Rows[index + 3];
-                                Paragraph pr112 = row11.Cells[1].AddParagraph();
-                                TextRange trr112 = pr112.AppendText("Đáp án");
-                                Paragraph pr113 = row11.Cells[3].AddParagraph();
-                                TextRange trr113 = pr113.AppendText("STT");
-                                Paragraph pr114 = row11.Cells[4].AddParagraph();
-                                TextRange trr114 = pr114.AppendText("Nội dung");
-                                Paragraph pr117 = row11.Cells[7].AddParagraph();
-                                TextRange trr117 = pr117.AppendText("Hình ảnh");
-                                Paragraph pr1110 = row11.Cells[10].AddParagraph();
-                                TextRange trr1110 = pr1110.AppendText("Đúng/Sai");
-                                table.ApplyHorizontalMerge(index + 3, 1, 2);
-                                table.ApplyHorizontalMerge(index + 3, 4, 6);
-                                table.ApplyHorizontalMerge(index + 3, 7, 9);
-
-                                var listAns = lessonPartAnswer.ToList().FindAll(o => o.ParentID == question.ID);
-                                Int32 indexAns = 0;
-                                foreach (var ans in listAns)
-                                {
-                                    // continue;
-                                    var IndexRowAns = index + 4 + indexAns;
-                                    TableRow rowAns = table.Rows[IndexRowAns];
-                                    table.ApplyHorizontalMerge(IndexRowAns, 1, 2);
-                                    table.ApplyHorizontalMerge(IndexRowAns, 4, 6);
-                                    table.ApplyHorizontalMerge(IndexRowAns, 7, 9);
-
-                                    //    //stt
-                                    Paragraph p0 = rowAns.Cells[3].AddParagraph();
-                                    TextRange txt0 = p0.AppendText($"{indexAns + 1}");
-                                    txt0.CharacterFormat.FontSize = 12;
-                                    txt0.CharacterFormat.TextColor = Color.Black;
-
-                                    //    //noi dung
-                                    Paragraph p1 = rowAns.Cells[4].AddParagraph();
-                                    TextRange txt1 = p1.AppendText(ans.Content);
-                                    txt0.CharacterFormat.FontSize = 12;
-                                    txt0.CharacterFormat.TextColor = Color.Black;
-
-                                    //    //hinh anh
-                                    Paragraph p2 = rowAns.Cells[7].AddParagraph();
-                                    TextRange txt2 = p2.AppendText(ans.Media?.Path);
-                                    txt2.CharacterFormat.FontSize = 12;
-                                    txt2.CharacterFormat.TextColor = Color.Black;
-                                    //DocPicture PicAns1 = p2.AppendPicture(ImageToByteArray(Image.FromFile(@"H:/Template/example.png")));
-                                    //PicAns1.Width = 50;
-                                    //PicAns1.Height = 20;
-
-                                    Paragraph _p3 = rowAns.Cells[10].AddParagraph();
-                                    TextRange txt3 = _p3.AppendText(ans.IsCorrect ? "x" : "");
-                                    txt3.CharacterFormat.FontSize = 12;
-                                    txt3.CharacterFormat.TextColor = Color.Black;
-                                    rowAns.Cells[10].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
-                                    _p3.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                    //IndexRowAns++;
-                                    indexAns++;
-                                }
-                                if (_lessonPart.Type.Equals("QUIZ3"))
-                                    index += listAns.Count() < 4 ? 4 + listAns.Count() : listAns.Count();
-                                else
-                                    index += listAns.Count();
-                            }
-                            #endregion
+                            p_contentRow_cell0.AppendText("Mô tả");
+                            p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
                         }
-                        #endregion
-                        Paragraph p3 = s.AddParagraph();
-                        TextRange TR3 = p3.AppendText("\n");
+
+                        table.ApplyHorizontalMerge(3, 1, partDSP.Count);
+
+                        //File Row
+                        TableRow fileRow = table.Rows[4];
+                        Paragraph p_fileRow_cell0 = fileRow.Cells[0].AddParagraph();
+                        fileRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_fileRow_cell0.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                        p_fileRow_cell0.AppendText("File");
+
+                        Paragraph p_fileRow_cell1 = fileRow.Cells[1].AddParagraph();
+                        fileRow.Cells[0].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p_fileRow_cell1.Format.HorizontalAlignment = HorizontalAlignment.Left;
+                        p_fileRow_cell1.AppendText("Thêm file hoặc liên kết tại đây");
+                        table.ApplyHorizontalMerge(4, 1, partDSP.Count);
+
+                        s.AddParagraph().AppendBreak(BreakType.LineBreak);
                     }
+
                     //Create a new paragraph
                     //Lưu ý
                     Paragraph paragraph = s.AddParagraph();
-                    TextRange TR4 = paragraph.AppendText("\nLưu ý: Câu hỏi sẽ có số thứ tự; các dòng ngay sau câu hỏi là câu trả lời của câu hỏi \nLiên kết hình ảnh/media có dạng http://... hoặc https://...");
+                    TextRange TR4 = paragraph.AppendText(Note);
                     TR4.CharacterFormat.FontSize = 12;
                     TR4.CharacterFormat.TextColor = Color.Red;
 
@@ -3203,9 +3011,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
 
                 List<QuestionViewModel> lpq = new List<QuestionViewModel>();
-                foreach (var quiz in Quiz)
+                for (int i = 0; i < Quiz.Count; i++)
                 {
-                    lpq.Add(quiz.Value);
+                    var quiz = Quiz.ContainsKey($"[Q{i + 1}]") ? Quiz[$"[Q{i + 1}]"] : null;
+                    if (quiz != null)
+                    {
+                        quiz.Content = quiz.Content.Contains($"[Q{i + 1}]") ? quiz.Content.Replace($"[Q{i + 1}]", "") : quiz.Content;
+                        lpq.Add(quiz);
+                    }
                 }
 
                 item.Questions = lpq;
@@ -3299,22 +3112,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     Paragraph para = nextPrg;
                     nextPrg = para.NextSibling as Paragraph;
-                    //if (para.Text.ToUpper().Contains("[ĐÁP ÁN]"))
-                    //{
-
-                    //    var Ans = para.Text.Trim().Replace("\v", "|").Split('|');
-                    //    foreach (var a in Ans)
-                    //    {
-                    //        if (a.Contains($"[A{indexans}]"))
-                    //        {
-                    //            String str = a.Replace($"[A{indexans}]", "").Trim();
-                    //            _listAns.Add($"[A{indexans}]", str);
-                    //            indexans++;
-                    //        }
-                    //    }
-                    //    table.Rows[3].Cells[1].Paragraphs.Remove(para);
-                    //}
-                    //if (para.Text.ToUpper().Contains("[CÂU HỎI]")) table.Rows[3].Cells[1].Paragraphs.Remove(para);
                     var content = para.Text.Trim();
                     String ex = "";
                     String h = "";
@@ -3323,16 +3120,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         indexH = indexans;
                         indexEx = indexans;
-                        //var Ans = content.Split('|');
-                        //foreach (var a in Ans)
-                        //{
-                        //    if (a.Contains($"[A{indexans}]"))
-                        //    {
-                        //        string str = a.Replace($"[A{indexans}]", "").Trim();
-                        //        _listAns.Add($"[A{indexans}]", str);
-                        //        indexans++;
-                        //    };
-                        //}
                         String str = content.Replace($"[A{indexans}]", "").Trim();
                         _listAns.Add($"[A{indexans}]", str);
                         indexans++;
@@ -3372,31 +3159,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 }
 
-                //for (Int32 i = 0; i < paragraphs.Count; i++)
-                //{
-                //    var paraText = descCell.Paragraphs[i].Text.Trim();
-                //    for (Int32 j = 0; j < _listAns.Count(); j++)
-                //    {
-                //        var a = _listAns[$"[A{j + 1}]"];
-                //        var ex = _listEx[$"E{j + 1}"];
-                //        var h = _listH[$"H{j + 1}"];
-                //        var str = a.Replace($"[A{j + 1}]", "").Trim();
-                //        var replace1 = $"_Q{j + 1}_";
-                //        var replace2 = $"<fillquiz contenteditable='false' readonly='readonly' title='{ex}'><input ans='{str}' class='fillquiz' contenteditable='false' dsp='{h}' placeholder='{ex}' readonly='readonly' type='text' value='{str}'/></fillquiz>";
-
-                //        if (paraText.Contains(replace1))
-                //        {
-                //            descCell.Paragraphs[i].Replace(replace1, replace2, false, true);
-                //        }
-                //    }
-                //}
-
+                var indexQ = 1;
                 for (Int32 i = 0; i < paragraphs.Count; i++)
                 {
                     var paraText = descCell.Paragraphs[i].Text.Trim();
-                    if (paraText.StartsWith($"_Q{i + 1}_"))
+                    if (paraText.Contains($"_Q{indexQ}_"))
                     {
-                        descCell.Paragraphs[i].Replace($"_Q{i + 1}_", $"EDUSOQUIZ2_Q{i + 1}_", false, true);
+                        descCell.Paragraphs[i].Replace($"_Q{indexQ}_", $"EDUSOQUIZ2_Q{indexQ}_", false, true);
+                        indexQ++;
                     }
                 }
 
@@ -3407,10 +3177,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var h = _listH.ContainsKey($"H{indexquiz}") ? _listH[$"H{indexquiz}"] : "";
                     var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
                     String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
-                    String replace1 = $"_Q{indexquiz}_";
+                    //String replace1 = $"_Q{indexquiz}_";
                     String replace2 = $"<fillquiz contenteditable=\"false\" readonly=\"readonly\" title=\"{ex}\"><input ans=\"{str}\" class=\"fillquiz\" contenteditable=\"false\" dsp=\"{h}\" placeholder=\"{ex}\" readonly=\"readonly\" type=\"text\" value=\"{str}\"/></fillquiz>";
-                    //String replace4 = "<br></div></body></html>";
-                    description = description.ToString().Replace(replace3, replace2).Replace(replace1, replace2);
+                    description = description.ToString().Replace(replace3, replace2);
                     indexquiz++;
                 }
                 item.Description = description;
@@ -4497,15 +4266,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         private static String Note = $"\nGiải thích kí hiệu" +
-            $"\n[Câu hỏi] : Bắt đầu câu hỏi" +
-            $"\n[Đáp án] : Bắt đầu đáp án" +
-            $"\n1. [Qxxx] : Nội dung câu hỏi (Đối với các dạng câu hỏi trắc nghiệm)." +
-            $"\n2. _Qxxx_ : Nội dung câu hỏi (Đối với dạng điền từ - đánh dấu vị trí điền từ)." +
-            $"\n3. [Axxx] : Nội dung câu trả lời." +
-            $"\n4. (x) : Đánh dấu vi trí câu trả lời đúng(Đối với các dạng trắc nghiệm)." +
-            $"\n5. [Exx] : Giải thích cho đáp án." +
-            $"\n6. [Hxxx] : Phần hiển thị của học viên" +
-            $"\n7. [P] : Điểm (Đối với dạng essay)" +
+            $"\n1. [Câu hỏi] : Bắt đầu câu hỏi" +
+            $"\n2. [Đáp án] : Bắt đầu đáp án" +
+            $"\n3. [Qxxx] : Nội dung câu hỏi (Đối với các dạng câu hỏi trắc nghiệm)." +
+            $"\n4. _Qxxx_ : Nội dung câu hỏi (Đối với dạng điền từ - đánh dấu vị trí điền từ)." +
+            $"\n5. [Axxx] : Nội dung câu trả lời." +
+            $"\n6. (x) : Đánh dấu vi trí câu trả lời đúng(Đối với các dạng trắc nghiệm)." +
+            $"\n7. [Exx] : Giải thích cho đáp án." +
+            $"\n8. [Hxxx] : Phần hiển thị của học viên" +
+            $"\n9. [P] : Điểm (Đối với dạng essay)" +
             $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
             $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";
 

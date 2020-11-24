@@ -2421,7 +2421,7 @@ var Lesson = (function () {
                         Swal.fire({
                             title: 'Thông báo',
                             icon: 'error',
-                            text: data.Msg
+                            text: data.Msg ? data.Msg : "Code: " + data.code + " Error: " + data.message
                         }).then(() => {
                             showCloneQuestion();
                         })
