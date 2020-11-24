@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -807,6 +808,84 @@ namespace BaseCustomerMVC.Controllers.Admin
                 return Json(ex.Message);
             }
         }
+
+
+        public JsonResult DeleteCenter(string centerID = "5fbcb0bcb7df2d22889f2c77")
+        {
+            //foreach (var teacher in _teacherService.CreateQuery().Find(t => t.Centers.Any(ct => ct.CenterID == centerID)).ToList())
+            //{
+            //    teacher.Centers.RemoveAll(t => t.CenterID == centerID);
+            //    _teacherService.Save(teacher);
+            //}
+
+            _teacherService.CreateQuery().UpdateMany(t => t.Centers.Any(ct => ct.CenterID == centerID)
+            , Builders<TeacherEntity>.Update.PullFilter<CenterMemberEntity>(cm => cm.Centers, Builders<CenterMemberEntity>.Filter.Where(c => c.CenterID == centerID)));
+
+            _studentService.CreateQuery().UpdateMany(t => t.Centers.Contains(centerID)
+            , Builders<StudentEntity>.Update.PullFilter<string>(ct => ct.Centers, Builders<string>.Filter.Eq(str => str, centerID)));
+
+            var classes = _classService.CreateQuery().Find(t => t.Center == centerID).ToList();
+            if (classes != null && classes.Count > 0)
+            {
+                var ids = classes.Select(t => t.ID).ToArray();
+                if (ids.Length > 0)
+                {
+                    //Remove Class Student
+                    _ = _studentService.LeaveClassAll(ids.ToList());
+                    //remove ClassSubject
+                    _ = _classSubjectService.RemoveManyClass(ids);
+                    //remove Lesson, Part, Question, Answer
+                    _ = _lessonHelper.RemoveManyClassLessons(ids);
+                    //remove Schedule
+                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                    //remove History
+                    _ = _progressHelper.RemoveClassHistory(ids);
+                    //remove Exam
+                    _ = _examService.RemoveManyClassExam(ids);
+                    //.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    //remove Exam Detail
+                    _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
+                    var delete = _classService.Collection.DeleteMany(o => ids.Contains(o.ID));
+                    return new JsonResult(delete);
+                }
+            }
+
+            var courses = _courseService.CreateQuery().Find(t => t.Center == centerID).ToList();
+            if (classes != null && classes.Count > 0)
+            {
+                var ids = classes.Select(t => t.ID).ToArray();
+                if (ids.Length > 0)
+                {
+                    _chapterService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                    _lessonService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                    _lessonPartService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                    _questionService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                    _answerService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                }
+            }
+
+            return Json("OK");
+        }
+
+
+        public JsonResult ShareStudent()
+        {
+            var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
+            var count = 0;
+            foreach (var course in courses)
+            {
+                if (course.StudentTargetCenters == null)
+                {
+                    course.StudentTargetCenters = course.TargetCenters;
+                    course.PublicWStudent = false;
+                    _courseService.Save(course);
+                    count++;
+                }
+            }
+            return Json("OK:" + count);
+        }
+
+
 
         public JsonResult ChangeLinkImage()
         {
