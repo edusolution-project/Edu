@@ -2364,10 +2364,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         html = "<b style='color:red'>[Câu hỏi]</b><br/>" + RenderQuiz2ForWord(_lessonPart, out answer) + "<br/><br/>";
                         answer = "<b style='color:red'>[Đáp án]</b><br/>" + answer;
-                        descriptionRow_Cel2_Content.AppendHTML(html);
-                        var aGrp2 = descriptionRow_Cel2.AddParagraph();
-                        aGrp2.ApplyStyle("DefStyle");
-                        aGrp2.AppendHTML(answer);
+                        descriptionRow_Cel2_Content.AppendHTML(html+answer);
+                        //var aGrp2 = descriptionRow_Cel2.AddParagraph();
+                        //aGrp2.ApplyStyle("DefStyle");
+                        //descriptionRow_Cel2_Content.AppendHTML(answer);
+                        //aGrp2.ApplyStyle("DefStyle");
+                        //foreach (var childprg in aGrp2.ChildObjects)
+                        //{
+                        //    if (childprg is Paragraph)
+                        //    {
+                        //        (childprg as Paragraph).ApplyStyle("DefStyle");
+                        //    }
+                        //}
                     }
                     break;
                 case "QUIZ1":
@@ -2389,8 +2397,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var lessonPartQuestion = _lessonPartQuestionService.GetByPartID(_lessonPart.ID).FirstOrDefault();
                     if (lessonPartQuestion != null)
                     {
-                        html += $"<p>[E]</p>{lessonPartQuestion.Description}";
-                        html += $"<p>[P]</p><p>{lessonPartQuestion.Point}</p>";
+                        html += $"<p style='margin:0pt'>[E]</p>{lessonPartQuestion.Description}";
+                        html += $"<p style='margin:0pt;margin-top:2pt'>[P] {lessonPartQuestion.Point}</p>";
                     }
                     descriptionRow_Cel2_Content.AppendHTML(html);
                     break;
@@ -2419,10 +2427,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (_lessonPart.Media.Path.ToLower().StartsWith("http"))//external
                 {
-                    attachmentRow_Cel2_Content.AppendHyperlink(_lessonPart.Media.Path, _lessonPart.Media.OriginalName
-                        //+ " - " + _lessonPart.Media.Path
-                        , HyperlinkType.WebLink
-                        );
+                    attachmentRow_Cel2_Content.AppendHyperlink(_lessonPart.Media.Path, _lessonPart.Media.OriginalName, HyperlinkType.WebLink);
                 }
                 else
                 {
@@ -2479,10 +2484,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             foreach (var quiz in questions)
             {
                 i++;
-                returnHtml += "<p>[Q" + i + "] " + RenderHtmlContent(quiz.Content, quiz.Media) + "</p>";
+                returnHtml += "<p style='margin:0pt'>[Q" + i + "] " + RenderHtmlContent(quiz.Content, quiz.Media) + "</p>";
                 var ans = _lessonPartAnswerService.GetByQuestionID(quiz.ID);
 
-                answer += "<p>";
+                answer += "<p style='margin:0pt'>";
 
                 if (ans != null && ans.Count() > 0)
                 {
@@ -2491,7 +2496,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 answer += "</p>";
                 if (!string.IsNullOrEmpty(quiz.Description))
-                    answer += ("<p>[E" + i + "] " + quiz.Description + "</p>");
+                    answer += ("<p style='margin:0pt'>[E" + i + "] " + quiz.Description + "</p>");
 
             }
 
@@ -2524,17 +2529,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 if (ans != null && ans.Count() > 0)
                 {
-                    answer += "<p>[A" + i + "] ";
+                    answer += "<p style='margin:0pt'>[A" + i + "] ";
                     answer += string.Join(" | ", ans.Select(t => t.Content));
+                    answer += "</p>";
                 }
-                answer += "</p></p>";
                 if (!string.IsNullOrEmpty(quiz.Content))
-                    answer += ($"[H{i}]" + quiz.Content);
-                answer += "</p><p>";
+                {
+                    answer += ($"<p style='margin:0pt'>[H{i}]" + quiz.Content + "</p>");
+                }
                 if (!string.IsNullOrEmpty(quiz.Description))
-                    answer += (" [E" + i + "]" + quiz.Description);
-                answer += "</p>";
-
+                {
+                    answer += ("<p style='margin:0pt'>[E" + i + "]" + quiz.Description + "</p>");
+                }
 
                 description = description.Substring(description.IndexOf(quizClose) + quizClose.Length);
                 firstOccurIndex = description.IndexOf(quizOpen);
@@ -2802,22 +2808,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     Status = true;
                                     break;
                                 case "IMAGE":
-                                    Msg += (await GetContentIMG(table, item.Type, basis, item));
+                                    Msg += (await GetContentIMG(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 case "VOCAB":
-                                    Msg += (await GetContentVocab(table, item.Type, basis, item));
+                                    Msg += (await GetContentVocab(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 case "QUIZ1":
                                 case "QUIZ3":
                                 case "QUIZ4":
-                                    Msg += (await GetContentQUIZ(table, item.Type, basis, item));
+                                    Msg += (await GetContentQUIZ(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 case "QUIZ2":
                                     item.Description = "";
-                                    Msg += (await GetContentQuiz2(table, item.Type, basis, item));
+                                    Msg += (await GetContentQuiz2(table, item.Type, basis, item, UserID));
                                     Status = true;
                                     break;
                                 case "ESSAY":
@@ -2889,15 +2895,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             else if (obj is DocPicture)
                             {
                                 var pic = obj as DocPicture;
-                                var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
-                                var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
+                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmssfff")}_{indexQuiz}.jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, createUser, basis);
 
                                 question.Media = new Media()
                                 {
                                     Created = DateTime.UtcNow,
                                     Path = path,
-                                    OriginalName = filename,
-                                    Name = filename,
+                                    OriginalName = fileName,
+                                    Name = fileName,
                                     Extension = "image/jpg"
                                 };
                             }
@@ -2929,8 +2935,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 var pic = obj as DocPicture;
                                 var previousSibling = (obj.PreviousSibling as TextRange).Text.Replace($"[A{indexAns}]", "").Replace($"[E{indexAns}]", "").Replace("|", "").Replace("(X)", "").Replace("(x)", "").Trim();
-                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmss")}_ans{previousSibling}.jpg";
-                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, basis);
+                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmssfff")}_ans{previousSibling}_{indexQuiz}_{indexAns}.jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, createUser, basis);
                                 var _test = lstAns.Contains(previousSibling);
                                 var ansWmedia = Quiz[$"[Q{indexAns}]"].Answers.Find(x => x.Content.Contains(previousSibling));
                                 ansWmedia.Media = new Media
@@ -2950,16 +2956,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     else if (content.Contains($"[E{indexEx}]"))
                     {
                         var str = content.Replace($"[E{indexEx}]", "").Trim();
-                        if (!String.IsNullOrEmpty(str))
+                        if (Quiz.ContainsKey($"[Q{indexEx}]"))
                         {
-                            Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
+                            if (!String.IsNullOrEmpty(str))
+                            {
+                                Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
+                            }
+                            while ((para.NextSibling as Paragraph) != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
+                            {
+                                Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
+                                paragraphs.Remove(para.NextSibling as Paragraph);
+                            }
+                            indexEx++;
                         }
-                        while ((para.NextSibling as Paragraph) != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
-                        {
-                            Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
-                            paragraphs.Remove(para.NextSibling as Paragraph);
-                        }
-                        indexEx++;
                     }
                 }
 
@@ -3047,7 +3056,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (contentCell0.Equals("file"))
                     {
                         item.Media = new Media();
-                        var contentFileImage = GetContentFile(contentRow.Cells[1].Paragraphs, basis);
+                        var contentFileImage = GetContentFile(contentRow.Cells[1].Paragraphs, basis, createUser);
                         if (contentFileImage.Count > 0)
                         {
                             item.Media.Created = DateTime.Now;
@@ -3143,6 +3152,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         _listH.Add($"H{indexH}", h);
                         indexH++;
+                        nextPrg = para.NextSibling as Paragraph;
                         descCell.Paragraphs.Remove(para);
                     }
                     else if (para.Text.Trim().Contains($"[E{indexEx}]"))
@@ -3156,6 +3166,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         _listEx.Add($"E{indexEx}", ex);
                         indexEx++;
+                        nextPrg = para.NextSibling as Paragraph;
                         descCell.Paragraphs.Remove(para);
                     }
                     else if (para.Text.ToUpper().Contains("[ĐÁP ÁN]")) descCell.Paragraphs.Remove(para);
@@ -3166,9 +3177,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 for (Int32 i = 0; i < paragraphs.Count; i++)
                 {
                     var paraText = descCell.Paragraphs[i].Text.Trim();
-                    if (paraText.Contains($"_Q{indexQ}_"))
+                    while (paraText.Contains($"_Q{indexQ}_"))
                     {
-                        descCell.Paragraphs[i].Replace($"_Q{indexQ}_", $"EDUSOQUIZ2_Q{indexQ}_", false, true);
+                        descCell.Paragraphs[i].Replace($"_Q{indexQ}_", $"EDUSOQUIZ2_Q{indexQ}_", true, false);
                         indexQ++;
                     }
                 }
@@ -3180,7 +3191,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var h = _listH.ContainsKey($"H{indexquiz}") ? _listH[$"H{indexquiz}"] : "";
                     var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
                     String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
-                    //String replace1 = $"_Q{indexquiz}_";
                     String replace2 = $"<fillquiz contenteditable=\"false\" readonly=\"readonly\" title=\"{ex}\"><input ans=\"{str}\" class=\"fillquiz\" contenteditable=\"false\" dsp=\"{h}\" placeholder=\"{ex}\" readonly=\"readonly\" type=\"text\" value=\"{str}\"/></fillquiz>";
                     description = description.ToString().Replace(replace3, replace2);
                     indexquiz++;
@@ -3189,13 +3199,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var newdescription = "";
                 item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
-                for (int i = 0; i < 1; i++)
-                {
-                    Int32 lastIndex = newdescription.IndexOf("</p>");
-                    newdescription = newdescription.ToString().Remove(0, lastIndex + 4);
-                }
-                String replace4 = "<br></div></body></html>";
-                item.Description = newdescription.ToString().Replace(replace4, "");
+                item.Description = newdescription.ToString();
 
                 //file 
                 var linkcell = table.Rows[4].Cells[1];
@@ -3554,8 +3558,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Directory.CreateDirectory(path);
 
                 doc2.SaveToFile(path + "/" + temp + ".html", FileFormat.Html);
-                //var doc3 = new Document();
-                //doc3.LoadFromFile(path + "/tempword.html", FileFormat.Txt);
                 using (var reader = new StreamReader(path + "/" + temp + ".html"))
                 {
                     content = reader.ReadToEnd();
@@ -3564,23 +3566,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     System.IO.File.Delete(path + "/" + temp + ".html");
                     System.IO.File.Delete(path + "/" + temp + ".css");
+                    System.IO.File.Delete(path + "/" + temp + "_styles.css");
                 }
                 catch
                 {
                 }
             }
 
-            //            String strToReplace1 = @"<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.1//EN' 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'><html xmlns='http://www.w3.org/1999/xhtml'><head><meta http-equiv='Content-Type' content='application/xhtml+xml; charset=utf-8' /><title></title><style type='text/css'>body{ font-family:'Times New Roman'; font-size:1em; }
-            //ul, ol{ margin-top: 0; margin-bottom: 0; }
-            //.Normal{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:0pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-            //.List-Paragraph{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:14.5pt;text-indent:-6.95pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:11pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-            //.Body-Text{page-break-inside:auto;page-break-after:auto;page-break-before:auto;margin-top:5.15pt;margin-bottom:0pt;margin-left:0pt;text-indent:0pt;border-top-style: none;border-left-style: none;border-right-style: none;border-bottom-style: none;font-size:12pt;font-family:'Times New Roman';mso-fareast-font-family:'Times New Roman';mso-bidi-font-family:'Times New Roman';lang:EN-US;mso-fareast-language:EN-US;mso-ansi-language:AR-SA;}
-            //</style></head><body style='pagewidth:595.35pt;pageheight:841.95pt;'><div class='Section0'><div style='min-height:20pt' /><p class='Normal'><span style='color:#FF0000;font-size:12pt;'>Evaluation Warning: The document was created with Spire.Doc for .NET.</span></p>";
+            for (int i = 0; i < 1; i++)
+            {
+                Int32 lastIndex = content.IndexOf("</p>");
+                content = content.ToString().Remove(0, lastIndex + 4);
+            }
+            String strToReplace4 = "<br></div></body></html>";
             String strToReplace2 = @"</div></body></html>";
             String strToreplace3 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta http-equiv=\"Content-Type\" content=\"application/xhtml+xml; charset=utf-8\" /><title></title></head><body style=\"pagewidth:595.35pt;pageheight:841.95pt;\"><div class=\"Section0\"><div style=\"min-height:20pt\" /><p class=\"Normal\"><span style=\"color:#FF0000;font-size:12pt;\"></span></p>";
             string test = content
-                //.Replace(strToReplace1, "")
+                .ToString()
                 .Replace("Evaluation Warning: The document was created with Spire.Doc for .NET.", "")
+                .Replace(strToReplace4, "")
                 .Replace(strToReplace2, "")
                 .Replace(temp + "_images/", "/Files/" + basis + "/" + user + "/" + temp + "_images/")
                 .Replace("<link href=\"" + temp + "_styles.css\" type=\"text/css\" rel=\"stylesheet\"/>", "")
@@ -3886,7 +3890,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return path;
         }
 
-        private Dictionary<String, String> GetContentFile(Spire.Doc.Collections.ParagraphCollection documentObject, String basis)
+        private Dictionary<String, String> GetContentFile(Spire.Doc.Collections.ParagraphCollection documentObject, String basis, String createUser)
         {
             Dictionary<String, String> dataResponse = new Dictionary<String, String>();
             foreach (DocumentObject docObject in documentObject[0].ChildObjects)
@@ -3894,8 +3898,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (docObject.DocumentObjectType == DocumentObjectType.Picture)
                 {
                     DocPicture picture = docObject as DocPicture;
-                    string fileName = string.Format($"Image{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}.png");
-                    var pathImage = SaveImageByByteArray(picture.ImageBytes, fileName, basis);
+                    string fileName = string.Format($"Image{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.png");
+                    var pathImage = SaveImageByByteArray(picture.ImageBytes, fileName, createUser, basis);
                     dataResponse.Add("FileName", fileName);
                     dataResponse.Add("FilePath", pathImage);
                 }
@@ -3930,8 +3934,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     else if (obj is DocPicture)
                     {
                         var pic = obj as DocPicture;
-                        var filename = DateTime.Now.ToString("yyyyMMddhhmmss") + ".jpg";
-                        var path = SaveImageByByteArray(pic.ImageBytes, filename, basis);
+                        var filename = DateTime.Now.ToString("yyyyMMddhhmmssfff") + ".jpg";
+                        var path = SaveImageByByteArray(pic.ImageBytes, filename, createUser, basis);
 
                         item.Media = new Media()
                         {
@@ -3998,7 +4002,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return linkfile;
         }
 
-        private String SaveImageByByteArray(byte[] byteArrayIn, string fileName, string center = "")
+        private string SaveImageByByteArray(byte[] byteArrayIn, string fileName, String user, string center = "")
         {
             try
             {
@@ -4008,7 +4012,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var size = returnImage.Size;//get size image
                 var IMG = (Image)(new Bitmap(returnImage, (size.Width <= 800 && size.Height <= 800 ? size : new Size(800, 800)))); //resize image
-                var folder = center == "" ? "eduso" : center + $"/IMG/{DateTime.UtcNow.ToString("yyyyMMdd")}";
+                var folder = center == "" && String.IsNullOrEmpty(user) ? "eduso/admin" : $"{center}/{user}/IMG/{DateTime.UtcNow.ToString("yyyyMMdd")}";
                 string uploads = Path.Combine(RootPath, folder);
                 if (!Directory.Exists(uploads))
                 {
