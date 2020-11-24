@@ -4273,10 +4273,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             $"\n2. [Đáp án] : Bắt đầu đáp án" +
             $"\n3. [Qxxx] : Nội dung câu hỏi (Đối với các dạng câu hỏi trắc nghiệm)." +
             $"\n4. _Qxxx_ : Nội dung câu hỏi (Đối với dạng điền từ - đánh dấu vị trí điền từ)." +
-            $"\n5. [Axxx] : Nội dung câu trả lời." +
-            $"\n6. (x) : Đánh dấu vi trí câu trả lời đúng(Đối với các dạng trắc nghiệm)." +
-            $"\n7. [Exx] : Giải thích cho đáp án." +
-            $"\n8. [Hxxx] : Phần hiển thị của học viên" +
+            $"\n5. [Axxx] : Nội dung câu trả lời; các câu hỏi có nhiều đáp án được viết trên cùng một dòng, cách nhau bởi dấu |" +
+            $"\n6. (x) : Đánh dấu câu trả lời đúng (Đối với các dạng trắc nghiệm)." +
+            $"\n7. [Exxx] : Giải thích cho đáp án đúng" +
+            $"\n8. [Hxxx] : Phần hiển thị với học viên tại vị trí điền từ" +
             $"\n9. [P] : Điểm (Đối với dạng essay)" +
             $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
             $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";

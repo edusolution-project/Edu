@@ -178,17 +178,17 @@
                         <th rowspan="2">Họ tên</th>
                         <th rowspan="2">Tiến độ</th>
                         <th rowspan="2">Lần học cuối</th>
-                        <th colspan="3">Luyện tập</th>
-                        <th colspan="3">Kiểm tra</th>
+                        <th colspan="2">Luyện tập</th>
+                        <th colspan="2">Kiểm tra</th>
                         <th rowspan="2">Xếp hạng</th>
                     </tr>
                     <tr>
                         <th>Thực hiện</th>
                         <th>TB</th>
-                        <th>TK</th>
+                        @*<th>TK</th>*@
                         <th>Thực hiện</th>
                         <th>TB</th>
-                        <th>TK</th>
+                        @*<th>TK</th>*@
                     </tr>
                 </thead>
                 <tbody>
@@ -199,10 +199,10 @@
                         <td>{{formatTime(item.LastDate)}}</td>
                         <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td>
                         <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>
+                        @*<td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>*@
                         <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td>
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>
+                        @*<td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>*@
                         <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                     </tr>
                 </tbody>
@@ -2037,7 +2037,7 @@
                 formatTime(time) {
                     var _time = moment(time);
                     if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
-                    return _time.format("DD/MM/YYYY hh:mm A")
+                    return _time.format("DD/MM/YYYY HH:mm")
                 },
                 getPeriod(obj) {
                     var startms = moment(obj.Created);
