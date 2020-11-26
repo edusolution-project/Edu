@@ -474,9 +474,10 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             var lessonProgresses = _lessonProgressService
                 //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26" && t.StudentID == "5f60e2e90dd2b41448909d05")
-                .GetAll().SortBy(t => t.LessonID).ThenBy(t => t.Tried)
+                .GetAll()
                 //.Project(t => new LessonProgressEntity { ID = t.ID, LessonID = t.LessonID, StudentID = t.StudentID })
                 .ToList();
+            lessonProgresses = lessonProgresses.OrderBy(t => t.LessonID).ThenBy(t => t.Tried).ToList();
 
             foreach (var lprg in lessonProgresses)
             {
@@ -821,8 +822,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _teacherService.CreateQuery().UpdateMany(t => t.Centers.Any(ct => ct.CenterID == centerID)
             , Builders<TeacherEntity>.Update.PullFilter<CenterMemberEntity>(cm => cm.Centers, Builders<CenterMemberEntity>.Filter.Where(c => c.CenterID == centerID)));
 
-            _studentService.CreateQuery().UpdateMany(t => t.Centers.Contains(centerID)
-            , Builders<StudentEntity>.Update.PullFilter<string>(ct => ct.Centers, Builders<string>.Filter.Eq(str => str, centerID)));
+            _studentService.CreateQuery().UpdateMany(t => t.Centers.Contains(centerID), Builders<StudentEntity>.Update.Pull<string>(ct => ct.Centers, centerID));
 
             var classes = _classService.CreateQuery().Find(t => t.Center == centerID).ToList();
             if (classes != null && classes.Count > 0)
@@ -846,7 +846,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //remove Exam Detail
                     _examDetailService.Collection.DeleteMany(o => ids.Contains(o.ClassID));
                     var delete = _classService.Collection.DeleteMany(o => ids.Contains(o.ID));
-                    return new JsonResult(delete);
                 }
             }
 
@@ -884,7 +883,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             return Json("OK:" + count);
         }
-
 
 
         public JsonResult ChangeLinkImage()

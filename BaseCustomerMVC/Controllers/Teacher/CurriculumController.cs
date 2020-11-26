@@ -33,6 +33,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using RestSharp.Extensions;
 using MongoDB.Bson.Serialization.Serializers;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -109,6 +110,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private string RootPath { get; }
         private string StaticPath { get; }
 
+        private string currentHost { get; }
+
+
         public CurriculumController(CourseService service,
                  CourseHelper courseHelper,
                  SubjectService subjectService,
@@ -155,6 +159,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , CourseLessonService courseLessonService
                  , VocabularyService vocabularyService
                  , IRoxyFilemanHandler roxyFilemanHandler
+                 , IHttpContextAccessor httpContextAccessor
                  )
         {
             _service = service;
@@ -214,6 +219,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             RootPath = (config.GetValue<string>("SysConfig:StaticPath") ?? evn.WebRootPath) + "/Files";
             StaticPath = (config.GetValue<string>("SysConfig:StaticPath") ?? evn.WebRootPath);
+            currentHost = httpContextAccessor.HttpContext.Request.Host.Value;
         }
 
         #region PAGE
@@ -2247,6 +2253,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     Paragraph paragraph = s.AddParagraph();
                     TextRange TR4 = paragraph.AppendText(Note);
+                    TR4.CharacterFormat.Italic = true;
                     TR4.CharacterFormat.FontSize = 12;
                     TR4.CharacterFormat.TextColor = Color.Red;
 
@@ -2331,18 +2338,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             descriptionRow_Cel1_Content.ApplyStyle("DefStyleCenter");
             switch (_lessonPart.Type)
             {
-                case "QUIZ1":
-                case "QUIZ2":
-                case "QUIZ3":
-                case "QUIZ4":
-                case "ESSAY":
-                    descriptionRow_Cel1_Content.AppendText("Nội dung");
-                    break;
-                case "VOCAB":
-                    descriptionRow_Cel1_Content.AppendText("Danh sách từ");
-                    break;
+                //case "QUIZ1":
+                //case "QUIZ2":
+                //case "QUIZ3":
+                //case "QUIZ4":
+                //case "ESSAY":
+                //    descriptionRow_Cel1_Content.AppendText("Nội dung");
+                //    break;
+                //case "VOCAB":
+                //    descriptionRow_Cel1_Content.AppendText("Danh sách từ");
+                //    break;
                 default:
-                    descriptionRow_Cel1_Content.AppendText("Mô tả");
+                    descriptionRow_Cel1_Content.AppendText("Nội dung");
                     break;
             }
 
@@ -2353,8 +2360,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
             //var newdoc = ConvertHtmlToWordDoc(_lessonPart.Description, basis, userid, _lessonPart.Type);
-
             var html = _lessonPart.Description;
+            if (html != null)
+                html = html.Replace("src=\"/", "src=\"https://" + currentHost + "/");
             descriptionRow_Cel2_Content.ApplyStyle("DefStyle");
             var answer = "";
             switch (_lessonPart.Type)
@@ -2362,9 +2370,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ2":
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
                     {
-                        html = "<b style='color:red'>[Câu hỏi]</b><br/>" + RenderQuiz2ForWord(_lessonPart, out answer) + "<br/><br/>";
-                        answer = "<b style='color:red'>[Đáp án]</b><br/>" + answer;
-                        descriptionRow_Cel2_Content.AppendHTML(html+answer);
+                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, out answer) + "</p>";
+                        answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
+                        descriptionRow_Cel2_Content.AppendHTML(html + answer);
                         //var aGrp2 = descriptionRow_Cel2.AddParagraph();
                         //aGrp2.ApplyStyle("DefStyle");
                         //descriptionRow_Cel2_Content.AppendHTML(answer);
@@ -2382,9 +2390,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ3":
                 case "QUIZ4":
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
-                        descriptionRow_Cel2_Content.AppendHTML(html + "<br/><br/>");
-                    var question = "<b style='color:red'>[Câu hỏi]</b><br/>" + RenderTQuizForWord(_lessonPart, out answer) + "<br/><br/>";
-                    answer = "<b style='color:red'>[Đáp án]</b><br/>" + answer;
+                        descriptionRow_Cel2_Content.AppendHTML("<p style='margin:0pt'>" + html + "</p>");
+                    var question = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderTQuizForWord(_lessonPart, out answer) + "</p>";
+                    answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
                     var qGrp = descriptionRow_Cel2.AddParagraph();
                     qGrp.ApplyStyle("DefStyle");
                     qGrp.AppendHTML(question);
@@ -2414,7 +2422,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             attachmentRow_Cel1.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
             var attachmentRow_Cel1_Content = attachmentRow_Cel1.AddParagraph();
             attachmentRow_Cel1_Content.ApplyStyle("DefStyleCenter");
-            attachmentRow_Cel1_Content.AppendText("File đính kèm");
+            attachmentRow_Cel1_Content.AppendText("File");
 
             table.ApplyHorizontalMerge(attachmentRow.GetRowIndex(), 1, partTypes.Count);
             var attachmentRow_Cel2_Content = attachmentRow.Cells[1].AddParagraph();
@@ -2500,13 +2508,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             }
 
+            returnHtml = returnHtml.Replace("src=\"/", "src=\"https://" + currentHost + "/");
             return returnHtml;
         }
 
         private string RenderQuiz2ForWord(LessonPartEntity lessonPart, out string answer)
         {
             answer = "";
-            var description = lessonPart.Description;
+            var description = lessonPart.Description.Replace("src=\"/", "src=\"https://" + currentHost + "/");
             var returnHtml = "";
             var quizOpen = "<fillquiz>";
             var quizClose = "</fillquiz>";
@@ -2600,7 +2609,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Paragraph p_titleRow_cell1 = titleRow.Cells[1].AddParagraph();
                         titleRow.Cells[1].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                         p_titleRow_cell1.Format.HorizontalAlignment = HorizontalAlignment.Left;
-                        p_titleRow_cell1.AppendText("Gõ tiêu đề tại đây.");
+                        p_titleRow_cell1.AppendText("Nhập tiêu đề tại đây.");
                         table.ApplyHorizontalMerge(0, 1, partDSP.Count);
 
                         //Type Row
@@ -2645,12 +2654,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         if (indexTable >= 6 && indexTable <= partTypes.Count)
                         {
                             p_contentRow_cell0.AppendText("Nội dung");
-                            p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
+                            p_contentRow_cell1.AppendText("Soạn thảo nội dung tại đây");
                             p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
                             if (indexTable == 6 || indexTable == 8 || indexTable == 9)
                             {
                                 p_contentRow_cell1.AppendText("[Câu hỏi]").CharacterFormat.Bold = true;
-                                p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
                                 p_contentRow_cell1.AppendText("[Q1] Nội dung câu hỏi");
                                 p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
                                 p_contentRow_cell1.AppendText("[Đáp án]").CharacterFormat.Bold = true;
@@ -2672,7 +2680,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             else
                             {
                                 p_contentRow_cell1.RemoveFrame();
-                                p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
+                                p_contentRow_cell1.AppendText("Soạn thảo nội dung tại đây");
                                 p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
                                 p_contentRow_cell1.AppendText("[E] Giải thích đáp án");
                                 p_contentRow_cell1.AppendBreak(BreakType.LineBreak);
@@ -2686,8 +2694,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                         else
                         {
-                            p_contentRow_cell0.AppendText("Mô tả");
-                            p_contentRow_cell1.AppendText("Gõ mô tả tại đây.");
+                            p_contentRow_cell0.AppendText("Nội dung");
+                            p_contentRow_cell1.AppendText("Soạn thảo nội dung tại đây");
                         }
 
                         table.ApplyHorizontalMerge(3, 1, partDSP.Count);
@@ -2712,6 +2720,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //Lưu ý
                     Paragraph paragraph = s.AddParagraph();
                     TextRange TR4 = paragraph.AppendText(Note);
+                    TR4.CharacterFormat.Italic = true;
                     TR4.CharacterFormat.FontSize = 12;
                     TR4.CharacterFormat.TextColor = Color.Red;
 
@@ -3593,170 +3602,170 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return test.Trim();
         }
 
-        private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
-        {
-            try
-            {
-                if (String.IsNullOrEmpty(html)) return "";
-                String _html = "";
-                if (type.Equals("QUIZ2"))
-                {
-                    if (lessonQuestionIDs == null || lessonPartAnswers == null) return "";
+        //private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
+        //{
+        //    try
+        //    {
+        //        if (String.IsNullOrEmpty(html)) return "";
+        //        String _html = "";
+        //        if (type.Equals("QUIZ2"))
+        //        {
+        //            if (lessonQuestionIDs == null || lessonPartAnswers == null) return "";
 
-                    var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
-                    Int32 indexStr = 0;
-                    foreach (var questionID in lessonQuestionIDs)
-                    {
-                        var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
-                        if (_listAns.Count() > 1)
-                        {
-                            String contentAns = "";
-                            foreach (var item in _listAns)
-                            {
-                                contentAns += $"{item.Content}|";
-                            }
-                            contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{contentAns}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        else
-                        {
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        indexStr++;
-                    }
-                }
+        //            var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
+        //            Int32 indexStr = 0;
+        //            foreach (var questionID in lessonQuestionIDs)
+        //            {
+        //                var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
+        //                if (_listAns.Count() > 1)
+        //                {
+        //                    String contentAns = "";
+        //                    foreach (var item in _listAns)
+        //                    {
+        //                        contentAns += $"{item.Content}|";
+        //                    }
+        //                    contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
+        //                    if (indexStr + 1 != str.Length)
+        //                        _html += $"{str[indexStr]}{{{{{contentAns}}}}}";
+        //                    if (indexStr + 1 == str.Length)
+        //                        _html += str[indexStr + 1];
+        //                }
+        //                else
+        //                {
+        //                    if (indexStr + 1 != str.Length)
+        //                        _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
+        //                    if (indexStr + 1 == str.Length)
+        //                        _html += str[indexStr + 1];
+        //                }
+        //                indexStr++;
+        //            }
+        //        }
 
-                html = String.IsNullOrEmpty(_html) ? html : _html;
-                String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
-                String folder = $"/Temp/{basis}/{user}/";
-                string uploads = $"{RootPath}{folder}";
-                if (!Directory.Exists(uploads))
-                {
-                    Directory.CreateDirectory(uploads);
-                }
-                String strDoc = "";
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    StreamWriter writer = new StreamWriter(ms);
+        //        html = String.IsNullOrEmpty(_html) ? html : _html;
+        //        String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
+        //        String folder = $"/Temp/{basis}/{user}/";
+        //        string uploads = $"{RootPath}{folder}";
+        //        if (!Directory.Exists(uploads))
+        //        {
+        //            Directory.CreateDirectory(uploads);
+        //        }
+        //        String strDoc = "";
+        //        using (MemoryStream ms = new MemoryStream())
+        //        {
+        //            StreamWriter writer = new StreamWriter(ms);
 
-                    writer.WriteLine(html);
-                    writer.Flush();
+        //            writer.WriteLine(html);
+        //            writer.Flush();
 
-                    //You have to rewind the MemoryStream before copying
-                    ms.Seek(0, SeekOrigin.Begin);
+        //            //You have to rewind the MemoryStream before copying
+        //            ms.Seek(0, SeekOrigin.Begin);
 
-                    using (FileStream fs = new FileStream(uploads + fileName, FileMode.OpenOrCreate))
-                    {
-                        ms.CopyTo(fs);
-                        fs.Flush();
-                    }
+        //            using (FileStream fs = new FileStream(uploads + fileName, FileMode.OpenOrCreate))
+        //            {
+        //                ms.CopyTo(fs);
+        //                fs.Flush();
+        //            }
 
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        Document doc = new Document();
-                        doc.LoadFromFile(uploads + fileName, FileFormat.Html, XHTMLValidationType.None);
+        //            using (MemoryStream memory = new MemoryStream())
+        //            {
+        //                Document doc = new Document();
+        //                doc.LoadFromFile(uploads + fileName, FileFormat.Html, XHTMLValidationType.None);
 
-                        strDoc = doc.GetText();
-                    }
+        //                strDoc = doc.GetText();
+        //            }
 
-                    System.IO.File.Delete(uploads + fileName);
-                }
-                return strDoc.Replace("Evaluation Warning: The document was created with Spire.Doc for .NET.", "");
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
+        //            System.IO.File.Delete(uploads + fileName);
+        //        }
+        //        return strDoc.Replace("Evaluation Warning: The document was created with Spire.Doc for .NET.", "");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ex.Message;
+        //    }
+        //}
 
-        private Document ConvertHtmlToWordDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
-        {
-            var retDoc = new Document();
-            try
-            {
-                if (String.IsNullOrEmpty(html)) return retDoc;
-                String _html = "";
-                if (type.Equals("QUIZ2"))
-                {
-                    if (lessonQuestionIDs == null || lessonPartAnswers == null) return retDoc;
+        //private Document ConvertHtmlToWordDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
+        //{
+        //    var retDoc = new Document();
+        //    try
+        //    {
+        //        if (String.IsNullOrEmpty(html)) return retDoc;
+        //        String _html = "";
+        //        if (type.Equals("QUIZ2"))
+        //        {
+        //            if (lessonQuestionIDs == null || lessonPartAnswers == null) return retDoc;
 
-                    var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
-                    Int32 indexStr = 0;
-                    foreach (var questionID in lessonQuestionIDs)
-                    {
-                        var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
-                        if (_listAns.Count() > 1)
-                        {
-                            String contentAns = "";
-                            foreach (var item in _listAns)
-                            {
-                                contentAns += $"{item.Content}|";
-                            }
-                            contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{contentAns}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        else
-                        {
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        indexStr++;
-                    }
-                }
+        //            var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
+        //            Int32 indexStr = 0;
+        //            foreach (var questionID in lessonQuestionIDs)
+        //            {
+        //                var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
+        //                if (_listAns.Count() > 1)
+        //                {
+        //                    String contentAns = "";
+        //                    foreach (var item in _listAns)
+        //                    {
+        //                        contentAns += $"{item.Content}|";
+        //                    }
+        //                    contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
+        //                    if (indexStr + 1 != str.Length)
+        //                        _html += $"{str[indexStr]}{{{{{contentAns}}}}}";
+        //                    if (indexStr + 1 == str.Length)
+        //                        _html += str[indexStr + 1];
+        //                }
+        //                else
+        //                {
+        //                    if (indexStr + 1 != str.Length)
+        //                        _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
+        //                    if (indexStr + 1 == str.Length)
+        //                        _html += str[indexStr + 1];
+        //                }
+        //                indexStr++;
+        //            }
+        //        }
 
-                html = String.IsNullOrEmpty(_html) ? html : _html;
-                String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
-                String folder = $"/Temp/{basis}/{user}/";
-                string uploads = $"{RootPath}{folder}";
-                if (!Directory.Exists(uploads))
-                {
-                    Directory.CreateDirectory(uploads);
-                }
-                String strDoc = "";
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    StreamWriter writer = new StreamWriter(ms);
+        //        html = String.IsNullOrEmpty(_html) ? html : _html;
+        //        String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
+        //        String folder = $"/Temp/{basis}/{user}/";
+        //        string uploads = $"{RootPath}{folder}";
+        //        if (!Directory.Exists(uploads))
+        //        {
+        //            Directory.CreateDirectory(uploads);
+        //        }
+        //        String strDoc = "";
+        //        using (MemoryStream ms = new MemoryStream())
+        //        {
+        //            StreamWriter writer = new StreamWriter(ms);
 
-                    writer.WriteLine(html);
-                    writer.Flush();
+        //            writer.WriteLine(html);
+        //            writer.Flush();
 
-                    //You have to rewind the MemoryStream before copying
-                    ms.Seek(0, SeekOrigin.Begin);
+        //            //You have to rewind the MemoryStream before copying
+        //            ms.Seek(0, SeekOrigin.Begin);
 
-                    using (FileStream fs = new FileStream(uploads + fileName, FileMode.OpenOrCreate))
-                    {
-                        ms.CopyTo(fs);
-                        fs.Flush();
-                    }
+        //            using (FileStream fs = new FileStream(uploads + fileName, FileMode.OpenOrCreate))
+        //            {
+        //                ms.CopyTo(fs);
+        //                fs.Flush();
+        //            }
 
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        Document doc = new Document();
-                        doc.LoadFromFile(uploads + fileName, FileFormat.Html, XHTMLValidationType.None);
+        //            using (MemoryStream memory = new MemoryStream())
+        //            {
+        //                Document doc = new Document();
+        //                doc.LoadFromFile(uploads + fileName, FileFormat.Html, XHTMLValidationType.None);
 
-                        retDoc = doc;
-                    }
+        //                retDoc = doc;
+        //            }
 
-                    System.IO.File.Delete(uploads + fileName);
-                }
-                return retDoc;
-            }
-            catch (Exception ex)
-            {
-                throw (ex);
-            }
-        }
+        //            System.IO.File.Delete(uploads + fileName);
+        //        }
+        //        return retDoc;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw (ex);
+        //    }
+        //}
 
         private async Task<Dictionary<String, String>> GetPathFileOLE(Paragraph para, String basis, String createUser)
         {

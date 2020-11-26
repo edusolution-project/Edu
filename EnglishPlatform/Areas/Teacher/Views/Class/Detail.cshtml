@@ -118,9 +118,9 @@
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark"  v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
-                                Chuyển chế độ soạn thảo
+                                Soạn thảo
                             </a>
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -150,9 +150,9 @@
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
-                                Chuyển chế độ soạn thảo
+                                Soạn thảo
                             </a>
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -1521,7 +1521,7 @@
                                 var _container = '#prc-' + chapter.ID + '-' + pos;
                                 var startdate = formatTime(chapter.StartDate);
                                 var enddate = formatTime(chapter.EndDate);
-                                
+
                                 $(_container).find('.input-group.date.st > input').val(startdate);
                                 $(_container).find('.input-group.date.ed > input').val(enddate);
                                 this.updateSubchapSchedule(obj);
