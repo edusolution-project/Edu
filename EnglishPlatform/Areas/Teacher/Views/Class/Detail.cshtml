@@ -30,7 +30,7 @@
 <link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
-
+<script src="~/js/export2excel/jquery.table2excel.js"></script>
 <script>
     setActiveMenu("course");
 </script>
@@ -54,14 +54,15 @@
             </div>
         </div>
         <div class="d-flex align-items-center" v-if="tab[2]">
-            <div class="box filter-box m-1">
+            @*<div class="col-md-12 form-row pb-2" v-if="tab[2]">*@
+            <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="searchCsbj">
                     <option value="">Tổng hợp</option>
                     <option v-for="(item,k) in classSubjects" :value="item.ID">{{item.CourseName}}</option>
                 </select>
             </div>
-            <div class="m-1 position-relative" v-if="searchCsbj != ''">
-                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
+            <div class="m-1 position-relative col-md-9 col-sm-12" v-if="searchCsbj != ''">
+                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle filter-box" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
                     Xem điểm theo tuần <span class="caret"></span>
                 </button>
                 <div style="position:absolute;left:0;top:40px;z-index:2" v-if="displaySelect">
@@ -76,6 +77,28 @@
                         </ul>
                     </div>
                 </div>
+            </div>
+            <div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
+                <select v-model="searchPoint">
+                    <option value="">Mặc định</option>
+                    <option value="1">Lọc theo thời gian</option>
+                </select>
+            </div>
+            <div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
+                <div class="form-row">
+                    <input type="date" v-model="searchwidthTime.startTime" class="form-control col-md-4 col-sm-12">
+                    <input type="date" v-model="searchwidthTime.endTime" class="form-control col-md-4 col-sm-12">
+                    <button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>
+                </div>
+            </div>
+            <div class="float-right">
+                <template v-if="!isLoading">
+                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="export2Excel()"><i title="Xuất file" class="ti-export"></i></button>*@
+                    <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2Excel()"><i title="Xuất file" class="ti-export"></i></button>
+                </template>
+                <template v-else>
+                    <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
+                </template>
             </div>
         </div>
 
@@ -171,39 +194,39 @@
             </div>
         </div>
         <div class="box" v-if="tab[2]">
-            <table id="ed_table" class="table table-hover" v-if="searchCsbj == ''">
+            <table id="ed_table" class="table table-hover table2excel" v-if="searchCsbj == ''">
                 <thead>
                     <tr>
                         <th rowspan="2">#</th>
                         <th rowspan="2">Họ tên</th>
                         <th rowspan="2">Tiến độ</th>
                         <th rowspan="2">Lần học cuối</th>
-                        <th colspan="3">Luyện tập</th>
-                        <th colspan="3">Kiểm tra</th>
+                        <th colspan="2">Luyện tập</th>
+                        <th colspan="2">Kiểm tra</th>
                         <th rowspan="2">Xếp hạng</th>
                     </tr>
                     <tr>
-                        <th>Thực hiện</th>
-                        <th>TB</th>
-                        <th>TK</th>
-                        <th>Thực hiện</th>
-                        <th>TB</th>
-                        <th>TK</th>
+                        <th>Tiến độ</th>
+                        <th>Điểm trung bình</th>
+                        @*<th>TK</th>*@
+                        <th>Tiến độ</th>
+                        <th>Điểm trung bình</th>
+                        @*<th>TK</th>*@
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(item,k) in scoreData">
-                        <td>{{(k+1)}}</td>
-                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/@currentClass.ID'" :title="item.FullName">{{item.FullName}}</a></td>
-                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                        <td>{{formatTime(item.LastDate)}}</td>
-                        <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                        <td>{{(k+1)}}</td> <!--STT-->
+                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/@currentClass.ID'" :title="item.FullName">{{item.FullName}}</a></td> <!--Họ tên-->
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td> <!--Tiến độ-->
+                        <td>{{formatTime(item.LastDate)}}</td> <!--Lần học cuối-->
+                        <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td> <!--Tiến độ-->
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td> <!--Điểm trung bình-->
+                        @*<td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>*@
+                        <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td> <!--Tiến độ-->
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td> <!--Điểm trung bình-->
+                        @*<td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>*@
+                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td> <!--Rank-->
                     </tr>
                 </tbody>
             </table>
@@ -955,7 +978,7 @@
                 },
                 searchCsbj:'',
                 classID: '@currentClass.ID',
-                className: '@currentClass.Name',
+                className: '@Html.Raw(currentClass.Name)',
                 startDate: '@currentClass.StartDate',
                 endDate: '@currentClass.EndDate',
                 classDescription: '@currentClass.Description',
@@ -1079,7 +1102,13 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 list_subject: [],
                 list_grades_full: [],
-                displaySelect: false
+                displaySelect: false,
+                searchPoint: '',
+                displaySelectTime: false,
+                searchwidthTime: {
+                    startTime: moment(String(new Date())).format('YYYY-MM-DD'),
+                    endTime: moment(String(new Date())).format('YYYY-MM-DD'),
+                }
             },
             watch: {
                 "ref.subjectID": function () {
@@ -1092,6 +1121,9 @@
                     this.loadClassScore()
                     this.filterChap.TargetChaps = []
                     this.filterChap.SelectAll = false;
+                },
+                "searchPoint": function () {
+                    this.displaySelectTime = !this.displaySelectTime;
                 }
             },
             methods: {
@@ -1521,7 +1553,7 @@
                                 var _container = '#prc-' + chapter.ID + '-' + pos;
                                 var startdate = formatTime(chapter.StartDate);
                                 var enddate = formatTime(chapter.EndDate);
-                                
+
                                 $(_container).find('.input-group.date.st > input').val(startdate);
                                 $(_container).find('.input-group.date.ed > input').val(enddate);
                                 this.updateSubchapSchedule(obj);
@@ -1932,7 +1964,7 @@
                     })
                 },
                 changeFile() {
-                    //debugger
+                    debugger
                     var listFiles = $('#modal_event input[type=file]')
                     if (listFiles[1].files[0] != null) { //file dinh kem
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
@@ -2114,6 +2146,51 @@
                         })
                     }
                     _that.checkToggle()
+                },
+                export2Excel() {
+                    this.isLoading = true;
+                    var table = $('#ed_table');
+                    if (table && table.length) {
+                        $(table).table2excel({
+                            exclude: ".noExl",
+                            name: "Excel Document Name",
+                            filename: "Bản điểm " + this.className + ".xls",
+                            fileext: ".xls",
+                            exclude_img: true,
+                            exclude_links: true,
+                            exclude_inputs: true,
+                            preserveColors: true
+                        });
+                        this.isLoading = false;
+                    }
+                    else {
+                        this.isLoading = false;
+                    }
+                },
+                format_Date(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
+                fillterWithTime() {
+                    debugger
+                    let _that = this;
+                    let _form = new FormData();
+                    if (this.searchCsbj == '') {
+                        _form.append('ClassID', _that.classID)
+                        _form.append('PageSize', 1000)
+                        _form.append('PageIndex', 1)
+                        _form.append('startTime', _that.searchwidthTime.startTime)
+                        _form.append('endTime', _that.searchwidthTime.endTime)
+                        _form.append('isFillter', true)
+                        let _url = '@processUrl("GetClassResult", "Class")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.scoreData = response.data.Data;
+                                this.scoreData = _that.scoreData
+                                this.totalRec = response.data.Model.totalRecord
+                            }).catch(e => { })
+                    }
                 }
             }
             });
@@ -2175,8 +2252,30 @@
                     delay: 25
                 }
             });
-
         }
+
+        //var export2Excel = function () {
+        //    try {
+        //        var table = $('#ed_table');
+        //        if (table && table.length) {
+        //            var preserveColors = (table.hasClass('table2excel_with_colors') ? true : false);
+        //            $(table).table2excel({
+        //                exclude: ".noExl",
+        //                name: "Excel Document Name",
+        //                filename: "myFileName" + new Date().toISOString().replace(/[\-\:\.]/g, "") + ".xls",
+        //                fileext: ".xlsx",
+        //                exclude_img: true,
+        //                exclude_links: true,
+        //                exclude_inputs: true,
+        //                preserveColors: preserveColors
+        //            });
+        //        }
+        //    }
+        //    catch (err) {
+        //        alert(err.message)
+        //    }
+        //}
+        //window.export2Excel = export2Excel;
     </script>
 }
 @section Modals{

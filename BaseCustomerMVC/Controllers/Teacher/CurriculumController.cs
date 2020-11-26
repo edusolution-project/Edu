@@ -2242,7 +2242,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         var _lessonPart = lessonPart.ElementAtOrDefault(x);
 
-                        RenderWordLessonPart(ref s, _lessonPart);
+                        RenderWordLessonPart(ref s, _lessonPart, basis, UserID);
                     }
 
                     Paragraph paragraph = s.AddParagraph();
@@ -2263,7 +2263,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart)
+        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart,String basis,String user)
         {
 
             Table table = s.AddTable(true);
@@ -2362,9 +2362,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ2":
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
                     {
-                        html = "<b style='color:red'>[Câu hỏi]</b><br/>" + RenderQuiz2ForWord(_lessonPart, out answer) + "<br/><br/>";
+                        html = "<b style='color:red'>[Câu hỏi]</b><br/>" + RenderQuiz2ForWord(_lessonPart,basis,user,out answer) + "<br/><br/>";
                         answer = "<b style='color:red'>[Đáp án]</b><br/>" + answer;
-                        descriptionRow_Cel2_Content.AppendHTML(html+answer);
+                        descriptionRow_Cel2_Content.AppendHTML(html + answer);
                         //var aGrp2 = descriptionRow_Cel2.AddParagraph();
                         //aGrp2.ApplyStyle("DefStyle");
                         //descriptionRow_Cel2_Content.AppendHTML(answer);
@@ -2503,7 +2503,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return returnHtml;
         }
 
-        private string RenderQuiz2ForWord(LessonPartEntity lessonPart, out string answer)
+        private string RenderQuiz2ForWord(LessonPartEntity lessonPart,String basis,String user, out string answer)
         {
             answer = "";
             var description = lessonPart.Description;
@@ -2547,6 +2547,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 questions.RemoveAt(0);
             }
 
+            String a = ConvertHtmlToDoc(returnHtml, basis, user);
+
+            //return ConvertHtmlToDoc(returnHtml,basis,user,lessonPart.Type);
             return returnHtml;
         }
 
@@ -3594,47 +3597,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return test.Trim();
         }
 
-        private String ConvertHtmlToDoc(String html, String basis, String user, String type, List<String> lessonQuestionIDs = null, List<LessonPartAnswerEntity> lessonPartAnswers = null)
+        private String ConvertHtmlToDoc(String html, String basis, String user)
         {
             try
             {
                 if (String.IsNullOrEmpty(html)) return "";
-                String _html = "";
-                if (type.Equals("QUIZ2"))
-                {
-                    if (lessonQuestionIDs == null || lessonPartAnswers == null) return "";
-
-                    var str = html.Replace("\"", "'").Replace("<fillquiz><input class='fillquiz' type='text'></fillquiz>", "|").Split('|');
-                    Int32 indexStr = 0;
-                    foreach (var questionID in lessonQuestionIDs)
-                    {
-                        var _listAns = lessonPartAnswers.FindAll(x => questionID.Contains(x.ParentID));
-                        if (_listAns.Count() > 1)
-                        {
-                            String contentAns = "";
-                            foreach (var item in _listAns)
-                            {
-                                contentAns += $"{item.Content}|";
-                            }
-                            contentAns = contentAns.Remove(contentAns.LastIndexOf('|'));
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{contentAns}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        else
-                        {
-                            if (indexStr + 1 != str.Length)
-                                _html += $"{str[indexStr]}{{{{{_listAns[0].Content}}}}}";
-                            if (indexStr + 1 == str.Length)
-                                _html += str[indexStr + 1];
-                        }
-                        indexStr++;
-                    }
-                }
-
-                html = String.IsNullOrEmpty(_html) ? html : _html;
-                String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmss")}.html";
+                String fileName = $"temp{DateTime.Now.ToString("yyyyMMddHHmmssfff")}_{user}.html";
                 String folder = $"/Temp/{basis}/{user}/";
                 string uploads = $"{RootPath}{folder}";
                 if (!Directory.Exists(uploads))
@@ -3662,8 +3630,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         Document doc = new Document();
                         doc.LoadFromFile(uploads + fileName, FileFormat.Html, XHTMLValidationType.None);
+                        Section s = doc.Sections[0];
+                        var para = s.Paragraphs;
 
-                        strDoc = doc.GetText();
                     }
 
                     System.IO.File.Delete(uploads + fileName);
@@ -4027,7 +3996,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             catch (Exception ex)
             {
-                return null;
+                return ex.Message;
             }
         }
 
@@ -4134,24 +4103,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
             }
-        }
-
-        private string GetText(Paragraph para)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (DocumentObject obj in para.ChildObjects)
-            {
-                if (obj is OfficeMath)
-                {
-                    stringBuilder.Append((obj as OfficeMath).ToMathMLCode());
-                }
-                else if (obj is TextRange)
-                {
-                    stringBuilder.Append((obj as TextRange).Text);
-                }
-            }
-            stringBuilder.AppendLine();
-            return stringBuilder.ToString();
         }
 
         private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)

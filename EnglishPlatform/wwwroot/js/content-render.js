@@ -109,7 +109,10 @@ var Lesson = (function () {
                 renderStandardLayout();
                 renderPreview();
                 break;
+            case mod.TEACHERPREVIEW:
             case mod.TEACHERPREVIEWEXAM:
+                redoExam();
+                break;
             case mod.STUDENT_EXAM:
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
@@ -127,7 +130,6 @@ var Lesson = (function () {
                 else
                     renderExam();
                 break;
-            case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 renderStandardLayout();
                 var hash = window.location.hash;
@@ -154,17 +156,6 @@ var Lesson = (function () {
         window.getLocalData = getLocalData
         window.ShowFullScreen = showFullScreen;
         window.openPreview = openPreview;
-        //var hash = window.location.hash;
-        //if (hash.startsWith('#')) {
-        //    hash = hash.split('#')[1]
-        //    //console.log(hash)
-        //    switch (hash) {
-        //        case 'redo':
-        //            redoExam();
-        //            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
-        //            break;
-        //    }
-        //}
     }
 
     var reloadData = function () {
@@ -583,7 +574,9 @@ var Lesson = (function () {
                     })
                     goPartInx(0);
                 }
-                renderOldAnswer();
+                if (config.mod == mod.STUDENT_EXAM) {
+                    renderOldAnswer();
+                }
                 break;
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
@@ -2934,6 +2927,8 @@ var Lesson = (function () {
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
+
+                $('#leftCol').addClass('hide');//fix tạm thời
             }
         }
         else {
@@ -2946,6 +2941,11 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
+
+            //fix tạm thời
+            if (!isContinue) {
+                $('#leftCol').addClass('hide');
+            }
         }
     }
 
@@ -3197,7 +3197,9 @@ var Lesson = (function () {
         }
         else {
             //temp fix 20200823
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //fix tạm thời
+            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
             //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
         }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
@@ -3748,10 +3750,10 @@ var Lesson = (function () {
     var completeExam = async function (isOvertime) {
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
-        }
-        while (__answer_sending) {
-            console.log("wait for complete answering ...");
-            await new Promise(r => setTimeout(r, 500));
+            while (__answer_sending) {
+                console.log("wait for complete answering ...");
+                await new Promise(r => setTimeout(r, 500));
+            }
         }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
