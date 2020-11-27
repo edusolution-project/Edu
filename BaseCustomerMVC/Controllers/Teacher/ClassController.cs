@@ -631,7 +631,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            startDate = o.StartDate,
                            endDate = o.EndDate,
                            students = studentCount,
-                           skill = skill
+                           skill = skill,
+                           bookName = _sbj.CourseName
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
 

@@ -35,7 +35,7 @@
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 d-none">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>

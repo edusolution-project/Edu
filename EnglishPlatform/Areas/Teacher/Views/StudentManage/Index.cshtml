@@ -36,19 +36,19 @@
                     <option v-for="(item,k) in list_active_class" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box w-152 m-1 ">
+            <div class="box filter-box w-152 m-1 d-none">
                 <select name="" v-model="search_subject_id">
                     <option value="">Chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box w-152 m-1">
+            <div class="box filter-box w-152 m-1 d-none">
                 <select name="" v-model="search_skill_id">
                     <option value="">Môn học</option>
                     <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="box filter-box w-152 m-1">
+            <div class="box filter-box w-152 m-1 d-none">
                 <select name="" v-model="search_grade_id">
                     <option value="">Cấp độ</option>
                     <option v-for="(item,k) in list_grades_full" v-if="matchGrade(item)" :value="item.ID">{{item.Name}}</option>

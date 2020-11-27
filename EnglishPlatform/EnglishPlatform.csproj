@@ -5,6 +5,7 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
 	<PreserveCompilationContext>true</PreserveCompilationContext>
 	<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

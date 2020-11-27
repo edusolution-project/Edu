@@ -561,7 +561,8 @@ namespace BaseCustomerMVC.Controllers.Student
                                       endDate = o.EndDate,
                                       skill = skill,
                                       type = _lesson.TemplateType,
-                                      onlineUrl = o.IsOnline ? onlineUrl : ""
+                                      onlineUrl = o.IsOnline ? onlineUrl : "",
+                                      bookName = _cs.CourseName
                                   }).OrderBy(t => t.startDate).ToList();
                 else
                     cacheClass = new List<StudentLessonScheduleViewModel>();

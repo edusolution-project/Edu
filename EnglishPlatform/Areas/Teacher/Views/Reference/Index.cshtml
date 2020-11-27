@@ -88,6 +88,7 @@
         </div>
     </div>
     <div class="card-body pt-2" v-cloak>
+        <div v-if="tab[1]" class="pt-0 pb-2 text-danger"><i>Lưu ý: học liệu nội bộ, theo yêu cầu của giáo viên & học viên</i></div>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">

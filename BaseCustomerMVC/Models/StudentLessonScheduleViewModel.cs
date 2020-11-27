@@ -14,6 +14,7 @@ namespace BaseCustomerMVC.Models
         public string className { get; set; }
         public string classSubjectID { get; set; }
         public string subjectName { get; set; }
+        public string bookName { get; set; }
         public string title { get; set; }
         public string lessonID { get; set; }
         public DateTime startDate { get; set; }

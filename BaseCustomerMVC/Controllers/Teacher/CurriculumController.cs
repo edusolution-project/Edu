@@ -593,6 +593,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.TotalPractices = 0;
                     item.TotalLessons = 0;
                     item.TotalExams = 0;
+                    item.SkillID = "7";//HARD CODE TO PREVENT ERRROR, REMOVE LATER
                     //item.IsPublic = false;
                     //if (item.TargetCenters != null && item.TargetCenters[0] != null)
                     //{
@@ -618,7 +619,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     olditem.Description = item.Description;
                     olditem.SubjectID = item.SubjectID;
                     olditem.GradeID = item.GradeID;
-                    olditem.SkillID = item.SkillID;
+                    //olditem.SkillID = item.SkillID;
                     olditem.Name = item.Name;
                     olditem.TeacherID = item.TeacherID;
                     //olditem.IsPublic = item.IsPublic;
