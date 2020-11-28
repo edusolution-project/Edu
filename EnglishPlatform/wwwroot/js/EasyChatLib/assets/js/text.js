@@ -495,4 +495,92 @@
     }
   
     lazyLoader.init();
-  })();
+})();
+
+(function () {
+    var __SCRIPT_URL = "";
+    function AlertMessage(scriptUrl) {
+        __SCRIPT_URL = scriptUrl;
+        init();
+    }
+    window.AlertMessage = AlertMessage;
+    var init = function () {
+        if ("Notification" in window) {
+            if (Notification.permission != 'granted') {
+                Notification.requestPermission(function (status) {
+                    if (status == "granted") {
+                        navigator.serviceWorker.getRegistration().then(function (reg) {
+                            new Notification("Hello world");
+                        });
+                    }
+                });
+            }
+        }
+        else {
+            throw "Browser not support Notification";
+        }
+    }
+    //{
+    //    body: "longht",
+    //    icon: "https://eduso.vn/images/Logo.png",
+    //    //image: "https://eduso.vn/images/Logo.png",
+    //    badge: "badge",
+    //    requireInteraction: requireInteraction,
+    //}
+    AlertMessage.prototype.Show = function (title, options, eventClick) {
+        if (!options.icon) {
+            options.icon = "https://eduso.vn/images/Logo.png";
+        }
+        options.badge = "https://eduso.vn/images/Logo.png";
+        var noti = new Notification(title, options);
+        if (eventClick) {
+            noti.addEventListener("click", eventClick);
+        }
+        return noti;
+    }
+    var serviceWorkerRegister = function () {
+        if (!'serviceWorker' in navigator) {
+            throw new Error('No Service Worker support!');
+        }
+        if (!'PushManager' in window) {
+            throw new Error('No Push API Support!');
+        }
+
+        navigator.serviceWorker.register(__SCRIPT_URL).then(function (reg) {
+            reg.installing; // the installing worker, or undefined
+            reg.waiting; // the waiting worker, or undefined
+            reg.active; // the active worker, or undefined
+
+            reg.addEventListener('updatefound', () => {
+                // A wild service worker has appeared in reg.installing!
+                const newWorker = reg.installing;
+
+                newWorker.state;
+                // "installing" - the install event has fired, but not yet complete
+                // "installed"  - install complete
+                // "activating" - the activate event has fired, but not yet complete
+                // "activated"  - fully active
+                // "redundant"  - discarded. Either failed install, or it's been
+                //                replaced by a newer version
+
+                newWorker.addEventListener('statechange', () => {
+                    // newWorker.state has changed
+                    console.log(newWorker.state);
+                });
+            });
+        });
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            // This fires when the service worker controlling this page
+            // changes, eg a new worker has skipped waiting and become
+            // the new active worker.
+            console.log("controllerchange");
+        });
+        window.ServiceWorkerRegistration
+
+    }
+    AlertMessage.prototype.RegisServiceWorker = serviceWorkerRegister;
+    return AlertMessage();
+}());
+
+var alertMessage = new AlertMessage('/sw.js');
+alertMessage.RegisServiceWorker();
