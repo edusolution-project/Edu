@@ -545,7 +545,17 @@
         if (!'PushManager' in window) {
             throw new Error('No Push API Support!');
         }
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            // This fires when the service worker controlling this page
+            // changes, eg a new worker has skipped waiting and become
+            // the new active worker.
+            console.log("controllerchange");
+        });
 
+        navigator.serviceWorker.addEventListener('message', event => {
+            // event is a MessageEvent object
+            console.log(`The service worker sent me a message: ${event.data}`);
+        });
         navigator.serviceWorker.register(__SCRIPT_URL).then(function (reg) {
             reg.installing; // the installing worker, or undefined
             reg.waiting; // the waiting worker, or undefined
@@ -568,15 +578,12 @@
                     console.log(newWorker.state);
                 });
             });
-        });
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            // This fires when the service worker controlling this page
-            // changes, eg a new worker has skipped waiting and become
-            // the new active worker.
-            console.log("controllerchange");
-        });
-        window.ServiceWorkerRegistration
 
+            navigator.serviceWorker.ready.then(function (swRegistration) {
+                swRegistration.active.postMessage("Hi service worker");
+                return swRegistration.sync.register('myFirstSync');
+            });
+        });
     }
     AlertMessage.prototype.RegisServiceWorker = serviceWorkerRegister;
     return AlertMessage();

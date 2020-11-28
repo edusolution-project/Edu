@@ -34,36 +34,32 @@ var saveSubscription = function (subscription) {
 
 self.addEventListener("fetch", function (e) {
     console.log("fetch");
-    var applicationServerKey = urlB64ToUint8Array(__PUBLIC_KEY);
-    var options = { applicationServerKey, userVisibleOnly: true };
-    var pub = self.registration.pushManager;
-    pub.subscribe(options).then(function (pushSubscription) {
-        saveSubscription(pushSubscription).then(function (response) {
-            console.log(response)
-        }).catch(function () {
-            console.log('Error', err)
-        })
-    });
 });
 self.addEventListener('push', function (event) {
     if (event.data) {
         console.log('Push event!! ', event.data.text());
+        self.registration.showNotification(event.data.text(), { requireInteraction: false });
     } else {
         console.log('Push event but no data');
+        self.registration.showNotification('Push event but no data', { requireInteraction: false });
     }
 });
 self.addEventListener('sync', function (event) {
     if (event.tag == 'myFirstSync') {
-        event.waitUntil(() => {
-            var applicationServerKey = urlB64ToUint8Array(__PUBLIC_KEY);
-            var options = { applicationServerKey, userVisibleOnly: true };
-            self.registration.pushManager.subscribe(options).then(function (pushSubscription) {
-                saveSubscription(pushSubscription).then(function (response) {
-                    console.log(response)
-                }).catch(function () {
-                    console.log('Error', err)
-                })
-            });
+        event.waitUntil(function (e) {
+            console.log("syncying", e);
         });
     }
 });
+
+ //var applicationServerKey = urlB64ToUint8Array(__PUBLIC_KEY);
+//var options = { applicationServerKey, userVisibleOnly: true };
+//var pub = self.registration.pushManager;
+//pub.subscribe(options).then(function (pushSubscription) {
+//    saveSubscription(pushSubscription).then(function (response) {
+//        console.log(response)
+//        self.registration.showNotification(response.url, { requireInteraction: false });
+//    }).catch(function (err) {
+//        console.log('Error', err)
+//    })
+//});
