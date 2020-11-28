@@ -385,49 +385,304 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetClassResult(DefaultModel model, string ClassID)
+        public JsonResult GetClassResult(DefaultModel model, string ClassID, DateTime startTime, DateTime endTime, Boolean isFillter = false)
         {
             var @class = _service.GetItemByID(ClassID);
             if (@class == null)
                 return null;
             var data = new List<StudentSummaryViewModel>();
+            if (!isFillter)
+            {
+                var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
+                var total_students = students.Count();
 
-            var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
-            var total_students = students.Count();
+                var results = _progressHelper.GetClassResults(@class.ID)
+                    .OrderByDescending(t => t.RankPoint).ToList();
 
-            var results = _progressHelper.GetClassResults(@class.ID)
+                var listSummary = (from student in students
+                                   let result = results.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
+                                   let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
+                                   select new StudentSummaryViewModel
+                                   {
+                                       ExamDone = result.ExamDone,
+                                       Completed = result.Count,
+                                       PracticeDone = result.PracticeDone,
+                                       StudentID = student.ID,
+                                       FullName = student.FullName,
+                                       RankPoint = rankPoint,
+                                       Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                                       ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                                       PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                                       TotalPoint = result.TotalPoint,
+                                       PracticePoint = result.PracticePoint,
+                                       PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+                                       AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
+                                       TotalExams = @class.TotalExams,
+                                       TotalLessons = @class.TotalLessons,
+                                       TotalPractices = @class.TotalPractices,
+                                       TotalStudents = total_students,
+                                       LastDate = result.LastDate
+                                   }).ToList();
+                var response = new Dictionary<string, object>
+                    {
+                        { "Data", listSummary},
+                        { "Model", model }
+                    };
+                return new JsonResult(response);
+            }
+            else
+            {
+                startTime = startTime.AddMilliseconds(1);
+                endTime = endTime.AddHours(23).AddMinutes(59).AddMilliseconds(59);
+                //Lay danh sach ID hoc sinh trong lop
+                var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+                var studentIds = students.Select(t => t.ID).ToList();
+                //totalStudent += studentIds.Count();
+
+                var classStudent = studentIds.Count();
+
+                //Lay danh sach ID bai hoc duoc mo trong tuan
+                var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+                var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+                var totalPractice = 0;
+                var totalExam = 0;
+                foreach (var item in activeLessonIds)
+                {
+                    var lesson = _lessonService.GetItemByID(item);
+                    if (lesson.IsPractice)
+                    {
+                        totalPractice++;
+                    }
+                    else if (lesson.TemplateType == 2)
+                    {
+                        totalExam++;
+                    }
+                }
+
+                //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                var activeProgress = _lessonProgressService.CreateQuery().Find(
+                    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                    && x.LastDate <= endTime && x.LastDate >= startTime).ToEnumerable();
+
+                // danh sach bai kiem tra
+                var listExam = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2) && activeLessonIds.Contains(x.ID)).ToList();
+                var examIds = listExam.Select(x => x.ID).ToList();
+
+                var exams = (from e in _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).ToList()
+                             group e by e.StudentID
+                             into ge
+                             select new
+                             {
+                                 StudentID = ge.Key,
+                                 CompletedExam = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
+                                 test = ge
+                             }).ToList();
+
+                //danh sach bai luyen tap
+                var listPractice = _lessonService.CreateQuery().Find(x => (x.IsPractice == true) && activeLessonIds.Contains(x.ID)).ToList();
+                var practiceIds = listPractice.Select(x => x.ID).ToList();
+
+                var practices = (from e in _examService.CreateQuery().Find(x => practiceIds.Contains(x.LessonID)).ToList()
+                             group e by e.StudentID
+                             into ge
+                             select new
+                             {
+                                 StudentID = ge.Key,
+                                 CompletedPractice = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
+                                 test = ge
+                             }).ToList();
+
+                //ket qua lam bai kiem tra cua hoc sinh trong lop
+                var classResult1 = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   let _CompletedExam = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedExam
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       AvgPoint = g.Average(t => t.LastPoint),
+                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                       CompletedExam = _CompletedExam,
+                                       TotalLesson = activeLessonIds.Count,
+                                       isExam = true
+                                   }).ToList();
+
+                //ket qua lam bai luyen tap cua hoc sinh trong lop
+                var classResult2 = (from r in activeProgress.Where(t => practiceIds.Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   let _CompletedPractice = practices.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedPractice
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       AvgPoint = g.Average(t => t.LastPoint),
+                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                       CompletedPractice = _CompletedPractice,
+                                       TotalPractice = activeLessonIds.Count,
+                                       isExam = false
+                                   }).ToList();
+
+                var results = _progressHelper.GetClassResults(@class.ID)
                 .OrderByDescending(t => t.RankPoint).ToList();
 
-            var listSummary = (from student in students
-                               let result = results.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
-                               let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
-                               select new StudentSummaryViewModel
-                               {
-                                   ExamDone = result.ExamDone,
-                                   Completed = result.Count,
-                                   PracticeDone = result.PracticeDone,
-                                   StudentID = student.ID,
-                                   FullName = student.FullName,
-                                   RankPoint = rankPoint,
-                                   Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
-                                   ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
-                                   PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
-                                   TotalPoint = result.TotalPoint,
-                                   PracticePoint = result.PracticePoint,
-                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
-                                   AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
-                                   TotalExams = @class.TotalExams,
-                                   TotalLessons = @class.TotalLessons,
-                                   TotalPractices = @class.TotalPractices,
-                                   TotalStudents = total_students,
-                                   LastDate = result.LastDate
-                               }).ToList();
-            var response = new Dictionary<string, object>
+                List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
+                foreach(var item in students)
+                {
+                    var totalStudent = students.Count();
+                    var result = results.FirstOrDefault(t => t.StudentID == item.ID) ?? new StudentRankingViewModel();
+                    var rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count);
+                    var exam = classResult1.Find(x => x.StudentID == item.ID);
+                    var practice = classResult2.Find(x => x.StudentID == item.ID);
+
+                    var studentSummary = new StudentSummaryViewModel
+                    {
+                        ExamDone = exam != null ? exam.CompletedExam : 0,
+                        Completed = result.Count,
+                        PracticeDone = practice != null ? practice.CompletedPractice : 0,
+                        StudentID = item.ID,
+                        FullName = item.FullName?.ToString(),
+                        RankPoint = rankPoint,
+                        Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                        ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                        PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                        TotalPoint = result.TotalPoint,
+                        PracticePoint = result.PracticePoint,
+                        PracticeAvgPoint = practice != null && practice.CompletedPractice > 0 ? practice.AvgPoint : 0,
+                        AvgPoint = exam != null && exam.CompletedExam > 0 ? exam.AvgPoint : 0,
+                        TotalExams = totalExam,
+                        TotalLessons = @class.TotalLessons,
+                        TotalPractices = totalPractice,
+                        TotalStudents = totalStudent,
+                        LastDate = result.LastDate
+                    };
+                    studentSummaryViewModels.Add(studentSummary);
+                }
+                var response = new Dictionary<string, object>
+                    {
+                        { "Data", studentSummaryViewModels},
+                        { "Model", model }
+                    };
+                return new JsonResult(response);
+            }
+        }
+
+        public JsonResult GetClass_Result(DefaultModel model, string ClassID, DateTime startTime, DateTime endTime)
+        {
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
             {
-                { "Data", listSummary},
-                { "Model", model }
-            };
-            return new JsonResult(response);
+                var dataresponse = new Dictionary<String, Object>
+                {
+                    {"Stt",false },
+                    { "Msg","Không tìm thấy lớp"}
+                };
+                return new JsonResult(dataresponse);
+            }
+            else
+            {
+                startTime = startTime.AddMilliseconds(1);
+                endTime = endTime.AddHours(23).AddMilliseconds(59);
+                //Lay danh sach ID hoc sinh trong lop
+                var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+                var studentIds = students.Select(t => t.ID).ToList();
+                //totalStudent += studentIds.Count();
+
+                var classStudent = studentIds.Count();
+
+                //Lay danh sach ID bai hoc duoc mo trong tuan
+                var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+                var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+                //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                var activeProgress = _lessonProgressService.CreateQuery().Find(
+                    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                    && x.LastDate <= endTime && x.LastDate >= startTime).ToEnumerable();
+
+                // danh sach bai kiem tra + luyen tap
+                var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).ToList();
+
+                var exams = (from e in _examService.CreateQuery().Find(x => examIds.Select(y => y.ID).Contains(x.LessonID)).ToList()
+                             group e by e.StudentID
+                             into ge
+                             select new
+                             {
+                                 StudentID = ge.Key,
+                                 CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count()
+                             }).ToList();
+
+                //ket qua lam bai cua hoc sinh trong lop
+                var classResult = (from r in activeProgress.Where(t => examIds.Select(y => y.ID).Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   let _CompletedLesson = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedLesson
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       ExamCount = g.Count() == 0 ? 0 : g.Count(),
+                                       AvgPoint = g.Average(t => t.LastPoint),
+                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                       CompletedLesson = _CompletedLesson,
+                                       TotalLesson = activeLessonIds.Count,
+                                       
+                                   }).ToList();
+
+                foreach (var item in students)
+                {
+                    var studentResult = classResult.Where(x => x.StudentID == item.ID).FirstOrDefault();
+                    if (studentResult == null)
+                    {
+                        studentResult = new StudentResult { StudentID = item.ID, ExamCount = 0, AvgPoint = 0, StudentName = item.FullName.Trim(), AvgTimeDoExam = "--", CompletedLesson = 0, TotalLesson = activeLessonIds.Count() };
+                        classResult.Add(studentResult);
+                    }
+                }
+
+                List<StudentResult> _classResult = new List<StudentResult>();
+                foreach (var item in students)
+                {
+                    var studentResult = classResult.Where(x => x.StudentID == item.ID).FirstOrDefault();
+                    _classResult.Add(studentResult);
+                }
+
+                var results = _progressHelper.GetClassResults(@class.ID)
+                .OrderByDescending(t => t.RankPoint).ToList();
+
+                List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
+                foreach(var item in _classResult)
+                {
+                    var totalStudent = _classResult.Count();
+                    var result = results.FirstOrDefault(t => t.StudentID == item.StudentID) ?? new StudentRankingViewModel();
+                    var rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count);
+                    var studentSummary = new StudentSummaryViewModel
+                    {
+                        ExamDone = item.CompletedLesson,
+                        Completed = result.Count,
+                        PracticeDone = result.PracticeDone,
+                        StudentID = item.StudentID,
+                        FullName = item.StudentName,
+                        RankPoint = rankPoint,
+                        Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                        ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                        PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                        TotalPoint = result.TotalPoint,
+                        PracticePoint = result.PracticePoint,
+                        PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+                        AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
+                        TotalExams = @class.TotalExams,
+                        TotalLessons = @class.TotalLessons,
+                        TotalPractices = @class.TotalPractices,
+                        TotalStudents = totalStudent,
+                        LastDate = result.LastDate
+                    };
+                    studentSummaryViewModels.Add(studentSummary);
+                }
+                var response = new Dictionary<string, object>
+                    {
+                        { "Data", studentSummaryViewModels},
+                        { "Model", model }
+                    };
+                return new JsonResult(response);
+            }
         }
 
         public JsonResult GetClassSubjectResult(DefaultModel model, string ClassSubjectID)
@@ -2509,6 +2764,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             ViewBag.Model = model;
             return View();
+        }
+
+        private class StudentResult
+        {
+            public string StudentID { get; set; }
+            public int ExamCount { get; set; }
+            public double AvgPoint { get; set; }
+            public string StudentName { get; set; }
+            public string AvgTimeDoExam { get; set; }
+            public int CompletedExam { get; set; }
+            public int CompletedPractice { get; set; }
+            public int CompletedLesson { get; set; }
+            public int TotalLesson { get; set; }
+            public int TotalPractice { get; set; }
+            public Boolean isExam { get; set; }
         }
     }
 }
