@@ -2752,7 +2752,6 @@ var Lesson = (function () {
                                 CompleteExam(true);
                             }
                             else {
-                                alert(1);
                                 console.log("Exam Continue")
                                 setLocalData("CurrentExam", exam.ID);
                                 $('#ExamID').val(exam.ID);
@@ -2936,6 +2935,8 @@ var Lesson = (function () {
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
+
+                $('#leftCol').addClass('hide');//fix tạm thời
             }
         }
         else {
@@ -2949,6 +2950,11 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
+
+            //fix tạm thời
+            if (!isContinue) {
+                $('#leftCol').addClass('hide');
+            }
         }
     }
 
@@ -3200,8 +3206,10 @@ var Lesson = (function () {
         }
         else {
             //temp fix 20200823
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //fix tạm thời
+            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
         }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
         tabsitem.append(itembox);
