@@ -80,7 +80,7 @@
             </div>
             <div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
                 <select v-model="searchPoint">
-                    <option value="">Mặc định</option>
+                    <option value="0">Mặc định</option>
                     <option value="1">Lọc theo thời gian</option>
                 </select>
             </div>
@@ -93,8 +93,9 @@
             </div>
             <div class="float-right">
                 <template v-if="!isLoading">
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="export2Excel()"><i title="Xuất file" class="ti-export"></i></button>*@
-                    <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2Excel()"><i title="Xuất file" class="ti-export"></i></button>
+                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel($event.target.value)"><i title="Xuất file" class="ti-export"></i></button>*@
+                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2Excel()"><i title="Xuất file" class="ti-export"></i></button>*@
+                    <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>
                 </template>
                 <template v-else>
                     <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
@@ -201,8 +202,8 @@
                         <th rowspan="2">Họ tên</th>
                         <th rowspan="2">Tiến độ</th>
                         <th rowspan="2">Lần học cuối</th>
-                        <th colspan="2">Luyện tập</th>
-                        <th colspan="2">Kiểm tra</th>
+                        <th colspan="2" style="text-align:center">Luyện tập</th>
+                        <th colspan="2" style="text-align:center">Kiểm tra</th>
                         <th rowspan="2">Xếp hạng</th>
                     </tr>
                     <tr>
@@ -218,7 +219,7 @@
                     <tr v-for="(item,k) in scoreData">
                         <td>{{(k+1)}}</td> <!--STT-->
                         <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/@currentClass.ID'" :title="item.FullName">{{item.FullName}}</a></td> <!--Họ tên-->
-                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td> <!--Tiến độ-->
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}" > {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td> <!--Tiến độ-->
                         <td>{{formatTime(item.LastDate)}}</td> <!--Lần học cuối-->
                         <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td> <!--Tiến độ-->
                         <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td> <!--Điểm trung bình-->
@@ -226,7 +227,7 @@
                         <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td> <!--Tiến độ-->
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td> <!--Điểm trung bình-->
                         @*<td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>*@
-                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td> <!--Rank-->
+                    <td class="text-black text-style" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td> <!--Rank-->
                     </tr>
                 </tbody>
             </table>
@@ -533,6 +534,10 @@
             .arrow.top:after {
                 bottom: -20px;
                 top: auto;
+            }
+
+            .converText{
+                mso-number-format: "\@@";
             }
     </style>
 
@@ -1103,7 +1108,7 @@
                 list_subject: [],
                 list_grades_full: [],
                 displaySelect: false,
-                searchPoint: '',
+                searchPoint: 0,
                 displaySelectTime: false,
                 searchwidthTime: {
                     startTime: moment(String(new Date())).format('YYYY-MM-DD'),
@@ -1123,7 +1128,14 @@
                     this.filterChap.SelectAll = false;
                 },
                 "searchPoint": function () {
-                    this.displaySelectTime = !this.displaySelectTime;
+                    debugger
+                    if (this.searchPoint == 0) {
+                        this.displaySelectTime = !this.displaySelectTime;
+                        this.loadClassScore();
+                    }
+                    else if (this.searchPoint == 1) {
+                        this.displaySelectTime = !this.displaySelectTime;
+                    }
                 }
             },
             methods: {
@@ -1964,7 +1976,6 @@
                     })
                 },
                 changeFile() {
-                    debugger
                     var listFiles = $('#modal_event input[type=file]')
                     if (listFiles[1].files[0] != null) { //file dinh kem
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
@@ -2173,7 +2184,6 @@
                     }
                 },
                 fillterWithTime() {
-                    debugger
                     let _that = this;
                     let _form = new FormData();
                     if (this.searchCsbj == '') {
@@ -2191,9 +2201,56 @@
                                 this.totalRec = response.data.Model.totalRecord
                             }).catch(e => { })
                     }
-                }
+                },
+                exportExcel() {
+                    var dataTable = [];
+                    var myTab = document.getElementById('ed_table');
+                    // LOOP THROUGH EACH ROW OF THE TABLE AFTER HEADER.
+                    for (i = 2; i < myTab.rows.length; i++) {
+                        var data = [];
+                        // GET THE CELLS COLLECTION OF THE CURRENT ROW.
+                        var objCells = myTab.rows.item(i).cells;
+                        // LOOP THROUGH EACH CELL OF THE CURENT ROW TO READ CELL VALUES.
+                        //for (var j = 1; j < objCells.length; j++) {
+                        //    var content = objCells.item(j).outerText;
+                        //    //debugger
+                        //    data.push(content);
+                        //}
+                        data.push(
+                            { 'StudentName': objCells.item(1).outerText },
+                            { 'Progress': objCells.item(2).outerText },
+                            { 'LastLearn': objCells.item(3).outerText },
+                            { 'ProgressPractice': objCells.item(4).outerText },
+                            { 'AvgPointPractice': objCells.item(5).outerText },
+                            { 'ProgressExam': objCells.item(6).outerText },
+                            { 'AvgPointExam': objCells.item(7).outerText },
+                            { 'Rank': objCells.item(8).outerText },
+                        );
+                        dataTable.push(data);
+                    }
+                    let _that = this;
+                    let _form = new FormData();
+                    _form.append("tablePoints", data);
+                    //_form.append("data", dataTable);
+                    let _url = '@processUrl("ExportTablePoint", "Class")'
+                    debugger
+                    axios({
+                        url: _url,
+                        method: 'POST',       // Worked using POST or PUT. Prefer POST
+                        responseType: 'blob',// important
+                        data: _form
+                    }).then((response) => {
+                    //axios.post(_url, _form).then((response) => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'file.xlsx');
+                        document.body.appendChild(link);
+                        link.click();
+                    });
+                },
             }
-            });
+        });
 
         var loadCheckPointData = function (data, questions) {
             var className = data.ClassName;
@@ -2254,28 +2311,32 @@
             });
         }
 
-        //var export2Excel = function () {
-        //    try {
-        //        var table = $('#ed_table');
-        //        if (table && table.length) {
-        //            var preserveColors = (table.hasClass('table2excel_with_colors') ? true : false);
-        //            $(table).table2excel({
-        //                exclude: ".noExl",
-        //                name: "Excel Document Name",
-        //                filename: "myFileName" + new Date().toISOString().replace(/[\-\:\.]/g, "") + ".xls",
-        //                fileext: ".xlsx",
-        //                exclude_img: true,
-        //                exclude_links: true,
-        //                exclude_inputs: true,
-        //                preserveColors: preserveColors
-        //            });
-        //        }
-        //    }
-        //    catch (err) {
-        //        alert(err.message)
-        //    }
-        //}
-        //window.export2Excel = export2Excel;
+        function ExportExcelV2(tableid, exclude, sheetname, filename) {
+            var _filename = "test";
+            var uri = 'data:application/vnd.ms-excel;base64,'
+                , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"\@@";}</style></head><body><table>{table}</table></body></html>'
+                , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            var table = document.getElementById("ed_table");
+            console.log(tableid);
+            //var table = $('#' + tableid);
+            var ctx = { worksheet: sheetname || 'Worksheet', table: table.innerHTML }
+            //window.location.href = uri + base64(format(template, ctx));
+            var link = document.createElement('a');
+            if (typeof link.download === 'string') {
+                link.href = uri + base64(format(template, ctx));
+                link.download = _filename;
+                //Firefox requires the link to be in the body
+                document.body.appendChild(link);
+                //simulate click
+                link.click();
+                //remove the link when done
+                document.body.removeChild(link);
+            } else {
+                window.open(uri + base64(format(template, ctx)));
+            }
+        }
+        window.ExportExcelV2 = ExportExcelV2;
     </script>
 }
 @section Modals{

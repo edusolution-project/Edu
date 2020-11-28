@@ -4,7 +4,7 @@
 @{
 
     Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
-    ViewData["Title"] = "Cập nhật thông tin";
+    ViewData["Title"] = "Trang cá nhân";
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl)
     {
@@ -25,77 +25,173 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
-            <h2 class="title" v-if="isInfo">Thông tin cá nhân</h2>
-            <h2 class="title" v-if="isPass"><a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu</h2>
+            <h2 class="title" v-if="isInfo">
+                <a href="javascript:;" v-if="tab[0]" v-bind:style="{borderBottom: '1px solid'}" v-on:click="tabChange(0)">Thông tin cá nhân</a>
+                <a href="javascript:;" v-else v-on:click="tabChange(0)">Thông tin cá nhân</a>
+            </h2>
+            <h2 class="title" v-if="isPass">
+                <a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu
+            </h2>
+            <h2 class="title">
+                <a href="javascript:;" v-if="tab[1]" v-bind:style="{borderBottom: '1px solid'}" v-on:click="tabChange(1)">Bảng điểm</a>
+                <a href="javascript:;" v-else v-on:click="tabChange(1)">Bảng điểm</a>
+            </h2>
             <div class="c-right">
                 <a href="javascript:;" title="logout" class="btn-logout" v-on:click="logout()">Log out <i class="ic ic-exit"></i></a>
             </div>
         </div>
     </div>
-    <div class="card-body" v-cloak>
-        <div class="box">
-            <div class="flex">
-                <div id="avatar_box" v-if="isInfo">
-                    <img v-on:error="errorImgUrl()" :src="cacheStatic(avatar.src,150,150,'')" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px" />
-                    <label for="in_avatar">Đổi hình đại diện</label>
-                    <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
-                </div>
-                <div class="box" id="profile_detail">
-                    <div class="form-group" v-if="isInfo">
-                        <label for="name">Họ và tên</label>
-                        <input type="text" v-model="profile.FullName" class="form-control" placeholder="Họ tên" id="name">
+    <template v-if="tab[0]">
+        <div class="card-body" v-cloak>
+            <div class="box">
+                <div class="flex">
+                    <div id="avatar_box" v-if="isInfo">
+                        <img v-on:error="errorImgUrl()" :src="cacheStatic(avatar.src,150,150,'')" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px" />
+                        <label for="in_avatar">Đổi hình đại diện</label>
+                        <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
                     </div>
-                    <div class="form-group" v-if="isInfo">
-                        <label for="msisdn">Số điện thoại</label>
-                        <input type="text" v-model="profile.Phone" class="form-control" placeholder="Số điện thoại" id="msisdn">
-                    </div>
-                    <div class="form-group" v-if="isInfo">
-                        <label for="mskype">Skype</label>
-                        <input type="text" v-model="profile.Skype" class="form-control" placeholder="Skype" id="mskype">
-                    </div>
-                    <div class="form-group" v-if="isInfo">
-                        <label for="email">Địa chỉ email</label>
-                        <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email" readonly="readonly">
-                    </div>
-                    <div class="form-group" v-if="isInfo">
-                        <label for="password">Mật khẩu</label>
-                        <div class="relative">
-                            <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
-                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                    <div class="box" id="profile_detail">
+                        <div class="form-group" v-if="isInfo">
+                            <label for="name">Họ và tên</label>
+                            <input type="text" v-model="profile.FullName" class="form-control" placeholder="Họ tên" id="name">
                         </div>
-                    </div>
-                    <!--  -->
-                    <div class="form-group" v-if="isPass">
-                        <label for="password_old">Mật khẩu cũ*</label>
-                        <div class="relative">
-                            <input :type="pass_type" v-model="password_old" class="form-control" placeholder="Mật khẩu" id="password_old">
-                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        <div class="form-group" v-if="isInfo">
+                            <label for="msisdn">Số điện thoại</label>
+                            <input type="text" v-model="profile.Phone" class="form-control" placeholder="Số điện thoại" id="msisdn">
                         </div>
-                    </div>
-                    <div class="form-group" v-if="isPass">
-                        <label for="password_new">Mật khẩu mới*</label>
-                        <div class="relative">
-                            <input :type="pass_type" v-model="password_new" class="form-control" placeholder="Mật khẩu" id="password_new">
-                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        <div class="form-group" v-if="isInfo">
+                            <label for="mskype">Skype</label>
+                            <input type="text" v-model="profile.Skype" class="form-control" placeholder="Skype" id="mskype">
                         </div>
-                    </div>
-                    <div class="form-group" v-if="isPass">
-                        <label for="password_confirm">Nhập lại mật khẩu mới</label>
-                        <div class="relative">
-                            <input :type="pass_type" v-model="password_confirm" class="form-control" placeholder="Mật khẩu" id="password_confirm">
-                            <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                        <div class="form-group" v-if="isInfo">
+                            <label for="email">Địa chỉ email</label>
+                            <input type="text" v-model="profile.Email" class="form-control" placeholder="Email" id="email" readonly="readonly">
                         </div>
-                    </div>
-                    <div class="margin-t20">
-                        <button class="btn btn-save" v-on:click="updateProfile()" v-if="isInfo">Lưu thay đổi</button>
-                        <button class="btn btn-save" v-on:click="updatePassword()" v-if="isPass">Lưu thay đổi</button>
-                        <a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isInfo" v-on:click="changeState(1)">Đổi mật khẩu <i class="ti-arrow-right"></i></a>
-                        @*<a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isPass">Quên mật khẩu <i class="ti-arrow-right"></i></a>*@
+                        <div class="form-group" v-if="isInfo">
+                            <label for="password">Mật khẩu</label>
+                            <div class="relative">
+                                <input :type="pass_type" v-model="password" class="form-control" placeholder="Mật khẩu" id="password">
+                                <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                            </div>
+                        </div>
+                        <!--  -->
+                        <div class="form-group" v-if="isPass">
+                            <label for="password_old">Mật khẩu cũ*</label>
+                            <div class="relative">
+                                <input :type="pass_type" v-model="password_old" class="form-control" placeholder="Mật khẩu" id="password_old">
+                                <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                            </div>
+                        </div>
+                        <div class="form-group" v-if="isPass">
+                            <label for="password_new">Mật khẩu mới*</label>
+                            <div class="relative">
+                                <input :type="pass_type" v-model="password_new" class="form-control" placeholder="Mật khẩu" id="password_new">
+                                <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                            </div>
+                        </div>
+                        <div class="form-group" v-if="isPass">
+                            <label for="password_confirm">Nhập lại mật khẩu mới</label>
+                            <div class="relative">
+                                <input :type="pass_type" v-model="password_confirm" class="form-control" placeholder="Mật khẩu" id="password_confirm">
+                                <span class="ic ic-eye" v-on:mouseover="showPass()" v-on:mouseleave="showPass(0)"></span>
+                            </div>
+                        </div>
+                        <div class="margin-t20">
+                            <button class="btn btn-save" v-on:click="updateProfile()" v-if="isInfo">Lưu thay đổi</button>
+                            <button class="btn btn-save" v-on:click="updatePassword()" v-if="isPass">Lưu thay đổi</button>
+                            <a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isInfo" v-on:click="changeState(1)">Đổi mật khẩu <i class="ti-arrow-right"></i></a>
+                            @*<a href="javascript:;" title="Đổi mật khẩu" class="link" v-if="isPass">Quên mật khẩu <i class="ti-arrow-right"></i></a>*@
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </template>
+    <template v-if="tab[1]">
+        <div class="container-fluid">
+            <table id="ed_table" class="table table-hover">
+                <thead>
+                    <tr>
+                        <th v-for="(field,k) in summaryFields">{{field.label}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in summaryData">
+                        <td><a href="#" v-on:click="showDetail(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
+                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                        <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+    <b-modal id="classsubject_modal" size="xl" title="Chi tiết">
+        <div class="flex j-between border-b">
+            <div class="tab bg-none">
+                <ul class="flex">
+                    <li v-bind:class="{active : isHistoryLearn}"><a href="javascript:;" title="Lịch sử học tập" v-on:click="tabChangeShowDetail(0)">Lịch sử học tập</a></li>
+                    <li v-bind:class="{active : isResult}"><a href="javascript:;" title="Kết quả" v-on:click="tabChangeShowDetail(1)">Kết quả</a></li>
+                </ul>
+            </div>
+            <div class="c-right"></div>
+        </div>
+        <div class="card-body" v-cloak>
+            <template v-if="isResult">
+                <div class="box">
+                    <table id="r_table" class="table">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <select class="form-control" v-on:change="loadResult()" id="examType">
+                                        <option selected value="2">Bài kiểm tra</option>
+                                        <option value="1">Bài luyện tập</option>
+                                    </select>
+                                </th>
+                                <th v-for="(field,k) in resultFields">{{field.label}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="resultData == null || resultData.length <= 0">
+                                <td colspan="5">Chưa có kết quả</a></td>
+                            </tr>
+                            <tr v-for="(item,k) in resultData">
+                                <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
+                                <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                                <td>{{formatTime(item.LearnLast)}}</td>
+                                <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
+                                <td>{{item.LearnCount}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+            <template v-if="isHistoryLearn">
+                <div class="box">
+                    <table id="p_table" class="table">
+                        <thead>
+                            <tr>
+                                <th v-for="(field,k) in progressFields">{{field.label}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="progressData == null || progressData.length <= 0">
+                                <td colspan="4">Chưa có lịch sử học tập</td>
+                            </tr>
+                            <tr v-for="(item,k) in progressData" v-else>
+                                <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title">{{item.Title}}</a></td>
+                                <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                                <td>{{formatTime(item.LearnLast)}}</td>
+                                <td>{{item.LearnCount}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+    </b-modal>
 </section>
 
 @section Scripts{
@@ -141,8 +237,82 @@
                 view: 10,
                 page: 1,
                 pass_type: 'password',
+                isTablePoint: false,
+                tab: [true, false],
+                search_subject: '',
+                classSubjects: [],
+                summaryData: [],
+                rank: { pos: 1, total: 1 },
+                avgPoint: 0,
+                summaryFields: [
+                    {
+                        key: 'subject',
+                        label: 'Học liệu'
+                    },
+                    {
+                        key: 'progress',
+                        label: 'KL đã hoàn thành'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm luyện tập'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm kiểm tra'
+                    },
+                    {
+                        key: 'rank',
+                        label: 'Xếp hạng'
+                    },
+                ],
+                isHistoryLearn: true,
+                progressData:[],
+                isResult: false,
+                resultData:[],
+                classSubjectID: '',
+                resultFields: [
+                    {
+                        key: 'schedule',
+                        label: 'Lịch kiểm tra'
+                    },
+                    {
+                        key: 'last_update',
+                        label: 'Lần cuối'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm'
+                    },
+                    {
+                        key: 'total',
+                        label: 'Lượt làm bài'
+                    },
+                ],
+                progressFields: [
+                    {
+                        key: 'lesson',
+                        label: 'Bài học'
+                    },
+                    {
+                        key: 'schedule',
+                        label: 'Lịch học'
+                    },
+                    {
+                        key: 'last_update',
+                        label: 'Lần cuối'
+                    },
+                    {
+                        key: 'total',
+                        label: 'Lượt học'
+                    },
+                ],
             },
             watch: {
+                search_subject: function () {
+                    history.replaceState({ sbj: this.search_subject }, '', '#' + this.search_subject);
+                    this.loadData()
+                }
             },
             methods: {
                 changeState(s = 0) {
@@ -150,16 +320,52 @@
                     switch (s) {
                         case 1:
                             history.replaceState({}, "Đổi mật khẩu", "#changlepassword");
-                            _that.isPass = true
-                            _that.isInfo = false
+                            _that.isPass = true;
+                            _that.isInfo = false;
                             break;
                         default:
                             history.replaceState({}, "Thông tin cá nhân", "#myprofile");
-                            _that.isPass = false
-                            _that.isInfo = true
+                            _that.isPass = false;
+                            _that.isInfo = true;
+                            _that.tab[s] = true;
                             break;
                     }
                     //console.log(s);
+                },
+                tabChange(a = 0) {
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Thông tin cá nhân", "#myprofile");
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Bảng điểm của tôi", "#mytablepoint");
+                            this.loadClassSubjects();
+                            this.loadData();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                tabChangeShowDetail(a = 0) {
+                    let _that = this;
+                    switch (a) {
+                        case 0:
+                            _that.isHistoryLearn = true;
+                            _that.isResult = false;
+                            _that.loadHistory();
+                            break;
+                        case 1:
+                            _that.isHistoryLearn = false;
+                            _that.isResult = true;
+                            _that.loadResult();
+                            break;
+                    }
+                    this.$forceUpdate()
                 },
                 getProfile() {
                      let _url = '@processUrl("GetProfile","Home")'
@@ -172,8 +378,6 @@
                                  this.avatar.file = this.profile.Avatar
                              }
                          }).catch(e =>{})
-                    //this.avatar.src = this.profile.avatar
-                    //this.avatar.file = this.profile.avatar
                 },
                 updateProfile() {
                     let _url = '@processUrl("SaveProfile","Home")'
@@ -252,9 +456,130 @@
                         this.pass_type = 'password'
                     }
                 },
+                loadScore() {
+                    let _that = this;
+                    let _form = new FormData();
+                    let url = '';
+                },
+                loadClassSubjects() {
+                    let _that = this
+                    if (_that.classSubjects.length > 0)
+                        return;
+
+                    let _form = new FormData()
+                    let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            _that.classSubjects = [];
+                            _data.forEach(function (item, k) {
+                                _that.classSubjects.push({
+                                    ID: item.ID,
+                                    Title: item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName,
+                                })
+
+                                var hash = window.location.hash.replace('#', '');
+                                if (Array.from(_that.classSubjects).findIndex(t => t.ID == hash) >= 0) {
+
+                                    _that.search_subject = hash;
+                                }
+
+                            })
+                        }).catch(e => { })
+                },
+                loadData() {
+                    let _that = this
+                    if (_that.search_subject == '') {
+                        _that.loadSummary();
+                        return true;
+                    }
+                    var pos = 0
+                    _that.tab.forEach(function (item, k) {
+                        if (_that.tab[k] == true) {
+                            pos = k
+                        }
+                    })
+                    switch (pos) {
+                        case 0:
+                            _that.loadHistory();
+                            break;
+                        case 1:
+                            _that.loadResult();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                loadSummary() {
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("GetLearningSummary", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.summaryData = response.data;
+                            //_that.rank = response.data.Result;
+                            //_that.avgPoint = response.data.Result.avg;
+                        }).catch(e => { })
+                },
+                getPercent(a, b) {
+                    var result = 0;
+                    if (a > 0)
+                        result = a * 100 / b;
+                    return result;
+                },
+                showDetail(ClassSubjectID) {
+                    let _that = this;
+                    _that.classSubjectID = ClassSubjectID;
+                    if (_that.isHistoryLearn) {
+                        _that.loadHistory();
+                    }
+                    else if (_that.isResult)
+                    {
+                        _that.loadResult()
+                    }
+                    _that.$bvModal.show('classsubject_modal');
+                },
+                loadResult() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("ClassSubjectID", _that.classSubjectID)
+                    _form.append('IsPractice', $("#examType").val() == '1')
+                    let _url = '@processUrl("GetLearningResult", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.resultData = response.data.Data;
+                            _that.avgPoint = 0;
+
+                            if (_that.resultData.length > 0) {
+                                _that.resultData.forEach(function (exam) {
+                                    _that.avgPoint += exam.Result
+                                });
+                                _that.avgPoint = _that.avgPoint / _that.resultData.length
+                            }
+                        }).catch(e => { })
+                },
+                 loadHistory() {
+                    let _that = this
+                    let _form = new FormData()
+                     _form.append('ClassID', _that.classID)
+                     _form.append('ClassSubjectID', _that.classSubjectID)
+                    _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
+                    _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
+                    let _url = '@processUrl("GetLearningProgress", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.progressData = response.data.Data;
+                        }).catch(e => { })
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                formatTime(time) {
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY hh:mm A")
+                }
             }
         });
     </script>
-
-
 }

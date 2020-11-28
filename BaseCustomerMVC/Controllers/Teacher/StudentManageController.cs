@@ -983,7 +983,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     cells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
                     //Lưu file lại
-                    //Byte[] bin = p.GetAsByteArray();
                     p.Save();
                 }
                 stream.Position = 0;
