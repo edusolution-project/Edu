@@ -149,6 +149,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
+                               IsHideAnswer = schedule.IsHideAnswer,
                                IsActive = schedule.IsActive,
                                IsOnline = schedule.IsOnline
                            })).ToList();

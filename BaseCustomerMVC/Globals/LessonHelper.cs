@@ -659,5 +659,17 @@ namespace BaseCustomerMVC.Globals
             public string ID { get; set; }
             public string Value { get; set; }
         }
+
+        internal bool isExamined(LessonEntity lesson)
+        {
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM && lesson.IsPractice)
+            {
+                var isExamined = _examService.CreateQuery().Find(t => t.LessonID == lesson.ID).Any();
+                //check
+                return isExamined;
+            }
+            else//LECTURE only
+                return true;
+        }
     }
 }

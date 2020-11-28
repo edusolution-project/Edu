@@ -2117,7 +2117,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.GetItemByID(item.ID);
+                LessonEntity data = null;
+                if (!string.IsNullOrEmpty(item.ID))
+                    data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.UtcNow;
@@ -2137,6 +2139,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+                    if (!_lessonHelper.isExamined(data))
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học đã bị khóa, không điều chỉnh được" }
+                            });
+                    }
+
                     item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
@@ -2217,16 +2228,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (!string.IsNullOrEmpty(model.ArrID))
                     ID = model.ArrID;
+                //check if lesson is lock: taken exam || practiced
                 var lesson = _lessonService.GetItemByID(ID);//TODO: check permission
                 if (lesson != null)
                 {
+                    if (!_lessonHelper.isExamined(lesson))
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học đã bị khóa, không điều chỉnh được" }
+                            });
+                    }
+
                     await _classHelper.IncreaseLessonCounter(lesson, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-
-                    //if (lesson.ChapterID == "0")
-                    //    await _classHelper.IncreaseClassSubjectCounter(lesson.ClassSubjectID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-                    //else
-                    //    await _classHelper.IncreaseChapterCounter(lesson.ChapterID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-
                     ChangeLessonPosition(lesson, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
                     await _lessonHelper.RemoveSingleLesson(lesson.ID);
 
@@ -2241,7 +2256,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                { "Error", "Item Not Found" }
+                                { "Error", "Bài học không tồn tại" }
                             });
                 }
             }
@@ -2290,6 +2305,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var rootItem = _lessonService.GetItemByID(ID);
                 var joinItem = _lessonService.GetItemByID(JoinLesson);
+
+
                 if (rootItem == null || joinItem == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -2298,6 +2315,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Error", "Dữ liệu không đúng" }
                     });
                 }
+
+                if (!_lessonHelper.isExamined(rootItem))
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học " + rootItem.Title + " đã bị khóa, không điều chỉnh được" }
+                            });
+                }
+
+                if (!_lessonHelper.isExamined(joinItem))
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học " + joinItem.Title + " đã bị khóa, không điều chỉnh được" }
+                            });
+                }
+
                 var currentIndex = _cloneLessonPartService.CreateQuery().CountDocuments(o => o.ParentID == rootItem.ID);
                 var joinParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == joinItem.ID).SortBy(o => o.Order).ToList();
 

@@ -441,7 +441,8 @@ namespace BaseCustomerMVC.Globals
             var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, item.StudentID);
             if (progress == null)//progress not found => create progress
             {
-                _chapterProgressService.Save(_chapterProgressService.NewProgressEntity(chapter, item.StudentID));
+                progress = _chapterProgressService.NewProgressEntity(chapter, item.StudentID);
+                _chapterProgressService.Save(progress);
                 //return;
             }
             //else
@@ -474,6 +475,7 @@ namespace BaseCustomerMVC.Globals
             else
             {
                 incPracPoint = point;
+
                 if (incCounter)//new
                     incPracCount = (long)item.Multiple;
 
