@@ -222,13 +222,6 @@
     <None Include="wwwroot\js\lib\teacher.config.url.base.js" />
     <None Include="wwwroot\js\lib\xhr.js" />
     <None Include="wwwroot\js\masonry.pkgd.min.js" />
-    <None Include="wwwroot\js\minify\common.lib.min.js" />
-    <None Include="wwwroot\js\minify\common.lib.min.js.map" />
-    <None Include="wwwroot\js\minify\common.min.js" />
-    <None Include="wwwroot\js\minify\common.min.js.map" />
-    <None Include="wwwroot\js\minify\detail.fn.min.js" />
-    <None Include="wwwroot\js\minify\detail.min.js" />
-    <None Include="wwwroot\js\minify\detail.min.js.map" />
     <None Include="wwwroot\js\moment-with-locales.min.js" />
     <None Include="wwwroot\js\moment.js" />
     <None Include="wwwroot\js\moment.min.js" />
@@ -2321,6 +2314,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\css\minify\" />
     <Folder Include="wwwroot\Drive.Storge\" />
+    <Folder Include="wwwroot\js\minify\" />
   </ItemGroup>
 
 </Project>

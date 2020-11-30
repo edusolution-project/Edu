@@ -102,14 +102,14 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Thảo luận</h4>
-                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="javascript:$('.easy-chat__content').addClass('open')" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245">
                         <ul class="list-discus">
                             <template v-if="discussion.length > 0">
                                 <li v-for="(item,k) in discussion">
                                     <div class="flex c-top">
-                                        <a href="javascript:$('.fn-box-chat-eduso').focus().click()" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
+                                        <a href="javascript:$('.easy-chat__content').addClass('open')" :title="item.title" class="title">{{shortenString(item.title == null? item.content:item.title, 60)}}</a>
                                         <div class="c-right"><i class="icofont icofont-user"></i>{{item.sender.name}}</div>
                                     </div>
                                     <p>{{shortenString(item.content,160)}}.</p>
@@ -117,7 +117,7 @@
                             </template>
                             <template v-else>
                                 <li>
-                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.fn-box-chat-eduso').focus().click()"> <i class="far fa-comments"></i> Kết nối ngay</button>
+                                    Chưa có thảo luận nào! <button class="ml-2 btn btn-sm btn-secondary" onclick="$('.easy-chat__content').addClass('open')"> <i class="far fa-comments"></i> Kết nối ngay</button>
                                 </li>
                             </template>
                         </ul>
@@ -131,7 +131,7 @@
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
                         <h4 class="box-head">Các khóa học khác</h4>
-                        <a href="@processUrl("OtherCourse", "Course")" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+                        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
                     </div>
                     <div class="box bg-1 padding-15 height-245" style="margin-bottom:20px">
                         <ul class="box list-scroll">

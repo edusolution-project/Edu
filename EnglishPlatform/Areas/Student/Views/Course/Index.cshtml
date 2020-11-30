@@ -60,6 +60,7 @@
                 <template v-if="item.ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group" :id="item.ID">
                         <h2 style="font-size:16px" class="font-weight-bold border-b pb-2 red-color">{{item.Name}} <span style="font-size:80%;">({{formatShortDate(item.StartDate)}} - {{formatShortDate(item.EndDate)}}) </span></h2>
+                        <h3 style="font-size:14px" class="" v-if="item.Description != null">{{item.Description}}</h3>
                     </div>
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD).length > 0">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chính quy</h2>

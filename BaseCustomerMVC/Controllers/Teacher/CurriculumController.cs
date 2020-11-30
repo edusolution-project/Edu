@@ -240,7 +240,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (teacher != null && teacher.Subjects != null)
             {
-                var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID)).ToList();
+                var subject = _subjectService.CreateQuery().Find(t => teacher.Subjects.Contains(t.ID) && t.IsActive).SortBy(t => t.Name).ToList();
                 var grade = _gradeService.CreateQuery().Find(t => teacher.Subjects.Contains(t.SubjectID)).ToList();
                 var skills = _skillService.GetList();
                 var courses = _service.CreateQuery().Find(t => t.Center.Equals(center.ID)).SortByDescending(o => o.ID).ToList();
@@ -2271,7 +2271,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart,String basis,String user)
+        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart, String basis, String user)
         {
 
             Table table = s.AddTable(true);
@@ -2371,7 +2371,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ2":
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
                     {
-                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, out answer) + "</p>";
+                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, basis, user, out answer) + "</p>";
                         answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
                         descriptionRow_Cel2_Content.AppendHTML(html + answer);
                         //var aGrp2 = descriptionRow_Cel2.AddParagraph();
@@ -2513,7 +2513,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return returnHtml;
         }
 
-        private string RenderQuiz2ForWord(LessonPartEntity lessonPart,String basis,String user, out string answer)
+        private string RenderQuiz2ForWord(LessonPartEntity lessonPart, String basis, String user, out string answer)
         {
             answer = "";
             var description = lessonPart.Description.Replace("src=\"/", "src=\"https://" + currentHost + "/");
@@ -2557,7 +2557,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 questions.RemoveAt(0);
             }
 
-            String a = ConvertHtmlToDoc(returnHtml, basis, user);
+            //String a = ConvertHtmlToDoc(returnHtml, basis, user);
 
             //return ConvertHtmlToDoc(returnHtml,basis,user,lessonPart.Type);
             return returnHtml;
