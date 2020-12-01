@@ -87,12 +87,13 @@
         </div>
     </div>
     <div class="card-body" v-cloak>
+        <div v-if="tab[1]" class="pt-0 pb-2 text-danger"><i>Lưu ý: Học liệu nội bộ, biên soạn theo yêu cầu của giáo viên & học viên</i></div>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData" v-if="tab[0]">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                     <a href="javascript:;" v-on:click="doMainAct(data)" :title="data.Title" class="thumb" style="max-width:130px; min-width:130px;">
-                        <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                        <img v-lazy="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
+                        <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
                     <div class="entry p-0">
                         <div>
@@ -100,9 +101,9 @@
                                 <a href="javascript:;" v-on:click="doMainAct(data)" :title="data.Title" class="title">{{data.Title}}</a>
                             </div>
                             @*<div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>*@
+                                <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                            </div>*@
                         </div>
                         <div class="pt-0 pb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
                             <p class="m-0">{{(data.Description != 'null') ? domDecoder(data.Description) : ''}}</p>
@@ -119,8 +120,8 @@
             <div class="col-md-6" v-for="data in tableData" v-if="tab[1]">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
                     <a href="javascript:;" v-on:click="showDocsInteractive(data)" :title="data.Name" class="thumb" style="max-width:130px; min-width:130px;">
-                        <img v-lazy="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                        <img v-lazy="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
+                        <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                        <img src="~/pictures/book.jpg" alt="" v-else class="w-100">
                     </a>
                     <div class="entry p-0 w-100">
                         <div>
@@ -285,7 +286,7 @@
                     }
                 }
                 else {
-                    this.tabChange(0);
+                    this.tabChange(1);
                 }
             },
             data: {

@@ -580,6 +580,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private string RenderVocab(string description)
         {
             string result = "";
+            if (string.IsNullOrEmpty(description))
+                return "";
             var vocabs = description.Split('|');
             if (vocabs == null || vocabs.Count() == 0)
                 return description;

@@ -531,6 +531,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID, center.ID))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
+            //var a = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
+            //var retStudents = new List<ClassStudentViewModel>();
+            //foreach (var item in a)
+            //{
+            //    var b = new ClassStudentViewModel
+            //    {
+            //        ID = item.ID,
+            //        StudentId = item.StudentId,
+            //        Avatar = item.Avatar,
+            //        FullName = item.FullName,
+            //        Email = item.Email,
+            //        Phone = item.Phone,
+            //        Address = item.Address,
+            //        Class = item.Class,
+            //        DateBorn = item.DateBorn,
+            //        IsActive = item.IsActive,
+            //        UserCreate = item.UserCreate,
+            //        CreateDate = item.CreateDate,
+            //        Skype = item.Skype,
+            //        JoinedClasses = item.JoinedClasses,
+            //        Centers = item.Centers,
+            //        ClassID = ClassID,
+            //        //ClassName = String.IsNullOrEmpty(ClassID) ? (item.JoinedClasses.Count()==0?"":String.Join("; ",_classService.GetMultipleClassName(item.JoinedClasses,item.ID,center.ID))): _classService.GetItemByID(ClassID).Name
+            //    };
+
+            //    retStudents.Add(b);
+            //}
 
             var response = new Dictionary<string, object>
             {
@@ -657,6 +684,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             int totalRows = workSheet.Dimension.Rows;
                             var classStudents = string.IsNullOrEmpty(ClassID) ? new List<string>() : _studentService.GetStudentIdsByClassId(ClassID).ToList();
                             var keyCol = 4;
+
+                            var cell1 = workSheet.Cells[1, 1].Value?.ToString().ToUpper();
+                            var cell2 = workSheet.Cells[1, 2].Value?.ToString().ToUpper();
+                            var cell3 = workSheet.Cells[1, 3].Value?.ToString().ToUpper();
+                            var cell4 = workSheet.Cells[1, 4].Value?.ToString().ToUpper();
+                            var cell5 = workSheet.Cells[1, 5].Value?.ToString().ToUpper();
+                            if (!cell1.Equals("STT") || !cell2.Equals("HO TEN") || !cell3.Equals("NGAY SINH") || !cell4.Equals("EMAIL") || !cell5.Equals("SDT"))
+                            {
+                                return Json(new { msg = "Sai định dạng,vui lòng tải và làm theo file mẫu." });
+                            }
+
                             for (int i = 1; i <= totalRows; i++)
                             {
                                 var isValidMail = true;

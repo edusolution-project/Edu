@@ -396,36 +396,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var data = new List<StudentSummaryViewModel>();
             if (!isFillter)
             {
-                var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
-                var total_students = students.Count();
-
-                var results = _progressHelper.GetClassResults(@class.ID)
-                    .OrderByDescending(t => t.RankPoint).ToList();
-
-                var listSummary = (from student in students
-                                   let result = results.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
-                                   let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
-                                   select new StudentSummaryViewModel
-                                   {
-                                       ExamDone = result.ExamDone,
-                                       Completed = result.Count,
-                                       PracticeDone = result.PracticeDone,
-                                       StudentID = student.ID,
-                                       FullName = student.FullName,
-                                       RankPoint = rankPoint,
-                                       Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
-                                       ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
-                                       PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
-                                       TotalPoint = result.TotalPoint,
-                                       PracticePoint = result.PracticePoint,
-                                       PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
-                                       AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
-                                       TotalExams = @class.TotalExams,
-                                       TotalLessons = @class.TotalLessons,
-                                       TotalPractices = @class.TotalPractices,
-                                       TotalStudents = total_students,
-                                       LastDate = result.LastDate
-                                   }).ToList();
+                List<StudentSummaryViewModel> listSummary = ClassResultSummary(@class);
                 var response = new Dictionary<string, object>
                     {
                         { "Data", listSummary},
@@ -446,6 +417,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //Lay danh sach ID bai hoc duoc mo trong tuan
                 var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+                //var type = activeLessons.Select(x => x.Type).ToList().Distinct();
                 var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
                 var totalPractice = 0;
@@ -453,7 +425,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var item in activeLessonIds)
                 {
                     var lesson = _lessonService.GetItemByID(item);
-                    if (lesson.IsPractice)
+                    if (lesson.IsPractice || lesson.TemplateType == 1)
                     {
                         totalPractice++;
                     }
@@ -568,6 +540,41 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     };
                 return new JsonResult(response);
             }
+        }
+
+        private List<StudentSummaryViewModel> ClassResultSummary(ClassEntity @class)
+        {
+            var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
+            var total_students = students.Count();
+
+            var results = _progressHelper.GetClassResults(@class.ID)
+                .OrderByDescending(t => t.RankPoint).ToList();
+
+            var listSummary = (from student in students
+                               let result = results.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
+                               let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
+                               select new StudentSummaryViewModel
+                               {
+                                   ExamDone = result.ExamDone,
+                                   Completed = result.Count,
+                                   PracticeDone = result.PracticeDone,
+                                   StudentID = student.ID,
+                                   FullName = student.FullName,
+                                   RankPoint = rankPoint,
+                                   Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                                   ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                                   PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                                   TotalPoint = result.TotalPoint,
+                                   PracticePoint = result.PracticePoint,
+                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+                                   AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
+                                   TotalExams = @class.TotalExams,
+                                   TotalLessons = @class.TotalLessons,
+                                   TotalPractices = @class.TotalPractices,
+                                   TotalStudents = total_students,
+                                   LastDate = result.LastDate
+                               }).ToList();
+            return listSummary;
         }
 
         public JsonResult GetClass_Result(DefaultModel model, string ClassID, DateTime startTime, DateTime endTime)
@@ -889,7 +896,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            startDate = o.StartDate,
                            endDate = o.EndDate,
                            students = studentCount,
-                           skill = skill
+                           skill = skill,
+                           bookName = _sbj.CourseName
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
 
@@ -2785,17 +2793,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #region File Excel
         //[HttpPost]
-        public JsonResult ExportTablePoint(String basis, List<TablePoint> tablePoints)
+        public IActionResult ExportTablePoint(String basis, String ClassID)
         {
             var center = _centerService.GetItemByCode(basis);
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
-            //if (String.IsNullOrEmpty(ClassID))
-            //{
-            //    return null;
-            //}
+            if (String.IsNullOrEmpty(ClassID))
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Data","Không tìm thấy lớp tương ứng" }
+                });
+            }
 
-            //var @class = _classService.GetItemByID(ClassID);
+            var @class = _classService.GetItemByID(ClassID);
+            List<StudentSummaryViewModel> listSummary = ClassResultSummary(@class);
 
             var stream = new MemoryStream();
 
@@ -2808,39 +2820,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     p.Workbook.Properties.Author = teacher.FullName;
 
                     // đặt tiêu đề cho file
-                    p.Workbook.Properties.Title = "Danh sách học viên";
+                    p.Workbook.Properties.Title = $"Bảng điểm {@class.Name}";
 
                     //Tạo một sheet để làm việc trên đó
-                    p.Workbook.Worksheets.Add($"@class.Name");
+                    p.Workbook.Worksheets.Add($"{@class.Name}");
 
                     // lấy sheet vừa add ra để thao tác
                     ExcelWorksheet ws = p.Workbook.Worksheets[1];
 
                     // đặt tên cho sheet
-                    ws.Name = $"Bảng điểm @class";
+                    ws.Name = $"Bảng điểm {@class}";
                     // fontsize mặc định cho cả sheet
                     ws.Cells.Style.Font.Size = 11;
                     // font family mặc định cho cả sheet
                     ws.Cells.Style.Font.Name = "Calibri";
 
                     // Tạo danh sách các column header
-                    string[] arrColumnHeader = new string[] { };
-                    //if (ClassID != null)
-                    //{
-                    arrColumnHeader = new string[]{
+                    string[] arrColumnHeader1 = new string[]{
                         "STT",
                         "Họ tên",
-                        "Ngày sinh",
-                        "Email",
-                        "Số điện thoại"
+                        "Tiến độ",
+                        "Lần học cuối",
+                        "Luyện tập",
+                        "",
+                        "Kiểm tra",
+                        "",
+                        "Xếp hạng"
+                    };
+
+                    string[] arrColumnHeader2 = new string[]{
+                        "Tiến độ",
+                        "Điểm trung bình",
+                        "Tiến độ",
+                        "Điểm trung bình",
                     };
 
                     // lấy ra số lượng cột cần dùng dựa vào số lượng header
-                    var countColHeader = arrColumnHeader.Count();
+                    var countColHeader = arrColumnHeader1.Count();
 
                     // merge các column lại từ column 1 đến số column header
                     // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
-                   // ws.Cells[1, 1].Value = ClassID == null ? $"Thống kê danh sách học viên {center.Name}" : $"Thống kê danh sách học viên lớp @class";
+                    ws.Cells[1, 1].Value = $"Bảng điểm {@class.Name}";
                     ws.Cells[1, 1, 1, countColHeader].Merge = true;
                     // in đậm
                     ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
@@ -2851,10 +2871,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     int rowIndex = 2;
 
                     //tạo các header từ column header đã tạo từ bên trên
-                    foreach (var item in arrColumnHeader)
+                    foreach (var item in arrColumnHeader1)
                     {
                         var cell = ws.Cells[rowIndex, colIndex];
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                        //set màu thành gray
+                        var fill = cell.Style.Fill;
+                        fill.PatternType = ExcelFillStyle.Solid;
+                        fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
 
+                        //căn chỉnh các border
+                        var border = cell.Style.Border;
+                        border.Bottom.Style =
+                            border.Top.Style =
+                            border.Left.Style =
+                            border.Right.Style = ExcelBorderStyle.Thin;
+                        cell.AutoFitColumns();
+                        //gán giá trị
+                        cell.Value = item;
+                        if (colIndex <= 4 || colIndex >= 9)
+                            ws.Cells[rowIndex, colIndex, rowIndex + 1, colIndex].Merge = true;
+                        colIndex++;
+                    }
+                    ws.Cells[2, 5, 2, 6].Merge = true;
+                    ws.Cells[2, 7, 2, 8].Merge = true;
+
+                    Int32 rowIndex1 = 3, colIndex1 = 5;
+                    foreach (var item in arrColumnHeader2)
+                    {
+                        var cell = ws.Cells[rowIndex1, colIndex1];
+                        cell.AutoFitColumns();
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
                         //set màu thành gray
                         var fill = cell.Style.Fill;
                         fill.PatternType = ExcelFillStyle.Solid;
@@ -2869,57 +2918,85 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         //gán giá trị
                         cell.Value = item;
-
-                        colIndex++;
+                        colIndex1++;
                     }
 
-                    // lấy ra danh sách UserInfo từ ItemSource của DataGrid
-                    //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
+                    Int32 rowIndexData = 4;
+                    foreach(var item in listSummary)
+                    {
+                        Int32 colIndexData = 1;
+                        //gan gia tri cho tung cell
+                        ws.Cells[rowIndexData, colIndexData++].Value = rowIndexData - 3;
+                        ws.Cells[rowIndexData, colIndexData++].Value = item.FullName;
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(((Double)item.Completed / item.TotalLessons) * 100, 2)}% ({item.Completed}/{item.TotalLessons})";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.LastDate.ToString()}";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.PracticeDone}/{item.TotalPractices}";
+                        if (item.PracticeAvgPoint > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(item.PracticeAvgPoint, 2)}%";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"0.00%";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.ExamDone}/{item.TotalExams}";
+                        if (item.AvgPoint > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(item.AvgPoint, 2)}%";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"0.00%";
+                        if (item.Rank > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{item.Rank}/{item.TotalStudents}";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"---";
 
-                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
-                    int index = 1;
-                    //foreach (var item in Data4Export.ToList())
-                    //{
-                    //    // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
-                    //    colIndex = 1;
+                        rowIndexData++;
+                    }
 
-                    //    // rowIndex tương ứng từng dòng dữ liệu
-                    //    rowIndex++;
+                    for (Int32 i = 1; i < listSummary.Count + 4; i++)
+                    {
+                        for (Int32 j = 1; j <= arrColumnHeader1.Count(); j++)
+                        {
+                            var cell = ws.Cells[i, j];
+                            //căn chỉnh các border
+                            var border = cell.Style.Border;
+                            border.Bottom.Style =
+                                border.Top.Style =
+                                border.Left.Style =
+                                border.Right.Style = ExcelBorderStyle.Thin;
+                            cell.AutoFitColumns();
 
-                    //    //gán giá trị cho từng cell                      
-                    //    ws.Cells[rowIndex, colIndex++].Value = index;
-                    //    ws.Cells[rowIndex, colIndex++].Value = item.FullName;
+                            if (i == 3 && (j < 5 || j > 8))
+                            {
+                                ws.Cells[2, j, i, j].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                ws.Cells[2, j, i, j].Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                            }
+                            else
+                            {
+                                if (j == 1 || j >= 5)
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                                else if (j == 2)
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                                else
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                            }
 
-                    //    // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
-                    //    ws.Cells[rowIndex, colIndex++].Value = (item.DateBorn > new DateTime(1900, 1, 1)) ? item.DateBorn.ToLocalTime().ToString("dd/MM/yyyy") : "";
-
-                    //    //if (ClassID != null)
-                    //    //{
-                    //    //    ws.Cells[rowIndex, colIndex++].Value = _classService.CreateQuery().Find(x=>item.JoinedClasses.Contains(x.ID)).FirstOrDefault().Name;
-                    //    //}
-                    //    ws.Cells[rowIndex, colIndex++].Value = item.Email;
-                    //    ws.Cells[rowIndex, colIndex++].Value = item.Phone;
-
-                    //    index++;
-                    //}
-                    //var cells = ws.Cells[1, countColHeader, (int)Data4Export.Count() + 2, countColHeader];
-                    //cells.AutoFitColumns();
-                    //cells.Style.Border.Top.Style =
-                    //cells.Style.Border.Left.Style =
-                    //cells.Style.Border.Right.Style =
-                    //cells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-
-                    //Lưu file lại
+                        }
+                    }
                     p.Save();
                 }
                 stream.Position = 0;
+                string excelName = $"Bảng điểm {@class.Name}.xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
             }
             catch (Exception ex)
             {
+                return Content(ex.Message);
             }
-            //string excelName = ClassID == null ? $"Danh sách học viên {center.Name}.xlsx" : $"Danh sách học viên lớp @class.xlsx";
-            FileStreamResult file = File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            return Json(file);
         }
         #endregion
 
