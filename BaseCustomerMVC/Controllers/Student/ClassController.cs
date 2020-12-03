@@ -28,7 +28,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
         private readonly ExamService _examService;
-        private readonly CourseLessonService _courseLessonService;
+        //private readonly CourseLessonService _courseLessonService;
         private readonly CourseChapterService _courseChapterService;
 
         public ClassController(
@@ -45,7 +45,7 @@ namespace BaseCustomerMVC.Controllers.Student
             LessonHelper lessonHelper,
             ProgressHelper progressHelper,
             ExamService examService,
-            CourseLessonService courseLessonService,
+            //CourseLessonService courseLessonService,
             CourseChapterService courseChapterService,
             LessonScheduleService lessonScheduleService,
             CalendarHelper calendarHelper
@@ -64,7 +64,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _lessonHelper = lessonHelper;
             _progressHelper = progressHelper;
             _examService = examService;
-            _courseLessonService = courseLessonService;
+            //_courseLessonService = courseLessonService;
             _courseChapterService = courseChapterService;
             _lessonScheduleService = lessonScheduleService;
             _calendarHelper = calendarHelper;
@@ -398,7 +398,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     classSubject.GradeID = course.GradeID;
                     classSubject.SubjectID = course.SubjectID;
                     classSubject.TeacherID = student.ID;
-                    //classSubject.TypeClass = CLASS_TYPE.EXTEND;
+                    //classSubject.TypeClass = CLASSSUBJECT_TYPE.EXTEND;
 
                     oldSubjects.Add(classSubject);
 

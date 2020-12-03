@@ -20,28 +20,28 @@ namespace BaseCustomerMVC.Controllers.Student
     public class ClassSubjectController : StudentController
     {
         private readonly GradeService _gradeService;
-        private readonly AccountService _accountService;
+        //private readonly AccountService _accountService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
-        private readonly ClassProgressService _progressService;
+        //private readonly ClassProgressService _progressService;
 
         private readonly ChapterService _chapterService;
-        private readonly ChapterExtendService _chapterExtendService;
+        //private readonly ChapterExtendService _chapterExtendService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
-        private readonly ScoreStudentService _scoreStudentService;
+        //private readonly ScoreStudentService _scoreStudentService;
         private readonly LessonProgressService _lessonProgressService;
-        private readonly LearningHistoryService _learningHistoryService;
+        //private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
-        private readonly IHostingEnvironment _env;
+        //private readonly IHostingEnvironment _env;
 
 
         //private readonly LessonPartService _lessonPartService;
@@ -58,16 +58,19 @@ namespace BaseCustomerMVC.Controllers.Student
         //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
         //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
-        private readonly FileProcess _fileProcess;
-        private readonly StudentHelper _studentHelper;
-        private readonly LessonHelper _lessonHelper;
+        //private readonly FileProcess _fileProcess;
+        //private readonly StudentHelper _studentHelper;
+        //private readonly LessonHelper _lessonHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
         private readonly CenterService _centerService;
+        //private readonly ClassProgressService _classProgressService;
+        private readonly ProgressHelper _progressHelper;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
 
 
         public ClassSubjectController(
-            AccountService accountService,
+            //AccountService accountService,
             GradeService gradeservice,
             SubjectService subjectService,
             ClassSubjectService classSubjectService,
@@ -75,27 +78,31 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService service,
             SkillService skillService,
             CourseService courseService,
-            ClassProgressService progressService,
+            //ClassProgressService progressService,
 
             ChapterService chapterService,
-            ChapterExtendService chapterExtendService,
+            //ChapterExtendService chapterExtendService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
             ExamService examService,
             ExamDetailService examDetailService,
-            LearningHistoryService learningHistoryService,
+            //LearningHistoryService learningHistoryService,
 
-            ScoreStudentService scoreStudentService,
+            //ScoreStudentService scoreStudentService,
             LessonProgressService lessonProgressService,
 
-            StudentService studentService, IHostingEnvironment evn,
-            LessonHelper lessonHelper,
-            StudentHelper studentHelper,
+            //StudentService studentService, IHostingEnvironment evn,
+            //LessonHelper lessonHelper,
+            //StudentHelper studentHelper,
             CenterService centerService,
+            //ClassProgressService classProgressService,
+            ProgressHelper progressHelper,
+            ClassSubjectProgressService classSubjectProgressService
 
-            FileProcess fileProcess)
+            //FileProcess fileProcess
+            )
         {
-            _accountService = accountService;
+            //_accountService = accountService;
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
@@ -103,37 +110,38 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
-            _progressService = progressService;
+            //_progressService = progressService;
 
             _chapterService = chapterService;
-            _chapterExtendService = chapterExtendService;
+            //_chapterExtendService = chapterExtendService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
             _lessonProgressService = lessonProgressService;
 
             _examService = examService;
             _examDetailService = examDetailService;
-            _learningHistoryService = learningHistoryService;
-            _scoreStudentService = scoreStudentService;
+            //_learningHistoryService = learningHistoryService;
+            //_scoreStudentService = scoreStudentService;
 
-            _studentService = studentService;
+            //_studentService = studentService;
             _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
-            _env = evn;
-            _fileProcess = fileProcess;
+            //_env = evn;
+            //_fileProcess = fileProcess;
 
-            _studentHelper = studentHelper;
-            _lessonHelper = lessonHelper;
+            //_studentHelper = studentHelper;
+            //_lessonHelper = lessonHelper;
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _centerService = centerService;
+            //_classProgressService = classProgressService;
+            _progressHelper = progressHelper;
+            _classSubjectProgressService = classSubjectProgressService;
         }
 
         public JsonResult GetClassSubjects(string ClassID, string SubjectID, string GradeID, string basis)
         {
-            //if (string.IsNullOrEmpty(ClassID))
-            //    return null;
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
             if (student == null)
@@ -154,7 +162,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 var retClassSbj = new List<ClassSubjectViewModel>();
 
                 var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
-
 
                 foreach (var _class in lclass.ToList())
                 {
@@ -187,7 +194,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                         CourseName = string.IsNullOrEmpty(r.CourseName) ? course.Name : r.CourseName,
                                         TeacherID = r.TeacherID,
                                         TeacherName = teacher == null ? "" : teacher.FullName,
-                                        TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
+                                        TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass,
                                         ClassName = _class.Name,
                                         ClassID = r.ClassID,
                                         StartDate = _class.StartDate,
@@ -197,18 +204,6 @@ namespace BaseCustomerMVC.Controllers.Student
                         retClass.Add(_class);
                     }
                 }
-
-                //var a = dataResponse.FindAll(x => x.TypeClass == CLASS_TYPE.STANDARD && x.ClassID != myclass.ID);
-                //var b = dataResponse.FindAll(x => x.TypeClass == CLASS_TYPE.EXTEND && x.ClassID != myclass.ID);
-                //var c = dataResponse.FindAll(x => x.ClassID == myclass.ID);
-
-                //var response = new Dictionary<string, object>
-                //{
-                //    {"ClassStandard",a },
-                //    {"ClassExtent",b },
-                //    {"MyClass",c },
-                //    {"MyClassID",myclass.ID }
-                //};
                 var response = new Dictionary<string, object>
                 {
                     {"Data", retClassSbj },
@@ -241,7 +236,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                   CourseName = course.Name,
                                   TeacherID = r.TeacherID,
                                   TeacherName = teacher == null? "Lớp cá nhân" : teacher.FullName,
-                                  TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass
+                                  TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass
                               }).ToList()
                     },
                     {"ClassMechanism",_classService.GetItemByID(ClassID).ClassMechanism }
@@ -314,6 +309,227 @@ namespace BaseCustomerMVC.Controllers.Student
             //        {"Error", ex.Message }
             //    });
             //}
+        }
+
+        public JsonResult GetLearningSummary(String basis)
+        {
+            try
+            {
+                string _studentid = User.Claims.GetClaimByType("UserID").Value;
+                var student = _studentService.GetItemByID(_studentid);
+                if (student == null)
+                {
+                    return Json("Không tìm thấy học viên.");
+                }
+
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                {
+                    return Json("Cơ sở không tồn tại.");
+                }
+
+                if (student.JoinedClasses.Count == 0)
+                {
+                    return Json("Sinh viên chưa có trong lớp.");
+                }
+
+                var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
+                if (lclass.Count() == 0)
+                {
+                    return null;
+                }
+
+                var data = new List<StudentSummaryViewModel>();
+                for (Int32 i = 0; i < lclass.Count(); i++)
+                {
+                    var @class = lclass.ElementAtOrDefault(i);
+                    if (@class == null) continue;
+                    var total_students = _studentService.CountByClass(@class.ID);
+                    //var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
+                    //    .AutoOrtherType(_classProgressService.GetItemByClassID(@class.ID, student.ID) ?? new ClassProgressEntity
+                    //    {
+                    //        ClassID = @class.ID,
+                    //        StudentID = student.ID,
+                    //    }, new StudentSummaryViewModel()
+                    //    {
+                    //        ClassName = @class.Name,
+                    //        Rank = -1,
+                    //        TotalStudents = (int)total_students,
+                    //        TotalLessons = @class.TotalLessons,
+                    //        TotalExams = @class.TotalExams,
+                    //        TotalPractices = @class.TotalPractices
+                    //    });
+
+                    //var results = _progressHelper.GetClassResults(@class.ID).OrderByDescending(t => t.RankPoint).ToList();
+
+                    //summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+                    //summary.AvgPoint = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+
+                    //if (results != null && (results.FindIndex(t => t.StudentID == summary.StudentID) >= 0))
+                    //    summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+
+                    //data.Add(summary);
+                    data.AddRange(GetClassSubjectSummary(@class, student.ID, total_students));
+                }
+                return new JsonResult(data);
+            }
+            catch(Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+        }
+
+        private List<StudentSummaryViewModel> GetClassSubjectSummary(ClassEntity @class, string StudentID, long total_students)
+        {
+            var data = new List<StudentSummaryViewModel>();
+
+            var subjects = _classSubjectService.GetByClassID(@class.ID);
+
+            foreach (var sbj in subjects)
+            {
+                var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
+                    .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
+                    {
+                        ClassID = @class.ID,
+                        StudentID = StudentID,
+                        ClassSubjectID = sbj.ID
+                    }, new StudentSummaryViewModel()
+                    {
+
+                        CourseName = sbj.CourseName,
+                        Rank = -1,
+                        TotalStudents = (int)total_students,
+                        TotalLessons = sbj.TotalLessons,
+                        TotalExams = sbj.TotalExams,
+                        TotalPractices = sbj.TotalPractices
+                    });
+
+                if (string.IsNullOrEmpty(summary.CourseName))
+                {
+                    var course = _courseService.GetItemByID(sbj.CourseID);
+                    if (course == null)
+                    {
+                        summary.SkillName = _skillService.GetItemByID(sbj.SkillID).Name;
+                    }
+                    else
+                    {
+                        summary.CourseName = course.Name;
+                    }
+                }
+
+                summary.AvgPoint = summary.TotalExams > 0 ? summary.TotalPoint / summary.TotalExams : 0;
+                summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+
+                var results = _progressHelper.GetClassSubjectResults(sbj.ID).OrderByDescending(t => t.RankPoint).ToList();
+                if (results != null && (results.FindIndex(t => t.StudentID == StudentID) >= 0))
+                    summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+
+                data.Add(summary);
+            }
+            return data;
+        }
+
+        public JsonResult GetLearningResult(DefaultModel model, string ClassSubjectID,String basis, bool isPractice = false)
+        {
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            if (student == null)
+            {
+                return Json("Không tìm thấy học viên");
+            }
+
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+            {
+                return Json("Cơ sở không tồn tại");
+            }
+            var StudentID = _studentid;
+
+            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentCs == null)
+                return null;
+
+            var data = new List<LessonProgressEntity>();
+            var passExams = new List<LessonEntity>();
+            if (!string.IsNullOrEmpty(ClassSubjectID))
+            {
+                passExams = (!isPractice ? _lessonService.GetClassSubjectExams(ClassSubjectID) : _lessonService.GetClassSubjectPractices(ClassSubjectID)).ToList();
+                data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
+            }
+
+            var lessons = (
+                            from lesson in passExams
+                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
+                            let schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID)
+                            select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
+                            {
+                                ScheduleID = schedule.ID,
+                                ScheduleStart = schedule.StartDate,
+                                ScheduleEnd = schedule.EndDate,
+                                IsActive = schedule.IsActive,
+                                LearnCount = progress.Tried,
+                                LearnLast = progress.LastTry,
+                                Result = progress.LastPoint,
+                                LessonId = lesson.ID,
+                            })).OrderByDescending(r => r.ScheduleStart).ThenBy(r => r.ChapterID).ThenBy(r => r.LessonId).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", lessons},
+                { "Model", model }
+            };
+            return new JsonResult(response);
+        }
+
+        public JsonResult GetLearningProgress(String ClassSubjectID,String basis)
+        {
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            if (student == null)
+            {
+                return Json("Không tìm thấy học viên");
+            }
+
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
+            {
+                return Json("Cơ sở không tồn tại");
+            }
+            var StudentID = _studentid;
+
+            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (currentCs == null)
+                return null;
+
+            List<LessonProgressEntity> data;
+            data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
+
+            var subjects = _classSubjectService.GetByCourseID(currentCs.CourseID);
+
+            var lessons = (from progress in data
+                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassSubjectID ==ClassSubjectID).FirstOrDefault()
+                           where schedule != null
+                           let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
+                           where classsubject != null
+                           let lesson = _lessonService.GetItemByID(progress.LessonID)
+                           select _moduleViewMapping.AutoOrtherType(lesson, new StudentModuleViewModel()
+                           {
+                               ScheduleID = schedule.ID,
+                               ScheduleStart = schedule.StartDate,
+                               Skill = _skillService.GetItemByID(classsubject.SkillID).Name,
+                               ScheduleEnd = schedule.EndDate,
+                               IsActive = schedule.IsActive,
+                               LearnCount = progress.TotalLearnt,
+                               TemplateType = lesson.TemplateType,
+                               LearnStart = progress.FirstDate,
+                               LearnLast = progress.LastDate
+                           })).OrderBy(r => r.LearnStart).ThenBy(r => r.ChapterID).ThenBy(r => r.ID).ToList();
+
+            var response = new Dictionary<string, object>
+            {
+                { "Data", lessons}
+            };
+            return new JsonResult(response);
         }
     }
 }

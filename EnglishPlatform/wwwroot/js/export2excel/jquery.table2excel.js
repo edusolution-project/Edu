@@ -46,7 +46,7 @@
                     head: "<x:ExcelWorksheet><x:Name>",
                     tail: "</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>"
                 },
-                mid: "</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>",
+                mid: "</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><style>.text-style{mso-number-format: \"\@\";}</style>",
                 table: {
                     head: "<table>",
                     tail: "</table>"

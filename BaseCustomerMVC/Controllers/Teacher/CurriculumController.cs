@@ -2249,7 +2249,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         var _lessonPart = lessonPart.ElementAtOrDefault(x);
 
-                        RenderWordLessonPart(ref s, _lessonPart, basis, UserID);
+                        RenderWordLessonPart(ref s, _lessonPart);
                     }
 
                     Paragraph paragraph = s.AddParagraph();
@@ -2271,7 +2271,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart, String basis, String user)
+        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart)
         {
 
             Table table = s.AddTable(true);
@@ -2371,7 +2371,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ2":
                     if (!string.IsNullOrEmpty(_lessonPart.Description))
                     {
-                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, basis, user, out answer) + "</p>";
+                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, out answer) + "</p>";
                         answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
                         descriptionRow_Cel2_Content.AppendHTML(html + answer);
                         //var aGrp2 = descriptionRow_Cel2.AddParagraph();
@@ -2513,7 +2513,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return returnHtml;
         }
 
-        private string RenderQuiz2ForWord(LessonPartEntity lessonPart, String basis, String user, out string answer)
+        private string RenderQuiz2ForWord(LessonPartEntity lessonPart, out string answer)
         {
             answer = "";
             var description = lessonPart.Description.Replace("src=\"/", "src=\"https://" + currentHost + "/");
@@ -2557,9 +2557,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 questions.RemoveAt(0);
             }
 
-            //String a = ConvertHtmlToDoc(returnHtml, basis, user);
-
-            //return ConvertHtmlToDoc(returnHtml,basis,user,lessonPart.Type);
             return returnHtml;
         }
 
@@ -2590,7 +2587,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     s.PageSetup.Orientation = PageOrientation.Landscape;
 
                     var defStyle = doc.AddParagraphStyle("DefStyle");
-                    defStyle.ParagraphFormat.BeforeAutoSpacing = false;
                     defStyle.CharacterFormat.FontName = "Calibri";
                     defStyle.CharacterFormat.FontSize = 13;
 
@@ -4040,7 +4036,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return null;
             }
         }
 
@@ -4147,6 +4143,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
             }
+        }
+
+        private string GetText(Paragraph para)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (DocumentObject obj in para.ChildObjects)
+            {
+                if (obj is OfficeMath)
+                {
+                    stringBuilder.Append((obj as OfficeMath).ToMathMLCode());
+                }
+                else if (obj is TextRange)
+                {
+                    stringBuilder.Append((obj as TextRange).Text);
+                }
+            }
+            stringBuilder.AppendLine();
+            return stringBuilder.ToString();
         }
 
         private List<QuestionViewModel> ExtractFillQuestionList(LessonPartEntity item, string creator, out string Description)

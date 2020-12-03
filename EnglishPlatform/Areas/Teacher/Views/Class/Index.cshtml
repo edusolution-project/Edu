@@ -70,7 +70,7 @@
                 <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@processUrl("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
-                    <td>{{item.SkillName}}</td>
+                    @*<td>{{item.SkillName}}</td>*@
                     <td>{{item.Teachers}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
@@ -382,10 +382,10 @@
                         key: 'class_name',
                         label: 'Tên lớp'
                     },
-                    {
-                        key: 'skills',
-                        label: 'Môn học'
-                    },
+                    //{
+                    //    key: 'skills',
+                    //    label: 'Môn học'
+                    //},
                     {
                         key: 'teacher_name',
                         label: 'Giáo viên'
@@ -480,7 +480,7 @@
                             //SkillID: '',
                             TeacherID: '',
                             CourseID: '',
-                            TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                            TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                         }
                     ],
                     IsOwner: false
@@ -778,7 +778,7 @@
                                     GradeID: '',
                                     TeacherID: '',
                                     CourseID: '',
-                                    TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                                    TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                                 }
                             ],
                             IsOwner: true
@@ -841,7 +841,7 @@
                                         TeacherID: item.TeacherID,
                                         CourseID: item.CourseID,
                                         IsLock: lock,
-                                        IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND',
+                                        IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND',
                                         TypeClass: item.TypeClass
                                     })
 
@@ -1022,7 +1022,7 @@
                         GradeID: '',
                         TeacherID: '',
                         CourseID: '',
-                        TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                        TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                     }
                     this.class_info.subject.push(_subject)
                     this.$forceUpdate();
@@ -1368,13 +1368,13 @@
                     <label class="label">Mô tả</label>
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription" :disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
-                <b-col class="form-group d-none">
+                @*<b-col class="form-group d-none">
                     <label class="label">Cho phép học sinh tự động tham gia:</label>
                     <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
                         <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
                         <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
                     </select>
-                </b-col>
+                </b-col>*@
                 <b-col class="form-group">
                     <label class="label">Ảnh lớp học</label>
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
@@ -1420,8 +1420,8 @@
                         <div class="width-100 mr-2">
                             <label for="">Loại học liệu</label>
                             <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
@@ -1473,8 +1473,8 @@
                         <div class="width-100 mr-2">
                             <label for="">Loại học liệu</label>
                             <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">

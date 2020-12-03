@@ -126,10 +126,11 @@ namespace BaseCustomerEntity.Database
         }
     }
 
-    public class CLASS_TYPE
+    public class CLASSSUBJECT_TYPE
     {
         public const int STANDARD = 0, //chính khóa
-            EXTEND = 1; //bổ trợ
+            EXTEND = 1, //bổ trợ
+            EXAM = 2; //kiểm tra
     }
 
 }

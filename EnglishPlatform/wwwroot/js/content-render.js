@@ -1810,7 +1810,25 @@ var Lesson = (function () {
 
     var renderEditPart = function (data) {
         var modalForm = window.partForm;
-        $('#partModal #modalTitle').html("Update");
+        $('#partModal #modalTitle').html("Cập nhật nội dung");
+        var textType = "";
+        switch (data.Type) {
+            case 'TEXT': textType = "Văn bản"; break;
+            case 'VIDEO': textType = "Video"; break;
+            case 'AUDIO': textType = "Audio"; break;
+            case 'IMG': textType = "Hình ảnh"; break;
+            case 'DOC': textType = "File văn bản (PDF, DOC, PPT, XLS)"; break;
+            case 'VOCAB': textType = "Từ vựng tiếng Anh"; break;
+            case 'QUIZ1': textType = "QUIZ: Chọn 1 đáp án đúng"; break;
+            case 'QUIZ2': textType = "QUIZ: Điền từ"; break;
+            case 'QUIZ3': textType = "QUIZ: Nối đáp án"; break;
+            case 'QUIZ4': textType = "QUIZ: Chọn 1/nhiều đáp án"; break;
+            case 'ESSAY': textType = "QUIZ: Essay"; break;
+            default: textType = "Unknown"; break;
+        }
+
+
+        $(modalForm).append($("<div>", {class: "mt-2 mb-3", html: "Kiểu nội dung: <b style='font-weight:700'>" + textType + "</b>" }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassSubjectID", "value": config.class_subject_id }));
@@ -1932,7 +1950,7 @@ var Lesson = (function () {
         contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề", "required": "required" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
-        contentholder.append($("<label>", { "class": "title", "text": "Mô tả:" }));
+        //contentholder.append($("<label>", { "class": "title", "text": "Mô tả:" }));
         //var desc = $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" });
         var desc = $("<div>", { "id": "editor", class: "editorck mb-3 p-2", "name": "Description", "data-title": "Nội dung giới thiệu", contenteditable: true });
         contentholder.append($("<div>", { class: "mb-2" }).append(desc));
@@ -2936,7 +2954,7 @@ var Lesson = (function () {
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
 
-                $('#leftCol').addClass('hide');//fix tạm thời
+                //$('#leftCol').addClass('hide');//fix tạm thời
             }
         }
         else {
@@ -2951,10 +2969,10 @@ var Lesson = (function () {
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
 
-            //fix tạm thời
-            if (!isContinue) {
-                $('#leftCol').addClass('hide');
-            }
+            ////fix tạm thời
+            //if (!isContinue) {
+            //    $('#leftCol').addClass('hide');
+            //}
         }
     }
 
@@ -3206,9 +3224,9 @@ var Lesson = (function () {
         }
         else {
             //temp fix 20200823
-            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
             //fix tạm thời
-            tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
             //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
         }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });

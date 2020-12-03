@@ -85,8 +85,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
                           where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
-                          let subject = _subjectService.GetItemByID(r.SubjectID)
-                          let grade = _gradeService.GetItemByID(r.GradeID)
+                          let subject = r.SubjectID != null?  _subjectService.GetItemByID(r.SubjectID): new SubjectEntity()
+                          let grade = r.GradeID != null? _gradeService.GetItemByID(r.GradeID): new GradeEntity()
                           let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}
                           let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)

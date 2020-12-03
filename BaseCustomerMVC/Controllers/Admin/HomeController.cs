@@ -1,6 +1,7 @@
 ﻿using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
 using Core_v2.Interfaces;
+using Google.Apis.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +10,10 @@ using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.Driver.Core.Misc;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using RestSharp;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -157,6 +160,9 @@ namespace BaseCustomerMVC.Controllers.Admin
             return View();
         }
 
+
+
+        #region Fix Region      
         //public async Task<JsonResult> FixScoreData()//Big fix
         //{
         //    var start = DateTime.UtcNow;
@@ -395,36 +401,41 @@ namespace BaseCustomerMVC.Controllers.Admin
             var change = 0;
 
 
-            //var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
-            //foreach (var clid in clids)
-            //{
-            //    var cl = _lessonService.GetItemByID(clid);
-            //    var oldpoint = cl.Point;
-            //    var isPrac = cl.IsPractice;
-            //    var newPrac = isPrac;
-            //    var point = calculateLessonPoint(cl, newPrac);
-            //    if (isPrac != newPrac)
-            //        change++;
-            //}
-            //str += " Course Lesson Point change " + change;
+            var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
+            foreach (var clid in clids)
+            {
+                var cl = _lessonService.GetItemByID(clid);
+                var oldpoint = cl.Point;
+                var isPrac = cl.IsPractice;
+                var newPrac = isPrac;
+                var point = calculateLessonPoint(cl, newPrac);
+                if ((isPrac != newPrac) || (point != oldpoint))
+                {
+                    _lessonService.Save(cl);
+                    change++;
+                }
+            }
+            str += " Course Lesson Point change " + change;
 
-            //var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
+            var lids = _clonelessonService.GetAll().Project(t => t.ID).ToList();
 
-            //change = 0;
-            //foreach (var lid in lids)
-            //{
+            change = 0;
+            foreach (var lid in lids)
+            {
 
-            //    var l = _clonelessonService.GetItemByID(lid);
-            //    var oldpiont = l.Point;
-            //    var isPrac = l.IsPractice;
-            //    var newPrac = isPrac;
-            //    var point = calculateCloneLessonPoint(l, newPrac);
+                var l = _clonelessonService.GetItemByID(lid);
+                var oldpoint = l.Point;
+                var isPrac = l.IsPractice;
+                var newPrac = isPrac;
+                var point = calculateCloneLessonPoint(l, newPrac);
 
-
-            //    if (isPrac != newPrac)
-            //        change++;
-            //}
-            //str += " - Lesson Point change " + change;
+                if ((isPrac != newPrac) || (point != oldpoint))
+                {
+                    _clonelessonService.Save(l);
+                    change++;
+                }
+            }
+            str += " - Lesson Point change " + change + " - ";
 
             //reset progress
 
@@ -461,25 +472,66 @@ namespace BaseCustomerMVC.Controllers.Admin
                 .Set(t => t.LastDate, new DateTime(1900, 1, 1))
                 );
 
-            //_lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
-            //    .Set(t => t.AvgPoint, 0)
-            //    .Set(t => t.LastPoint, 0)
-            //    .Set(t => t.LastTry, DateTime.MinValue)
-            //    .Set(t => t.MaxPoint, 0)
-            //    .Set(t => t.MinPoint, 0)
-            //    .Set(t => t.Tried, 0)
-            //    );
+            _lessonProgressService.CreateQuery().UpdateMany(t => true, Builders<LessonProgressEntity>.Update
+                .Set(t => t.AvgPoint, 0)
+                .Set(t => t.LastPoint, 0)
+                .Set(t => t.LastTry, DateTime.MinValue)
+                .Set(t => t.MaxPoint, 0)
+                .Set(t => t.MinPoint, 0)
+                .Set(t => t.Tried, 0)
+                );
 
-            //str += (DateTime.UtcNow - start).TotalSeconds;
-            //start = DateTime.UtcNow;
-            //str += " Phase 5: ";
+            str += (DateTime.UtcNow - start).TotalSeconds;
+            start = DateTime.UtcNow;
+            str += " Phase 5: ";
+
+            //reapply exam maxpoint
+            var exams = _examService.GetAll().ToEnumerable();
+
+            var examPointChange = 0;
+            foreach (var e in exams)
+            {
+                var lesson = _clonelessonService.GetItemByID(e.LessonID);
+                if (lesson != null)
+                {
+                    if (e.MaxPoint == 0 || e.MaxPoint != lesson.Point)
+                    {
+                        e.MaxPoint = lesson.Point;
+                        _examService.Save(e);
+                        examPointChange++;
+                    }
+                }
+                else
+                {
+                    var parts = _clonelessonPartService.GetByLessonID(e.LessonID);//remove orphan parts
+                    foreach (var part in parts)
+                    {
+                        await _examDetailService.Collection.DeleteManyAsync(t => t.LessonPartID == part.ID);
+                        var quizs = _clonequestionService.GetByPartID(part.ID);
+                        foreach (var quiz in quizs)
+                        {
+                            await _cloneanswerService.Collection.DeleteManyAsync(t => t.ParentID == quiz.ID);
+                            await _clonequestionService.RemoveAsync(quiz.ID);
+                        }
+                        await _clonelessonPartService.RemoveAsync(part.ID);
+                    }
+                    await _examService.RemoveAsync(e.ID);
+                }
+            }
+
+            str += " - ExamPoint Change :" + examPointChange + " - ";
 
             var lessonProgresses = _lessonProgressService
-                //.CreateQuery().Find(t => t.ClassID == "5f60dd6b0dd2b41448907f26" && t.StudentID == "5f60e2e90dd2b41448909d05")
+                //.CreateQuery().Find(t => t.ClassID == "5f649e8ed533d51c9013e9c1" 
+                //&& t.StudentID == "5f60e2e90dd2b41448909d05"
+                //)
                 .GetAll()
                 //.Project(t => new LessonProgressEntity { ID = t.ID, LessonID = t.LessonID, StudentID = t.StudentID })
                 .ToList();
-            lessonProgresses = lessonProgresses.OrderBy(t => t.LessonID).ThenBy(t => t.Tried).ToList();
+            lessonProgresses = lessonProgresses//OrderBy(t => t.LessonID).ThenBy(t => t.Tried)
+                .ToList();
+
+            var lessonPointChange = 0;
 
             foreach (var lprg in lessonProgresses)
             {
@@ -491,6 +543,17 @@ namespace BaseCustomerMVC.Controllers.Admin
                 var lesson = _clonelessonService.GetItemByID(lprg.LessonID);
                 if (lesson.IsPractice)
                 {
+                    var lastestEx = _examService.GetLastestByLessonAndStudent(lprg.LessonID, lprg.StudentID);
+                    if (lastestEx != null && lastestEx.MaxPoint > 0)
+                    {
+                        var lpoint = lastestEx.Point * 100 / lastestEx.MaxPoint;
+                        if (lpoint != lprg.LastPoint)
+                        {
+                            lprg.LastPoint = lpoint;
+                            lessonPointChange++;
+                        }
+                    }
+
                     if (lesson.ChapterID != "0")
                         //Task.Run(() =>
                         //{
@@ -518,11 +581,105 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
             }
 
+            str += " - LessonPoint Change :" + lessonPointChange + " - ";
+
             str += (DateTime.UtcNow - start).TotalSeconds;
             start = DateTime.UtcNow;
             str += " End. ";
             return Json(str);
         }
+
+        public async Task<JsonResult> FixExam()
+        {
+            _lessonService.CreateQuery().UpdateMany(t => t.TemplateType == LESSON_TEMPLATE.EXAM,
+                Builders<CourseLessonEntity>.Update.Set(t => t.IsPractice, true).Set(t => t.TemplateType, LESSON_TEMPLATE.LECTURE)
+                );
+
+            _clonelessonService.CreateQuery().UpdateMany(t => t.TemplateType == LESSON_TEMPLATE.EXAM,
+                Builders<LessonEntity>.Update.Set(t => t.IsPractice, true).Set(t => t.TemplateType, LESSON_TEMPLATE.LECTURE)
+                );
+
+            var courseChapters = _courseChapterService.CreateQuery()
+                .Find(t => t.TotalExams > 0).ToList();
+            foreach (var chapter in courseChapters)
+            {
+                if (chapter.TotalExams > 0)
+                {
+                    var exCount = chapter.TotalExams;
+                    //await _courseHelper.IncreaseCourseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+                    chapter.TotalPractices += exCount;
+                    chapter.TotalExams = 0;
+                    _courseChapterService.Save(chapter);
+                    if (chapter.ParentID == "0")
+                        await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0, 0 - exCount, exCount);
+                }
+            }
+
+            var cloneChapters = _chapterService.CreateQuery()
+                .Find(t => t.TotalExams > 0).ToEnumerable();
+            foreach (var chapter in cloneChapters)
+            {
+                if (chapter.TotalExams > 0)
+                {
+                    var exCount = chapter.TotalExams;
+                    //await _classHelper.IncreaseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+                    chapter.TotalPractices += exCount;
+                    chapter.TotalExams = 0;
+                    _courseChapterService.Save(chapter);
+                    if (chapter.ParentID == "0")
+                        await _classHelper.IncreaseClassSubjectCounter(chapter.ClassSubjectID, 0, 0 - exCount, exCount);
+                }
+            }
+
+            var chapPrgs = _chapterProgressService.CreateQuery().Find(t => t.ExamDone > 0).ToEnumerable();
+
+            foreach (var prg in chapPrgs)
+            {
+                if (prg.ExamDone > 0)
+                {
+                    var point = prg.TotalPoint;
+                    var count = prg.ExamDone;
+                    prg.PracticeDone += count;
+                    prg.PracticePoint += point;
+                    prg.PracticeAvgPoint = prg.PracticeDone > 0 ? (prg.PracticePoint * 100 / prg.PracticeDone) : 0;
+
+                    _chapterProgressService.Save(prg);
+
+                    var chapter = _chapterService.GetItemByID(prg.ChapterID);
+                    if (chapter.ParentID == "0")
+                    {
+                        await _progressHelper.UpdateClassSubjectPoint(chapter.ClassSubjectID, prg.StudentID, 0 - point, 0 - count, point, count);
+                    }
+                }
+            }
+            return Json("OK");
+        }
+
+        public async Task<JsonResult> CreateExamSubject()
+        {
+            var classes = _classService.CreateQuery().Find(t => t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToList();
+            foreach (var @currentClass in classes)
+            {
+                var subjects = _classSubjectService.CreateQuery().Find(t => t.ClassID == currentClass.ID && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+                if (subjects == null || subjects.Count == 0) //create exam Subject
+                {
+                    var newSbj = new ClassSubjectEntity
+                    {
+                        ClassID = currentClass.ID,
+                        CourseName = "Kiểm tra, đánh giá",
+                        Description = "Kiểm tra, đánh giá",
+                        StartDate = currentClass.StartDate,
+                        EndDate = currentClass.EndDate,
+                        TypeClass = CLASSSUBJECT_TYPE.EXAM,
+                        TeacherID = currentClass.TeacherID
+                    };
+                    _classSubjectService.Save(newSbj);
+                }
+            }
+            return Json("OK");
+
+        }
+
 
         //public async Task<JsonResult> Remark(string ExamID)//Big fix
         //{
@@ -616,7 +773,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             return point;
         }
 
-        #region Fix Region
         public JsonResult FixFillquiz()
         {
             Stopwatch stopWatch = new Stopwatch();
@@ -812,7 +968,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-
         public JsonResult DeleteCenter(string centerID = "5fbcb0bcb7df2d22889f2c77")
         {
             //foreach (var teacher in _teacherService.CreateQuery().Find(t => t.Centers.Any(ct => ct.CenterID == centerID)).ToList())
@@ -868,7 +1023,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("OK");
         }
 
-
         public JsonResult ShareStudent()
         {
             var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
@@ -885,7 +1039,6 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             return Json("OK:" + count);
         }
-
 
         public JsonResult ChangeLinkImage()
         {
