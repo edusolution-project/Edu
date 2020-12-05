@@ -453,7 +453,8 @@ var Lesson = (function () {
 
                 var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort mt-2 mb-2 mr-2", "title": "Sort", "onclick": "SortPart()" });
-                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
+                //var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
+                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddParttoExam('" + data.ID + "','" + data.TemplateType + "')" });
                 var toggleMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Về chế độ xem", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort mr-2" });
@@ -469,7 +470,7 @@ var Lesson = (function () {
                 lessonButton.append(sort);
                 sort.append(iconSort).append("Sắp xếp");
                 lessonButton.append(create);
-                create.append(iconCreate).append("Thêm nội dung 1");
+                create.append(iconCreate).append("Thêm nội dung");
                 //headerRow.append(lessonButton);
                 lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
@@ -1778,6 +1779,11 @@ var Lesson = (function () {
     }
 
     var modalAddPart = function (lessonID, type) {
+
+        $(".swal2-container").hide();
+        $('#partModal').modal('hide');
+        $('#partModal').modal('show');
+
         var modalForm = window.partForm;
         $(modalForm).empty();
         $('#partModal #modalTitle').html("Thêm nội dung");
@@ -4629,6 +4635,7 @@ var Lesson = (function () {
 
     //Thêm từ bài
     var showModaltoAddExam = function () {
+        $(".swal2-container").hide();
         listLessonPartID = [];
         $('#ModaltoAddExam').modal('show');
         $('#partModal').modal('hide');
@@ -4640,75 +4647,142 @@ var Lesson = (function () {
         Ajax(config.url.load_classsubject, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res).Data;
-                var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "ClassSubject", "required": "required", "id": "chooseCourse" }).bind("change", chooseCourse);
-                $(modalForm).append(selectTemplate);
-                $(selectTemplate).append("<option value=''>--- Chọn giáo trình ---</option>");
+                //var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "ClassSubject", "required": "required", "id": "chooseCourse" }).bind("change", chooseCourse);
+                //$(modalForm).append(selectTemplate);
+                //$(selectTemplate).append("<option value=''>--- Chọn giáo trình ---</option>");
+                //for (var i = 0; i < data.length; i++) {
+                //    var item = data[i];
+                //    if (item.CourseName)
+                //        $(selectTemplate).append("<option value='" + item.ID + "'>" + item.CourseName + "</option>")
+                //}
+                var ulselectTemplate = $("<ul>", { "class": "list ls-practice", "name": "ClassSubject", "id": "chooseCourse" });
+                $(modalForm).append(ulselectTemplate);
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
                     if (item.CourseName)
-                        $(selectTemplate).append("<option value='" + item.ID + "'>" + item.CourseName + "</option>")
+                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:16px;color:" + item.Color + "'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' onclick='chooseCourse(\"" + item.ID + "\",this)'></i></div></li>");
                 }
             })
     }
 
-    var chooseCourse = function () {
-        var modalForm = window.partModaltoAddExam;
-        var id = $("#chooseCourse").val();
-        if (id !== undefined) {
-            var dataform = new FormData();
-            dataform.append("ID", id);
-            Ajax(config.url.load_contents, dataform, "POST", false)
-                .then(function (res) {
-                    var data = JSON.parse(res).Data
-                    var chapters = data.Chapters;
-                    var lessons = data.Lessons;
+    var chooseCourse = function (id,obj) { //chương
+        //var modalForm = window.partModaltoAddExam;
+        //var id = $("#chooseCourse").val();
+        var containerCourse = $("#" + id);
+        var child = containerCourse.children()[0];
+        var classi = $(obj).attr("class");
+        if (classi.includes("fa-arrow-alt-circle-down")) {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+            containerCourse.empty();
+            containerCourse.append(child);
+            if (id !== undefined) {
+                var dataform = new FormData();
+                dataform.append("ID", id);
+                Ajax(config.url.load_contents, dataform, "POST", false)
+                    .then(function (res) {
+                        var data = JSON.parse(res).Data
+                        var chapters = data.Chapters;
+                        var lessons = data.Lessons;
 
-                    var selectChapterTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectChapter" }).bind("change", chooseLesson);
-                    $(modalForm).append(selectChapterTemplate);
-                    $(selectChapterTemplate).append("<option value=''>--- Chọn chương ---</option>");
-                    for (var i = 0; i < chapters.length; i++) {
-                        var chapter = chapters[i];
-                        $(selectChapterTemplate).append("<option value='" + chapter.ID + "'>" + chapter.Name + "</option>")
-                    }
+                        //var selectChapterTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectChapter" }).bind("change", chooseLesson);
+                        //$(containerCourse).append(selectChapterTemplate);
+                        //$(selectChapterTemplate).append("<option value=''>--- Chọn chương ---</option>");
+                        //for (var i = 0; i < chapters.length; i++) {
+                        //    var chapter = chapters[i];
+                        //    $(selectChapterTemplate).append("<option value='" + chapter.ID + "'>" + chapter.Name + "</option>")
+                        //}
 
-                    var selectLessonTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectLesson" });
-                    $(modalForm).append(selectLessonTemplate);
-                    $(selectLessonTemplate).append("<option value=''>--- Chọn bài ---</option>");
-                    for (var i = 0; i < lessons.length; i++) {
-                        var lesson = lessons[i];
-                        $(selectLessonTemplate).append("<option value='" + lesson.ID + "' data-chapter-id='" + lesson.ChapterID + "' class='hide'>" + lesson.Title + "</option>")
-                    }
-                })
-        }
-    }
+                        var ulselectChapterTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectChapter" });
+                        containerCourse.append(ulselectChapterTemplate);
+                        for (var i = 0; i < chapters.length; i++) {
+                            var chapter = chapters[i];
+                            $(ulselectChapterTemplate).append('<li style="padding: 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div style="font-size: 16px"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
 
-    var chooseLesson = function () {
-        var id = $("#selectChapter").val();
-        var lessons = $("#selectLesson");
-        for (var i = 0; i < lessons.length; i++) {
-            var lesson = lessons[i];
-            for (var j = 0; j < lesson.length; j++) {
-                var a = lesson[j];
-                if ($(a).attr('data-chapter-id')===id) {
-                    $(a).removeClass('hide');
-                    //$(a).attr('onclick','choosePart()');
-                }
-                else {
-                    if ($(a).attr('class') != 'hide') {
-                        $(a).addClass('hide');
-                        //$(a).removeAttr('onclick');
-                    }
-                }
+                            var containerLesson = $("#" + chapter.ID);
+                            var firstChil = containerLesson.children()[0];
+                            var ulselectLessonTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectLesson" });
+                            containerLesson.empty();
+                            containerLesson.append(firstChil);
+                            containerLesson.append(ulselectLessonTemplate);
+                            for (var j = 0; j < lessons.length; j++) {
+                                var lesson = lessons[j];
+                                if (lesson.ChapterID == chapter.ID) {
+                                    $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
+                                }
+                            }
+                        }
+
+                        //var ulselectLessonTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectLesson" });
+                        //containerCourse.append(ulselectLessonTemplate);
+                        //for (var i = 0; i < lessons.length; i++) {
+                        //    var lesson = lessons[i];
+                        //    $(ulselectLessonTemplate).append('<li class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lesson.ID + '"><div style="font-size: 20px">' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
+                        //}
+
+                        //var selectLessonTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectLesson" });
+                        //$(containerCourse).append(selectLessonTemplate);
+                        //$(selectLessonTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                        //for (var i = 0; i < lessons.length; i++) {
+                        //    var lesson = lessons[i];
+                        //    $(selectLessonTemplate).append("<option value='" + lesson.ID + "' data-chapter-id='" + lesson.ChapterID + "' class='hide'>" + lesson.Title + "</option>")
+                        //}
+                    })
             }
         }
-        $(lessons).attr('onchange', 'choosePart()');
+        else {
+            containerCourse.empty();
+            containerCourse.append(child);
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+        }
     }
 
-    var choosePart = function () {
-        var modalForm = window.partModaltoAddExam;
-        var lessonid = $("#selectLesson").val();
+    var chooseLesson = function (id, obj) { //bài trong chương
+        var chapterParent = $("#" + id);
+        var ul = chapterParent.children()[1];
+        var classUl = $(ul).attr("class");
+        var classi = $(obj).attr("class");
+        if (classi.includes("fa-arrow-alt-circle-down")) {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+        }
+        else {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+        }
+        if (classUl.includes("hide")) {
+            $(ul).removeClass("hide");
+            //var id = $("#selectChapter").val();
+            //var lessons = $("#selectLesson");
+            //for (var i = 0; i < lessons.length; i++) {
+            //    var lesson = lessons[i];
+            //    for (var j = 0; j < lesson.length; j++) {
+            //        var a = lesson[j];
+            //        if ($(a).attr('data-chapter-id') === id) {
+            //            $(a).removeClass('hide');
+            //            //$(a).attr('onclick','choosePart()');
+            //        }
+            //        else {
+            //            if ($(a).attr('class') != 'hide') {
+            //                $(a).addClass('hide');
+            //                //$(a).removeAttr('onclick');
+            //            }
+            //        }
+            //    }
+            //}
+            //$(lessons).attr('onchange', 'choosePart()');
+        }
+        else {
+            $(ul).addClass("hide");
+        }
+    }
+
+    var choosePart = function (lessonid, classsbjid, obj) {
+        //var modalForm = window.partModaltoAddExam;
+        //var lessonid = $("#selectLesson").val();
         var classid = $('#ClassID').val();
-        var classsbjid = $('#chooseCourse').val();
+        //var classsbjid = $('#chooseCourse').val();
         var dataform = new FormData();
         dataform.append("LessonID", lessonid);
         dataform.append("ClassID", classid);
@@ -4717,28 +4791,41 @@ var Lesson = (function () {
             .then(function (res) {
                 var data = JSON.parse(res).Data;
                 if (data !== undefined) {
+                    var containerLessonPart = $('#' + lessonid);
+                    var firstChild = containerLessonPart.children()[0];
+                    var ulselectLessonPartTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectLessonPart" });
+                    containerLessonPart.empty();
+                    containerLessonPart.append(firstChild);
+                    containerLessonPart.append(ulselectLessonPartTemplate);
                     for (var i = 0; i < data.length; i++) {
-                        var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
-                        $(modalForm).append(selectLessonPartTemplate);
-                        $(selectLessonPartTemplate).append("<option value=''>--- Chọn bài ---</option>");
-                        var html='';
-                        for (var i = 0; i < data.length; i++) {
-                            var item = data[i];
-                            switch (item.Type) {
-                                case 'QUIZ1': //trac nghiem
-                                case 'QUIZ3':
-                                case 'QUIZ4':
-                                    $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
-                                    html += renderQuestiontoSelectQ(item);
-                                    $(modalForm).append(html);
-                                    break;
-                                case 'QUIZ2'://dien tu
-                                    $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
-                                    //html += renderQuestiontoSelectQ2(item);
-                                    break;
-                                default:
-                            }
-                        }
+                        var lessonPart = data[i];
+                        if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4"))
+                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 16px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
+
+                        //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
+                        //$(modalForm).append(selectLessonPartTemplate);
+                        //$(selectLessonPartTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                        //var html='';
+                        //for (var i = 0; i < data.length; i++) {
+                        //    var item = data[i];
+                        //    switch (item.Type) {
+                        //        case 'QUIZ1': //trac nghiem
+                        //        case 'QUIZ3':
+                        //        case 'QUIZ4':
+                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                        //            html += renderQuestiontoSelectQ(item);
+                        //            $(modalForm).append(html);
+                        //            break;
+                        //        case 'QUIZ2'://dien tu
+                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                        //            //html += renderQuestiontoSelectQ2(item);
+                        //            break;
+                        //        default:
+                        //    }
+                        //}
+
+                        var parentLesson = $("#" + lessonid);
+
                     }
                 }
                 else {
@@ -4806,9 +4893,10 @@ var Lesson = (function () {
     var selectQuestiontoSave = function (questionID) {
     }
 
-    var selectAllQuestion = function (obj) {
+    var selectAllQuestion = function (lessonpartID, obj) {
+        //debugger
         var stt = obj.checked;
-        var lessonpartID = $(obj).attr('data-lessonpart-id');
+        //var lessonpartID = $(obj).attr('data-lessonpart-id');
         if (stt) {
             listLessonPartID.push(lessonpartID);
         }
@@ -4818,7 +4906,6 @@ var Lesson = (function () {
                 listLessonPartID.splice(index, 1);
             }
         }
-        debugger
     }
 
     var saveQAtoExam = function () {
@@ -4833,9 +4920,9 @@ var Lesson = (function () {
             Ajax(config.url.create_exam, dataform, "POST", false)
                 .then(function (res) {
                     var data = JSON.parse(res);
-                    debugger
                     if (data.Stt) {
-                        alert("THêm thành công")
+                        location.reload();
+                        alert("Ttêm thành công")
                     }
                     else {
                         alert(data.Msg);
@@ -4847,6 +4934,21 @@ var Lesson = (function () {
         }
     }
 
+    var ShowAddParttoExam = function (id, type) {
+        id = "'" + id + "'";
+        type = "'" + type + "'";
+        Swal.fire({
+            title: '<strong>Chọn thao tác</strong>',
+            icon: 'question',
+            html:
+                '<button type="button" class="btn btn-primary mr-2" onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>' +
+                '<button type="button" class="btn btn-secondary mr-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button>'+
+                '<button type="button" class="btn btn-secondary mr-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button>',
+            //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
+            confirmButtonText: 'Đóng',
+        })
+    }
+
     window.choosePart = choosePart;
     window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
     window.renderAns = renderAns;
@@ -4856,6 +4958,8 @@ var Lesson = (function () {
     window.chooseLessonPart = chooseLessonPart;
     window.saveQAtoExam = saveQAtoExam;
     window.selectAllQuestion = selectAllQuestion;
+    window.ShowAddParttoExam = ShowAddParttoExam;
+    window.chooseCourse = chooseCourse;
 
     window.LessonInstance = {} || Lesson;
 
