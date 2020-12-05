@@ -1131,6 +1131,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _service.Save(item);
 
+                var subjects = _classSubjectService.CreateQuery().Find(t => t.ClassID == item.ID && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+                if (subjects.Count() == 0)
+                {
+                    var newSbj = new ClassSubjectEntity
+                    {
+                        ClassID = item.ID,
+                        CourseName = "Kiểm tra, đánh giá",
+                        Description = "Kiểm tra, đánh giá",
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        TypeClass = CLASSSUBJECT_TYPE.EXAM,
+                        TeacherID = item.TeacherID
+                    };
+                    _classSubjectService.Save(newSbj);
+                    classSubjects.Add(newSbj);
+                }
+
+
                 //Create class subjects
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
