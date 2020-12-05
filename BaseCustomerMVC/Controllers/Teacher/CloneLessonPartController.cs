@@ -37,6 +37,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
         private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonpartAnswerMapping;
+        private readonly MappingEntity<CloneLessonPartEntity, CloneLessonPartViewModel> _cloneLessonPartViewModelMapping;
+        private readonly MappingEntity<LessonPartQuestionEntity, CloneQuestionViewModel> _cloneQuestionViewModelMapping;
+        //private readonly MappingEntity<LessonPartAnswerEntity> _cloneQuestionViewModelMapping;
 
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
@@ -84,6 +87,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
             _lessonpartAnswerMapping = new MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity>();
+            _cloneLessonPartViewModelMapping = new MappingEntity<CloneLessonPartEntity, CloneLessonPartViewModel>();
+            _cloneQuestionViewModelMapping = new MappingEntity<LessonPartQuestionEntity, CloneQuestionViewModel>();
             _fileProcess = fileProcess;
             _vocabularyService = vocabularyService;
         }
@@ -332,7 +337,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ1":
                 case "QUIZ3":
                 case "QUIZ4":
-                    if (RemovedQuestions != null & RemovedQuestions.Count > 0)
+                    if (RemovedQuestions != null || RemovedQuestions.Count > 0)
                     {
                         _cloneQuestionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
 
@@ -1009,5 +1014,95 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
+
+        #region
+        public JsonResult CreateExam(String basis,List<String> ListLessonPartID,String ClassSubjectID,String LessonID)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                if (ListLessonPartID.Count == 0)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Data",null },
+                        {"Stt",false },
+                        {"Msg","Chưa chọn bài" }
+                    });
+                }
+                else
+                {
+                    var listLessonPart = _cloneLessonPartService.GetByIDs(ListLessonPartID);
+                    if (listLessonPart.Count() == 0)
+                    {
+                        return Json(new Dictionary<String, Object>
+                        {
+                            {"Data",null },
+                            {"Stt",false },
+                            {"Msg","Chưa chọn bài" }
+                        });
+                    }
+                    else
+                    {
+                        foreach (var lessonPart in listLessonPart)
+                        {
+                            var listQuestion = _cloneQuestionService.GetByPartID(lessonPart.ID);
+                            var _listQuestion = new List<CloneQuestionViewModel>();
+                            if (listLessonPart.Count() > 0)
+                            {
+                                foreach (var lessonPartQ in listQuestion)
+                                {
+                                    var listAns = _cloneAnswerService.GetByQuestionID(lessonPartQ.ID);
+                                    var _listAns = new List<CloneLessonPartAnswerEntity>();
+                                    foreach(var item in listAns)
+                                    {
+                                        var _a = _lessonpartAnswerMapping.AutoOrtherTypeWithoutID(item, new CloneLessonPartAnswerEntity
+                                        {
+                                            Created = DateTime.Now,
+                                            CreateUser = UserID,
+                                            ClassSubjectID = ClassSubjectID
+                                        });
+                                    }
+
+                                    var q = _cloneQuestionViewModelMapping.AutoOrtherTypeWithoutID(lessonPartQ, new CloneQuestionViewModel
+                                    {
+                                        Created = DateTime.Now,
+                                        CreateUser = UserID,
+                                        Answers = new List<CloneLessonPartAnswerEntity>(),
+                                        ClassSubjectID = ClassSubjectID,
+                                        LessonID = LessonID
+                                    });
+                                    q.Answers.AddRange(_listAns);
+                                    _listQuestion.Add(q);
+                                }
+                            }
+                            var a = new CloneLessonPartViewModel();
+                            a.Questions = new List<CloneQuestionViewModel>();
+                            _cloneLessonPartViewModelMapping.AutoOrtherTypeWithoutID(lessonPart, a);
+                            a.ClassSubjectID = ClassSubjectID;
+                            a.Questions.AddRange(_listQuestion);
+                            a.ParentID = LessonID;
+                            var x = CreateOrUpdate(basis,a, ClassSubjectID,new List<string>(),new List<string>()).Result;
+                        }
+                    }
+                    return Json(new Dictionary<String, Object>
+                            {
+                                {"Data",null },
+                                {"Stt",true },
+                                {"Msg","Thành công" }
+                            });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                    {
+                        {"Data",null },
+                        {"Stt",false },
+                        {"Msg",ex.Message }
+                    });
+            }
+        }
+        #endregion
     }
 }

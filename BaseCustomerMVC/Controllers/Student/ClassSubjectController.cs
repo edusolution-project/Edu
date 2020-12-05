@@ -247,7 +247,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetContents(string ID, string Parent)
+        public JsonResult GetContents(String ID, String Parent)
         {
             //try
             //{
@@ -430,7 +430,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return data;
         }
 
-        public JsonResult GetLearningResult(DefaultModel model, string ClassSubjectID,String basis, bool isPractice = false)
+        public JsonResult GetLearningResult(DefaultModel model,String ClassSubjectID,String basis, Boolean isPractice = false)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);
@@ -460,7 +460,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var lessons = (
                             from lesson in passExams
-                            let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
+                            let progress = data.FirstOrDefault(t => t.StudentID == student.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
                             let schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID)
                             select _assignmentViewMapping.AutoOrtherType(lesson, new StudentAssignmentViewModel()
                             {

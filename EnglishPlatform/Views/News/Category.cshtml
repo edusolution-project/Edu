@@ -29,28 +29,35 @@
                     @category.Name
                     <div class="underline"></div>
                 </div>
-                <div class="news-list flex-md-row pb-3">
-                    <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
-                        <div class="thumb " style="width:216px;height:122px;text-align:center">
-                            <a :href="'/tin-tuc/@category.Code/' + item.Code">
-                                <img :src="'/Upload/News/'+item.Thumbnail"  style="max-width:100%;max-height:100%;text-align:center"/>
-                            </a>
-                        </div>
-                        <div class="ml-3 media-body">
-                            <div class="news-title">
+                <template v-if="tableData != null">
+                    <div class="news-list flex-md-row pb-3">
+                        <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
+                            <div class="thumb " style="width:216px;height:122px;text-align:center">
                                 <a :href="'/tin-tuc/@category.Code/' + item.Code">
-                                    {{item.Title}}
+                                    <img :src="''+item.Thumbnail" style="max-width:100%;max-height:100%;text-align:center" />
                                 </a>
                             </div>
-                            <div class="news-desc">
-                                {{item.Summary}}
-                            </div>
-                            <div class="news-time">
-                                {{moment(String(item.PublishDate)).format('MM-DD-YYYY')}}
+                            <div class="ml-3 media-body">
+                                <div class="news-title">
+                                    <a :href="'/tin-tuc/@category.Code/' + item.Code">
+                                        {{item.Title}}
+                                    </a>
+                                </div>
+                                <div class="news-desc">
+                                    {{item.Summary}}
+                                </div>
+                                <div class="news-time">
+                                    {{moment(String(item.PublishDate)).format('MM-DD-YYYY')}}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
+                <template v-else>
+                    <div class="news-list flex-md-row pb-3" style="text-align:center">
+                        <h2>Chưa có tin mới, vui lòng quay lại sau.</h2>
+                        </div>
+                </template>
             </div>
         </div>
 
@@ -66,11 +73,13 @@
         new Vue({
             el: ".category-box",
             mounted() {
+                this.getData();
             },
             data: {
                 isLoading: false,
                 catID: '@category.ID',
-                tableData: @Html.Raw(Json.Serialize(firstPage)),
+                //tableData: @Html.Raw(Json.Serialize(firstPage)),
+                tableData: [],
                 view: 12,
                 totalRec: @initTotalRec,
                 page: 1
@@ -84,16 +93,15 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
                     let _url = '@Url.Action("GetList", "News")'
-
                     axios.post(_url, _form)
                         .then(response => {
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
+                            if (this.tableData.length == 1) {
+                                window.location.href = window.location.href + "/" + this.tableData[0].Code
+                            }
                             this.totalRec = response.data.Model.totalRecord
                             console.log(totalRec)
-                            //var tt = response.data.Model.totalRecord;
-                            //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
-                            //console.log(_that.active_course);
                         }).catch(e => { })
                 },
             }

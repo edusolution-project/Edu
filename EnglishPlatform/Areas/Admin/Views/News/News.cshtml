@@ -110,38 +110,17 @@
                                 <div class="form-row">
                                     <div class="col-sm-12">
                                         @*<select id="CategoryCode" name="CategoryCode" class="form-control" onchange="renderProduct()" required>*@
-                                        <select id="CategoryCode" name="CategoryCode" class="form-control" required>
+                                        <select id="CategoryID" name="CategoryID" class="form-control" required>
                                             <option value="">--- Lựa chọn danh mục ---</option>
                                             @{ for (int i = 0; newscategory != null && i < newscategory.Count; i++)
                                                 {
-                                                    <option value="@newscategory[i].Code">@newscategory[i].Name</option>
+                                                    <option value="@newscategory[i].ID">@newscategory[i].Name</option>
                                                 } }
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        @*<div class="form-row">
-                            <div class="form-group col-sm-12">
-                                <select id="CenterID" name="CenterID" class="form-control" onchange="renderProduct()" required>
-                                    <option value="">--- Lựa chọn cơ sở ---</option>
-                                    @{ for (int i = 0; listCenter != null && i < listCenter.Count; i++)
-                                        {
-                                            <option value="@listCenter[i].ID">@listCenter[i].Name</option>
-                                        } }
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row hide" id="salePrice">
-                            <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm" />
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá(%)" />
-                            </div>
-                        </div>*@
 
                         <div class="form-row">
                             <div class="form-group col-sm-12">
@@ -298,7 +277,7 @@
                         body.append("<tr>" +
                             "<td class='text-center'>" + (data.Model.pageSize*data.Model.pageIndex + i+1) + "</td>" +
                             "<td class='text-center'>" +
-                            "<img src='/Upload/News/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
+                            "<img src='https://static.eduso.vn/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
                             "<td 'text-center'>" + item.Title + "</td>" +
                             "<td 'text-center'>" + item.Code + "</td>" +
@@ -395,6 +374,7 @@
     $(form).find("input:disabled").removeAttr("disabled");
 
         var data = new FormData(form);
+        debugger
 
         data.delete("IsHot");
         data.append("IsHot", $(form).find("#IsHot").prop("checked"));
@@ -405,7 +385,6 @@
         data.delete("Content");
         data.append("Content", CKEDITOR.instances.Content.getData());
 
-    //data.append("Content", CKEDITOR.instances.Content.getData());
         showLoading("Sending data ...");
 
     Ajax(_url, _method, data, true)
@@ -447,7 +426,7 @@
 
             var item = JSON.parse(res);
             var listinput = $(form).find('input');
-            debugger
+            
             //debugger
             for (var i = 0; i < listinput.length; i++) {
                 if ($(listinput[i]).attr("type") == "file") continue;
@@ -492,10 +471,10 @@
 
             var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
             document.getElementById("PublishDate").value = time;
-            debugger
+            
         });
         //if (ClassID != "") {
-        debugger
+        
         $("#ClassID").val(ClassID).find("option[value=" + ClassID + "]").attr('selected', true);
             //}
     }

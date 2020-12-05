@@ -469,7 +469,7 @@ var Lesson = (function () {
                 lessonButton.append(sort);
                 sort.append(iconSort).append("Sắp xếp");
                 lessonButton.append(create);
-                create.append(iconCreate).append("Thêm nội dung");
+                create.append(iconCreate).append("Thêm nội dung 1");
                 //headerRow.append(lessonButton);
                 lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
@@ -4628,6 +4628,236 @@ var Lesson = (function () {
             AnswerFillQuestion($(obj).attr("id"));
     }
 
+    //Thêm từ bài
+    var showModaltoAddExam = function () {
+        listLessonPartID = [];
+        $('#ModaltoAddExam').modal('show');
+        $('#partModal').modal('hide');
+        var modalForm = window.partModaltoAddExam;
+        var classID = $("#ClassID").val();
+        var dataform = new FormData();
+        dataform.append("ClassID", classID);
+        $(modalForm).empty();
+        Ajax(config.url.load_classsubject, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res).Data;
+                var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "ClassSubject", "required": "required", "id": "chooseCourse" }).bind("change", chooseCourse);
+                $(modalForm).append(selectTemplate);
+                $(selectTemplate).append("<option value=''>--- Chọn giáo trình ---</option>");
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    if (item.CourseName)
+                        $(selectTemplate).append("<option value='" + item.ID + "'>" + item.CourseName + "</option>")
+                }
+            })
+    }
+
+    var chooseCourse = function () {
+        var modalForm = window.partModaltoAddExam;
+        var id = $("#chooseCourse").val();
+        if (id !== undefined) {
+            var dataform = new FormData();
+            dataform.append("ID", id);
+            Ajax(config.url.load_contents, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res).Data
+                    var chapters = data.Chapters;
+                    var lessons = data.Lessons;
+
+                    var selectChapterTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectChapter" }).bind("change", chooseLesson);
+                    $(modalForm).append(selectChapterTemplate);
+                    $(selectChapterTemplate).append("<option value=''>--- Chọn chương ---</option>");
+                    for (var i = 0; i < chapters.length; i++) {
+                        var chapter = chapters[i];
+                        $(selectChapterTemplate).append("<option value='" + chapter.ID + "'>" + chapter.Name + "</option>")
+                    }
+
+                    var selectLessonTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectLesson" });
+                    $(modalForm).append(selectLessonTemplate);
+                    $(selectLessonTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                    for (var i = 0; i < lessons.length; i++) {
+                        var lesson = lessons[i];
+                        $(selectLessonTemplate).append("<option value='" + lesson.ID + "' data-chapter-id='" + lesson.ChapterID + "' class='hide'>" + lesson.Title + "</option>")
+                    }
+                })
+        }
+    }
+
+    var chooseLesson = function () {
+        var id = $("#selectChapter").val();
+        var lessons = $("#selectLesson");
+        for (var i = 0; i < lessons.length; i++) {
+            var lesson = lessons[i];
+            for (var j = 0; j < lesson.length; j++) {
+                var a = lesson[j];
+                if ($(a).attr('data-chapter-id')===id) {
+                    $(a).removeClass('hide');
+                    //$(a).attr('onclick','choosePart()');
+                }
+                else {
+                    if ($(a).attr('class') != 'hide') {
+                        $(a).addClass('hide');
+                        //$(a).removeAttr('onclick');
+                    }
+                }
+            }
+        }
+        $(lessons).attr('onchange', 'choosePart()');
+    }
+
+    var choosePart = function () {
+        var modalForm = window.partModaltoAddExam;
+        var lessonid = $("#selectLesson").val();
+        var classid = $('#ClassID').val();
+        var classsbjid = $('#chooseCourse').val();
+        var dataform = new FormData();
+        dataform.append("LessonID", lessonid);
+        dataform.append("ClassID", classid);
+        dataform.append("ClassSubjectID", classsbjid);
+        Ajax(config.url.list_part, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res).Data;
+                if (data !== undefined) {
+                    for (var i = 0; i < data.length; i++) {
+                        var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
+                        $(modalForm).append(selectLessonPartTemplate);
+                        $(selectLessonPartTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                        var html='';
+                        for (var i = 0; i < data.length; i++) {
+                            var item = data[i];
+                            switch (item.Type) {
+                                case 'QUIZ1': //trac nghiem
+                                case 'QUIZ3':
+                                case 'QUIZ4':
+                                    $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                                    html += renderQuestiontoSelectQ(item);
+                                    $(modalForm).append(html);
+                                    break;
+                                case 'QUIZ2'://dien tu
+                                    $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                                    //html += renderQuestiontoSelectQ2(item);
+                                    break;
+                                default:
+                            }
+                        }
+                    }
+                }
+                else {
+                    alert("Bài chưa có dữ liệu. Liên hệ người tạo để biết thêm chi tiết");
+                }
+            })
+    }
+
+    var renderQuestiontoSelectQ = function (item) {
+        var html = '<div class="hide" id="select_' + item.ID + '">';
+        html += '<div class="row"><div class="col-sm-10"></div><div class="col-sm-2">Chọn tất cả <input type="checkbox" onclick="selectAllQuestion(this)" data-lessonpart-id="' + item.ID + '"/></div></div>';
+        for (var i = 0; i < item.Questions.length; i++) {
+            var question = item.Questions[i];
+            html += '<div class="row">';
+            html += '<div class="quiz-item col-sm-11" id=' + question.ID + '><div class="quiz-box-header" data-lessonPart-id=' + question.ParentID + '><h5 class="title blue-color">' + question.Content + '</h5></div><div class="answer-wrapper row">';
+            html += renderAns(question);
+            //html += '</div></div><input type="checkbox" onchange="selectQuestiontoSave(\'' + question.ID+'\')" id="input_id_' + question.ID + '"/></div>';
+            html += '</div></div></div>';
+        }
+        html += "</div>";
+        return html;
+    }
+
+    //var renderQuestiontoSelectQ2 = function () {
+
+    //}
+
+    var renderAns = function (item) {
+        var html = '';
+        for (var i = 0; i < item.Answers.length; i++) {
+            var ans = item.Answers[i];
+            html += '<fieldset class="col-sm-3" id="ans2Ex_' + ans.ID + '">' +
+                '<div class="form-check"><input type="hidden"><input id="' + ans.ID + '" type="radio"' +
+                'class="input-checkbox answer-checkbox form-check-input" name="rd_' + ans.ID + '"';
+            if (ans.IsCorrect)
+                html += 'style="pointer-events: none;" checked="checked"><label class="answer-text form-check-label"';
+            else
+                html += 'style="pointer-events: none;"><label class="answer-text form-check-label"';
+
+            html += 'for="' + ans.ID + '">' + ans.Content + '</label></div>' +
+                '</fieldset>';
+        }
+        return html;
+    }
+
+    var chooseLessonPart = function () {
+        var lessonpartid = $("#chooseLessonPart").val();
+        var b = $("#chooseLessonPart")[0];
+        for (var i = 0; i < b.length; i++) {
+            var option = b[i];
+            if (lessonpartid === option.value) {
+                var a = $('#select_' + lessonpartid + '');
+                a.removeClass('hide');
+            }
+            else {
+                var a = $('#select_' + option.value + '');
+                a.addClass('hide');
+            }
+        }
+    }
+
+    //var listQuestionID = [];
+    var listLessonPartID = [];
+
+    var selectQuestiontoSave = function (questionID) {
+    }
+
+    var selectAllQuestion = function (obj) {
+        var stt = obj.checked;
+        var lessonpartID = $(obj).attr('data-lessonpart-id');
+        if (stt) {
+            listLessonPartID.push(lessonpartID);
+        }
+        else {
+            var index = listLessonPartID.indexOf(lessonpartID);
+            if (index > -1) {
+                listLessonPartID.splice(index, 1);
+            }
+        }
+        debugger
+    }
+
+    var saveQAtoExam = function () {
+        if (listLessonPartID.length > 0) {
+            var classSubjectID = $("#ClassSubjectID")[0].value;
+            var lessonID = $("#LessonID")[0].value;
+            var dataform = new FormData();
+            for (var i = 0; i < listLessonPartID.length; i++)
+                dataform.append("ListLessonPartID", listLessonPartID[i]);
+            dataform.append("ClassSubjectID", classSubjectID);
+            dataform.append("LessonID", lessonID);
+            Ajax(config.url.create_exam, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    debugger
+                    if (data.Stt) {
+                        alert("THêm thành công")
+                    }
+                    else {
+                        alert(data.Msg);
+                    }
+                })
+        }
+        else {
+            alert("Bạn chưa chọn câu hỏi");
+        }
+    }
+
+    window.choosePart = choosePart;
+    window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
+    window.renderAns = renderAns;
+    //window.renderQuestiontoSelectQ2 = renderQuestiontoSelectQ2;
+    window.selectQuestiontoSave = selectQuestiontoSave;
+    window.chooseLesson = chooseLesson;
+    window.chooseLessonPart = chooseLessonPart;
+    window.saveQAtoExam = saveQAtoExam;
+    window.selectAllQuestion = selectAllQuestion;
+
     window.LessonInstance = {} || Lesson;
 
     LessonInstance.onReady = onReady;
@@ -4682,6 +4912,8 @@ var Lesson = (function () {
     window.fillquizFocus = fillquizFocus;
     window.fillquizBlur = fillquizBlur;
     window.downloadFileWordWitdData = downloadFileWordWitdData;
+
+    window.showModaltoAddExam = showModaltoAddExam;
     return LessonInstance;
 }());
 

@@ -5,73 +5,49 @@
     List<BaseCustomerEntity.Database.CenterEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string mtype = ViewBag.Type as string;
 }
-<div class="topbar d-flex align-items-center">
-    <div class="container bg-transparent">
-        <div class="d-flex text-light align-items-center justify-content-between">
-            <div class="ml-2 ml-md-0">
-                <span class="hotline d-flex align-items-center"><i class="ic ic-phone mr-1"></i> HOTLINE: <a href="tel:+84989085398" class="action-link ml-1">+ 84 989.085.398</a></span>
-            </div>
-            <div class="d-flex align-items-center">
-                @if (allcenters == null)
-                {
-                    if (mtype == "admin")
-                    {
 
-                    }
-                    else
-                    {
-                        <a href="/login" title="Đăng nhập" class="action-link mr-3">Đăng nhập</a>
-                        <span class="divider align-self-lg-stretch bg-light"></span>
-                        <a href="/login" class="action-link ml-3">Đăng ký</a>
-                    }
-                }
-                else
-                {
-                    if (allcenters.Count == 1)
-                    {
-                        <a href="/@allcenters[0].Code/@mtype" title="@allcenters[0].Name" class="action-link mr-3">Đến @allcenters[0].Name</a>
-                    }
-                    else
-                    {
-                        <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="border: solid 2px green; font-size: 12px;">
-                            <option value="">-- Đến cơ sở --</option>
-                            @foreach (var ct in allcenters)
-                            {
-                                <option value="@ct.Code">@ct.Name</option>
-                            }
-                        </select>
-                        <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
-                        @:<script>var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/teacher" }</script>
-
-
-                    }
-                }
-            </div>
-        </div>
-
-    </div>
-</div>
-<div class="menubar d-flex align-items-center">
-    <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
-        <div>
-            <div class="home d-none d-md-block">
-                <a href="/" class="logo">
-                    <img src="~/images/LogoTOP.png" />
-                </a>
-            </div>
-            <div class="toggler">
-            </div>
-        </div>
-        <div class="nav-link d-flex flex-wrap">
-            <a for="home" href="/" class="m-1 mr-md-4">Trang chủ</a>
-            <a for="aboutus" href="@Url.RouteUrl("news-about-us")" class="m-1 mr-md-4 ml-md-4">Về EDUSO</a>
-            <a for="san-pham" href="@Url.RouteUrl("news-product")" class="m-1 mr-md-4 ml-md-4">Sản phẩm</a>
-            <a for="su-kien" href="@Url.RouteUrl("news-event")" class="m-1 mr-md-4 ml-md-4">Sự kiện</a>
-            <a for="news" href="@Url.RouteUrl("news-default")" class="m-1 mr-md-4 ml-md-4">Tin tức</a>
-            <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" class="m-1 ml-md-4">Tuyển dụng</a>
+<section id="menuTop">
+    <div class="topbar d-flex align-items-center" style="height:20px">
+        <div class="container bg-transparent">
         </div>
     </div>
-</div>
+    <div class="menubar d-flex align-items-center" style="height:160px">
+        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+            <div style="margin-left:25px">
+                <div class="home d-none d-md-block">
+                    <a href="/">
+                        <img src="~/images/bottom-logo.png" />
+                    </a>
+                </div>
+                <div class="toggler">
+                </div>
+            </div>
+            <div class="nav-link d-flex flex-wrap">
+                <a for="home" href="/" class="m-1 mr-md-4"><h5>TRANG CHỦ</h5></a>
+                <div class="m-1 mr-md-4 ml-md-4">
+                    <a for="aboutus" href="@Url.RouteUrl("news-about-us")" id="aboutus" onclick="showDropDown()" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
+                    @*<a for="aboutus" href="javascript:void(0)" id="aboutus" onclick="showDropDown()" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
+                    <ul id="chil_aboutus">
+                        <li v-for="item in listCategory">
+                            <a :href="'/tin-tuc/'+item.Code">
+                                <h5>{{item.Name}}</h5>
+                            </a>
+                        </li>
+                        <li><a href="#"><h5>BAN LÃNH ĐẠO</h5></a></li>
+        <li><a href="#"><h5>LĨNH VỰC HOẠT ĐỘNG CHÍNH</h5></a></li>
+        <li><a href="#"><h5>SẢN PHẨM</h5></a></li>
+        <li><a href="#"><h5>THÀNH TỰU ĐẠT ĐƯỢC</h5></a></li>
+                    </ul>*@
+                </div>
+                <a for="san-pham" href="@Url.RouteUrl("news-product")" class="m-1 mr-md-4 ml-md-4"><h5>SẢN PHẨM</h5></a>
+                <a for="su-kien" href="@Url.RouteUrl("news-event")" class="m-1 mr-md-4 ml-md-4"><h5>SỰ KIỆN</h5></a>
+                <a for="news" href="@Url.RouteUrl("news-default")" class="m-1 mr-md-4 ml-md-4"><h5>TIN TỨC</h5></a>
+                <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" class="m-1 mr-md-4 ml-md-4"><h5>TUYỂN DỤNG</h5></a>
+                <a href="/login" title="Đăng nhập" class="action-link m-1 mr-md-4 ml-md-4"><h5>ĐĂNG NHẬP</h5></a>
+            </div>
+        </div>
+    </div>
+</section>
 <style>
     .topbar {
         height: 48px;
@@ -156,4 +132,72 @@
         cursor: pointer;
         color: #C1272C;
     }
+
+    #aboutus {
+        position: relative;
+    }
+
+    #chil_aboutus {
+        position: absolute;
+        z-index: 1000;
+        min-width: 10rem;
+        text-align: left;
+        list-style: none;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid rgba(0,0,0,0.15);
+        border-radius: 0.25rem;
+        padding: 5px 10px 0px 10px;
+        display:none
+    }
+
+        #chil_aboutus li {
+            list-style: none;
+            margin: 0px;
+            padding: 0px;
+        }
+
+    #aboutus:hover + #chil_aboutus {
+        /*display: block*/
+    }
 </style>
+
+<script>
+    new Vue({
+        el:'#chil_aboutus',
+        mounted() {
+            this.loadCategory();
+        },
+        components: {
+
+        },
+        data: {
+            listCategory: []
+        },
+        watch: {
+
+        },
+        methods: {
+            loadCategory() {
+                let _that = this;
+                let _form = new FormData();
+                _form.append("ParentCategoryCode", "gioi-thieu");
+                let _url = '/News/GetCategory'
+                axios.post(_url, _form)
+                    .then(response => {
+                        _that.listCategory = response.data.Data;
+                    })
+            }
+        }
+    });
+
+    var showDropDown = function () {
+        var isDisplay = $('#chil_aboutus').css('display');
+        if (isDisplay.includes("none")) {
+            $('#chil_aboutus').css('display', 'block');
+        }
+        else {
+            $('#chil_aboutus').css('display', 'none');
+        }
+    }
+</script>

@@ -51,5 +51,10 @@ namespace BaseCustomerEntity.Database
                                 .SortBy(q => q.Order)
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
+
+        public IEnumerable<CloneLessonPartEntity> GetByIDs(List<String> IDs)
+        {
+            return Collection.Find(x => IDs.Contains(x.ID)).ToEnumerable();
+        }
     }
 }

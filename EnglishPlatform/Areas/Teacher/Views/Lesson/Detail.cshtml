@@ -28,6 +28,8 @@
     <input type="hidden" id="LessonID" value="@Data.ID" />
     <input type="hidden" id="ChapterID" value="@Data.ChapterID" />
     <input type="hidden" id="CourseID" value="@Data.CourseID" />
+    <input type="hidden" id="ClassID" value="@Data.ClassID" />
+    <input type="hidden" id="ClassSubjectID" value="@Data.ClassSubjectID" />
 </div>
 @section Sidebar
 {
@@ -39,7 +41,7 @@
     <script src="~/js/content-render.js?20200915"></script>
     @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
 
-    <script>
+<script>
         var config = {
         container: "lessonContainer",
         mod: mod.TEACHERVIEW,
@@ -52,6 +54,9 @@
             move_part: '@processUrl("ChangePosition","CloneLessonPart")',
             export_quiztemp: '@processUrl("ExportQuestionTemplate", "Curriculum")',
             import_quiz: '@processUrl("ImportQuestion", "Curriculum")',
+            load_classsubject: '@processUrl("GetClassSubjects", "ClassSubject")',
+            load_contents: '@processUrl("GetFullStructure", "ClassSubject")',
+            create_exam:'@processUrl("CreateExam", "CloneLessonPart")'
         },
         type: @Data.TemplateType,
         lesson_id: '@Data.ID',
@@ -60,7 +65,7 @@
         chap_id: '@Data.ChapterID'
     }
     var widget = new Lesson.onReady(config);
-    </script>
+</script>
     <link href="~/css/detailui.css" rel="stylesheet" />
 }
 
@@ -79,11 +84,44 @@
                     <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+                    <div class="col-sm-8">
+                        <button class="btn mt-2 mb-2" title="Input từ Word" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i>Input từ Word</button>
+                        <button class="btn mt-2 mb-2" title="Thêm từ bài" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i>Thêm từ bài</button>
+                    </div>
+                    <div class="col-sm-4" style="text-align:right"> 
+                        <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                        <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" role="dialog" aria-hidden="true" id="ModaltoAddExam" data-backdrop="static">
+        <div class="modal-dialog modal-xl lesson-modal modal-dialog-centered  modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm vào bài kiểm tra</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModaltoAddExam()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" id="modal-body" name="partModaltoAddExam" enctype="multipart/form-data"></form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal" onclick="closeModaltoAddExam()">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="saveQAtoExam()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var closeModaltoAddExam = function () {
+        $('#ModaltoAddExam').modal('hide');
+        $('#partModal').modal('show');
+    }
+</script>
 }
 

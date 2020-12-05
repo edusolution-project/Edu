@@ -143,8 +143,8 @@
                         <div class="row">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Kiểu bài:</label>
-                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()">
-                                    <option value="1">Bài giảng</option>
+                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()" disabled>
+                                    @*<option value="1">Bài giảng</option>*@
                                     <option value="2">Bài kiểm tra </option>
                                 </select>
                             </div>
@@ -775,7 +775,7 @@
         modal.find("[name=ID]").val("");
         modal.find("[name=Point]").val("0");
         modal.find("[name=Timer]").val("0");
-        SelectTemplate("1");
+        SelectTemplate("2");
         return false;
     }
 

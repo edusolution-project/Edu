@@ -920,7 +920,7 @@
         </b-col>
         <b-col class="form-group">
             <label for="">Chọn danh sách học viên (excel)</label>
-            <input type="file" class="btn btn-info" :ref="`uploadfile`" accept=".xls,.xlsx" v-on:change="changeFile()" /><br />
+            <input type="file" class="btn btn-info" :ref="`uploadfile`" accept=".xlsx" v-on:change="changeFile()" /><br />
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <button v-on:click="downloadTemplate()" class="btn btn-secondary">Tải file mẫu</button>

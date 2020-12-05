@@ -71,20 +71,6 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        //public new NewsEntity Save(NewsEntity entity)
-        //{
-        //    if (entity.ID == null || entity.ID == "")
-        //    {
-        //        entity.UID = _indexService.GetNewIndex("News").ToString();
-        //        Collection.InsertOne(entity);
-        //    }
-        //    else
-        //    {
-        //        Collection.ReplaceOne(t => t.ID == entity.ID, entity);
-        //    }
-        //    return entity;
-        //}
-
         public void ChangeStatus(List<string> IDs, bool status, string check)
         {
             if (check.Equals("IsTop"))
@@ -112,5 +98,10 @@ namespace BaseCustomerEntity.Database
 
         public NewsEntity GetItemByCode(string Code) => Collection.Find<NewsEntity>(x => x.Code.Equals(Code)// && x.IsActive==true
         ).FirstOrDefault();
+
+        public IEnumerable<NewsEntity> GetAllNews()
+        {
+            return Collection.Find<NewsEntity>(x => x.Type.Equals("news")).ToEnumerable();
+        }
     }
 }
