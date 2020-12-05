@@ -73,11 +73,13 @@
         new Vue({
             el: ".category-box",
             mounted() {
+                this.getData();
             },
             data: {
                 isLoading: false,
                 catID: '@category.ID',
-                tableData: @Html.Raw(Json.Serialize(firstPage)),
+                //tableData: @Html.Raw(Json.Serialize(firstPage)),
+                tableData: [],
                 view: 12,
                 totalRec: @initTotalRec,
                 page: 1
@@ -91,11 +93,13 @@
                     _form.append('PageIndex', _that.page)
                     _form.append('SearchText', _that.searchTerm)
                     let _url = '@Url.Action("GetList", "News")'
-
                     axios.post(_url, _form)
                         .then(response => {
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
+                            if (this.tableData.length == 1) {
+                                window.location.href = window.location.href + "/" + this.tableData[0].Code
+                            }
                             this.totalRec = response.data.Model.totalRecord
                             console.log(totalRec)
                         }).catch(e => { })

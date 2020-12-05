@@ -272,7 +272,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if (Thumbnail != null)
                 {
-                    removeThumbnail(olditem.Thumbnail);
+                    //removeThumbnail(olditem.Thumbnail);
                     item.Thumbnail = urlThumbnail(Thumbnail);
                 }
                 else
@@ -353,7 +353,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             else
             {
                 var thumbnail = _serviceNews.GetItemByID(model.ArrID).Thumbnail;
-                removeThumbnail(thumbnail);
+                //removeThumbnail(thumbnail);
                 var delete = _serviceNews.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
                 return new JsonResult(delete);
             }
