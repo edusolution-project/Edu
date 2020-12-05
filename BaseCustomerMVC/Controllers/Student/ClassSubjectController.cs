@@ -91,7 +91,8 @@ namespace BaseCustomerMVC.Controllers.Student
             //ScoreStudentService scoreStudentService,
             LessonProgressService lessonProgressService,
 
-            //StudentService studentService, IHostingEnvironment evn,
+            StudentService studentService,
+            //IHostingEnvironment evn,
             //LessonHelper lessonHelper,
             //StudentHelper studentHelper,
             CenterService centerService,
@@ -123,7 +124,7 @@ namespace BaseCustomerMVC.Controllers.Student
             //_learningHistoryService = learningHistoryService;
             //_scoreStudentService = scoreStudentService;
 
-            //_studentService = studentService;
+            _studentService = studentService;
             _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             //_env = evn;
