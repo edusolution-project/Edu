@@ -20,28 +20,28 @@ namespace BaseCustomerMVC.Controllers.Student
     public class ClassSubjectController : StudentController
     {
         private readonly GradeService _gradeService;
-        private readonly AccountService _accountService;
+        //private readonly AccountService _accountService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
         private readonly ClassService _classService;
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
-        private readonly ClassProgressService _progressService;
+        //private readonly ClassProgressService _progressService;
 
         private readonly ChapterService _chapterService;
-        private readonly ChapterExtendService _chapterExtendService;
+        //private readonly ChapterExtendService _chapterExtendService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
-        private readonly ScoreStudentService _scoreStudentService;
+        //private readonly ScoreStudentService _scoreStudentService;
         private readonly LessonProgressService _lessonProgressService;
-        private readonly LearningHistoryService _learningHistoryService;
+        //private readonly LearningHistoryService _learningHistoryService;
 
         private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
-        private readonly IHostingEnvironment _env;
+        //private readonly IHostingEnvironment _env;
 
 
         //private readonly LessonPartService _lessonPartService;
@@ -58,19 +58,19 @@ namespace BaseCustomerMVC.Controllers.Student
         //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
         //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
 
-        private readonly FileProcess _fileProcess;
-        private readonly StudentHelper _studentHelper;
-        private readonly LessonHelper _lessonHelper;
+        //private readonly FileProcess _fileProcess;
+        //private readonly StudentHelper _studentHelper;
+        //private readonly LessonHelper _lessonHelper;
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
         private readonly CenterService _centerService;
-        private readonly ClassProgressService _classProgressService;
+        //private readonly ClassProgressService _classProgressService;
         private readonly ProgressHelper _progressHelper;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
 
 
         public ClassSubjectController(
-            AccountService accountService,
+            //AccountService accountService,
             GradeService gradeservice,
             SubjectService subjectService,
             ClassSubjectService classSubjectService,
@@ -78,30 +78,31 @@ namespace BaseCustomerMVC.Controllers.Student
             ClassService service,
             SkillService skillService,
             CourseService courseService,
-            ClassProgressService progressService,
+            //ClassProgressService progressService,
 
             ChapterService chapterService,
-            ChapterExtendService chapterExtendService,
+            //ChapterExtendService chapterExtendService,
             LessonService lessonService,
             LessonScheduleService lessonScheduleService,
             ExamService examService,
             ExamDetailService examDetailService,
-            LearningHistoryService learningHistoryService,
+            //LearningHistoryService learningHistoryService,
 
-            ScoreStudentService scoreStudentService,
+            //ScoreStudentService scoreStudentService,
             LessonProgressService lessonProgressService,
 
-            StudentService studentService, IHostingEnvironment evn,
-            LessonHelper lessonHelper,
-            StudentHelper studentHelper,
+            //StudentService studentService, IHostingEnvironment evn,
+            //LessonHelper lessonHelper,
+            //StudentHelper studentHelper,
             CenterService centerService,
-            ClassProgressService classProgressService,
+            //ClassProgressService classProgressService,
             ProgressHelper progressHelper,
-            ClassSubjectProgressService classSubjectProgressService,
+            ClassSubjectProgressService classSubjectProgressService
 
-            FileProcess fileProcess)
+            //FileProcess fileProcess
+            )
         {
-            _accountService = accountService;
+            //_accountService = accountService;
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
@@ -109,32 +110,32 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = service;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
-            _progressService = progressService;
+            //_progressService = progressService;
 
             _chapterService = chapterService;
-            _chapterExtendService = chapterExtendService;
+            //_chapterExtendService = chapterExtendService;
             _lessonService = lessonService;
             _lessonScheduleService = lessonScheduleService;
             _lessonProgressService = lessonProgressService;
 
             _examService = examService;
             _examDetailService = examDetailService;
-            _learningHistoryService = learningHistoryService;
-            _scoreStudentService = scoreStudentService;
+            //_learningHistoryService = learningHistoryService;
+            //_scoreStudentService = scoreStudentService;
 
-            _studentService = studentService;
+            //_studentService = studentService;
             _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
-            _env = evn;
-            _fileProcess = fileProcess;
+            //_env = evn;
+            //_fileProcess = fileProcess;
 
-            _studentHelper = studentHelper;
-            _lessonHelper = lessonHelper;
+            //_studentHelper = studentHelper;
+            //_lessonHelper = lessonHelper;
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _centerService = centerService;
-            _classProgressService = classProgressService;
+            //_classProgressService = classProgressService;
             _progressHelper = progressHelper;
             _classSubjectProgressService = classSubjectProgressService;
         }
@@ -193,7 +194,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                         CourseName = string.IsNullOrEmpty(r.CourseName) ? course.Name : r.CourseName,
                                         TeacherID = r.TeacherID,
                                         TeacherName = teacher == null ? "" : teacher.FullName,
-                                        TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
+                                        TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass,
                                         ClassName = _class.Name,
                                         ClassID = r.ClassID,
                                         StartDate = _class.StartDate,
@@ -235,7 +236,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                   CourseName = course.Name,
                                   TeacherID = r.TeacherID,
                                   TeacherName = teacher == null? "Lớp cá nhân" : teacher.FullName,
-                                  TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass
+                                  TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass
                               }).ToList()
                     },
                     {"ClassMechanism",_classService.GetItemByID(ClassID).ClassMechanism }

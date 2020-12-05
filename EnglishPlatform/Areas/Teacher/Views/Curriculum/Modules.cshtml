@@ -172,7 +172,7 @@
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="row">
-                            <div class="form-group col-md-12">
+                            <div class="form-group col-md-12 d-none">
                                 <label class="col-form-label">Kiểu bài:</label>
                                 <select name="TemplateType" class="form-control" onchange="SelectTemplate()" @if (isLock) { @: readonly="true"
                                         }>
@@ -846,7 +846,7 @@
     {
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Add Lesson");
+        modalTitle.text("Thêm bài");
         modal.find(".chooseOrder").hide();
         modal.find("[name=Title]").val("");
         modal.find("[name=ChapterID]").val(ID);

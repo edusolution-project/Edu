@@ -238,7 +238,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
             var skillIDs = subjects.Select(t => t.SkillID).Distinct();
-            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
+            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct().Where(s => s != "").ToList();
             vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
             vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
@@ -459,50 +459,50 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var practiceIds = listPractice.Select(x => x.ID).ToList();
 
                 var practices = (from e in _examService.CreateQuery().Find(x => practiceIds.Contains(x.LessonID)).ToList()
-                             group e by e.StudentID
+                                 group e by e.StudentID
                              into ge
-                             select new
-                             {
-                                 StudentID = ge.Key,
-                                 CompletedPractice = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
-                                 test = ge
-                             }).ToList();
+                                 select new
+                                 {
+                                     StudentID = ge.Key,
+                                     CompletedPractice = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
+                                     test = ge
+                                 }).ToList();
 
                 //ket qua lam bai kiem tra cua hoc sinh trong lop
                 var classResult1 = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                                   group r by r.StudentID
+                                    group r by r.StudentID
                                    into g
-                                   let _CompletedExam = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedExam
-                                   select new StudentResult
-                                   {
-                                       StudentID = g.Key,
-                                       AvgPoint = g.Average(t => t.LastPoint),
-                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
-                                       CompletedExam = _CompletedExam,
-                                       TotalLesson = activeLessonIds.Count,
-                                       isExam = true
-                                   }).ToList();
+                                    let _CompletedExam = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedExam
+                                    select new StudentResult
+                                    {
+                                        StudentID = g.Key,
+                                        AvgPoint = g.Average(t => t.LastPoint),
+                                        StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                        CompletedExam = _CompletedExam,
+                                        TotalLesson = activeLessonIds.Count,
+                                        isExam = true
+                                    }).ToList();
 
                 //ket qua lam bai luyen tap cua hoc sinh trong lop
                 var classResult2 = (from r in activeProgress.Where(t => practiceIds.Contains(t.LessonID) && t.Tried > 0)
-                                   group r by r.StudentID
+                                    group r by r.StudentID
                                    into g
-                                   let _CompletedPractice = practices.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedPractice
-                                   select new StudentResult
-                                   {
-                                       StudentID = g.Key,
-                                       AvgPoint = g.Average(t => t.LastPoint),
-                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
-                                       CompletedPractice = _CompletedPractice,
-                                       TotalPractice = activeLessonIds.Count,
-                                       isExam = false
-                                   }).ToList();
+                                    let _CompletedPractice = practices.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedPractice
+                                    select new StudentResult
+                                    {
+                                        StudentID = g.Key,
+                                        AvgPoint = g.Average(t => t.LastPoint),
+                                        StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                        CompletedPractice = _CompletedPractice,
+                                        TotalPractice = activeLessonIds.Count,
+                                        isExam = false
+                                    }).ToList();
 
                 var results = _progressHelper.GetClassResults(@class.ID)
                 .OrderByDescending(t => t.RankPoint).ToList();
 
                 List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
-                foreach(var item in students)
+                foreach (var item in students)
                 {
                     var totalStudent = students.Count();
                     var result = results.FirstOrDefault(t => t.StudentID == item.ID) ?? new StudentRankingViewModel();
@@ -634,7 +634,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                        StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
                                        CompletedLesson = _CompletedLesson,
                                        TotalLesson = activeLessonIds.Count,
-                                       
+
                                    }).ToList();
 
                 foreach (var item in students)
@@ -658,7 +658,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 .OrderByDescending(t => t.RankPoint).ToList();
 
                 List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
-                foreach(var item in _classResult)
+                foreach (var item in _classResult)
                 {
                     var totalStudent = _classResult.Count();
                     var result = results.FirstOrDefault(t => t.StudentID == item.StudentID) ?? new StudentRankingViewModel();
@@ -1700,7 +1700,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 classSubject.GradeID = Course.GradeID;
                 classSubject.SubjectID = Course.SubjectID;
                 classSubject.TeacherID = teacher.ID;
-                classSubject.TypeClass = CLASS_TYPE.EXTEND;
+                classSubject.TypeClass = CLASSSUBJECT_TYPE.EXTEND;
 
                 oldSubjects.Add(classSubject);
 
@@ -1736,7 +1736,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     classSubject.GradeID = Course.GradeID;
                     classSubject.SubjectID = Course.SubjectID;
                     classSubject.TeacherID = teacher.ID;
-                    classSubject.TypeClass = CLASS_TYPE.EXTEND;
+                    classSubject.TypeClass = CLASSSUBJECT_TYPE.EXTEND;
 
                     listclassSubject.Add(classSubject);
 
@@ -2860,7 +2860,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     // merge các column lại từ column 1 đến số column header
                     // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
-                    ws.Cells[1, 1].Value = $"Bảng điểm {@class.Name}";
+                    // ws.Cells[1, 1].Value = ClassID == null ? $"Thống kê danh sách học viên {center.Name}" : $"Thống kê danh sách học viên lớp @class";
                     ws.Cells[1, 1, 1, countColHeader].Merge = true;
                     // in đậm
                     ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;

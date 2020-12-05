@@ -1318,10 +1318,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (part.Type == "ESSAY")
                     {
                         point += part.Point;
+                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
                     }
                     else
                     {
                         point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
                     }
                 }
             _lessonService.UpdateLessonPoint(lessonId, point);

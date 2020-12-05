@@ -1506,7 +1506,7 @@ namespace EnglishPlatform.Controllers
                                         CourseName = string.IsNullOrEmpty(r.CourseName) ? course.Name : r.CourseName,
                                         TeacherID = r.TeacherID,
                                         TeacherName = teacher == null ? "" : teacher.FullName,
-                                        TypeClass = r.TypeClass == null ? CLASS_TYPE.STANDARD : r.TypeClass,
+                                        TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass,
                                         ClassName = _class.Name,
                                         ClassID = r.ClassID,
                                         StartDate = _class.StartDate,

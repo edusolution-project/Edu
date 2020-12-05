@@ -132,7 +132,7 @@
             <div class="form-group">
                 <h3 style="font-size:15px;" class="font-weight-bold">Học liệu chính quy</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD" :for="obj.ID">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
@@ -164,7 +164,7 @@
             <div class="form-group">
                 <h3 style="font-size:15px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND" :for="obj.ID">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
                             <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
                                 <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
@@ -175,6 +175,38 @@
                                 Bảng điểm
                             </a>
                             <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
+                                <i class="far fa-edit ml-3"></i>
+                                Soạn thảo
+                            </a>
+                        </div>
+                        <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
+                            <ul class="list">
+                                <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                              v-bind:data="item"
+                                              v-bind:classbj="obj.ID"
+                                              v-bind:pos="k"
+                                              v-bind:owner="obj.TeacherID"
+                                              v-bind:listchaps="list_chapters"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                            </ul>
+                        </b-collapse>
+                    </li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <h3 style="font-size:15px;" class="font-weight-bold pt-3">Kiểm tra / đánh giá</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" :for="obj.ID">
+                        <div class="class_row d-flex justify-content-start">
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>Bài kiểm tra của lớp @currentClass.Name
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
+                                <i class="fas fa-poll-h ml-3"></i>
+                                Bảng điểm
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
                                 Soạn thảo
                             </a>
@@ -227,7 +259,7 @@
                         <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td> <!--Tiến độ-->
                         <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td> <!--Điểm trung bình-->
                         @*<td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>*@
-                    <td class="text-black text-style" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td> <!--Rank-->
+                        <td class="text-black text-style" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td> <!--Rank-->
                     </tr>
                 </tbody>
             </table>
@@ -536,9 +568,9 @@
                 top: auto;
             }
 
-            .converText{
-                mso-number-format: "\@@";
-            }
+        .converText {
+            mso-number-format: "\@@";
+        }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
@@ -983,7 +1015,7 @@
                 },
                 searchCsbj:'',
                 classID: '@currentClass.ID',
-                className: '@Html.Raw(currentClass.Name)',
+                className: "@Html.Raw(currentClass.Name.Replace("'","\'"))",
                 startDate: '@currentClass.StartDate',
                 endDate: '@currentClass.EndDate',
                 classDescription: '@currentClass.Description',
