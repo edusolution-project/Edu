@@ -72,7 +72,7 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public LearningHistoryService(IConfiguration config, string dbName):base(config, dbName)
+        public LearningHistoryService(IConfiguration config, string dbName) : base(config, dbName)
         {
         }
 
@@ -115,6 +115,11 @@ namespace BaseCustomerEntity.Database
         public LearningHistoryEntity GetLastLearnt(string StudentID, string LessonID, string ClassSubjectID)
         {
             return Collection.Find(t => t.StudentID == StudentID && t.LessonID == LessonID && t.ClassSubjectID == ClassSubjectID).FirstOrDefault();
+        }
+
+        public LearningHistoryEntity GetStudentLastLearn(string StudentID)
+        {
+            return Collection.Find(t => t.StudentID == StudentID).SortByDescending(t => t.ID).FirstOrDefault();
         }
     }
 }

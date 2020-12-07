@@ -530,6 +530,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ClassName = string.IsNullOrEmpty(ClassID) ?
                        (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID, center.ID))) :
                         _classService.GetItemByID(ClassID).Name,
+                    LastJoinDate = (_learningHistoryService.GetStudentLastLearn(t.ID) ?? new LearningHistoryEntity()).Time
                 }));
 
             var response = new Dictionary<string, object>
