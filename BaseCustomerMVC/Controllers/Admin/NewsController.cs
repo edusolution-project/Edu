@@ -472,5 +472,28 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
         #endregion
+
+        #region uploadimg
+        public JsonResult GetPathIMG(IFormFile Thumbnail)
+        {
+            try
+            {
+                if (Thumbnail != null)
+                {
+                    var filepath = urlThumbnail(Thumbnail);
+                    var data = new Dictionary<String, Object>
+                {
+                    { "FilePath", filepath }
+                };
+                    return Json(data);
+                }
+                else { return Json("loi"); }
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        #endregion
     }
 }
