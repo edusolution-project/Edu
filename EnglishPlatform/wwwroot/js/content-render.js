@@ -4709,7 +4709,7 @@ var Lesson = (function () {
                             for (var j = 0; j < lessons.length; j++) {
                                 var lesson = lessons[j];
                                 if (lesson.ChapterID == chapter.ID) {
-                                    $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
+                                    $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-3 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
                                 }
                             }
                         }
@@ -4830,7 +4830,7 @@ var Lesson = (function () {
                     }
                 }
                 else {
-                    alert("Bài chưa có dữ liệu. Liên hệ người tạo để biết thêm chi tiết");
+                    alert("Bài chưa có nội dung!");
                 }
             })
     }
@@ -4942,9 +4942,9 @@ var Lesson = (function () {
             title: '<strong>Chọn thao tác</strong>',
             icon: 'question',
             html:
-                '<button type="button" class="btn btn-primary mr-2" onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>' +
-                '<button type="button" class="btn btn-secondary mr-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button>'+
-                '<button type="button" class="btn btn-secondary mr-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button>',
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>'+
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',
         })
