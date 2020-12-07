@@ -247,7 +247,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetContents(String ID, String Parent)
+        public JsonResult GetContents(string ID, string Parent)
         {
             //try
             //{
@@ -430,7 +430,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return data;
         }
 
-        public JsonResult GetLearningResult(DefaultModel model,String ClassSubjectID,String basis, Boolean isPractice = false)
+        public JsonResult GetLearningResult(DefaultModel model, string ClassSubjectID,String basis, bool isPractice = false)
         {
             string _studentid = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(_studentid);

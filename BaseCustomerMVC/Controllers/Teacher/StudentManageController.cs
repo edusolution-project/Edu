@@ -531,33 +531,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID, center.ID))) :
                         _classService.GetItemByID(ClassID).Name,
                 }));
-            //var a = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList();
-            //var retStudents = new List<ClassStudentViewModel>();
-            //foreach (var item in a)
-            //{
-            //    var b = new ClassStudentViewModel
-            //    {
-            //        ID = item.ID,
-            //        StudentId = item.StudentId,
-            //        Avatar = item.Avatar,
-            //        FullName = item.FullName,
-            //        Email = item.Email,
-            //        Phone = item.Phone,
-            //        Address = item.Address,
-            //        Class = item.Class,
-            //        DateBorn = item.DateBorn,
-            //        IsActive = item.IsActive,
-            //        UserCreate = item.UserCreate,
-            //        CreateDate = item.CreateDate,
-            //        Skype = item.Skype,
-            //        JoinedClasses = item.JoinedClasses,
-            //        Centers = item.Centers,
-            //        ClassID = ClassID,
-            //        //ClassName = String.IsNullOrEmpty(ClassID) ? (item.JoinedClasses.Count()==0?"":String.Join("; ",_classService.GetMultipleClassName(item.JoinedClasses,item.ID,center.ID))): _classService.GetItemByID(ClassID).Name
-            //    };
-
-            //    retStudents.Add(b);
-            //}
 
             var response = new Dictionary<string, object>
             {
