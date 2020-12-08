@@ -32,7 +32,12 @@
     <link href="~/js/VueAgile/normalize.min.css" rel="stylesheet" />
     <script src='https://unpkg.com/vue-agile@1.0.5'></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.0.0/animate.min.css" />
-
+    <script>
+        var setActiveMenu = function (menu) {
+            $('.nav-link [for=' + menu + ']').addClass('active');
+        }
+        window.setActiveMenu = setActiveMenu;
+    </script>
 </head>
 <body>
     <style>

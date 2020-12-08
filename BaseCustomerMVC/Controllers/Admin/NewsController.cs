@@ -22,7 +22,7 @@ using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 10)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 4)]
     public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
@@ -260,6 +260,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
                 item.LastEdit = DateTime.UtcNow;
+                item.IsActive = olditem.IsActive;
 
                 var pos = 0;
                 var sameUrl = _serviceNews.GetItemByCode(item.Code);

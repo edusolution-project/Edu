@@ -3,6 +3,7 @@
     var AdminMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByAdmin();
     var TeacherMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByTeacher();
     var StudentMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByStudent();
+    var NewsMenus = BaseCustomerMVC.Globals.StartUp.GetAccessCtrlsByNewsAdministrator();
     var Permission = User.FindAll(o => o.Type == BaseAccess.Permission.ClaimType)?.Select(x => x.Value.Split('*'))?.ToHashSet();
 }
 <!-- Sidebar -->

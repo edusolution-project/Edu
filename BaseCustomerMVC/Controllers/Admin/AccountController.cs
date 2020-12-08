@@ -43,6 +43,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             ViewBag.Role = _roleService.CreateQuery().Find(o => o.Code == "admin").SingleOrDefault();
             ViewBag.Model = model;
+            ViewBag.ListRole = _roleService.CreateQuery().Find(x=>x.Code!= "superadmin").ToList();
             return View();
         }
 
@@ -51,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<AccountEntity>>();
-            var roleList = new List<string> { "admin", "superadmin" };
+            var roleList = new List<string> { "admin", "superadmin", "tin_tuc" };
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
@@ -66,7 +67,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 filter.Add(Builders<AccountEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
 
-            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == ACCOUNT_TYPE.ADMIN));
+            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == ACCOUNT_TYPE.ADMIN || o.Type==ACCOUNT_TYPE.ADMINISTRATOR_NEWS));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();

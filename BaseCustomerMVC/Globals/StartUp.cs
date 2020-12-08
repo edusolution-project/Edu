@@ -19,6 +19,7 @@ namespace BaseCustomerMVC.Globals
         const string _adminType = "admin";
         const string _teacherType = "teacher";
         const string _studentType = "student";
+        const string _news_administrator_Type = "news_administrator";
         private static Assembly GetAssembly()
         {
             return Assembly.GetExecutingAssembly();
@@ -34,6 +35,11 @@ namespace BaseCustomerMVC.Globals
         public static List<AccessCtrlAttribute> GetAccessCtrlsByStudent()
         {
             return GetAccessCtrl<Globals.StudentController>(_studentType);
+        }
+
+        public static List<AccessCtrlAttribute> GetAccessCtrlsByNewsAdministrator()
+        {
+            return GetAccessCtrl<Globals.AdminController>(_news_administrator_Type);
         }
 
         private static List<AccessCtrlAttribute> GetAccessCtrl<T>(string type) {

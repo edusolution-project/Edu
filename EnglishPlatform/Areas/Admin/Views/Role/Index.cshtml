@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     var data = ViewBag.Data as BaseCustomerEntity.Database.RoleEntity;
 }
+@using BaseCustomerEntity.Database;
 
 @TempData["Error_Permision"]
 <!-- Begin Page Content -->
@@ -76,14 +77,41 @@
                             </div>
                         </div>
                     </div>
+                    @*<div class="form-row">
+            <div class="form-group row col-md-6">
+                <label for="staticText" class="col-md-4 col-form-label">Trạng thái:</label>
+                <div class="col-md-8">
+                    <select data-name="active" class="form-control">
+                        <option value="true" selected>Hoạt động</option>
+                        <option value="false">Không hoạt động</option>
+                    </select>
+                </div>
+            </div>
+        </div>*@
+
                     <div class="form-row">
-                        <div class="form-group row col-md-6">
-                            <label for="staticText" class="col-md-4 col-form-label">Trạng thái:</label>
-                            <div class="col-md-8">
-                                <select data-name="active" class="form-control">
-                                    <option value="true" selected>Hoạt động</option>
-                                    <option value="false">Không hoạt động</option>
-                                </select>
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Trạng thái:</label>
+                                <div class="col-md-8">
+                                    <select data-name="active" class="form-control">
+                                        <option value="true" selected>Hoạt động</option>
+                                        <option value="false">Không hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <div class="form-row">
+                                <label for="staticText" class="col-md-4 col-form-label">Loại quyền:</label>
+                                <div class="col-md-8">
+                                    <select data-name="typeRole" class="form-control">
+                                        <option value="@ACCOUNT_TYPE.ADMIN" selected>Admin</option>
+                                        <option value="@ACCOUNT_TYPE.ADMINISTRATOR_NEWS">Tin tức</option>
+                                        <option value="@ACCOUNT_TYPE.TEACHER">Giáo viên</option>
+                                        <option value="@ACCOUNT_TYPE.STUDENT">Học sinh</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,10 +210,12 @@
         var name = ModalCenter.querySelector('input[data-name="name"]').value;
         var parent = ModalCenter.querySelector('[data-name="parent"]').value;
         var active = ModalCenter.querySelector('[data-name="active"]').value;
+        var typeRole = ModalCenter.querySelector('[data-name="typeRole"]').value;
         var data = {
             Name: name,
             ParentID: parent,
-            IsActive: active
+            IsActive: active,
+            Type: typeRole
         };
         g_Ajax("@Url.Action("Create","Role")", JSON.stringify(data), "POST").then(function (res) {
             var dataJson = JSON.parse(res);

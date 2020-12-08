@@ -12,10 +12,7 @@
 <script src="~/js/minify/common.lib.min.js?20200604"></script>
 
 <script>
-    if($('.nav-link [for=@category.Code]').length > 0)
-        $('.nav-link [for=@category.Code]').addClass('active');
-    else
-        $('.nav-link [for=news]').addClass('active');
+    setActiveMenu('@category.Code');
 </script>
 <style>
     .news-item {
