@@ -1,0 +1,60 @@
+﻿
+@{
+    ViewData["Title"] = "Learningoutcomes";
+    Layout = "~/Views/Shared/_LayoutStudent_NewUI.cshtml";
+}
+<script>
+    setActiveMenu('learningoutcomes');
+</script>
+<section class="module" id="dashboard_content">
+    <div class="card-header border-b">
+        <div class="flex flex-wrap align-items-center">
+            <div class="tab bg-none col-md-12 m-1">
+                <ul class="flex flex-row">
+                    <li class="">
+                        <a href="javascript:;" title="Kết quả luyện tập">Kết quả luyện tập</a>
+                    </li>
+                    <li class="active">
+                        <a href="javascript:;" title="Kết quả kiểm tra">Kết quả kiểm tra</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <template v-if="tab[1]">
+            <div class="container-fluid">
+                <table id="ed_table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th v-for="(field,k) in summaryFields">{{field.label}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in summaryData">
+                            <td><a href="#" v-on:click="showDetail(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
+                            <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                            <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
+                            <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                            <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+    </div>
+</section>
+
+@section Scripts{
+    <script>
+        new Vue({
+            el: "#main_content",
+            mounted() { },
+            data: {},
+            watch: {
+            },
+            methods: {},
+        })
+    </script>
+}
