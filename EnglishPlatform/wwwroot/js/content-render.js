@@ -47,7 +47,7 @@ CKEDITOR.on('instanceCreated', function (event) {
         $(e.editor.element.$).removeAttr("title").attr('title', $(e.editor.element.$).attr('data-title'));
     });
 });
-CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
+//CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
 
 var quiz3m_ans = [];
 
@@ -1233,7 +1233,8 @@ var Lesson = (function () {
 
 
                     CKEDITOR.replace(esid, {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'
+                        //, ckeditor_wiris'
                     });
                     //CKEDITOR.inline(esid, {
                     //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
@@ -1834,7 +1835,7 @@ var Lesson = (function () {
         }
 
 
-        $(modalForm).append($("<div>", {class: "mt-2 mb-3", html: "Kiểu nội dung: <b style='font-weight:700'>" + textType + "</b>" }));
+        $(modalForm).append($("<div>", { class: "mt-2 mb-3", html: "Kiểu nội dung: <b style='font-weight:700'>" + textType + "</b>" }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassSubjectID", "value": config.class_subject_id }));
@@ -2063,7 +2064,7 @@ var Lesson = (function () {
                 //    addNewQuestion();
                 $('.editorck').not('.d-none').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2185,7 +2186,7 @@ var Lesson = (function () {
                     addNewQuestion();
                 $('.editorck').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2198,7 +2199,7 @@ var Lesson = (function () {
             case "QUIZ2":
                 CKEDITOR.replace('editor', {
                     allowedContent: true,
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
+                    extraPlugins: 'uploadimage,youtube,fillquiz',//ckeditor_wiris,
                     removeDialogTabs: 'textfield',
                     removePlugins: 'forms'
                 });
@@ -2241,7 +2242,7 @@ var Lesson = (function () {
         var status = $(parent).find('.chkToggleExplain').prop('checked');
         if (status == true) {
             CKEDITOR.replace($(cke)[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
         }
         else {
@@ -2278,7 +2279,7 @@ var Lesson = (function () {
 
         if ($(clone).find('.chkToggleExplain').prop('checked'))
             CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
 
         $(clone).find("[name^='Questions.']").each(function () {
@@ -4575,10 +4576,10 @@ var Lesson = (function () {
         var cloneQuestion = $(_this).parent()[0].cloneNode(true);
         if (showEX) {
             CKEDITOR.replace($(_this).parent().find('.editorck')[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
             CKEDITOR.replace($(cloneQuestion).find('.editorck')[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
             $(cloneQuestion).find('.chkToggleExplain').prop("checked", true);
         }
@@ -4955,9 +4956,9 @@ var Lesson = (function () {
             title: '<strong>Chọn thao tác</strong>',
             icon: 'question',
             html:
-                '<button type="button" class="btn btn-primary mr-2" onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>' +
-                '<button type="button" class="btn btn-secondary mr-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button>'+
-                '<button type="button" class="btn btn-secondary mr-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button>',
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>'+
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',
         })

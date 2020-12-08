@@ -417,7 +417,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 //Lay danh sach ID bai hoc duoc mo trong tuan
                 var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
-                //var type = activeLessons.Select(x => x.Type).ToList().Distinct();
                 var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
                 var totalPractice = 0;
@@ -425,7 +424,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var item in activeLessonIds)
                 {
                     var lesson = _lessonService.GetItemByID(item);
-                    if (lesson.IsPractice || lesson.TemplateType == 1)
+                    if (lesson.IsPractice)
                     {
                         totalPractice++;
                     }
@@ -2134,7 +2133,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             var chapters = _chapterService.GetByClassSubject(ID).ToList();
-
             ViewBag.Chapter = chapters;
             ViewBag.User = UserID;
 

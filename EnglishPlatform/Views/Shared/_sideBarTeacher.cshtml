@@ -37,7 +37,7 @@
         background: #FFF;
         left: 0;
         border-right: 2px solid #F0F3F4;
-        margin-top:10px
+        margin-top: 10px
     }
 
         #sidebar-content ul li a {
@@ -61,17 +61,17 @@
         background-color: white;
         overflow-x: hidden;
         transition: 0.5s;
-       /* padding-top: 60px;*/
+        /* padding-top: 60px;*/
     }
 
-    .sidebar span{
-        margin-left:10px;
-        margin-bottom:10px;
-        margin-top:10px
+    .sidebar span {
+        margin-left: 10px;
+        margin-bottom: 10px;
+        margin-top: 10px
     }
 
-    .sidebar{
-        z-index:0 !important
+    .sidebar {
+        z-index: 0 !important
     }
 
     .sidenav a {
@@ -83,11 +83,11 @@
         transition: 0.3s;
     }
 
-            .sidenav a:hover {
-                color: #f1f1f1;
-            }
+        .sidenav a:hover {
+            color: #f1f1f1;
+        }
 
-        /*.sidenav .closebtn {
+    /*.sidenav .closebtn {
             position: absolute;
             top: 0;
             right: 25px;
@@ -99,9 +99,9 @@
     #closebtn {
         font-size: 30px;
         color: #4e6774;
-        position:absolute;
-        right:0px;
-        top:10px
+        position: absolute;
+        right: 0px;
+        top: 10px
     }
 
     @@media screen and (max-height: 450px) {
@@ -114,54 +114,54 @@
             }
     }
 
-    #mySidenav{
-        width:0px
+    #mySidenav {
+        width: 0px
     }
 
-    #mySidenav ul{
-        list-style:none;
-        margin:0px;
-        padding:0px
-    }
-
-        #mySidenav ul li {
-            border-radius: unset;
-            display: block;
-            padding: 15px 24px;
-            border-left: 1px solid white;
+        #mySidenav ul {
+            list-style: none;
+            margin: 0px;
+            padding: 0px
         }
 
-            #mySidenav ul li a {
-                color: #4e6774;
-                font: 14px Archivo, sans-serif;
-                font-weight: 600;
-                border-left: 2px solid transparent;
-                line-height: 20px;
-                white-space: nowrap;
+            #mySidenav ul li {
+                border-radius: unset;
+                display: block;
+                padding: 15px 24px;
+                border-left: 1px solid white;
             }
 
-            #mySidenav ul li:hover {
-                color: #D03239;
-                background: #F0F3F4;
-                border-color: #D03239;
-            }
+                #mySidenav ul li a {
+                    color: #4e6774;
+                    font: 14px Archivo, sans-serif;
+                    font-weight: 600;
+                    border-left: 2px solid transparent;
+                    line-height: 20px;
+                    white-space: nowrap;
+                }
 
-            #mySidenav ul li:hover a{
-                color: #D03239;
-                text-decoration: none;  
-            }
+                #mySidenav ul li:hover {
+                    color: #D03239;
+                    background: #F0F3F4;
+                    border-color: #D03239;
+                }
+
+                    #mySidenav ul li:hover a {
+                        color: #D03239;
+                        text-decoration: none;
+                    }
 
     #tableContents list-group-item.active {
         background: #F0F3F4 !important
     }
 
-    #tableContents ul{
-        list-style:none
+    #tableContents ul {
+        list-style: none
     }
 
     #tableContents li {
         border-left: 2px solid white;
-            padding: 15px 24px;
+        padding: 15px 24px;
     }
 
         #tableContents li a {
@@ -170,31 +170,31 @@
             font-weight: 600 !important;
             border-left: 2px solid transparent;
             line-height: 20px;
-/*            padding: 15px 24px;*/
-        }
-
-        #tableContents li:hover{
-            background:#f0f3f4
-        }
-
-        #tableContents ul li a {
-            color: #4e6774;
-            font: 14px Archivo, sans-serif;
-            font-weight: 600;
-            border-left: 2px solid transparent;
-            line-height: 20px;
-            white-space: nowrap;
-        }
-
-        #tableContents li:hover a {
-            color: #D03239;
-            background-color: #D03239;
-            background: #F0F3F4
+            /*            padding: 15px 24px;*/
         }
 
         #tableContents li:hover {
-            border-left: 2px solid #D03239
+            background: #f0f3f4
         }
+
+    #tableContents ul li a {
+        color: #4e6774;
+        font: 14px Archivo, sans-serif;
+        font-weight: 600;
+        border-left: 2px solid transparent;
+        line-height: 20px;
+        white-space: nowrap;
+    }
+
+    #tableContents li:hover a {
+        color: #D03239;
+        background-color: #D03239;
+        background: #F0F3F4
+    }
+
+    #tableContents li:hover {
+        border-left: 2px solid #D03239
+    }
 
     /*#tableContents .list-group-item.list-group-item-action a {
         color: #4e6774;
@@ -202,7 +202,7 @@
         font-weight: 600;
         border-left: 2px solid transparent;
         line-height: 20px;*/
-/*        white-space: nowrap;*/
+    /*        white-space: nowrap;*/
     /*}*/
 
     #title {
@@ -221,7 +221,8 @@
             <img src="@(_center.Image != null ? _center.Image : "/images/Logo.png")" style="max-height:100px;" />
         </a>
     </div>
-    <div style="font-size:30px;cursor:pointer;width:240px;position:relative;padding-left:5px"><span onclick="openNav()">&#9776;</span>
+    <div style="font-size:30px;cursor:pointer;width:240px;position:relative;padding-left:5px">
+        <span onclick="openNav()">&#9776;</span>
         @*<a href="javascript:void(0)" id="closebtn" class="hide" onclick="closeNav()">&times;</a>*@
     </div>
     <div id="mySidenav" class="sidenav">
@@ -232,18 +233,16 @@
                     Soạn bài giảng
                 </a>
             </li>
-
+            <li>
+                <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Học liệu">
+                    <i class="ic ic-file"></i>
+                    Học liệu
+                </a>
+            </li>
             <li>
                 <a class="nav-link p-0" href="@processUrl("Index","Class")" title="Quản lý lớp học">
                     <i class="ic ic-book-pen"></i>
                     Quản lý lớp học
-                </a>
-            </li>
-
-            <li>
-                <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="Lịch dạy">
-                    <i class="ic ic-celendar"></i>
-                    Lịch dạy
                 </a>
             </li>
 
@@ -255,18 +254,12 @@
             </li>
 
             <li>
-                <a class="nav-link p-0" href="@processUrl("Index" , "Discuss" )" title="Thảo luận">
-                    <i class="ic ic-discussion" aria-hidden="true"></i>
-                    Thảo luận
+                <a class="nav-link p-0" href="@processUrl("Index" , "Calendar" )" title="lịch dạy">
+                    <i class="ic ic-celendar"></i>
+                    Quản lý lịch dạy
                 </a>
             </li>
 
-            <li>
-                <a class="nav-link p-0" href="@processUrl("Index" , "Reference" )" title="Tài liệu tham khảo">
-                    <i class="ic ic-file"></i>
-                    Tài liệu tham khảo
-                </a>
-            </li>
         </ul>
     </div>
 
@@ -296,7 +289,7 @@
         $('.sidebar-item a').tooltip({
             trigger: 'hover'
         });
-
+        openNav()
     });
 
     function showExtra(tab) {
@@ -335,7 +328,7 @@
 
     function heightSideBar() {
         var height = $(window).height() - 284;
-        document.getElementById("tableContents").style.maxHeight = height+"px";
+        document.getElementById("tableContents").style.maxHeight = height + "px";
     }
 
     $(window).resize(function () {

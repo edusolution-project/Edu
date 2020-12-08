@@ -587,7 +587,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                var code = vocab.ToLower().Replace(" ", "-");
+                var vocabularies = _vocabularyService.GetItemByCode(code);
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=

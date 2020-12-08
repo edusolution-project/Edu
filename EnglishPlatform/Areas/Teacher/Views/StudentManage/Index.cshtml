@@ -62,8 +62,8 @@
                 <div class="flex mb-2">*@
 
             <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" v-on:click="showStudentModal()"><i class="ti-plus" title="Thêm học viên"></i></b-button>
-            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-import" title="Thêm file"></i></b-button>
-            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="exportExcel($event.target.value)"><i class="ti-export" title="Xuất file"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="showStudentUploadModal($event.target.value)"><i class="ti-export" title="Thêm file"></i></b-button>
+            <b-button class="btn-addevent btn-student btn-sm m-1" v-if="isHeadTeacher" style="margin-left:5px" v-on:click="exportExcel($event.target.value)"><i class="ti-import" title="Xuất file"></i></b-button>
             @*</div>*@
         </div>
     </div>
@@ -71,7 +71,13 @@
         <table id="ed_table" class="table">
             <thead>
                 <tr>
-                    <th v-for="(field,k) in fields">{{field.label}}</th>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Lớp</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th>Lần học cuối</th>
+                    <th>Tác vụ</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,16 +89,17 @@
                     </td>
                     <td style="text-align:left">
                         <template v-if="item.JoinedClasses != null && item.JoinedClasses.length == 1">
-                            <a :href="'@processUrl("Detail", "Class")/' + item.JoinedClasses + '#module'">{{item.ClassName}}</a>
+                            <a :href="'@processUrl("Detail", "Class")/' + item.JoinedClasses + '#module'" style="white-space:nowrap">{{item.ClassName}}</a>
                         </template>
                         <template v-else>
-                            <div style="overflow: hidden; text-overflow: ellipsis;">
+                            <div style="overflow: hidden; text-overflow: ellipsis; white-space:nowrap">
                                 <a href="javascript:void(0)" :title="item.ClassName" v-on:click="showListClass(item.ClassName,item.FullName,item.JoinedClasses)">{{item.ClassName}}</a>
                             </div>
                         </template>
                     </td>
                     <td>{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
+                    <td>{{formatTime(item.LastJoinDate)}}</td>
                     <td style="width:150px">
                         @if (IsHeadTeacher)
                         {
@@ -313,44 +320,6 @@
                     class_id: ""
                 },
                 list_student: [
-                ],
-                fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'name',
-                        label: 'Họ tên'
-                    },
-                    {
-                        key: 'class',
-                        label: 'Lớp'
-                    },
-                    {
-                        key: 'email',
-                        label: 'Email'
-                    },
-                    {
-                        key: 'phone',
-                        label: 'SĐT'
-                    },
-                    //{
-                    //    key: 'per',
-                    //    label: 'Tiến độ'
-                    //},
-                    //{
-                    //    key: 'last_update',
-                    //    label: 'Lần học cuối'
-                    //},
-                    //{
-                    //    key: 'score',
-                    //    label: 'Kết quả'
-                    //},
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
                 ],
                 tableData: [
                 ],
@@ -738,6 +707,11 @@
                     if (value) {
                         return moment(String(value)).format('YYYY-MM-DD')
                     }
+                },
+                formatTime(time) {
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY HH:mm")
                 },
                 showModalAddClass(student) {
                     this.nameStudent = student.FullName

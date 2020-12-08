@@ -13,6 +13,7 @@
 
         return $"/{center}{url}";
     }
+    var templateType = Data.TypeClass == BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM ? BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM : BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE;
 }
 
 <style>
@@ -142,11 +143,7 @@
                         <input type="hidden" name="ClassSubjectID" id="ClassSubjectID" value="@Data.ID" />
                         <div class="row">
                             <div class="form-group col-md-12">
-                                <label class="col-form-label">Kiểu bài:</label>
-                                <select name="TemplateType" class="form-control" onchange="SelectTemplate()" disabled>
-                                    @*<option value="1">Bài giảng</option>*@
-                                    <option value="2">Bài kiểm tra </option>
-                                </select>
+                                <input type="hidden" name="TemplateType" value="@templateType" class="d-none" />
                             </div>
                         </div>
                         <div class="row">
@@ -590,9 +587,9 @@
                                 else
                                     $('select#ParentID option[prt=' + chapter.ParentID + ']').after($("<option>", { value: chapter.ID, text: chapter.Name, "prt": chapter.ParentID }));
                             }
-                            
+
                         }
-                            
+
 
                         RenderChapter(chapter);
                     }
@@ -768,14 +765,14 @@
         //debugger
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Add Lesson");
+        modalTitle.text("Thêm bài");
         modal.find(".chooseOrder").hide();
         modal.find("[name=Title]").val("");
         modal.find("[name=ChapterID]").val(ID);
         modal.find("[name=ID]").val("");
         modal.find("[name=Point]").val("0");
         modal.find("[name=Timer]").val("0");
-        SelectTemplate("2");
+        SelectTemplate("@templateType");
         return false;
     }
 
@@ -1000,11 +997,11 @@
 
     function SelectTemplate(type)
     {
-        var modal = $("#lessonModal");
-        if(type != null && type != "")
-            modal.find("[name=TemplateType]").val(type);
-        var template = modal.find("[name=TemplateType]").val();
-        switch(template)
+        //var modal = $("#lessonModal");
+        //if(type != null && type != "")
+        //    modal.find("[name=TemplateType]").val(type);
+        //var template = modal.find("[name=TemplateType]").val();
+        switch (type)
         {
             case "1": //bài giảng
                 modal.find("[for=examOnly]").hide();

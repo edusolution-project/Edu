@@ -337,7 +337,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 case "QUIZ1":
                 case "QUIZ3":
                 case "QUIZ4":
-                    if (RemovedQuestions != null || RemovedQuestions.Count > 0)
+                    if (RemovedQuestions != null && RemovedQuestions.Count > 0)
                     {
                         _cloneQuestionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
 
@@ -347,7 +347,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
-                    if (RemovedAnswers != null & RemovedAnswers.Count > 0)
+                    if (RemovedAnswers != null && RemovedAnswers.Count > 0)
                         _cloneAnswerService.CreateQuery().DeleteMany(o => RemovedAnswers.Contains(o.ID));
                     item.CourseID = parentLesson.CourseID;
 
