@@ -194,11 +194,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        public async Task<JsonResult> CreateOrUpdate(string basis, CloneLessonPartViewModel item, string ClassSubjectID, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
+        public async Task<JsonResult> CreateOrUpdate(string basis, CloneLessonPartViewModel item, List<string> RemovedQuestions = null, List<string> RemovedAnswers = null)
         {
             var createduser = User.Claims.GetClaimByType("UserID").Value;
             var parentLesson = _lessonService.GetItemByID(item.ParentID);
-            var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+            var currentCs = _classSubjectService.GetItemByID(parentLesson.ClassSubjectID);
 
             var isPractice = parentLesson.IsPractice;
             if (parentLesson == null || currentCs == null)
@@ -1016,84 +1016,53 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #region
-        public JsonResult CreateExam(String basis,List<String> ListLessonPartID,String ClassSubjectID,String LessonID)
+        public JsonResult CreateExamPart(string basis, List<string> ListLessonPartID, string LessonID)
         {
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+                var lesson = _lessonService.GetItemByID(LessonID);
+                if (lesson == null)
+                    return Json(new Dictionary<string, Object>
+                    {
+                        {"Data",null },
+                        {"Stt",false },
+                        {"Msg","Thông tin không đúng" }
+                    });
                 if (ListLessonPartID.Count == 0)
                 {
-                    return Json(new Dictionary<String, Object>
+                    return Json(new Dictionary<string, Object>
                     {
                         {"Data",null },
                         {"Stt",false },
                         {"Msg","Chưa chọn bài" }
                     });
                 }
-                else
+
+                var listLessonPart = _cloneLessonPartService.GetByIDs(ListLessonPartID);
+                if (listLessonPart.Count() == 0)
                 {
-                    var listLessonPart = _cloneLessonPartService.GetByIDs(ListLessonPartID);
-                    if (listLessonPart.Count() == 0)
-                    {
-                        return Json(new Dictionary<String, Object>
+                    return Json(new Dictionary<String, Object>
                         {
                             {"Data",null },
                             {"Stt",false },
                             {"Msg","Chưa chọn bài" }
                         });
-                    }
-                    else
-                    {
-                        foreach (var lessonPart in listLessonPart)
-                        {
-                            var listQuestion = _cloneQuestionService.GetByPartID(lessonPart.ID);
-                            var _listQuestion = new List<CloneQuestionViewModel>();
-                            if (listLessonPart.Count() > 0)
-                            {
-                                foreach (var lessonPartQ in listQuestion)
-                                {
-                                    var listAns = _cloneAnswerService.GetByQuestionID(lessonPartQ.ID);
-                                    var _listAns = new List<CloneLessonPartAnswerEntity>();
-                                    foreach(var item in listAns)
-                                    {
-                                        var _a = _lessonpartAnswerMapping.AutoOrtherTypeWithoutID(item, new CloneLessonPartAnswerEntity
-                                        {
-                                            Created = DateTime.Now,
-                                            CreateUser = UserID,
-                                            ClassSubjectID = ClassSubjectID
-                                        });
-                                    }
+                }
+                foreach (var lessonPart in listLessonPart)
+                {
+                    _ = CopyPartToLesson(basis, lessonPart, lesson, UserID);
+                }
 
-                                    var q = _cloneQuestionViewModelMapping.AutoOrtherTypeWithoutID(lessonPartQ, new CloneQuestionViewModel
-                                    {
-                                        Created = DateTime.Now,
-                                        CreateUser = UserID,
-                                        Answers = new List<CloneLessonPartAnswerEntity>(),
-                                        ClassSubjectID = ClassSubjectID,
-                                        LessonID = LessonID
-                                    });
-                                    q.Answers.AddRange(_listAns);
-                                    _listQuestion.Add(q);
-                                }
-                            }
-                            var a = new CloneLessonPartViewModel();
-                            a.Questions = new List<CloneQuestionViewModel>();
-                            _cloneLessonPartViewModelMapping.AutoOrtherTypeWithoutID(lessonPart, a);
-                            a.ClassSubjectID = ClassSubjectID;
-                            a.Questions.AddRange(_listQuestion);
-                            a.ParentID = LessonID;
-                            var x = CreateOrUpdate(basis,a, ClassSubjectID,new List<string>(),new List<string>()).Result;
-                        }
-                    }
-                    return Json(new Dictionary<String, Object>
+                return Json(new Dictionary<String, Object>
                             {
                                 {"Data",null },
                                 {"Stt",true },
                                 {"Msg","Thành công" }
                             });
-                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                     {
@@ -1104,5 +1073,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
         #endregion
+
+        private async Task CopyPartToLesson(string basis, CloneLessonPartEntity originPart, LessonEntity targetLesson, string createdUser)
+        {
+            var newPart = new CloneLessonPartViewModel();
+            _cloneLessonPartViewModelMapping.AutoOrtherTypeWithoutID(originPart, newPart);
+            newPart.Questions = _cloneQuestionService.GetByPartID(originPart.ID).Select(question => _cloneQuestionViewModelMapping.AutoOrtherTypeWithoutID(question, new CloneQuestionViewModel
+            {
+                Created = DateTime.Now,
+                CreateUser = createdUser,
+                Answers = _cloneAnswerService.GetByQuestionID(question.ID).Select(answer => _lessonpartAnswerMapping.AutoOrtherTypeWithoutID(answer, new CloneLessonPartAnswerEntity
+                {
+                    Created = DateTime.Now,
+                    CreateUser = createdUser,
+                    ClassSubjectID = targetLesson.ClassSubjectID,
+                    ParentID = null
+                })).ToList(),
+                ClassSubjectID = targetLesson.ClassSubjectID,
+                LessonID = targetLesson.ID
+            })).ToList();
+            newPart.ClassSubjectID = targetLesson.ClassSubjectID;
+            newPart.ParentID = targetLesson.ID;
+            newPart.ClassID = targetLesson.ID;
+
+            await CreateOrUpdate(basis, newPart, new List<string>(), new List<string>());
+        }
+
     }
 }
