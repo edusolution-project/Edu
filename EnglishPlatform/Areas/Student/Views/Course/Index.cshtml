@@ -126,9 +126,47 @@
                         </ul>
                     </div>
                 </template>
-                <template v-else>
+                <template v-else-if="item.ClassMechanism == @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu cá nhân</h2>
+                        <ul class="list ls-practice row">
+                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.ClassID == item.ID">
+                                <div class="inner d-flex w-100" style="max-height:150px">
+                                    <div class="align-top" style="width:102px">
+                                        <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
+                                            <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                        </a>
+                                    </div>
+                                    <div class="flex-fill ml-2 col-md-8">
+                                        <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
+                                            {{csbj.CourseName}}
+                                        </a>
+                                        <p class="mb-1 pb-0 mt-1" style="font-size:13px">
+                                            <span>{{csbj.SubjectName}}</span>
+                                            <template v-if="csbj.SkillName != null">
+                                                -
+                                                <span>{{csbj.SkillName}}</span>
+                                            </template>
+                                        </p>
+                                        <p style="font-size:13px">
+                                            <template v-if="csbj.TeacherName != null">
+                                                <span>GV: {{csbj.TeacherName}}</span>
+                                            </template>
+                                        </p>
+                                    </div>
+                                    <template>
+                                        <button v-if="isMobileDevice()" style="display:inline-flex!important;height:35px;border-radius:20px;position:inherit!important" type="button" class="btn" v-on:click="removeCourse(csbj)"><i class="far fa-trash-alt"></i></button>
+                                        <button v-else type="button" class="btn btn-delete" v-on:click="removeCourse(csbj)"><i class="far fa-trash-alt"></i></button>
+                                    </template>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </template>
+
+                <template v-else-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                    <div class="form-group">
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Kiểm tra & đánh giá</h2>
                         <ul class="list ls-practice row">
                             <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100" style="max-height:150px">
@@ -277,7 +315,7 @@
                     let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
-                                //var _data = response.data.Data;
+                                var _data = response.data.Data;
                                 if (response.data.Classes.length == 0) {
                                     swal({
                                         title: "Bạn chưa có trong lớp học nào, liên hệ với giáo viên hoặc chuyển đến học liệu để thêm vào lớp cá nhân của bạn",

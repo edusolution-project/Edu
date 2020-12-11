@@ -1241,93 +1241,96 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var oSbj in oldSubjects)
                     {
-                        var nSbj = classSubjects.Find(t => t.ID == oSbj.ID);
-                        if (!isHeadTeacher && oSbj.TeacherID != userId) //other teacher's class => skip
-                            nSbj = oSbj;
-
-                        var update = false;
-
-                        if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
-                        //delete oldSubject
+                        if (oSbj.TypeClass != CLASSSUBJECT_TYPE.EXAM)
                         {
-                            _ = RemoveClassSubject(oSbj);
-                            if (nSbj != null)
-                                nSbj.ID = null;//remove ID to create new
-                        }
+                            var nSbj = classSubjects.Find(t => t.ID == oSbj.ID);
+                            if (!isHeadTeacher && oSbj.TeacherID != userId) //other teacher's class => skip
+                                nSbj = oSbj;
 
-                        if (nSbj != null)
-                        {
-                            var newMember = new ClassMemberEntity();
-                            long lessoncount = 0;
-                            long examcount = 0;
-                            long practicecount = 0;
+                            var update = false;
 
-                            if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
+                            if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
+                            //delete oldSubject
                             {
-                                update = true;
-                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
-                                if (string.IsNullOrEmpty(nSbj.ID))//Error
-                                    continue;
+                                _ = RemoveClassSubject(oSbj);
+                                if (nSbj != null)
+                                    nSbj.ID = null;//remove ID to create new
                             }
-                            else //Not change
-                            {
-                                //update period
-                                oSbj.StartDate = item.StartDate.ToUniversalTime();
-                                oSbj.EndDate = item.EndDate.ToUniversalTime();
-                                oSbj.TypeClass = nSbj.TypeClass;
-                                var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
-                                if (teacher == null) continue;
 
-                                if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
+                            if (nSbj != null)
+                            {
+                                var newMember = new ClassMemberEntity();
+                                long lessoncount = 0;
+                                long examcount = 0;
+                                long practicecount = 0;
+
+                                if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                                 {
                                     update = true;
-                                    oSbj.TeacherID = nSbj.TeacherID;
-                                    var skill = _skillService.GetItemByID(oSbj.SkillID);
-                                    if (skill == null) continue;
-                                    var course = _courseService.GetItemByID(nSbj.CourseID);
-                                    var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
-                                    if (tc == null)
-                                        tc_sj.Add(new TeacherSubjectsViewModel
-                                        {
-                                            TeacherId = teacher.ID,
-                                            FullName = teacher.FullName,
-                                            Email = teacher.Email,
-                                            SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
-                                        });
-                                    else
-                                        tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
-                                    _ = Task.Run(() =>
+                                    nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
+                                    if (string.IsNullOrEmpty(nSbj.ID))//Error
+                                        continue;
+                                }
+                                else //Not change
+                                {
+                                    //update period
+                                    oSbj.StartDate = item.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                    oSbj.TypeClass = nSbj.TypeClass;
+                                    var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
+                                    if (teacher == null) continue;
+
+                                    if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
                                     {
-                                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
-                                    });
+                                        update = true;
+                                        oSbj.TeacherID = nSbj.TeacherID;
+                                        var skill = _skillService.GetItemByID(oSbj.SkillID);
+                                        if (skill == null) continue;
+                                        var course = _courseService.GetItemByID(nSbj.CourseID);
+                                        var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                                        if (tc == null)
+                                            tc_sj.Add(new TeacherSubjectsViewModel
+                                            {
+                                                TeacherId = teacher.ID,
+                                                FullName = teacher.FullName,
+                                                Email = teacher.Email,
+                                                SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                                            });
+                                        else
+                                            tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
+                                        _ = Task.Run(() =>
+                                        {
+                                            _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                        });
+                                    }
+
+                                    if (isHeadTeacher || update) // head-teacher | owned classsubject => update
+                                        _classSubjectService.Save(oSbj);
+
+                                    examcount = oSbj.TotalExams;
+                                    lessoncount = oSbj.TotalLessons;
+                                    practicecount = oSbj.TotalPractices;
+                                    newMember = new ClassMemberEntity
+                                    {
+                                        TeacherID = teacher.ID,
+                                        Name = teacher.FullName,
+                                        Type = ClassMemberType.TEACHER
+                                    };
                                 }
 
-                                if (isHeadTeacher || update) // head-teacher | owned classsubject => update
-                                    _classSubjectService.Save(oSbj);
+                                processCS.Add(nSbj.ID);
+                                if (!oldData.Skills.Contains(nSbj.SkillID))
+                                    oldData.Skills.Add(nSbj.SkillID);
+                                if (!oldData.Subjects.Contains(nSbj.SubjectID))
+                                    oldData.Subjects.Add(nSbj.SubjectID);
+                                if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
+                                    oldData.Members.Add(newMember);
+                                //add counter
 
-                                examcount = oSbj.TotalExams;
-                                lessoncount = oSbj.TotalLessons;
-                                practicecount = oSbj.TotalPractices;
-                                newMember = new ClassMemberEntity
-                                {
-                                    TeacherID = teacher.ID,
-                                    Name = teacher.FullName,
-                                    Type = ClassMemberType.TEACHER
-                                };
+                                oldData.TotalLessons += lessoncount;
+                                oldData.TotalExams += examcount;
+                                oldData.TotalPractices += practicecount;
                             }
-
-                            processCS.Add(nSbj.ID);
-                            if (!oldData.Skills.Contains(nSbj.SkillID))
-                                oldData.Skills.Add(nSbj.SkillID);
-                            if (!oldData.Subjects.Contains(nSbj.SubjectID))
-                                oldData.Subjects.Add(nSbj.SubjectID);
-                            if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
-                                oldData.Members.Add(newMember);
-                            //add counter
-
-                            oldData.TotalLessons += lessoncount;
-                            oldData.TotalExams += examcount;
-                            oldData.TotalPractices += practicecount;
                         }
                     }
                 }
