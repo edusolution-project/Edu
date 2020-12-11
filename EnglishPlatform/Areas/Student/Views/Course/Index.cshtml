@@ -93,7 +93,6 @@
                             </li>
                         </ul>
                     </div>
-
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND).length > 0">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chuyên đề</h2>
                         <ul class="list ls-practice row">
@@ -120,6 +119,21 @@
                                                 <span>GV: {{csbj.TeacherName}}</span>
                                             </template>
                                         </p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
+                        <ul class="list ls-practice row">
+                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID">
+                                <div class="inner d-flex w-100" style="max-height:150px">
+                                    <div class="flex-fill ml-2">
+                                        <h2 style="font-size:15px;" class="font-weight-bold blue-color">
+                                            <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="font-weight-bold">
+                                                {{csbj.CourseName}}
+                                            </a>
+                                        </h2>
                                     </div>
                                 </div>
                             </li>

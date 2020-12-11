@@ -26,6 +26,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonHelper _lessonHelper;
+        private readonly CenterService _centerService;
 
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -70,7 +71,8 @@ namespace BaseCustomerMVC.Controllers.Student
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
-            VocabularyService vocabularyService
+            VocabularyService vocabularyService,
+            CenterService centerService
             )
         {
             _subjectService = subjectService;
@@ -97,6 +99,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _vocabularyService = vocabularyService;
             _progressHelper = progressHelper;
+            _centerService = centerService;
         }
 
         //public IActionResult Index()
@@ -318,6 +321,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ViewBag.NextLesson = nextLesson;
                 ViewBag.Chapter = chapter;
             }
+            ViewBag.Center = _centerService.GetItemByCode(basis);
             //if (newui == 1)
             return View("Detail_new");
             //return View();

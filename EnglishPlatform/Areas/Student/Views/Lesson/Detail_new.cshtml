@@ -5,6 +5,8 @@
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+    var currentCenter = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
+
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
     var failpass = ViewBag.FailPass ?? false;
@@ -63,7 +65,74 @@ else
         @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
         @*<script src="~/js/lib/jquery.ui.touch-punch.min.js"></script>*@
         <script src="~/js/lib/sweetalert2@9.js"></script>
-        <script src="~/js/content-render.js?@DateTime.Now.ToString("yyyyMMddhhmmss")"></script>
+        @if (currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE)
+        {
+            <script src="~/js/content-render.js?@DateTime.Now.ToString("yyyyMMddhhmmss")"></script>
+        }
+        else
+        {
+            <script src="~/js/content-render-exam.js"></script>
+            <style>
+                #sidebar, body, html, #exam-teacher {
+                    background-color: #e8eff5 !important;
+                }
+
+                .right-content {
+                    top: 45px !important;
+                }
+
+                #QuizNav {
+                    display: none;
+                    top: 46px;
+                    right: 5px;
+                    left: calc(50% + 522px) !important;
+                    position: fixed;
+                    bottom: 10px;
+                    overflow: auto;
+                }
+
+                #PartNav {
+                    border: solid 3px #CCC;
+                    background: #FFF;
+                    padding: 10px;
+                    border-radius: 10px;
+                    box-shadow: 1px 2px 7px #999;
+                    display: none;
+                    top: 46px;
+                    width: 150px;
+                    right: calc(50% + 522px) !important;
+                    position: fixed;
+                    overflow: auto;
+                }
+
+                .card-body {
+                    top: 110px !important;
+                }
+
+                .lesson-box {
+                    max-width: 1024px;
+                    width: 100%;
+                    border-left: solid 1px #CCC;
+                    border-right: solid 1px #CCC;
+                }
+
+                .btn-answer-idx {
+                    background: #6c757d;
+                }
+
+                .selection {
+                    background: #d8dee8 !important;
+                }
+
+                .btn-answer-idx.selection {
+                    background: #cc7923 !important;
+                }
+
+                .examHeader {
+                    border: solid 2px #333;
+                }
+            </style>
+        }
         <script>
             var config = {
                 container: "exam-student",
@@ -82,7 +151,10 @@ else
                 lesson_id: '@currentLesson.ID',
                 class_id: '@currentClass.ID',
                 class_subject_id: '@currentClassSubject.ID',
-                chap_id: '@currentLesson.ChapterID'
+                chap_id: '@currentLesson.ChapterID',
+                class_name: '@currentClass.Name',
+                center_name: '@currentCenter.Name',
+                student_name: '...................................'
             }
             var widget = new Lesson.onReady(config);
         </script>

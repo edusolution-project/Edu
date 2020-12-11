@@ -1136,8 +1136,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var newSbj = new ClassSubjectEntity
                     {
                         ClassID = item.ID,
-                        CourseName = "Kiểm tra, đánh giá",
-                        Description = "Kiểm tra, đánh giá",
+                        CourseName = "Bài kiểm tra",
+                        Description = "Bài kiểm tra",
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         TypeClass = CLASSSUBJECT_TYPE.EXAM,
@@ -2938,7 +2938,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
 
                     Int32 rowIndexData = 4;
-                    foreach(var item in listSummary)
+                    foreach (var item in listSummary)
                     {
                         Int32 colIndexData = 1;
                         //gan gia tri cho tung cell

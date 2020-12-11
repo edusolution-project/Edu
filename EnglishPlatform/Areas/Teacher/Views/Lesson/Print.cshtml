@@ -1,11 +1,13 @@
 ﻿@{
-    ViewData["Title"] = "Trải nghiệm học viên";
+
     Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
 
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var currentCenter = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
+
+    ViewData["Title"] = currentLesson.Title + " - " + DateTime.Now.ToString("dd/MM/yyyy");
 
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
@@ -17,7 +19,6 @@
 }
 @section Sidebar
 {
-    @await Html.PartialAsync("_sidebarExam")
 }
 <div class="left-col">
     <div class="main-container">
@@ -45,12 +46,16 @@
                 background-color: #e8eff5 !important;
             }
 
+            #sidebar {
+                display: none;
+            }
+
             .right-content {
                 top: 45px !important;
             }
 
             #QuizNav {
-                display: none;
+                display: none !important;
                 top: 46px;
                 right: 5px;
                 left: calc(50% + 522px) !important;
@@ -65,7 +70,7 @@
                 padding: 10px;
                 border-radius: 10px;
                 box-shadow: 1px 2px 7px #999;
-                display: none;
+                display: none !important;
                 top: 46px;
                 width: 150px;
                 right: calc(50% + 522px) !important;
@@ -75,14 +80,19 @@
             }
 
             .card-body {
-                top: 110px !important;
+                top: 0 !important;
+                position: relative !important;
+                background: #FFF !important;
+                padding-top: 0;
+            }
+
+            .main-container, .left-col, .right-content {
+                position: relative !important;
             }
 
             .lesson-box {
                 max-width: 1024px;
                 width: 100%;
-                border-left: solid 1px #CCC;
-                border-right: solid 1px #CCC;
             }
 
             .btn-answer-idx {
@@ -100,7 +110,64 @@
             .examHeader {
                 border: solid 2px #333;
             }
+
+            .tab-content > .main-column:first-child {
+                border: none;
+            }
+
+            * {
+                color: #000 !important;
+                border-color: #000 !important;
+            }
+
+            .title.green-color {
+                color: #000 !important;
+                font-weight: bold;
+            }
+
+            .title.blue-color {
+                color: #000 !important;
+            }
+
+            @@media print {
+                .part-box.QUIZ3 {
+                    page-break-inside: avoid;
+                }
+            }
         </style>
+        <style media="print">
+
+            * {
+                position: relative !important
+            }
+
+            .btn-close-preview {
+                display: none;
+            }
+
+            div {
+                break-inside: avoid;
+            }
+
+            h2 {
+                page-break-before: always;
+            }
+
+            h3, h4 {
+                page-break-after: avoid;
+            }
+
+            pre, blockquote {
+                page-break-inside: avoid;
+            }
+
+            .part-box.QUIZ3 {
+                page-break-inside: avoid;
+                page-break-before: always;
+            }
+        </style>
+
+
     }
 
     <script>
@@ -153,4 +220,10 @@
             color: #999;
         }
     </style>
+    <script>
+        var r = setTimeout(function () {
+            window.print();
+        }, 2000);
+
+    </script>
 }

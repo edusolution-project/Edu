@@ -666,8 +666,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                     var newSbj = new ClassSubjectEntity
                     {
                         ClassID = currentClass.ID,
-                        CourseName = "Kiểm tra, đánh giá",
-                        Description = "Kiểm tra, đánh giá",
+                        CourseName = "Bài kiểm tra",
+                        Description = "Bài kiểm tra",
                         StartDate = currentClass.StartDate,
                         EndDate = currentClass.EndDate,
                         TypeClass = CLASSSUBJECT_TYPE.EXAM,

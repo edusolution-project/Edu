@@ -175,8 +175,8 @@ namespace BaseCustomerMVC.Controllers.Student
                     if (csbjs.Count() > 0)
                     {
                         var data = (from r in csbjs
-                                    let subject = _subjectService.GetItemByID(r.SubjectID)
-                                    let grade = _gradeService.GetItemByID(r.GradeID)
+                                    let subject = r.SubjectID != null ? _subjectService.GetItemByID(r.SubjectID) : new SubjectEntity()
+                                    let grade = r.GradeID != null ? _gradeService.GetItemByID(r.GradeID) : new GradeEntity()
                                     let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
                                     let skill = r.SkillID == null ? null : _skillService.GetItemByID(r.SkillID)
                                     let teacher = _teacherService.GetItemByID(r.TeacherID)
