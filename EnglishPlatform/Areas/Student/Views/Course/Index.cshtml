@@ -124,23 +124,41 @@
                             </li>
                         </ul>
                     </div>
+
+                    @* exam *@
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Đánh giá & kiểm tra</h2>
                         <ul class="list ls-practice row">
                             <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID">
-                                <div class="inner d-flex w-100" style="max-height:150px">
+                                <div class="inner d-flex w-100">
+                                    <div class="align-top" style="width:102px">
+                                        <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
+                                            <img v-lazy="cacheImg(csbj.SkillImage,100,130)" :title="csbj.CourseName" class="rounded border" />
+                                        </a>
+                                    </div>
                                     <div class="flex-fill ml-2">
-                                        <h2 style="font-size:15px;" class="font-weight-bold blue-color">
-                                            <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="font-weight-bold">
-                                                {{csbj.CourseName}}
-                                            </a>
-                                        </h2>
+                                        <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
+                                            {{csbj.CourseName}}
+                                        </a>
+                                        <p class="mb-1 pb-0 mt-1" style="font-size:13px">
+                                            <span>{{csbj.SubjectName}}</span>
+                                            <template v-if="csbj.SkillName != null">
+                                                -
+                                                <span>{{csbj.SkillName}}</span>
+                                            </template>
+                                        </p>
+                                        <p style="font-size:13px">
+                                            <template v-if="csbj.TeacherName != null">
+                                                <span>GV: {{csbj.TeacherName}}</span>
+                                            </template>
+                                        </p>
                                     </div>
                                 </div>
                             </li>
                         </ul>
                     </div>
                 </template>
-                <template v-else>
+                <template v-else-if="item.ClassMechanism == @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu cá nhân</h2>
                         <ul class="list ls-practice row">
@@ -291,7 +309,7 @@
                     let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
-                                //var _data = response.data.Data;
+                                var _data = response.data.Data;
                                 if (response.data.Classes.length == 0) {
                                     swal({
                                         title: "Bạn chưa có trong lớp học nào, liên hệ với giáo viên hoặc chuyển đến học liệu để thêm vào lớp cá nhân của bạn",
@@ -310,6 +328,7 @@
                                 else {
                                     this.classes = response.data.Classes;
                                     this.classSubjects = response.data.Data;
+                                    debugger
                                 }
                                 //_data.forEach(function (item, k) {
                                 //    _that.classSubjects.push({

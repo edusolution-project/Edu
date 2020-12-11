@@ -1,54 +1,125 @@
 ﻿@using BaseCustomerMVC.Globals
 @using System.Security.Claims
 @{
-    var model = ViewBag.Model;
-    List<BaseCustomerEntity.Database.CenterEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
-    string mtype = ViewBag.Type as string;
-}
+        var model = ViewBag.Model;
+        List<BaseCustomerEntity.Database.CenterEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
+        string mtype = ViewBag.Type as string;
+    }
 
-<section id="menuTop">
+<section id="menu_Top">
+
     <div class="topbar d-flex align-items-center" style="height:20px">
         <div class="container bg-transparent">
         </div>
     </div>
-    <div class="menubar d-flex align-items-center" style="height:160px">
-        <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
-            <div style="margin-left:25px">
-                <div class="home d-none d-md-block">
-                    <a href="/">
-                        <img src="~/images/bottom-logo.png" />
-                    </a>
-                </div>
-                <div class="toggler">
-                </div>
-            </div>
-            <div class="nav-link d-flex flex-wrap">
+
+    <div id="menuMobile" style="display:none">
+        <div class="topnav">
+            <a href="/" class="active"><img src="~/images/bottom-logo.png" /></a>
+            <div id="myLinks">
                 <a for="home" href="/" class="m-1 mr-md-4"><h5>TRANG CHỦ</h5></a>
-                <div class="m-1 mr-md-4 ml-md-4">
-                    <a for="aboutus" href="@Url.RouteUrl("news-about-us")" id="aboutus" onclick="showDropDown()" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
-                    @*<a for="aboutus" href="javascript:void(0)" id="aboutus" onclick="showDropDown()" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
-                    <ul id="chil_aboutus">
-                        <li v-for="item in listCategory">
-                            <a :href="'/tin-tuc/'+item.Code">
-                                <h5>{{item.Name}}</h5>
-                            </a>
-                        </li>
-                        <li><a href="#"><h5>BAN LÃNH ĐẠO</h5></a></li>
-        <li><a href="#"><h5>LĨNH VỰC HOẠT ĐỘNG CHÍNH</h5></a></li>
-        <li><a href="#"><h5>SẢN PHẨM</h5></a></li>
-        <li><a href="#"><h5>THÀNH TỰU ĐẠT ĐƯỢC</h5></a></li>
-                    </ul>*@
-                </div>
-                <a for="san-pham" href="@Url.RouteUrl("news-product")" class="m-1 mr-md-4 ml-md-4"><h5>SẢN PHẨM</h5></a>
-                <a for="su-kien" href="@Url.RouteUrl("news-event")" class="m-1 mr-md-4 ml-md-4"><h5>SỰ KIỆN</h5></a>
-                <a for="news" href="@Url.RouteUrl("news-default")" class="m-1 mr-md-4 ml-md-4"><h5>TIN TỨC</h5></a>
-                <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" class="m-1 mr-md-4 ml-md-4"><h5>TUYỂN DỤNG</h5></a>
+                <a for="gioi-thieu" href="@Url.RouteUrl("news-about-us")" id="aboutus" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
+                <a for="san-pham" href="@Url.RouteUrl("news-product")" onclick="setActiveMenu('san-pham')" class="m-1 mr-md-4 ml-md-4"><h5>SẢN PHẨM</h5></a>
+                <a for="su-kien" href="@Url.RouteUrl("news-event")" onclick="setActiveMenu('su-kien')" class="m-1 mr-md-4 ml-md-4"><h5>SỰ KIỆN</h5></a>
+                <a for="news" href="@Url.RouteUrl("news-default")" onclick="setActiveMenu('news')" class="m-1 mr-md-4 ml-md-4"><h5>TIN TỨC</h5></a>
+                <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" onclick="setActiveMenu('tuyen-dung')" class="m-1 mr-md-4 ml-md-4"><h5>TUYỂN DỤNG</h5></a>
                 <a href="/login" title="Đăng nhập" class="action-link m-1 mr-md-4 ml-md-4"><h5>ĐĂNG NHẬP</h5></a>
+            </div>
+            <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+                <i class="fa fa-bars"></i>
+            </a>
+        </div>
+    </div>
+
+    <div id="menuDesktop">
+
+        <div class="menubar d-flex align-items-center" style="height:160px">
+            <div class="container d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <div style="margin-left:25px">
+                    <div class="home d-none d-md-block">
+                        <a href="/">
+                            <img src="~/images/bottom-logo.png" />
+                        </a>
+                    </div>
+                    <div class="toggler">
+                    </div>
+                </div>
+                <div class="nav-link d-flex flex-wrap">
+                    <a for="home" href="/" class="m-1 mr-md-4"><h5>TRANG CHỦ</h5></a>
+                    <div class="m-1 mr-md-4 ml-md-4">
+                        <a for="gioi-thieu" href="@Url.RouteUrl("news-about-us")" id="aboutus" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
+                        @*<a for="aboutus" href="javascript:void(0)" id="aboutus" onclick="showDropDown()" data-toggle="dropdown"><h5>GIỚI THIỆU</h5></a>
+                                        <ul id="chil_aboutus">
+                                            <li v-for="item in listCategory">
+                                                <a :href="'/tin-tuc/'+item.Code">
+                                                    <h5>{{item.Name}}</h5>
+                                                </a>
+                                            </li>
+                                            <li><a href="#"><h5>BAN LÃNH ĐẠO</h5></a></li>
+                            <li><a href="#"><h5>LĨNH VỰC HOẠT ĐỘNG CHÍNH</h5></a></li>
+                            <li><a href="#"><h5>SẢN PHẨM</h5></a></li>
+                            <li><a href="#"><h5>THÀNH TỰU ĐẠT ĐƯỢC</h5></a></li>
+                                        </ul>*@
+                    </div>
+                    <a for="san-pham" href="@Url.RouteUrl("news-product")" onclick="setActiveMenu('san-pham')" class="m-1 mr-md-4 ml-md-4"><h5>SẢN PHẨM</h5></a>
+                    <a for="su-kien" href="@Url.RouteUrl("news-event")" onclick="setActiveMenu('su-kien')" class="m-1 mr-md-4 ml-md-4"><h5>SỰ KIỆN</h5></a>
+                    <a for="news" href="@Url.RouteUrl("news-default")" onclick="setActiveMenu('news')" class="m-1 mr-md-4 ml-md-4"><h5>TIN TỨC</h5></a>
+                    <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" onclick="setActiveMenu('tuyen-dung')" class="m-1 mr-md-4 ml-md-4"><h5>TUYỂN DỤNG</h5></a>
+                    <a href="/login" title="Đăng nhập" class="action-link m-1 mr-md-4 ml-md-4"><h5>ĐĂNG NHẬP</h5></a>
+                </div>
             </div>
         </div>
     </div>
+
 </section>
 <style>
+
+    .mobile-container {
+        max-width: 480px;
+        margin: auto;
+        background-color: #555;
+        height: 500px;
+        color: white;
+        border-radius: 10px;
+    }
+
+    .topnav {
+        overflow: hidden;
+        background-color: #333;
+        position: relative;
+    }
+
+        .topnav #myLinks {
+            display: none;
+            background-color: darkgray;
+        }
+
+        .topnav a {
+            color: #08486b;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 17px;
+            display: block;
+        }
+
+            .topnav a.icon {
+                background: #808080;
+                display: block;
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+
+            .topnav a:hover {
+                background-color: #ddd;
+                color: black;
+            }
+
+    .active {
+        background-color: #fff;
+        /*color: white;*/
+    }
+
     .topbar {
         height: 48px;
         background-color: #03324C !important;
@@ -163,41 +234,56 @@
 </style>
 
 <script>
-    new Vue({
-        el:'#chil_aboutus',
-        mounted() {
-            this.loadCategory();
-        },
-        components: {
 
-        },
-        data: {
-            listCategory: []
-        },
-        watch: {
-
-        },
-        methods: {
-            loadCategory() {
-                let _that = this;
-                let _form = new FormData();
-                _form.append("ParentCategoryCode", "gioi-thieu");
-                let _url = '/News/GetCategory'
-                axios.post(_url, _form)
-                    .then(response => {
-                        _that.listCategory = response.data.Data;
-                    })
-            }
+    var isMobileDevice = function () {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return true;
+        } else {
+            return false;
         }
-    });
+    }
 
-    var showDropDown = function () {
+    var showDropDown = function (menu) {
+
+        setActiveMenu(menu);
+
         var isDisplay = $('#chil_aboutus').css('display');
         if (isDisplay.includes("none")) {
             $('#chil_aboutus').css('display', 'block');
         }
         else {
             $('#chil_aboutus').css('display', 'none');
+        }
+    }
+
+    var responeMenu = function () {
+        //debugger
+        var w = $(window).width();
+        if (w < 1024) {
+            document.getElementById("menuMobile").style.display = "";
+            document.getElementById("menuDesktop").style.display = "none";
+        }
+        else {
+            document.getElementById("menuMobile").style.display = "none";
+            document.getElementById("menuDesktop").style.display = "";
+        }
+    }
+
+    $(document).ready(function () {
+        responeMenu();
+    });
+
+    //window.onresize = responeMenu();
+    $(window).resize(function () {
+        responeMenu();
+    });
+
+    function myFunction() {
+        var x = document.getElementById("myLinks");
+        if (x.style.display === "block") {
+            x.style.display = "none";
+        } else {
+            x.style.display = "block";
         }
     }
 </script>

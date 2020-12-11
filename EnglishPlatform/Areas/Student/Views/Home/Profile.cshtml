@@ -26,16 +26,16 @@
     <div class="card-header" v-cloak>
         <div class="flex border-b padding-b25">
             <h2 class="title" v-if="isInfo">
-                <a href="javascript:;" v-if="tab[0]" v-bind:style="{borderBottom: '1px solid'}" v-on:click="tabChange(0)">Thông tin cá nhân</a>
-                <a href="javascript:;" v-else v-on:click="tabChange(0)">Thông tin cá nhân</a>
+                @*<a href="javascript:;" v-if="tab[0]" v-bind:style="{borderBottom: '1px solid'}" v-on:click="tabChange(0)">Thông tin cá nhân</a>*@
+                <a href="javascript:;">Thông tin cá nhân</a>
             </h2>
             <h2 class="title" v-if="isPass">
                 <a href="javascript:;" title="Quay lại" v-on:click="changeState()"><i class="ti-arrow-left"></i></a>Đổi mật khẩu
             </h2>
-            <h2 class="title">
+            @*<h2 class="title">
                 <a href="javascript:;" v-if="tab[1]" v-bind:style="{borderBottom: '1px solid'}" v-on:click="tabChange(1)">Bảng điểm</a>
                 <a href="javascript:;" v-else v-on:click="tabChange(1)">Bảng điểm</a>
-            </h2>
+            </h2>*@
             <div class="c-right">
                 <a href="javascript:;" title="logout" class="btn-logout" v-on:click="logout()">Log out <i class="ic ic-exit"></i></a>
             </div>

@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Gói học", "admin", 2)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Gói học", BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 2)]
     public class ProductController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
@@ -50,7 +50,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
         }
 
-        public ActionResult Index()
+        public IActionResult Index()
         {
             var center = _serviceCenter.GetAll();
             var listClass = _serviceClass.GetAll();

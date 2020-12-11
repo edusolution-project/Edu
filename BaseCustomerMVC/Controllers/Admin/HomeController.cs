@@ -67,6 +67,8 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LearningHistoryService _learningHistoryService;
 
+        private readonly AccountService _accountService;
+
         private string host;
         private string staticPath;
         private string RootPath { get; }
@@ -108,7 +110,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 ReferenceService referenceService,
                 CalendarService calendarService,
                 LessonScheduleService lessonScheduleService,
-                LearningHistoryService learningHistoryService
+                LearningHistoryService learningHistoryService,
+                AccountService accountService
             )
         {
             _lessonService = lessonService;
@@ -147,6 +150,8 @@ namespace BaseCustomerMVC.Controllers.Admin
             _lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
 
+            _accountService = accountService;
+
             _env = env;
 
             host = iConfig.GetValue<string>("SysConfig:Domain");
@@ -157,6 +162,12 @@ namespace BaseCustomerMVC.Controllers.Admin
         // GET: Home
         public ActionResult Index()
         {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var account = _accountService.GetItemByID(UserID);
+            if (account != null)
+            {
+                ViewBag.Account = account;
+            }
             return View();
         }
 

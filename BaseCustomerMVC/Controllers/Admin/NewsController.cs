@@ -22,7 +22,7 @@ using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 10)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 4)]
     public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
@@ -260,6 +260,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
                 item.LastEdit = DateTime.UtcNow;
+                item.IsActive = olditem.IsActive;
 
                 var pos = 0;
                 var sameUrl = _serviceNews.GetItemByCode(item.Code);
@@ -467,6 +468,29 @@ namespace BaseCustomerMVC.Controllers.Admin
                 return Json("Gửi thành công");
             }
             catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        #endregion
+
+        #region uploadimg
+        public JsonResult GetPathIMG(IFormFile Thumbnail)
+        {
+            try
+            {
+                if (Thumbnail != null)
+                {
+                    var filepath = urlThumbnail(Thumbnail);
+                    var data = new Dictionary<String, Object>
+                {
+                    { "FilePath", filepath }
+                };
+                    return Json(data);
+                }
+                else { return Json("loi"); }
+            }
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }

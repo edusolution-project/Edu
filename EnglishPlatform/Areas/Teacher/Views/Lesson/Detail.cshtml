@@ -155,14 +155,15 @@
                     <form action="#" id="modal-body" name="partForm" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
-                    <div class="col-sm-8">
+                    @*<div class="col-sm-8">
                         <button class="btn mt-2 mb-2" title="Input từ Word" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i>Input từ Word</button>
                         <button class="btn mt-2 mb-2" title="Thêm từ bài" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i>Thêm từ bài</button>
                     </div>
                     <div class="col-sm-4" style="text-align:right">
+                    <div class="col-sm-4" style="text-align:right">*@ 
                         <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
                         <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
-                    </div>
+                    @*</div>*@
                 </div>
             </div>
         </div>
@@ -173,7 +174,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitle">Thêm vào bài kiểm tra</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModaltoAddExam()">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -181,7 +182,7 @@
                     <form action="#" id="modal-body" name="partModaltoAddExam" enctype="multipart/form-data"></form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal" onclick="closeModaltoAddExam()">Đóng</button>
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
                     <button type="button" class="btn btn-primary btnSaveForm" onclick="saveQAtoExam()">Lưu</button>
                 </div>
             </div>

@@ -26,5 +26,7 @@ namespace BaseCustomerMVC.Models
         public long TotalPractices { get; set; }
         [JsonProperty("RankPoint")]
         public double RankPoint { get; set; }
+        [JsonProperty("TypeClassSbj")]
+        public double TypeClassSbj { get; set; }
     }
 }

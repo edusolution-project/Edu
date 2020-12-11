@@ -94,6 +94,11 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassID == ClassID).Project(t => t.ID).ToList();
         }
 
+        public List<ClassSubjectEntity> GetByTypeClass(String ClassID,Int32 typeClass)
+        {
+            return Collection.Find(x => x.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+        }
+
 
         public Task RemoveByClass(string ClassID)
         {
