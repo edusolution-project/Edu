@@ -458,6 +458,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         ExamDone = examDone,
                         AvgPoint = studentResultExam.Count > 0 ? studentResultExam.Select(x => x.AvgPoint).Average() : 0,
                         Completed = examDone,
+                        TypeClassSbj = sbj.TypeClass
                     };
 
                     if (string.IsNullOrEmpty(StudentSummaryViewModel.CourseName))
@@ -552,6 +553,19 @@ namespace BaseCustomerMVC.Controllers.Student
 
             foreach (var sbj in subjects)
             {
+                if(sbj.CourseName == "Kiểm tra, đánh giá")
+                {
+                    var a123 = "";
+                }
+                var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.ClassSubjectID == sbj.ID).ToList();
+                var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                //danh sach bai kiem tra
+                var examIds = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                var examDone = _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID) && x.StudentID == StudentID).ToList().GroupBy(x => x.LessonID).ToList().Count;
+
+                var practiceIds = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                var practiceDone = _examService.CreateQuery().Find(x => practiceIds.Contains(x.LessonID) && x.StudentID == StudentID).ToList().GroupBy(x => x.LessonID).ToList().Count;
+
                 var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
                     .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
                     {
@@ -565,8 +579,12 @@ namespace BaseCustomerMVC.Controllers.Student
                         TotalStudents = (int)total_students,
                         TotalLessons = sbj.TotalLessons,
                         TotalExams = sbj.TotalExams,
-                        TotalPractices = sbj.TotalPractices
+                        TotalPractices = sbj.TotalPractices,
+                        TypeClassSbj = sbj.TypeClass
                     });
+
+                summary.ExamDone = examDone;
+                summary.PracticeDone = practiceDone;
 
                 if (string.IsNullOrEmpty(summary.CourseName))
                 {

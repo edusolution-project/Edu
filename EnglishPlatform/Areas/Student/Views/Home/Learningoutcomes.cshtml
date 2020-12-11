@@ -22,8 +22,8 @@
                         <a href="javascript:;" v-on:click="tabChange(0)" title="Kết quả luyện tập">Kết quả luyện tập</a>
                     </li>
                     @*<li :class="{active:tab[1]}">
-                        <a href="javascript:;" v-on:click="tabChange(1)" title="Kết quả kiểm tra">Kết quả kiểm tra</a>
-                    </li>*@
+                            <a href="javascript:;" v-on:click="tabChange(1)" title="Kết quả kiểm tra">Kết quả kiểm tra</a>
+                        </li>*@
                 </ul>
             </div>
             <div class="col-md-12 form-row pb-2">
@@ -52,14 +52,14 @@
                 <template v-if="tab[0]">
                     <tbody>
                         <tr v-for="(item,k) in summaryData">
-                            <template v-if="item.Type != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                            <template v-if="item.TypeClassSbj != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                                 <td><a href="#" v-on:click="showDetail(item.ClassSubjectID,item.CourseName)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
                                 <td class="text-danger" v-if="isShowAllPractice" v-bind:class="{good : (getPercent(item.PracticeDone, item.TotalPractices) > 50)}"> {{getPercent(item.PracticeDone, item.TotalPractices).toFixed(2)}}%  ({{item.PracticeDone}}/{{item.TotalPractices}})</td>
                                 <td class="text-danger" v-else v-bind:class="{good : (getPercent(item.PracticeDone, item.TotalPractices) > 50)}"> {{getPercent(item.PracticeDone, item.TotalPractices).toFixed(2)}}%  ({{item.PracticeDone}}/{{item.TotalPractices}})</td>
                                 <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
                                 <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                             </template>
-                            <template v-else-if="item.Type == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                            <template v-else-if="item.TypeClassSbj == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                                 <td><a href="#" v-on:click="showDetail(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
                                 <td class="text-danger" v-if="isShowAllExam" v-bind:class="{good : (getPercent(item.ExamDone, item.TotalExams) > 50)}"> {{getPercent(item.ExamDone, item.TotalExams).toFixed(2)}}%  ({{item.ExamDone}}/{{item.TotalExams}})</td>
                                 <td class="text-danger" v-else v-bind:class="{good : (getPercent(item.ExamDone, item.TotalExams) > 50)}"> {{getPercent(item.ExamDone, item.TotalExams).toFixed(2)}}%  ({{item.ExamDone}}/{{item.TotalExams}})</td>
@@ -85,12 +85,12 @@
     </div>
 
     <b-modal id="classsubject_modal" size="xl" :title="'Chi tiết '+courseName">
-        <div class="flex j-between border-b">
-            <div class="tab bg-none">
-                <h2></h2>
-            </div>
-            <div class="c-right"></div>
-        </div>
+        @*<div class="flex j-between border-b">
+                <div class="tab bg-none">
+                    <h2></h2>
+                </div>
+                <div class="c-right"></div>
+            </div>*@
         <div class="card-body" v-cloak>
             <div class="box">
                 <template v-if="list_chapters.length > 0">
@@ -107,39 +107,80 @@
                 <template v-else>
                     Chưa có dữ liệu
                 </template>
-                <!--<ul class="list ls-pratice" v-for="(chapter,k) in list_chapters">
-        <li class="col-md-12">
-            <div class="inner">
-                <div class="d-flex justify-content-between w-100 align-items-start align-items-md-center flex-column flex-md-row btn-collapse">
-                    <a href="javascript:;" :id="chapter.ID" class="blue-color collapsed" :aria-controls="'prc-' + chapter.ID +'-'+ k" aria-expanded="false" data-toggle="collapse" role="button">
-                        <i class="ic far fa-folder mr-2"></i>{{chapter.Name}}<i class="ic ic-collapse" v-on:click="getSubList(chapter.ID, k,chapter.ClassSubjectID)"></i>
-                    </a>
-                </div>
-                <div :id="'prc-' + chapter.ID +'-'+ k" title="'my-accordion-'+i" role="tabpanel" style="" class="collapse show">
-                    <div class="card-body">
-                        <ul class="list" v-for="(lesson,i) in list_lessons">
-                            <template>
-                                <li :id="lesson.ID" class="sub-practice d-flex flex-column">
-                                    <div class="d-flex justify-content-between w-100 align-items-start align-items-md-center flex-column flex-md-row">
-                                        <a href="#" class="text-dark">
-                                            <i class="ic far fa-file-alt mr-2"></i>
-                                            {{lesson.Title}}
-                                        </a> <ul class="time-line flex flex-row"></ul>
-                                    </div>
-                                    <div class="d-flex justify-content-start w-100 mt-2 align-items-center">
-                                        <a href="/truong-thpt-vinh-yen/student/Lesson/Detail/5f7e80abf197721750de5eaa/5f7e80abf197721750de5ea8" title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size: 60%; min-width: unset;">CHƯA HỌC</a>-->
-                <!---->
-                <!--</div>
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </li>
-    </ul>-->
             </div>
         </div>
+    </b-modal>
+
+    @*<b-modal id="detail_modal" size="xl" :title="'Chi tiết bài học ' + lessonName" data-backdrop="static" data-keyboard="false">
+        <div class="card-body" v-cloak>
+            <div class="box">
+                <template v-if="resultData.length > 0">
+                    <table id="r_table" class="table">
+                        <thead>
+                            <tr>
+                                <th v-for="(field,k) in resultFields">{{field.label}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="resultData == null || resultData.length <= 0">
+                                <td colspan="5">Chưa có kết quả</a></td>
+                            </tr>
+                            <tr v-for="(item,k) in resultData">
+                                <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
+                                <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
+                                <td>{{formatTime(item.LearnLast)}}</td>
+                                <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
+                                <td>{{item.LearnCount}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>
+                    Chưa có dữ liệu
+                </template>
+            </div>
+        </div>
+    </b-modal>*@
+
+    <b-modal :no-close-on-backdrop="true" id="detail_modal" size="xl" centered :title="'Kết quả bài học '+lessonName" style="width:800px">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="flex border-b pb-3 justify-content-between">
+                    <div class="flex width-100">
+                        <label class="label"><b style="font-size:120%">Số lượt làm bài: {{history.length}}</b></label>
+                        <input type="hidden" value="lesson_result.ID" />
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center">#</th>
+                            <th scope="col" class="text-center">Điểm</th>
+                            <th scope="col" class="text-center">Giờ bắt đầu</th>
+                            <th scope="col" class="text-center">Giờ kết thúc</th>
+                            <th scope="col" class="text-center">Thời gian làm</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                            @*<th scope="col" class="text-center"></th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in history" v-if="history.length > 0">
+                            <td class="text-center">{{k+1}}</td>
+                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
+                            <td class="text-center">{{formatTime(item.Created)}}</td>
+                            <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
+                            <td class="text-center">{{getPeriod(item)}}</td>
+                            <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
+                            @*<td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>*@
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <template v-slot:modal-footer>
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
     </b-modal>
 </section>
 
@@ -173,6 +214,7 @@
                 window.formatTime = this.formatTime
                 window.isValid = this.isValid
                 window.GoLesson = this.goLesson
+                window.GoDetail = this.GoDetail
                 //this.loadSummary();
             },
             data: {
@@ -199,6 +241,28 @@
                         label: 'Xếp hạng'
                     },
                 ],
+                resultFields: [
+                    {
+                        key: 'lesson',
+                        label: 'Bài học'
+                    },
+                    {
+                        key: 'schedule',
+                        label: 'Lịch kiểm tra'
+                    },
+                    {
+                        key: 'last_update',
+                        label: 'Lần cuối'
+                    },
+                    {
+                        key: 'score',
+                        label: 'Điểm'
+                    },
+                    {
+                        key: 'total',
+                        label: 'Lượt làm bài'
+                    },
+                ],
                 summaryData: [],
                 resultData:[],
                 classSubjectID: '',
@@ -209,7 +273,9 @@
                 list_chapters: [],
                 list_lessons: [],
                 load_chapter: [],
-                courseName:''
+                courseName: '',
+                lessonName: '',
+                history:[]
             },
             watch: {
             },
@@ -218,7 +284,7 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append("ClassSubjectID", _that.classSubjectID)
-                    _form.append('IsPractice', $("#examType").val() == '1')
+                    _form.append('IsPractice', false)
                     let _url = '@processUrl("GetLearningResult", "ClassSubject")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -246,7 +312,7 @@
                             _that.summaryData = response.data;
                         }).catch(e => { })
                 },
-                loadSummaryExam() {
+                @*loadSummaryExam() {
                     let _that = this
                     let _form = new FormData();
                     let _url = '@processUrl("GetLearningSummary", "ClassSubject")';
@@ -258,7 +324,7 @@
                         .then(response => {
                             _that.summaryExamData = response.data;
                         }).catch(e => { })
-                },
+                },*@
                 getPercent(a, b) {
                     var result = 0;
                     if (a > 0)
@@ -303,7 +369,6 @@
                             })
                             this.list_chapters = _that.list_chapters;
                             this.list_lessons = _that.list_lessons;
-                            debugger
                         }).catch(e => { })
                 },
                 getSubList(chapterId, pos, ClassSubjectID) {
@@ -367,6 +432,48 @@
                     var url = '@processUrl("Detail", "Lesson")/' + ID + '/'+ClasssubjecID
                     history.replaceState(state, document.title, '#' + ID);
                     document.location.href = url;
+                },
+                GoDetail(lessonID, ClasssubjecID, LessonName) {
+                    let _that = this;
+                    let _form = new FormData();
+                    _form.append('LessonID', lessonID);
+                    //_form.append('ClassSubjectID', ClasssubjecID);
+                    let _url = '@processUrl("GetLessonProgressList", "Exam")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+
+                            if (_data != null && _data[0].ListExam != null) {
+                                _that.history = _data[0].ListExam;
+                            }
+                            else
+                                _that.history = [];
+                        }).catch(e => { })
+
+                    this.lessonName = LessonName;
+                    _that.$bvModal.show('detail_modal');
+                },
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                getPeriod(obj) {
+                    var startms = moment(obj.Created);
+                    var endms = moment(obj.EndTime);
+                    console.log(startms);
+                    console.log(endms);
+                    var ret = "";
+                    if (endms.days() - startms.days() > 0)
+                        ret += (endms.days() - startms.days()) + "d ";
+                    if (endms.hours() - startms.hours() > 0)
+                        ret += (endms.hours() - startms.hours()) + "h ";
+                    if (endms.minutes() - startms.minutes() > 0)
+                        ret += (endms.minutes() - startms.minutes()) + "m ";
+                    if (endms.second() - startms.second() > 0)
+                        ret += (endms.second() - startms.second()) + "s ";
+                    if (ret.length == 0)
+                        ret = "0s";
+                    return ret;
                 }
             },
         })
@@ -408,7 +515,7 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice d-flex flex-column" :id="lesson.ID">
             <div class="d-flex justify-content-between w-100 align-items-start align-items-md-center flex-column flex-md-row">
-                <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-on:click.prevent="GoLesson(lesson.ID,lesson.ClassSubjectID)" class="text-dark">
+                <a href="javascript:void(0)" v-on:click.prevent="GoDetail(lesson.ID,lesson.ClassSubjectID,lesson.Title)" class="text-dark">
                     <i v-if="lesson.TemplateType === 2" class="ic far fa-edit mr-2"></i>
                     <i v-else class="ic far fa-file-alt mr-2"></i>
                     {{lesson.Title}}
@@ -421,29 +528,26 @@
             @*Exam*@
             <div class="d-flex justify-content-start w-100 mt-2 align-items-center">
                 <template v-if="lesson.TemplateType === 2">
-                    <template v-if="!isValid(lesson)">
+                    @*<template v-if="!isValid(lesson)">
                         <a title="CHƯA MỞ" class="btn-act act ml-0 bg-secondary pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" v-if="moment(lesson.StartDate) > moment()" v-on:click="lockNotify(lesson,1)">CHƯA MỞ</a>
                         <a title="HẾT HẠN" class="btn-act act ml-0 bg-secondary pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" v-else v-on:click="lockNotify(lesson,0)">HẾT HẠN</a>
-                    </template>
-                    <template v-else-if="lesson.Tried > 0">
+                    </template>*@
+                    @*<template v-else-if="lesson.Tried > 0">
                         <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-if="lesson.LastExam != null" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐÃ LÀM">ĐÃ LÀM</a>
                         <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-else class="btn-act act ml-0 bg-warning pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;" title="ĐANG LÀM">ĐANG LÀM</a>
-                    </template>
-                    <template v-else>
+                    </template>*@
+                    @*<template v-else>
                         <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" title="Làm bài" class="btn-act act ml-0 bg-info pt-0 pb-0 pl-2 pr-2" style="min-width:unset; font-size:60%;">CHƯA LÀM</a>
-                    </template>
+                    </template>*@
                     <div v-if="isValidTime(lesson.LastJoin)" class="text-muted ml-2" style="font-size:90%">
                         @*<span>Làm bài lần cuối</span>*@
                         <span>{{formatTime(lesson.LastJoin)}}</span> - @*Kết quả:*@
                         <span class="bg-transparent text-primary font-weight-bold" v-bind:class="{'text-danger' : parseInt(lesson.DoPoint) < 50, 'text-success' : parseInt(lesson.DoPoint) > 70}">{{lesson.DoPoint.toFixed(2)}}%</span>
                     </div>
-                    <a target="_blank" v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@processUrl("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="pt-0 pb-0 pl-2 pr-2 ml-1 text-muted" style="min-width:unset; font-size: 90%;"> (Xem đáp án)</a>
+                    @*<a target="_blank" v-if="lesson.Tried > 0 && lesson.LastExam != null" :href="'@processUrl("Review", "Lesson")/' + lesson.LastExam" title="Xem đáp án" class="pt-0 pb-0 pl-2 pr-2 ml-1 text-muted" style="min-width:unset; font-size: 90%;"> (Xem đáp án)</a>*@
                 </template>
                 <template v-else>
-                    <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-if="isValidTime(lesson.LastJoin)" title="ĐÃ HỌC" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style=" min-width:unset; font-size:60%;">ĐÃ HỌC</a>
-                    <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
-                    <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
-                    <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
+                    @*<a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-if="isValidTime(lesson.LastJoin)" title="ĐÃ HỌC" class="btn-act act ml-0 bg-success pt-0 pb-0 pl-2 pr-2" style=" min-width:unset; font-size:60%;">ĐÃ HỌC</a>*@
                     <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + lesson.ID + '/' + lesson.ClassSubjectID" v-else title="CHƯA HỌC" class="btn-act act ml-0 pt-0 pb-0 pl-2 pr-2 bg-info" style="font-size:60%; min-width: unset;">CHƯA HỌC</a>
                     <div v-if="isValidTime(lesson.LastJoin)" class="text-muted" style="font-size:90%">
                         @*<span class="ml-2">Học lần cuối: </span>*@

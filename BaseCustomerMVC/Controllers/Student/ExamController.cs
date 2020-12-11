@@ -36,6 +36,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly StudentService _studentService;
         private readonly ClassService _classService;
         //private readonly LearningHistoryService _learningHistoryService;
+        private readonly LessonProgressService _lessonProgressService;
 
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -63,6 +64,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
+            LessonProgressService lessonProgressService,
 
             ProgressHelper progressHelper,
 
@@ -87,6 +89,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examDetailService = examDetailService;
             _studentService = studentService;
             _teacherService = teacherService;
+            _lessonProgressService = lessonProgressService; 
 
             _progressHelper = progressHelper;
 
@@ -678,6 +681,60 @@ namespace BaseCustomerMVC.Controllers.Student
                 contentType = "application/octet-stream";
             }
             return contentType;
+        }
+
+        public JsonResult GetLessonProgressList(string LessonID)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return null;
+            }
+            var StudentID = _studentService.GetItemByID(userId).ID;
+
+            var result = new List<StudentLessonResultViewModel>();
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return Json("No data");
+            var listStudent = new List<StudentEntity>();
+            if (!string.IsNullOrEmpty(StudentID))
+                listStudent.Add(_studentService.GetItemByID(StudentID));
+            else
+                listStudent = _studentService.GetStudentsByClassId(lesson.ClassID).ToList();
+
+            if (listStudent != null && listStudent.Count() > 0)
+            {
+                foreach (var student in listStudent)
+                {
+                    var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == lesson.ID).SortByDescending(t => t.ID).ToList();
+                    var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, lesson.ID);
+                    var tried = examresult.Count();
+                    var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                    var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+                    var lastEx = examresult.FirstOrDefault();
+                    result.Add(new StudentLessonResultViewModel(student)
+                    {
+                        LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+                        MaxPoint = maxpoint,
+                        MinPoint = minpoint,
+                        AvgPoint = avgpoint,
+                        TriedCount = tried,
+                        LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+                        OpenCount = progress?.TotalLearnt ?? 0,
+                        LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+                        IsCompleted = lastEx != null && lastEx.Status,
+                        ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList()
+                    });
+                }
+            }
+
+            var response = new Dictionary<string, object>
+                {
+                    { "Data", result }
+                };
+            return new JsonResult(response);
         }
 
     }
