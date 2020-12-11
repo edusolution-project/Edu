@@ -1476,8 +1476,14 @@ var Lesson = (function () {
                 }
                 container.append(answer);
                 if (data.IsCorrect == true) {
-                    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
-                    document.getElementById(data.ID).style.display = "none";
+                    if (data.Media == null) {
+                        placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
+                        document.getElementById(data.ID).style.display = "none";
+                    }
+                    else {
+                        placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "html": $(answer).html() }));
+                        document.getElementById(data.ID).style.display = "none";
+                    }
                 }
                 break;
             case "QUIZ1":
@@ -4666,7 +4672,7 @@ var Lesson = (function () {
             })
     }
 
-    var chooseCourse = function (id,obj) { //chương
+    var chooseCourse = function (id, obj) { //chương
         //var modalForm = window.partModaltoAddExam;
         //var id = $("#chooseCourse").val();
         var containerCourse = $("#" + id);
@@ -4974,7 +4980,7 @@ var Lesson = (function () {
             icon: 'question',
             html:
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
-                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>'+
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>' +
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',

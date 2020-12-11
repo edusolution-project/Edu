@@ -112,13 +112,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Subject = currentClassSubject;
             ViewBag.Lesson = Data;
             ViewBag.Title = Data.Title;
+            ViewBag.Center = _centerService.GetItemByCode(basis);
 
             if (frameview == 1)
+                //return Data.TemplateType == LESSON_TEMPLATE.LECTURE ? View("FrameDetails") : View("FrameDetails_E");
                 return View("FrameDetails");
+            //return Data.TemplateType == LESSON_TEMPLATE.LECTURE ? View() : View("Detail_E");
             return View();
         }
 
-        public IActionResult Preview(DefaultModel model, string basis, string ClassID)
+        public IActionResult Preview(DefaultModel model, string basis, string ClassID, string print = "")
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (ClassID == null)
@@ -144,8 +147,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Subject = currentClassSubject;
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
+            ViewBag.Center = _centerService.GetItemByCode(basis);
+            if (print == "1")
+                return View("Print");
             return View();
         }
+
+        public IActionResult Print(DefaultModel model, string basis, string ClassID)
+        {
+            return Preview(model, basis, ClassID, "1");
+        }
+
 
         [HttpPost]
         public JsonResult GetDetailsLesson(string ID)

@@ -74,7 +74,7 @@
                     <th>#</th>
                     <th>Họ tên</th>
                     <th>Lớp</th>
-                    <th>Email</th>
+                    <th style="width: 300px">Email</th>
                     <th>SĐT</th>
                     <th>Lần học cuối</th>
                     <th>Tác vụ</th>
@@ -87,7 +87,7 @@
                         <a :href="'@processUrl("StudentDetail", "Class")/' + item.ID + '/' + item.ClassID" :title="item.FullName" v-if="item.ClassID != null">{{item.FullName}}</a>
                         <a :href="'@processUrl("Detail", "StudentManage")/' + item.ID" :title="item.FullName" v-else="item.ClassID != null">{{item.FullName}}</a>
                     </td>
-                    <td style="text-align:left">
+                    <td style="text-align:left;">
                         <template v-if="item.JoinedClasses != null && item.JoinedClasses.length == 1">
                             <a :href="'@processUrl("Detail", "Class")/' + item.JoinedClasses + '#module'" style="white-space:nowrap">{{item.ClassName}}</a>
                         </template>
@@ -97,7 +97,7 @@
                             </div>
                         </template>
                     </td>
-                    <td>{{item.Email}}</td>
+                    <td style="column-rule-width:medium">{{item.Email}}</td>
                     <td>{{item.Phone}}</td>
                     <td>{{formatTime(item.LastJoinDate)}}</td>
                     <td style="width:150px">
