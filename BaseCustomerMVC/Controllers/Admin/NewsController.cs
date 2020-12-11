@@ -22,7 +22,7 @@ using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 4)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 4)]
     public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;

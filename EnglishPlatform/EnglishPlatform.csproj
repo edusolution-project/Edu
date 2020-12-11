@@ -6,6 +6,7 @@
 	<PreserveCompilationContext>true</PreserveCompilationContext>
 	<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
 	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<UserSecretsId>b0adcfcf-9257-4849-ab2b-3543df99e7e0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

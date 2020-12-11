@@ -39,7 +39,8 @@ namespace BaseCustomerMVC.Globals
 
         public static List<AccessCtrlAttribute> GetAccessCtrlsByNewsAdministrator()
         {
-            return GetAccessCtrl<Globals.AdminController>(_news_administrator_Type);
+            var a= GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
+            return GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
         }
 
         private static List<AccessCtrlAttribute> GetAccessCtrl<T>(string type) {

@@ -251,12 +251,8 @@ namespace AutoEmailEduso
 
                             // danh sach bai kiem tra
                             var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-                            //var examIds = _lessonService.CreateQuery().Find(x => (x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-                            // b = _lessonService.CreateQuery().Find(x => activeLessonIds.Contains(x.ID) && (x.TemplateType == 1 || x.IsPractice == true)).ToList();
-                            //var a = activeProgress.ToList().FindAll(x => examIds.Contains(x.LessonID) && x.Tried > 0 ).ToList();
                             //ket qua lam bai cua hoc sinh trong lop
-                            //var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                            var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID))
+                            var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                                group r by r.StudentID
                                                into g
                                                select new StudentResult
