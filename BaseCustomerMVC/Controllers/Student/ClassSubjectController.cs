@@ -629,7 +629,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
             if (currentCs == null)
-                return null;
+                return Json("Không tìm thấy môn học");
 
             var data = new List<LessonProgressEntity>();
             var passExams = new List<LessonEntity>();
@@ -683,7 +683,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
             if (currentCs == null)
-                return null;
+                return Json("Không tìm thấy môn học");
 
             List<LessonProgressEntity> data;
             data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
