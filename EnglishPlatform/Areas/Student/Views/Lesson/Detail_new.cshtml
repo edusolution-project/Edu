@@ -139,7 +139,7 @@ else
                 mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.STUDENT_EXAM" : "mod.STUDENT_LECTURE"),
                 url: {
                     load: '@processUrl("GetLesson", "Lesson")',
-                    current: '@processUrl("GetCurrentExam", "Exam")',
+                    current: '@processUrl("GetCurrentExam",  "Exam")',
                     start: '@processUrl("Create", "Exam")',
                     answer: '@processUrl("CreateDetail", "Exam")',
                     removeans: '@processUrl("RemoveDetail", "Exam")',

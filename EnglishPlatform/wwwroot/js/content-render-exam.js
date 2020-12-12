@@ -324,14 +324,13 @@ var Lesson = (function () {
         var infoHolder = $('.examHeader');
         console.log(infoHolder);
         var date = new Date();
-        var centerInfo = $("<div>", { class: "col-6", style: "text-transform: uppercase; font-weight:700", text: "Trường: " + config.center_name });
+        var centerInfo = $("<div>", { class: "col-6 text-center", style: "text-transform: uppercase; font-weight:700", html: "Trường: " + config.center_name + "<br/>Lớp: <span style='font-weight:700'>" + config.class_name + "</span>" });
         var dateInfo = $("<div>", { class: "col-6 text-right font-italic", style: "font-size:90%", text: "Ngày " + date.getDate() + " tháng " + (date.getMonth() + 1) + " năm " + date.getFullYear() });
-        var lessonTitle = $("<div>", { class: "col-6 font-weight-bold", text: _data.Title + " - Thời gian: " + _data.Timer + 'p' });
-        var studentInfo = $("<div>", { class: "col-6", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span> - Lớp: <span style='font-weight:700'>" + config.class_name + "</span>" });
+        var lessonTitle = $("<div>", { class: "col-6 font-weight-bold text-right", text: _data.Title + " - Thời gian: " + _data.Timer + "p" });
+        var studentInfo = $("<div>", { class: "col-6 text-center", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span>" });
 
         infoHolder.append($("<div>", { class: "col-12 row" }).append(centerInfo).append(dateInfo));
-        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(lessonTitle));
-        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo));
+        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle));
 
     }
 
@@ -926,7 +925,7 @@ var Lesson = (function () {
     }
 
     var openPrint = function () {
-        window.open(document.location.href.replace("/Detail", "/Print") );
+        window.open(document.location.href.replace("/Detail", "/Print"));
     }
 
     //Preview: view + edit
@@ -2817,7 +2816,15 @@ var Lesson = (function () {
                 }).append('<i class="fas fa-ban mr-2"></i>').append("Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")");
                 isOverdue = true
             }
-            else {
+            else if (startDate < moment(new Date(1900, 1, 1))) {
+                console.log("Not set")
+                doButton = $('<div>', {
+                    "class": "btn btn-danger m-2 lesson-action",
+                    "style": "cursor: pointer",
+                    "disabled": "disabled"
+                }).append('<i class="fas fa-ban mr-2"></i>').append("Bài đang bị khóa");
+                isOverdue = true
+            } else {
                 console.log("In due")
                 doButton = $('<div>', {
                     "class": "btn btn-primary m-2 lesson-action",

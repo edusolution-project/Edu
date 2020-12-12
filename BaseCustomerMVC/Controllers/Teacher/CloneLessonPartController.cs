@@ -1076,7 +1076,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private async Task CopyPartToLesson(string basis, CloneLessonPartEntity originPart, LessonEntity targetLesson, string createdUser)
         {
-            var newPart = new CloneLessonPartViewModel();
+            var newPart = new CloneLessonPartViewModel { };
             _cloneLessonPartViewModelMapping.AutoOrtherTypeWithoutID(originPart, newPart);
             newPart.Questions = _cloneQuestionService.GetByPartID(originPart.ID).Select(question => _cloneQuestionViewModelMapping.AutoOrtherTypeWithoutID(question, new CloneQuestionViewModel
             {
@@ -1087,6 +1087,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Created = DateTime.Now,
                     CreateUser = createdUser,
                     ClassSubjectID = targetLesson.ClassSubjectID,
+                    IsCorrect = answer.IsCorrect, //BAD MAPPING
                     ParentID = null
                 })).ToList(),
                 ClassSubjectID = targetLesson.ClassSubjectID,
