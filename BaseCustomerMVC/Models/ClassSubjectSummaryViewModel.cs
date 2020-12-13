@@ -28,5 +28,7 @@ namespace BaseCustomerMVC.Models
         public double RankPoint { get; set; }
         [JsonProperty("TypeClassSbj")]
         public double TypeClassSbj { get; set; }
+        [JsonProperty("Order")]
+        public double Order { get; set; }
     }
 }

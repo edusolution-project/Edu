@@ -621,12 +621,12 @@ namespace BaseCustomerMVC.Controllers.Student
         }
         #endregion
 
-        #region Learningoutcomes
-        public IActionResult Learningoutcomes()
-        {
-            return View("Learningoutcomes");
-        }
-        #endregion
+        //#region Learningoutcomes
+        //public IActionResult Learningoutcomes()
+        //{
+        //    return View("Learningoutcomes");
+        //}
+        //#endregion
 
         protected string processUrl(string center, string act, string ctrl, Object param = null)
         {
