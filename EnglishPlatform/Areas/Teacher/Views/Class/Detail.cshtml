@@ -45,7 +45,7 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
+                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
                     <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
                 </ul>
             </div>
@@ -285,7 +285,7 @@
                 </table>
             </div>
         </div>
-        <div class="box" v-if="tab[3]">
+        @*<div class="box" v-if="tab[3]">
             <div class="row ls-doc" v-if="ref.data.length > 0">
                 <div class="col-md-6" v-for="data in ref.data">
                     <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
@@ -298,10 +298,10 @@
                                 <div>
                                     <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
                                 </div>
-                                @*<div>
-                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                    </div>*@
+                                *<div>
+                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                </div>*
                             </div>
                             <div class="pt-0 pb-2">
                                 <p>{{domDecoder(data.Description)}}</p>
@@ -320,8 +320,8 @@
             <div class="row ls-doc text-center d-block" v-else>
                 Không có tài liệu
             </div>
-        </div>
-        <div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
+        </div>*@
+        @*<div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
             <div class="paging-view">
                 Hiển thị:
                 <select v-model="ref.view" v-on:change="loadPreference()">
@@ -338,7 +338,7 @@
                                   v-on:input="loadPreference()"></b-pagination>
                 </div>
             </div>
-        </div>
+        </div>*@
         <div class="box" v-show="tab[4]">
             <ul class="list ls-practice">
                 <li v-for="(obj,i) in classSubjects">
@@ -1002,9 +1002,9 @@
                         case 'score':
                             this.tabChange(2);
                             break;
-                        case 'reference':
-                            this.tabChange(3);
-                            break;
+                        //case 'reference':
+                        //    this.tabChange(3);
+                        //    break;
                         case 'result':
                             this.tabChange(4);
                             break;

@@ -41,7 +41,12 @@
         <table id="ed_table" class="table">
             <thead>
                 <tr>
-                    <th v-for="(field,k) in fields">{{field.label}}</th>
+                    <th style="width:40px">#</th>
+                    <th>Họ tên</th>
+                    <th style="width:300px;">Email</th>
+                    <th>SĐT</th>
+                    <th>Chức danh</th>
+                    <th>Tác vụ</th>
                 </tr>
             </thead>
             <tbody>
@@ -165,36 +170,36 @@
                     pass: "",
                     subjects: [],
                 },
-                fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'name',
-                        label: 'Họ tên'
-                    },
-                    {
-                        key: 'email',
-                        label: 'Email'
-                    },
-                    {
-                        key: 'phone',
-                        label: 'SĐT'
-                    },
-                    //{
-                    //    key: 'subjects',
-                    //    label: 'Chuyên môn'
-                    //},
-                    {
-                        key: 'pos',
-                        label: 'Chức danh'
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
-                ],
+                //fields: [
+                //    {
+                //        key: 'stt',
+                //        label: '#'
+                //    },
+                //    {
+                //        key: 'name',
+                //        label: 'Họ tên'
+                //    },
+                //    {
+                //        key: 'email',
+                //        label: 'Email'
+                //    },
+                //    {
+                //        key: 'phone',
+                //        label: 'SĐT'
+                //    },
+                //    //{
+                //    //    key: 'subjects',
+                //    //    label: 'Chuyên môn'
+                //    //},
+                //    {
+                //        key: 'pos',
+                //        label: 'Chức danh'
+                //    },
+                //    {
+                //        key: 'actions',
+                //        label: 'Tác vụ'
+                //    }
+                //],
                 tableData: [
                 ],
                 //list_subject: [],
@@ -449,7 +454,7 @@
 
         var check = false;
         function showSelect() {
-            
+
             if (check == false) {
                 $('#selectSub').attr('style', 'display:block');
                 check = true;
@@ -477,10 +482,10 @@
             </div>
         </b-col>
         @*<b-col class="form-group">
-            <label for="">Email</label>
-            <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
-            <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
-        </b-col>*@
+                <label for="">Email</label>
+                <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
+                <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
+            </b-col>*@
         <b-col class="form-group row">
             <div class="col-sm-6">
                 <label for="">Điện thoại</label>
@@ -497,43 +502,44 @@
         </b-col>
         <b-col class="form-group row">
             <!--
-        <div class="col-sm-6" style="position:relative">
-            <label for="">Chọn chuyên môn</label>
-            <div class="row col-md-4 ">
-                @*<div class="input-group">
-                    <div class="input-group-btn row">*@
-                        <div class="col-sm-4">
-                            <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
-                                Chọn <span class="caret"></span>
-                            </button>
+            <div class="col-sm-6" style="position:relative">
+                <label for="">Chọn chuyên môn</label>
+                <div class="row col-md-4 ">
+                    @*<div class="input-group">
+                        <div class="input-group-btn row">*@
+                            <div class="col-sm-4">
+                                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
+                                    Chọn <span class="caret"></span>
+                                </button>
+                            </div>
+                        @*</div>
+                        <div class="subject_wrapper d-none">
                         </div>
-                    @*</div>
-                    <div class="subject_wrapper d-none">
-                    </div>
 
-                </div>*@
-            </div>
-            <div class="col-sm-8">
-                <div id="selectSub" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                    <ul class="subjectSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
-                        @{
-                            for (int i = 0; ViewBag.Subject != null && i < ViewBag.Subject.Count; i++)
-                            {
-                                <li>
-                                    <a>
-                                        <input type="checkbox" id="@ViewBag.Subject[i].ID" value="@ViewBag.Subject[i].ID" v-model="add_member.subjects"><span class="lbl"> @ViewBag.Subject[i].Name </span>
-                                        @*<input type="checkbox" id="@ViewBag.Subject[i].ID" v-model="add_member.subjects" /><span class="lbl"> @ViewBag.Subject[i].Name </span>*@
-                                    </a>
-                                </li>
-                            }
-                        }
-                    </ul>
+                    </div>*@
                 </div>
-            </div>
-        </div>-->
+                <div class="col-sm-8">
+                    <div id="selectSub" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                        <ul class="subjectSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
+                            @{
+                                for (int i = 0; ViewBag.Subject != null && i < ViewBag.Subject.Count; i++)
+                                {
+                                    <li>
+                                        <a>
+                                            <input type="checkbox" id="@ViewBag.Subject[i].ID" value="@ViewBag.Subject[i].ID" v-model="add_member.subjects"><span class="lbl"> @ViewBag.Subject[i].Name </span>
+                                            @*<input type="checkbox" id="@ViewBag.Subject[i].ID" v-model="add_member.subjects" /><span class="lbl"> @ViewBag.Subject[i].Name </span>*@
+                                        </a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>-->
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">
+            m
             <template v-if="isLoading">
                 <b-button>Đang thực hiện...</b-button>
             </template>

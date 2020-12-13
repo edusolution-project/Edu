@@ -1862,6 +1862,9 @@ var Lesson = (function () {
                     },
                     success: function (data) {
                         if (data.Error == null) {
+                            //$('#pills-part-' + id).remove();
+                            //$('#pills-' + id).remove();
+                            //renderQuizCounter()
                             document.location = document.location;
                         }
                         else {
@@ -4706,7 +4709,7 @@ var Lesson = (function () {
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
                     if (item.CourseName)
-                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:16px;color:" + item.Color + "'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' onclick='chooseCourse(\"" + item.ID + "\",this)'></i></div></li>");
+                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:14px;color:#00BBD4;font-weight:700'><span style='cursor:pointer' onclick='chooseCourse(\"" + item.ID + "\",this)'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' ></i></span></div></li>");
                 }
             })
     }
@@ -4716,10 +4719,11 @@ var Lesson = (function () {
         //var id = $("#chooseCourse").val();
         var containerCourse = $("#" + id);
         var child = containerCourse.children()[0];
-        var classi = $(obj).attr("class");
+        var icon = $(obj).find("i");
+        var classi = $(icon).attr("class");
         if (classi.includes("fa-arrow-alt-circle-down")) {
-            $(obj).removeClass();
-            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+            $(icon).removeClass();
+            $(icon).addClass("far fa-arrow-alt-circle-left ml-1");
             containerCourse.empty();
             containerCourse.append(child);
             if (id !== undefined) {
@@ -4743,7 +4747,7 @@ var Lesson = (function () {
                         containerCourse.append(ulselectChapterTemplate);
                         for (var i = 0; i < chapters.length; i++) {
                             var chapter = chapters[i];
-                            $(ulselectChapterTemplate).append('<li style="padding: 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div style="font-size: 16px"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
+                            $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
 
                             var containerLesson = $("#" + chapter.ID);
                             var firstChil = containerLesson.children()[0];
@@ -4754,7 +4758,7 @@ var Lesson = (function () {
                             for (var j = 0; j < lessons.length; j++) {
                                 var lesson = lessons[j];
                                 if (lesson.ChapterID == chapter.ID) {
-                                    $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-3 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
+                                    $(ulselectLessonTemplate).append('<li class="sub-practice pt-3 pb-1 pl-2" id="' + lesson.ID + '"></i><div class="pb-1"><span style="cursor:pointer" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1"></i></span></div></li>')
                                 }
                             }
                         }
@@ -4779,12 +4783,13 @@ var Lesson = (function () {
         else {
             containerCourse.empty();
             containerCourse.append(child);
-            $(obj).removeClass();
-            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+            $(icon).removeClass();
+            $(icon).addClass("far fa-arrow-alt-circle-down ml-1");
         }
     }
 
-    var chooseLesson = function (id, obj) { //bài trong chương
+    var chooseLesson = function (id, objHolder) { //bài trong chương
+        var obj = $(objHolder).find("i").last();
         var chapterParent = $("#" + id);
         var ul = chapterParent.children()[1];
         var classUl = $(ul).attr("class");
@@ -4824,11 +4829,12 @@ var Lesson = (function () {
         }
     }
 
-    var choosePart = function (lessonid, classsbjid, obj) {
+    var choosePart = function (lessonid, classsbjid, objHolder) {
         //var modalForm = window.partModaltoAddExam;
         //var lessonid = $("#selectLesson").val();
         var classid = $('#ClassID').val();
         //var classsbjid = $('#chooseCourse').val();
+        var obj = $(objHolder).find("i").last();
         var dataform = new FormData();
         dataform.append("LessonID", lessonid);
         dataform.append("ClassID", classid);
@@ -4846,7 +4852,7 @@ var Lesson = (function () {
                     for (var i = 0; i < data.length; i++) {
                         var lessonPart = data[i];
                         if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4"))
-                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 16px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
+                            $(ulselectLessonPartTemplate).append('<li style="padding:5px 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 14px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
 
                         //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
                         //$(modalForm).append(selectLessonPartTemplate);
@@ -4968,7 +4974,7 @@ var Lesson = (function () {
                     var data = JSON.parse(res);
                     if (data.Stt) {
                         location.reload();
-                        alert("Ttêm thành công")
+                        alert("Đã thêm nội dung")
                     }
                     else {
                         alert(data.Msg);

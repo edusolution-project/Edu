@@ -88,7 +88,10 @@
         </div>
     </div>
     <div class="card-body pt-2" v-cloak>
-        <div v-if="tab[1]" class="pt-0 pb-2 text-danger"><i>Lưu ý: Học liệu nội bộ, biên soạn theo yêu cầu của giáo viên & học viên</i></div>
+        <div v-if="tab[1]" class="pt-0 pb-2 text-danger">
+            <i>Lưu ý: Học liệu nội bộ, biên soạn theo yêu cầu của giáo viên & học viên</i><br />
+            <i>Các thầy cô có thể vào "Xem chi tiết" và tải học liệu về lớp của mình.</i>
+        </div>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
@@ -341,7 +344,7 @@
                 subjectID: function () {
                     this.getData()
                 },
-                "docsInteractive.ClassID": function () {                    
+                "docsInteractive.ClassID": function () {
                     if (this.docsInteractive.ClassID=="true") {
                         this.isCreateNewClass = true
                         //alert(this.docsInteractive.NewClass)
