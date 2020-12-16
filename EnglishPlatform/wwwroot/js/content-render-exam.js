@@ -308,8 +308,12 @@ var Lesson = (function () {
 
         lessonBody.append(partsHolder);
         if (isMobileDevice()) {
-            $('#pills-tabContent').attr("class", "w-100 m-0 p-0").show();
-            $('#pills-tabContent .main-column:first-child').addClass("border-right-0");
+            //$('#pills-tabContent').attr("class", "w-100 m-0 p-0").show();
+            //$('#pills-tabContent .main-column:first-child').addClass("border-right-0");
+            $('.h-100').removeClass('h-100');
+            cardBody.removeClass('position-absolute');
+            container.removeClass('bg-secondary');
+
         }
         else {
             $('.main-column').addClass('scrollbar-outer').scrollbar();
@@ -910,8 +914,14 @@ var Lesson = (function () {
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
 
-        leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("d-none").show();
+
+        if (!isMobileDevice()) {
+            leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("d-none").show();
+        }
         rightCol.parent().removeClass("col-md-6").removeClass("col-md-8").removeClass("col-md-12").addClass("col-md-12").show();
+
+
+
     }
 
     var switchMode = function (mode) {
@@ -996,7 +1006,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-10 green-color", "text": (data.Title == null ? "" : data.Title) + time
+                    "class": "title col-md-10 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + time
                     //+ point
                 }));
 
@@ -1010,7 +1020,7 @@ var Lesson = (function () {
                 break;
             default:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
+                    "class": "title col-md-12 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
                     //+ point
                 }));
                 break;
@@ -2846,13 +2856,14 @@ var Lesson = (function () {
             lesson_action_holder.append(doButton);
             //wrapper.append(doButton);
             //wrapper.append(backButton);
-            lastExamResult =
-                $("<div>", { id: "last-result", class: "text-center" })
-                    //.append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
-                    .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
-                        BeginExam(this)
-                    }).prepend($('<i>', { class: "fas fa-play mr-2" })));
-            wrapper.append(lastExamResult);
+            //if (!isOverdue) {
+            //    lastExamResult =
+            //        $("<div>", { id: "last-result", class: "text-center" })
+            //            .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
+            //                BeginExam(this)
+            //            }).prepend($('<i>', { class: "fas fa-play mr-2" })));
+            //    wrapper.append(lastExamResult);
+            //}
         }
         else {
             var lastExam = data;
@@ -3122,6 +3133,7 @@ var Lesson = (function () {
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
+
     }
 
     //---- 14-10-2020
@@ -3249,7 +3261,7 @@ var Lesson = (function () {
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
         boxHeader.append($("<h5>", {
-            "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
+            "class": "title col-md-12 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
             //+ point
         }));
 
@@ -3951,7 +3963,7 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4991,11 +5003,11 @@ var Lesson = (function () {
         type = "'" + type + "'";
         Swal.fire({
             title: '<strong>Chọn thao tác</strong>',
-            icon: 'question',
+            icon: 'info',
             html:
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>' +
-                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',
         })

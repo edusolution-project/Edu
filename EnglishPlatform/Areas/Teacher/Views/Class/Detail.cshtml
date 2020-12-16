@@ -220,6 +220,9 @@
                                               v-bind:owner="obj.TeacherID"
                                               v-bind:listchaps="list_chapters"
                                               v-bind:type="'exam'"></chap-content>
+
+                                @*<lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject" v-bind:type="type"></lesson-item>*@
+
                                 <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
                             </ul>
                         </b-collapse>
@@ -286,59 +289,59 @@
             </div>
         </div>
         @*<div class="box" v-if="tab[3]">
-            <div class="row ls-doc" v-if="ref.data.length > 0">
-                <div class="col-md-6" v-for="data in ref.data">
-                    <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
-                        <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
-                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                            <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
-                        </a>
-                        <div class="entry p-0">
-                            <div>
+                <div class="row ls-doc" v-if="ref.data.length > 0">
+                    <div class="col-md-6" v-for="data in ref.data">
+                        <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                            <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
+                                <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                                <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
+                            </a>
+                            <div class="entry p-0">
                                 <div>
-                                    <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
+                                    <div>
+                                        <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
+                                    </div>
+                                    *<div>
+                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
+                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
+                                    </div>*
                                 </div>
-                                *<div>
-                                    <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                    <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                </div>*
-                            </div>
-                            <div class="pt-0 pb-2">
-                                <p>{{domDecoder(data.Description)}}</p>
-                            </div>
-                            <div>
-                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
-                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
-                                <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
+                                <div class="pt-0 pb-2">
+                                    <p>{{domDecoder(data.Description)}}</p>
+                                </div>
+                                <div>
+                                    <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                    <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                    <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                    <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                    <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row ls-doc text-center d-block" v-else>
-                Không có tài liệu
-            </div>
-        </div>*@
-        @*<div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
-            <div class="paging-view">
-                Hiển thị:
-                <select v-model="ref.view" v-on:change="loadPreference()">
-                    <option value="10">10 kết quả</option>
-                    <option value="20">20 kết quả</option>
-                    <option value="30">30 kết quả</option>
-                </select>
-            </div>
-            <div class="page-control">
-                <div class="right">
-                    <b-pagination v-model="ref.page"
-                                  :total-rows="ref.totalRec"
-                                  :per-page="ref.view"
-                                  v-on:input="loadPreference()"></b-pagination>
+                <div class="row ls-doc text-center d-block" v-else>
+                    Không có tài liệu
                 </div>
-            </div>
-        </div>*@
+            </div>*@
+        @*<div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
+                <div class="paging-view">
+                    Hiển thị:
+                    <select v-model="ref.view" v-on:change="loadPreference()">
+                        <option value="10">10 kết quả</option>
+                        <option value="20">20 kết quả</option>
+                        <option value="30">30 kết quả</option>
+                    </select>
+                </div>
+                <div class="page-control">
+                    <div class="right">
+                        <b-pagination v-model="ref.page"
+                                      :total-rows="ref.totalRec"
+                                      :per-page="ref.view"
+                                      v-on:input="loadPreference()"></b-pagination>
+                    </div>
+                </div>
+            </div>*@
         <div class="box" v-show="tab[4]">
             <ul class="list ls-practice">
                 <li v-for="(obj,i) in classSubjects">
@@ -640,8 +643,7 @@
                                               v-bind:pos="j"
                                               v-bind:owner="owner"
                                               v-bind:listchaps="listchaps"
-                                              v-bind:type="type"
-                                              ></chap-content>
+                                              v-bind:type="type"></chap-content>
                                 <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject" v-bind:type="type"></lesson-item>
                             </template>
                         </ul>
@@ -654,12 +656,19 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-2 pb-1 pl-2 rounded">
             <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
-                    <span>
-                        <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
-                        <i v-else class="ic far fa-file-alt mr-2"></i>
-                        {{data.Title}}
-                    </span>
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + data.ClassSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+                    <template v-if="data.TemplateType === 2">
+                        <span class="text-danger">
+                            <i class="ic far fa-edit mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span>
+                            <i class="ic far fa-file-alt mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
                 </a>
                 <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
@@ -1452,7 +1461,7 @@
                             _that.ref.data = response.data.Data;
                             this.ref.data = _that.ref.data
                             this.ref.totalRec = response.data.Model.totalRecord
-                            console.log(totalRec)
+                            //console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
@@ -1473,7 +1482,7 @@
                             _that.ref.data = response.data.Data;
                             this.ref.data = _that.ref.data
                             this.ref.totalRec = response.data.Model.totalRecord
-                            console.log(totalRec)
+                            //console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
@@ -1523,7 +1532,7 @@
 
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
+                            //console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -1647,7 +1656,7 @@
                     let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
+                            //console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -1676,6 +1685,8 @@
                     })
                 },
                 filterLesson(obj) {
+                    //console.log(obj);
+                    //console.log(obj.ClassSubject);
                     var filter = this.list_lessons.filter((p) => {
                         return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })

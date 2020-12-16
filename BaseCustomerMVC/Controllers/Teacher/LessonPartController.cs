@@ -37,6 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
         private readonly CourseHelper _courseHelper;
+        private readonly LessonHelper _lessonHelper;
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -60,6 +61,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FileProcess fileProcess,
             VocabularyService vocabularyService,
             CourseHelper courseHelper,
+            LessonHelper lessonHelper,
 
             IRoxyFilemanHandler roxyFilemanHandler
             )
@@ -79,6 +81,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
             _vocabularyService = vocabularyService;
             _courseHelper = courseHelper;
+            _lessonHelper = lessonHelper;
 
             _roxyFilemanHandler = roxyFilemanHandler;
         }
@@ -469,7 +472,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //increase practice counter
                         await _courseHelper.ChangeLessonPracticeState(parentLesson);
                     }
-                    calculateLessonPoint(item.ParentID);
+                    _lessonHelper.calculateLessonPoint(item.ParentID);
                     IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
@@ -646,7 +649,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        calculateLessonPoint(parentLesson.ID);
+                        _lessonHelper.calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _lessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
@@ -1308,27 +1311,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //return org;
         }
         //TODO: Need update later
-        private double calculateLessonPoint(string lessonId)
-        {
-            var point = 0.0;
-            var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
-            if (parts != null && parts.Count() > 0)
-                foreach (var part in parts)
-                {
-                    if (part.Type == "ESSAY")
-                    {
-                        point += part.Point;
-                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
-                    }
-                    else
-                    {
-                        point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
-                        _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
-                    }
-                }
-            _lessonService.UpdateLessonPoint(lessonId, point);
-            return point;
-        }
+        //private double calculateLessonPoint(string lessonId)
+        //{
+        //    var point = 0.0;
+        //    var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+        //    if (parts != null && parts.Count() > 0)
+        //        foreach (var part in parts)
+        //        {
+        //            if (part.Type == "ESSAY")
+        //            {
+        //                point += part.Point;
+        //                _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+        //            }
+        //            else
+        //            {
+        //                point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+        //                _questionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+        //            }
+        //        }
+        //    _lessonService.UpdateLessonPoint(lessonId, point);
+        //    return point;
+        //}
     }
 
     public class PronunExplain

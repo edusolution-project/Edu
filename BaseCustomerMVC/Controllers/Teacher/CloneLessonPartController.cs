@@ -28,6 +28,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassHelper _classHelper;
         private readonly ClassSubjectService _classSubjectService;
         private readonly LessonService _lessonService;
+        private readonly LessonHelper _lessonHelper;
 
 
         private readonly CloneLessonPartService _cloneLessonPartService;
@@ -56,6 +57,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //CourseService courseService,
             //ChapterService chapterService,
             LessonService lessonService,
+            LessonHelper lessonHelper,
             //LessonScheduleService lessonScheduleService,
             //LessonPartService lessonPartService,
             //LessonPartQuestionService lessonPartQuestionService,
@@ -79,6 +81,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_lessonPartService = lessonPartService;
             //_lessonPartQuestionService = lessonPartQuestionService;
             //_lessonPartAnswerService = lessonPartAnswerService;
+            _lessonHelper = lessonHelper;
 
             _cloneLessonPartService = service;
             _cloneAnswerService = cloneLessonPartAnswerService;
@@ -376,7 +379,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
 
-            calculateLessonPoint(item.ParentID);
+            _lessonHelper.calculateCloneLessonPoint(item.ParentID);
 
             return new JsonResult(new Dictionary<string, object>
                             {
@@ -432,7 +435,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        calculateLessonPoint(parentLesson.ID);
+                        _lessonHelper.calculateCloneLessonPoint(item.ParentID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _cloneLessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
@@ -446,7 +449,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -994,26 +996,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return StringHelper.ReplaceSpecialCharacters(org);
         }
 
-        private double calculateLessonPoint(string lessonId)
-        {
-            var point = 0.0;
-            var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
-            foreach (var part in parts)
-            {
-                if (part.Type == "ESSAY")
-                {
-                    point += part.Point;
-                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
-                }
-                else
-                {
-                    point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
-                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
-                }
-            }
-            _lessonService.UpdateLessonPoint(lessonId, point);
-            return point;
-        }
+        //private double calculateLessonPoint(string lessonId)
+        //{
+        //    var point = 0.0;
+        //    var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+        //    foreach (var part in parts)
+        //    {
+        //        if (part.Type == "ESSAY")
+        //        {
+        //            point += part.Point;
+        //            _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+        //        }
+        //        else
+        //        {
+        //            point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+        //            _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+        //        }
+        //    }
+        //    _lessonService.UpdateLessonPoint(lessonId, point);
+        //    return point;
+        //}
 
         #region
         public JsonResult CreateExamPart(string basis, List<string> ListLessonPartID, string LessonID)
@@ -1054,6 +1056,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     _ = CopyPartToLesson(basis, lessonPart, lesson, UserID);
                 }
+
+                _lessonHelper.calculateCloneLessonPoint(LessonID);
 
                 return Json(new Dictionary<String, Object>
                             {
@@ -1097,8 +1101,130 @@ namespace BaseCustomerMVC.Controllers.Teacher
             newPart.ParentID = targetLesson.ID;
             newPart.ClassID = targetLesson.ID;
 
-            await CreateOrUpdate(basis, newPart, new List<string>(), new List<string>());
+            await ClonePart(basis, newPart);
         }
+
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        public async Task<JsonResult> ClonePart(string basis, CloneLessonPartViewModel item)
+        {
+            var createduser = User.Claims.GetClaimByType("UserID").Value;
+            var parentLesson = _lessonService.GetItemByID(item.ParentID);
+            var currentCs = _classSubjectService.GetItemByID(parentLesson.ClassSubjectID);
+
+            var isPractice = parentLesson.IsPractice;
+            if (parentLesson == null || currentCs == null)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", "Parent Item Not found" }
+                });
+            }
+
+            item.Created = DateTime.UtcNow;
+            item.TeacherID = currentCs.TeacherID;
+            var maxItem = _cloneLessonPartService.CreateQuery()
+                .Find(o => o.ParentID == item.ParentID)
+                .SortByDescending(o => o.Order).FirstOrDefault();
+            item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+
+            item.Updated = DateTime.UtcNow;
+            item.ClassID = currentCs.ClassID;
+            item.ClassSubjectID = currentCs.ID;
+            item.CourseID = currentCs.CourseID;
+
+            var lessonpart = item.ToEntity();
+            _cloneLessonPartService.Save(lessonpart);
+
+            item.ID = lessonpart.ID;
+
+            switch (lessonpart.Type)
+            {
+                case "ESSAY":
+                    _cloneQuestionService.CreateQuery().DeleteMany(t => t.ParentID == lessonpart.ID);
+                    var question = new CloneLessonPartQuestionEntity
+                    {
+                        CourseID = lessonpart.CourseID,
+                        Content = "",
+                        Description = item.Questions == null ? "" : item.Questions[0].Description,
+                        ParentID = lessonpart.ID,
+                        CreateUser = createduser,
+                        Point = lessonpart.Point,
+                        Created = lessonpart.Created,
+                    };
+                    _cloneQuestionService.Save(question);
+                    isPractice = true;
+                    break;
+                //case "VOCAB":
+                //    if (lessonpart.Description != null && lessonpart.Description.Length > 0)
+                //    {
+                //        var vocabArr = lessonpart.Description.Split('|');
+                //        if (vocabArr != null && vocabArr.Length > 0)
+                //        {
+                //            foreach (var vocab in vocabArr)
+                //            {
+                //                var vocabulary = vocab.Trim();
+                //                _ = GetVocab(vocabulary);
+                //            }
+                //        }
+                //    }
+                //    break;
+                case "QUIZ2": //remove all previous question
+                    var oldQuizIds = _cloneQuestionService.CreateQuery().Find(q => q.ParentID == lessonpart.ID).Project(i => i.ID).ToEnumerable();
+                    foreach (var quizid in oldQuizIds)
+                        _cloneAnswerService.CreateQuery().DeleteMany(a => a.ParentID == quizid);
+                    _cloneQuestionService.CreateQuery().DeleteMany(q => q.ParentID == lessonpart.ID);
+
+                    if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
+                    {
+                        var newdescription = "";
+                        if (item.Questions == null || item.Questions.Count == 0)
+                            item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
+                        lessonpart.Description = newdescription;
+                        _cloneLessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                    }
+                    else
+                    {
+                        //No Question
+                    }
+
+                    item.CourseID = parentLesson.CourseID;
+
+                    if (item.Questions != null && item.Questions.Count > 0)
+                    {
+                        await SaveQuestionFromView(item, createduser, null, basis);
+                    }
+                    isPractice = true;
+                    break;
+                case "QUIZ1":
+                case "QUIZ3":
+                case "QUIZ4":
+                    item.CourseID = parentLesson.CourseID;
+
+                    if (item.Questions != null && item.Questions.Count > 0)
+                    {
+                        await SaveQuestionFromView(item, createduser, null);
+                    }
+                    isPractice = true;
+                    break;
+                default:
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
+            }
+
+            _lessonHelper.calculateCloneLessonPoint(item.ParentID);
+
+            return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
+        }
+
 
     }
 }

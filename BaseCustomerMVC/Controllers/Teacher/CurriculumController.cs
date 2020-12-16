@@ -47,6 +47,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly GradeService _gradeService;
         private readonly CourseLessonService _lessonService;
         private readonly SkillService _skillService;
+        private readonly LessonHelper _lessonHelper;
 
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -125,7 +126,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  LessonPartQuestionService lessonPartQuestionService,
                  TeacherService teacherService,
                  TeacherHelper teacherHelper,
-                 ModCourseService modservice
+                 ModCourseService modservice,
+
+                 LessonHelper lessonHelper
 
                 , RoleService roleService
                 , ModSubjectService modsubjectService
@@ -172,6 +175,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonService = lessonService;
             _centerService = centerService;
             _roleService = roleService;
+            _lessonHelper = lessonHelper;
 
             _lessonPartService = lessonPartService;
             _lessonPartAnswerService = lessonPartAnswerService;
@@ -2846,6 +2850,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                         }
                     }
+                    _lessonHelper.calculateLessonPoint(ParentID);
+
                     System.IO.File.Delete(filePath);
                     return new JsonResult(new Dictionary<string, object>
                     {

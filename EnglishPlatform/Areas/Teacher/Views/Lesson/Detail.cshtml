@@ -42,11 +42,11 @@
     <script src="~/js/lib/jquery.ui.touch-punch.min.js"></script>
     @if (Data.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE)
     {
-        <script src="~/js/content-render.js?@DateTime.Now.ToString("yyyyMMddhhmmss")"></script>
+        <script src="~/js/content-render.js?@DateTime.Now.ToString("yyyyMMdd")"></script>
     }
     else
     {
-        <script src="~/js/content-render-exam.js"></script>
+        <script src="~/js/content-render-exam.js?@DateTime.Now.ToString("yyyyMMdd")"></script>
         <style>
             #sidebar, body, html, #lessonContainer {
                 background-color: #e8eff5 !important;

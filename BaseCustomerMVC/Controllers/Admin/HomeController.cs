@@ -5,6 +5,7 @@ using Google.Apis.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
@@ -38,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly CourseHelper _courseHelper;
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
+        private readonly CalendarHelper _calendarHelper;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -101,6 +103,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 CourseHelper courseHelper,
                 LessonHelper lessonHelper,
                 ProgressHelper progressHelper,
+                CalendarHelper calendarHelper,
 
                 CenterService centerService,
                 StudentService studentService,
@@ -141,6 +144,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _courseHelper = courseHelper;
             _lessonHelper = lessonHelper;
             _progressHelper = progressHelper;
+            _calendarHelper = calendarHelper;
 
             _centerService = centerService;
             _studentService = studentService;
@@ -691,6 +695,59 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         }
 
+        public async Task<JsonResult> FixUTCSchedule(string classList)
+        {
+            var arr = classList.Split(',');
+            var classsubjs = new List<ClassSubjectEntity>();
+            if (arr.Length > 0)
+                foreach (var clid in arr)
+                {
+                    classsubjs.AddRange(_classSubjectService.GetByClassID(clid));
+                }
+
+            foreach (var sbj in classsubjs)
+            {
+                var rootchaps = _chapterService.GetSubChapters(sbj.ID, "0");
+                foreach (var chap in rootchaps)
+                {
+                    if (chap.StartDate > new DateTime(1900, 1, 1))
+                        UpdateChapterCalendar(chap, "5e43fedd4a77b123fc297e90");//Mr Lam
+                }
+            }
+
+            return Json("OK");
+
+        }
+
+        private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        {
+            var lessonids = _clonelessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
+            foreach (var id in lessonids)
+            {
+                var schedule = _lessonScheduleService.GetItemByLessonID(id);
+                schedule.StartDate = entity.StartDate;
+                schedule.EndDate = entity.EndDate;
+                UpdateCalendar(schedule, UserID);
+                _lessonScheduleService.CreateOrUpdate(schedule);
+            }
+            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+            foreach (var subchap in subchaps)
+            {
+                subchap.StartDate = entity.StartDate;
+                subchap.EndDate = entity.EndDate;
+                _chapterService.Save(subchap);
+                UpdateChapterCalendar(subchap, UserID);
+            }
+        }
+
+        private void UpdateCalendar(LessonScheduleEntity entity, string userid)
+        {
+            //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+            //if (oldcalendar != null)
+            _calendarHelper.RemoveSchedule(entity.ID);
+            if (entity.IsActive)
+                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+        }
 
         //public async Task<JsonResult> Remark(string ExamID)//Big fix
         //{
