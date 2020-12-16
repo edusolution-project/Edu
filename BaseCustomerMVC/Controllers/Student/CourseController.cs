@@ -1030,5 +1030,25 @@ namespace BaseCustomerMVC.Controllers.Student
         //    }
         //    return Json("Fixed");
         //}
+
+        #region Learningoutcomes
+        public IActionResult Learningoutcomes(String basis)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(userId);
+            var center = _centerService.GetItemByCode(basis);
+            //var lclass = _service.GetItemsByIDs(student.JoinedClasses).Where(x => x.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToList();
+            var lclass = _service.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
+            if (lclass.Count() == 0)
+            {
+                return Json("lclass = 0");
+            }
+
+            lclass = lclass.ToList().Where(x => x.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToList();
+            ViewBag.ListClass = lclass;
+            ViewBag.CurrentAccount = student;
+            return View("Learningoutcomes");
+        }
+        #endregion
     }
 }
