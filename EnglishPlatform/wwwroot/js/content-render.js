@@ -641,18 +641,24 @@ var Lesson = (function () {
                                     //console.log(data);
                                     localStorage.clear();
                                     console.log("New Exam");
-                                    $('li[for=lesson-info]').hide().removeClass('d-flex');
+                                    //console.log(_UImode);
+                                    //if (_UImode != UIMode.EXAM_ONLY) 
+
                                     //console.log(getLocalData("CurrentExam"))    
                                     if (config.mod == mod.STUDENT_LECTURE) {
+                                        $('li[for=lesson-info]').hide().removeClass('d-flex');
                                         renderLectureExam(exam, false);
+                                        
                                         //renderOldAnswer();
                                     }
-                                    else
+                                    else {
                                         renderLectureExam(exam, true);
+                                        goPartInx(0);
+                                    }
+
 
                                 }
                                 else {
-                                    
                                     console.log("Exam Continue");
                                     $('li[for=lesson-info]').show().addClass('d-flex');
                                     setLocalData("CurrentExam", exam.ID);
@@ -2920,6 +2926,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+        console.log(data);
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2941,8 +2948,8 @@ var Lesson = (function () {
                     }
                     else
                         wrapper.append(completeButton);
+                    $('#rightCol').find('.tab-pane').show();
                 }
-                $('#rightCol').find('.tab-pane').show();
                 //renderQuizCounter();
                 //renderOldAnswer();
             }
@@ -3128,7 +3135,7 @@ var Lesson = (function () {
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
-        
+
     }
 
     //---- 14-10-2020
