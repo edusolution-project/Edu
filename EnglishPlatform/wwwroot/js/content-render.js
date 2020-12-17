@@ -655,8 +655,6 @@ var Lesson = (function () {
                                         renderLectureExam(exam, true);
                                         goPartInx(0);
                                     }
-
-
                                 }
                                 else {
                                     console.log("Exam Continue");

@@ -58,7 +58,7 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner">
-                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.bookName" class="title"><h4 style="color: #47d9a5"><i class="ic ic-headphone-o"></i>{{item.bookName}}</h4></a>
+                                <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.bookName" class="title"><h4 style="color: #47d9a5"><i class="ic ic-readbook-o"></i>{{item.bookName}}</h4></a>
                                 <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@processUrl("Detail","Lesson")/' + item.lessonID + '/' + item.classsubjectID" :title="item.className" class="title">{{item.className}}</a>
