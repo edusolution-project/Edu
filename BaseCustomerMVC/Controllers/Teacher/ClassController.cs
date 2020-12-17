@@ -778,10 +778,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var listTime = GetListWeek(startDate);
                 Dictionary<String, Object> dataResponse = new Dictionary<string, object>();
                 Dictionary<String, Object> dataTime = new Dictionary<string, object>();
-                foreach (var item in listTime)
-                {
-                    dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
-                }
+                //foreach (var item in listTime)
+                //{
+                //    dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                //}
 
                 var index = 1;
                 foreach (var student in listStudent)
@@ -791,15 +791,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     foreach (var item in listTime)
                     {
                         result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj);
+                        if (result.Count == 0) continue;
                         var data = new StudentDetailVM();
                         data.StudentName = student.FullName;
                         data.StudentID = student.ID;
                         data.Week = item.Key; ;
-                        var point = result.Count() > 0 ? result.Average(x => x.LastPoint) : 0;
+                        var point = result.Count() > 0 ? result.Average(x => x.LastPoint).ToString() : "---";
                         data.Point = point.ToString();
                         data.StartTime = item.Value.StartTime;
                         data.EndTime = item.Value.EndTime;
                         dataresponse.Add(data);
+
+                        if (!dataTime.ContainsKey(item.Key.ToString()))
+                        {
+                            dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                        }
                     }
 
                     dataResponse.Add(index.ToString(), dataresponse);

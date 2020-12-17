@@ -641,6 +641,7 @@ var Lesson = (function () {
                                     //console.log(data);
                                     localStorage.clear();
                                     console.log("New Exam");
+                                    $('li[for=lesson-info]').hide().removeClass('d-flex');
                                     //console.log(getLocalData("CurrentExam"))    
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         renderLectureExam(exam, false);
@@ -651,7 +652,9 @@ var Lesson = (function () {
 
                                 }
                                 else {
-                                    console.log("Exam Continue")
+                                    
+                                    console.log("Exam Continue");
+                                    $('li[for=lesson-info]').show().addClass('d-flex');
                                     setLocalData("CurrentExam", exam.ID);
                                     $('#ExamID').val(exam.ID);
 
@@ -680,6 +683,7 @@ var Lesson = (function () {
                                             countdown(false);
                                         }
                                         renderLectureExam(exam, true);
+                                        goPartInx(0);
                                         if (config.mod == mod.STUDENT_LECTURE) {
                                             renderOldAnswer();
                                         }
@@ -2006,7 +2010,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "VOCAB":
-                desc.parent().prev().remove();
+                //desc.parent().prev().remove();??????
                 desc.parent().remove();
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập danh sách từ vựng, cách nhau bởi dấu |" }));
                 contentholder.append($("<input>", { "type": "text", "name": "Description", "class": "input-text form-control", "placeholder": "Danh sách từ vựng" }).val(description));
@@ -2969,6 +2973,7 @@ var Lesson = (function () {
 
                 //$('#leftCol').addClass('hide');//fix tạm thời
             }
+            //goPartInx(0);
         }
         else {
 
@@ -3123,6 +3128,7 @@ var Lesson = (function () {
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
+        
     }
 
     //---- 14-10-2020

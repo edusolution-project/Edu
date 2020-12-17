@@ -255,7 +255,7 @@
                     <table id="table_point" class="table">
                         <thead>
                             <tr>
-                                <th style="width:20px">STT</th>
+                                <th style="width:30px">STT</th>
                                 <th>Họ Tên</th>
                                 @*<th v-for="(item,k) in fieldsTime">Tuần {{k}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</th>*@
                                 <th v-for="(item,k) in fieldsTime">Tuần {{k}}</th>
@@ -2354,7 +2354,7 @@
                         var point = phannguyen + phanthapphan;
                         return point
                     }
-                    return value
+                    else return value
                 },
                 showDetailStudent(studentID) {
 
@@ -2414,6 +2414,7 @@
                     _form.append("ClassSubjectID", _that.searchCsbj)
                     let _url = '@processUrl("GetLessonProgressListInWeek", "Exam")'
                     this.isLoading = true
+                    this.result_data = []
                     axios.post(_url, _form)
                         .then(response => {
                             this.isLoading = false
@@ -2439,6 +2440,7 @@
                     _form.append("ClassID", '@currentClass.ID')
                     let _url = '@processUrl("GetLessonProgressExam", "Exam")'
                     this.isLoading = true
+                    this.result_data = []
                     axios.post(_url, _form)
                         .then(response => {
                             this.isLoading = false
@@ -2663,12 +2665,12 @@
                             <td class="text-center">{{k+1}}</td>
                             <td>{{item.StudentName}}</td>
                             <td class="text-center">{{item.TriedCount}}</td>
-                            <td class="text-center">{{item.MinPoint.toFixed(2)}}</td>
-                            <td class="text-center">{{item.MaxPoint.toFixed(2)}}</td>
-                            <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
+                            <td class="text-center">{{roundPoint(item.MinPoint,2)}}</td>
+                            <td class="text-center">{{roundPoint(item.MaxPoint,2)}}</td>
+                            <td class="text-center">{{roundPoint(item.AvgPoint,2)}}</td>
                             <td class="text-center">{{formatTime(item.LastTried)}}</td>
                             <td class="text-center">{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
-                            <td class="text-center">{{item.LastPoint.toFixed(2)}}</td>
+                            <td class="text-center">{{roundPoint(item.LastPoint,2)}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -2683,30 +2685,35 @@
     <b-modal :no-close-on-backdrop="true" id="modal_history" size="xl" centered title="Lịch sử làm bài">
         <div class="row">
             <div class="col-md-12">
-                <table id="st_table" class="table">
-                    <thead>
-                        <tr class="text-center">
-                            <th scope="col" class="text-center">#</th>
-                            <th scope="col" class="text-center">Điểm</th>
-                            <th scope="col" class="text-center">Giờ bắt đầu</th>
-                            <th scope="col" class="text-center">Giờ kết thúc</th>
-                            <th scope="col" class="text-center">Thời gian làm</th>
-                            <th scope="col" class="text-center">Trạng thái</th>
-                            <th scope="col" class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item,k) in student_result.History">
-                            <td class="text-center">{{k+1}}</td>
-                            <td class="text-center">{{item.MaxPoint > 0 ? convertPoint(item.Point * 100 / item.MaxPoint) : 0}}</td>
-                            <td class="text-center">{{formatTime(item.Created)}}</td>
-                            <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
-                            <td class="text-center">{{getPeriod(item)}}</td>
-                            <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
-                            <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <template v-if="student_result.History.length > 0">
+                    <table id="st_table" class="table">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col" class="text-center">#</th>
+                                <th scope="col" class="text-center">Giờ bắt đầu</th>
+                                <th scope="col" class="text-center">Giờ kết thúc</th>
+                                <th scope="col" class="text-center">Thời gian làm</th>
+                                <th scope="col" class="text-center">Trạng thái</th>
+                                <th scope="col" class="text-center">Điểm</th>
+                                <th scope="col" class="text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in student_result.History">
+                                <td class="text-center">{{k+1}}</td>
+                                <td class="text-center">{{formatTime(item.Created)}}</td>
+                                <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
+                                <td class="text-center">{{getPeriod(item)}}</td>
+                                <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
+                                <td class="text-center">{{item.MaxPoint > 0 ? convertPoint(item.Point * 100 / item.MaxPoint) : 0}}</td>
+                                <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>
+                    Chưa có lịch sử học tập
+                </template>
             </div>
         </div>
 
@@ -2789,13 +2796,13 @@
             <template v-if="result_data.length > 0">
                 <table id="id_table" class="table">
                     <thead>
-                        <tr>
-                            <th rowspan="2" style="width:50px">STT</th>
-                            <th rowspan="2">Bài</th>
-                            <th rowspan="2" style="width:100px">Số lượt làm</th>
+                        @*<tr>
+                            <th rowspan="1" style="width:50px">STT</th>
+                            <th rowspan="1">Bài</th>
+                            <th rowspan="1" style="width:100px">Số lượt làm</th>
                             <th colspan="3" style="width:150px">Điểm</th>
                             <th colspan="3" style="width:350px">Lượt làm cuối</th>
-                            <th rowspan="2" style="width:100px"></th>
+                            <th rowspan="1" style="width:100px"></th>
                         </tr>
                         <tr>
                             <th style="width:50px">Thấp nhất</th>
@@ -2804,6 +2811,15 @@
                             <th style="width:150px">Thời gian</th>
                             <th style="width:150px">Trạng thái</th>
                             <th style="width:50px">Điểm</th>
+                        </tr>*@
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th style="width:100px">Số lượt làm</th>
+                            <th style="width:150px">Thời gian</th>
+                            <th style="width:150px">Trạng thái</th>
+                            <th style="width:50px">Điểm</th>
+                            <th style="width:100px"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2811,13 +2827,13 @@
                             <td>{{k+1}}</td>
                             <td style="cursor:pointer" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="openHistory(item)">{{item.LessonName}}</td>
                             <td>{{item.TriedCount}}</td>
-                            <td>{{convertPoint(item.MinPoint)}}</td>
+                            @*<td>{{convertPoint(item.MinPoint)}}</td>
                             <td>{{convertPoint(item.MaxPoint)}}</td>
-                            <td>{{convertPoint(item.AvgPoint)}}</td>
+                            <td>{{convertPoint(item.AvgPoint)}}</td>*@
                             <td>{{formatTime(item.LastTried)}}</td>
                             <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
                             <td>{{convertPoint(item.LastPoint)}}</td>
-                            <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Đi đến bài học</a></td>
+                            <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
                         </tr>
                     </tbody>
                 </table>
