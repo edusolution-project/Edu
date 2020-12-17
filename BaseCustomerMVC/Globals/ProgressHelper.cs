@@ -27,6 +27,8 @@ namespace BaseCustomerMVC.Globals
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
+        private readonly LessonScheduleService _lessonScheduleService;
+
         public ProgressHelper(
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
@@ -40,7 +42,8 @@ namespace BaseCustomerMVC.Globals
             ClassService classService,
 
             ExamService examService,
-            ExamDetailService examDetailService
+            ExamDetailService examDetailService,
+            LessonScheduleService lessonScheduleService
         )
         {
             _learningHistoryService = learningHistoryService;
@@ -57,6 +60,7 @@ namespace BaseCustomerMVC.Globals
 
             _examService = examService;
             _examDetailService = examDetailService;
+            _lessonScheduleService = lessonScheduleService;
         }
 
         #region Learning Progress
@@ -792,6 +796,51 @@ namespace BaseCustomerMVC.Globals
         public double CalculateRankPoint(double examPoint, double practicePoint, double progress)
         {
             return examPoint * 1000 * 1000 + practicePoint * 1000 + progress;
+        }
+        #endregion
+
+        #region
+        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj)
+        {
+            List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
+            if (StartWeek == new DateTime(2020, 10, 12))
+            {
+                var test = "";
+            }
+            //lay danh sach bai hoc trogn tuan
+            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+            //danh sach bai luyen tap
+            var practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+            foreach (var practice in practices)
+            {
+                var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+                var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, practice.ID);
+                var tried = examresult.Count();
+                var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+                var lastEx = examresult.FirstOrDefault();
+                result.Add(new StudentLessonResultViewModel(student)
+                {
+                    LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+                    MaxPoint = maxpoint,
+                    MinPoint = minpoint,
+                    AvgPoint = avgpoint,
+                    TriedCount = tried,
+                    LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+                    OpenCount = progress?.TotalLearnt ?? 0,
+                    LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+                    IsCompleted = lastEx != null && lastEx.Status,
+                    ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
+                    LessonName = practice.Title,
+                    LessonID = practice.ID,
+                    ClassSubjectID = practice.ClassSubjectID
+                });
+            }
+            return result;
         }
         #endregion
 

@@ -40,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonProgressService _lessonProgressService;
 
         private readonly LessonHelper _lessonHelper;
+        private readonly ClassSubjectService _classSubjectService;
+        private readonly ProgressHelper _progressHelper;
 
         //private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -59,6 +61,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartAnswerService lessonPartAnswerService,
             LessonProgressService lessonProgressService,
             LessonHelper lessonHelper,
+            ClassSubjectService classSubjectService,
+            ProgressHelper progressHelper,
             IRoxyFilemanHandler roxyFilemanHandler
             )
         {
@@ -79,6 +83,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonProgressService = lessonProgressService;
             _lessonHelper = lessonHelper;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _classSubjectService = classSubjectService;
+            _progressHelper = progressHelper;
         }
 
         [Obsolete]
@@ -378,5 +384,84 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(response);
             }
         }
+
+        public async Task<JsonResult> GetLessonProgressListInWeek(String basis, String StudentID, String ClassSubjectID, DateTime StartWeek, DateTime EndWeek)
+        {
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+            {
+                return Json("Học sinh không tồn tại");
+            }
+
+            var classSbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (classSbj == null)
+            {
+                return Json("Môn học không có");
+            }
+
+            var result = new List<StudentLessonResultViewModel>();
+            result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+
+            return Json(result);
+        }
+
+        public async Task<JsonResult> GetLessonProgressExam(String basis, String StudentID, String ClassID)
+        {
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+            {
+                return Json("Không tìm thấy thông tin học viên.");
+            }
+
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+            {
+                return Json("Khong tim thay lop tuong ung");
+            }
+
+            var classSbjExam = _classSubjectService.GetByClassID(@class.ID).Where(x=>x.TypeClass == CLASSSUBJECT_TYPE.EXAM);
+            var result = new List<StudentLessonResultViewModel>();
+            foreach(var item in classSbjExam)
+            {
+                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item);
+            }
+
+            return Json(result);
+        }
+
+        //private void GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj, List<StudentLessonResultViewModel> result)
+        //{
+        //    //lay danh sach bai hoc trogn tuan
+        //    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+        //    var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+        //    //danh sach bai luyen tap
+        //    var practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+        //    foreach (var practice in practices)
+        //    {
+        //        var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+        //        var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, practice.ID);
+        //        var tried = examresult.Count();
+        //        var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+        //        var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+        //        var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+        //        var lastEx = examresult.FirstOrDefault();
+        //        result.Add(new StudentLessonResultViewModel(student)
+        //        {
+        //            LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+        //            MaxPoint = maxpoint,
+        //            MinPoint = minpoint,
+        //            AvgPoint = avgpoint,
+        //            TriedCount = tried,
+        //            LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+        //            OpenCount = progress?.TotalLearnt ?? 0,
+        //            LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+        //            IsCompleted = lastEx != null && lastEx.Status,
+        //            ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
+        //            LessonName = practice.Title
+        //        });
+        //    }
+        //}
     }
 }
