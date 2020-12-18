@@ -58,7 +58,8 @@
             <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="searchCsbj">
                     <option value="">Tổng hợp</option>
-                    <option v-for="(item,k) in classSubjects" :value="item.ID" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{item.CourseName}}</option>
+                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
+                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{item.CourseName}}</option>
                 </select>
             </div>
             @*<div class="m-1 position-relative col-md-9 col-sm-12" v-if="searchCsbj != ''">
@@ -78,30 +79,30 @@
                         </div>
                     </div>
                 </div>*@
-            <div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
+            <!--<div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
                 <select v-model="searchPoint">
                     <option value="">Theo phân công giáo viên</option>
-                    <option value="1">Tất cả</option>
+                    <option value="1">Tất cả</option>-->
                     @*<option value="2">Theo thời gian</option>*@
-                </select>
-            </div>
-            <div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
+                <!--</select>
+            </div>-->
+            <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
                 <div class="form-row">
                     <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
-                    <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
+                    <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
                     @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
-                </div>
+                <!--</div>
             </div>
             <div class="float-right" v-if="searchCsbj==''">
-                <template v-if="!isLoading">
+                <template v-if="!isLoading">-->
                     @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
                     @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
                     @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
-                </template>
+                <!--</template>
                 <template v-else>
                     <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
                 </template>
-            </div>
+            </div>-->
         </div>
 
     </div>
@@ -229,6 +230,12 @@
         </div>
         <div class="box" v-if="tab[2]">
             <div class="container-fluid">
+                @*<template v-if="studentSummarySbj.length == null && table[1]">
+                        <div style="text-align:center">
+                            <span>Chưa có dữ liệu ...</span><br />
+                        </div>
+                    </template>
+                    <template v-else>*@
                 <template v-if="table[0] && isLoading == false">
                     <table id="table_point" class="table">
                         <thead>
@@ -251,25 +258,30 @@
                         </tbody>
                     </table>
                 </template>
+                @*</template>*@
                 <template v-else-if="table[1] && isLoading == false">
-                    <table id="table_point" class="table">
-                        <thead>
-                            <tr>
-                                <th style="width:30px">STT</th>
-                                <th>Họ Tên</th>
-                                @*<th v-for="(item,k) in fieldsTime">Tuần {{k}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</th>*@
-                                <th v-for="(item,k) in fieldsTime">Tuần {{k}}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(items,i) in studentSummarySbj">
-                                <td>{{i}}</td>
-                                <td>{{items[0].studentName}}</td>
-                                @*<td v-for="item in items" style="cursor:pointer"  onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailinWeek(item)">{{convertPoint(item.point)}}</td>*@
-                            <td v-for="item in items" style="cursor:pointer" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="view" v-if="fieldsTime">
+                        <div class="wrapper">
+                            <table class="table" id="table_point">
+                                <thead>
+                                    <tr>
+                                        <th class="sticky-col first-col">STT</th>
+                                        <th class="sticky-col second-col">Họ tên</th>
+                                        @*<th v-for="(item,k) in fieldsTime">Tuần {{k}}</th>*@
+                                        <th v-for="(item,k) in fieldsTime" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(items,i) in studentSummarySbj">
+                                        <td class="sticky-col first-col">{{i}}</td>
+                                        <td class="sticky-col second-col">{{items[0].studentName}}</td>
+                                        <td v-for="item in items" style="cursor:pointer;width:50px;height:20px" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="view" v-else style="text-align:center">Chưa có dữ liệu ...</div>
                 </template>
             </div>
         </div>
@@ -587,6 +599,39 @@
             text-align: center;
             border: 0.5px solid gray;
             vertical-align: middle
+        }
+
+        /*-----------*/
+        .view {
+            margin: auto;
+            /*width: 600px;*/
+        }
+
+        .wrapper {
+            position: relative;
+            overflow: auto;
+            /*border: 1px solid black;*/
+            white-space: nowrap;
+        }
+
+        .sticky-col {
+            position: -webkit-sticky;
+            position: sticky;
+            background-color: white;
+        }
+
+        .first-col {
+            width: 30px;
+            min-width: 10px;
+            max-width: 50px;
+            left: 0px;
+        }
+
+        .second-col {
+            width: 250px;
+            min-width: 150px;
+            max-width: 300px;
+            left: 0px;
         }
     </style>
 
@@ -1082,8 +1127,7 @@
                         label: 'Xếp hạng'
                     }
                 ],
-                scoreData: [
-                ],
+                scoreData: [],
                 scoreSbjChap: [],
                 scoreSbjStudent: [],
                 //view: 10,
@@ -1167,7 +1211,13 @@
                     dataPractice: [],
                     dataExam:[]
                 },
-                studentSummarySbj:[]
+                studentSummarySbj: [],
+                progessSbj: {
+                    title: '',
+                    startTime: '',
+                    endTime:'',
+                    data:[]
+                }
             },
             watch: {
                 "ref.subjectID": function () {
@@ -1354,7 +1404,6 @@
                         }).catch(e => { })
                 },
                 loadResult(subject, chapter) {
-
                     let _that = this
                     let key = subject + "_" + chapter
                     if (_that.loaded_chapter_result.includes(key))
@@ -1460,7 +1509,7 @@
                     }
                     else {
                         this.tableChange(1);
-                        _form.append('ClassSubjectID', this.searchCsbj)
+                        _form.append('ClassSubjectID', this.searchCsbj.ID)
                         _form.append('PageSize', 1000)
                         _form.append('PageIndex', 1)
                         let _url = '@processUrl("GetClassSubjectResult", "Class")'
@@ -1470,6 +1519,10 @@
                                 this.isLoading = false
                                 this.fieldsTime = response.data.DataTime
                                 this.studentSummarySbj = response.data.DataStudent
+                                //if (response.data.Error) {
+                                    this.isLoading = false
+                                    //alert(response.data.Error)
+                                //}
                                 //debugger
                                 //_that.scoreSbjChap = response.data.Chapter;
                                 //_that.scoreSbjStudent = response.data.Student;
@@ -1539,6 +1592,27 @@
                     @*document.location = '@processUrl("Index","Discuss", new { id = currentClass.ID })'*@
                     //console.log(5)
                     $('.fn-box-chat-eduso').focus().click()
+                },
+                loadResultwTime(objTime, classsbj) {
+                    let _that = this
+                    let _form = new FormData();
+                    _form.append("StartTime", objTime.startTime)
+                    _form.append("EndTime", objTime.endTime)
+                    if (classsbj) {
+                        _form.append("ClassSubjectID", classsbj)
+                    }
+                    else {
+                        _form.append("ClassSubjectID", this.searchCsbj.ID)
+                    }
+                    this.progessSbj.startTime = objTime.startTime
+                    this.progessSbj.endTime = objTime.endTime
+                    this.progessSbj.title = this.searchCsbj.CourseName
+                    let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.progessSbj.data = response.data.Data
+                        }).catch(e => { })
+                    this.$bvModal.show("progessmodal-xl")
                 },
 
                 //MODULE
@@ -2176,6 +2250,11 @@
                     if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
                     return _time.format("DD/MM/YYYY HH:mm")
                 },
+                formatDatenoYear(date) {
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("DD/MM")
+                },
                 getPeriod(obj) {
                     var startms = moment(obj.Created);
                     var endms = moment(obj.EndTime);
@@ -2251,7 +2330,7 @@
                     window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/@currentClass.ID';
                 },
                 showScoreboard(obj) {
-                    this.searchCsbj = obj.ID;
+                    this.searchCsbj.ID = obj.ID;
                     this.tabChange(2);
                 },
                 toggleSelect() {
@@ -2358,14 +2437,14 @@
                 },
                 showDetailStudent(studentID) {
 
-                    //this.studentSummary.studentID = ''
-                    //this.studentSummary.studentName = ''
-                    //this.studentSummary.className = ''
-                    //this.studentSummary.avgPointPractice = ''
-                    //this.studentSummary.avgPointExam = ''
-                    //this.studentSummary.result = []
-                    //this.studentSummary.dataPractice = []
-                    //this.studentSummary.dataExam = []
+                    this.studentSummary.studentID = ''
+                    this.studentSummary.studentName = ''
+                    this.studentSummary.className = ''
+                    this.studentSummary.avgPointPractice = ''
+                    this.studentSummary.avgPointExam = ''
+                    this.studentSummary.result = []
+                    this.studentSummary.dataPractice = []
+                    this.studentSummary.dataExam = []
 
                     //debugger
                     let _that = this
@@ -2373,6 +2452,7 @@
                     _form.append("StudentID", studentID)
                     _form.append("ClassID", _that.classID)
                     let _url = '@processUrl("GetStudentSummary", "Class")'
+                    this.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
                             var dataPractice = response.data.Practice
@@ -2385,45 +2465,53 @@
                             this.studentSummary.dataExam = dataExam
                             this.studentSummary.avgPointPractice = this.calcAveragePractice(dataPractice)
                             this.studentSummary.avgPointExam = this.calcAverageExam(dataExam)
+                            this.isLoading = false
                             //debugger
-                        })
+                        }).catch(e => { this.isLoading = false })
                     this.$bvModal.show("detailStudentSummary_modal")
                 },
                 calcAveragePractice(obj) {
-                    var totalPointPractice = 0;
-                    for (var i = 0; i < obj.length; i++) {
-                        var item = obj[i];
-                        totalPointPractice += item.PracticeAvgPoint;
+                    if (obj.length > 0) {
+                        var totalPointPractice = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i];
+                            totalPointPractice += item.PracticeAvgPoint;
+                        }
+                        return (totalPointPractice / obj.length)
                     }
-                    return this.roundPoint((totalPointPractice / obj.length), 1)
+                    else return "---"
                 },
                 calcAverageExam(obj) {
+                    //debugger
                     var totalPointExam = 0;
                     for (var i = 0; i < obj.length; i++) {
                         var item = obj[i];
-                        totalPointExam += item.AvgPoint;
+                        totalPointExam += (item.multiple1 + item.multiple2 * 2 + item.multiple3 * 3);
                     }
-                    return this.roundPoint((totalPointExam / obj.length), 1)
+                    return (totalPointExam / 6)
                 },
                 loadDetailinWeek(obj) {
-                    let _that = this
-                    let _form = new FormData()
-                    _form.append("StartWeek", obj.startTime)
-                    _form.append("EndWeek", obj.endTime)
-                    _form.append("StudentID", obj.studentID)
-                    _form.append("ClassSubjectID", _that.searchCsbj)
-                    let _url = '@processUrl("GetLessonProgressListInWeek", "Exam")'
-                    this.isLoading = true
-                    this.result_data = []
-                    axios.post(_url, _form)
-                        .then(response => {
-                            this.isLoading = false
-                            var data = response.data
-                            this.result_data = data
-                            //debugger
-                        }).catch(e => { this.isLoading = false })
-                    this.isLoading = false
-                    this.$bvModal.show("detailLessonInWeek-modal")
+                    if (obj.point >= 0) {
+                        let _that = this
+                        let _form = new FormData()
+                        _form.append("StartWeek", obj.startTime)
+                        _form.append("EndWeek", obj.endTime)
+                        _form.append("StudentID", obj.studentID)
+                        _form.append("ClassSubjectID", _that.searchCsbj.ID)
+                        let _url = '@processUrl("GetLessonProgressListInWeek", "Exam")'
+                        this.isLoading = true
+                        this.result_data = []
+                        axios.post(_url, _form)
+                            .then(response => {
+                                this.isLoading = false
+                                var data = response.data
+                                this.result_data = data
+                                //debugger
+                            }).catch(e => { this.isLoading = false })
+                        this.isLoading = false
+                        this.$bvModal.show("detailLessonInWeek-modal")
+                    }
+                    else return
                 },
                 roundPoint(value, precision) {
                     if (value > 0) {
@@ -2705,7 +2793,7 @@
                                 <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
                                 <td class="text-center">{{getPeriod(item)}}</td>
                                 <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
-                                <td class="text-center">{{item.MaxPoint > 0 ? convertPoint(item.Point * 100 / item.MaxPoint) : 0}}</td>
+                                <td class="text-center">{{item.MaxPoint > 0 ? roundPoint((item.Point * 100 / item.MaxPoint),1) : 0}}</td>
                                 <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
                             </tr>
                         </tbody>
@@ -2740,51 +2828,59 @@
 
     <b-modal id="detailStudentSummary_modal" size="xl" :title="studentSummary.studentName + '-' + studentSummary.className">
         <div class="modal-body">
-            <table id="id_table" class="table">
-                <thead>
-                    <tr>
-                        <th rowspan="2" style="width:50px">STT</th>
-                        <th rowspan="2">Môn học</th>
-                        <th rowspan="2" style="width:130px">Điểm luyện tập</th>
-                        <th colspan="3" style="width:390px">Điểm kiểm tra</th>
-                    </tr>
-                    <tr>
-                        <th style="width:130px">Bài kiểm tra 1</th>
-                        <th style="width:130px">Bài kiểm tra 2</th>
-                        <th style="width:130px">Bài kiểm tra 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template>
-                        <tr v-for="(itemSummary,i) in studentSummary.dataPractice">
-                            <td>{{itemSummary.Order}}</td>
-                            <td>{{itemSummary.CourseName}}</td>
-                            <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
-                            <template v-if="studentSummary.dataExam.length == 0 && itemSummary.Order == 1">
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                            </template>
-                            <template v-else-if="itemSummary.Order == 1">
-                                <td>{{roundPoint(studentSummary.dataExam[0].multiple1,1)}}</td>
-                                <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
-                                <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>
-                            </template>
-                            <template v-else>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </template>
+            <template v-if="isLoading">
+                <div style="text-align:center">
+                    <span>Đang tải dữ liệu ...</span><br />
+                    <b-spinner label="Loading..."></b-spinner>
+                </div>
+            </template>
+            <template v-else>
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width:50px">STT</th>
+                            <th rowspan="2">Môn học</th>
+                            <th rowspan="2" style="width:130px">Điểm luyện tập</th>
+                            <th colspan="3" style="width:390px">Điểm kiểm tra</th>
                         </tr>
-                        <tr style="font-weight:bold">
-                            <td colspan="2">Điểm trung bình</td>
-                            <td>{{studentSummary.avgPointPractice}}</td>
-                            <td colspan="3">{{studentSummary.avgPointExam}}</td>
+                        <tr>
+                            <th style="width:130px">Bài kiểm tra 1</th>
+                            <th style="width:130px">Bài kiểm tra 2</th>
+                            <th style="width:130px">Bài kiểm tra 3</th>
                         </tr>
+                    </thead>
+                    <tbody>
+                        <template>
+                            <tr v-for="(itemSummary,i) in studentSummary.dataPractice">
+                                <td>{{itemSummary.Order}}</td>
+                                <td>{{itemSummary.CourseName}}</td>
+                                <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
+                                <template v-if="studentSummary.dataExam.length == 0 && itemSummary.Order == 1">
+                                    <td>0</td>
+                                    <td>0</td>
+                                    <td>0</td>
+                                </template>
+                                <template v-else-if="itemSummary.Order == 1">
+                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple1,1)}}</td>
+                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
+                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>
+                                </template>
+                                <template v-else>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </template>
+                            </tr>
+                            <tr style="font-weight:bold">
+                                <td colspan="2">Điểm trung bình</td>
+                                <td>{{roundPoint(studentSummary.avgPointPractice,1)}}</td>
+                                <td colspan="3">{{roundPoint(studentSummary.avgPointExam,1)}}</td>
+                            </tr>
 
-                    </template>
-                </tbody>
-            </table>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
@@ -2797,21 +2893,21 @@
                 <table id="id_table" class="table">
                     <thead>
                         @*<tr>
-                            <th rowspan="1" style="width:50px">STT</th>
-                            <th rowspan="1">Bài</th>
-                            <th rowspan="1" style="width:100px">Số lượt làm</th>
-                            <th colspan="3" style="width:150px">Điểm</th>
-                            <th colspan="3" style="width:350px">Lượt làm cuối</th>
-                            <th rowspan="1" style="width:100px"></th>
-                        </tr>
-                        <tr>
-                            <th style="width:50px">Thấp nhất</th>
-                            <th style="width:50px">Cao nhất</th>
-                            <th style="width:50px">Trung bình</th>
-                            <th style="width:150px">Thời gian</th>
-                            <th style="width:150px">Trạng thái</th>
-                            <th style="width:50px">Điểm</th>
-                        </tr>*@
+                                <th rowspan="1" style="width:50px">STT</th>
+                                <th rowspan="1">Bài</th>
+                                <th rowspan="1" style="width:100px">Số lượt làm</th>
+                                <th colspan="3" style="width:150px">Điểm</th>
+                                <th colspan="3" style="width:350px">Lượt làm cuối</th>
+                                <th rowspan="1" style="width:100px"></th>
+                            </tr>
+                            <tr>
+                                <th style="width:50px">Thấp nhất</th>
+                                <th style="width:50px">Cao nhất</th>
+                                <th style="width:50px">Trung bình</th>
+                                <th style="width:150px">Thời gian</th>
+                                <th style="width:150px">Trạng thái</th>
+                                <th style="width:50px">Điểm</th>
+                            </tr>*@
                         <tr>
                             <th style="width:50px">STT</th>
                             <th>Bài</th>
@@ -2828,11 +2924,11 @@
                             <td style="cursor:pointer" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="openHistory(item)">{{item.LessonName}}</td>
                             <td>{{item.TriedCount}}</td>
                             @*<td>{{convertPoint(item.MinPoint)}}</td>
-                            <td>{{convertPoint(item.MaxPoint)}}</td>
-                            <td>{{convertPoint(item.AvgPoint)}}</td>*@
+                                <td>{{convertPoint(item.MaxPoint)}}</td>
+                                <td>{{convertPoint(item.AvgPoint)}}</td>*@
                             <td>{{formatTime(item.LastTried)}}</td>
                             <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
-                            <td>{{convertPoint(item.LastPoint)}}</td>
+                            <td>{{roundPoint(item.LastPoint,1)}}</td>
                             <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
                         </tr>
                     </tbody>
@@ -2844,6 +2940,34 @@
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="progessmodal-xl" size="xl" :title="progessSbj.title +' (' + formatShortDate(progessSbj.startTime) + ' - ' + formatShortDate(progessSbj.endTime) +')'">
+        <div class="modal-body">
+            <table class="table" id="id_table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Chương</th>
+                        <th>Bài</th>
+                        @*<th>Tỉ lệ mở</th>*@
+                        <th>Tỉ lệ làm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in progessSbj.data">
+                        <td>{{k+1}}</td>
+                        <td>{{item.ChapterName}}</td>
+                        <td>{{item.Title}}</td>
+                        @*<td>{{item.LearntCount}}/@currentClass.TotalStudents</td>*@
+                        <td>{{item.ExamCount}}/@currentClass.TotalStudents</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal('progessmodal-xl')">Đóng</b-button>
         </template>
     </b-modal>
 }

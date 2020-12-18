@@ -158,5 +158,17 @@ namespace BaseCustomerEntity.Database
         {
             await Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
         }
+
+        public IEnumerable<LessonScheduleEntity> GetActiveLesson(DateTime StartTime,DateTime EndTime,String ClassSubjectID,String ClassID = "")
+        {
+            if (String.IsNullOrEmpty(ClassID))
+            {
+                return Collection.Find(o => o.StartDate <= EndTime && o.EndDate >= StartTime && o.ClassSubjectID == ClassSubjectID).ToEnumerable();
+            }
+            else
+            {
+                return Collection.Find(o => o.StartDate <= EndTime && o.EndDate >= StartTime && o.ClassSubjectID == ClassSubjectID && o.ClassID == ClassID).ToEnumerable();
+            }
+        }
     }
 }

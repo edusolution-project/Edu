@@ -400,7 +400,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var result = new List<StudentLessonResultViewModel>();
-            result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+            if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj, true);
+            }
+            else
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+            }
 
             return Json(result);
         }

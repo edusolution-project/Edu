@@ -800,19 +800,30 @@ namespace BaseCustomerMVC.Globals
         #endregion
 
         #region
-        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj)
+        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj,Boolean isExam = false)
         {
             List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
-            if (StartWeek == new DateTime(2020, 10, 12))
-            {
-                var test = "";
-            }
+            if (StartWeek > classSbj.EndDate) return result;
+            //if (StartWeek == new DateTime(2020, 10, 12))
+            //{
+            //    var test = "";
+            //}
             //lay danh sach bai hoc trogn tuan
             var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
             var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
             //danh sach bai luyen tap
-            var practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+            List<LessonEntity> practices = new List<LessonEntity>();
+
+            if (isExam)
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).ToList();
+            }
+            else
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+            }
+
             foreach (var practice in practices)
             {
                 var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();

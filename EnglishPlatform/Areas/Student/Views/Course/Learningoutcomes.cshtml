@@ -69,7 +69,7 @@
                     <template>
                         <tr v-for="(itemSummary,i) in summaryData" v-if="item.ID == itemSummary.ClassID">
                             <td>{{itemSummary.Order}}</td>
-                            <td><a href="#" v-on:click="showDetail(itemSummary.CourseName,itemSummary.ClassSubjectID)">{{itemSummary.CourseName}}</a></td>
+                            <td><a href="#" v-on:click="showDetail(itemSummary.CourseName,itemSummary.ClassSubjectID,itemSummary.Order)">{{itemSummary.CourseName}}</a></td>
                             <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
                             @*<template v-if="i == 0 || (summaryData[i-1].ClassID != item.ID)">*@
                             <template v-if="summaryExam.length == 0 && itemSummary.Order == 1">
@@ -90,7 +90,7 @@
                         </tr>
                         <tr style="font-weight:bold">
                             <td colspan="2">Điểm trung bình</td>
-                            <td v-if="avgpointpractice[k].ClassID == item.ID">{{avgpointpractice[k].AvgPractice,1}}</td>
+                            <td v-if="avgpointpractice[k].ClassID == item.ID">{{roundPoint(avgpointpractice[k].AvgPractice,1)}}</td>
                             <td colspan="3" v-if="avgpointexam[k].ClassID == item.ID">{{roundPoint(avgpointexam[k].AvgExam,1)}}</td>
                         </tr>
 
@@ -102,22 +102,61 @@
 
     <b-modal id="detail_modal" size="lg" :title="detail.title">
         <div class="modal-body">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Tuần</th>
-                        <th>Tiến độ</th>
-                        <th>Điểm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item,i) in detail.data">
-                        <td>Tuần {{item.week}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</td>
-                        <td>{{item.practiceDone}}/{{item.totalPractice}}</td>
-                        <td>{{convertPoint(item.point)}}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <template v-if="isLoading">
+                <div style="text-align:center">
+                    <span>Đang tải dữ liệu ...</span><br />
+                    <b-spinner label="Loading..."></b-spinner>
+                </div>
+            </template>
+            <template v-else>
+
+                <template v-if="detail.dataExam.length > 0">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th colspan="8">Chi tiết kiểm tra & đánh giá</th>
+                            </tr>
+                            <tr>
+                                <th>STT</th>
+                                <th>Bài</th>
+                                <th>Số lượt làm</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th>Điểm</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in detail.dataExam">
+                                <td>{{k+1}}</td>
+                                <td>{{item.LessonName}}</td>
+                                <td>{{item.TriedCount}}</td>
+                                <td>{{formatTime(item.LastTried)}}</td>
+                                <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
+                                <td>{{roundPoint(item.MaxPoint,1)}}</td>
+                                <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tuần</th>
+                            @*<th>Tiến độ</th>*@
+                            <th>Điểm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,i) in detail.data">
+                            <td>Tuần {{item.week}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</td>
+                            @*<td>{{item.practiceDone}}/{{item.totalPractice}}</td>*@
+                            <td>{{roundPoint(item.point,1)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
@@ -245,7 +284,8 @@
                 avgpointexam: [],
                 detail: {
                     title: '',
-                    data: []
+                    data: [],
+                    dataExam:[]
                 },
                 classID: '',
                 filterTablePoint: {
@@ -253,7 +293,8 @@
                     showAll: 2, //tất cả
                     time: 3, //theo thời gian
                     typeFilter: 1
-                }
+                },
+                isLoading: false
             },
             watch: {
                 classID: function () {
@@ -338,19 +379,24 @@
                     }
                     this.$forceUpdate()
                 },
-                showDetail(CourseName, ClassSubjectID) {
+                showDetail(CourseName, ClassSubjectID, Order) {
                     let _that = this;
                     let _form = new FormData();
                     this.detail.title = CourseName
                     let _url = '@processUrl("GetDetailCourse", "ClassSubject")';
                     _form.append("ClassSubjectID", ClassSubjectID);
                     _form.append("TypeFilter", this.filterTablePoint.typeFilter);
+                    if (Order == 1) {
+                        _form.append("HasExam", true);
+                    }
+                    this.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
-                            var data = response.data;
-                            this.detail.data = data
-                            //debugger
-                        });
+                            //var data = response.data.Practice;
+                            this.detail.data = response.data.Practice
+                            this.detail.dataExam = response.data.Exam
+                            this.isLoading = false
+                        }).catch(e => { this.isLoading = false });
                     _that.$bvModal.show('detail_modal');
                 },
                 getList(ClassSubjectID){
@@ -470,7 +516,7 @@
                     return ret;
                 },
                 convertPoint(value) {
-                    if (value >= 0) {
+                    if (value > 0) {
                         value = value / 10;
                         var phannguyen = parseInt(value);
                         var phanthapphan = value - phannguyen;
@@ -504,17 +550,18 @@
                             var item = obj[i];
                             totalPointPractice += item.PracticeAvgPoint;
                         }
-                        return this.roundPoint((totalPointPractice / obj.length), 1)
+                        return (totalPointPractice / obj.length)
                     }
                     else return "---"
                 },
                 calcAverageExam(obj) {
+                    //debugger
                     var totalPointExam = 0;
                     for (var i = 0; i < obj.length; i++) {
                         var item = obj[i];
                         totalPointExam += (item.multiple1 + item.multiple2 * 2 + item.multiple3 * 3);
                     }
-                    return this.roundPoint((totalPointExam / 3), 1)
+                    return (totalPointExam / 6)
                 },
                 hideModal() {
                     this.isLoading = false
