@@ -16,6 +16,13 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Http;
 using OfficeOpenXml.ConditionalFormatting;
 using System.Net;
+using Spire.Doc;
+using Spire.Doc.Fields;
+using Spire.Doc.Documents;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -46,6 +53,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly VocabularyService _vocabularyService;
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly IHostingEnvironment _env;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+
+        private string RootPath { get; }
+        private string StaticPath { get; }
+        private string currentHost { get; }
+
 
         public CloneLessonPartController(
             //GradeService gradeservice,
@@ -66,7 +81,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
             FileProcess fileProcess,
-            VocabularyService vocabularyService
+            VocabularyService vocabularyService,
+
+            IConfiguration config,
+            IHostingEnvironment env,
+            IRoxyFilemanHandler roxyFilemanHandler,
+            IHttpContextAccessor httpContextAccessor
             )
         {
             //_gradeService = gradeservice;
@@ -94,6 +114,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneQuestionViewModelMapping = new MappingEntity<LessonPartQuestionEntity, CloneQuestionViewModel>();
             _fileProcess = fileProcess;
             _vocabularyService = vocabularyService;
+
+            _env = env;
+            RootPath = (config.GetValue<string>("SysConfig:StaticPath") ?? env.WebRootPath) + "/Files";
+            StaticPath = (config.GetValue<string>("SysConfig:StaticPath") ?? env.WebRootPath);
+            _roxyFilemanHandler = roxyFilemanHandler;
+            currentHost = httpContextAccessor.HttpContext.Request.Host.Value;
         }
 
         [Obsolete]
@@ -1226,5 +1252,1028 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
+
+
+        ////////////////////////////////////////////////////////////////////
+
+        public async Task<JsonResult> ImportFromWord(string basis = "", string ParentID = "")
+        {
+            Boolean Status = false;
+            try
+            {
+                var form = HttpContext.Request.Form;
+                if (form == null || form.Files == null || form.Files.Count <= 0)
+                    return new JsonResult(new Dictionary<string, object> { { "Error", "Chưa chọn file" } });
+
+
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var file = form.Files[0];
+                var dirPath = "Upload\\Quiz";
+
+                if (!Directory.Exists(Path.Combine(_env.WebRootPath, dirPath)))
+                    Directory.CreateDirectory(Path.Combine(_env.WebRootPath, dirPath));
+                var filePath = Path.Combine(_env.WebRootPath, dirPath + "\\" + DateTime.Now.ToString("ddMMyyyyhhmmss") + file.FileName);
+
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    String Msg = "";
+                    await file.CopyToAsync(stream);
+                    stream.Close();
+                    using (var readStream = new FileStream(filePath, FileMode.Open))
+                    {
+                        //Create a Document instance and load the word document
+                        Document document = new Document(readStream);
+
+                        //Get the first session
+                        var sw = document.Sections[0];
+                        Int32 countTable = sw.Body.Tables.Count;
+
+                        for (int indexTable = 0; indexTable < sw.Body.Tables.Count; indexTable++)
+                        {
+                            //Get the first table in the textbox
+                            Table table = sw.Body.Tables[indexTable] as Table;
+
+                            //var parentLesson = _lessonService.GetItemByID(ParentID);
+                            //var isPractice = parentLesson.IsPractice;
+
+                            var item = new CloneLessonPartViewModel();
+
+                            String title = table.Rows[0].Cells[1].Paragraphs[0].Text?.ToString().Trim();
+
+                            item.Title = title;
+                            item.Created = DateTime.UtcNow;
+                            item.Updated = DateTime.UtcNow;
+                            //item.Description = description;
+                            item.Point = 0;//đếm câu hỏi
+                            item.ParentID = ParentID;
+
+                            var maxItem = _cloneLessonPartService.CreateQuery()
+                            .Find(o => o.ParentID == item.ParentID)
+                            .SortByDescending(o => o.Order).FirstOrDefault();
+                            item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+
+                            //check type
+                            var typeRow = table.Rows[2];
+
+                            for (int indexCell = 1; indexCell < typeRow.Cells.Count; indexCell++)
+                            {
+                                var txtCell = typeRow.Cells[indexCell].Paragraphs[0].Text.ToString().ToUpper();
+                                if (txtCell.Contains("X"))
+                                {
+                                    //type = table.Rows[1].Cells[indexCell].Paragraphs[0].Text.ToString().ToUpper();
+                                    item.Type = partTypes[indexCell - 1];
+                                    break;
+                                }
+                            }
+
+                            switch (item.Type)
+                            {
+                                case "TEXT":
+                                case "AUDIO":
+                                case "VIDEO":
+                                case "DOC":
+                                    Msg += (await GetContentOther(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                case "IMAGE":
+                                    Msg += (await GetContentIMG(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                case "VOCAB":
+                                    Msg += (await GetContentVocab(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                case "QUIZ1":
+                                case "QUIZ3":
+                                case "QUIZ4":
+                                    Msg += (await GetContentQUIZ(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                case "QUIZ2":
+                                    item.Description = "";
+                                    Msg += (await GetContentQuiz2(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                case "ESSAY":
+                                    item.Type = "ESSAY";
+                                    Msg += (await GetContentEssay(table, item.Type, basis, item, UserID));
+                                    Status = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    _lessonHelper.calculateLessonPoint(ParentID);
+
+                    System.IO.File.Delete(filePath);
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        //{ "Data", full_item },
+                        {"Msg", Msg },
+                        {"Stt",Status == string.IsNullOrEmpty(Msg) }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                    {
+                        //{ "Data", full_item },
+                        {"Msg", ex.Message },
+                        {"Stt",false }
+                    });
+            }
+        }
+
+        private Dictionary<String, String> GetContentFile(Spire.Doc.Collections.ParagraphCollection documentObject, String basis, String createUser)
+        {
+            Dictionary<String, String> dataResponse = new Dictionary<String, String>();
+            foreach (DocumentObject docObject in documentObject[0].ChildObjects)
+            {
+                if (docObject.DocumentObjectType == DocumentObjectType.Picture)
+                {
+                    DocPicture picture = docObject as DocPicture;
+                    string fileName = string.Format($"Image{DateTime.UtcNow.ToString("yyyyMMddHHmmssfff")}.png");
+                    var pathImage = SaveImageByByteArray(picture.ImageBytes, fileName, createUser, basis);
+                    dataResponse.Add("FileName", fileName);
+                    dataResponse.Add("FilePath", pathImage);
+                }
+            }
+            return dataResponse;
+        }
+
+        private async Task<string> GetContentFile(string basis, CloneLessonPartViewModel item, string createUser, TableCell linkcell, string linkfile)
+        {
+            foreach (Paragraph prg in linkcell.Paragraphs)
+            {
+
+                foreach (DocumentObject obj in prg.ChildObjects)
+                {
+
+                    if (obj is Field)
+                    {
+                        var link = obj as Field;
+                        if (link.Type == FieldType.FieldHyperlink)
+                        {
+                            item.Media = new Media
+                            {
+                                Created = DateTime.UtcNow,
+                                Path = link.Value.Replace("\"", ""),
+                                OriginalName = link.FieldText,
+                                Name = link.FieldText,
+                                Extension = FileProcess.GetContentType(link.FieldText)
+                            };
+                            break;
+                        }
+                    }
+                    else if (obj is DocPicture)
+                    {
+                        var pic = obj as DocPicture;
+                        var filename = DateTime.Now.ToString("yyyyMMddhhmmssfff") + ".jpg";
+                        var path = SaveImageByByteArray(pic.ImageBytes, filename, createUser, basis);
+
+                        item.Media = new Media()
+                        {
+                            Created = DateTime.UtcNow,
+                            Path = path,
+                            OriginalName = filename,
+                            Name = filename,
+                            Extension = "image/jpg"
+                        };
+                        break;
+                    }
+                    else if (obj is DocOleObject)
+                    {
+                        Dictionary<String, String> pathFileOLE = await GetPathFileOLE(obj as DocOleObject, basis, createUser);
+                        item.Media = new Media()
+                        {
+                            Created = DateTime.UtcNow,
+                            Path = pathFileOLE["pathFileOLE"],
+                            OriginalName = pathFileOLE["packageFileName"],
+                            Name = pathFileOLE["packageFileName"],
+                            Extension = FileProcess.GetContentType(pathFileOLE["extension"])
+                        };
+                        break;
+                    }
+                    else if (obj is TextRange)
+                    {
+                        var str = (obj as TextRange).Text;
+                        if (str.ToLower().StartsWith("http"))
+                        {
+                            linkfile = str.Trim();
+                            var contentType = FileProcess.GetContentType(linkfile);
+                            if (contentType == "application/octet-stream")//unknown type
+                            {
+                                switch (item.Type)
+                                {
+                                    case "AUDIO":
+                                        contentType = "audio/mp3";
+                                        break;
+                                    case "VIDEO":
+                                        contentType = "video/mpeg";
+                                        break;
+                                    case "DOC":
+                                        contentType = "application/pdf";
+                                        break;
+                                    case "IMAGE":
+                                        contentType = "image/jpeg";
+                                        break;
+                                }
+                            }
+                            item.Media = new Media()
+                            {
+                                Created = DateTime.UtcNow,
+                                Path = linkfile,
+                                OriginalName = linkfile,
+                                Name = linkfile,
+                                Extension = contentType
+                            };
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return linkfile;
+        }
+
+        private async Task<String> GetContentOther(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                //description
+                String html = await StringHelper.ConvertDocToHtml(table, basis, createUser, StaticPath);
+                item.Description = html;
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
+                await CreateOrUpdate(basis, item);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return $"{type} is error {ex.Message}";
+            }
+        }
+
+        private async Task CreateOrUpdate(string basis, CloneLessonPartViewModel item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var parentLesson = _lessonService.GetItemByID(item.ParentID);
+                var createduser = User.Claims.GetClaimByType("UserID").Value;
+                if (parentLesson != null)
+                {
+                    var isPractice = parentLesson.IsPractice;
+                    var maxItem = _cloneLessonPartService.CreateQuery()
+                            .Find(o => o.ParentID == item.ParentID)
+                            .SortByDescending(o => o.Order).FirstOrDefault();
+
+                    item.CourseID = parentLesson.CourseID;
+                    item.ClassID = parentLesson.ClassID;
+                    item.ClassSubjectID = parentLesson.ClassSubjectID;
+
+                    item.Created = DateTime.UtcNow;
+                    item.Order = maxItem != null ? maxItem.Order + 1 : 0;
+                    item.Updated = DateTime.UtcNow;
+                    item.TeacherID = createduser;
+
+                    var lessonpart = item.ToEntity();
+                    _cloneLessonPartService.CreateQuery().InsertOne(lessonpart);
+                    item.ID = lessonpart.ID;
+
+                    switch (lessonpart.Type)
+                    {
+                        case "QUIZ2": //remove all previous question
+
+                            if (item.Questions != null && item.Questions.Count > 0)
+                            {
+                                await SaveQA(item, UserID);
+                            }
+                            isPractice = true;
+                            break;
+                        default://QUIZ1,3,4
+
+                            if (item.Questions != null && item.Questions.Count > 0)
+                            {
+                                await SaveQA(item, UserID);
+                            }
+                            isPractice = true;
+                            break;
+                    }
+
+                    if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
+                    {
+                        parentLesson.IsPractice = isPractice;
+                        _lessonService.Save(parentLesson);
+                        //increase practice counter
+                        await _classHelper.ChangeLessonPracticeState(parentLesson);
+                    }
+                    //calculateLessonPoint(item.ParentID);
+
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+                String msg = ex.Message;
+            }
+        }
+
+
+        private async Task<String> GetContentQUIZ(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                //List<QuestionViewModel> Quiz = new List<QuestionViewModel>();
+                Dictionary<String, CloneQuestionViewModel> Quiz = new Dictionary<string, CloneQuestionViewModel>();
+                Dictionary<String, List<AnswerViewModel>> listAns = new Dictionary<string, List<AnswerViewModel>>();
+                Int32 pos = -1;
+                Int32 indexQuiz = 1;
+                Int32 indexAns = 1;
+                Int32 indexEx = 1;
+
+                var paragraphs = table.Rows[3].Cells[1].Paragraphs;
+                var objs = table.Rows[3].Cells[1].ChildObjects;
+                foreach (Paragraph para in paragraphs)
+                {
+                    var content = para.Text.Trim();
+                    if (content.Contains($"[Q{indexQuiz}]"))//cau hoi
+                    {
+                        var question = new CloneQuestionViewModel
+                        {
+                            ParentID = item.ID,
+                            ClassID = item.ClassID,
+                            ClassSubjectID = item.ClassSubjectID,
+                            CourseID = item.CourseID,
+                            Order = item.Order,
+                            Created = DateTime.UtcNow,
+                            Updated = DateTime.UtcNow,
+                            CreateUser = createUser,
+                            Point = 1,
+                            Answers = new List<CloneLessonPartAnswerEntity>() { },//danh sach cau tra loi,
+                        };
+                        foreach (DocumentObject obj in para.ChildObjects)
+                        {
+                            if (obj is TextRange)
+                            {
+                                question.Content += (obj as TextRange).Text.Replace($"[Q{indexQuiz}]", "");
+                            }
+                            else if (obj is DocPicture)
+                            {
+                                var pic = obj as DocPicture;
+                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmssfff")}_{indexQuiz}.jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, createUser, basis);
+
+                                question.Media = new Media()
+                                {
+                                    Created = DateTime.UtcNow,
+                                    Path = path,
+                                    OriginalName = fileName,
+                                    Name = fileName,
+                                    Extension = "image/jpg"
+                                };
+                            }
+                        }
+                        Quiz.Add($"[Q{indexQuiz}]", question);
+                        pos++;
+                        indexQuiz++;
+                    }
+                    else if (content.Contains($"[A{indexAns}]"))
+                    {
+                        var lstAns = para.Text.Replace($"[Đáp án]\v[A{indexAns}]", "").Replace($"[A{indexAns}]", "").Trim().Split('|');
+                        foreach (var _ans in lstAns)
+                        {
+                            var ans = new CloneLessonPartAnswerEntity
+                            {
+                                ClassID = item.ClassID,
+                                ClassSubjectID = item.ClassSubjectID,
+                                CourseID = item.CourseID,
+                                CreateUser = createUser,
+                                Created = DateTime.UtcNow,
+                                Updated = DateTime.UtcNow,
+                                //Media = null,
+                                Content = _ans.Replace("(x)", "").Replace("(X)", "").Trim(),
+                                IsCorrect = _ans.Trim().ToUpper().Contains("X") ? true : false,
+                            };
+                            Quiz[$"[Q{indexAns}]"].Answers.Add(ans);
+                        }
+                        foreach (DocumentObject obj in para.ChildObjects)
+                        {
+                            if (obj is DocPicture)
+                            {
+                                var pic = obj as DocPicture;
+                                var previousSibling = (obj.PreviousSibling as TextRange).Text.Replace($"[A{indexAns}]", "").Replace($"[E{indexAns}]", "").Replace("|", "").Replace("(X)", "").Replace("(x)", "").Trim();
+                                var fileName = $"{DateTime.Now.ToString("yyyyMMddhhmmssfff")}_ans{previousSibling}_{indexQuiz}_{indexAns}.jpg";
+                                var path = SaveImageByByteArray(pic.ImageBytes, fileName, createUser, basis);
+                                var _test = lstAns.Contains(previousSibling);
+                                var ansWmedia = Quiz[$"[Q{indexAns}]"].Answers.Find(x => x.Content.Contains(previousSibling));
+                                ansWmedia.Media = new Media
+                                {
+                                    Name = fileName,
+                                    OriginalName = fileName,
+                                    Path = path,
+                                    Extension = "image/jpg",
+                                    //Extension = System.IO.Path.GetExtension(path),
+                                    Created = DateTime.Now,
+                                    Size = pic.Size.Width * pic.Size.Height
+                                };
+                            }
+                        }
+                        indexAns++;
+                    }
+                    else if (content.Contains($"[E{indexEx}]"))
+                    {
+                        var str = content.Replace($"[E{indexEx}]", "").Trim();
+                        if (Quiz.ContainsKey($"[Q{indexEx}]"))
+                        {
+                            if (!String.IsNullOrEmpty(str))
+                            {
+                                Quiz[$"[Q{indexEx}]"].Description += $"<p>{str}</p>";
+                            }
+                            while ((para.NextSibling as Paragraph) != null && !(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]"))
+                            {
+                                Quiz[$"[Q{indexEx}]"].Description += $"<p>{(para.NextSibling as Paragraph)?.Text}</p>";
+                                paragraphs.Remove(para.NextSibling as Paragraph);
+                            }
+                            indexEx++;
+                        }
+                    }
+                }
+
+                //desription
+                //foreach (Paragraph _para in paragraphs)
+                //{
+                //    //var _para = paragraphs[0];
+                //    while (_para != null && (_para.Text.Trim().ToUpper().Contains("[CÂU HỎI]") || _para.Text.Trim().ToUpper().Contains("[ĐÁP ÁN]")))
+                //    {
+                //        if (_para.NextSibling != null)
+                //        {
+                //            paragraphs.Remove((_para.NextSibling as Paragraph));
+                //        }
+                //        else
+                //        {
+                //            paragraphs.Remove(_para);
+                //        }
+                //    }
+                //}
+
+                Paragraph nextPrg = paragraphs[0];
+                //foreach (Paragraph para in paragraphs)
+                while (nextPrg != null)
+                {
+                    Paragraph para = nextPrg;
+                    var content = para.Text.Trim();
+                    if (content.ToUpper().Contains("[CÂU HỎI]") || content.ToUpper().Contains("[ĐÁP ÁN]"))
+                    {
+                        var nextObj = para.NextSibling;
+                        while (nextObj != null)
+                        {
+                            var next = nextObj.NextSibling;
+                            objs.Remove(nextObj);
+                            nextObj = next;
+                        }
+                        paragraphs.Remove(para);
+                        break;
+                    }
+                    else
+                    {
+                        nextPrg = nextPrg.NextSibling as Paragraph;
+                    }
+                }
+
+                item.Description = await StringHelper.ConvertDocToHtml(table, basis, createUser, StaticPath);
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
+                var lpq = new List<CloneQuestionViewModel>();
+                for (int i = 0; i < Quiz.Count; i++)
+                {
+                    var quiz = Quiz.ContainsKey($"[Q{i + 1}]") ? Quiz[$"[Q{i + 1}]"] : null;
+                    if (quiz != null)
+                    {
+                        quiz.Content = quiz.Content.Contains($"[Q{i + 1}]") ? quiz.Content.Replace($"[Q{i + 1}]", "") : quiz.Content;
+                        lpq.Add(quiz);
+                    }
+                }
+
+                item.Questions = lpq;
+                await CreateOrUpdate(basis, item);
+
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return "Type QUIZ 134 has error: " + ex.Message;
+            }
+        }
+
+        private async Task<String> GetContentIMG(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                var totalRows = table.Rows.Count;
+                for (int indexRow = 0; indexRow < totalRows; indexRow++)
+                {
+                    var contentRow = table.Rows[indexRow];
+                    String contentCell0 = contentRow.Cells[0].Paragraphs[0].Text?.ToString().Trim().ToLower();
+
+                    if (contentCell0.Equals("file"))
+                    {
+                        item.Media = new Media();
+                        var contentFileImage = GetContentFile(contentRow.Cells[1].Paragraphs, basis, createUser);
+                        if (contentFileImage.Count > 0)
+                        {
+                            item.Media.Created = DateTime.Now;
+                            item.Media.Name = contentFileImage["FileName"];
+                            item.Media.Path = contentFileImage["FilePath"];
+                            item.Media.Extension = "image/png";
+                        }
+                        else
+                        {
+                            item.Media = new Media();
+                        }
+                        break;
+                    }
+                    else continue;
+                }
+                _cloneLessonPartService.CreateOrUpdate(item);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return "Type IMG has error: " + ex.Message;
+            }
+        }
+
+        private async Task<String> GetContentVocab(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                var descriptionCell = table.Rows[3].Cells[1];
+                var desc = descriptionCell.FirstParagraph.Text;
+
+                var vocabArr = desc.Split('|');
+                if (vocabArr != null && vocabArr.Length > 0)
+                {
+                    foreach (var vocab in vocabArr)
+                    {
+                        var vocabulary = vocab.Trim().ToLower();
+                        _ = GetVocabByCambridge(vocabulary);
+                    }
+                }
+                item.Description = desc;
+
+                await CreateOrUpdate(basis, item);
+                return $"";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private async Task<String> GetContentQuiz2(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                Dictionary<String, String> _listAns = new Dictionary<String, String>();
+                Dictionary<String, String> _listH = new Dictionary<String, String>();
+                Dictionary<String, String> _listEx = new Dictionary<String, String>();
+                var descCell = table.Rows[3].Cells[1];
+                var paragraphs = descCell.Paragraphs;
+                Int32 indexquiz = 1, indexans = 1, indexH = 1, indexEx = 1;
+                Paragraph nextPrg = paragraphs[0];
+                //foreach (Paragraph para in paragraphs)
+                while (nextPrg != null)
+                {
+                    Paragraph para = nextPrg;
+                    nextPrg = para.NextSibling as Paragraph;
+                    var content = para.Text.Trim();
+                    String ex = "";
+                    String h = "";
+                    if (para.Text.ToUpper().Contains("[CÂU HỎI]")) descCell.Paragraphs.Remove(para);
+                    else if (para.Text.Trim().Contains($"[A{indexans}]"))
+                    {
+                        indexH = indexans;
+                        indexEx = indexans;
+                        String str = content.Replace($"[A{indexans}]", "").Trim();
+                        _listAns.Add($"[A{indexans}]", str);
+                        indexans++;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.Trim().Contains($"[H{indexH}]"))
+                    {
+                        indexEx = indexH;
+                        var str = content.Replace($"[H{indexH}]", "").Trim();
+                        h += str;
+                        while (para.NextSibling != null && (
+                            !(para.NextSibling as Paragraph).Text.Contains($"[A{indexH + 1}]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[E{indexH + 1}]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[E{indexH}]")))
+                        {
+                            h += (para.NextSibling as Paragraph)?.Text + " ";
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                        }
+                        _listH.Add($"H{indexH}", h);
+                        indexH++;
+                        nextPrg = para.NextSibling as Paragraph;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.Trim().Contains($"[E{indexEx}]"))
+                    {
+                        var str = content.Replace($"[E{indexEx}]", "").Trim();
+                        ex += str;
+                        while (para.NextSibling != null && (!(para.NextSibling as Paragraph).Text.Contains($"[A{indexEx + 1}]") && !(para.NextSibling as Paragraph).Text.Contains($"[H{indexEx + 1}]")))
+                        {
+                            ex += (para.NextSibling as Paragraph)?.Text + " ";
+                            descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                        }
+                        _listEx.Add($"E{indexEx}", ex);
+                        indexEx++;
+                        nextPrg = para.NextSibling as Paragraph;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.ToUpper().Contains("[ĐÁP ÁN]")) descCell.Paragraphs.Remove(para);
+
+                }
+
+                var indexQ = 1;
+                for (Int32 i = 0; i < paragraphs.Count; i++)
+                {
+                    var paraText = descCell.Paragraphs[i].Text.Trim();
+                    while (paraText.Contains($"_Q{indexQ}_"))
+                    {
+                        descCell.Paragraphs[i].Replace($"_Q{indexQ}_", $"EDUSOQUIZ2_Q{indexQ}_", true, false);
+                        indexQ++;
+                    }
+                }
+
+                String description = await StringHelper.ConvertDocToHtml(table, basis, createUser, StaticPath);
+                foreach (var a in _listAns)
+                {
+                    var ex = _listEx.ContainsKey($"E{indexquiz}") ? _listEx[$"E{indexquiz}"] : "";
+                    var h = _listH.ContainsKey($"H{indexquiz}") ? _listH[$"H{indexquiz}"] : "";
+                    var str = a.Value.Replace($"[A{indexquiz}]", "").Trim();
+                    String replace3 = $"EDUSOQUIZ2_Q{indexquiz}_";
+                    String replace2 = $"<fillquiz contenteditable=\"false\" readonly=\"readonly\" title=\"{ex}\"><input ans=\"{str}\" class=\"fillquiz\" contenteditable=\"false\" dsp=\"{h}\" placeholder=\"{ex}\" readonly=\"readonly\" type=\"text\" value=\"{str}\"/></fillquiz>";
+                    description = description.ToString().Replace(replace3, replace2);
+                    indexquiz++;
+                }
+                item.Description = description;
+
+                var newdescription = "";
+                item.Questions = ExtractFillQuestionList(item, createUser, out newdescription);
+                item.Description = newdescription.ToString();
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
+                await CreateOrUpdate(basis, item);
+
+                return $"";
+            }
+            catch (Exception ex)
+            {
+                return $"{type} has error {ex.Message}";
+            }
+        }
+
+        private async Task<String> GetContentEssay(Table table, String type, String basis, CloneLessonPartViewModel item, String createUser = null)
+        {
+            try
+            {
+                String descriptionLessonPart = "";
+                String descriptionQUIZ = "";
+                Double point = 0;
+
+                var descCell = table.Rows[3].Cells[1];
+                var paragraphs = descCell.Paragraphs;
+                DocumentObject nextPrg = paragraphs[0];
+
+                //lay mo ta
+                while (nextPrg != null)
+                {
+                    if (!(nextPrg is Paragraph))
+                    {
+                        nextPrg = nextPrg.NextSibling as DocumentObject;
+                        continue;
+                    }
+                    Paragraph para = nextPrg as Paragraph;
+                    nextPrg = para.NextSibling as DocumentObject;
+
+                    var content = para.Text.Trim();
+                    //if (para.Text.ToUpper().Contains("[DES]"))
+                    //    descCell.Paragraphs.Remove(para);
+                    //else if (para.Text.Trim().ToUpper().Contains($"[EX]"))
+                    if (para.Text.Trim().ToUpper().Contains($"[E]"))
+                    {
+                        var str = content.Replace($"[E]", "").Trim();
+                        descriptionQUIZ += str;
+                        while (para.NextSibling != null && (
+                            !(para.NextSibling as Paragraph).Text.Contains($"[E]")
+                            && !(para.NextSibling as Paragraph).Text.Contains($"[P]")))
+                        {
+                            descriptionQUIZ += (para.NextSibling as Paragraph)?.Text + " ";
+                            if (!(para.NextSibling as Paragraph).Text.Trim().Contains("[P]"))
+                            {
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            }
+                        }
+                        nextPrg = para.NextSibling as DocumentObject;
+                        descCell.Paragraphs.Remove(para);
+                    }
+                    else if (para.Text.Trim().ToUpper().Contains($"[P]"))
+                    {
+                        var str = content.Replace($"[P]", "").Trim();
+                        if (!String.IsNullOrEmpty(str))
+                        {
+                            Double.TryParse(str, out point);
+                            while (para.NextSibling != null)
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            descCell.Paragraphs.Remove(para);
+                        }
+                        else
+                        {
+                            Double.TryParse((para.NextSibling as Paragraph)?.Text.Trim(), out point);
+                            while (para.NextSibling != null)
+                                descCell.Paragraphs.Remove(para.NextSibling as Paragraph);
+                            descCell.Paragraphs.Remove(para);
+                        }
+                    }
+                }
+
+
+                descriptionLessonPart = await StringHelper.ConvertDocToHtml(table, basis, createUser, StaticPath);
+                descriptionQUIZ = $"<p>{descriptionQUIZ}</p>";
+
+                item.Description = descriptionLessonPart;
+                item.Point = point;
+                var question = new CloneQuestionViewModel
+                {
+                    Created = DateTime.UtcNow,
+                    CreateUser = createUser,
+                    Description = descriptionQUIZ,
+                    Point = point,
+                    MaxPoint = point
+                };
+                item.Questions = new List<CloneQuestionViewModel>();
+                item.Questions.Add(question);
+
+                //file 
+                var linkcell = table.Rows[4].Cells[1];
+
+                var linkfile = "";
+                linkfile = await GetContentFile(basis, item, createUser, linkcell, linkfile);
+
+                await CreateOrUpdate(basis, item);
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private async Task SaveQA(CloneLessonPartViewModel item, string UserID)
+        {
+            foreach (var questionVM in item.Questions)
+            {
+                questionVM.ParentID = item.ID;
+                questionVM.CourseID = item.CourseID;
+
+                var quiz = questionVM.ToEntity();
+                if (questionVM.ID == "0" || questionVM.ID == null || _cloneQuestionService.GetItemByID(quiz.ID) == null)
+                {
+                    var _maxItem = _cloneQuestionService.CreateQuery()
+                        .Find(o => o.ParentID == item.ID)
+                        .SortByDescending(o => o.Order).FirstOrDefault();
+                    quiz.Order = questionVM.Order;
+                    quiz.Created = DateTime.UtcNow;
+                    quiz.Updated = DateTime.UtcNow;
+                    quiz.CreateUser = UserID;
+                }
+                _cloneQuestionService.CreateQuery().InsertOne(quiz);
+
+                questionVM.ID = quiz.ID;
+
+                if (questionVM.Answers != null && questionVM.Answers.Count > 0)
+                {
+                    foreach (var answer in questionVM.Answers)
+                    {
+                        answer.ParentID = questionVM.ID;
+                        var _maxItem1 = _cloneAnswerService.CreateQuery().Find(o => o.ParentID == quiz.ID).SortByDescending(o => o.Order).FirstOrDefault();
+                        answer.Order = _maxItem1 != null ? _maxItem1.Order + 1 : 0;
+                        answer.Created = DateTime.UtcNow;
+                        answer.Updated = DateTime.UtcNow;
+                        answer.CreateUser = quiz.CreateUser;
+                        answer.CourseID = quiz.CourseID;
+                        _cloneAnswerService.CreateQuery().InsertOne(answer);
+                    }
+                }
+            }
+        }
+
+        private async Task<Dictionary<String, String>> GetPathFileOLE(DocOleObject Ole, String basis, String createUser)
+        {
+            Dictionary<String, String> dataResponse = new Dictionary<String, String>();
+            String[] typeVideo = { ".ogm", ".wmv", ".mpg", ".webm", ".ogv", ".mov", ".asx", ".mpge", ".mp4", ".m4v", ".avi" };
+            String[] typeAudio = { ".opus", ".flac", ".weba", ".webm", ".wav", ".ogg", ".m4a", ".oga", ".mid", ".mp3", ".aiff", ".wma", ".au" };
+            String path = "";
+            String user = String.IsNullOrEmpty(createUser) ? "admin" : createUser;
+            //foreach (DocumentObject obj in para.ChildObjects)
+            //{
+            //    if (obj.DocumentObjectType == DocumentObjectType.OleObject)
+            //    {
+            String typeFile = Ole.ObjectType.ToUpper();
+            String packageFileName = Ole.PackageFileName.ToString().Trim();
+
+
+            var filename = packageFileName.Replace("\\", "#").Split('#').Last();
+            String extension = Path.GetExtension(filename);
+            dataResponse.Add("packageFileName", filename);
+            dataResponse.Add("extension", extension);
+            if (typeFile.Contains("AcroExch.Document.11".ToUpper()))//pdf
+            {
+                path = await SaveFileToDrive(Ole, user, extension, basis);
+                dataResponse.Add("pathFileOLE", path);
+            }
+            else if (typeFile.Contains("Excel.Sheet.12".ToUpper()) || typeFile.Contains("Excel.Sheet.8".ToUpper()))//excel - check
+            {
+                path = await SaveFileToDrive(Ole, user, extension, basis);
+                dataResponse.Add("pathFileOLE", path);
+            }
+            //else if(typeFile.Contains("Excel.Sheet.12".ToUpper()) || typeFile.Contains("Excel.Sheet.8".ToUpper()))//doc
+            //{
+
+            //}
+            else if (typeFile.Contains("PowerPoint.Slide.8".ToUpper()) || typeFile.Contains("PowerPoint.Slide.12".ToUpper()))//power point
+            {
+                path = await SaveFileToDrive(Ole, user, extension, basis);
+                dataResponse.Add("pathFileOLE", path);
+            }
+            else
+            {
+                if (typeVideo.Contains(extension))//video
+                {
+                    path = await SaveFileToDrive(Ole, user, extension, basis);
+                    dataResponse.Add("pathFileOLE", path);
+                }
+                else if (typeAudio.Contains(extension))//audio
+                {
+                    path = await SaveFileToDrive(Ole, user, extension, basis);
+                    dataResponse.Add("pathFileOLE", path);
+                }
+                else
+                {
+                    path = await SaveFileToDrive(Ole, user, extension, basis);
+                    dataResponse.Add("pathFileOLE", path);
+                }
+                //    }
+                //}
+            }
+            return dataResponse;
+        }
+
+        private async Task<String> SaveFileToDrive(DocOleObject Ole, String user, String extension, String basis)
+        {
+            Byte[] bytes = Ole.NativeData;
+            String path = "";
+            using (MemoryStream memory = new MemoryStream(bytes))
+            {
+                path = _roxyFilemanHandler.GoogleDriveApiService.CreateLinkViewFile(_roxyFilemanHandler.UploadFileWithGoogleDrive(basis, user, memory, extension));
+                memory.Close();
+            }
+            return path;
+        }
+
+        private string SaveImageByByteArray(byte[] byteArrayIn, string fileName, String user, string center = "")
+        {
+            try
+            {
+                return FileProcess.ConvertImageByByteArray(byteArrayIn, fileName, $"{center}/{user}", RootPath);
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        private async Task GetVocabByCambridge(string vocab)
+        {
+            //check if vocab is exist
+            var code = vocab.ToLower().Replace(" ", "-");
+            var olditems = _vocabularyService.GetItemByCode(code);
+            if (olditems != null && olditems.Count > 0)
+                return;
+
+            var listVocab = new List<VocabularyEntity>();
+            var pronUrl = "https://dictionary.cambridge.org/vi/dictionary/english/" + code;
+            var dictUrl = "https://dictionary.cambridge.org/vi/dictionary/english-vietnamese/" + code;
+            var listExp = new List<PronunExplain>();
+
+            using (var expclient = new WebClient())
+            {
+                var expDoc = new HtmlDocument();
+                string expHtml = expclient.DownloadString(dictUrl);
+                expDoc.LoadHtml(expHtml);
+                var expContents = expDoc.DocumentNode.SelectNodes("//div[contains(@class,\"english-vietnamese kdic\")]");
+                if (expContents != null && expContents.Count() > 0)
+                {
+                    foreach (var expContent in expContents)
+                    {
+                        var typeNode = expContent.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]");
+                        if (typeNode == null) continue;
+                        var type = typeNode.InnerText;
+                        if (listExp.Any(t => t.WordType == type))
+                            continue;
+                        var expNodes = expContent.SelectNodes(".//span[contains(@class,\"trans dtrans\")]");
+                        if (expNodes == null)
+                            return;
+                        if (expNodes != null && expNodes.Count() > 0)
+                        {
+                            foreach (var node in expNodes)
+                            {
+                                listExp.Add(new PronunExplain
+                                {
+                                    WordType = type,
+                                    Meaning = node.InnerText
+                                });
+                            }
+                        }
+
+                    }
+                }
+            }
+            //if (listExp == null || listExp.Count == 0)
+            //    return;
+
+            using (var client = new WebClient())
+            {
+                HtmlDocument doc = new HtmlDocument();
+                string html = client.DownloadString(pronUrl);
+                doc.LoadHtml(html);
+
+                var contentHolder = doc.DocumentNode.SelectNodes("//div[contains(@class, \"pos-header\")]");
+                if (contentHolder != null && contentHolder.Count() > 0)
+                {
+                    foreach (var content in contentHolder)
+                    {
+                        var typeNode = content.SelectSingleNode(".//span[contains(@class,\"pos dpos\")]");
+                        var typeText = typeNode.InnerText;
+
+                        if (listVocab.Any(t => t.WordType == typeText))
+                            continue;
+                        try
+                        {
+
+                            var pronun = content.SelectSingleNode(".//span[contains(@class,\"us dpron-i\")]");
+                            var pronunText = pronun.SelectSingleNode(".//span[contains(@class,\"pron dpron\")]").InnerText;
+                            var pronunPath = pronun.SelectSingleNode(".//source[1]").GetAttributeValue("src", null);
+                            pronunPath = "https://dictionary.cambridge.org" + pronunPath;
+                            var vocabulary = new VocabularyEntity
+                            {
+                                Name = vocab,
+                                Code = code,
+                                Language = "en-us",
+                                WordType = typeText,
+                                Pronunciation = pronunText,
+                                PronunAudioPath = pronunPath,
+                                Created = DateTime.UtcNow,
+                                Description = string.Join(", ", listExp.Where(t => t.WordType == typeText).Select(t => t.Meaning))
+                            };
+                            listVocab.Add(vocabulary);
+
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            if (listVocab.Count() == 0) return;
+            foreach (var vocal in listVocab)
+                _vocabularyService.Save(vocal);
+            return;
+        }
     }
 }

@@ -54,6 +54,12 @@ namespace BaseCustomerMVC.Models
 
     public class CloneQuestionViewModel : CloneLessonPartQuestionEntity
     {
+        [JsonProperty("Answers")]
+        public List<CloneLessonPartAnswerEntity> Answers { get; set; }
+        [JsonProperty("MaxPoint")]
+        public double MaxPoint { get; set; }
+
+
         public CloneQuestionViewModel()
         {
         }
@@ -77,9 +83,6 @@ namespace BaseCustomerMVC.Models
         {
             this.Answers = Answers;
         }
-
-        [JsonProperty("Answers")]
-        public List<CloneLessonPartAnswerEntity> Answers { get; set; }
 
         public CloneLessonPartQuestionEntity ToEntity()
         {

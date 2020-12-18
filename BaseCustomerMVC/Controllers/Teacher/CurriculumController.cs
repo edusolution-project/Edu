@@ -1373,8 +1373,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Etype = item.Etype;
                     data.Limit = item.Limit;
 
-                    if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
-                        data.Limit = 0;
+                    //if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
+                    //    data.Limit = 0;
 
                     data.Updated = DateTime.UtcNow;
 
@@ -2452,7 +2452,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (ext.ToLower().Contains("image"))
                     {
-                        var img = attachmentRow_Cel2_Content.AppendPicture(ImageToByteArray(Image.FromFile(objPath)));
+                        var img = attachmentRow_Cel2_Content.AppendPicture(FileProcess.ImageToByteArray(Image.FromFile(objPath)));
                         var scale = 100;
                         if (img.Width > 0 && img.Height > 0)
                         {
@@ -4022,23 +4022,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                MemoryStream ms = new MemoryStream(byteArrayIn);
-                Image returnImage = Image.FromStream(ms);
-                //return returnImage;
-
-                var size = returnImage.Size;//get size image
-                var IMG = (Image)(new Bitmap(returnImage, (size.Width <= 800 && size.Height <= 800 ? size : new Size(800, 800)))); //resize image
-                var folder = center == "" && String.IsNullOrEmpty(user) ? "eduso/admin" : $"{center}/{user}/IMG/{DateTime.UtcNow.ToString("yyyyMMdd")}";
-                string uploads = Path.Combine(RootPath, folder);
-                if (!Directory.Exists(uploads))
-                {
-                    Directory.CreateDirectory(uploads);
-                }
-                using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
-                {
-                    IMG.Save(fileStream, ImageFormat.Jpeg);
-                }
-                return $"{"/Files"}/{folder}/{fileName}";
+                return FileProcess.ConvertImageByByteArray(byteArrayIn, fileName, $"{center}/{user}", RootPath);
             }
             catch (Exception ex)
             {
@@ -4249,14 +4233,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-        private byte[] ImageToByteArray(System.Drawing.Image imageIn)
-        {
-            using (var ms = new MemoryStream())
-            {
-                imageIn.Save(ms, imageIn.RawFormat);
-                return ms.ToArray();
-            }
-        }
+       
 
         private string validateFill(string org)
         {

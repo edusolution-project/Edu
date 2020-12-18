@@ -157,11 +157,12 @@
                                 <label class="col-form-label">Thời gian làm bài (phút):</label>
                                 <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn">
                             </div>
-                            <div class="form-group col-md-6" for="examOnly">
+                            <div class="form-group col-md-6">
                                 <label class="col-form-label">Giới hạn số lượt làm bài:</label>
                                 <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
                             </div>
                         </div>
+                        @if (templateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM) {
                         <div class="row">
                             <div class="form-group col-md-6" for="examOnly">
                                 <label class="col-form-label">Kiểu bài kiểm tra:</label>
@@ -177,6 +178,7 @@
                                 <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
                             </div>
                         </div>
+                        }
                         <div class="row chooseOrder" style="display:none">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Thứ tự:</label>
@@ -772,6 +774,7 @@
         modal.find("[name=ID]").val("");
         modal.find("[name=Point]").val("0");
         modal.find("[name=Timer]").val("0");
+        modal.find("[name=Limit]").val("0");
         SelectTemplate("@templateType");
         return false;
     }
@@ -997,7 +1000,7 @@
 
     function SelectTemplate(type)
     {
-        //var modal = $("#lessonModal");
+        var modal = $("#lessonModal");
         //if(type != null && type != "")
         //    modal.find("[name=TemplateType]").val(type);
         //var template = modal.find("[name=TemplateType]").val();

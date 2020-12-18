@@ -15,8 +15,6 @@ namespace BaseCustomerMVC.Globals
         private readonly LessonService _lessonService;
         private readonly CourseLessonService _courseLessonService;
 
-        private readonly IndexService _indexService;
-
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
@@ -72,7 +70,7 @@ namespace BaseCustomerMVC.Globals
             _lessonService = lessonService;
             _courseLessonService = courseLessonService;
 
-            _indexService = indexService;
+            //_indexService = indexService;
 
             _examService = examService;
             _examDetailService = examDetailService;
@@ -181,7 +179,6 @@ namespace BaseCustomerMVC.Globals
             _lessonService.UpdateLessonPoint(lessonId, point);
             return point;
         }
-
 
         #region Copy CourseLesson From CourseLesson
         public async Task CopyCourseLessonFromCourseLesson(CourseLessonEntity orgItem, CourseLessonEntity cloneItem)
@@ -699,11 +696,6 @@ namespace BaseCustomerMVC.Globals
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             return count <= 0;
         }
-        public class CorrectAns
-        {
-            public string ID { get; set; }
-            public string Value { get; set; }
-        }
 
         internal bool isExamined(LessonEntity lesson)
         {
@@ -716,5 +708,11 @@ namespace BaseCustomerMVC.Globals
             else//LECTURE only
                 return true;
         }
+    }
+
+    public class CorrectAns
+    {
+        public string ID { get; set; }
+        public string Value { get; set; }
     }
 }

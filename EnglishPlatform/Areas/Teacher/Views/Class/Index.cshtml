@@ -61,10 +61,10 @@
             <tbody>
                 <tr v-if="tableData == null || tableData.length <= 0">
                     <template v-if="isLoading">
-                        <td colspan="8">Đang gửi dữ liệu...</td>
+                        <td colspan="7">Đang lấy dữ liệu...</td>
                     </template>
                     <template v-else>
-                        <td colspan="8">Không có thông tin phù hợp</td>
+                        <td colspan="7">Không có thông tin phù hợp</td>
                     </template>
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">

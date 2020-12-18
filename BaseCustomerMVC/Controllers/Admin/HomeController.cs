@@ -567,6 +567,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                             lprg.LastPoint = lpoint;
                             lessonPointChange++;
                         }
+                        lprg.Tried = lastestEx.Number;
+                        lprg.PointChange = lprg.LastPoint;
+                        lprg.LastTry = lastestEx.Created;
+                        _lessonProgressService.Save(lprg);
                     }
 
                     if (lesson.ChapterID != "0")
@@ -614,59 +618,77 @@ namespace BaseCustomerMVC.Controllers.Admin
                 Builders<LessonEntity>.Update.Set(t => t.IsPractice, true).Set(t => t.TemplateType, LESSON_TEMPLATE.LECTURE)
                 );
 
-            var courseChapters = _courseChapterService.CreateQuery()
-                .Find(t => t.TotalExams > 0).ToList();
-            foreach (var chapter in courseChapters)
+            var examSubj = _classSubjectService.CreateQuery().Find(t => t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+            if (examSubj != null)
             {
-                if (chapter.TotalExams > 0)
+                foreach (var sbj in examSubj)
                 {
-                    var exCount = chapter.TotalExams;
-                    //await _courseHelper.IncreaseCourseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
-                    chapter.TotalPractices += exCount;
-                    chapter.TotalExams = 0;
-                    _courseChapterService.Save(chapter);
-                    if (chapter.ParentID == "0")
-                        await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0, 0 - exCount, exCount);
+                    _clonelessonService.CreateQuery().UpdateMany(t => t.ClassSubjectID == sbj.ID,
+                    Builders<LessonEntity>.Update.Set(t => t.IsPractice, false).Set(t => t.TemplateType, LESSON_TEMPLATE.EXAM)
+                    );
                 }
             }
 
-            var cloneChapters = _chapterService.CreateQuery()
-                .Find(t => t.TotalExams > 0).ToEnumerable();
-            foreach (var chapter in cloneChapters)
-            {
-                if (chapter.TotalExams > 0)
-                {
-                    var exCount = chapter.TotalExams;
-                    //await _classHelper.IncreaseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
-                    chapter.TotalPractices += exCount;
-                    chapter.TotalExams = 0;
-                    _courseChapterService.Save(chapter);
-                    if (chapter.ParentID == "0")
-                        await _classHelper.IncreaseClassSubjectCounter(chapter.ClassSubjectID, 0, 0 - exCount, exCount);
-                }
-            }
+            //_courseChapterService.CreateQuery().UpdateMany(t => t.ClassSubjectID == sbj.ID,
+            //        Builders<LessonEntity>.Update.Set(t => t.IsPractice, false).Set(t => t.TemplateType, LESSON_TEMPLATE.EXAM)
+            //        );
 
-            var chapPrgs = _chapterProgressService.CreateQuery().Find(t => t.ExamDone > 0).ToEnumerable();
 
-            foreach (var prg in chapPrgs)
-            {
-                if (prg.ExamDone > 0)
-                {
-                    var point = prg.TotalPoint;
-                    var count = prg.ExamDone;
-                    prg.PracticeDone += count;
-                    prg.PracticePoint += point;
-                    prg.PracticeAvgPoint = prg.PracticeDone > 0 ? (prg.PracticePoint * 100 / prg.PracticeDone) : 0;
 
-                    _chapterProgressService.Save(prg);
 
-                    var chapter = _chapterService.GetItemByID(prg.ChapterID);
-                    if (chapter.ParentID == "0")
-                    {
-                        await _progressHelper.UpdateClassSubjectPoint(chapter.ClassSubjectID, prg.StudentID, 0 - point, 0 - count, point, count);
-                    }
-                }
-            }
+            //var courseChapters = _courseChapterService.CreateQuery()
+            //    .Find(t => t.TotalExams > 0).ToList();
+            //foreach (var chapter in courseChapters)
+            //{
+            //    if (chapter.TotalExams > 0)
+            //    {
+            //        var exCount = chapter.TotalExams;
+            //        //await _courseHelper.IncreaseCourseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+            //        chapter.TotalPractices += exCount;
+            //        chapter.TotalExams = 0;
+            //        _courseChapterService.Save(chapter);
+            //        if (chapter.ParentID == "0")
+            //            await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0, 0 - exCount, exCount);
+            //    }
+            //}
+
+            //var cloneChapters = _chapterService.CreateQuery()
+            //    .Find(t => t.TotalExams > 0).ToEnumerable();
+            //foreach (var chapter in cloneChapters)
+            //{
+            //    if (chapter.TotalExams > 0)
+            //    {
+            //        var exCount = chapter.TotalExams;
+            //        //await _classHelper.IncreaseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+            //        chapter.TotalPractices += exCount;
+            //        chapter.TotalExams = 0;
+            //        _courseChapterService.Save(chapter);
+            //        if (chapter.ParentID == "0")
+            //            await _classHelper.IncreaseClassSubjectCounter(chapter.ClassSubjectID, 0, 0 - exCount, exCount);
+            //    }
+            //}
+
+            //var chapPrgs = _chapterProgressService.CreateQuery().Find(t => t.ExamDone > 0).ToEnumerable();
+
+            //foreach (var prg in chapPrgs)
+            //{
+            //    if (prg.ExamDone > 0)
+            //    {
+            //        var point = prg.TotalPoint;
+            //        var count = prg.ExamDone;
+            //        prg.PracticeDone += count;
+            //        prg.PracticePoint += point;
+            //        prg.PracticeAvgPoint = prg.PracticeDone > 0 ? (prg.PracticePoint * 100 / prg.PracticeDone) : 0;
+
+            //        _chapterProgressService.Save(prg);
+
+            //        var chapter = _chapterService.GetItemByID(prg.ChapterID);
+            //        if (chapter.ParentID == "0")
+            //        {
+            //            await _progressHelper.UpdateClassSubjectPoint(chapter.ClassSubjectID, prg.StudentID, 0 - point, 0 - count, point, count);
+            //        }
+            //    }
+            //}
             return Json("OK");
         }
 

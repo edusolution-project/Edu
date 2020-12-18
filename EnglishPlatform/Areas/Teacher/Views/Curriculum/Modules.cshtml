@@ -13,7 +13,6 @@
         return $"/{center}{url}";
     }
 }
-
 <style>
     .red-color {
         color: #D03239 !important;
@@ -194,7 +193,7 @@
                                 <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
                                        }>
                             </div>
-                            <div class="form-group col-md-6" for="examOnly">
+                            <div class="form-group col-md-6">
                                 <label class="col-form-label">Giới hạn số lượt làm bài:</label>
                                 <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
                                        }>
@@ -853,6 +852,7 @@
         modal.find("[name=ID]").val("");
         modal.find("[name=Point]").val("0");
         modal.find("[name=Timer]").val("0");
+        modal.find("[name=Limit]").val("0");
         SelectTemplate("1");
         return false;
     }

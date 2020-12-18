@@ -374,17 +374,24 @@ var Lesson = (function () {
 
 
                 var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Input từ Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word mr-2"></i>').append("Input từ Word");
+                //var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Input từ Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word mr-2"></i>').append("Input từ Word");
                 var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất file", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word mr-2"></i>').append("Xuất file");
                 lessonButton.append(btnExplain);
-                lessonButton.append(btnAddFileFromWord);
+                //lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
 
 
+
+
+                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddPartToLesson('" + data.ID + "','" + data.TemplateType + "')" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
+                create.append(iconCreate).append("Thêm nội dung");
+                lessonButton.append(create);
+
                 //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
-                lessonButton.append(create);
-                create.prepend(iconCreate).append("Trực tiếp");
+                //lessonButton.append(create);
+                //create.prepend(iconCreate).append("Trực tiếp");
                 //lessonButton.append(remove); //removeLesson
                 //remove.append(iconTrash);
                 //headerRow.append(lessonButton);
@@ -453,12 +460,10 @@ var Lesson = (function () {
 
                 var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort mt-2 mb-2 mr-2", "title": "Sort", "onclick": "SortPart()" });
-                //var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
-                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddParttoExam('" + data.ID + "','" + data.TemplateType + "')" });
+                //var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });                
                 var toggleMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Về chế độ xem", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort mr-2" });
-                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
                 var iconToggle = $("<i>", { "class": "fas fa-eye mr-2" });
 
                 if (!(_totalPart > 1)) {
@@ -469,8 +474,13 @@ var Lesson = (function () {
                 toggleMode.append(iconToggle).append("Xem");
                 lessonButton.append(sort);
                 sort.append(iconSort).append("Sắp xếp");
-                lessonButton.append(create);
+
+                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddPartToLesson('" + data.ID + "','" + data.TemplateType + "')" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
                 create.append(iconCreate).append("Thêm nội dung");
+                lessonButton.append(create);
+
+
                 //headerRow.append(lessonButton);
                 lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
@@ -648,7 +658,7 @@ var Lesson = (function () {
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         $('li[for=lesson-info]').hide().removeClass('d-flex');
                                         renderLectureExam(exam, false);
-                                        
+
                                         //renderOldAnswer();
                                     }
                                     else {
@@ -3799,6 +3809,20 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
+            }
+        }
+
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
             while (__answer_sending) {
@@ -3808,9 +3832,17 @@ var Lesson = (function () {
         }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
+
+
+
         if ($('#QuizNav').hasClass("show"))
             toggleNav();
+
+
+
+
         if (isOvertime || true) {
+
             //var exam = document.querySelector("input[name='ExamID']");
             //var exam = getLocalData("CurrentExam");
             if (config.mod != mod.TEACHERPREVIEWEXAM) {
@@ -4652,7 +4684,7 @@ var Lesson = (function () {
     }
 
     //Thêm từ bài
-    var showModaltoAddExam = function () {
+    var showModalAddToLesson = function () {
         $(".swal2-container").hide();
         listLessonPartID = [];
         $('#ModaltoAddExam').modal('show');
@@ -4829,15 +4861,15 @@ var Lesson = (function () {
                         containerLessonPart.append(firstChild);
                         containerLessonPart.append(ulselectLessonPartTemplate);
 
-                        var quiz1 = data.find(x => x.Type == "QUIZ1");
-                        var quiz2 = data.find(x => x.Type == "QUIZ2");
-                        var quiz3 = data.find(x => x.Type == "QUIZ3");
-                        var quiz4 = data.find(x => x.Type == "QUIZ4");
+                        //var quiz1 = data.find(x => x.Type == "QUIZ1");
+                        //var quiz2 = data.find(x => x.Type == "QUIZ2");
+                        //var quiz3 = data.find(x => x.Type == "QUIZ3");
+                        //var quiz4 = data.find(x => x.Type == "QUIZ4");
 
-                        if (quiz1 || quiz2 || quiz3 || quiz4) {
+                        //if (quiz1 || quiz2 || quiz3 || quiz4) {
                             for (var i = 0; i < data.length; i++) {
                                 var lessonPart = data[i];
-                                if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4")) {
+                                //if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4")) {
                                     $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 16px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
                                 }
                                 //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
@@ -4862,13 +4894,13 @@ var Lesson = (function () {
                                 //    }
                                 //}
 
-                                //var parentLesson = $("#" + lessonid);
+                                var parentLesson = $("#" + lessonid);
 
-                            }
-                        }
-                        else {
-                            alert("Bài chưa có nội dung!");
-                        }
+                            //}
+                        //}
+                        //else {
+                        //    alert("Bài chưa có nội dung!");
+                        //}
                     }
                     else {
                         alert("Bài chưa có dữ liệu. Liên hệ người tạo để biết thêm chi tiết");
@@ -4983,7 +5015,7 @@ var Lesson = (function () {
         }
     }
 
-    var ShowAddParttoExam = function (id, type) {
+    var ShowAddPartToLesson = function (id, type) {
         id = "'" + id + "'";
         type = "'" + type + "'";
         Swal.fire({
@@ -4991,8 +5023,8 @@ var Lesson = (function () {
             icon: 'question',
             html:
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
-                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>' +
-                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>',
+                //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModalAddToLesson()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',
         })
@@ -5007,7 +5039,7 @@ var Lesson = (function () {
     window.chooseLessonPart = chooseLessonPart;
     window.saveQAtoExam = saveQAtoExam;
     window.selectAllQuestion = selectAllQuestion;
-    window.ShowAddParttoExam = ShowAddParttoExam;
+    window.ShowAddPartToLesson = ShowAddPartToLesson;
     window.chooseCourse = chooseCourse;
 
     window.LessonInstance = {} || Lesson;
@@ -5065,7 +5097,7 @@ var Lesson = (function () {
     window.fillquizBlur = fillquizBlur;
     window.downloadFileWordWitdData = downloadFileWordWitdData;
 
-    window.showModaltoAddExam = showModaltoAddExam;
+    window.showModalAddToLesson = showModalAddToLesson;
     return LessonInstance;
 }());
 

@@ -404,7 +404,6 @@ var Lesson = (function () {
                 lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
 
-
                 //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
                 lessonButton.append(create);
@@ -1630,8 +1629,8 @@ var Lesson = (function () {
 
                 switch (config.mod) {
                     case mod.TEACHERVIEW:
-                    case mod.TEACHERPREVIEW:
-                    case mod.TEACHERPREVIEWEXAM:
+                        //case mod.TEACHERPREVIEW:
+                        //case mod.TEACHERPREVIEWEXAM:
                         break;
                     default:
                         var quiz = prevHolder.data("questionId");
@@ -2565,13 +2564,13 @@ var Lesson = (function () {
     var goQuiz = function (quizid, obj, scroll = true) {
         var _quiz = $('#' + quizid);
         var _partid = _quiz.attr('data-part-id');
-        console.log(quizid);
+        //console.log(quizid);
         var _part = $('.tab-pane#pills-part-' + _partid);
 
         var part = _part[0];
         if (part != null) {
             var el = part.querySelector("[id='" + quizid + "']");
-            console.log(el.classList);
+            //console.log(el.classList);
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
@@ -3826,6 +3825,20 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
+            }
+        }
+
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
             while (__answer_sending) {
@@ -4271,6 +4284,10 @@ var Lesson = (function () {
                         });
                         //alert(err);
                     });
+            }
+            else {
+                //console.log('#quiznav' + questionId);
+                $('#quizNav' + questionId).addClass('completed');
             }
         }
     }
