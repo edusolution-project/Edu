@@ -44,9 +44,9 @@
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
-                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Bảng điểm</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
                     @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
-                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
+                    @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
                 </ul>
             </div>
             <div class="c-right">
@@ -83,22 +83,22 @@
                 <select v-model="searchPoint">
                     <option value="">Theo phân công giáo viên</option>
                     <option value="1">Tất cả</option>-->
-                    @*<option value="2">Theo thời gian</option>*@
-                <!--</select>
+            @*<option value="2">Theo thời gian</option>*@
+            <!--</select>
             </div>-->
             <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
                 <div class="form-row">
                     <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
                     <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
-                    @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
-                <!--</div>
+            @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
+            <!--</div>
             </div>
             <div class="float-right" v-if="searchCsbj==''">
                 <template v-if="!isLoading">-->
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
-                <!--</template>
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            <!--</template>
                 <template v-else>
                     <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
                 </template>
@@ -200,7 +200,7 @@
                 <ul class="list ls-practice">
                     <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
-                            <a href="javascript:;" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2 text-danger"  v-on:click="loadContent(obj.ID)" v-on:load="alert(1)">
+                            <a href="javascript:;" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2 text-danger" v-on:click="loadContent(obj.ID)" v-on:load="alert(1)">
                                 <h3 style="font-size:15px;" class="font-weight-bold"> Kiểm tra / đánh giá</h3>
                             </a>
                             <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
@@ -211,18 +211,18 @@
                                 <i class="far fa-edit ml-3"></i>
                                 Soạn thảo
                             </a>
-                        </div>                        
+                        </div>
                         @*<b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">*@
-                            <ul class="list">
-                                <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                              v-bind:data="item"
-                                              v-bind:classbj="obj.ID"
-                                              v-bind:pos="k"
-                                              v-bind:owner="obj.TeacherID"
-                                              v-bind:listchaps="list_chapters"
-                                              v-bind:type="'exam'"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
-                            </ul>
+                        <ul class="list">
+                            <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                          v-bind:data="item"
+                                          v-bind:classbj="obj.ID"
+                                          v-bind:pos="k"
+                                          v-bind:owner="obj.TeacherID"
+                                          v-bind:listchaps="list_chapters"
+                                          v-bind:type="'exam'"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
+                        </ul>
                         @*</b-collapse>*@
                     </li>
                 </ul>
@@ -246,7 +246,7 @@
                                 <td>{{k+1}}</td>
                                 <td><a href="javascript:void(0)" v-on:click="showDetailStudent(item.StudentID)">{{item.FullName}}</a></td>
                                 <td>{{roundPoint(item.PracticeAvgPoint,1)}}</td>
-                                <td style="cursor:pointer" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailExam(item)">{{roundPoint(item.AvgPoint,1)}}</td>
+                                <td class="action-cel" v-on:click="loadDetailExam(item)">{{roundPoint(item.AvgPoint,1)}}</td>
                                 @*<td>1/32</td>*@
                             </tr>
                         </tbody>
@@ -255,20 +255,20 @@
                 <template v-else-if="table[1] && isLoading == false">
                     <div class="view" v-if="fieldsTime">
                         <div class="wrapper">
-                            <table class="table" id="table_point">
+                            <table class="table scoretable" id="table_point">
                                 <thead>
                                     <tr>
                                         <th class="sticky-col first-col">STT</th>
                                         <th class="sticky-col second-col">Họ tên</th>
                                         @*<th v-for="(item,k) in fieldsTime">Tuần {{k}}</th>*@
-                                        <th v-for="(item,k) in fieldsTime" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
+                                        <th v-for="(item,k) in fieldsTime" class="action-cel" style="width:50px; font-size:80%;" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
                                         <td class="sticky-col second-col">{{items[0].studentName}}</td>
-                                        <td v-for="item in items" style="cursor:pointer;width:50px;height:20px" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                        <td v-for="item in items" class="action-cel" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -623,8 +623,21 @@
             width: 250px;
             min-width: 150px;
             max-width: 300px;
-            left: 0px;
+            left: 36px;
         }
+
+        .scoretable th, scoretable.td {
+            padding: 0 5px;
+        }
+
+        .action-cel {
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+            .action-cel:hover {
+                background-color: lightgray;
+            }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
@@ -1482,27 +1495,19 @@
                     let _that = this
                     let _form = new FormData()
 
-                    if (this.searchCsbj == '') {
+                    if (this.searchCsbj == '' || this.searchCsbj == 1) {
                         this.tableChange(0);
                         _form.append('ClassID', _that.classID)
                         _form.append('PageSize', 1000)
                         _form.append('PageIndex', 1)
-                        //if (isFillter==1) {
-                        //    _form.append('startTime', _that.searchwidthTime.startTime)
-                        //    _form.append('endTime', _that.searchwidthTime.endTime)
-                        //    _form.append('isFillter', true)
-                        //    //this.scoreData=[]
-                        //}
                         let _url = '@processUrl("GetClassResult", "Class")'
                         axios.post(_url, _form)
                             .then(response => {
                                 _that.scoreData = response.data.Data;
                                 this.scoreData = _that.scoreData
                                 this.totalRec = response.data.Model.totalRecord
-                                //var tt = response.data.Model.totalRecord;
-                                //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
                             }).catch(e => { })
-                    }
+                    @*}
                     else if (this.searchCsbj == 1) {
                         this.tableChange(0);
                         _form.append('ClassID', _that.classID)
@@ -1514,7 +1519,7 @@
                                 _that.scoreData = response.data.Data;
                                 this.scoreData = _that.scoreData
                                 this.totalRec = response.data.Model.totalRecord
-                            }).catch(e => { })
+                            }).catch(e => { })*@
                     }
                     else {
                         this.tableChange(1);
@@ -1617,6 +1622,7 @@
                     this.progessSbj.endTime = objTime.endTime
                     this.progessSbj.title = this.searchCsbj.CourseName
                     let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
+                    console.log(_url);
                     axios.post(_url, _form)
                         .then(response => {
                             this.progessSbj.data = response.data.Data
@@ -2242,7 +2248,7 @@
                 },
                 openHistory(obj) {
                     let _that = this;
-                    if (obj != null) {
+                    if (obj != null) {                        
                         _that.student_result.ID = obj.StudentID
                         _that.student_result.Name = obj.StudentName
                         _that.student_result.History = obj.ListExam
@@ -2932,7 +2938,7 @@
                     <tbody>
                         <tr v-for="(item,k) in result_data">
                             <td>{{k+1}}</td>
-                            <td style="cursor:pointer" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="openHistory(item)">{{item.LessonName}}</td>
+                            <td class="action-cell" v-on:click="openHistory(item)">{{item.LessonName}}</td>
                             <td>{{item.TriedCount}}</td>
                             @*<td>{{convertPoint(item.MinPoint)}}</td>
                                 <td>{{convertPoint(item.MaxPoint)}}</td>

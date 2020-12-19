@@ -66,7 +66,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <template>
+                    <template v-if="summaryData != null && summaryData.length > 0">
                         <tr v-for="(itemSummary,i) in summaryData" v-if="item.ID == itemSummary.ClassID">
                             <td>{{itemSummary.Order}}</td>
                             <td><a href="#" v-on:click="showDetail(itemSummary.CourseName,itemSummary.ClassSubjectID,itemSummary.Order)">{{itemSummary.CourseName}}</a></td>

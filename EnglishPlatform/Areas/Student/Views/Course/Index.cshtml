@@ -126,20 +126,29 @@
                     </div>
 
                     @* exam *@
-                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
-                        <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Kiểm tra</h2>
-                        <ul class="list ls-practice row">
-                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID">
-                                <div class="inner d-flex w-100">
-                                    <div class="flex-fill ml-2">
-                                        <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-dark font-weight-bold">
-                                            Bài kiểm tra của lớp {{item.Name}}
-                                        </a>
-                                    </div>
+                <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
+
+                    <a v-for="(csbj,j) in classSubjects" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID" :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-danger font-weight-bold">
+                        <h2 style="font-size:15px;" class="font-weight-bold pb-3">
+
+                            Bài kiểm tra
+
+                        </h2> 
+                    </a>
+
+
+                    @*<ul class="list ls-practice row">
+
+
+                        <liclass ="form-row col-md-6 col-sm-12 mb-3" >
+                            <div class="inner d-flex w-100">
+                                <div class="flex-fill ml-2">
+
                                 </div>
+                            </div>
                             </li>
-                        </ul>
-                    </div>
+                    </ul>*@
+                </div>
                 </template>
                 <template v-else-if="item.ClassMechanism == @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group">
@@ -311,7 +320,7 @@
                                 else {
                                     this.classes = response.data.Classes;
                                     this.classSubjects = response.data.Data;
-                                    debugger
+                                    //debugger
                                 }
                                 //_data.forEach(function (item, k) {
                                 //    _that.classSubjects.push({

@@ -77,14 +77,19 @@
     <div class="card-body" v-cloak>
         <div class="box">
             <ul class="list ls-pratice">
-                <chap-content v-for="(item,k) in list_data"
-                              v-bind:data="item"
-                              v-bind:pos="k"
-                              v-if="item.ParentID == '0'"
-                              v-bind:subchaps="list_data">
-                </chap-content>
+                <template v-if="list_data.length > 0 || list_lessons.length > 0">
+                    <chap-content v-for="(item,k) in list_data"
+                                  v-bind:data="item"
+                                  v-bind:pos="k"
+                                  v-if="item.ParentID == '0'"
+                                  v-bind:subchaps="list_data">
+                    </chap-content>
 
-                <lesson-item v-for="lesson in filterLesson('0')" v-if="lesson != null" v-bind:lesson="lesson" v-bind:classSubject="`@currentCs.ID`"></lesson-item>
+                    <lesson-item v-for="lesson in filterLesson('0')" v-if="lesson != null" v-bind:lesson="lesson" v-bind:classSubject="`@currentCs.ID`"></lesson-item>
+                </template>
+                <template v-else>
+                    Không có nội dung
+                </template>
             </ul>
         </div>
     </div>
