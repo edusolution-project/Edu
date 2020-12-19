@@ -129,6 +129,11 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
+
+        public ClassSubjectEntity GetClassSubjectExamByClassID(String ClassID)
+        {
+            return Collection.Find(x => x.ClassID == ClassID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
+        }
     }
 
     public class CLASSSUBJECT_TYPE

@@ -16,6 +16,7 @@ using Google.Apis.Drive.v3.Data;
 using System.IO;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using System.Diagnostics;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -418,7 +419,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && (o.StartDate != new DateTime() || o.EndDate != new DateTime()) && o.StartDate <= DateTime.Now).ToList();
             var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
             var activeProgress = _lessonProgressService.CreateQuery().Find(x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)).ToEnumerable();
-            var practiceIDs = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+            var practiceIDs = _lessonService.CreateQuery().Find(x => activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+            //var examIDs = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
 
             //ket qua lam bai cua hoc sinh trong lop
             var classResult = (from r in activeProgress.Where(t => practiceIDs.Contains(t.LessonID) && t.Tried > 0)
@@ -449,6 +451,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var studentresult = classResult.Where(x => x.StudentID == id).FirstOrDefault();
                 data.Add(studentresult);
             }
+            //foreach (var student in students)
+            //{
+            //    var result = new List<StudentLessonResultViewModel>();
+            //    foreach (var sbj in classSbjnoExam)
+            //    {
+            //        result = _progressHelper.GetLessonProgressList(sbj.StartDate, DateTime.Now, student, sbj).Result;
+            //    }
+            //    data.Add(new StudentSummaryViewModel { StudentID = student.ID, PracticeAvgPoint = result.Count > 0 ? result.Average(x => x.LastPoint) : 0, AvgPoint = 0, FullName = student.FullName });
+            //}
 
             Dictionary<String, Object> dataresponse = new Dictionary<string, object>
             {
@@ -771,6 +782,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //string _studentid = User.Claims.GetClaimByType("UserID").Value;
                 //var student = _studentService.GetItemByID(_studentid);
                 var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID == ClassSubjectID).FirstOrDefault();
+                if(lesson == null)
+                {
+                    return new JsonResult(new Dictionary<String, Object> {
+                                        {"Error","Chưa có bài học" },
+                                        {"DataStudent",""},
+                                        {"DataTime","" }
+                                    });
+                }
                 var @class = _classService.GetItemByID(lesson.ClassID);
                 var sbj = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
                 var startDate = sbj.StartDate;
@@ -778,11 +797,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var listTime = GetListWeek(startDate);
                 Dictionary<String, Object> dataResponse = new Dictionary<string, object>();
                 Dictionary<String, Object> dataTime = new Dictionary<string, object>();
-                foreach (var item in listTime)
-                {
-                    dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
-                }
-
+                //foreach (var item in listTime)
+                //{
+                //    dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                //}
                 var index = 1;
                 foreach (var student in listStudent)
                 {
@@ -790,16 +808,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
                     foreach (var item in listTime)
                     {
-                        result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj);
+                        if (sbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+                        {
+                            result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj, true);
+                        }
+                        else
+                        {
+                            result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj);
+                        }
+                        if (result.Count == 0) continue;
                         var data = new StudentDetailVM();
                         data.StudentName = student.FullName;
                         data.StudentID = student.ID;
                         data.Week = item.Key; ;
-                        var point = result.Count() > 0 ? result.Average(x => x.LastPoint) : 0;
+                        var point = result.Count() > 0 ? result.Average(x => x.LastPoint).ToString() : "";
                         data.Point = point.ToString();
                         data.StartTime = item.Value.StartTime;
                         data.EndTime = item.Value.EndTime;
                         dataresponse.Add(data);
+
+                        if (!dataTime.ContainsKey(item.Key.ToString()))
+                        {
+                            dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                        }
                     }
 
                     dataResponse.Add(index.ToString(), dataresponse);
@@ -858,9 +889,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //    dataResponse.Add(student.ID, dataresponse);
                 //}
                 return new JsonResult(new Dictionary<String, Object> {
-                {"DataStudent",dataResponse },
-                {"DataTime",dataTime }
-            });
+                                        {"DataStudent",dataResponse },
+                                        {"DataTime",dataTime }
+                                    });
             }
             catch (Exception ex)
             {
@@ -920,7 +951,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    return new JsonResult(response);
         //}
 
-        public JsonResult GetStudentSummary(String basis, String StudentID, String ClassID, Int32 TypeFilter = Type_Filter.LESSONSCHEDULE)
+        public JsonResult GetStudentSummary(String basis, String StudentID, String ClassID)
         {
             try
             {
@@ -949,6 +980,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var subjects = _classSubjectService.GetByClassID(@class.ID);
 
                 var index = 0;
+                var result = new List<StudentLessonResultViewModel>();
                 foreach (var sbj in subjects.OrderBy(x => x.TypeClass))
                 {
                     var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.ClassSubjectID == sbj.ID && (o.StartDate != new DateTime() || o.EndDate != new DateTime()) && o.StartDate <= DateTime.Now).ToList();
@@ -957,29 +989,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     index = index + 1;
                     if (sbj.TypeClass != CLASSSUBJECT_TYPE.EXAM)
                     {
+
+                        result = _progressHelper.GetLessonProgressList(sbj.StartDate, DateTime.Now, student, sbj).Result;
+
                         //if (activeLessonIds.Count == 0) continue;
-                        var practiceIds = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-                        if (practiceIds.Count == 0)
+                        //var practiceIds = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                        if (result.Count == 0)
                         {
                             index = index - 1;
                             continue;
                         }
-                        var studentResult = activeProgress.Where(x => practiceIds.Contains(x.LessonID) && x.Tried > 0).ToList();
+                        //var studentResult = activeProgress.Where(x => practiceIds.Contains(x.LessonID) && x.Tried > 0).ToList();
 
                         var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryViewModel>()
-                            .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
+                            .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, student.ID) ?? new ClassSubjectProgressEntity
                             {
                                 ClassID = @class.ID,
-                                StudentID = StudentID,
+                                StudentID = student.ID,
                                 ClassSubjectID = sbj.ID
                             }, new StudentSummaryViewModel()
                             {
                                 CourseName = sbj.CourseName,
                                 TotalPractices = sbj.TotalPractices,
                                 TypeClassSbj = sbj.TypeClass,
-                                Order = index,
-                                ClassName = @class.Name,
-                                FullName = student.FullName
+                                Order = index
                             });
                         if (string.IsNullOrEmpty(summary.CourseName))
                         {
@@ -993,15 +1026,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 summary.CourseName = course.Name;
                             }
                         }
-                        if (TypeFilter.Equals(Type_Filter.LESSONSCHEDULE))
-                        {
-                            summary.PracticeAvgPoint = studentResult.Count() > 0 ? studentResult.Average(x => x.LastPoint) : 0;
-                        }
+                        //if (TypeFilter.Equals(Type_Filter.LESSONSCHEDULE))
+                        //{
+                        summary.PracticeAvgPoint = result.Count() > 0 ? result.Average(x => x.LastPoint) : 0;
+                        //}
                         data.Add(summary);
                     }
                     else
                     {
-                        var exam = _lessonProgressService.CreateQuery().Find(x => activeLessonIds.Contains(x.LessonID)).ToList().GroupBy(x => x.Multiple).Select(x => new { Multiple = x.Key, ListPoint = x.ToList().Where(y => y.Tried > 0).Select(y => y.AvgPoint).ToList() });
+                        var exam = _lessonProgressService.CreateQuery().Find(x => activeLessonIds.Contains(x.LessonID)).ToList().GroupBy(x => x.Multiple).Select(x => new { Multiple = x.Key, ListPoint = x.ToList().Where(y => y.Tried > 0).Select(y => y.LastPoint).ToList() });
                         var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryExamViewModel>()
                             .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, StudentID) ?? new ClassSubjectProgressEntity
                             {
@@ -1075,6 +1108,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 listDateTime.Add(index, weekn);
                 index++;
             }
+            listDateTime[index - 1].EndTime = DateTime.Now;
             return listDateTime;
         }
 
@@ -3393,6 +3427,66 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String ProgressExam { get; set; }
             public String AvgPointExam { get; set; }
             public String Rank { get; set; }
+        }
+
+        //test
+        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressListTest(DateTime StartWeek, DateTime EndWeek, List<String> studentIDs, ClassSubjectEntity classSbj, Boolean isExam = false)
+        {
+            List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
+            if (StartWeek > classSbj.EndDate) return result;
+            if (StartWeek == new DateTime(2020, 10, 12))
+            {
+                var test = "";
+            }
+            //lay danh sach bai hoc trogn tuan
+            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+            //danh sach bai luyen tap
+            List<LessonEntity> practices = new List<LessonEntity>();
+
+            if (isExam)
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).ToList();
+            }
+            else
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+            }
+
+            if (practices.Count > 0)
+            {
+                var a = "";
+            }
+
+            foreach (var practice in practices)
+            {
+                var examresult = _examService.CreateQuery().Find(t => studentIDs.Contains(t.StudentID) && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+                var progress = _lessonProgressService.CreateQuery().Find(t => studentIDs.Contains(t.StudentID) && t.LessonID == practice.ID).FirstOrDefault(); ;
+                var tried = examresult.Count();
+                var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+                var lastEx = examresult.FirstOrDefault();
+                result.Add(new StudentLessonResultViewModel(new StudentEntity())
+                {
+                    LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+                    MaxPoint = maxpoint,
+                    MinPoint = minpoint,
+                    AvgPoint = avgpoint,
+                    TriedCount = tried,
+                    LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+                    OpenCount = progress?.TotalLearnt ?? 0,
+                    LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+                    IsCompleted = lastEx != null && lastEx.Status,
+                    ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
+                    LessonName = practice.Title,
+                    LessonID = practice.ID,
+                    ClassSubjectID = practice.ClassSubjectID
+                });
+            }
+            return result;
         }
     }
 }

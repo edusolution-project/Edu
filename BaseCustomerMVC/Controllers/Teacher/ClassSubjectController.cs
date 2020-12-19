@@ -262,5 +262,52 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //    });
             //}
         }
+
+        public JsonResult GetResultsWithTime(String basis,String ClassSubjectID,DateTime StartTime,DateTime EndTime)
+        {
+            try
+            {
+                var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+                if(currentCs == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+                }
+
+                var avtiveLessons = _lessonScheduleService.GetActiveLesson(StartTime, EndTime, currentCs.ID);
+                var activeLessonIDs = avtiveLessons.Select(x => x.LessonID);
+                //var progress = _lessonProgressService.CreateQuery().Find(o => activeLessonIDs.Contains(o.LessonID) && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.LessonID);
+                List<LessonResultViewModel> lessonResult = new List<LessonResultViewModel>();
+
+                foreach (var item in avtiveLessons)
+                {
+                    var progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == item.LessonID && o.ClassSubjectID == currentCs.ID);
+                    var lesson = _lessonService.GetItemByID(item.LessonID);
+                    var examCount = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).Project(t => t.StudentID).ToList().Distinct().Count();
+                    var result = new LessonResultViewModel()
+                    {
+                        ScheduleID = item.ID,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        LearntCount = progress.Count(),
+                        ExamCount = examCount,
+                        AvgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
+                        AvgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
+                        Title = lesson.Title,
+                        ChapterName = _chapterService.GetItemByID(lesson.ChapterID)?.Name
+                    };
+                    lessonResult.Add(result);
+                }
+                return new JsonResult(new Dictionary<String, Object> {
+                    {"Data",lessonResult }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
     }
 }
