@@ -782,7 +782,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //string _studentid = User.Claims.GetClaimByType("UserID").Value;
                 //var student = _studentService.GetItemByID(_studentid);
                 var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID == ClassSubjectID).FirstOrDefault();
-                if(lesson == null)
+                if (lesson == null)
                 {
                     return new JsonResult(new Dictionary<String, Object> {
                                         {"Error","Chưa có bài học" },
@@ -797,39 +797,79 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var listTime = GetListWeek(startDate);
                 Dictionary<String, Object> dataResponse = new Dictionary<string, object>();
                 Dictionary<String, Object> dataTime = new Dictionary<string, object>();
+                //List<StudentLessonResultViewModel> test = new List<StudentLessonResultViewModel>();
+                //var listStdIDs = listStudent.Select(x => x.ID).ToList();
                 //foreach (var item in listTime)
                 //{
-                //    dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                //    if (sbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+                //    {
+                //        test = await _progressHelper.GetLessonProgressList1(item.Value.StartTime, item.Value.EndTime, listStdIDs, sbj, true);
+                //    }
+                //    else
+                //    {
+                //        test = await _progressHelper.GetLessonProgressList1(item.Value.StartTime, item.Value.EndTime, listStdIDs, sbj);
+                //    }
+                //    var testResult = test.GroupBy(x => x.StudentID);
+                //    var a1 = "";
                 //}
+
+                //var indexTest = 1;
+                //foreach (var student in listStudent)
+                //{
+
+                //}
+                var start = listTime.FirstOrDefault().Value.StartTime;
+                var end = listTime.LastOrDefault().Value.EndTime;
+                //var total = _progressHelper.GetLessonProgressList1(start, end, sbj);
+
+                var progress = _lessonProgressService.CreateQuery().Find(t => t.ClassSubjectID == sbj.ID).ToList();
+                var activeLessons = _lessonScheduleService.GetActiveLesson(start, end, sbj.ID).ToList();
+
                 var index = 1;
+
+                var activeLessonDic = new Dictionary<int, List<string>>();
+
                 foreach (var student in listStudent)
                 {
                     List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
+
                     foreach (var item in listTime)
                     {
-                        if (sbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+                        if(student.ID == "5f7e81bef197721750de7955" && item.Value.StartTime == new DateTime(2020, 10, 5))
                         {
-                            result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj, true);
+                            var test = "";
                         }
-                        else
+                        if (!activeLessonDic.ContainsKey(item.Key))
                         {
-                            result = await _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj);
+                            var activeIds = activeLessons.Where(t => t.EndDate > item.Value.StartTime && t.StartDate <= item.Value.EndTime).Select(t => t.LessonID).ToList();
+                            var activePractice = _lessonService.CreateQuery().Find(t => activeIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
+                            activeLessonDic[item.Key] = activePractice;
                         }
-                        if (result.Count == 0) continue;
+
+                        var lessonids = activeLessonDic[item.Key];
+
+                        //var lessonids = activeLessons.Where(t => t.EndDate > item.Value.StartTime && t.StartDate <= item.Value.EndTime).Select(t => t.ID).ToList();
+
                         var data = new StudentDetailVM();
                         data.StudentName = student.FullName;
                         data.StudentID = student.ID;
-                        data.Week = item.Key; ;
-                        var point = result.Count() > 0 ? result.Average(x => x.LastPoint).ToString() : "";
+                        data.Week = item.Key;
+
+                        var presult = progress.Where(t => t.StudentID == student.ID && lessonids.Contains(t.LessonID));
+                        if (lessonids.Count() == 0) continue;
+                        var point = presult.Count() > 0 ? (presult.Sum(x => x.LastPoint)/lessonids.Count()).ToString() : "---";
                         data.Point = point.ToString();
+
                         data.StartTime = item.Value.StartTime;
                         data.EndTime = item.Value.EndTime;
+                        data.TotalPractice = lessonids.Count();
+
                         dataresponse.Add(data);
 
-                        if (!dataTime.ContainsKey(item.Key.ToString()))
+                        if (!dataTime.ContainsKey((item.Key - 1).ToString()))
                         {
-                            dataTime.Add(item.Key.ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                            dataTime.Add((item.Key-1).ToString(), new { item.Value.StartTime, item.Value.EndTime });
                         }
                     }
 

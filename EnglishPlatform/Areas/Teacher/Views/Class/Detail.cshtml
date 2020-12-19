@@ -83,22 +83,22 @@
                 <select v-model="searchPoint">
                     <option value="">Theo phân công giáo viên</option>
                     <option value="1">Tất cả</option>-->
-                    @*<option value="2">Theo thời gian</option>*@
-                <!--</select>
+            @*<option value="2">Theo thời gian</option>*@
+            <!--</select>
             </div>-->
             <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
                 <div class="form-row">
                     <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
                     <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
-                    @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
-                <!--</div>
+            @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
+            <!--</div>
             </div>
             <div class="float-right" v-if="searchCsbj==''">
                 <template v-if="!isLoading">-->
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
-                    @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
-                <!--</template>
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            <!--</template>
                 <template v-else>
                     <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
                 </template>
@@ -265,16 +265,21 @@
                             <table class="table" id="table_point">
                                 <thead>
                                     <tr>
-                                        <th class="sticky-col first-col">STT</th>
-                                        <th class="sticky-col second-col">Họ tên</th>
-                                        @*<th v-for="(item,k) in fieldsTime">Tuần {{k}}</th>*@
+                                        <th class="sticky-col first-col" rowspan="2">STT</th>
+                                        <th class="sticky-col second-col" rowspan="2">Họ tên</th>
+                                        <th rowspan="2">Trung bình</th>
+                                        <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
+
+                                    </tr>
+                                    <tr>
                                         <th v-for="(item,k) in fieldsTime" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
-                                        <td class="sticky-col second-col">{{items[0].studentName}}</td>
+                                        <td class="sticky-col second-col">{{ (items != null && items.length > 0) ? items[0].studentName : "Khong co"}}</td>
+                                        <td>{{calcAvginWeek(items)}}</td>
                                         <td v-for="item in items" style="cursor:pointer;width:50px;height:20px" onMouseOver="this.style.backgroundColor='lightgray'" onMouseOut="this.style.backgroundColor=''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
                                     </tr>
                                 </tbody>
@@ -1518,6 +1523,7 @@
                             .then(response => {
                                 this.isLoading = false
                                 this.fieldsTime = response.data.DataTime
+                                //debugger
                                 this.studentSummarySbj = response.data.DataStudent
                                 //if (response.data.Error) {
                                     this.isLoading = false
@@ -2490,6 +2496,22 @@
                     }
                     return (totalPointExam / 6)
                 },
+                calcAvginWeek(obj) {
+                    console.log(obj)
+                    if (obj.length > 0) {
+                        var total = 0;
+                        var totalLesson = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i];
+                            var count = item.totalPractice;
+                            var point = parseFloat(item.point);
+                            total += (isNaN(point) ? 0 : point) * count;
+                            totalLesson += (isNaN(count) ? 0 : count);
+                        }
+                        return this.roundPoint((total / totalLesson), 1);
+                    } else
+                        return "---";
+                },
                 loadDetailinWeek(obj) {
                     if (obj.point >= 0) {
                         let _that = this
@@ -2517,7 +2539,7 @@
                     if (value > 0) {
                         value = value / 10
                         var multiplier = Math.pow(10, precision || 0);
-                        return Math.round(value * multiplier) / multiplier;
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
                     }
                     else return value
                 },
