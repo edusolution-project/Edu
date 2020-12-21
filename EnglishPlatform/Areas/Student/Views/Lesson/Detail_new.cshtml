@@ -71,7 +71,7 @@ else
         }
         else
         {
-            <script src="~/js/content-render-exam.js"></script>
+            <script src="~/js/content-render-exam.js?@DateTime.Now.ToString("yyyyMMddhhmmss")"></script>
             <style>
                 #sidebar, body, html, #exam-teacher {
                     background-color: #e8eff5 !important;
@@ -131,7 +131,57 @@ else
                 .examHeader {
                     border: solid 2px #333;
                 }
+
+                @@media (max-width: 768px) {
+                    .right-content {
+                        top: 155px !important;
+                        bottom: 50px;
+                    }
+
+                    #QuizNav {
+                        top: 95px;
+                        left: 5px !important;
+                        height: 50px;
+                    }
+
+                        #QuizNav > div:first-child {
+                            display: none;
+                        }
+
+                        #QuizNav .quiz-wrapper {
+                            white-space: nowrap;
+                            flex-wrap: nowrap;
+                        }
+
+                            #QuizNav .quiz-wrapper > button {
+                                display: block;
+                                min-width: 28px;
+                            }
+
+                    #PartNav {
+                        right: 5px !important;
+                        left: 5px;
+                        bottom: 5px;
+                        top: auto;
+                        width: auto;
+                        padding: 0px 10px;
+                        z-index: 999;
+                        overflow: scroll;
+                        white-space: nowrap;
+                    }
+
+                        #PartNav > div {
+                            display: inline-block;
+                            margin-right: 7px;
+                            border: none !important;
+                        }
+
+                            #PartNav > div::before {
+                                content: "* ";
+                            }
+                }
             </style>
+
         }
         <script>
             var config = {
@@ -139,7 +189,7 @@ else
                 mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.STUDENT_EXAM" : "mod.STUDENT_LECTURE"),
                 url: {
                     load: '@processUrl("GetLesson", "Lesson")',
-                    current: '@processUrl("GetCurrentExam", "Exam")',
+                    current: '@processUrl("GetCurrentExam",  "Exam")',
                     start: '@processUrl("Create", "Exam")',
                     answer: '@processUrl("CreateDetail", "Exam")',
                     removeans: '@processUrl("RemoveDetail", "Exam")',

@@ -2324,7 +2324,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            {
                                ScheduleID = schedule.ID,
                                ScheduleStart = schedule.StartDate,
-                               Skill = String.IsNullOrEmpty(classsubject.SkillID) ? "" : _skillService.GetItemByID(classsubject.SkillID).Name,
+                               //Skill = String.IsNullOrEmpty(classsubject.SkillID) ?"":_skillService.GetItemByID(classsubject.SkillID).Name,
                                ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
                                LearnCount = progress.TotalLearnt,

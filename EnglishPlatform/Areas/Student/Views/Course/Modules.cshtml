@@ -83,7 +83,8 @@
                               v-if="item.ParentID == '0'"
                               v-bind:subchaps="list_data">
                 </chap-content>
-                <lesson-item v-for="lesson in filterLesson({ID:'0'})" v-bind:data="lesson" v-bind:classSubject="`@currentCs.ID`"></lesson-item>
+
+                <lesson-item v-for="lesson in filterLesson('0')" v-if="lesson != null" v-bind:lesson="lesson" v-bind:classSubject="`@currentCs.ID`"></lesson-item>
             </ul>
         </div>
     </div>
@@ -294,9 +295,8 @@
             },
             filterLesson(ID) {
                 //console.log(ID);
-                //console.log(this.list_lessons);
                 return this.list_lessons.filter((p) => {
-        	        return p.ChapterID == ID
+                    return p.ChapterID == ID
                 })
             },
             getSubList(chapterId, pos){

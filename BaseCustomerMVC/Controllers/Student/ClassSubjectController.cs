@@ -162,7 +162,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var retClass = new List<ClassEntity>();
                 var retClassSbj = new List<ClassSubjectViewModel>();
 
-                var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
+                var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate.AddDays(1) >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
 
                 foreach (var _class in lclass.ToList())
                 {
@@ -342,7 +342,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 lclass = lclass.ToList().Where(x => x.ClassMechanism != CLASS_MECHANISM.PERSONAL);
 
-                var data = new Dictionary<String,Object>();
+                var data = new Dictionary<String, Object>();
                 for (Int32 i = 0; i < lclass.Count(); i++)
                 {
                     var @class = lclass.ElementAtOrDefault(i);
@@ -581,7 +581,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 string _studentid = User.Claims.GetClaimByType("UserID").Value;
                 var student = _studentService.GetItemByID(_studentid);
-                var lesson = _lessonService.CreateQuery().Find(x=>x.ClassSubjectID == ClassSubjectID).FirstOrDefault();
+                var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID == ClassSubjectID).FirstOrDefault();
                 var @class = _classService.GetItemByID(lesson.ClassID);
                 var sbj = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
                 var startDate = sbj.StartDate;
@@ -679,13 +679,13 @@ namespace BaseCustomerMVC.Controllers.Student
                     {"Exam",result }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }
         }
 
-        private Dictionary<Int32,DateTimeVM> GetListWeek(DateTime StartDate)
+        private Dictionary<Int32, DateTimeVM> GetListWeek(DateTime StartDate)
         {
             var currentTime = DateTime.Now;
             Dictionary<Int32, DateTimeVM> listDateTime = new Dictionary<int, DateTimeVM>();
@@ -713,7 +713,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return listDateTime;
         }
 
-        public class StudentSummaryExamViewModel: StudentSummaryViewModel
+        public class StudentSummaryExamViewModel : StudentSummaryViewModel
         {
             public Double Multiple1 { get; set; }
             public Double Multiple2 { get; set; }

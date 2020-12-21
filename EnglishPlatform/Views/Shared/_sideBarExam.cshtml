@@ -45,6 +45,7 @@
     .top-menu {
         /*min-width: 130px;*/
         margin-top: 2px;
+        z-index: 1000;
     }
 
         .top-menu:hover a, .top-menu.active a {
@@ -285,7 +286,7 @@
             </li>
             <i class="fa fa-chevron-left mt-1"></i>
             <li for="path_menu" class="top-menu">
-                <a title="@ClassSubject.CourseName"><i class="ic fas fa-list-ol"></i>@ClassSubject.CourseName</a>
+                <a title="@ClassSubject.CourseName" href="@processUrl("Editor", "Class")/@ClassSubject.ID/@Class.ID><i class="ic fas fa-list-ol"></i>@ClassSubject.CourseName</a>
                 <div class="sub-menu">
                     <div class="content-holder">
                         <ul class="chap_content"></ul>

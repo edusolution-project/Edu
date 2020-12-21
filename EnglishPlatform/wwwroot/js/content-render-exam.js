@@ -308,8 +308,12 @@ var Lesson = (function () {
 
         lessonBody.append(partsHolder);
         if (isMobileDevice()) {
-            $('#pills-tabContent').attr("class", "w-100 m-0 p-0").show();
-            $('#pills-tabContent .main-column:first-child').addClass("border-right-0");
+            //$('#pills-tabContent').attr("class", "w-100 m-0 p-0").show();
+            //$('#pills-tabContent .main-column:first-child').addClass("border-right-0");
+            $('.h-100').removeClass('h-100');
+            cardBody.removeClass('position-absolute');
+            container.removeClass('bg-secondary');
+
         }
         else {
             $('.main-column').addClass('scrollbar-outer').scrollbar();
@@ -324,14 +328,13 @@ var Lesson = (function () {
         var infoHolder = $('.examHeader');
         console.log(infoHolder);
         var date = new Date();
-        var centerInfo = $("<div>", { class: "col-6", style: "text-transform: uppercase; font-weight:700", text: "Trường: " + config.center_name });
+        var centerInfo = $("<div>", { class: "col-6 text-center", style: "text-transform: uppercase; font-weight:700", html: "Trường: " + config.center_name + "<br/>Lớp: <span style='font-weight:700'>" + config.class_name + "</span>" });
         var dateInfo = $("<div>", { class: "col-6 text-right font-italic", style: "font-size:90%", text: "Ngày " + date.getDate() + " tháng " + (date.getMonth() + 1) + " năm " + date.getFullYear() });
-        var lessonTitle = $("<div>", { class: "col-6 font-weight-bold", text: _data.Title + " - Thời gian: " + _data.Timer + 'p' });
-        var studentInfo = $("<div>", { class: "col-6", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span> - Lớp: <span style='font-weight:700'>" + config.class_name + "</span>" });
+        var lessonTitle = $("<div>", { class: "col-6 font-weight-bold text-right", text: _data.Title + " - Thời gian: " + _data.Timer + "p" });
+        var studentInfo = $("<div>", { class: "col-6 text-center", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span>" });
 
         infoHolder.append($("<div>", { class: "col-12 row" }).append(centerInfo).append(dateInfo));
-        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(lessonTitle));
-        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo));
+        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle));
 
     }
 
@@ -400,7 +403,6 @@ var Lesson = (function () {
                 lessonButton.append(btnExplain);
                 lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
-
 
                 //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
@@ -911,8 +913,14 @@ var Lesson = (function () {
         var leftCol = mainContainer.find('#leftCol');
         var rightCol = mainContainer.find('#rightCol');
 
-        leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("d-none").show();
+
+        if (!isMobileDevice()) {
+            leftCol.parent().removeClass("col-md-6").removeClass("col-md-4").removeClass("col-md-12").addClass("d-none").show();
+        }
         rightCol.parent().removeClass("col-md-6").removeClass("col-md-8").removeClass("col-md-12").addClass("col-md-12").show();
+
+
+
     }
 
     var switchMode = function (mode) {
@@ -926,7 +934,7 @@ var Lesson = (function () {
     }
 
     var openPrint = function () {
-        window.open(document.location.href.replace("/Detail", "/Print") );
+        window.open(document.location.href.replace("/Detail", "/Print"));
     }
 
     //Preview: view + edit
@@ -997,7 +1005,7 @@ var Lesson = (function () {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-10 green-color", "text": (data.Title == null ? "" : data.Title) + time
+                    "class": "title col-md-10 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + time
                     //+ point
                 }));
 
@@ -1011,7 +1019,7 @@ var Lesson = (function () {
                 break;
             default:
                 boxHeader.append($("<h5>", {
-                    "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
+                    "class": "title col-md-12 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
                     //+ point
                 }));
                 break;
@@ -1621,8 +1629,8 @@ var Lesson = (function () {
 
                 switch (config.mod) {
                     case mod.TEACHERVIEW:
-                    case mod.TEACHERPREVIEW:
-                    case mod.TEACHERPREVIEWEXAM:
+                        //case mod.TEACHERPREVIEW:
+                        //case mod.TEACHERPREVIEWEXAM:
                         break;
                     default:
                         var quiz = prevHolder.data("questionId");
@@ -1863,6 +1871,9 @@ var Lesson = (function () {
                     },
                     success: function (data) {
                         if (data.Error == null) {
+                            //$('#pills-part-' + id).remove();
+                            //$('#pills-' + id).remove();
+                            //renderQuizCounter()
                             document.location = document.location;
                         }
                         else {
@@ -2553,13 +2564,13 @@ var Lesson = (function () {
     var goQuiz = function (quizid, obj, scroll = true) {
         var _quiz = $('#' + quizid);
         var _partid = _quiz.attr('data-part-id');
-        console.log(quizid);
+        //console.log(quizid);
         var _part = $('.tab-pane#pills-part-' + _partid);
 
         var part = _part[0];
         if (part != null) {
             var el = part.querySelector("[id='" + quizid + "']");
-            console.log(el.classList);
+            //console.log(el.classList);
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
@@ -2817,7 +2828,15 @@ var Lesson = (function () {
                 }).append('<i class="fas fa-ban mr-2"></i>').append("Bài chưa được mở (" + startDate.format("DD/MM/YYYY hh:mm A") + ")");
                 isOverdue = true
             }
-            else {
+            else if (startDate < moment(new Date(1900, 1, 1))) {
+                console.log("Not set")
+                doButton = $('<div>', {
+                    "class": "btn btn-danger m-2 lesson-action",
+                    "style": "cursor: pointer",
+                    "disabled": "disabled"
+                }).append('<i class="fas fa-ban mr-2"></i>').append("Bài đang bị khóa");
+                isOverdue = true
+            } else {
                 console.log("In due")
                 doButton = $('<div>', {
                     "class": "btn btn-primary m-2 lesson-action",
@@ -2836,13 +2855,14 @@ var Lesson = (function () {
             lesson_action_holder.append(doButton);
             //wrapper.append(doButton);
             //wrapper.append(backButton);
-            lastExamResult =
-                $("<div>", { id: "last-result", class: "text-center" })
-                    //.append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần 0) chưa bắt đầu" }))
-                    .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
-                        BeginExam(this)
-                    }).prepend($('<i>', { class: "fas fa-play mr-2" })));
-            wrapper.append(lastExamResult);
+            //if (!isOverdue) {
+            //    lastExamResult =
+            //        $("<div>", { id: "last-result", class: "text-center" })
+            //            .append($('<div>', { class: "text-center h4 btn-primary mt-5 btn", text: "Làm bài ngay", style: "cursor:pointer" }).click(function () {
+            //                BeginExam(this)
+            //            }).prepend($('<i>', { class: "fas fa-play mr-2" })));
+            //    wrapper.append(lastExamResult);
+            //}
         }
         else {
             var lastExam = data;
@@ -3112,6 +3132,7 @@ var Lesson = (function () {
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
+
     }
 
     //---- 14-10-2020
@@ -3239,7 +3260,7 @@ var Lesson = (function () {
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
         boxHeader.append($("<h5>", {
-            "class": "title col-md-12 green-color", "text": (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
+            "class": "title col-md-12 green-color", "text": "Câu " + ($(container).find('.part-box').length + 1) + ": " + (data.Title == null ? "" : data.Title) + (data.Type == "ESSAY" ? "(" + data.Point + "đ)" : "") + time
             //+ point
         }));
 
@@ -3804,6 +3825,20 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
+            }
+        }
+
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
             while (__answer_sending) {
@@ -3941,7 +3976,7 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4249,6 +4284,10 @@ var Lesson = (function () {
                         });
                         //alert(err);
                     });
+            }
+            else {
+                //console.log('#quiznav' + questionId);
+                $('#quizNav' + questionId).addClass('completed');
             }
         }
     }
@@ -4699,7 +4738,7 @@ var Lesson = (function () {
                 for (var i = 0; i < data.length; i++) {
                     var item = data[i];
                     if (item.CourseName)
-                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:16px;color:" + item.Color + "'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' onclick='chooseCourse(\"" + item.ID + "\",this)'></i></div></li>");
+                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:14px;color:#00BBD4;font-weight:700'><span style='cursor:pointer' onclick='chooseCourse(\"" + item.ID + "\",this)'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' ></i></span></div></li>");
                 }
             })
     }
@@ -4709,10 +4748,11 @@ var Lesson = (function () {
         //var id = $("#chooseCourse").val();
         var containerCourse = $("#" + id);
         var child = containerCourse.children()[0];
-        var classi = $(obj).attr("class");
+        var icon = $(obj).find("i");
+        var classi = $(icon).attr("class");
         if (classi.includes("fa-arrow-alt-circle-down")) {
-            $(obj).removeClass();
-            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+            $(icon).removeClass();
+            $(icon).addClass("far fa-arrow-alt-circle-left ml-1");
             containerCourse.empty();
             containerCourse.append(child);
             if (id !== undefined) {
@@ -4736,7 +4776,7 @@ var Lesson = (function () {
                         containerCourse.append(ulselectChapterTemplate);
                         for (var i = 0; i < chapters.length; i++) {
                             var chapter = chapters[i];
-                            $(ulselectChapterTemplate).append('<li style="padding: 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div style="font-size: 16px"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
+                            $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
 
                             var containerLesson = $("#" + chapter.ID);
                             var firstChil = containerLesson.children()[0];
@@ -4747,7 +4787,7 @@ var Lesson = (function () {
                             for (var j = 0; j < lessons.length; j++) {
                                 var lesson = lessons[j];
                                 if (lesson.ChapterID == chapter.ID) {
-                                    $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-3 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
+                                    $(ulselectLessonTemplate).append('<li class="sub-practice pt-3 pb-1 pl-2" id="' + lesson.ID + '"></i><div class="pb-1"><span style="cursor:pointer" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1"></i></span></div></li>')
                                 }
                             }
                         }
@@ -4772,12 +4812,13 @@ var Lesson = (function () {
         else {
             containerCourse.empty();
             containerCourse.append(child);
-            $(obj).removeClass();
-            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+            $(icon).removeClass();
+            $(icon).addClass("far fa-arrow-alt-circle-down ml-1");
         }
     }
 
-    var chooseLesson = function (id, obj) { //bài trong chương
+    var chooseLesson = function (id, objHolder) { //bài trong chương
+        var obj = $(objHolder).find("i").last();
         var chapterParent = $("#" + id);
         var ul = chapterParent.children()[1];
         var classUl = $(ul).attr("class");
@@ -4817,11 +4858,12 @@ var Lesson = (function () {
         }
     }
 
-    var choosePart = function (lessonid, classsbjid, obj) {
+    var choosePart = function (lessonid, classsbjid, objHolder) {
         //var modalForm = window.partModaltoAddExam;
         //var lessonid = $("#selectLesson").val();
         var classid = $('#ClassID').val();
         //var classsbjid = $('#chooseCourse').val();
+        var obj = $(objHolder).find("i").last();
         var dataform = new FormData();
         dataform.append("LessonID", lessonid);
         dataform.append("ClassID", classid);
@@ -4839,7 +4881,7 @@ var Lesson = (function () {
                     for (var i = 0; i < data.length; i++) {
                         var lessonPart = data[i];
                         if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4"))
-                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 16px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
+                            $(ulselectLessonPartTemplate).append('<li style="padding:5px 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 14px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
 
                         //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
                         //$(modalForm).append(selectLessonPartTemplate);
@@ -4961,7 +5003,7 @@ var Lesson = (function () {
                     var data = JSON.parse(res);
                     if (data.Stt) {
                         location.reload();
-                        alert("Ttêm thành công")
+                        alert("Đã thêm nội dung")
                     }
                     else {
                         alert(data.Msg);
@@ -4978,11 +5020,11 @@ var Lesson = (function () {
         type = "'" + type + "'";
         Swal.fire({
             title: '<strong>Chọn thao tác</strong>',
-            icon: 'question',
+            icon: 'info',
             html:
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
                 '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>' +
-                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-file-word mr-2"></i> Thêm từ bài </button></p>',
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModaltoAddExam()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
             //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
             confirmButtonText: 'Đóng',
         })

@@ -15,8 +15,6 @@ namespace BaseCustomerMVC.Globals
         private readonly LessonService _lessonService;
         private readonly CourseLessonService _courseLessonService;
 
-        private readonly IndexService _indexService;
-
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
 
@@ -72,7 +70,7 @@ namespace BaseCustomerMVC.Globals
             _lessonService = lessonService;
             _courseLessonService = courseLessonService;
 
-            _indexService = indexService;
+            //_indexService = indexService;
 
             _examService = examService;
             _examDetailService = examDetailService;
@@ -136,6 +134,50 @@ namespace BaseCustomerMVC.Globals
             }
             else
                 await Task.WhenAll(lstask, sctask, cltask, cqtask);
+        }
+
+
+        public double calculateLessonPoint(string lessonId)
+        {
+            var point = 0.0;
+            var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            if (parts != null && parts.Count() > 0)
+                foreach (var part in parts)
+                {
+                    if (part.Type == "ESSAY")
+                    {
+                        point += part.Point;
+                        _lessonPartQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+                    }
+                    else
+                    {
+                        point += _lessonPartQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                        _lessonPartQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<LessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+                    }
+                }
+            _courseLessonService.UpdateLessonPoint(lessonId, point);
+            return point;
+        }
+
+        public double calculateCloneLessonPoint(string lessonId)
+        {
+            var point = 0.0;
+            var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            foreach (var part in parts)
+            {
+                if (part.Type == "ESSAY")
+                {
+                    point += part.Point;
+                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+                }
+                else
+                {
+                    point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+                }
+            }
+            _lessonService.UpdateLessonPoint(lessonId, point);
+            return point;
         }
 
         #region Copy CourseLesson From CourseLesson
@@ -654,11 +696,6 @@ namespace BaseCustomerMVC.Globals
             double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             return count <= 0;
         }
-        public class CorrectAns
-        {
-            public string ID { get; set; }
-            public string Value { get; set; }
-        }
 
         internal bool isExamined(LessonEntity lesson)
         {
@@ -671,5 +708,11 @@ namespace BaseCustomerMVC.Globals
             else//LECTURE only
                 return true;
         }
+    }
+
+    public class CorrectAns
+    {
+        public string ID { get; set; }
+        public string Value { get; set; }
     }
 }

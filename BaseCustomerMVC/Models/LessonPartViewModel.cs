@@ -54,24 +54,6 @@ namespace BaseCustomerMVC.Models
     public class QuestionViewModel : LessonPartQuestionEntity
     {
 
-        public QuestionViewModel()
-        {
-        }
-
-        public QuestionViewModel(LessonPartQuestionEntity o)
-        {
-            this.Created = o.Created;
-            this.Description = o.Description;
-            this.ID = o.ID;
-            this.Updated = o.Updated;
-            this.Content = o.Content;
-            this.CreateUser = o.CreateUser;
-            this.ParentID = o.ParentID;
-            this.Order = o.Order;
-            this.Point = o.Point;
-            this.Media = o.Media;
-            Answers = new List<LessonPartAnswerEntity>();
-        }
 
         [JsonProperty("Answers")]
         public List<LessonPartAnswerEntity> Answers { get; set; }
@@ -101,6 +83,26 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("MaxPoint")]
         public double MaxPoint { get; set; }
+
+
+        public QuestionViewModel()
+        {
+        }
+
+        public QuestionViewModel(LessonPartQuestionEntity o)
+        {
+            this.Created = o.Created;
+            this.Description = o.Description;
+            this.ID = o.ID;
+            this.Updated = o.Updated;
+            this.Content = o.Content;
+            this.CreateUser = o.CreateUser;
+            this.ParentID = o.ParentID;
+            this.Order = o.Order;
+            this.Point = o.Point;
+            this.Media = o.Media;
+            Answers = new List<LessonPartAnswerEntity>();
+        }
 
         public LessonPartQuestionEntity ToEntity()
         {

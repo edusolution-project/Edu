@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -8,6 +9,7 @@ using SixLabors.ImageSharp.Processing;
 using Spire.Pdf.OPC;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -26,6 +28,7 @@ namespace BaseCustomerMVC.Globals
             _evn = evn;
             RootPath = (iConfig.GetValue<string>("SysConfig:StaticPath") ?? _evn.WebRootPath) + "/Files";
         }
+        
         public async Task<string> SaveMediaAsync(IFormFile formFile, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
         {
             string extension = Path.GetExtension(formFile.FileName);
@@ -61,7 +64,7 @@ namespace BaseCustomerMVC.Globals
 
                 using (Stream inputStream = formFile.OpenReadStream())
                 {
-                    using (var image = Image.Load<Rgba32>(inputStream))
+                    using (var image = SixLabors.ImageSharp.Image.Load<Rgba32>(inputStream))
                     {
                         var imageEncoder = new JpegEncoder()
                         {
@@ -140,6 +143,56 @@ namespace BaseCustomerMVC.Globals
                 File.Delete(item);
             }
         }
+
+        public static string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
+
+        public static string ConvertImageByByteArray(byte[] byteArrayIn, string fileName, string tempPath, string RootPath)
+        {
+            try
+            {
+                MemoryStream ms = new MemoryStream(byteArrayIn);
+                System.Drawing.Image returnImage = System.Drawing.Image.FromStream(ms);
+                //return returnImage;
+
+                var size = returnImage.Size;//get size image
+                var IMG = (System.Drawing.Image)(new Bitmap(returnImage, (size.Width <= 800 && size.Height <= 800 ? size : new Size(800, 800)))); //resize image
+                var folder = string.IsNullOrEmpty(tempPath) ? "eduso/admin" : $"{tempPath}/IMG/{DateTime.UtcNow.ToString("yyyyMMdd")}";
+                string uploads = Path.Combine(RootPath, folder);
+                if (!Directory.Exists(uploads))
+                {
+                    Directory.CreateDirectory(uploads);
+                }
+                using (var fileStream = new FileStream(Path.Combine(uploads, fileName), FileMode.Create))
+                {
+                    IMG.Save(fileStream, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+                return $"{"/Files"}/{folder}/{fileName}";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public static byte[] ImageToByteArray(System.Drawing.Image imageIn)
+        {
+            using (var ms = new MemoryStream())
+            {
+                imageIn.Save(ms, imageIn.RawFormat);
+                return ms.ToArray();
+            }
+        }
+
 
         //public async Task<string> SaveMediaAsyncWithDraw(Image image, string filename = "", string folder = "", string center = "", bool resize = false, int stat_width = 600, int stat_height = 800)
         //{

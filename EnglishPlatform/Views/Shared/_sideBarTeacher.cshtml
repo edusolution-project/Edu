@@ -14,29 +14,33 @@
 }
 
 <style>
-    #sidebar-content .card-header {
+    .sidebar .card-header {
         border: none;
         padding: 5px;
         margin-bottom: 7px;
         background: #FFF;
-        border-bottom: solid 1px #EEE;
+        border-bottom: none;
+        text-align: center;
     }
 
-    #sidebar-content .logo {
-        max-width: 100%;
+    .sidebar {
+        border-right: solid 1px #DDD;
     }
 
-        #sidebar-content .logo img {
-            max-height: 100px;
+        .sidebar .logo {
             max-width: 100%;
-            width: auto;
-            height: auto;
         }
+
+            .sidebar .logo img {
+                max-height: 100px;
+                max-width: 100%;
+                width: auto;
+                height: auto;
+            }
 
     #sidebar-content {
         background: #FFF;
         left: 0;
-        border-right: 2px solid #F0F3F4;
         margin-top: 10px
     }
 
@@ -314,7 +318,7 @@
     function openNav() {
         //debugger
         if (document.getElementById("mySidenav").style.width == "") {
-            document.getElementById("mySidenav").style.width = "240px";
+            document.getElementById("mySidenav").style.width = "100%";
             //document.getElementById("closebtn").classList.remove("hide");
         }
         else

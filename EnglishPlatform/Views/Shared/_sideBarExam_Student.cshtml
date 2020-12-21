@@ -45,6 +45,7 @@
     .top-menu {
         /*width: 130px;*/
         margin-top: 2px;
+        z-index: 1000;
     }
 
         .top-menu:hover a, .top-menu.active a {
@@ -341,14 +342,6 @@
             display: none;
         }
 
-        .right-content.no-info-bar {
-            top: 48px;
-        }
-
-        .right-content.showQuiz {
-            top: 200px;
-        }
-
         #QuizNav {
             top: 91px;
             height: 100px;
@@ -382,8 +375,8 @@
         .top-menu[for=lesson-info] {
             list-style: none;
             border-bottom: solid 1px #CCC;
-            border-top: solid 1px #CCC;
             height: 43px;
+            background-color: #FFF;
         }
 
             .top-menu[for=lesson-info] span {
@@ -400,6 +393,7 @@
 
         .right-content {
             top: 90px;
+            z-index: -1;
         }
     }
 </style>

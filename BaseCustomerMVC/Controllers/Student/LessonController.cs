@@ -261,7 +261,7 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult Detail(DefaultModel model, string basis, string ClassID, int newui = 0)
+        public IActionResult Detail(DefaultModel model, string basis, string ClassID)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (ClassID == null)
@@ -281,7 +281,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Lesson = lesson;
             ViewBag.Type = lesson.TemplateType;
             string condChap = "";
-            if (!String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
+            if (chapter != null && !String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
             {
                 var conditionchap = _chapterService.GetItemByID(chapter.ConditionChapter);
                 if (conditionchap != null)

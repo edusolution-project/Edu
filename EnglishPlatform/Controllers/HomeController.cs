@@ -226,8 +226,8 @@ namespace EnglishPlatform.Controllers
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                //return RedirectToAction("Login");
-                return View();
+                return RedirectToAction("Login");
+                //return View();
             }
         }
 

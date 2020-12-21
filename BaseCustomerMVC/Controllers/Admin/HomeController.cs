@@ -5,6 +5,7 @@ using Google.Apis.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
@@ -38,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly CourseHelper _courseHelper;
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
+        private readonly CalendarHelper _calendarHelper;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -101,6 +103,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 CourseHelper courseHelper,
                 LessonHelper lessonHelper,
                 ProgressHelper progressHelper,
+                CalendarHelper calendarHelper,
 
                 CenterService centerService,
                 StudentService studentService,
@@ -141,6 +144,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _courseHelper = courseHelper;
             _lessonHelper = lessonHelper;
             _progressHelper = progressHelper;
+            _calendarHelper = calendarHelper;
 
             _centerService = centerService;
             _studentService = studentService;
@@ -563,6 +567,10 @@ namespace BaseCustomerMVC.Controllers.Admin
                             lprg.LastPoint = lpoint;
                             lessonPointChange++;
                         }
+                        lprg.Tried = lastestEx.Number;
+                        lprg.PointChange = lprg.LastPoint;
+                        lprg.LastTry = lastestEx.Created;
+                        _lessonProgressService.Save(lprg);
                     }
 
                     if (lesson.ChapterID != "0")
@@ -610,59 +618,77 @@ namespace BaseCustomerMVC.Controllers.Admin
                 Builders<LessonEntity>.Update.Set(t => t.IsPractice, true).Set(t => t.TemplateType, LESSON_TEMPLATE.LECTURE)
                 );
 
-            var courseChapters = _courseChapterService.CreateQuery()
-                .Find(t => t.TotalExams > 0).ToList();
-            foreach (var chapter in courseChapters)
+            var examSubj = _classSubjectService.CreateQuery().Find(t => t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+            if (examSubj != null)
             {
-                if (chapter.TotalExams > 0)
+                foreach (var sbj in examSubj)
                 {
-                    var exCount = chapter.TotalExams;
-                    //await _courseHelper.IncreaseCourseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
-                    chapter.TotalPractices += exCount;
-                    chapter.TotalExams = 0;
-                    _courseChapterService.Save(chapter);
-                    if (chapter.ParentID == "0")
-                        await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0, 0 - exCount, exCount);
+                    _clonelessonService.CreateQuery().UpdateMany(t => t.ClassSubjectID == sbj.ID,
+                    Builders<LessonEntity>.Update.Set(t => t.IsPractice, false).Set(t => t.TemplateType, LESSON_TEMPLATE.EXAM)
+                    );
                 }
             }
 
-            var cloneChapters = _chapterService.CreateQuery()
-                .Find(t => t.TotalExams > 0).ToEnumerable();
-            foreach (var chapter in cloneChapters)
-            {
-                if (chapter.TotalExams > 0)
-                {
-                    var exCount = chapter.TotalExams;
-                    //await _classHelper.IncreaseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
-                    chapter.TotalPractices += exCount;
-                    chapter.TotalExams = 0;
-                    _courseChapterService.Save(chapter);
-                    if (chapter.ParentID == "0")
-                        await _classHelper.IncreaseClassSubjectCounter(chapter.ClassSubjectID, 0, 0 - exCount, exCount);
-                }
-            }
+            //_courseChapterService.CreateQuery().UpdateMany(t => t.ClassSubjectID == sbj.ID,
+            //        Builders<LessonEntity>.Update.Set(t => t.IsPractice, false).Set(t => t.TemplateType, LESSON_TEMPLATE.EXAM)
+            //        );
 
-            var chapPrgs = _chapterProgressService.CreateQuery().Find(t => t.ExamDone > 0).ToEnumerable();
 
-            foreach (var prg in chapPrgs)
-            {
-                if (prg.ExamDone > 0)
-                {
-                    var point = prg.TotalPoint;
-                    var count = prg.ExamDone;
-                    prg.PracticeDone += count;
-                    prg.PracticePoint += point;
-                    prg.PracticeAvgPoint = prg.PracticeDone > 0 ? (prg.PracticePoint * 100 / prg.PracticeDone) : 0;
 
-                    _chapterProgressService.Save(prg);
 
-                    var chapter = _chapterService.GetItemByID(prg.ChapterID);
-                    if (chapter.ParentID == "0")
-                    {
-                        await _progressHelper.UpdateClassSubjectPoint(chapter.ClassSubjectID, prg.StudentID, 0 - point, 0 - count, point, count);
-                    }
-                }
-            }
+            //var courseChapters = _courseChapterService.CreateQuery()
+            //    .Find(t => t.TotalExams > 0).ToList();
+            //foreach (var chapter in courseChapters)
+            //{
+            //    if (chapter.TotalExams > 0)
+            //    {
+            //        var exCount = chapter.TotalExams;
+            //        //await _courseHelper.IncreaseCourseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+            //        chapter.TotalPractices += exCount;
+            //        chapter.TotalExams = 0;
+            //        _courseChapterService.Save(chapter);
+            //        if (chapter.ParentID == "0")
+            //            await _courseHelper.IncreaseCourseCounter(chapter.CourseID, 0, 0 - exCount, exCount);
+            //    }
+            //}
+
+            //var cloneChapters = _chapterService.CreateQuery()
+            //    .Find(t => t.TotalExams > 0).ToEnumerable();
+            //foreach (var chapter in cloneChapters)
+            //{
+            //    if (chapter.TotalExams > 0)
+            //    {
+            //        var exCount = chapter.TotalExams;
+            //        //await _classHelper.IncreaseChapterCounter(chapter.ID, 0, 0 - chapter.TotalExams, chapter.TotalExams);
+            //        chapter.TotalPractices += exCount;
+            //        chapter.TotalExams = 0;
+            //        _courseChapterService.Save(chapter);
+            //        if (chapter.ParentID == "0")
+            //            await _classHelper.IncreaseClassSubjectCounter(chapter.ClassSubjectID, 0, 0 - exCount, exCount);
+            //    }
+            //}
+
+            //var chapPrgs = _chapterProgressService.CreateQuery().Find(t => t.ExamDone > 0).ToEnumerable();
+
+            //foreach (var prg in chapPrgs)
+            //{
+            //    if (prg.ExamDone > 0)
+            //    {
+            //        var point = prg.TotalPoint;
+            //        var count = prg.ExamDone;
+            //        prg.PracticeDone += count;
+            //        prg.PracticePoint += point;
+            //        prg.PracticeAvgPoint = prg.PracticeDone > 0 ? (prg.PracticePoint * 100 / prg.PracticeDone) : 0;
+
+            //        _chapterProgressService.Save(prg);
+
+            //        var chapter = _chapterService.GetItemByID(prg.ChapterID);
+            //        if (chapter.ParentID == "0")
+            //        {
+            //            await _progressHelper.UpdateClassSubjectPoint(chapter.ClassSubjectID, prg.StudentID, 0 - point, 0 - count, point, count);
+            //        }
+            //    }
+            //}
             return Json("OK");
         }
 
@@ -691,6 +717,59 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         }
 
+        public async Task<JsonResult> FixUTCSchedule(string classList)
+        {
+            var arr = classList.Split(',');
+            var classsubjs = new List<ClassSubjectEntity>();
+            if (arr.Length > 0)
+                foreach (var clid in arr)
+                {
+                    classsubjs.AddRange(_classSubjectService.GetByClassID(clid));
+                }
+
+            foreach (var sbj in classsubjs)
+            {
+                var rootchaps = _chapterService.GetSubChapters(sbj.ID, "0");
+                foreach (var chap in rootchaps)
+                {
+                    if (chap.StartDate > new DateTime(1900, 1, 1))
+                        UpdateChapterCalendar(chap, "5e43fedd4a77b123fc297e90");//Mr Lam
+                }
+            }
+
+            return Json("OK");
+
+        }
+
+        private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        {
+            var lessonids = _clonelessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
+            foreach (var id in lessonids)
+            {
+                var schedule = _lessonScheduleService.GetItemByLessonID(id);
+                schedule.StartDate = entity.StartDate;
+                schedule.EndDate = entity.EndDate;
+                UpdateCalendar(schedule, UserID);
+                _lessonScheduleService.CreateOrUpdate(schedule);
+            }
+            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+            foreach (var subchap in subchaps)
+            {
+                subchap.StartDate = entity.StartDate;
+                subchap.EndDate = entity.EndDate;
+                _chapterService.Save(subchap);
+                UpdateChapterCalendar(subchap, UserID);
+            }
+        }
+
+        private void UpdateCalendar(LessonScheduleEntity entity, string userid)
+        {
+            //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+            //if (oldcalendar != null)
+            _calendarHelper.RemoveSchedule(entity.ID);
+            if (entity.IsActive)
+                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+        }
 
         //public async Task<JsonResult> Remark(string ExamID)//Big fix
         //{

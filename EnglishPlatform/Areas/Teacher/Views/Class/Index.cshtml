@@ -61,10 +61,10 @@
             <tbody>
                 <tr v-if="tableData == null || tableData.length <= 0">
                     <template v-if="isLoading">
-                        <td colspan="8">Đang gửi dữ liệu...</td>
+                        <td colspan="7">Đang lấy dữ liệu...</td>
                     </template>
                     <template v-else>
-                        <td colspan="8">Không có thông tin phù hợp</td>
+                        <td colspan="7">Không có thông tin phù hợp</td>
                     </template>
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">
@@ -1387,8 +1387,8 @@
                 </b-col>
             </div>
             <div class="col-md-8">
-                <ul class="list list-subject" v-for="(sub,k) in class_info.subject">
-                    <li class="flex" :id="sub.UID">
+                <ul class="list list-subject" v-for="(sub,k) in class_info.subject" :class="sub.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM' ? 'd-none':''">
+                    <li class="flex":id="sub.UID" >
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
                             <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
@@ -1433,10 +1433,8 @@
                         </div>
 
                         <div class="btn-group mt-4">
-
                             <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
                             <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
-
                             <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                             <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
                         </div>

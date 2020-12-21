@@ -60,7 +60,7 @@
                     <li v-for="(item,k) in lesson_week">
                         <div class="box radius">
                             <div class="padding-15 inner" v-if="validDate(item)">
-                                <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.bookName" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.bookName}}</h4></a>
+                                <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.bookName" class="title"><h4 style="color: #47d9a5"><i class="ic ic-readbook-o"></i>{{item.bookName}}</h4></a>
                                 <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.title" class="title">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a :href="'@processUrl("Detail", "Lesson")/' + item.lessonID + '/' + item.classSubjectID" :title="item.className" class="title">{{item.className}}</a>
@@ -71,7 +71,7 @@
                                 </div>
                             </div>
                             <div class="padding-15 inner bg-light" v-else>
-                                <a href="javascript:;" :title="subjectName" v-on:click="showLockNotify(item)" class="title"><h4 :style="'color: ' + item.skill.Color"><i class="ic ic-headphone-o" :style="'background-image:url(' + item.skill.Image + ')'"></i>{{item.bookName}}</h4></a>
+                                <a href="javascript:;" :title="item.subjectName" v-on:click="showLockNotify(item)" class="title"><h4 style="color: #47d9a5"><i class="ic ic-readbook-o"></i>{{item.bookName}}</h4></a>
                                 <a href="javascript:;" :title="item.title" class="title" v-on:click="showLockNotify(item)">{{item.title}}</a>
                                 <div class="c-bot">
                                     <a href="javascript:;" :title="item.className" class="title" v-on:click="showLockNotify(item)">{{item.className}}</a>
