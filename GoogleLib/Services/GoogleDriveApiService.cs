@@ -35,6 +35,9 @@ namespace GoogleLib.Services
         public string URL_THUMBNAIL { get => "https://drive.google.com/thumbnail?id={id}"; }
         private readonly DriveService _driveService;
         private readonly IConfiguration _configuration;
+
+        public GoogleCredential AuthGoogleCredential { get; private set; }
+
         public GoogleDriveApiService(IConfiguration configuration)
         {
             _configuration = configuration;
