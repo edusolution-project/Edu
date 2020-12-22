@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using WebPush.Services.Sqlite;
 using WebPush.Services.Cosmos;
+using WebPush.Services.Sqlite;
 
 namespace WebPush.Services
 {

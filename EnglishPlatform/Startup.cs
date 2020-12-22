@@ -123,6 +123,9 @@ namespace EnglishPlatform
             //app.UseAuthention(Configuration);
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UsePushSubscriptionStore();
+
             app.Use(async (content, next) =>
             {
                 if (content.Request.Query.ContainsKey("googletest"))

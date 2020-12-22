@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver;
-using WP = Lib.Net.Http.WebPush;
+using Microsoft.EntityFrameworkCore;
+using Lib.Net.Http.WebPush;
+using WebPush.Services.Sqlite;
 using WebPush.Interfaces;
 
 namespace WebPush.Services.Sqlite
@@ -16,28 +17,30 @@ namespace WebPush.Services.Sqlite
             _context = context;
         }
 
-        public Task StoreSubscriptionAsync(WP.PushSubscription subscription)
+        public Task StoreSubscriptionAsync(PushSubscription subscription)
         {
-            return _context.CreateQuery().InsertOneAsync(new PushSubscription(subscription));
+            _context.Subscriptions.Add(new PushSubscriptionContext.PushSubscription(subscription));
+
+            return _context.SaveChangesAsync();
         }
 
         public async Task DiscardSubscriptionAsync(string endpoint)
         {
-            var data = _context.CreateQuery()?.Find(o => o.Endpoint == endpoint)?.SingleOrDefault();
-            if(data != null)
-            {
-               await _context.CreateQuery().DeleteOneAsync(o => o.Endpoint == data.Endpoint);
-            }
+            PushSubscriptionContext.PushSubscription subscription = await _context.Subscriptions.FindAsync(endpoint);
+
+            _context.Subscriptions.Remove(subscription);
+
+            await _context.SaveChangesAsync();
         }
 
-        public Task ForEachSubscriptionAsync(Action<WP.PushSubscription> action)
+        public Task ForEachSubscriptionAsync(Action<PushSubscription> action)
         {
             return ForEachSubscriptionAsync(action, CancellationToken.None);
         }
 
-        public Task ForEachSubscriptionAsync(Action<WP.PushSubscription> action, CancellationToken cancellationToken)
+        public Task ForEachSubscriptionAsync(Action<PushSubscription> action, CancellationToken cancellationToken)
         {
-            return _context.CreateQuery().Find(o => true).ForEachAsync(action, cancellationToken);
+            return _context.Subscriptions.AsNoTracking().ForEachAsync(action, cancellationToken);
         }
     }
 }

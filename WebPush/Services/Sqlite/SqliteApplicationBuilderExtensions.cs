@@ -7,6 +7,12 @@ namespace WebPush.Services.Sqlite
     {
         public static IApplicationBuilder UseSqlitePushSubscriptionStore(this IApplicationBuilder app)
         {
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                PushSubscriptionContext context = serviceScope.ServiceProvider.GetService<PushSubscriptionContext>();
+                context.Database.EnsureCreated();
+            }
+
             return app;
         }
     }

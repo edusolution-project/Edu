@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WebPush.Interfaces;
+using WebPush.Services.Sqlite;
 
 namespace WebPush.Services.Sqlite
 {
