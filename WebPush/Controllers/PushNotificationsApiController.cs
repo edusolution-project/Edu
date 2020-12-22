@@ -55,7 +55,8 @@ namespace WebPush.Controllers
             _pushNotificationsQueue.Enqueue(new PushMessage(message.Notification)
             {
                 Topic = message.Topic,
-                Urgency = message.Urgency,
+                Urgency = message.Urgency,   
+                Content = message.Content
             });
 
             return NoContent();
