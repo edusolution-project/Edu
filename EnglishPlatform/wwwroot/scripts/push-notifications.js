@@ -1,10 +1,10 @@
-﻿const PushNotifications = (function () {
-    let applicationServerPublicKey;
+﻿var PushNotifications = (function () {
+    var applicationServerPublicKey;
 
-    let consoleOutput;
-    let pushServiceWorkerRegistration;
-    let subscribeButton, unsubscribeButton;
-    let topicInput, urgencySelect, notificationInput;
+    var consoleOutput;
+    var pushServiceWorkerRegistration;
+    var subscribeButton, unsubscribeButton;
+    var topicInput, urgencySelect, notificationInput;
 
     function initializeConsole() {
         consoleOutput = document.getElementById('output');
@@ -134,9 +134,9 @@
     }
 
     function sendPushNotification() {
-        let payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value };
+        var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value };
 
-        fetch('push-notifications-api/notifications', {
+        fetch('/push-notifications-api/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

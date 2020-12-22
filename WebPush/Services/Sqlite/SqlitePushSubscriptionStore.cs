@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Lib.Net.Http.WebPush;
-using  WebPush.Interfaces;
+using MongoDB.Driver;
+using WP = Lib.Net.Http.WebPush;
+using WebPush.Interfaces;
 
 namespace WebPush.Services.Sqlite
 {
@@ -16,30 +16,28 @@ namespace WebPush.Services.Sqlite
             _context = context;
         }
 
-        public Task StoreSubscriptionAsync(PushSubscription subscription)
+        public Task StoreSubscriptionAsync(WP.PushSubscription subscription)
         {
-            _context.Subscriptions.Add(new PushSubscriptionContext.PushSubscription(subscription));
-
-            return _context.SaveChangesAsync();
+            return _context.CreateQuery().InsertOneAsync(new PushSubscription(subscription));
         }
 
         public async Task DiscardSubscriptionAsync(string endpoint)
         {
-            PushSubscriptionContext.PushSubscription subscription = await _context.Subscriptions.FindAsync(endpoint);
-
-            _context.Subscriptions.Remove(subscription);
-
-            await _context.SaveChangesAsync();
+            var data = _context.CreateQuery()?.Find(o => o.Endpoint == endpoint)?.SingleOrDefault();
+            if(data != null)
+            {
+               await _context.CreateQuery().DeleteOneAsync(o => o.Endpoint == data.Endpoint);
+            }
         }
 
-        public Task ForEachSubscriptionAsync(Action<PushSubscription> action)
+        public Task ForEachSubscriptionAsync(Action<WP.PushSubscription> action)
         {
             return ForEachSubscriptionAsync(action, CancellationToken.None);
         }
 
-        public Task ForEachSubscriptionAsync(Action<PushSubscription> action, CancellationToken cancellationToken)
+        public Task ForEachSubscriptionAsync(Action<WP.PushSubscription> action, CancellationToken cancellationToken)
         {
-            return _context.Subscriptions.AsNoTracking().ForEachAsync(action, cancellationToken);
+            return _context.CreateQuery().Find(o => true).ForEachAsync(action, cancellationToken);
         }
     }
 }

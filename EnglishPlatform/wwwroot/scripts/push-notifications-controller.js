@@ -15,7 +15,7 @@
 
     return {
         retrievePublicKey: function () {
-            return fetch('push-notifications-api/public-key').then(function (response) {
+            return fetch('/push-notifications-api/public-key').then(function (response) {
                 if (response.ok) {
                     return response.text().then(function (applicationServerPublicKeyBase64) {
                         return urlB64ToUint8Array(applicationServerPublicKeyBase64);
@@ -26,14 +26,14 @@
             });
         },
         storePushSubscription: function (pushSubscription) {
-            return fetch('push-notifications-api/subscriptions', {
+            return fetch('/push-notifications-api/subscriptions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(pushSubscription)
             });
         },
         discardPushSubscription: function (pushSubscription) {
-            return fetch('push-notifications-api/subscriptions?endpoint=' + encodeURIComponent(pushSubscription.endpoint), {
+            return fetch('/push-notifications-api/subscriptions?endpoint=' + encodeURIComponent(pushSubscription.endpoint), {
                 method: 'DELETE'
             });
         }

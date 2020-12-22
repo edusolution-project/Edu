@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using WebPush.Services.Sqlite;
+using WebPush.Services.Cosmos;
 
 namespace WebPush.Services
 {
@@ -14,6 +15,11 @@ namespace WebPush.Services
             {
                 app.UseSqlitePushSubscriptionStore();
             }
+            else if (subscriptionStoreType == SubscriptionStoreTypes.CosmosDB)
+            {
+                app.UseCosmosDbPushSubscriptionStore();
+            }
+
             return app;
         }
     }

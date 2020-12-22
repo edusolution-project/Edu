@@ -1,6 +1,6 @@
 ﻿self.importScripts('/scripts/push-notifications-controller.js');
 
-const pushNotificationTitle = 'Demo.AspNetCore.PushNotifications';
+var pushNotificationTitle = 'EnglishPlatform';
 
 self.addEventListener('push', function (event) {
     event.waitUntil(self.registration.showNotification(pushNotificationTitle, {
@@ -10,7 +10,7 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener('pushsubscriptionchange', function (event) {
-    const handlePushSubscriptionChangePromise = Promise.resolve();
+    var handlePushSubscriptionChangePromise = Promise.resolve();
 
     if (event.oldSubscription) {
         handlePushSubscriptionChangePromise = handlePushSubscriptionChangePromise.then(function () {

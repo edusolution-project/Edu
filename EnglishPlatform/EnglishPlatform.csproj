@@ -2288,6 +2288,7 @@
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
     <ProjectReference Include="..\GoogleApp\GoogleApp.csproj" />
     <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
+    <ProjectReference Include="..\WebPush\WebPush.csproj" />
   </ItemGroup>
 
 

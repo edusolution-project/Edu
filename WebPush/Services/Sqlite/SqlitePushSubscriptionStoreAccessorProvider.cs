@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using  WebPush.Interfaces;
+using WebPush.Interfaces;
 
 namespace WebPush.Services.Sqlite
 {
