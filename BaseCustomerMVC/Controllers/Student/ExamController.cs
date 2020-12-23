@@ -499,7 +499,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         return Json(item);
                     }
 
-                    var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}", HttpContext);
+                    var dataFiles = _roxyFilemanHandler.UploadAnswerBasis($"{basis}/Student", HttpContext);
 
                     var map = new MappingEntity<ExamDetailEntity, ExamDetailEntity>();
 

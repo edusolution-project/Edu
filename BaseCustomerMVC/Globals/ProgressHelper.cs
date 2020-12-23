@@ -805,6 +805,8 @@ namespace BaseCustomerMVC.Globals
         #region
         public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj,Boolean isExam = false)
         {
+
+            //TODO: RECHECK !!!!!!!!!!!!!!!!!!
             List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
             if (StartWeek > classSbj.EndDate) return result;
             

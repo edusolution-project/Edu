@@ -354,6 +354,35 @@
         @await Html.PartialAsync("_EasyChat")
     }
 
+
+    <script>
+        var openPoll = function () {
+            $('html').append($('<div>', { id: 'pollPopup', style: 'position:fixed; top: 0; left: 0; right: 0; bottom: 0; background: #333; opacity:0.95; z-index: 99999999999' })
+                .append($('<div>', { style: 'margin-top: 150px; text-align:center;' })
+                    .append($('<p>', { style: 'font-size: 150%; color:#FFF; width: 70%; display:inline-block; line-height: 1.5', html: 'Cảm ơn bạn đã sử dụng hệ thống của Eduso!<br/> Để Eduso có thể hỗ trợ tốt nhất cho hoạt động học tập của bạn, vui lòng cho Eduso biết ý kiến của bạn về các trải nghiệm trên hệ thống.' }))
+                    .append($('<p>').append($('<button>', { class: 'btn btn-primary mt-3', text: 'Thực hiện khảo sát', onclick: 'gotoPoll()' })))
+                ));
+            $('body').css('overflow', 'hidden');
+        }
+
+        var gotoPoll = function () {
+            $('#pollPopup').remove();
+            $('body').css('overflow', 'auto');
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLScWFpuctPBXcnlwq3jQ7cFw5Juzc8gw9_L0sNriimpAt-qZIQ/viewform');
+        }
+
+        var pageCount = localStorage.getItem("PageStudentCount");
+        console.log(pageCount);
+        if (!pageCount > 0)
+            pageCount = 1
+        else
+            pageCount = parseInt(pageCount);
+        localStorage.setItem("PageStudentCount", pageCount + 1);
+        if (pageCount == 3) {
+            openPoll();
+        }
+    </script>
+
 </body>
 </html>
 

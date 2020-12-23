@@ -828,15 +828,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var index = 1;
 
                 var activeLessonDic = new Dictionary<int, List<string>>();
+                var studentData = new List<Object>();
+
 
                 foreach (var student in listStudent)
                 {
                     List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
+                    studentData.Add(new { student.ID, student.FullName });
 
                     foreach (var item in listTime)
                     {
-                        if(student.ID == "5f7e81bef197721750de7955" && item.Value.StartTime == new DateTime(2020, 10, 5))
+                        if (student.ID == "5f7e81bef197721750de7955" && item.Value.StartTime == new DateTime(2020, 10, 5))
                         {
                             var test = "";
                         }
@@ -858,7 +861,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         var presult = progress.Where(t => t.StudentID == student.ID && lessonids.Contains(t.LessonID));
                         if (lessonids.Count() == 0) continue;
-                        var point = presult.Count() > 0 ? (presult.Sum(x => x.LastPoint)/lessonids.Count()).ToString() : "---";
+                        var point = presult.Count() > 0 ? (presult.Sum(x => x.LastPoint) / lessonids.Count()).ToString() : "---";
                         data.Point = point.ToString();
 
                         data.StartTime = item.Value.StartTime;
@@ -869,7 +872,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                         if (!dataTime.ContainsKey((item.Key - 1).ToString()))
                         {
-                            dataTime.Add((item.Key-1).ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                            dataTime.Add((item.Key - 1).ToString(), new { item.Value.StartTime, item.Value.EndTime });
                         }
                     }
 
@@ -929,6 +932,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //    dataResponse.Add(student.ID, dataresponse);
                 //}
                 return new JsonResult(new Dictionary<String, Object> {
+                                        {"ListStudent",studentData },
                                         {"DataStudent",dataResponse },
                                         {"DataTime",dataTime }
                                     });
