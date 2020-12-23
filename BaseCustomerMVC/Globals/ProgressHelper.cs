@@ -26,6 +26,7 @@ namespace BaseCustomerMVC.Globals
 
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
+        private readonly StudentService _studentService;
 
         private readonly LessonScheduleService _lessonScheduleService;
 
@@ -43,7 +44,8 @@ namespace BaseCustomerMVC.Globals
 
             ExamService examService,
             ExamDetailService examDetailService,
-            LessonScheduleService lessonScheduleService
+            LessonScheduleService lessonScheduleService,
+            StudentService studentService
         )
         {
             _learningHistoryService = learningHistoryService;
@@ -61,6 +63,7 @@ namespace BaseCustomerMVC.Globals
             _examService = examService;
             _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
+            _studentService = studentService;
         }
 
         #region Learning Progress
@@ -804,15 +807,13 @@ namespace BaseCustomerMVC.Globals
         {
             List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
             if (StartWeek > classSbj.EndDate) return result;
-            //if (StartWeek == new DateTime(2020, 10, 12))
-            //{
-            //    var test = "";
-            //}
+            
             //lay danh sach bai hoc trogn tuan
-            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate > StartWeek).ToList();
             var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
             //danh sach bai luyen tap
+            var a = _lessonService.CreateQuery().Find(t => activeLessonIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
             List<LessonEntity> practices = new List<LessonEntity>();
 
             if (isExam)

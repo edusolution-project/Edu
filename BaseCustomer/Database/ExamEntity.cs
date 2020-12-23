@@ -137,6 +137,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).FirstOrDefault();
         }
+        public IEnumerable<ExamEntity> GetListByLessonAndStudent(string LessonID, string StudentID)
+        {
+            return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).ToEnumerable();
+        }
 
         //public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         //{
