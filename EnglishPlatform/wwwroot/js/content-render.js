@@ -2962,6 +2962,7 @@ var Lesson = (function () {
                 //renderOldAnswer();
             }
             else {
+                //alert(1);
                 //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
@@ -3001,7 +3002,7 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
-
+            $('.top-menu[for=lesson-info]').remove();
             ////fix tạm thời
             //if (!isContinue) {
             //    $('#leftCol').addClass('hide');

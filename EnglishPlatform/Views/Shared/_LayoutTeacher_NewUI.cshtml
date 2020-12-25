@@ -383,16 +383,38 @@
             window.open('https://docs.google.com/forms/d/e/1FAIpQLSc09SsHWOOfAomRg7kRE4RvKmAxPrZKc7T0vIY1uAI5f2uK7A/viewform');
         }
 
-        var pageCount = localStorage.getItem("PageTCCount");
+        var pageCount = getCookie("PageTCCount");
         if (!pageCount > 0)
             pageCount = 1
         else
             pageCount = parseInt(pageCount);
-        localStorage.setItem("PageTCCount", pageCount + 1);
+        setCookie("PageTCCount", pageCount + 1, 30);
         if (pageCount == 5) {
             openPoll();            
         }
-      
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
     </script>
 </body>
 </html>
