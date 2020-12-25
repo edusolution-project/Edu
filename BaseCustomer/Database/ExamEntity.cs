@@ -403,5 +403,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID && o.Status == false && o.Number < Number).SortBy(t => t.Number).ToEnumerable();
         }
+
+        public IEnumerable<ExamEntity> GetItemByLessonScheduleID(String LessonScheduleID)
+        {
+            return CreateQuery().Find(x=>x.LessonScheduleID == LessonScheduleID).ToEnumerable();
+        }
     }
 }

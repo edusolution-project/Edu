@@ -392,7 +392,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 { "Data", item },
                                 {"Error", null }
                             });
-                    break;
             }
 
             if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)
