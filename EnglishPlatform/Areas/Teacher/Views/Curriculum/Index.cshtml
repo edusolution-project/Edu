@@ -87,7 +87,7 @@
                     <td>{{formatShortDate(item.Created)}}</td>
                     <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
-                        <div class="d-flex btn-group">
+                        <div class="btn-group" style="display:block">
                             <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
                             <a class="btn-act btn-edit" title="Ghép bài giảng" href="javascript:;" v-on:click="showMergeItem(item)"><i class="fa fa-first-aid"></i></a>
@@ -124,6 +124,10 @@
         #ed_table tr td:first-child {
             width: 50px;
             max-width: 50px;
+        }
+
+        .btn-act {
+            display: inline-block;
         }
     </style>
     <script>

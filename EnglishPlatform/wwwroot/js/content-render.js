@@ -3001,7 +3001,7 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
-
+            $('.top-menu[for=lesson-info]').remove();
             ////fix tạm thời
             //if (!isContinue) {
             //    $('#leftCol').addClass('hide');
