@@ -1041,9 +1041,9 @@ namespace AutoEmailEduso
 
                 foreach (var center in activeCenters)
                 {
-                    //if (center.Abbr.Contains("utc"))
+                    if (center.Abbr.Contains("utc"))
                     //if (center.Abbr.Contains("c3vyvp"))
-                    if (center.Abbr.Contains("vp"))
+                    //if (center.Abbr.Contains("vp"))
                     {
                         var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
                         var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
@@ -1352,7 +1352,7 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\VP\\{dataCenter.CenterName}Month{month}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Hoa\\SentToHuonghl\\{dataCenter.CenterName}Month{month}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
                 }
                 return "";
             }
@@ -1621,7 +1621,7 @@ namespace AutoEmailEduso
                             cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                             cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             cell.Merge = true;
-                            cell.Value = inforClass.StartDate.ToShortDateString();
+                            cell.Value = inforClass.StartDate.ToString("dd/MM/yyyy");
                             cell.Style.WrapText = true;
                             var border = cell.Style.Border;
                             border.Bottom.Style =
@@ -1636,7 +1636,7 @@ namespace AutoEmailEduso
                             cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                             cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                             cell.Merge = true;
-                            cell.Value = inforClass.EndDate.ToShortDateString();
+                            cell.Value = inforClass.EndDate.ToString("dd/MM/yyyy");
                             cell.Style.WrapText = true;
                             var border = cell.Style.Border;
                             border.Bottom.Style =
@@ -1834,7 +1834,7 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\VP\\{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Hoa\\SentToHuonghl\\{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
                 }
                 return "";
             }
