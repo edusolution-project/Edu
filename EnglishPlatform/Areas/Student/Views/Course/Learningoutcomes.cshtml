@@ -57,41 +57,34 @@
                         <th rowspan="2" style="width:50px">STT</th>
                         <th rowspan="2">Môn học</th>
                         <th rowspan="2" style="width:130px">Điểm luyện tập</th>
-                        <th colspan="3" style="width:390px">Điểm kiểm tra</th>
+                        <th :colspan="summaryExam.length > 0 ? summaryExam.length.length : 1" style="width:390px">Điểm kiểm tra</th>
                     </tr>
                     <tr>
-                        <th style="width:130px">Bài kiểm tra 1</th>
-                        <th style="width:130px">Bài kiểm tra 2</th>
-                        <th style="width:130px">Bài kiểm tra 3</th>
+                        <th v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0">Bài số {{k+1}}</th>
+                        <th v-if="summaryExam.length == 0">Chưa có dữ liệu kiểm tra</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <template v-if="summaryData != null && summaryData.length > 0">
+                    <template>
                         <tr v-for="(itemSummary,i) in summaryData" v-if="item.ID == itemSummary.ClassID">
                             <td>{{itemSummary.Order}}</td>
-                            <td><a href="#" v-on:click="showDetail(itemSummary.CourseName,itemSummary.ClassSubjectID,itemSummary.Order)">{{itemSummary.CourseName}}</a></td>
+                            <td v-on:click="showDetail(itemSummary.CourseName,itemSummary.ClassSubjectID,itemSummary.Order)" class="td_action">{{itemSummary.CourseName}} (Đã giao: {{itemSummary.TotalLessons}})</td>
                             <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
-                            @*<template v-if="i == 0 || (summaryData[i-1].ClassID != item.ID)">*@
                             <template v-if="summaryExam.length == 0 && itemSummary.Order == 1">
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
+                                <td>---</td>
                             </template>
                             <template v-else-if="itemSummary.Order == 1">
-                                <td>{{roundPoint(summaryExam[k].multiple1,1)}}</td>
-                                <td>{{summaryExam[k].multiple2}}</td>
-                                <td>{{summaryExam[k].multiple3}}</td>
+                                <td v-for="(item,k) in summaryExam">{{roundPoint(item.point,1)}}</td>
                             </template>
                             <template v-else>
-                                <td></td>
-                                <td></td>
-                                <td></td>
+                                <td v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0"></td>
+                                <td v-if="summaryExam.length == 0"></td>
                             </template>
                         </tr>
                         <tr style="font-weight:bold">
                             <td colspan="2">Điểm trung bình</td>
-                            <td v-if="avgpointpractice[k].ClassID == item.ID">{{roundPoint(avgpointpractice[k].AvgPractice,1)}}</td>
-                            <td colspan="3" v-if="avgpointexam[k].ClassID == item.ID">{{roundPoint(avgpointexam[k].AvgExam,1)}}</td>
+                            <td v-for="(point,x) in avgpointpractice" v-if="point.ClassID == item.ID">{{roundPoint(point.AvgPointPractice,1)}}</td>
+                            <td v-for="(point,x) in avgpointexam" v-if="point.ClassID == item.ID">{{roundPoint(point.AvgPointExam,1)}}</td>
                         </tr>
 
                     </template>
@@ -185,6 +178,14 @@
             border: 0.5px solid gray;
             vertical-align: middle
         }
+
+        .td_action{
+            cursor:pointer;
+        }
+            .td_action:hover {
+                cursor: pointer;
+                background-color: lightgray
+            }
     </style>
     <script>
 
@@ -266,6 +267,8 @@
                     },
                 ],
                 summaryData: [],
+                avgpointpractice: [],
+                avgpointexam: [],
                 summaryExam: [],
                 resultData:[],
                 classSubjectID: '',
@@ -280,8 +283,8 @@
                 history: [],
                 showAll: 1,
                 list_class:@Html.Raw(Json.Serialize(lclass)),
-                avgpointpractice: [],
-                avgpointexam: [],
+                //avgpointpractice: [],
+                //avgpointexam: [],
                 detail: {
                     title: '',
                     data: [],
@@ -338,22 +341,10 @@
                         .then(response => {
                             var avgpointpractice = [];
                             var avgpointexam = [];
-                            for (var i = 0; i < this.list_class.length; i++) {
-                                var idclass = this.list_class[i].ID;
-                                var item = response.data[idclass]
-                                if (item != undefined) {
-                                    avgPractice = this.calcAveragePractice(item.Practice, idclass);
-                                    avgExam = this.calcAverageExam(item.Exam, idclass);
-
-                                    avgpointpractice.push({ ClassID: idclass, AvgPractice: avgPractice });
-                                    avgpointexam.push({ ClassID: idclass, AvgExam: avgExam });
-
-                                    _that.summaryData = _that.summaryData.concat(item.Practice)
-                                    _that.summaryExam = _that.summaryExam.concat(item.Exam)
-                                }
-                            }
-                            this.avgpointexam = avgpointexam;
-                            this.avgpointpractice = avgpointpractice;
+                            _that.summaryData = response.data.Practice;
+                            _that.summaryExam = response.data.Exam;
+                            _that.avgpointpractice = this.calcAveragePractice(_that.summaryData)
+                            _that.avgpointexam = this.calcAverageExam(_that.summaryExam)
                         }).catch(e => { })
                 },
                 getPercent(a, b) {
@@ -544,24 +535,75 @@
                     return value
                 },
                 calcAveragePractice(obj) {
+                    var array = []
                     if (obj.length > 0) {
-                        var totalPointPractice = 0;
-                        for (var i = 0; i < obj.length; i++) {
-                            var item = obj[i];
-                            totalPointPractice += item.PracticeAvgPoint;
+                        for (var j = 0; j < this.list_class.length; j++) {
+                            var idclass = this.list_class[j].ID;
+                            var totalPointPractice = 0;
+                            var totalLesson = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                var item = obj[i];
+                                if (idclass == item.ClassID) {
+                                    totalPointPractice += item.PracticeAvgPoint * item.TotalLessons;
+                                    totalLesson += item.TotalLessons
+                                }
+                            }
+                            if (totalLesson != 0) {
+                                array.push({ ClassID: idclass, AvgPointPractice: (totalPointPractice / totalLesson) })
+                            }
+                            else {
+                                array.push({ ClassID: idclass, AvgPointPractice: "---" })
+                            }
                         }
-                        return (totalPointPractice / obj.length)
+                        return array
                     }
-                    else return "---"
+                    else {
+                        for (var i = 0; i < this.list_class.length; i++) {
+                            var idclass = this.list_class[i].ID;
+                            array.push({ ClassID: idclass, AvgPointPractice: "---" })
+                        }
+                        return array
+                    }
+                    //if (obj.length > 0) {
+                    //    var totalPointPractice = 0;
+                    //    for (var i = 0; i < obj.length; i++) {
+                    //        var item = obj[i];
+                    //        totalPointPractice += item.PracticeAvgPoint;
+                    //    }
+                    //    return (totalPointPractice / obj.length)
+                    //}
+                    //else return "---"
                 },
                 calcAverageExam(obj) {
-                    //debugger
-                    var totalPointExam = 0;
-                    for (var i = 0; i < obj.length; i++) {
-                        var item = obj[i];
-                        totalPointExam += (item.multiple1 + item.multiple2 * 2 + item.multiple3 * 3);
+                    var array = []
+                    if (obj.length > 0) {
+                        for (var j = 0; j < this.list_class.length; j++) {
+                            var idclass = this.list_class[j].ID;
+                            var totalPointExam = 0;
+                            var totalLesson = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                var item = obj[i];
+                                if (idclass == item.ClassID) {
+                                    totalPointExam += item.Point
+                                    totalLesson += 1
+                                }
+                            }
+                            if (totalLesson != 0) {
+                                array.push({ ClassID: idclass, AvgPointExam: (totalPointPractice / totalLesson) })
+                            }
+                            else {
+                                array.push({ ClassID: idclass, AvgPointExam: "---" })
+                            }
+                        }
+                        return array
                     }
-                    return (totalPointExam / 6)
+                    else {
+                        for (var i = 0; i < this.list_class.length; i++) {
+                            var idclass = this.list_class[i].ID;
+                            array.push({ ClassID: idclass, AvgPointExam: "---" })
+                        }
+                        return array
+                    }
                 },
                 hideModal() {
                     this.isLoading = false

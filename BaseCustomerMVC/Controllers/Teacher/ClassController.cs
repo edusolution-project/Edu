@@ -799,12 +799,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var activeLessonDic = new Dictionary<int, List<string>>();
 
+                var allWeekActiveIds = activeLessons.Where(t => t.EndDate > listTime.FirstOrDefault().Value.StartTime && t.StartDate <= listTime.LastOrDefault().Value.EndTime).Select(t => t.LessonID).ToList();
+                var allWeekactivePractice = _lessonService.CreateQuery().Find(t => allWeekActiveIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
+                var _listStudent = new List<InforStudent>();
+
                 foreach (var student in listStudent)
                 {
                     List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
 
-                    var countLessonids = 0;
                     foreach (var item in listTime)
                     {
                         if (!activeLessonDic.ContainsKey(item.Key))
@@ -815,7 +818,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
 
                         var lessonids = activeLessonDic[item.Key];
-                        countLessonids += lessonids.Count();
 
                         var data = new StudentDetailVM();
                         data.StudentName = student.FullName;
@@ -840,14 +842,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
+                    //tinh diem trung binh
+                    var _presult = progress.Where(t => t.StudentID == student.ID && allWeekactivePractice.Contains(t.LessonID));
+                    _listStudent.Add(new InforStudent()
+                    {
+                        StudentID = student.ID,
+                        FullName = student.FullName,
+                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x=>x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---"
+                    });
+
                     dataResponse.Add(index.ToString(), dataresponse);
                     index++;
                 }
-                
+
+                //var _listStudent = listStudent.Select(x => new { StudentID = x.ID, FullName = x.FullName });
+
                 return new JsonResult(new Dictionary<String, Object> {
                                         {"DataStudent",dataResponse },
                                         {"DataTime",dataTime },
-                                        {"ListStudents",null }
+                                        {"ListStudent",_listStudent }
                                     });
             }
             catch (Exception ex)
@@ -1045,6 +1058,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String StudentID { get; set; }
             public String ClassID { get; set; }
             public Double TypeClassSbj { get; set; }
+        }
+
+        public class InforStudent
+        {
+            public String StudentID { get; set; }
+            public String FullName { get; set; }
+            public String AvgPointPratice { get; set; }
         }
 
         public class Type_Filter

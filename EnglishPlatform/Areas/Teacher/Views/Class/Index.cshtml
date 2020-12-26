@@ -48,7 +48,11 @@
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
                 <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
             </div>
-            <b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            <div class="col-12 col-md-2 ml-auto">
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
+                <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+                @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
+            </div>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -1332,6 +1336,32 @@
                 formatDate(value) {
                     if (value) {
                         return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
+                exportExcel(tableid) {
+                    var _filename = "Danh sách lớp học";
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
                     }
                 },
                 a(obj, userid) {

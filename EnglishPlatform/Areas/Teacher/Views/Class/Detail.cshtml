@@ -95,7 +95,7 @@
             </div>
             <div class="float-right" v-if="searchCsbj==''">
                 <template v-if="!isLoading">-->
-            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel()"><i title="Xuất file" class="ti-export"></i></button>*@
+            <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel('table_point')"><i title="Xuất file" class="ti-import"></i></button>
             @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
             @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
             <!--</template>
@@ -272,7 +272,8 @@
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
                                         <td class="sticky-col second-col">{{ list_students[i-1].fullName}}</td>
-                                        <td>{{calcAvginWeek(items)}}</td>
+                                        <td>{{roundPoint(list_students[i-1].avgPointPratice,1)}}</td>
+                                        @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
                                             <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
                                         </template>
@@ -651,8 +652,8 @@
             .td_hover:hover {
                 background-color: lightgray;
             }
-            left: 36px;
-        }
+            @*left: 36px;
+        }*@
 
         .scoretable th, scoretable.td {
             padding: 0 5px;
@@ -776,9 +777,9 @@
                     <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
                     <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
                 </div>
-                @*<div class="status" v-if="owner == '@currentuser'">
+                <div class="status" v-if="owner == '@currentuser'">
                         <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>*@
+                    </div>
             </div>
         </li>
     </script>
@@ -838,9 +839,9 @@
                     </span>
                 </a>
                 <div class="flex-column col-3">
-                    @*<span>
+                    <span>
                             Tỉ lệ mở
-                        </span>*@
+                        </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -853,9 +854,9 @@
                     </div>
                 </div>
                 <div class="flex-column col-3">
-                    @*<span>
+                    <span>
                             Tỉ lệ làm bài
-                        </span>*@
+                        </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -1568,7 +1569,7 @@
                                 this.isLoading = false
                                 this.fieldsTime = response.data.DataTime
                                 this.list_students = response.data.ListStudent;
-                                //debugger
+                                debugger
                                 this.studentSummarySbj = response.data.DataStudent
                                 //debugger
                                 //if (response.data.Error) {
@@ -2435,14 +2436,20 @@
                         return moment(String(value)).format('YYYY-MM-DD')
                     }
                 },
-                exportExcel() {
-                    //debugger
-                    var _filename = "Bảng điểm tổng hợp lớp " + this.className;
+                exportExcel(tableid) {
+                    var _filename = "";
+                    if (this.searchCsbj == "") {
+                        _filename = "Bảng điểm tổng hợp lớp " + this.className;
+                    }
+                    else {
+                        _filename = "Bảng điểm môn " + this.searchCsbj.CourseName + " lớp " + this.className;
+                    }
                     var uri = 'data:application/vnd.ms-excel;base64,'
                         , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
                         , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
                         , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
-                    var table = document.getElementById("ed_table");
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
                     //console.log(tableid);
                     //var table = $('#' + tableid);
                     var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
@@ -2461,7 +2468,7 @@
                         window.open(uri + base64(format(template, ctx)));
                     }
                 },
-                export2ExcelV2() {
+                export2ExcelV2() { //code server
                     var classID = this.classID;
                     var url = '@processUrl("ExportTablePoint", "Class")/?ClassID=' + classID + '&&basic=@center';
                     window.open(url);
@@ -2531,7 +2538,7 @@
                     this.$bvModal.show("detailStudentSummary_modal")
                 },
                 calcAveragePractice(obj) {
-                    debugger
+                    //debugger
                     if (obj.length > 0) {
                         var totalPointPractice = 0;
                         var totalLesson = 0;
@@ -2639,7 +2646,7 @@
                             if (status) {
                                 var data = response.data.Data
                                 this.detailProgessLesson.isShow = true
-                                this.detailProgessLesson.data = data
+                                this.detailProgessLesson.data = data //here
                                 this.detailProgessLesson.title = Title
                             }
                             else {
@@ -2653,9 +2660,9 @@
                 },
                 test(obj) {
                     //debugger
-                    this.searchCsbj.ID = obj.ClassSubjectID
-                    this.searchCsbj.CourseName = obj.CourseName
-                    this.hideModal()
+                    //this.searchCsbj.ID = obj.ClassSubjectID
+                    //this.searchCsbj.CourseName = obj.CourseName
+                    //this.hideModal()
                 }
             }
         });
@@ -3011,22 +3018,6 @@
             <template v-if="result_data.length > 0">
                 <table id="id_table" class="table">
                     <thead>
-                        @*<tr>
-                                <th rowspan="1" style="width:50px">STT</th>
-                                <th rowspan="1">Bài</th>
-                                <th rowspan="1" style="width:100px">Số lượt làm</th>
-                                <th colspan="3" style="width:150px">Điểm</th>
-                                <th colspan="3" style="width:350px">Lượt làm cuối</th>
-                                <th rowspan="1" style="width:100px"></th>
-                            </tr>
-                            <tr>
-                                <th style="width:50px">Thấp nhất</th>
-                                <th style="width:50px">Cao nhất</th>
-                                <th style="width:50px">Trung bình</th>
-                                <th style="width:150px">Thời gian</th>
-                                <th style="width:150px">Trạng thái</th>
-                                <th style="width:50px">Điểm</th>
-                            </tr>*@
                         <tr>
                             <th style="width:50px">STT</th>
                             <th>Bài</th>
