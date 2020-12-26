@@ -48,7 +48,7 @@
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
                 <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
             </div>
-            <div class="col-12 col-md-2 ml-auto">
+            <div class="col-12 col-md-2 ml-auto text-md-right">
                 <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
                 <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
                 @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
@@ -1399,12 +1399,12 @@
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription" :disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
                 @*<b-col class="form-group d-none">
-                    <label class="label">Cho phép học sinh tự động tham gia:</label>
-                    <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
-                    </select>
-                </b-col>*@
+                        <label class="label">Cho phép học sinh tự động tham gia:</label>
+                        <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
+                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
+                        </select>
+                    </b-col>*@
                 <b-col class="form-group">
                     <label class="label">Ảnh lớp học</label>
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
@@ -1418,7 +1418,7 @@
             </div>
             <div class="col-md-8">
                 <ul class="list list-subject" v-for="(sub,k) in class_info.subject" :class="sub.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM' ? 'd-none':''">
-                    <li class="flex":id="sub.UID" >
+                    <li class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
                             <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">

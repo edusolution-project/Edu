@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
-using System.Dynamic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using BaseCoreEmail;
 using BaseCustomerEntity.Database;
-using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -1180,7 +1171,7 @@ namespace AutoEmailEduso
             return dataClass;
         }
 
-        private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter,String month="")
+        private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String month = "")
         {
             try
             {
@@ -1207,7 +1198,7 @@ namespace AutoEmailEduso
 
                     // Tạo danh sách các column header
                     //string[] arrColumnHeader = {"#","Lớp","Ngày bắt đầu","Ngày kết thúc","Sĩ số","Chưa sử dụng hệ thống","10.0 - 8.0","7.9 - 5.0","4.9 - 2.0","1.9 - 0.0"};
-                    string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0","Chưa làm" };
+                    string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0", "Chưa làm" };
 
                     // lấy ra số lượng cột cần dùng dựa vào số lượng header
                     var countColHeader = arrColumnHeader.Count();
@@ -1304,7 +1295,7 @@ namespace AutoEmailEduso
                         //set màu thành gray
                         var fill = cell.Style.Fill;
                         fill.PatternType = ExcelFillStyle.Solid;
-                        fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157,195,230));
+                        fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
 
                         //căn chỉnh các border
                         var border = cell.Style.Border;
@@ -1343,7 +1334,7 @@ namespace AutoEmailEduso
                         ws.Cells[rowIndex, colIndex++].Value = item.MinPoint5;
                         ws.Cells[rowIndex, colIndex++].Value = item.MinPoint2;
                         ws.Cells[rowIndex, colIndex++].Value = item.MinPoint0;
-                        ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass- item.MinPoint0 - item.MinPoint2 - item.MinPoint5 - item.MinPoint8;
+                        ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass - item.MinPoint0 - item.MinPoint2 - item.MinPoint5 - item.MinPoint8;
 
                         // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
                         //ws.Cells[rowIndex, colIndex++].Value = item.Birthday.ToShortDateString();
@@ -1389,7 +1380,7 @@ namespace AutoEmailEduso
 
                     // Tạo danh sách các column header
                     //string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Chưa sử dụng hệ thống", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0","Chưa làm" };
-                    string[] arrColumnHeader = { "#", "Lớp","Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
+                    string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
 
                     // lấy ra số lượng cột cần dùng dựa vào số lượng header
                     var countColHeader = arrColumnHeader.Count();
@@ -1433,28 +1424,28 @@ namespace AutoEmailEduso
                     #endregion
 
                     #region row 3
-                    ws.Cells[3, 1,3,2].Value = $"Tổng số giáo viên: {dataCenter.TotalTeachersinCenter}";
+                    ws.Cells[3, 1, 3, 2].Value = $"Tổng số giáo viên: {dataCenter.TotalTeachersinCenter}";
                     ws.Cells[3, 1, 3, 2].Merge = true;
                     // in đậm
-                    ws.Cells[3, 1,3,2].Style.Font.Bold = true;
+                    ws.Cells[3, 1, 3, 2].Style.Font.Bold = true;
                     // căn giữa
-                    ws.Cells[3, 1,3,2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    ws.Cells[3, 1, 3, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
                     ws.Cells[3, 80, 3, 97].Value = "Điểm 5.0 - 7.9";
                     ws.Cells[3, 80, 3, 97].Merge = true;
                     ws.Cells[3, 98, 3, 108].Style.Fill.PatternType = ExcelFillStyle.Gray0625;
                     ws.Cells[3, 98, 3, 108].Merge = true;
-                    ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157,195,230));
+                    ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
                     //ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                     #endregion
 
                     #region row 4
-                    ws.Cells[4, 1,4,2].Value = $"Tổng số học viên: {dataCenter.TotalStudentsinCenter}";
+                    ws.Cells[4, 1, 4, 2].Value = $"Tổng số học viên: {dataCenter.TotalStudentsinCenter}";
                     ws.Cells[4, 1, 4, 2].Merge = true;
                     // in đậm
-                    ws.Cells[4, 1,4,2].Style.Font.Bold = true;
+                    ws.Cells[4, 1, 4, 2].Style.Font.Bold = true;
                     // căn giữa
-                    ws.Cells[4, 1,4,2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    ws.Cells[4, 1, 4, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
                     ws.Cells[4, 4].Value = $"Hoạt động: {dataCenter.DaHoc}";
                     // in đậm
@@ -1466,37 +1457,37 @@ namespace AutoEmailEduso
                     ws.Cells[4, 80, 4, 97].Merge = true;
                     ws.Cells[4, 98, 4, 108].Style.Fill.PatternType = ExcelFillStyle.DarkUp;
                     ws.Cells[4, 98, 4, 108].Merge = true;
-                    ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255,255,102));
+                    ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
                     //ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                     #endregion
 
                     #region row 5
-                    ws.Cells[5, 1,5,2].Value = $"Tổng số lớp: {dataCenter.TotalClass}";
-                    ws.Cells[5, 1,5,2].Merge = true;
+                    ws.Cells[5, 1, 5, 2].Value = $"Tổng số lớp: {dataCenter.TotalClass}";
+                    ws.Cells[5, 1, 5, 2].Merge = true;
                     // in đậm
-                    ws.Cells[5, 1,5,2].Style.Font.Bold = true;
+                    ws.Cells[5, 1, 5, 2].Style.Font.Bold = true;
                     // căn giữa
                     ws.Cells[5, 1, 5, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
-                    ws.Cells[5, 4,5,4].Value = $"Lớp đang hoạt động: {dataCenter.TotalClassActive}";
+                    ws.Cells[5, 4, 5, 4].Value = $"Lớp đang hoạt động: {dataCenter.TotalClassActive}";
                     // in đậm
                     ws.Cells[5, 4, 5, 4].Style.Font.Bold = true;
                     // căn giữa
                     ws.Cells[5, 4, 5, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
-                    ws.Cells[5, 80,5,97].Value = "Điểm 0.0 - 1.9";
+                    ws.Cells[5, 80, 5, 97].Value = "Điểm 0.0 - 1.9";
                     ws.Cells[5, 80, 5, 97].Merge = true;
                     ws.Cells[5, 98, 5, 108].Style.Fill.PatternType = ExcelFillStyle.LightVertical;
-                    ws.Cells[5, 98, 5, 108].Merge=true;
-                    ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237,67,67));
+                    ws.Cells[5, 98, 5, 108].Merge = true;
+                    ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
                     //ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                     #endregion
 
                     #region row 6
-                    ws.Cells[6,80,6,97].Value = "Chưa học";
+                    ws.Cells[6, 80, 6, 97].Value = "Chưa học";
                     ws.Cells[6, 80, 6, 97].Merge = true;
-                    ws.Cells[6, 98,6,108].Style.Fill.PatternType = ExcelFillStyle.DarkTrellis;
-                    ws.Cells[6, 98,6,108].Merge=true;
+                    ws.Cells[6, 98, 6, 108].Style.Fill.PatternType = ExcelFillStyle.DarkTrellis;
+                    ws.Cells[6, 98, 6, 108].Merge = true;
                     //ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174,157,245));
                     ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                     #endregion
@@ -1523,15 +1514,15 @@ namespace AutoEmailEduso
                         //gán giá trị
                         cell.Value = item;
                         colIndex++;
-                        if(colIndex == 8)
+                        if (colIndex == 8)
                         {
                             ws.Cells[rowIndex, 8, rowIndex, 108].Merge = true;
                         }
-                        if(colIndex == 1)
+                        if (colIndex == 1)
                         {
                             ws.Column(colIndex).Width = 2.5;
                         }
-                        if(colIndex == 2 || colIndex == 4 || colIndex == 5)
+                        if (colIndex == 2 || colIndex == 4 || colIndex == 5)
                         {
                             ws.Column(colIndex).Width = 15;
                         }
@@ -1539,7 +1530,7 @@ namespace AutoEmailEduso
                         {
                             ws.Column(colIndex).Width = 22;
                         }
-                        if(colIndex == 6)
+                        if (colIndex == 6)
                         {
                             ws.Column(colIndex).Width = 7;
                         }
@@ -1699,7 +1690,7 @@ namespace AutoEmailEduso
                                 //set màu thành lightgreen
                                 var fill8 = ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Fill;
                                 fill8.PatternType = ExcelFillStyle.DarkDown;
-                                fill8.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134,208,141));
+                                fill8.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134, 208, 141));
                                 //fill8.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                                 ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Merge = true;
                                 // in đậm
@@ -1727,7 +1718,7 @@ namespace AutoEmailEduso
                                 //set màu thành lightgreen
                                 var fill5 = ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Fill;
                                 fill5.PatternType = ExcelFillStyle.Gray0625;
-                                fill5.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157,195,230));
+                                fill5.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
                                 //fill5.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                                 ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Merge = true;
                                 // in đậm
@@ -1748,7 +1739,7 @@ namespace AutoEmailEduso
                                 ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Value = $"{persentMinPoint2}%";
                                 var fill2 = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Fill;
                                 fill2.PatternType = ExcelFillStyle.DarkUp;
-                                fill2.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255,255,102));
+                                fill2.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
                                 //fill2.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                                 ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Merge = true;
                                 // in đậm
@@ -1769,7 +1760,7 @@ namespace AutoEmailEduso
                                 ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Value = $"{persentMinPoint0}%";
                                 var fill0 = ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.Fill;
                                 fill0.PatternType = ExcelFillStyle.LightVertical;
-                                fill0.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237,67,67));
+                                fill0.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
                                 //fill0.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                                 ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Merge = true;
                                 // in đậm
@@ -1811,7 +1802,7 @@ namespace AutoEmailEduso
                                     ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Value = $"{persentChuaLam}%";
                                     var fill = ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.Fill;
                                     fill.PatternType = ExcelFillStyle.DarkTrellis;
-                                    fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174,157,245));
+                                    fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174, 157, 245));
                                     //fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
                                     ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Merge = true;
                                     // in đậm

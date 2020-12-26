@@ -47,9 +47,9 @@
                         <span class="ic ic-picker"></span>
                     </div>*@
             </div>
-            <div class="flex rate" v-if="tab[1] || search_subject == ''">
+            <div class="flex rate d-none" v-if="tab[1] || search_subject == ''">
                 <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
-                <span><i class="ic ic-award"></i>Xếp hạng: {{ checkrank() + '/' + rank.total}}</span>
+                @*<span><i class="ic ic-award"></i>Xếp hạng: {{ checkrank() + '/' + rank.total}}</span>*@
             </div>
         </div>
         <div class="flex j-between border-b" v-if="search_subject != ''">
@@ -122,11 +122,11 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in summaryData">
-                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
-                            <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
+                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
+                            @*<td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>*@
                             <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
-                            <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
-                            <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                            @*<td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>*@
+                            @*<td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>*@
                         </tr>
                     </tbody>
                 </table>
@@ -214,22 +214,22 @@
                         key: 'subject',
                         label: 'Học liệu'
                     },
-                    {
-                        key: 'progress',
-                        label: 'KL đã hoàn thành'
-                    },
-                    {
-                        key: 'score',
-                        label: 'Điểm luyện tập'
-                    },
+                    //{
+                    //    key: 'progress',
+                    //    label: 'KL đã hoàn thành'
+                    //},
                     {
                         key: 'score',
-                        label: 'Điểm kiểm tra'
+                        label: 'Điểm'
                     },
-                    {
-                        key: 'rank',
-                        label: 'Xếp hạng'
-                    },
+                    //{
+                    //    key: 'score',
+                    //    label: 'Điểm kiểm tra'
+                    //},
+                    //{
+                    //    key: 'rank',
+                    //    label: 'Xếp hạng'
+                    //},
                 ],
                 progressFields: [
                     {
@@ -380,11 +380,14 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    _form.append('ID', '@currentStudent.ID')
-                    let _url = '@processUrl("GetLearningSummary", "Class")'
+                    _form.append('StudentID', '@currentStudent.ID')
+                    //let _url = '@processUrl("GetLearningSummary", "Class")'
+                    let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.summaryData = response.data.Data;
+                            //_that.summaryData = response.data.Data;
+                            _that.summaryData = response.data.Practice;
+                            debugger
                             _that.rank = response.data.Result;
                             _that.avgPoint = response.data.Result.avg;
                         }).catch(e => { })
@@ -537,11 +540,11 @@
                     //}
                 },
                 checkrank() {
-                    if (this.search_subject == "")
-                        return this.rank.pos;
-                    var rank = this.summaryData.filter(t => t.ClassSubjectID == this.search_subject)[0].Rank;
-                    if (rank > 0) return rank;
-                    return '-';
+                    //if (this.search_subject == "")
+                    //    return this.rank.pos;
+                    //var rank = this.summaryData.filter(t => t.ClassSubjectID == this.search_subject)[0].Rank;
+                    //if (rank > 0) return rank;
+                    //return '-';
                 }
             }
         });

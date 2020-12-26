@@ -44,16 +44,17 @@
                         <template v-for="(item,k) in sumarryData">
                             <tr :class="item.ClassName != null ? 'font-weight-bold bg-light' : ''">
                                 <template v-if="item.ClassName != null">
-                                    <td colspan="2">
+                                    <td colspan="1">
                                         <a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.ClassName}}</a>
                                     </td>
+                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
                                 </template>
                                 <template v-else>
                                     <td></td>
-                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
+                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
                                 </template>
-                                <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                                <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                                @*<td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>*@
+                                <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
                                 <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                             </tr>
                         </template>
@@ -86,10 +87,10 @@
                         key: 'subject',
                         label: 'Môn học'
                     },
-                    {
-                        key: 'progress',
-                        label: 'Tiến độ'
-                    },
+                    //{
+                    //    key: 'progress',
+                    //    label: 'Tiến độ'
+                    //},
                     {
                         key: 'score',
                         label: 'Kết quả'
@@ -111,7 +112,6 @@
                     _that.loadSummary();
                 },
                 loadSummary() {
-                    debugger
                     let _that = this
                     let _form = new FormData()
                     _form.append('StudentID', '@currentStudent.ID')
@@ -119,7 +119,9 @@
                     let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.sumarryData = response.data.Data;
+                            //_that.sumarryData = response.data.Data;
+                            _that.sumarryData = response.data.Practice
+                            debugger
                         }).catch(e => { })
                 },
                 domDecoder(str) {
