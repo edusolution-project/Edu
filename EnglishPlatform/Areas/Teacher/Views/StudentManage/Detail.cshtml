@@ -111,9 +111,11 @@
                     _that.loadSummary();
                 },
                 loadSummary() {
+                    debugger
                     let _that = this
                     let _form = new FormData()
-                    _form.append('ID', '@currentStudent.ID')
+                    _form.append('StudentID', '@currentStudent.ID')
+                    _form.append('ClassID', '')
                     let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {

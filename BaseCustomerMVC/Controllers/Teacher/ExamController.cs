@@ -436,6 +436,60 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(result);
         }
 
+        public JsonResult GetDetailProgessExam(String LessonScheduleID)
+        {
+            try
+            {
+                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID);
+                var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).OrderByDescending(x => x.Number).FirstOrDefault();
+                //if (exams == null || exams.Count() == 0)
+                if (exams == null)
+                {
+                    return Json(
+                            new Dictionary<String, Object>
+                            {
+                                {"Status",false },
+                                {"Message","Không tìm thấy bài học"}
+                            }
+                        );
+                }
+                //var examIDs = exams.Select(x => x.ID).ToList();
+                var examIDs = exams.ID;
+
+                //var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
+                var detailExams = _examDetailService.GetByExamID(examIDs).ToList().GroupBy(x => x.LessonPartID);
+                var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
+                var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title }).ToList();
+                var result = detailExams.ToList().Select(x =>
+                new
+                {
+                    x.Key,
+                    TitleLessonPart = listLessonPart.Where(y=>y.ID == x.Key).FirstOrDefault().Title,
+                    CountFalse = x.ToList().FindAll(y => y.RealAnswerID != y.AnswerID).Count,
+                    CountTrue = x.ToList().FindAll(y => y.RealAnswerID == y.AnswerID).Count,
+                    TotalAns = x.ToList().Count
+                }).ToList();
+
+                return Json(
+                        new Dictionary<String, Object>
+                        {
+                            {"Status",true },
+                            {"Data",result }
+                        }
+                    );
+            }
+            catch(Exception ex)
+            {
+                return Json(
+                        new Dictionary<String, Object>
+                        {
+                            {"Status",false },
+                            {"Message",ex.Message }
+                        }
+                    );
+            }
+        }
+
         //private void GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj, List<StudentLessonResultViewModel> result)
         //{
         //    //lay danh sach bai hoc trogn tuan

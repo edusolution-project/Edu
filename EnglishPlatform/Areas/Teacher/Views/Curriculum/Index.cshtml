@@ -53,7 +53,11 @@
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
             </div>
-            <b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+            <div class="ml-0 ml-md-auto">
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
+                <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
+            </div>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -791,7 +795,33 @@
                         }
                     }
                     _that.checkToggle(st)
-                }
+                },
+                exportExcel(tableid) {
+                    var _filename = "Danh sách bài giảng";
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
+                    }
+                },
             }
         });
 

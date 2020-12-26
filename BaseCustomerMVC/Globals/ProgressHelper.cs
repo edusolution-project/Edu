@@ -829,12 +829,14 @@ namespace BaseCustomerMVC.Globals
 
             foreach (var practice in practices)
             {
-                var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+                var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(x=>x.Number).ToList();
                 var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, practice.ID);
                 var tried = examresult.Count();
                 var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
                 var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
                 var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+                var coursename = _chapterService.CreateQuery().Find(x => x.ID == practice.ChapterID).FirstOrDefault();
 
                 var lastEx = examresult.FirstOrDefault();
                 result.Add(new StudentLessonResultViewModel(student)
@@ -851,7 +853,8 @@ namespace BaseCustomerMVC.Globals
                     ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
                     LessonName = practice.Title,
                     LessonID = practice.ID,
-                    ClassSubjectID = practice.ClassSubjectID
+                    ClassSubjectID = practice.ClassSubjectID,
+                    CourseName = coursename != null ? coursename.Name : ""
                 });
             }
             return result;

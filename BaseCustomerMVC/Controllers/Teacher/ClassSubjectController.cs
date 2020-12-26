@@ -236,8 +236,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            select _resultMapping.AutoOrtherType(r, new LessonResultViewModel()
                            {
                                ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
+                               //StartDate = schedule.StartDate,
+                               //EndDate = schedule.EndDate,
                                LearntCount = progressCount,
                                ExamCount = examCount,
                                AvgPoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
@@ -278,25 +278,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var avtiveLessons = _lessonScheduleService.GetActiveLesson(StartTime, EndTime, currentCs.ID);
                 var activeLessonIDs = avtiveLessons.Select(x => x.LessonID);
-                //var progress = _lessonProgressService.CreateQuery().Find(o => activeLessonIDs.Contains(o.LessonID) && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.LessonID);
-                List<LessonResultViewModel> lessonResult = new List<LessonResultViewModel>();
+                var progress = _lessonProgressService.CreateQuery().Find(o => activeLessonIDs.Contains(o.LessonID) && o.ClassSubjectID == currentCs.ID).ToList();
+                List<LessonResultVM> lessonResult = new List<LessonResultVM>();
 
                 foreach (var item in avtiveLessons)
                 {
-                    var progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == item.LessonID && o.ClassSubjectID == currentCs.ID);
+                    //var progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == item.LessonID && o.ClassSubjectID == currentCs.ID);
                     var lesson = _lessonService.GetItemByID(item.LessonID);
+                    //var exam = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.StudentID);
+                    //var _progessResult = progress.Where(x => x.LessonID == item.LessonID).ToList();
                     var examCount = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).Project(t => t.StudentID).ToList().Distinct().Count();
-                    var result = new LessonResultViewModel()
+                    var progessResult = progress.Where(x=>x.LessonID == item.LessonID && x.Tried > 0).GroupBy(x=>x.StudentID).Select(x=>new {x.Key, Point = x.ToList().Average(y=>y.LastPoint) });
+                    //var avgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
+                    //var avgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
+                    var result = new LessonResultVM()
                     {
                         ScheduleID = item.ID,
-                        StartDate = item.StartDate,
-                        EndDate = item.EndDate,
-                        LearntCount = progress.Count(),
+                        //StartDate = item.StartDate,
+                        //EndDate = item.EndDate,
+                        //LearntCount = progress.Count(),
                         ExamCount = examCount,
-                        AvgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
-                        AvgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
+                        //AvgPoint = avgPoint,
+                        //AvgPracticePoint = avgPracticePoint,
                         Title = lesson.Title,
-                        ChapterName = _chapterService.GetItemByID(lesson.ChapterID)?.Name
+                        ChapterName = _chapterService.GetItemByID(lesson.ChapterID)?.Name,
+                        MinPoint8 = progessResult.Where(x=>x.Point >= 80).Count(),
+                        MinPoint5 = progessResult.Where(x => x.Point >= 50 && x.Point < 80).Count(),
+                        MinPoint2 = progessResult.Where(x => x.Point >= 20 && x.Point < 50).Count(),
+                        MinPoint0 = progessResult.Where(x => x.Point >= 00 && x.Point < 20).Count(),
                     };
                     lessonResult.Add(result);
                 }
@@ -308,6 +317,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 return Json(ex.Message);
             }
+        }
+
+        public class LessonResultVM
+        {
+            public String ScheduleID { get; set; }
+            public Int32 ExamCount { get; set; }
+            public String Title { get; set; }
+            public String ChapterName { get; set; }
+            public Double MinPoint0 { get; set; }
+            public Double MinPoint2 { get; set; }
+            public Double MinPoint5 { get; set; }
+            public Double MinPoint8 { get; set; }
+
         }
     }
 }
