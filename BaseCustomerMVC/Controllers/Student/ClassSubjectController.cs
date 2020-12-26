@@ -312,54 +312,54 @@ namespace BaseCustomerMVC.Controllers.Student
             //}
         }
 
-        public JsonResult GetLearningSummary(String basis, Boolean isPractice,Int32 TypeFilter)
+        public JsonResult GetLearningSummary(String basis, Boolean isPractice, Int32 TypeFilter)
         {
-            try
+            //try
+            //{
+            string _studentid = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(_studentid);
+            if (student == null)
             {
-                string _studentid = User.Claims.GetClaimByType("UserID").Value;
-                var student = _studentService.GetItemByID(_studentid);
-                if (student == null)
-                {
-                    return Json("Không tìm thấy học viên.");
-                }
-
-                var center = _centerService.GetItemByCode(basis);
-                if (center == null)
-                {
-                    return Json("Cơ sở không tồn tại.");
-                }
-
-                if (student.JoinedClasses.Count == 0)
-                {
-                    return Json("Sinh viên chưa có trong lớp.");
-                }
-
-                var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
-                if (lclass.Count() == 0)
-                {
-                    return Json("lclass = 0");
-                }
-
-                lclass = lclass.ToList().Where(x => x.ClassMechanism != CLASS_MECHANISM.PERSONAL);
-
-                var data = new Dictionary<String, Object>();
-                for (Int32 i = 0; i < lclass.Count(); i++)
-                {
-                    var @class = lclass.ElementAtOrDefault(i);
-                    if (@class == null) continue;
-                    var total_students = _studentService.CountByClass(@class.ID);
-                    var a = GetClassSubjectSummary(@class, student, total_students);
-                    data.Add(@class.ID,a);
-                }
-                return new JsonResult(data);
+                return Json("Không tìm thấy học viên.");
             }
-            catch (Exception ex)
+
+            var center = _centerService.GetItemByCode(basis);
+            if (center == null)
             {
-                return new JsonResult(ex.Message);
+                return Json("Cơ sở không tồn tại.");
             }
+
+            if (student.JoinedClasses.Count == 0)
+            {
+                return Json("Sinh viên chưa có trong lớp.");
+            }
+
+            var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
+            if (lclass.Count() == 0)
+            {
+                return Json("lclass = 0");
+            }
+
+            lclass = lclass.ToList().Where(x => x.ClassMechanism != CLASS_MECHANISM.PERSONAL);
+
+            var data = new Dictionary<String, Object>();
+            for (Int32 i = 0; i < lclass.Count(); i++)
+            {
+                var @class = lclass.ElementAtOrDefault(i);
+                if (@class == null) continue;
+                var total_students = _studentService.CountByClass(@class.ID);
+                var a = GetClassSubjectSummary(@class, student, total_students);
+                data.Add(@class.ID, a);
+            }
+            return new JsonResult(data);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return new JsonResult(ex.Message);
+            //}
         }
 
-        private Dictionary<String,Object> GetClassSubjectSummary(ClassEntity @class, StudentEntity Student, long total_students)
+        private Dictionary<String, Object> GetClassSubjectSummary(ClassEntity @class, StudentEntity Student, long total_students)
         {
             Dictionary<String, Object> data_response = new Dictionary<String, Object>();
             var data = new List<StudentSummaryViewModel>();
@@ -374,7 +374,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 //var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.ClassSubjectID == sbj.ID && (o.StartDate != new DateTime() || o.EndDate != new DateTime()) && o.StartDate <= DateTime.Now).ToList();
                 //var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
                 //var activeProgress = _lessonProgressService.CreateQuery().Find(x => x.StudentID == Student.ID && activeLessonIds.Contains(x.LessonID) && x.LastDate <= DateTime.Now).ToList();
-                index = index+1;
+                index = index + 1;
                 if (sbj.TypeClass != CLASSSUBJECT_TYPE.EXAM)
                 {
                     result = _progressHelper.GetLessonProgressList(sbj.StartDate, DateTime.Now, Student, sbj).Result;
@@ -427,7 +427,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     //{
                     //    var a = _lessonProgressService.CreateQuery().Find(x => activeLessonIds.Contains(x.LessonID)).ToList();
                     //}
-                    var exam = _lessonProgressService.CreateQuery().Find(x => activeLessonIds.Contains(x.LessonID)).ToList().GroupBy(x=>x.Multiple).Select(x=>new { Multiple = x.Key,ListPoint = x.ToList().Where(y=>y.Tried > 0).Select(y=>y.LastPoint).ToList() });
+                    var exam = _lessonProgressService.CreateQuery().Find(x => activeLessonIds.Contains(x.LessonID)).ToList().GroupBy(x => x.Multiple).Select(x => new { Multiple = x.Key, ListPoint = x.ToList().Where(y => y.Tried > 0).Select(y => y.LastPoint).ToList() });
                     var summary = new MappingEntity<ClassSubjectProgressEntity, StudentSummaryExamViewModel>()
                         .AutoOrtherType(_classSubjectProgressService.GetItemByClassSubjectID(sbj.ID, Student.ID) ?? new ClassSubjectProgressEntity
                         {
@@ -445,9 +445,9 @@ namespace BaseCustomerMVC.Controllers.Student
                     var Multiple1 = exam.Where(x => x.Multiple == 1).FirstOrDefault();
                     var Multiple2 = exam.Where(x => x.Multiple == 2).FirstOrDefault();
                     var Multiple3 = exam.Where(x => x.Multiple == 3).FirstOrDefault();
-                    summary.Multiple1 = Multiple1 == null ? 0 : Multiple1.ListPoint.Average();
-                    summary.Multiple2 = Multiple2 == null ? 0 : Multiple2.ListPoint.Average();
-                    summary.Multiple3 = Multiple3 == null ? 0 : Multiple3.ListPoint.Average();
+                    summary.Multiple1 = Multiple1 == null || Multiple1.ListPoint != null ? 0 : Multiple1.ListPoint.Average();
+                    summary.Multiple2 = Multiple2 == null || Multiple2.ListPoint != null ? 0 : Multiple2.ListPoint.Average();
+                    summary.Multiple3 = Multiple3 == null || Multiple3.ListPoint != null ? 0 : Multiple3.ListPoint.Average();
 
                     if (string.IsNullOrEmpty(summary.CourseName))
                     {
@@ -465,8 +465,8 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
             }
 
-            data_response.Add("Practice",data);
-            data_response.Add("Exam",dataExam);
+            data_response.Add("Practice", data);
+            data_response.Add("Exam", dataExam);
             return data_response;
         }
 
@@ -575,7 +575,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return new JsonResult(response);
         }
 
-        public JsonResult GetDetailCourse(String basis,String ClassSubjectID,Boolean HasExam = false)
+        public JsonResult GetDetailCourse(String basis, String ClassSubjectID, Boolean HasExam = false)
         {
             try
             {
