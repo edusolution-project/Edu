@@ -569,7 +569,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Data",null },
                         {"Error", "Không tìm thấy lịch học" }
                     });
-                
+                var oldLesson = _lessonService.GetItemByID(oldItem.LessonID);
+                if(oldLesson == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy bài kiểm tra" }
+                    });
+                }
+                if(oldLesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    oldItem.IsHideAnswer = true;
+                }
                 oldItem.StartDate = entity.StartDate.ToUniversalTime();
                 oldItem.EndDate = entity.EndDate.ToUniversalTime();
 

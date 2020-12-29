@@ -502,7 +502,9 @@ namespace BaseCustomerMVC.Controllers.Student
             if (currentStudent == null || currentStudent.JoinedClasses == null || currentStudent.JoinedClasses.Count == 0)
                 return Json(new { });
 
-            var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
+            var @class = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Where(x => x.IsActive && x.EndDate >= DateTime.Now).ToList();
+            var classids = @class.Select(t => t.ID).ToList();
+            //var classids = _service.GetItemsByIDs(currentStudent.JoinedClasses, center.ID).Select(t => t.ID).ToList();
 
             if (classids == null || classids.Count == 0)
                 return Json(new { });
