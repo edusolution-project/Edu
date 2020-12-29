@@ -2456,7 +2456,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var scale = 100;
                         if (img.Width > 0 && img.Height > 0)
                         {
-
                             if (img.Width / img.Height > maxWidth / maxHeight)
                             {
                                 if (img.Width > maxWidth)
@@ -2472,9 +2471,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     else
                     {
-                        var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, null);
-                        ole.Width = maxWidth;
-                        ole.Height = maxHeight;
+                        Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(objPath);
+                        var byteIcon = IconToBytes(icon);
+                        Document document = new Document();
+                        Section section = document.AddSection();
+                        Paragraph p = section.AddParagraph();
+                        //DocPicture Pic = p.AppendPicture(byteIcon);
+                        DocPicture Pic = p.AppendPicture(FileProcess.ImageToByteArray(Image.FromFile($"{StaticPath}\\images\\default-Icon-File.png.jpg")));
+                        Pic.Width = 100;
+                        Pic.Height = 50;
+                        if (ext.Contains("audio"))
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
+                            ole.Width = Pic.Width;
+                            ole.Height = Pic.Height;
+                        }
+                        else if(ext.Contains("video"))
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic, OleObjectType.VideoClip);
+                            ole.Width = maxWidth;
+                            ole.Height = maxHeight;
+                        }    
+                        else
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
+                            ole.Width = maxWidth;
+                            ole.Height = maxHeight;
+                        }
                     }
                 }
             }
@@ -2483,6 +2506,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //break part
             s.AddParagraph();
+        }
+
+        private static byte[] IconToBytes(Icon icon)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                icon.Save(ms);
+                return ms.ToArray();
+            }
         }
 
         private string RenderTQuizForWord(LessonPartEntity lessonPart, out string answer)

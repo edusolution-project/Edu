@@ -163,8 +163,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 var retClassSbj = new List<ClassSubjectViewModel>();
 
                 var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate.AddDays(1) >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
-
-                foreach (var _class in lclass.ToList())
+                var lclasses = lclass.Where(x => x.IsActive && x.EndDate >= DateTime.Now).ToList();
+                foreach (var _class in lclasses.ToList())
+                //foreach (var _class in lclass.ToList())
                 {
                     var csbjs = _classSubjectService.GetByClassID(_class.ID).AsEnumerable();
                     if (!string.IsNullOrEmpty(SubjectID))

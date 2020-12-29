@@ -440,8 +440,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID);
-                var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).OrderByDescending(x => x.Number).FirstOrDefault();
+                var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
+                    new ExamEntity
+                    {
+                        StudentID = x.Key,
+                        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID
+                    }
+                );
+                //var test = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x => x.StudentID);
+                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).OrderByDescending(x => x.Number).FirstOrDefault();
                 //if (exams == null || exams.Count() == 0)
                 if (exams == null)
                 {
@@ -453,11 +460,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                         );
                 }
-                //var examIDs = exams.Select(x => x.ID).ToList();
-                var examIDs = exams.ID;
+                var examIDs = exams.Select(x => x.ID).ToList();
+                //var examIDs = exams.ID;
 
                 //var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
-                var detailExams = _examDetailService.GetByExamID(examIDs).ToList().GroupBy(x => x.LessonPartID);
+                var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
                 var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
                 var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title }).ToList();
                 var result = detailExams.ToList().Select(x =>
