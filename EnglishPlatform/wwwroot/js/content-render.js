@@ -3003,7 +3003,7 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
-            $('.top-menu[for=lesson-info]').remove();
+            $('.top-menu[for=lesson-info]').hide();
             ////fix tạm thời
             //if (!isContinue) {
             //    $('#leftCol').addClass('hide');
@@ -3097,6 +3097,8 @@ var Lesson = (function () {
                     setLocalData("CurrentExam", data.Data.ID);
 
                     renderExamDetail();
+
+                    $('.top-menu[for=lesson-info]').show();
 
                     //console.log(data);
                     if (data.Data.Timer > 0) {
