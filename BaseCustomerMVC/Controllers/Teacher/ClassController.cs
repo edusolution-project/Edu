@@ -422,14 +422,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var progessExam = progess.ToList().Where(x => listIdsExam.Contains(x.LessonID) && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { StudentID = x.Key, Point = x.ToList().Sum(y => y.LastPoint) / listIdsExam.Count() });
 
             var data = new List<StudentSummaryViewModel>();
-            var dataResult = progess.ToList().GroupBy(x => x.StudentID).Select(x =>
-            new StudentSummaryViewModel
-            {
-                StudentID = x.Key,
-                FullName = students.Where(y => y.ID == x.Key).FirstOrDefault().FullName,
-                PracticeAvgPoint = listIdsPractice.Count() > 0 ? x.ToList().Where(y => listIdsPractice.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsPractice.Count() : 0,
-                AvgPoint = listIdsExam.Count() > 0 ? x.ToList().Where(y => listIdsExam.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsExam.Count() : 0
-            });
+            //var _dataResult = progess.ToList().GroupBy(x => x.StudentID).Select(x =>
+            //new StudentSummaryViewModel
+            //{
+            //    StudentID = x.Key,
+            //    FullName = students.Where(y => y.ID == x.Key).FirstOrDefault().FullName,
+            //    PracticeAvgPoint = listIdsPractice.Count() > 0 ? x.ToList().Where(y => listIdsPractice.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsPractice.Count() : 0,
+            //    AvgPoint = listIdsExam.Count() > 0 ? x.ToList().Where(y => listIdsExam.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsExam.Count() : 0
+            //});
+
+            var dataResult = from p in progess.ToList()
+                             group p by p.StudentID
+                             into g
+                             let student = students.Where(x => x.ID == g.Key).FirstOrDefault()
+                             let countPratice = listIdsPractice.Count()
+                             let countExam = listIdsExam.Count()
+                             let sumLastPointPractice = g.ToList().Where(x => listIdsPractice.Contains(x.LessonID)).Sum(x => x.LastPoint)
+                             let sumLastPointExam = g.ToList().Where(x => listIdsExam.Contains(x.LessonID)).Sum(x => x.LastPoint)
+                             select new StudentSummaryViewModel
+                             {
+                                 StudentID = g.Key,
+                                 FullName = student == null ? "" : student.FullName,
+                                 PracticeAvgPoint = countPratice > 0 ? sumLastPointPractice / countPratice : 0,
+                                 AvgPoint = countExam > 0 ? sumLastPointExam / countExam : 0
+                             };
 
             if (dataResult.Count() != students.Count())
             {
@@ -1562,7 +1578,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     {"Error", "Không tìm thấy lớp" }
                 });
-
+                
                 oldData.Updated = DateTime.UtcNow;
                 var mustUpdateName = false;
                 if (oldData.Name != item.Name)
@@ -1574,6 +1590,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.StartDate = item.StartDate.ToUniversalTime();
                 oldData.EndDate = item.EndDate.ToUniversalTime();
                 oldData.Description = item.Description;
+                if (item.EndDate <= DateTime.Now)
+                {
+                    oldData.IsActive = false;
+                }
                 //_service.Save(oldData);
 
                 oldData.Skills = new List<string>();
@@ -3128,6 +3148,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
+                                    //ExamDetailID = examview.Details.Count > 0 ? examview.Details.FirstOrDefault().ID : "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
                                     MaxPoint = z.Point
                                 }))?.ToList()
