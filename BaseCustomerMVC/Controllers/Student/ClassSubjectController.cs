@@ -407,11 +407,15 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var data = new List<StudentSummaryViewModel>();
-            for (int i = 0; i < practiceResult.Count(); i++)
+            var a = practiceResult.GroupBy(x => x.ClassID);
+            foreach(var item in a)
             {
-                var item = practiceResult.ElementAtOrDefault(i);
-                item.Order = i + 1;
-                data.Add(item);
+                for (int i = 0; i < item.Count(); i++)
+                {
+                    var _item = item.ElementAtOrDefault(i);
+                    _item.Order = i + 1;
+                    data.Add(_item);
+                }
             }
             Dictionary<String, Object> data_response = new Dictionary<String, Object>();
             data_response.Add("Practice", data);
