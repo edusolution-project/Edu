@@ -187,6 +187,7 @@ var ExamReview = (function () {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;
                 var title = "Làm đúng";
                 var _class = "success";
+              debugger
                 if (item.TypeAnswer != "ESSAY") {
                     // câu trắc nghiệm
                     if (detail) {
@@ -213,6 +214,7 @@ var ExamReview = (function () {
                 } else {
                     if (detail) {
                         console.log(item);
+                        debugger
                         if (item.RealAnswerEssay || item.PointEssay >= 0) {
                             _class = "essay success";
                             if (item.PointEssay <= 0) {
@@ -1087,6 +1089,7 @@ var ExamReview = (function () {
                     html += renderMediaAnswer(mediaFile);
                 }
                 html += '</div>'
+                debugger
                 var textBtn = ((content == null || content == '') && point == 0) ? "chấm điểm" : "chấm lại";
                 var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
 

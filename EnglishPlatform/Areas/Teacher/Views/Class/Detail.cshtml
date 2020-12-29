@@ -1358,7 +1358,6 @@
                         .then(response => {
                             var _data = response.data.Data;
                             _that.classSubjects = [];
-                            //console.log(_that.classSubject)
                             _data.forEach(function (item, k) {
                                 //debugger
                                 _that.classSubjects.push({
@@ -1373,21 +1372,12 @@
                                     Lessons: [],
                                     TypeClass:item.TypeClass
                                 });
-                                //loadContent(item.ID);
-                                //_that.changeAddSubject(item)
-                                //_that.changeAddGrade(item)
                                 if (item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM)
                                     loadContent(item.ID);
                             })
 
                             _that.init = true;
                         }).catch(e => { });
-
-                    //this.$forceUpdate();
-                    //this.$nextTick(function () {
-                    //    console.log($(".list.ls-practice > li > .inner > .parent"));
-                    //    $(".list.ls-practice > li > .inner > .parent").click();
-                    //});
                 },
                 loadContent(subject, chapter) {
 
@@ -1871,6 +1861,8 @@
                     var filter = this.list_lessons.filter((p) => {
                         return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
                     })
+                    if (filter.length > 0)
+                    debugger
                     return filter;
                 },
                 filterResult(obj) {

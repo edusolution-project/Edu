@@ -475,17 +475,17 @@ namespace BaseCustomerMVC.Controllers.Admin
         #endregion
 
         #region uploadimg
-        public JsonResult GetPathIMG(IFormFile Thumbnail)
+        public JsonResult GetPathIMG(IFormFile Thumbnail,IFormFile upload,String ckCsrfToken)
         {
             try
             {
-                if (Thumbnail != null)
+                if (upload != null)
                 {
-                    var filepath = urlThumbnail(Thumbnail);
+                    var filepath = urlThumbnail(upload);
                     var data = new Dictionary<String, Object>
-                {
-                    { "FilePath", filepath }
-                };
+                        {
+                            { "FilePath", filepath }
+                        };
                     return Json(data);
                 }
                 else { return Json("loi"); }
