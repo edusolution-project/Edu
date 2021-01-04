@@ -252,8 +252,8 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             //try
             //{
-            var currentClass = _classSubjectService.GetItemByID(ID);
-            if (currentClass == null)
+            var currentCs = _classSubjectService.GetItemByID(ID);
+            if (currentCs == null)
                 return new JsonResult(new Dictionary<string, object>
                     {
                         {"Error", "Không tìm thấy lớp học" }
@@ -274,16 +274,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 TopID = top.ParentID;
             }
 
-            var chapters = _chapterService.CreateQuery().Find(c => c.ClassSubjectID == currentClass.ID && c.ParentID == Parent).ToList();
-            //var chapterExtends = _chapterExtendService.Search(currentClass.ID);
+            var chapters = _chapterService.GetSubChapters(currentCs.ID, Parent);
 
-            //foreach (var chapter in chapters)
-            //{
-            //    var extend = chapterExtends.SingleOrDefault(t => t.ChapterID == chapter.ID);
-            //    if (extend != null) chapter.Description = extend.Description;
-            //}
-
-            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentClass.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
+            var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            where schedule != null
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()
@@ -291,7 +284,9 @@ namespace BaseCustomerMVC.Controllers.Student
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive
+                               IsHideAnswer = schedule.IsHideAnswer,
+                               IsActive = schedule.IsActive,
+                               IsOnline = schedule.IsOnline
                            })).ToList();
 
             var response = new Dictionary<string, object>
@@ -412,11 +407,15 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             var data = new List<StudentSummaryViewModel>();
-            for (int i = 0; i < practiceResult.Count(); i++)
+            var a = practiceResult.GroupBy(x => x.ClassID);
+            foreach(var item in a)
             {
-                var item = practiceResult.ElementAtOrDefault(i);
-                item.Order = i + 1;
-                data.Add(item);
+                for (int i = 0; i < item.Count(); i++)
+                {
+                    var _item = item.ElementAtOrDefault(i);
+                    _item.Order = i + 1;
+                    data.Add(_item);
+                }
             }
             Dictionary<String, Object> data_response = new Dictionary<String, Object>();
             data_response.Add("Practice", data);

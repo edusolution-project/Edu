@@ -547,7 +547,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                   where _cs != null
                                   let skill = _skillService.GetItemByID(_cs.SkillID)
                                   let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                                  where _subject != null
+                                  //where _subject != null
                                   let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
                                   let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
                                   select new StudentLessonScheduleViewModel
@@ -556,7 +556,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                       classID = _class.ID,
                                       className = _class.Name,
                                       classSubjectID = _cs.ID,
-                                      subjectName = _subject.Name,
+                                      subjectName = _subject == null ? "" : _subject.Name,
                                       title = _lesson.Title,
                                       lessonID = _lesson.ID,
                                       startDate = o.StartDate,

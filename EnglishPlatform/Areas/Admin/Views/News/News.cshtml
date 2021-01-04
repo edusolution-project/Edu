@@ -135,7 +135,7 @@
                             </div>
                         </div>
 
-                        <div class="form-row">
+                        @*<div class="form-row">
                             <div class="col-sm-8 form-group">
                                 <input type="text" class="form-control" id="pathImg" placeholder="Copy link ảnh tại đây">
                             </div>
@@ -148,7 +148,7 @@
                                         <label class="custom-file-label form-control">Chọn đường dẫn</label>
                                     </div>
                             </div>
-                        </div>
+                        </div>*@
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
@@ -258,7 +258,6 @@
     //})
 
     var getPathIMG = function (obj) {
-        debugger
         var file = obj.files[0];
         var form_data = new FormData();
         var _url = '/admin/News/GetPathIMG'
@@ -557,11 +556,12 @@
         for (name in CKEDITOR.instances) {
             CKEDITOR.instances[name].destroy(true);
         }
-        //CKEDITOR.replace("Content");
-        CKEDITOR.replace('Content', {
-            filebrowserBrowseUrl: '/ckfinder/ckfinder.html',
-            filebrowserUploadUrl: '/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files'
-        });
+        CKEDITOR.replace("Content");
+        //CKEDITOR.replace('Content', {
+        //    //filebrowserBrowseUrl: '/ckfinder/ckfinder.html',
+        //    //filebrowserImageUploadUrl: '/admin/News/GetPathIMG?command=QuickUpload&type=Files'
+        //    filebrowserImageUploadUrl: '/admin/News/GetPathIMG'
+        //});
 
 
         var txtarea = form.querySelector('textarea');

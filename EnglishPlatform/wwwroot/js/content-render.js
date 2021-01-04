@@ -2402,6 +2402,7 @@ var Lesson = (function () {
     }
 
     var downloadFileWordWitdData = function () {
+        debugger
         window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
     }
 

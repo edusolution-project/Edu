@@ -57,7 +57,7 @@
                         <th rowspan="2" style="width:50px">STT</th>
                         <th rowspan="2">Môn học</th>
                         <th rowspan="2" style="width:130px">Điểm luyện tập</th>
-                        <th :colspan="summaryExam.length > 0 ? summaryExam.length.length : 1" style="width:390px">Điểm kiểm tra</th>
+                        <th :colspan="summaryExam.length > 0 ? summaryExam.length : 1" style="width:390px">Điểm kiểm tra</th>
                     </tr>
                     <tr>
                         <th v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0">Bài số {{k+1}}</th>
@@ -74,17 +74,18 @@
                                 <td>---</td>
                             </template>
                             <template v-else-if="itemSummary.Order == 1">
-                                <td v-for="(item,k) in summaryExam">{{roundPoint(item.point,1)}}</td>
+                                <td v-for="(itemExam,k) in summaryExam" v-if="itemExam.classID == item.ID">{{roundPoint(itemExam.point,1)}}</td>
+                                <td v-else></td>
                             </template>
                             <template v-else>
-                                <td v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0"></td>
+                                <td v-for="(itemExam,k) in summaryExam" v-if="summaryExam.length > 0"></td>
                                 <td v-if="summaryExam.length == 0"></td>
                             </template>
                         </tr>
                         <tr style="font-weight:bold">
                             <td colspan="2">Điểm trung bình</td>
                             <td v-for="(point,x) in avgpointpractice" v-if="point.ClassID == item.ID">{{roundPoint(point.AvgPointPractice,1)}}</td>
-                            <td v-for="(point,x) in avgpointexam" v-if="point.ClassID == item.ID">{{roundPoint(point.AvgPointExam,1)}}</td>
+                            <td v-for="(point,x) in avgpointexam" v-if="point.ClassID == item.ID" :colspan="summaryExam.length > 0 ? summaryExam.length : 1">{{roundPoint(point.AvgPointExam,1)}}</td>
                         </tr>
 
                     </template>
@@ -345,6 +346,7 @@
                             _that.summaryExam = response.data.Exam;
                             _that.avgpointpractice = this.calcAveragePractice(_that.summaryData)
                             _that.avgpointexam = this.calcAverageExam(_that.summaryExam)
+                            debugger
                         }).catch(e => { })
                 },
                 getPercent(a, b) {
@@ -583,13 +585,13 @@
                             var totalLesson = 0;
                             for (var i = 0; i < obj.length; i++) {
                                 var item = obj[i];
-                                if (idclass == item.ClassID) {
-                                    totalPointExam += item.Point
+                                if (idclass == item.classID) {
+                                    totalPointExam += item.point
                                     totalLesson += 1
                                 }
                             }
                             if (totalLesson != 0) {
-                                array.push({ ClassID: idclass, AvgPointExam: (totalPointPractice / totalLesson) })
+                                array.push({ ClassID: idclass, AvgPointExam: (totalPointExam / totalLesson) })
                             }
                             else {
                                 array.push({ ClassID: idclass, AvgPointExam: "---" })

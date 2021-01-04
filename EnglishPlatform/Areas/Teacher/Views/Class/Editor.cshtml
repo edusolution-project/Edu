@@ -561,9 +561,10 @@
                 title_cPart = $("<div>", { "class": "col-md-12" });
                 title_cPart.append($("<i>", { "class": "far fa-folder mr-1 mt-1", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
                 title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm chương", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
-                title_cPart.append($("<i>", { "class": "far fa-file ml-5 mr-1 mt-1", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài kiểm tra", "onclick": "AddLesson('0'); return false;" }));
-                title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm bài kiểm tra", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài kiểm tra", "onclick": "AddLesson('0'); return false;" }));
-
+                if (data.Data.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                    title_cPart.append($("<i>", { "class": "far fa-file ml-5 mr-1 mt-1", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài kiểm tra", "onclick": "AddLesson('0'); return false;" }));
+                    title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm bài kiểm tra", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài kiểm tra", "onclick": "AddLesson('0'); return false;" }));
+                }
                 rootAction.append(title_cPart);
                 rootContent.append(rootAction);
 
