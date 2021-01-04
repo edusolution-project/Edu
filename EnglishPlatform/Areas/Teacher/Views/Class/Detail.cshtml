@@ -762,7 +762,7 @@
                         </span>
                     </template>
                 </a>
-                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
+                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
                     <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>

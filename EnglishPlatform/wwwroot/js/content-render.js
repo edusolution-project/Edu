@@ -642,6 +642,8 @@ var Lesson = (function () {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
                                 renderLectureExam(exam, false);
+                                $('li[for=lesson-info]').hide().removeClass('d-flex');
+
                             }
                             else {
                                 console.log("Load current exam....");
@@ -658,7 +660,7 @@ var Lesson = (function () {
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         $('li[for=lesson-info]').hide().removeClass('d-flex');
                                         renderLectureExam(exam, false);
-
+                                        
                                         //renderOldAnswer();
                                     }
                                     else {
@@ -3096,7 +3098,7 @@ var Lesson = (function () {
                     setLocalData("CurrentExam", data.Data.ID);
 
                     renderExamDetail();
-
+                    
                     $('.top-menu[for=lesson-info]').show();
 
                     //console.log(data);
