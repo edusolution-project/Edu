@@ -1629,8 +1629,8 @@ var Lesson = (function () {
 
                 switch (config.mod) {
                     case mod.TEACHERVIEW:
-                        //case mod.TEACHERPREVIEW:
-                        //case mod.TEACHERPREVIEWEXAM:
+                    case mod.TEACHERPREVIEW:
+                    case mod.TEACHERPREVIEWEXAM:
                         break;
                     default:
                         var quiz = prevHolder.data("questionId");
@@ -2345,6 +2345,7 @@ var Lesson = (function () {
             })
         }
         else {//file word
+            debugger
             Swal.fire({
                 title: '<strong>Chọn thao tác</strong>',
                 icon: 'question',
@@ -2373,6 +2374,7 @@ var Lesson = (function () {
     }
 
     var chooseQuestionFile = function (obj, type) {
+        debugger
         $(obj).siblings('input').unbind().change(function (e) {
             uploadQuestionFile(e, type);
         });
@@ -2389,6 +2391,8 @@ var Lesson = (function () {
             xhr.open('POST', config.url.import_quiz);
         }
         else {//file word
+            var a = config.url.import_quiz_with_word;
+            debugger
             xhr.open('POST', config.url.import_quiz_with_word);
         }
         xhr.send(formData);
@@ -2564,13 +2568,13 @@ var Lesson = (function () {
     var goQuiz = function (quizid, obj, scroll = true) {
         var _quiz = $('#' + quizid);
         var _partid = _quiz.attr('data-part-id');
-        //console.log(quizid);
+        console.log(quizid);
         var _part = $('.tab-pane#pills-part-' + _partid);
 
         var part = _part[0];
         if (part != null) {
             var el = part.querySelector("[id='" + quizid + "']");
-            //console.log(el.classList);
+            console.log(el.classList);
             if (!part.classList.contains("active")) {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
@@ -3825,20 +3829,6 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
-
-        if (!isOvertime) {
-            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
-            if (undoneQuiz > 0) {
-                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
-
-                }
-                else {
-                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
-                    return false;
-                }
-            }
-        }
-
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
             while (__answer_sending) {
@@ -3976,7 +3966,7 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4284,10 +4274,6 @@ var Lesson = (function () {
                         });
                         //alert(err);
                     });
-            }
-            else {
-                //console.log('#quiznav' + questionId);
-                $('#quizNav' + questionId).addClass('completed');
             }
         }
     }
@@ -4776,8 +4762,18 @@ var Lesson = (function () {
                         containerCourse.append(ulselectChapterTemplate);
                         for (var i = 0; i < chapters.length; i++) {
                             var chapter = chapters[i];
-                            $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
-
+                            if (chapter.ParentID == "0") {
+                                $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
+                            else {
+                                var containerSubChapter = $("#" + chapter.ParentID);
+                                var firstChilSub = containerSubChapter.children()[0];
+                                var ulselectSubChapterTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectSubChapter" });
+                                containerSubChapter.empty()
+                                containerSubChapter.append(firstChilSub);
+                                containerSubChapter.append(ulselectSubChapterTemplate)
+                                $(ulselectSubChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
                             var containerLesson = $("#" + chapter.ID);
                             var firstChil = containerLesson.children()[0];
                             var ulselectLessonTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectLesson" });
@@ -4878,35 +4874,17 @@ var Lesson = (function () {
                     containerLessonPart.empty();
                     containerLessonPart.append(firstChild);
                     containerLessonPart.append(ulselectLessonPartTemplate);
+                    var count = 0
                     for (var i = 0; i < data.length; i++) {
                         var lessonPart = data[i];
-                        if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4"))
+                        if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4")) {
                             $(ulselectLessonPartTemplate).append('<li style="padding:5px 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 14px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
-
-                        //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
-                        //$(modalForm).append(selectLessonPartTemplate);
-                        //$(selectLessonPartTemplate).append("<option value=''>--- Chọn bài ---</option>");
-                        //var html='';
-                        //for (var i = 0; i < data.length; i++) {
-                        //    var item = data[i];
-                        //    switch (item.Type) {
-                        //        case 'QUIZ1': //trac nghiem
-                        //        case 'QUIZ3':
-                        //        case 'QUIZ4':
-                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
-                        //            html += renderQuestiontoSelectQ(item);
-                        //            $(modalForm).append(html);
-                        //            break;
-                        //        case 'QUIZ2'://dien tu
-                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
-                        //            //html += renderQuestiontoSelectQ2(item);
-                        //            break;
-                        //        default:
-                        //    }
-                        //}
-
-                        var parentLesson = $("#" + lessonid);
-
+                            count += 1
+                        }
+                        //var parentLesson = $("#" + lessonid);
+                    }
+                    if (count == 0) {
+                        $(ulselectLessonPartTemplate).append('<li style="padding:5px 10px" class="sub-practice pt-2 pb-1 pl-2 rounded"><div style="font-size: 14px;color: red;">Bài không có các dạng câu hỏi</div></li>')
                     }
                 }
                 else {

@@ -3168,6 +3168,103 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public JsonResult GetLessonToMark(String ClassID)
+        {
+            Boolean Status = false;
+            try
+            {
+                if (String.IsNullOrEmpty(ClassID))
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin lớp học tương ứng" },
+                        {"Data",null}
+                    });
+                }
+
+                var @class = _classService.GetItemByID(ClassID);
+                if (@class == null)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin lớp học tương ứng" },
+                        {"Data",null}
+                    });
+                }
+
+                var classSbjs = _classSubjectService.CreateQuery().Find(x=>x.ClassID == @class.ID);
+                if(classSbjs == null || classSbjs.Count() == 0)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin môn học trong lớp" },
+                        {"Data",null}
+                    });
+                }
+                var classSbjIDs = classSbjs.ToList().Select(x => x.ID).ToList();
+                var lesonpartEssay = _cloneLessonPartService.GetLessonIDByTypeEssay(@class.ID, classSbjIDs);
+                var exams = from e in _examService.CreateQuery().Find(x => lesonpartEssay.Contains(x.LessonID) && x.Marked == false).ToList()
+                            group e by e.StudentID
+                            into g
+                            let exam = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+                            where exam != null
+                            select new ExamViewModel
+                            {
+                                ID = exam.ID,
+                                ClassID = exam.ClassID,
+                                ClassSubjectID = exam.ClassSubjectID,
+                                LessonID = exam.LessonID,
+                                StudentID = exam.StudentID,
+                                StudentName = _studentService.GetItemByID(exam.StudentID)?.FullName
+                            };
+                if (exams == null || exams.Count() == 0)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin bài kiểm tra." },
+                        {"Data",null}
+                    });
+                }
+
+                var lessonIDs = exams.Select(x => x.LessonID).ToList();
+                var lessons = _lessonService.CreateQuery().Find(x => lessonIDs.Contains(x.ID));
+
+                var result = from e in exams.ToList()
+                             group e by e.ClassSubjectID
+                             into g
+                             let classSbj = classSbjs.ToList().Where(x => x.ID == g.Key).FirstOrDefault()
+                             let lesson = lessons.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
+                             select new LessonToMarkVM
+                             {
+                                 classSubjectID = g.Key,
+                                 CourseName = classSbj == null ? "": classSbj.CourseName,
+                                 ListLesson = lesson == null ? new List<LessonEntity>() : lesson,
+                                 ListExam = g == null ?  new List<ExamViewModel>() : g.ToList(),
+                                 Image = classSbj == null ? "" : classSbj.Image,
+                                 TeacherID = classSbj.TeacherID
+                             };
+
+                return Json(new Dictionary<String, Object> {
+                        {"Status",true },
+                        {"Error",null },
+                        {"Data",result }
+                    });
+            }
+            catch(Exception ex)
+            {
+                Status = false;
+                return Json(new Dictionary<String, Object> {
+                    {"Status",Status },
+                    {"Error",ex.Message },
+                    {"Data",null}
+                });
+            }
+        }
+
         private class StudentResult
         {
             public string StudentID { get; set; }
@@ -3182,6 +3279,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public int TotalLesson { get; set; }
             public int TotalPractice { get; set; }
             public Boolean isExam { get; set; }
+        }
+
+        private class LessonToMarkVM
+        {
+            public String classSubjectID { get; set; }
+            public String CourseName { get; set; }
+            public List<LessonEntity> ListLesson { get; set; }
+            public List<ExamViewModel> ListExam { get; set; }
+            public String TeacherName { get; set; }
+            public String TeacherID { get; set; }
+            public String Image { get; set; }
+            public String Color { get; set; }
         }
 
         #region File Excel
