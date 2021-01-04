@@ -440,16 +440,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
-                var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
-                    new ExamEntity
-                    {
-                        StudentID = x.Key,
-                        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID
-                    }
-                );
-                //var test = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x => x.StudentID);
-                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).OrderByDescending(x => x.Number).FirstOrDefault();
-                //if (exams == null || exams.Count() == 0)
+                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
+                //    new ExamVM
+                //    {
+                //        StudentID = x.Key,
+                //        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID,
+                //        LessonID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().LessonID,
+                //        ClassSubjectID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassSubjectID,
+                //        TotalLearn = x.ToList().Count,
+                //        ClassID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassID,
+                //    }
+                //);
+
+                var exams = from e in _service.GetItemByLessonScheduleID(LessonScheduleID)
+                           group e by e.StudentID
+                             into g
+                           let item = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+                           select new ExamVM
+                           {
+                               StudentID = g.Key,
+                               StudentName = _studentService.GetItemByID(g.Key).FullName,
+                               TotalLearn = item == null ? 0 : item.Number,
+                               LastPoint = item == null ? 0 : (item.Point == 0 ? 0 : (item.Point * 100) / item.MaxPoint),
+                               Created = item?.Created ?? new DateTime(1900, 1, 1),
+                               ID = item.ID,
+                               Status = item.Status
+                           };
                 if (exams == null)
                 {
                     return Json(
@@ -460,28 +476,70 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                         );
                 }
-                var examIDs = exams.Select(x => x.ID).ToList();
-                //var examIDs = exams.ID;
 
-                //var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
+                var examIDs = exams.Select(x => x.ID).ToList();
                 var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
                 var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
-                var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title }).ToList();
-                var result = detailExams.ToList().Select(x =>
-                new
+                var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title,Type = x.Type }).ToList();
+                //if(examIDs.Count() == 0)
+                //{
+                //    var result1 = new {
+                //        ExamID = "",
+                //        TitleLessonPart = "",
+                //        CountFalse = 1,
+                //        CountTrue = 0,
+                //        TotalAns = 1
+                //    };
+                //    return Json(
+                //        new Dictionary<String, Object>
+                //        {
+                //            {"Status",true },
+                //            {"Data",result1 },
+                //            {"DetailLesson",exams }
+                //        }
+                //    );
+                //}
+
+                List<ExamDetailEntity> listDetailExams = new List<ExamDetailEntity>();
+                foreach(var item in _examDetailService.GetByExamIDs(examIDs).ToList())
                 {
-                    x.Key,
-                    TitleLessonPart = listLessonPart.Where(y=>y.ID == x.Key).FirstOrDefault().Title,
-                    CountFalse = x.ToList().FindAll(y => y.RealAnswerID != y.AnswerID).Count,
-                    CountTrue = x.ToList().FindAll(y => y.RealAnswerID == y.AnswerID).Count,
-                    TotalAns = x.ToList().Count
-                }).ToList();
+                    var cloneLessonPart = listLessonPart.Where(x=>x.ID == item.LessonPartID).FirstOrDefault();
+                    //if (item.LessonPartID == "5f6b11892618882ab86de2f2") { var test1 = ""; }
+                    if(cloneLessonPart.Type == "QUIZ2")
+                    {
+                        if(item.AnswerValue != item.RealAnswerValue)
+                        {
+                            item.AnswerID = "1";
+                            item.RealAnswerID = "2";
+                        }
+                        else
+                        {
+                            item.AnswerID = item.RealAnswerID;
+                        }
+                    }
+                    listDetailExams.Add(item);
+                }
+
+                //var result = from d in _examDetailService.GetByExamIDs(examIDs).ToList()
+                var result = from d in listDetailExams
+                             group d by d.LessonPartID
+                              into g
+                              let detailExams1 = g
+                              select new
+                              {
+                                  ExamID = g.FirstOrDefault().ExamID,
+                                  TitleLessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault().Title,
+                                  CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID ).Count(),
+                                  CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID ).Count(),
+                                  TotalAns = g.Count()
+                              };
 
                 return Json(
                         new Dictionary<String, Object>
                         {
                             {"Status",true },
-                            {"Data",result }
+                            {"Data",result },
+                            {"DetailLesson",exams }
                         }
                     );
             }
@@ -495,6 +553,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     );
             }
+        }
+
+        protected class ExamVM : ExamEntity
+        {
+            public String StudentName { get; set; }
+            public Int32 TotalLearn { get; set; }
         }
 
         //private void GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj, List<StudentLessonResultViewModel> result)

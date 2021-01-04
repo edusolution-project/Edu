@@ -48,7 +48,7 @@
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
                 <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
             </div>
-            <div class="col-12 col-md-2 ml-auto text-md-right">
+            <div class="col-12 col-md-4 ml-auto text-md-right">
                 <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
                 <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
                 @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@

@@ -4720,8 +4720,6 @@ var Lesson = (function () {
     }
 
     var chooseCourse = function (id, obj) { //chương
-        //var modalForm = window.partModaltoAddExam;
-        //var id = $("#chooseCourse").val();
         var containerCourse = $("#" + id);
         var child = containerCourse.children()[0];
         var classi = $(obj).attr("class");
@@ -4751,28 +4749,29 @@ var Lesson = (function () {
                         containerCourse.append(ulselectChapterTemplate);
                         for (var i = 0; i < chapters.length; i++) {
                             var chapter = chapters[i];
-                            $(ulselectChapterTemplate).append('<li style="padding: 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div style="font-size: 16px"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
-
+                            if (chapter.ParentID == "0") {
+                                $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
+                            else {
+                                var containerSubChapter = $("#" + chapter.ParentID);
+                                var firstChilSub = containerSubChapter.children()[0];
+                                var ulselectSubChapterTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectSubChapter" });
+                                containerSubChapter.empty()
+                                containerSubChapter.append(firstChilSub);
+                                containerSubChapter.append(ulselectSubChapterTemplate)
+                                $(ulselectSubChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
                             var containerLesson = $("#" + chapter.ID);
                             var firstChil = containerLesson.children()[0];
                             var ulselectLessonTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectLesson" });
                             containerLesson.empty();
                             containerLesson.append(firstChil);
                             containerLesson.append(ulselectLessonTemplate);
-                            if (lessons.length > 0) {
-                                for (var j = 0; j < lessons.length; j++) {
-                                    var lesson = lessons[j];
-                                    if (lesson.ChapterID == chapter.ID) {
-                                        $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lesson.ID + '"></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"></i></div></li>')
-                                    }
-                                    else {
-                                        //alert("Chưa có nội dung");
-                                        continue;
-                                    }
+                            for (var j = 0; j < lessons.length; j++) {
+                                var lesson = lessons[j];
+                                if (lesson.ChapterID == chapter.ID) {
+                                    $(ulselectLessonTemplate).append('<li class="sub-practice pt-3 pb-1 pl-2" id="' + lesson.ID + '"></i><div class="pb-1"><span style="cursor:pointer" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1"></i></span></div></li>')
                                 }
-                            }
-                            else {
-                                $(ulselectLessonTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" ></i><div style="font-size: 16px"><i class="ic far fa-file-alt mr-2"></i>Chưa có bài</div></li>')
                             }
                         }
 

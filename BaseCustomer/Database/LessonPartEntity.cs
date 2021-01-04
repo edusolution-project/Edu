@@ -70,7 +70,7 @@ namespace BaseCustomerEntity.Database
                                 .SortBy(q => q.Order)
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
-
-
+    
+    
     }
 }
