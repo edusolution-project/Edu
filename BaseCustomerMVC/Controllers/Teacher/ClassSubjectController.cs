@@ -32,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonProgressService _lessonProgressService;
+        private readonly ClassService _classService;
 
         private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
@@ -53,7 +54,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             ExamService examService,
             ChapterService chapterService,
-            LessonProgressService lessonProgressService
+            LessonProgressService lessonProgressService,
+            ClassService classService
             )
         {
             _gradeService = gradeservice;
@@ -67,6 +69,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _lessonProgressService = lessonProgressService;
             _examService = examService;
+            _classService = classService;
 
             _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
@@ -81,6 +84,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacherID = "";
             if (User.IsInRole("teacher"))
                 teacherID = User.Claims.GetClaimByType("UserID").Value;
+
+            var @class = _classService.GetItemByID(ClassID);
+            if(@class == null)
+            {
+                return Json("Lop khong ton tai");
+            }
+
+            var watch1 = new System.Diagnostics.Stopwatch();
+            var watch2 = new System.Diagnostics.Stopwatch();
+            watch1.Start();
+            var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x=>new {x.ID,x.ClassSubjectID }).ToList();
+            watch1.Stop();
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
@@ -90,6 +105,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                           let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}
                           let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
+                          let countActiveLesson = activeLesson.Any(x=>x.ClassSubjectID == r.ID)
                           select new ClassSubjectViewModel
                           {
                               ID = r.ID,
@@ -105,10 +121,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseName = string.IsNullOrEmpty(course.Name) ? skill?.Name : course.Name,
                               TeacherID = r.TeacherID,
                               TeacherName = teacher.FullName,
-                              TypeClass = r.TypeClass
+                              TypeClass = r.TypeClass,
+                              HasLessonActive = countActiveLesson
                           }).ToList()
                 },
             };
+            watch2.Stop();
             return new JsonResult(response);
         }
 

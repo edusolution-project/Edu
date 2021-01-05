@@ -50,5 +50,7 @@ namespace BaseCustomerMVC.Models
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
         public DateTime EndDate { get; set; }
+        [JsonProperty("HasLessonActive")]
+        public Boolean HasLessonActive { get; set; }
     }
 }
