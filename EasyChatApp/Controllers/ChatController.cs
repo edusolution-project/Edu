@@ -22,6 +22,7 @@ namespace EasyChatApp.Controllers
     public class ChatController : Controller
     {
         const string SYSTEM_EDUSO = "sytem_eduso";
+        const string CSKH_EDUSO = "cskh_eduso";
         private readonly IHubContext<EasyChatHub> _hubContext;
         private readonly ILog _log;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -29,10 +30,14 @@ namespace EasyChatApp.Controllers
         private readonly MessagerService _messagerService;
         private readonly IConfiguration _configuration;
         private readonly GroupAndUserService _groupAndUserService;
-        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext , IConfiguration configuration
-            , GroupUserService  groupUserService
+        private readonly StudentService _studentService;
+        private readonly TeacherService _teacherService;
+        public ChatController(ILog log, IRoxyFilemanHandler roxyFilemanHandler, IHubContext<EasyChatHub> hubContext, IConfiguration configuration
+            , GroupUserService groupUserService
             , MessagerService messagerService,
-            GroupAndUserService groupAndUserService)
+            GroupAndUserService groupAndUserService,
+            StudentService studentService,
+            TeacherService teacherService)
         {
             this._log = log;
             _roxyFilemanHandler = roxyFilemanHandler;
@@ -41,6 +46,8 @@ namespace EasyChatApp.Controllers
             _messagerService = messagerService;
             _configuration = configuration;
             _groupAndUserService = groupAndUserService;
+            _studentService = studentService;
+            _teacherService = teacherService;
         }
         /// <summary>
         /// 
@@ -62,7 +69,7 @@ namespace EasyChatApp.Controllers
             {
                 if (model.user == SYSTEM_EDUSO || model.receiver == SYSTEM_EDUSO)
                 {
-                    MessagerEntity item = new MessagerEntity() { IsPublic = model.receiver == SYSTEM_EDUSO, Content = model.message,Sender = model.user };
+                    MessagerEntity item = new MessagerEntity() { IsPublic = model.receiver == SYSTEM_EDUSO, Content = model.message, Sender = model.user };
                     var group = model.user == model.receiver ? null : _groupUserService.GetGroupPrivate(model.user, model.receiver);
                     item.GroupId = group == null ? null : group.ID;
                     var medias = _roxyFilemanHandler.UploadFileWithGoogleDrive(model.center, model.user, HttpContext);
@@ -90,7 +97,7 @@ namespace EasyChatApp.Controllers
                     response.Code = 200;
                     response.Data = item;
                     response.Message = "SUCCESS";
-                    if(model.user == SYSTEM_EDUSO)
+                    if (model.user == SYSTEM_EDUSO)
                     {
                         if (model.receiver == SYSTEM_EDUSO)
                         {
@@ -107,7 +114,7 @@ namespace EasyChatApp.Controllers
                             }
                         }
                     }
-                    
+
                 }
                 else
                 {
@@ -163,26 +170,26 @@ namespace EasyChatApp.Controllers
                     response.Message = "SUCCESS";
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 response.Code = 500;
                 response.Message = ex.Message;
                 response.Data = null;
             }
             return response;
-        } 
+        }
         [HttpPost]
         public async Task<Response> RemoveMessage(string user, string messageId)
         {
             Response response = new Response();
             try
             {
-                if (string.IsNullOrEmpty(user)) { return new Response() { Code= 405,Message= "not permission" }; }
+                if (string.IsNullOrEmpty(user)) { return new Response() { Code = 405, Message = "not permission" }; }
                 if (string.IsNullOrEmpty(messageId)) { return new Response() { Code = 404, Message = "not found data" }; }
                 var message = _messagerService.GetItemByID(messageId);
-                if(message != null)
+                if (message != null)
                 {
-                    if(message.Sender == user)
+                    if (message.Sender == user)
                     {
                         message.IsDel = true;
                         _messagerService.CreateOrUpdate(message);
@@ -215,7 +222,7 @@ namespace EasyChatApp.Controllers
                                 }
                             }
                         }
-                        
+
                         return response;
                     }
                     else
@@ -251,7 +258,7 @@ namespace EasyChatApp.Controllers
                     response.Code = 200;
                     response.Message = "SUCCESS";
                     //thoi diem hien tai ve sau
-                    var listData = _messagerService.CreateQuery().Find(o => o.IsDel == false &&((o.GroupId == groupName && o.IsPublic == false) || (o.Sender == SYSTEM_EDUSO && o.IsPublic == true)))?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
+                    var listData = _messagerService.CreateQuery().Find(o => o.IsDel == false && ((o.GroupId == groupName && o.IsPublic == false) || (o.Sender == SYSTEM_EDUSO && o.IsPublic == true)))?.SortByDescending(o => o.Time)?.Skip(pageSize * pageIndex)?
                         .Limit(pageSize)?.ToList()?.OrderBy(o => o.Time)?.ToList();
 
                     response.Data = new { Data = listData, PageIndex = (listData == null || listData.Count < 0) ? pageIndex : pageIndex + 1 };
@@ -294,10 +301,85 @@ namespace EasyChatApp.Controllers
             }
             return response;
         }
+        [HttpGet]
+        public HashSet<MemberInfo> GetContactByUser(string user)
+        {
+            try
+            {
+                HashSet<MemberInfo> contacts = new HashSet<MemberInfo>();
+                HashSet<string> hMembers = new HashSet<string>();
+                var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList();
+                if(listPrivateGroups != null)
+                {
+                    for(int i = 0; i < listPrivateGroups.Count; i++)
+                    {
+                        List<string> members = listPrivateGroups[i].Members;
+                        string realMember = members.SingleOrDefault(o => o != user);
+                        if (!string.IsNullOrEmpty(realMember) && realMember != CSKH_EDUSO && realMember != SYSTEM_EDUSO)
+                        {
+                            hMembers.Add(realMember);
+                        }
+
+                    }
+
+                    if(hMembers.Count > 0)
+                    {
+                        List<StudentEntity> listStudent = _studentService.CreateQuery().Find(o=> hMembers.Contains(o.ID))?.ToList();
+                        List<TeacherEntity> listTeacher = _teacherService.CreateQuery().Find(o => hMembers.Contains(o.ID))?.ToList();
+
+                        for(int i = 0; listStudent != null && i < listStudent.Count; i++)
+                        {
+                            var student = listStudent[i];
+                            
+                            if (contacts.Count == 0 || contacts.FirstOrDefault(o=>o.ID == student.ID) == null)
+                            {
+                                var item = new MemberInfo() { ID = student.ID, Center = "", Name = student.FullName };
+                                contacts.Add(item);
+                            }
+                            
+                        }
+                        for (int i = 0; listTeacher != null && i < listTeacher.Count; i++)
+                        {
+                            var teacher = listTeacher[i];
+                            
+                            if (contacts.Count == 0 || contacts.FirstOrDefault(o => o.ID == teacher.ID) == null)
+                            {
+                                var item = new MemberInfo() { ID = teacher.ID, Center = "", Name = teacher.FullName };
+                                contacts.Add(item);
+                            }
+
+                        }
+
+                    }
+                }
+                return contacts;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
 
         public GroupMapping<string> GroupMapping()
         {
             return EasyChatHub.GroupMapping;
+        }
+
+        public MemberInfo GetMember(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            var student = _studentService.GetItemByID(id);
+            if(student != null)
+            {
+                return new MemberInfo() { ID = student.ID, Center = "", Name = student.FullName };
+            }
+            var teacher = _teacherService.GetItemByID(id);
+            if(teacher != null)
+            {
+                return new MemberInfo() { ID = teacher.ID, Center = "", Name = teacher.FullName };
+            }
+
+            return null;
         }
         public string ScriptEasyChat()
         {
@@ -306,45 +388,75 @@ namespace EasyChatApp.Controllers
             string urlSend = host + "/Chat/SendMessage";
             string urlRemove = host + "/Chat/RemoveMessage?user={user}&messageId={messageId}&connectionId={connectionId}";
             string urlGet = host + "/Chat/GetMessages?user={user}&receiver={receiver}&groupId={groupId}&messageId={messageId}&startDate={startDate}&pageIndex={pageIndex}&pageSize={pageSize}";
-            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "','SYSTEM_EDUSO':'"+ SYSTEM_EDUSO + "'}";
+            string urlCSKH = host + "/Chat/GetContactByUser?user={user}";
+            string urlMember = host + "/Chat/GetMember?user={user}";
+            string value = "var g_EasyChatURL={'SendMessage':'"+urlSend+ "','RemoveMessage':'" + urlRemove + "','GetMessage':'" + urlGet + "','GetNoti':'" + urlNoti + "','SYSTEM_EDUSO':'"+ SYSTEM_EDUSO + "','CSKH_EDUSO':'"+ CSKH_EDUSO + "','GetContact':'"+ urlCSKH + "','getMember':'" + urlMember + "'}";
+            
             return value;
         }
         [HttpGet]
         public HashSet<string> GetNotifications(string user, string groupNames)
         {
-            List<string> groups = groupNames.Split(',')?.ToList();
-            var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o=>o.ID)?.ToList();
-            if (listPrivateGroups == null) { listPrivateGroups = new List<string>(); }
-            if (groups == null) return null;
-            var listTime = _groupAndUserService.CreateQuery().Find(o => o.UserID == user && groups.Contains(o.GroupID))?.ToList();
-            if(listTime != null)
+            if(user != CSKH_EDUSO)
             {
-                
-                var times = listTime.Select(o => o.TimeLife)?.ToList();
-                double max = times.Max();
-                
-                var messages = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
-
-                var messagesPrivate = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
-
-                var publicMessage = _messagerService.CreateQuery().Find(o => o.Time > max && (o.IsPublic == true && o.Sender == SYSTEM_EDUSO) && o.IsDel == false)?.ToList();
-                var listData = messages != null && messages.Count > 0 ? messages.Select(o => o.GroupId)?.ToHashSet() : new HashSet<string>();
-
-                if(messagesPrivate != null)
+                List<string> groups = string.IsNullOrEmpty(groupNames) ? new List<string>() : groupNames.Split(',')?.ToList();
+                var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o => o.ID)?.ToList();
+                if (listPrivateGroups == null) { listPrivateGroups = new List<string>(); }
+                if (groups == null && groups.Count == 0) return null;
+                var listTime = _groupAndUserService.CreateQuery().Find(o => o.UserID == user && groups.Contains(o.GroupID))?.ToList();
+                if (listTime != null)
                 {
-                    for(int i =0; i < messagesPrivate.Count; i++)
+                    var times = listTime.Count == 0 ? null : listTime.Select(o => o.TimeLife)?.ToList();
+
+                    double max = times == null ? 0 : times.Max();
+                    var messages = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                    var messagesPrivate = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                    var publicMessage = _messagerService.CreateQuery().Find(o => o.Time > max && (o.IsPublic == true && o.Sender == SYSTEM_EDUSO) && o.IsDel == false)?.ToList();
+                    var listData = messages != null && messages.Count > 0 ? messages.Select(o => o.GroupId)?.ToHashSet() : new HashSet<string>();
+
+                    if (messagesPrivate != null)
                     {
-                        listData.Add(messagesPrivate[i].Sender);
-                    };
-                }
+                        for (int i = 0; i < messagesPrivate.Count; i++)
+                        {
+                            listData.Add(messagesPrivate[i].Sender);
+                        };
+                    }
 
-                if(publicMessage != null)
-                {
-                    if(publicMessage.Count > 0) listData.Add(SYSTEM_EDUSO);
+                    if (publicMessage != null)
+                    {
+                        if (publicMessage.Count > 0) listData.Add(SYSTEM_EDUSO);
+                    }
+                    return listData.Count > 0 ? listData : null;
                 }
-                return listData.Count > 0 ? listData : null;
             }
+            else
+            {
+                var listTime = _groupAndUserService.CreateQuery().Find(o => o.UserID == user)?.ToList();
+                if(listTime != null && listTime.Count > 0)
+                {
+                    var listPrivateGroups = _groupUserService.CreateQuery().Find(o => o.Members.Contains(user))?.ToList()?.Select(o => o.ID)?.ToList();
+                    var times = listTime.Count == 0 ? null : listTime.Select(o => o.TimeLife)?.ToList();
 
+                    double max = times == null ? 0 : times.Max();
+                    var messages = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                    var messagesPrivate = _messagerService.CreateQuery().Find(o => o.Time > max && listPrivateGroups.Contains(o.GroupId) && o.Sender != user && o.IsDel == false)?.ToList();
+
+                    var publicMessage = _messagerService.CreateQuery().Find(o => o.Time > max && (o.IsPublic == true && o.Sender == SYSTEM_EDUSO) && o.IsDel == false)?.ToList();
+                    var listData = messages != null && messages.Count > 0 ? messages.Select(o => o.GroupId)?.ToHashSet() : new HashSet<string>();
+
+                    if (messagesPrivate != null)
+                    {
+                        for (int i = 0; i < messagesPrivate.Count; i++)
+                        {
+                            listData.Add(messagesPrivate[i].Sender);
+                        };
+                    }
+                    return listData.Count > 0 ? listData : null;
+                }
+            }
             return null;
         }
 
@@ -376,5 +488,11 @@ namespace EasyChatApp.Controllers
         public int Code { get; set; }
         public string Message { get; set; }
         public object Data { get; set; }
+    }
+    public class MemberInfo
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+        public string Center { get; set; }
     }
 }

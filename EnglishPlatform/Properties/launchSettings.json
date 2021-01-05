@@ -3,12 +3,12 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://test.eduso.vn/",
+      "applicationUrl": "https://test.eduso.vn",
       "sslPort": 0
     },
     "iisExpress": {
-      "applicationUrl": "https://test.eduso.vn",
-      "sslPort": 44303
+      "applicationUrl": "http://test.eduso.vn",
+      "sslPort": 44320
     }
   },
   "profiles": {
@@ -17,11 +17,13 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "ancmHostingModel": "InProcess"
     },
     "EnglishPlatform": {
       "commandName": "IISExpress",
       "launchBrowser": true,
+      "ancmHostingModel": "InProcess",
       "applicationUrl": "https://localhost:5001;http://localhost:5000"
     }
   }

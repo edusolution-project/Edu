@@ -76,12 +76,12 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                     contentBox.setAttribute('style', 'z-index:999999999999');
                 }
                 else {
-                    contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
+                    if(__CURRENTUSER.isCSKH != true) contentBox.setAttribute('style', 'width:0px;border:0;padding:0');
                 }
                
             }
             var left = root.querySelector('.easy-chat__content--left');
-            if (left) {
+            if (left && __CURRENTUSER.isCSKH != true) {
                 left.style.display = 'none';
             }
         }
@@ -230,25 +230,48 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
     EasyChat.prototype.Create = function (obj) {
         _mergeConfig(obj);
         __CURRENTUSER = __defaulConfig.currentUser;
-        __GROUP.Create(__defaulConfig.url.group.getlist).then(function () {
-
-            var array = __GROUP.GetAll();
-            var listString = [];
-            for (var i = 0; i < array.length; i++) {
-                var item = array[i];
-                if (item) {
-                    listString.push(item.id);
-                }
-            }
-            __MEMBER.Create(__defaulConfig.url.member.getlist, listString).then(function () {
+        if(__CURRENTUSER.isCSKH == true){
+            __MEMBER.Create(__defaulConfig.extendsUrl.GetContact.replace("{user}",__CURRENTUSER.id), [__CURRENTUSER.id]).then(function () {
                 renderHTML();
                 ConnectHub();
                 getNoti();
             });
-        });
+        }
+        else{
+            __GROUP.Create(__defaulConfig.url.group.getlist).then(function () {
+                var array = __GROUP.GetAll();
+                var listString = [];
+                for (var i = 0; i < array.length; i++) {
+                    var item = array[i];
+                    if (item) {
+                        listString.push(item.id);
+                    }
+                }
+                __MEMBER.Create(__defaulConfig.url.member.getlist, listString).then(function () {
+                    renderHTML();
+                    ConnectHub();
+                    getNoti();
+                    cskh_gotoTop();
+                });
+            });
+        }
     }
     EasyChat.prototype.Destroy = function () {
 
+    }
+    var cskh_gotoTop = function(){
+        var root = getRoot();
+        if(root){
+            var listContact = root.querySelector('.list-contact');
+            if(listContact){
+                var user_cskh = __MEMBER.GetSupportCustomer();
+                var cskh_box = listContact.querySelector('[data-id="'+user_cskh.id+'"]');
+                if(cskh_box){
+                    listContact.insertBefore(cskh_box,listContact.childNodes[1]);
+                    cskh_box.setAttribute('style','background:#cd2e2e');
+                }
+            }
+        }
     }
     var getRoot = function () {
         return document.getElementById(__defaulConfig.id);
@@ -644,9 +667,32 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
         if (data.sender != __defaulConfig.currentUser.id) {
+            var member = __MEMBER.GetItemByID(data.sender);
+            if(member.length == 0 && __CURRENTUSER.isCSKH == true && __CURRENTUSER.id !=  g_EasyChatURL.SYSTEM_EDUSO){
+                __MEMBER.UpdateWithAjax(__defaulConfig.extendsUrl.getMember.replace("user={user}","id="+data.sender)).then(function(){
+                    member = __MEMBER.GetItemByID(data.sender);
+                    if(member.length > 0){
+                        UpdateContactUI(member);
+                    }
+                    
+                });
+            }
             showNoti([id]);
         }
     });
+    var UpdateContactUI = function(data){
+        if(data){
+            var uiData = data.length > 0 ? data[0] : data;
+            var root = getRoot();
+            if(root){
+                var listContact = root.querySelector('.list-contact');
+                if(listContact){
+                    var el = UI.CreateItemContact(uiData,false,"EasyChat.OpenMessageBox(this)");
+                    listContact.insertBefore(el,listContact.childNodes[0]);
+                }
+            }
+        }
+    }
     var getNoti = function () {
         var ajax = new Ajax();
         //"https://localhost:44374/Chat/GetNotifications?user={user}&groupNames={groupNames}"

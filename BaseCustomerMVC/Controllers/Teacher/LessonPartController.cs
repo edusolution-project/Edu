@@ -25,6 +25,7 @@ using Spire.Doc.Fields;
 using Spire.Doc.Documents;
 using System.Drawing;
 using System.Drawing.Imaging;
+using SkiaSharp;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -250,6 +251,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             //        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                             //    }
                             //}
+
                             if (item.Type == "IMG")
                             {
                                 if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
@@ -284,19 +286,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 item.Media.Size = file.Length;
                                 if (!typeImage.Contains(extension))
                                 {
-                                    var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
-                                    item.Media.Path = mediarsp.Path;
-                                    if (typeVideo.Contains(extension))
+                                    if (file.FileName.ToLower().EndsWith(".ppt") || file.FileName.ToLower().EndsWith(".pptx"))
                                     {
-                                        item.Media.Extension = "video/mp4";
-                                    }
-                                    else if (typeAudio.Contains(extension))
-                                    {
-                                        item.Media.Extension = "audio/mp3";
+                                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                        item.Media.Extension = extension;
                                     }
                                     else
                                     {
-                                        item.Media.Extension = extension;
+                                        var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                                        item.Media.Path = mediarsp.Path;
+                                        if (typeVideo.Contains(extension))
+                                        {
+                                            item.Media.Extension = "video/mp4";
+                                        }
+                                        else if (typeAudio.Contains(extension))
+                                        {
+                                            item.Media.Extension = "audio/mp3";
+                                        }
+                                        else
+                                        {
+                                            item.Media.Extension = extension;
+                                        }
                                     }
                                 }
                                 else

@@ -99,7 +99,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
+                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
                           let subject = r.SubjectID != null?  _subjectService.GetItemByID(r.SubjectID): new SubjectEntity()
                           let grade = r.GradeID != null? _gradeService.GetItemByID(r.GradeID): new GradeEntity()
                           let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}
@@ -282,12 +282,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //}
         }
 
-        public JsonResult GetResultsWithTime(String basis,String ClassSubjectID,DateTime StartTime,DateTime EndTime)
+        public JsonResult GetResultsWithTime(String basis, String ClassSubjectID, DateTime StartTime, DateTime EndTime)
         {
             try
             {
                 var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
-                if(currentCs == null)
+                if (currentCs == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -307,7 +307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //var exam = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.StudentID);
                     //var _progessResult = progress.Where(x => x.LessonID == item.LessonID).ToList();
                     var examCount = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).Project(t => t.StudentID).ToList().Distinct().Count();
-                    var progessResult = progress.Where(x=>x.LessonID == item.LessonID && x.Tried > 0).GroupBy(x=>x.StudentID).Select(x=>new {x.Key, Point = x.ToList().Average(y=>y.LastPoint) });
+                    var progessResult = progress.Where(x => x.LessonID == item.LessonID && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { x.Key, Point = x.ToList().Average(y => y.LastPoint) });
                     //var avgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
                     //var avgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
                     var result = new LessonResultVM()
@@ -321,7 +321,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //AvgPracticePoint = avgPracticePoint,
                         Title = lesson.Title,
                         ChapterName = _chapterService.GetItemByID(lesson.ChapterID)?.Name,
-                        MinPoint8 = progessResult.Where(x=>x.Point >= 80).Count(),
+                        MinPoint8 = progessResult.Where(x => x.Point >= 80).Count(),
                         MinPoint5 = progessResult.Where(x => x.Point >= 50 && x.Point < 80).Count(),
                         MinPoint2 = progessResult.Where(x => x.Point >= 20 && x.Point < 50).Count(),
                         MinPoint0 = progessResult.Where(x => x.Point >= 00 && x.Point < 20).Count(),
@@ -332,7 +332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Data",lessonResult }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }

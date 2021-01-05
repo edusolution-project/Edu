@@ -38,6 +38,8 @@ namespace EasyChatApp
             services.AddSingleton<MessagerService>();
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();
+            services.AddSingleton<TeacherService>();
+            services.AddSingleton<StudentService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
