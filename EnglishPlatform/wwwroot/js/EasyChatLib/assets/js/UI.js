@@ -18,6 +18,7 @@
         _mergeConfig(config);
         this.render = createRoot.bind(this);
         this.renderListItemContact = renderListItemContact.bind(this);
+        this.CreateItemContact = updateItemContact;
     }
 
     var _mergeConfig = function(config){
@@ -101,6 +102,22 @@
             data.avatar = isGroup ? _config.image : _config.avatar;
         }
         return '<div class="item-contact" style="background:' + _bgColor + '" title="' + data.name + '" data-id="' + data.id + '" data-group="' + isGroup + '" onclick="' + callBack + '"><div class="contact-info"><div class="avatar" data-status=""><img src="' + data.avatar + '" alt=""></div><div class="user-info"><div class="name">' + _strLop + data.name + '</div><div class="status-text">...</div></div></div><div class="time-online">...</div><div class="noti"></div></div>';
+    }
+    var updateItemContact = function (data, isGroup, callBack) {
+        var _strLop = isGroup && !data.isSystem ? "Lớp " : "";
+        var _bgColor = data.isSystem ? "#45b3f3" : "#fff";
+        if (!data.avatar) {
+            data.avatar = isGroup ? _config.image : _config.avatar;
+        }
+        var div = document.createElement("div");
+        div.classList = "item-contact";
+        div.setAttribute("style","background:" + _bgColor);
+        div.setAttribute("title",data.name);
+        div.setAttribute("data-id",data.id);
+        div.setAttribute("data-group",isGroup);
+        div.setAttribute("onclick",callBack);
+        div.innerHTML = '<div class="contact-info"><div class="avatar" data-status=""><img src="' + data.avatar + '" alt=""></div><div class="user-info"><div class="name">' + _strLop + data.name + '</div><div class="status-text">...</div></div></div><div class="time-online">...</div><div class="noti open">1</div>';
+        return div;
     }
     var renderListItemContact = function(data,isGroup,callBack){
         var html = '';

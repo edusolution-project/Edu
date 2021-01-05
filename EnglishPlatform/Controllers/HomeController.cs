@@ -1223,7 +1223,11 @@ namespace EnglishPlatform.Controllers
                 return ex.Message;
             }
         }
-
+        [Route("/CSKH")]
+        public IActionResult CSKH()
+        {
+            return View();
+        }
         #region Test
         //[HttpPost]
         //[Route("/home/test/{id}")]

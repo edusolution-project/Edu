@@ -2,18 +2,14 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
-    "iis": {
-      "applicationUrl": "https://test.eduso.vn/",
-      "sslPort": 0
-    },
     "iisExpress": {
-      "applicationUrl": "https://test.eduso.vn",
-      "sslPort": 44303
+      "applicationUrl": "http://localhost:52198/",
+      "sslPort": 44320
     }
   },
   "profiles": {
     "IIS Express": {
-      "commandName": "IIS",
+      "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

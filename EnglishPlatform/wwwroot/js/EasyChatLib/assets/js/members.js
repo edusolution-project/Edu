@@ -1,12 +1,13 @@
 (function(text){
     "use strict";
-    var __MEMBERS = [];
-    var __TEXT = text;
-    var __DEFAULT_MEMBER = { id: g_EasyChatURL.SYSTEM_EDUSO, name:"Thông tin cập nhật hệ thống",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
+    var __MEMBERS           = [];
+    var __TEXT              = text;
+    var __DEFAULT_MEMBER    = { id: g_EasyChatURL.SYSTEM_EDUSO, name:"Thông tin cập nhật hệ thống",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:true};
+    var __CSKH_MEMBER       = { id: g_EasyChatURL.CSKH_EDUSO, name:"Chăm sóc khách hàng",center:"eduso",avatar:"https://eduso.vn/images/Logo.png",isSystem:false,isCSKH:true};
     function Member(){
 
     }
-    window.Member = Member;
+    window.Member   = Member;
     var isExist = function(member){
         if(!__MEMBERS) __MEMBER = [];
         if(__MEMBERS.length == 0) return false;
@@ -35,25 +36,46 @@
     Member.prototype.GetAdmin = function(){
         return __DEFAULT_MEMBER;
     }
+    Member.prototype.GetSupportCustomer = function(){
+        return __CSKH_MEMBER;
+    }
     Member.prototype.Create = function(url,listClass){
         var ajax = createAjax();
         return ajax.proccessWithDataHeader("GET", url, {classNames:listClass} , false).then(function(data){
             //console.log(data);
-            __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
+            if(data){
+                __MEMBERS = typeof(data) == "string" ? JSON.parse(data) : data;
+            }
         });
     }
     Member.prototype.GetItemByID = function(id){
         if(id == __DEFAULT_MEMBER.id){
             return [__DEFAULT_MEMBER];
         }
+        if(id == __CSKH_MEMBER){
+            return [__CSKH_MEMBER];
+        }
         return __MEMBERS.filter(function(v){if(v.id == id) return v;});
     }
     Member.prototype.GetAll = function(){
         updateItem(__DEFAULT_MEMBER);
+        updateItem(__CSKH_MEMBER);
         return __MEMBERS;
     }
     Member.prototype.Search = function(textSearch){
         return search(textSearch);
+    }
+    Member.prototype.UpdateWithAjax = function(url){
+        var ajax = createAjax();
+        return ajax.proccessWithDataHeader("GET", url, {classNames:""} , false).then(function(data){
+            //console.log(data);
+            if(data){
+                var jsonData = typeof(data) == "string" ? JSON.parse(data) : data;
+                if(jsonData != null){
+                    updateItem(jsonData);
+                }
+            }
+        });
     }
     Member.prototype.Update = updateItem;
     var updateItem = function(members){

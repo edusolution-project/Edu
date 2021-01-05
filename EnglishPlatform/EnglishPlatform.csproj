@@ -155,6 +155,17 @@
     <None Include="wwwroot\fonts\Simple-Line-Icons.woff2" />
     <None Include="wwwroot\fonts\themify.svg" />
     <None Include="wwwroot\images\bottom-logo.png" />
+    <None Include="wwwroot\images\icon\excel.svg" />
+    <None Include="wwwroot\images\icon\happy.svg" />
+    <None Include="wwwroot\images\icon\image_available.svg" />
+    <None Include="wwwroot\images\icon\pdf.svg" />
+    <None Include="wwwroot\images\icon\powerpoint.svg" />
+    <None Include="wwwroot\images\icon\tick-delivered.svg" />
+    <None Include="wwwroot\images\icon\tick-read.svg" />
+    <None Include="wwwroot\images\icon\tick-send.svg" />
+    <None Include="wwwroot\images\icon\typing-01.svg" />
+    <None Include="wwwroot\images\icon\typing-02.svg" />
+    <None Include="wwwroot\images\icon\word.svg" />
     <None Include="wwwroot\js\bootstrap-tagsinput.js" />
     <None Include="wwwroot\js\bootstrap-vue.min.js" />
     <None Include="wwwroot\js\calendar\js\Calendar.js" />
@@ -524,6 +535,9 @@
     <None Include="wwwroot\libs\quill-editor\quill.min.js" />
     <None Include="wwwroot\libs\vue-2.6.0.js" />
     <None Include="wwwroot\libs\vuejs-datepicker.min.js" />
+    <None Include="wwwroot\scripts\push-notifications-controller.js" />
+    <None Include="wwwroot\scripts\push-notifications.js" />
+    <None Include="wwwroot\scripts\service-workers\push-service-worker.js" />
     <None Include="wwwroot\scss\navs\_global.scss" />
     <None Include="wwwroot\scss\navs\_sidebar.scss" />
     <None Include="wwwroot\scss\navs\_topbar.scss" />
@@ -2268,6 +2282,7 @@
     <ProjectReference Include="..\BaseHub\BaseHub.csproj" />
     <ProjectReference Include="..\GoogleApp\GoogleApp.csproj" />
     <ProjectReference Include="..\GoogleLib\GoogleLib.csproj" />
+    <ProjectReference Include="..\WebPush\WebPush.csproj" />
   </ItemGroup>
 
 
@@ -2313,6 +2328,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="wwwroot\css\minify\" />
     <Folder Include="wwwroot\Drive.Storge\" />
     <Folder Include="wwwroot\js\minify\" />
