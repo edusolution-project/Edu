@@ -324,7 +324,7 @@
                         else {
                             isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "News")',LoadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
                         }
-
+                        //debugger
                         var createdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.CreateDate));
                         var publishdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.PublishDate));
                         body.append("<tr>" +
@@ -333,7 +333,7 @@
                             "<img src='https://static.eduso.vn/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
                             "<td 'text-center'>" + item.Title + "</td>" +
-                            "<td 'text-center'>" + item.Code + "</td>" +
+                            "<td 'text-center'>https://test.eduso.vn/tin-tuc/" + item.Url + "</td>" +
                             "<td class='text-center' stye='max-height:'>" + item.Summary + "</td>" +
                             "<td class='text-center'>"+createdate+"</td>" +
                             "<td class='text-center'>" + publishdate + "</td>" +

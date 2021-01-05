@@ -22,7 +22,7 @@ using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 4)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 4)]
     public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
@@ -329,11 +329,35 @@ namespace BaseCustomerMVC.Controllers.Admin
             {
                 data = data.SortByDescending(x => x.CreateDate);
             }
+
+            var dataResult = (from d in data.ToList()
+                             let category = _serviceNewCate.GetItemByID(d.CategoryID)
+                             where category != null
+                             select new NewsViewModel
+                             {
+                                 CategoryID = category.ID,
+                                 CenterID = d.CenterID,
+                                 Code = d.Code,
+                                 Content = d.Content,
+                                 CreateDate = d.CreateDate,
+                                 CreateUser = d.CreateUser,
+                                 ID=d.ID,
+                                 IsActive = d.IsActive,
+                                 IsHot = d.IsHot,
+                                 IsPublic = d.IsPublic,
+                                 IsTop = d.IsTop,
+                                 PublishDate = d.PublishDate,
+                                 Summary = d.Summary,
+                                 Thumbnail = d.Thumbnail,
+                                 Type = d.Type,
+                                 Title = d.Title,
+                                 Url = String.IsNullOrEmpty(category.Code) && String.IsNullOrEmpty(d.Code) ? "" : $"{category.Code}/{d.Code}"
+                             }).ToList();
             
-            model.TotalRecord = data.CountDocuments();
-            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
-                ? data.ToList()
-                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
+            model.TotalRecord = dataResult.Count();
+            var DataResponse = dataResult == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
+                ? dataResult.ToList()
+                : dataResult.Skip((model.PageIndex) * model.PageSize).Take(model.PageSize).ToList();
 
             var response = new Dictionary<string, object>
             {

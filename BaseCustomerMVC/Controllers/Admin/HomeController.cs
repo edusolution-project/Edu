@@ -1655,5 +1655,37 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         #endregion
+
+        public IActionResult FixDataPractice()
+        {
+            var lesson = _lessonService.CreateQuery().Find(x => x.IsPractice == false && x.TemplateType == 1);
+            var lessonIDs = lesson.ToList().Select(x => x.ID).ToList();
+            var lessonparts = _lessonPartService.CreateQuery().Find(x => lessonIDs.Contains(x.ParentID)).ToList();
+            var glessonparts = lessonparts.GroupBy(x => x.Type).ToList();
+            var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => lessonIDs.Contains(x.ParentID)).ToList();
+            var gclonelessonparts = clonelessonparts.GroupBy(x => x.Type).ToList();
+            return Content("");
+        }
+
+        //public IActionResult Center()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetAll();
+        //        foreach (var item in centers.ToList())
+        //        {
+        //            if (item.ExpireDate <= DateTime.Now)
+        //            {
+        //                item.ExpireDate = new DateTime(2021,1,31);
+        //                _centerService.Save(item);
+        //            }
+        //        }
+        //        return Content("done");
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return Content(ex.Message);
+        //    }
+        //}
     }
 }

@@ -37,11 +37,11 @@ namespace BaseCustomerMVC.Globals
             return GetAccessCtrl<Globals.StudentController>(_studentType);
         }
 
-        public static List<AccessCtrlAttribute> GetAccessCtrlsByNewsAdministrator()
-        {
-            var a= GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
-            return GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
-        }
+        //public static List<AccessCtrlAttribute> GetAccessCtrlsByNewsAdministrator()
+        //{
+        //    var a= GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
+        //    return GetAccessCtrl<Globals.AdminController>(BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS);
+        //}
 
         private static List<AccessCtrlAttribute> GetAccessCtrl<T>(string type) {
             
