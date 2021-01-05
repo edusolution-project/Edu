@@ -36,10 +36,11 @@
                 <div class="box filter-box w-152">
                     <select v-model="search_subject">
                         <option value="">-- Tất cả học liệu ---</option>
-                        <option v-for="(item, k) in classSubjects"
-                                :value="item.ID">
-                            {{item.Title}}
-                        </option>
+                        <template v-for="(item, k) in classSubjects">
+                            @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.Title}}</option>*@
+                            <option :value="item.ID" v-if="item.HasLessonActive">{{item.Title}} ___ [ĐÃ GIAO]</option>
+                            <option :value="item.ID" v-else>{{item.Title}}</option>
+                        </template>
                     </select>
                 </div>
                 @*<div class="box filter-box w-250" v-if="search_subject != ''">
@@ -76,7 +77,7 @@
                             <td colspan="4">Chưa có lịch sử học tập</td>
                         </tr>
                         <tr v-for="(item,k) in progressData" v-else>
-                            <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title">{{item.Title}}</a></td>
+                            <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title" target="_blank">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                             <td>{{formatTime(item.LearnLast)}}</td>
                             <td>{{item.LearnCount}}</td>
@@ -90,8 +91,8 @@
                         <tr>
                             <th>
                                 <select class="form-control" v-on:change="loadResult()" id="examType">
-                                    <option selected value="2">Bài kiểm tra</option>
-                                    <option value="1">Bài luyện tập</option>
+                                    <option selected value="1">Bài luyện tập</option>
+                                    <option value="2">Bài kiểm tra</option>
                                 </select>
                             </th>
                             <th v-for="(field,k) in resultFields">{{field.label}}</th>
@@ -105,7 +106,7 @@
                             <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
                             <td>{{formatTime(item.LearnLast)}}</td>
-                            <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
+                            <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (roundPoint(item.Result,1))}}</td>
                             <td>{{item.LearnCount}}</td>
                         </tr>
                     </tbody>
@@ -124,7 +125,7 @@
                         <tr v-for="(item,k) in summaryData">
                             <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
                             @*<td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>*@
-                            <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{roundPoint(item.PracticeAvgPoint,1)}}</td>
                             @*<td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>*@
                             @*<td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>*@
                         </tr>
@@ -159,7 +160,7 @@
                     <tbody>
                         <tr v-for="(item,k) in studentResult.history" v-if="studentResult.history.length > 0">
                             <td class="text-center">{{k+1}}</td>
-                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
+                            <td class="text-center">{{ roundPoint((item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0),1)}}</td>
                             <td class="text-center">{{formatTime(item.Created)}}</td>
                             <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
                             <td class="text-center">{{getPeriod(item)}}</td>
@@ -178,6 +179,27 @@
 </section>
 
 @section Scripts {
+    <style>
+        #s_table tbody td {
+            padding: 0px;
+        }
+
+        .table td, .table th {
+            padding: 0px
+        }
+
+        .table thead th {
+            border: 0.5px solid gray;
+            text-align: center;
+            vertical-align: middle
+        }
+
+        .table tbody td {
+            text-align: center;
+            border: 0.5px solid gray;
+            vertical-align: middle
+        }
+    </style>
     <script>
         new Vue({
             el: ".module",
@@ -256,7 +278,7 @@
                     //},
                     {
                         key: 'schedule',
-                        label: 'Lịch kiểm tra'
+                        label: 'Lịch làm bài'
                     },
                     {
                         key: 'last_update',
@@ -341,8 +363,18 @@
                     _form.append('ID', '@currentStudent.ID')
                     _form.append('ClassSubjectID', _that.search_subject)
                     _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
-                    _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
-                    _form.append('IsPractice', $("#examType").val() == '1')
+                    _form.append('EndDate', moment(_that.enddate).format("MM/DD/YYYY"))
+                    var isPractice = true
+                    if ($("#examType").val() == undefined || $("#examType").val() == '1') {
+                        isPractice = true
+                    }
+                    //else if ($("#examType").val() == '1') {
+                    //    isPractice = true
+                    //}
+                    else if ($("#examType").val() == '2') {
+                        isPractice = false
+                    }
+                    _form.append('IsPractice', isPractice)
                     let _url = '@processUrl("GetLearningResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
@@ -387,7 +419,7 @@
                         .then(response => {
                             //_that.summaryData = response.data.Data;
                             _that.summaryData = response.data.Practice;
-                            debugger
+                            //debugger
                             _that.rank = response.data.Result;
                             _that.avgPoint = response.data.Result.avg;
                         }).catch(e => { })
@@ -409,6 +441,7 @@
                                     ID: item.ID,
                                     Title: item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName,
                                     Image: item.SkillImage,
+                                    HasLessonActive: item.HasLessonActive
                                 })
 
                                 var hash = window.location.hash.replace('#', '');
@@ -545,7 +578,15 @@
                     //var rank = this.summaryData.filter(t => t.ClassSubjectID == this.search_subject)[0].Rank;
                     //if (rank > 0) return rank;
                     //return '-';
-                }
+                },
+                roundPoint(value, precision) {
+                    if (value > 0) {
+                        value = value / 10
+                        var multiplier = Math.pow(10, precision || 0);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                    }
+                    else return value
+                },
             }
         });
     </script>

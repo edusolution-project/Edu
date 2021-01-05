@@ -400,7 +400,8 @@
                         _that.addItem.TeacherID = obj.TeacherID;
                         //_that.addItem.IsPublic = obj.IsPublic;
                         //_that.addItem.PublicWStudent = obj.PublicWStudent;
-                        if (obj.TargetCenters != null) {
+                        //debugger
+                        if (obj.TargetCenters != null || obj.TargetCenters.length > 0) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
                             if (obj.TargetCenters.length == this.list_centers.length) {
                                 _that.addItem.SelectAll = true;

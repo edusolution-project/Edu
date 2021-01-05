@@ -253,8 +253,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Skills = skills;
                 ViewBag.Courses = courses;
             }
-
-            ViewBag.AllCenters = teacher.Centers.Select(t => new CenterEntity { Code = t.Code, Name = t.Name, ID = t.CenterID }).ToList();
+            var centersIDs = teacher.Centers.Select(t => t.CenterID).ToList();
+            ViewBag.AllCenters = _centerService.CreateQuery().Find(t => centersIDs.Contains(t.ID) && t.ExpireDate >= DateTime.UtcNow && t.Status == true).ToList();
 
             if (!_teacherHelper.HasRole(UserID, center.ID, "head-teacher"))
                 ViewBag.Teachers = new List<UserViewModel> { new UserViewModel { ID = teacher.ID, Name = teacher.FullName } };

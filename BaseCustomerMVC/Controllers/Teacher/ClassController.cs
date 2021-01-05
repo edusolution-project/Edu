@@ -1035,6 +1035,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 data_response.Add("Practice", data);
                 data_response.Add("Exam", dataExam);
+                data_response.Add("ListClass", listClass);
                 return Json(data_response);
             }
             catch (Exception ex)
@@ -2248,9 +2249,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
+            var activeLesson = _lessonScheduleService.GetActiveLesson(currentClass.StartDate, DateTime.Now, ClassSubjectID);
+            var activeLessonIDs = activeLesson.Select(x => x.LessonID).ToList();
+            data = data.Where(x => activeLessonIDs.Contains(x.LessonID)).ToList();
 
             var lessons = (from progress in data
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           let schedule = activeLesson.Where(x=>x.LessonID == progress.LessonID && x.ClassID == currentClass.ID).FirstOrDefault()
                            where schedule != null
                            let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
                            where classsubject != null
@@ -2307,9 +2312,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
+            var activeLesson = _lessonScheduleService.GetActiveLesson(currentClass.StartDate, DateTime.Now, ClassSubjectID);
+            var activeLessonIDs = activeLesson.Select(x => x.LessonID).ToList();
 
             var lessons = (
-                            from lesson in passExams
+                            from lesson in passExams.Where(x=>activeLessonIDs.Contains(x.ID))
                             let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
                             //from progress in data
                             //where progress.Tried > 0
@@ -3218,7 +3225,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 ClassSubjectID = exam.ClassSubjectID,
                                 LessonID = exam.LessonID,
                                 StudentID = exam.StudentID,
-                                StudentName = _studentService.GetItemByID(exam.StudentID)?.FullName
+                                StudentName = _studentService.GetItemByID(exam.StudentID)?.FullName,
+                                Point = exam.Point == 0 ? 0 : (exam.Point / exam.MaxPoint) * 100,
+                                LastPoint = exam.LastPoint,
+                                MaxPoint = exam.MaxPoint
                             };
                 if (exams == null || exams.Count() == 0)
                 {
@@ -3238,13 +3248,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              into g
                              let classSbj = classSbjs.ToList().Where(x => x.ID == g.Key).FirstOrDefault()
                              let lesson = lessons.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
+                             let course = _courseService.GetItemByID(classSbj.CourseID)
                              select new LessonToMarkVM
                              {
                                  classSubjectID = g.Key,
                                  CourseName = classSbj == null ? "": classSbj.CourseName,
                                  ListLesson = lesson == null ? new List<LessonEntity>() : lesson,
                                  ListExam = g == null ?  new List<ExamViewModel>() : g.ToList(),
-                                 Image = classSbj == null ? "" : classSbj.Image,
+                                 Image = course == null ? "" : course.Image,
                                  TeacherID = classSbj.TeacherID
                              };
 
