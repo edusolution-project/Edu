@@ -54,6 +54,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
         private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+
+        private readonly string[] typeVideo = { ".ogm", ".wmv", ".mpg", ".webm", ".ogv", ".mov", ".asx", ".mpge", ".mp4", ".m4v", ".avi" };
+        private readonly string[] typeAudio = { ".opus", ".flac", ".weba", ".webm", ".wav", ".ogg", ".m4a", ".oga", ".mid", ".mp3", ".aiff", ".wma", ".au" };
+        private readonly string[] typeImage = { ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg", ".png", ".gif", ".bmp", ".dip" };
+
         private readonly IHostingEnvironment _env;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
@@ -255,15 +260,78 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
-                    if (file != null)
+                    //var file = files.Where(f => f.Name == item.Media.Name).SingleOrDefault();
+                    //if (file != null)
+                    //{
+                    //    item.Media.Created = DateTime.UtcNow;
+                    //    item.Media.Size = file.Length;
+                    //    item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                    //}
+                    if (item.Type == "IMG")
                     {
+                        if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
+                        {
+                            item.Media.Created = DateTime.UtcNow;
+                            item.Media.Size = 0;
+                            item.Media.Path = item.Media.Name.Trim();
+                            item.Media.Extension = "image/png";
+                        }
+                        else
+                        {
+                            var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
+                            if (file != null)
+                            {
+                                item.Media.Created = DateTime.UtcNow;
+                                item.Media.Size = file.Length;
+                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                item.Media.Extension = "image/png";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //foreach (var file in files)
+                        //{
+                        var file = files.Where(f => f.Name == item.Media.Name).FirstOrDefault();
+                        string extension = Path.GetExtension(file.FileName);
+
+                        item.Media = new Media();
+                        item.Media.Name = item.Media.OriginalName = file.FileName;
                         item.Media.Created = DateTime.UtcNow;
                         item.Media.Size = file.Length;
-                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+
+                        if (file.FileName.ToLower().EndsWith(".ppt") || file.FileName.ToLower().EndsWith(".pptx"))
+                        {
+                            item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                            item.Media.Extension = extension;
+                        }
+                        else
+                        {
+                            if (!typeImage.Contains(extension))
+                            {
+                                var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, createduser, file);
+                                item.Media.Path = mediarsp.Path;
+                                if (typeVideo.Contains(extension))
+                                {
+                                    item.Media.Extension = "video/mp4";
+                                }
+                                else if (typeAudio.Contains(extension))
+                                {
+                                    item.Media.Extension = "audio/mp3";
+                                }
+                                else
+                                {
+                                    item.Media.Extension = extension;
+                                }
+                            }
+                            else
+                            {
+                                item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                item.Media.Extension = "image/png";
+                            }
+                        }
                     }
                 }
-
             }
             else // Update
             {
