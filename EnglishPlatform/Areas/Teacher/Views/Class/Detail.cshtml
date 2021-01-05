@@ -387,36 +387,39 @@
             <ul class="list ls-practice">
                 <li v-for="(item,k) in lessonToMark.data">
                     <div class="class_row d-flex justify-content-start">
-                        <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2">
-                            @*<i class="ic ic-headphone-o mr-1 align-middle" :style="'background-image:url(' + cacheStatic(item.image,48) + ')'" v-if="item.image != ''"></i>{{item.courseName}}
-                            <i class="ic ic-headphone-o mr-1 align-middle" v-else></i>{{item.courseName}}*@
+                        <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(item.classSubjectID)">
                             <i class="ic ic-headphone-o mr-1 align-middle"></i>{{item.courseName}}
                             <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
                         </a>
                     </div>
-                <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
-                    <ul class="list" v-if="item.listLesson.length > 0">
-                        @*<lesson-item v-for="lesson in item.listLesson" v-bind:data="lesson" v-bind:owner="item.teacherID" v-bind:classSubject="item.classSubjectID"></lesson-item>*@
-                        <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
-                            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                                <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
-                                    <template v-if="lesson.TemplateType === 2">
-                                        <span class="text-danger">
-                                            <i class="ic far fa-edit mr-2"></i>
-                                            {{lesson.Title}}
-                                        </span>
-                                    </template>
-                                    <template v-else>
-                                        <span>
-                                            <i class="ic far fa-file-alt mr-2"></i>
-                                            {{lesson.Title}}
-                                        </span>
-                                    </template>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </b-collapse>
+                    <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
+                        <chap-content v-for="(chapter,i) in list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
+                                      v-bind:data="chapter"
+                                      v-bind:classbj="item.ID"
+                                      v-bind:pos="i"
+                                      v-bind:owner="item.TeacherID"
+                                      v-bind:listchaps="list_chapters"></chap-content>
+                        <ul class="list" v-if="item.listLesson.length > 0">
+                            <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
+                                <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                                    <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title,lesson.ID)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
+                                        <template v-if="lesson.TemplateType === 2">
+                                            <span class="text-danger">
+                                                <i class="ic far fa-edit mr-2"></i>
+                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                            </span>
+                                        </template>
+                                        <template v-else>
+                                            <span>
+                                                <i class="ic far fa-file-alt mr-2"></i>
+                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                            </span>
+                                        </template>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </b-collapse>
                 </li>
             </ul>
         </div>
@@ -2771,12 +2774,39 @@
                             this.isLoading = false
                         }).catch(e => { this.isLoading = false })
                 },
-                ShowDetailLessonToMark(listExam, courseName, Title) {
+                ShowDetailLessonToMark(listExam, courseName, Title,ID) {
                     //debugger
                     this.lessonToMark.courseName = courseName
                     this.lessonToMark.title = Title
-                    this.lessonToMark.dataDetail = listExam
+                    this.lessonToMark.dataDetail = []
+                    if (listExam.length > 0) {
+                        for (var i = 0; i < listExam.length; i++) {
+                            var exam = listExam[i]
+                            if (exam.LessonID == ID) {
+                                this.lessonToMark.dataDetail.push(exam)
+                            }
+                        }
+                    }
+                    //this.lessonToMark.dataDetail = listExam
                     this.$bvModal.show("LessonToMark-modal")
+                },
+                filterChapter(ChapterID,obj) {
+                    var listChapters = this.list_chapters
+                    if (obj) {
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            var parentItem = []
+                            if (item.ID == ChapterID) {
+                                if (item.ParentID) {
+                                    parentItem = listChapters.find(x => x.ID == item.ParentID)
+                                    return item.Name + " - " + parentItem?.Title 
+                                }
+                                else {
+                                    return item.Name
+                                }
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -3285,7 +3315,7 @@
                     <tbody>
                         <tr v-for="(item,k) in lessonToMark.dataDetail">
                             <td>{{k+1}}</td>
-                            <td class="td_hover" v-on:click="openHistory(item)">{{item.StudentName}}</td>
+                            <td class="td_hover">{{item.StudentName}}</td>
                             <td>{{lessonToMark.title}}</td>
                             <td>{{roundPoint(item.Point,1)}}</td>
                             <td>{{item.Marked == false? "Chưa chấm" : "Đã chấm"}}</td>
