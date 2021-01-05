@@ -65,8 +65,8 @@
                     </option>*@
                     <template v-for="(item, k) in classSubjects" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                         @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.CourseName}}</option>*@
-                        <option :value="item.ID" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
-                        <option :value="item.ID" v-else>{{item.CourseName}}</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-else>{{item.CourseName}}</option>
                     </template>
                 </select>
             </div>
