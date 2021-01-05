@@ -45,7 +45,7 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>
+                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài tự luận</a></li>
                     @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
                 </ul>
@@ -61,12 +61,12 @@
                     <option value="">Tổng hợp</option>
                     <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
                     @*<option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
-                        {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
-                    </option>*@
+                            {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
+                        </option>*@
                     <template v-for="(item, k) in classSubjects" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                         @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.CourseName}}</option>*@
-                        <option :value="item.ID" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
-                        <option :value="item.ID" v-else>{{item.CourseName}}</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-else>{{item.CourseName}}</option>
                     </template>
                 </select>
             </div>
@@ -282,17 +282,17 @@
                                         <td class="sticky-col second-col">{{ list_students[i-1].fullName}}</td>
                                         <td class="sticky-col third-col">{{roundPoint(list_students[i-1].avgPointPratice,1)}}</td>
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
-                                    <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
-                                        <template v-for="item in items">
-                                            @*<template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
-                                            <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>*@
-                                            <td style="width:50px;height:20px" v-if="roundPoint(item.point,1) >= 8" class="action-cel color-minpoint8" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 5 && roundPoint(item.point,1) < 8" class="action-cel color-minpoint5" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 2 && roundPoint(item.point,1) < 5" class="action-cel color-minpoint2" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 0 && roundPoint(item.point,1) < 2" class="action-cel color-minpoint0" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else class="color-dontwork">{{roundPoint(item.point,1)}}</td>
+                                        <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                            <template v-for="item in items">
+                                                @*<template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                                    <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>*@
+                                                <td style="width:50px;height:20px" v-if="roundPoint(item.point,1) >= 8" class="action-cel color-minpoint8" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 5 && roundPoint(item.point,1) < 8" class="action-cel color-minpoint5" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 2 && roundPoint(item.point,1) < 5" class="action-cel color-minpoint2" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 0 && roundPoint(item.point,1) < 2" class="action-cel color-minpoint0" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else class="color-dontwork">{{roundPoint(item.point,1)}}</td>
+                                            </template>
                                         </template>
-                                    </template>
                                         <template v-else>
                                             <td>Chưa đặt lịch</td>
                                         </template>
@@ -389,34 +389,34 @@
                     <div class="class_row d-flex justify-content-start">
                         <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2">
                             @*<i class="ic ic-headphone-o mr-1 align-middle" :style="'background-image:url(' + cacheStatic(item.image,48) + ')'" v-if="item.image != ''"></i>{{item.courseName}}
-                            <i class="ic ic-headphone-o mr-1 align-middle" v-else></i>{{item.courseName}}*@
+                                <i class="ic ic-headphone-o mr-1 align-middle" v-else></i>{{item.courseName}}*@
                             <i class="ic ic-headphone-o mr-1 align-middle"></i>{{item.courseName}}
                             <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
                         </a>
                     </div>
-                <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
-                    <ul class="list" v-if="item.listLesson.length > 0">
-                        @*<lesson-item v-for="lesson in item.listLesson" v-bind:data="lesson" v-bind:owner="item.teacherID" v-bind:classSubject="item.classSubjectID"></lesson-item>*@
-                        <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
-                            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                                <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
-                                    <template v-if="lesson.TemplateType === 2">
-                                        <span class="text-danger">
-                                            <i class="ic far fa-edit mr-2"></i>
-                                            {{lesson.Title}}
-                                        </span>
-                                    </template>
-                                    <template v-else>
-                                        <span>
-                                            <i class="ic far fa-file-alt mr-2"></i>
-                                            {{lesson.Title}}
-                                        </span>
-                                    </template>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                </b-collapse>
+                    <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
+                        <ul class="list" v-if="item.listLesson.length > 0">
+                            @*<lesson-item v-for="lesson in item.listLesson" v-bind:data="lesson" v-bind:owner="item.teacherID" v-bind:classSubject="item.classSubjectID"></lesson-item>*@
+                            <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
+                                <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                                    <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
+                                        <template v-if="lesson.TemplateType === 2">
+                                            <span class="text-danger">
+                                                <i class="ic far fa-edit mr-2"></i>
+                                                {{lesson.Title}}
+                                            </span>
+                                        </template>
+                                        <template v-else>
+                                            <span>
+                                                <i class="ic far fa-file-alt mr-2"></i>
+                                                {{lesson.Title}}
+                                            </span>
+                                        </template>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </b-collapse>
                 </li>
             </ul>
         </div>
@@ -850,8 +850,8 @@
                     <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
                 </div>
                 <div class="status" v-if="owner == '@currentuser'">
-                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                </div>
             </div>
         </li>
     </script>
@@ -912,8 +912,8 @@
                 </a>
                 <div class="flex-column col-3">
                     <span>
-                            Tỉ lệ mở
-                        </span>
+                        Tỉ lệ mở
+                    </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -927,8 +927,8 @@
                 </div>
                 <div class="flex-column col-3">
                     <span>
-                            Tỉ lệ làm bài
-                        </span>
+                        Tỉ lệ làm bài
+                    </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -3085,8 +3085,8 @@
                         </tr>
                         <tr>
                             @*<th style="width:130px">Bài kiểm tra 1</th>
-                            <th style="width:130px">Bài kiểm tra 2</th>
-                            <th style="width:130px">Bài kiểm tra 3</th>*@
+                                <th style="width:130px">Bài kiểm tra 2</th>
+                                <th style="width:130px">Bài kiểm tra 3</th>*@
                             <th v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0">Bài số {{k+1}}</th>
                             <th v-if="studentSummary.dataExam.length == 0">Chưa có dữ liệu kiểm tra</th>
                         </tr>
@@ -3103,8 +3103,8 @@
                                 <template v-else-if="itemSummary.Order == 1">
                                     <td v-for="(item,k) in studentSummary.dataExam">{{roundPoint(item.point,1)}}</td>
                                     @*<td>{{roundPoint(studentSummary.dataExam[0].multiple1,1)}}</td>
-                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
-                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>*@
+                                        <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
+                                        <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>*@
                                 </template>
                                 <template v-else>
                                     <td v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0"></td>
@@ -3183,7 +3183,7 @@
                         <th>5.0 - 7.9</th>
                         <th>2.0 - 4.9</th>
                         <th>0.0 - 1.9</th>
-                       @* <th>Tổng</th>*@
+                        @* <th>Tổng</th>*@
                     </tr>
                 </thead>
                 <tbody>
@@ -3201,7 +3201,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal('progessmodal-xl')">Đóng</b-button>
         </template>
