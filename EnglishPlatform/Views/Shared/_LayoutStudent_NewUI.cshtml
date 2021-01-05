@@ -341,19 +341,8 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @if (center == "ern")
-    {
-        @*longht them*@
-        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-        @await Html.PartialAsync("_EasyRealtime")
-    }
-    else
-    {
-        @await Html.PartialAsync("_EasyChat")
-    }
 
+    @await Html.PartialAsync("_EasyChat")
 
     <script>
         var openPoll = function () {

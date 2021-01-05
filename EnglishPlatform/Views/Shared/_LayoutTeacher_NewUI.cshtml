@@ -353,8 +353,10 @@
     </script>
     <!--End of Tawk.to Script-->
 
-    <script>
 
+    @await Html.PartialAsync("_EasyChat")
+
+    <script>
 
         var openPoll = function () {
             $('html').append($('<div>', { id: 'pollPopup', style: 'position:fixed; top: 0; left: 0; right: 0; bottom: 0; background: #333; opacity:0.95; z-index: 99999999999' })
@@ -378,7 +380,7 @@
             pageCount = parseInt(pageCount);
         setCookie("PageTCCount", pageCount + 1, 30);
         if (pageCount == 5) {
-            openPoll();            
+            openPoll();
         }
 
         function setCookie(cname, cvalue, exdays) {
