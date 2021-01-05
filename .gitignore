@@ -354,7 +354,8 @@ Admin_Customer/Views/Shared/_LayoutTeacher.oldcshtml
 Admin_Customer/Views/Shared/_LayoutStudent.oldcshtml
 *.rar
 EnglishPlatform/wwwroot/Files/
-/EnglishPlatform/.config
+/EnglishPlatform/*.config
+/EnglishPlatform/appsettings.json
 /EnglishPlatform/wwwroot/UPLOADS/NewFeed
 /EnglishPlatform/wwwroot
 /EnglishPlatform/wwwroot/generic_wiris
