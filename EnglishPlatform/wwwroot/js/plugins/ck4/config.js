@@ -11,14 +11,14 @@ CKEDITOR.editorConfig = function( config ) {
 	config.toolbarGroups = [
 		{ name: 'document', groups: ['mode', 'document', 'doctools'] },
 		{ name: 'clipboard', groups: ['clipboard', 'undo'] },
-		{ name: 'editing', groups: ['find', 'selection', 'spellchecker', 'editing'] },
+		//{ name: 'editing', groups: ['find', 'selection', 'spellchecker', 'editing'] },
 		//{ name: 'forms', groups: ['forms'] },
-		'/',
+		//'/',
 		{ name: 'basicstyles', groups: ['basicstyles', 'cleanup'] },
 		{ name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align', 'bidi', 'paragraph'] },
 		{ name: 'links', groups: ['links'] },
 		{ name: 'insert', groups: ['insert'] },
-		'/',
+		//'/',
 		{ name: 'styles', groups: ['styles'] },
 		{ name: 'colors', groups: ['colors'] },
 		{ name: 'tools', groups: ['tools'] },
@@ -26,7 +26,7 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'about', groups: ['about'] }
 	];
 
-	config.removeButtons = 'CreateDiv,Language,Anchor,Flash,Smiley,About,Print,NewPage,Save,TextField';
+	config.removeButtons = 'CreateDiv,Language,Anchor,Flash,Smiley,About,Print,NewPage,Save,TextField,Font,FontSize,Subscript,Superscript';
     
     config.removeDialogTabs = 'image:advanced;link:advanced;textfield';
 	config.extraPlugins = 'uploadimage';
