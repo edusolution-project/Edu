@@ -6,8 +6,6 @@
     var listCenter = ViewBag.ListCenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js"></script>
-@*<script src="//cdn.ckeditor.com/4.15.1/standard/ckeditor.js"></script>*@
-@*<script src="//cdn.ckeditor.com/4.15.1/full/ckeditor.js"></script>*@
 
 <!-- Begin Page Content -->
 <div class="container-fluid">
@@ -106,7 +104,7 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
-                                <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" required>
+                                <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" onchange="tes" required>
                             </div>
                             <div class="form-group col-md-4">
                                 <div class="form-row">
@@ -232,33 +230,6 @@
 
 <script>
 
-    //var test = function () {
-    //    debugger
-    //    editor = CKEDITOR.replace('Content')
-    //    editor.addCommand("mySimpleCommand", {
-    //        exec: function (edt) {
-    //            alert(edt.getData());
-    //        }
-    //    });
-    //    editor.ui.addButton('SuperButton', {
-    //        label: "Click me",
-    //        command: 'mySimpleCommand',
-    //        toolbar: 'insert',
-    //        icon: 'https://img.vn/uploads/thuvien/viber-image-2019-08-06-10-40-38-jpg-20190807145944LO3qbinQdG.jpg'
-    //    });
-    //};
-
-    //$('.datepicker').each(function () {
-    //    var fieldID = $(this).next().attr("id");
-    //    $(this).datepicker({
-    //        changeMonth: true,
-    //        changeYear: true,
-    //        dateFormat: 'dd/mm/yy',
-    //        altField: '#' + fieldID,
-    //        altFormat: 'yy-mm-dd'
-    //    }).val("");
-    //})
-
     var getPathIMG = function (obj) {
         var file = obj.files[0];
         var form_data = new FormData();
@@ -329,13 +300,14 @@
                         //debugger
                         var createdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.CreateDate));
                         var publishdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.PublishDate));
+                        var hrefOrigin = window.location.origin;
                         body.append("<tr>" +
                             "<td class='text-center'>" + (data.Model.pageSize*data.Model.pageIndex + i+1) + "</td>" +
                             "<td class='text-center'>" +
                             "<img src='https://static.eduso.vn/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
-                            "<td 'text-center'>" + item.Title + "</td>" +
-                            "<td 'text-center'>https://test.eduso.vn/tin-tuc/" + item.Url + "</td>" +
+                            "<td 'text-center'><a href='" + hrefOrigin + "/tin-tuc/" + item.Url + "' target='_blank'>" + item.Title + "</a></td>" +
+                            "<td 'text-center'>" + hrefOrigin + "/tin-tuc/" + item.Url + "</td>" +
                             "<td class='text-center' stye='max-height:'>" + item.Summary + "</td>" +
                             "<td class='text-center'>"+createdate+"</td>" +
                             "<td class='text-center'>" + publishdate + "</td>" +
@@ -386,6 +358,8 @@
 
     $(document).ready(function () {
         LoadData();
+        CKEDITOR.config.height = 500;
+        //CKEDITOR.config.extraPlugins = 'lineheight';
     });
 
     $('form').submit(function (e) {
@@ -520,9 +494,9 @@
                 txtarea[i].value = item.Data[$(txtarea[i]).attr("name")]
             }
 
-            $(form).find('#img').attr('src', '/Upload/News/' + item.Data.Thumbnail);
+            $(form).find('#img').attr('src', 'https://static.eduso.vn/' + item.Data.Thumbnail);
             $(form).find('#linkImage').removeClass('hide');
-            $(form).find('#linkImage').attr('href', '/Upload/News/' + item.Data.Thumbnail);
+            $(form).find('#linkImage').attr('href', 'https://static.eduso.vn/' + item.Data.Thumbnail);
 
             var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
             document.getElementById("PublishDate").value = time;

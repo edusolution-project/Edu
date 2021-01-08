@@ -31,7 +31,7 @@
                         <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
                             <div class="thumb " style="width:216px;height:122px;text-align:center">
                                 <a :href="'/tin-tuc/@category.Code/' + item.Code">
-                                    <img :src="''+item.Thumbnail" style="max-width:100%;max-height:100%;text-align:center" />
+                                    <img :src="cacheStatic(img.Thumbnail)" style="max-width:100%;max-height:100%;text-align:center" />
                                 </a>
                             </div>
                             <div class="ml-3 media-body">

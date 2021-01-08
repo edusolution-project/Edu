@@ -9,7 +9,9 @@ namespace BaseCustomerMVC.Models
     public class NewsViewModel:NewsEntity
     {
         [JsonProperty("CategoryName")]
-        public List<NewsCategoryEntity> CategoryName { get; set; }
+        public string CategoryName { get; set; }
+        [JsonProperty("CategoryCode")]
+        public string CategoryCode { get; set; }
         [JsonProperty("CenterName")]
         public string CenterName { get; set; }
         [JsonProperty("ClassName")]

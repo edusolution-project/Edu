@@ -26,11 +26,12 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name: 'about', groups: ['about'] }
 	];
 
-	config.removeButtons = 'CreateDiv,Language,Anchor,Flash,Smiley,About,Print,NewPage,Save,TextField,Font,FontSize,Subscript,Superscript';
+	config.removeButtons = 'CreateDiv,Language,Anchor,Flash,Smiley,About,Print,NewPage,Save,TextField,Subscript,Superscript';
     
     config.removeDialogTabs = 'image:advanced;link:advanced;textfield';
 	config.extraPlugins = 'uploadimage';
 	config.extraPlugins = 'youtube';
 	config.imageUploadUrl = '/Home/UploadImage';
 	//config.extraAllowedContent = 'fillquiz';
+	config.extraPlugins = 'lineheight';
 };

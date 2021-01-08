@@ -4,9 +4,9 @@
     ViewData["Title"] = news.Title;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<section style="font-family:Open Sans">
+<section style="font-family:Open Sans" id="section">
     <div class="container">
-        @*<div class="row form-group">
+        <div class="row form-group">
             <div class="inner-content">
                 <div class="content-box">
                     <div class="box-title d-flex justify-content-center mb-5">
@@ -15,40 +15,49 @@
                     </div> <div class="news-list flex-md-row pb-3"></div>
                 </div>
             </div>
-        </div>*@
+        </div>
 
-        @*<div class="row form-group" ">
+        <div class="row form-group">
             <div class="col-md-2"></div>
-            <div class="col-md-8 col-sm-12" id="content" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:26px">
+            <div class="col-md-8 col-sm-12" id="summary" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:26px">
                 @news.Summary
             </div>
-        </div>*@
+            <div class="col-md-2"></div>
+            <div class="col-md-2"></div>
+            <div class="col-md-8 col-sm-12" style="padding-top:5px">
+                <ul id="nextNews">
+                    <li v-for="(item,k) in items" v-if="k <= 1"><a :href="item.Url" style="margin: 0px 0px 6px -9px;text-decoration:none" :title="item.Title">{{item.Title}}</a></li>
+                </ul>
+            </div>
+        </div>
 
         <div class="media-container-row row">
             <div class="col-md-2"></div>
-            <div class="col-md-8 col-sm-12" id="content" style="text-align:justify">
+            <div class="col-md-8 col-sm-12" id="content" style="text-align:justify;font-size:18px;font-family:'Be Vietnam',sans-serif">
                 @Html.Raw(news.Content)
+                <div class="float-right" style="font-style:italic">@news.PublishDate.ToString("dd/MM/yyyy")</div>
             </div>
         </div>
-
-        @*<div class="row">
-            <div class="col-sm-11"></div>
-            <div class="col-sm-1">@news.PublishDate.ToString("dd-MM-yyyy")</div>
-        </div>*@
     </div>
-    @*<div class="row form-group">
-        <div class="col-sm-12" style="text-align:center;font-family: Open Sans;    font-size: 30px;    font-weight: bold;">
-            Những tin liên quan
+    <div class="row form-group" id="related_news">
+        <div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 30px;font-weight: bold;">
+            Tin cùng chuyên mục
         </div>
 
         <div class="col-sm-12">
-            <div class="carousel-wrap" id="partner">
+            <div class="carousel-wrap" id="partner" style="text-align:center">
                 <div class="owl-carousel">
                     <div class="item" v-for="img in items">
-                        <a :href="'/tin-tuc/doi-tac/'+img.Code">
-                            <img :src="'/Upload/News/'+img.Thumbnail" :title="img.Title">
-                            <div class=" col-sm-12" style="position:absolute;bottom:0px;color:white;left:5px">
+                        <a :href="img.Url">
+                            <img :src="cacheStatic(img.Thumbnail,200,120)" :title="img.Title">
+                            <div class=" col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700">
                                 {{img.Title}}
+                                <template v-if="img.IsHot">
+                                    <span class="iconb-ccm">Nổi bật</span>
+                                </template>
+                                <template v-else>
+                                    <span class="iconb-ccm" v-if="getHourse(img.PublishDate) != false">{{getHourse(img.PublishDate)}} giờ trước</span>
+                                </template>
                             </div>
                         </a>
                     </div>
@@ -57,7 +66,7 @@
             </div>
         </div>
 
-    </div>*@
+    </div>
 </section>
 <script>
     @if(news.Code == "ve-eduso")
@@ -74,58 +83,96 @@
             url: '@Url.Action("getlist", "news")',
             type: "post",
             dataType: "json",
-            data: { catID: '@news.CategoryID' },
+            data: { catID: '@news.CategoryID',CurrentNewsCode: '@news.Code' },
             success: function (result) {
-
+                var hrefOrigin = window.location.origin;
+                if (result.Data.length > 0) {
+                    for (var i = 0; i < result.Data.length; i++) {
+                        var item = result.Data[i]
+                        item.Url = hrefOrigin + "/tin-tuc/" + item.CategoryCode + "/" + item.Code
+                    }
+                }
+                else {
+                    $('#related_news').attr('style', 'display:none')
+                }
                 new Vue({
-                    el: '#partner',
+                    el: '#section',
                     data: {
                         items: result.Data
                     },
                     mounted() {
-                        callCarousel()
+                        callCarousel(result.Data)
                     }
                 })
             }
         });
     }
 
-        function callCarousel() {
-            var $owl = $('.owl-carousel');
-            $owl.trigger('destroy.owl.carousel');
-            //debugger
-            // After destory, the markup is still not the same with the initial.
-            // The differences are:
-            //   1. The initial content was wrapped by a 'div.owl-stage-outer';
-            //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
-            //   We have to remove that before the new initialization.
-            $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
-            //debugger
-            $owl.owlCarousel({
-                // your initial option here, again.
-                items: 4,
-                loop: true,
-                margin: 10,
-                nav: true,
-                navText: [
-                    "<i class='fa fa-caret-left'></i>",
-                    "<i class='fa fa-caret-right'></i>"
-                ],
-            });
+    function formatShortDate(date) {
+        var _date = moment(date);
+        if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+        return _date.format("DD/MM/YYYY")
+    };
 
-            //$('.owl-carousel').owlCarousel({
-            //    items: 4,
-            //    loop: true,
-            //    margin: 10,
-            //    nav: true,
-            //    navText: [
-            //        "<i class='fa fa-caret-left'></i>",
-            //        "<i class='fa fa-caret-right'></i>"
-            //    ],
-            //    //autoplay: true,
-            //    //autoplayHoverPause: true,
-            //})
+    function formatTime(time) {
+        var _time = moment(time);
+        if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+        return _time.format("DD/MM/YYYY HH:mm")
+    };
+
+    function getHourse(time) {
+        var _time = moment(time)._d;
+        var today = new Date();
+        if (_time.getDate() == today.getDate()) {
+            return today.getHours() - _time.getHours()
         }
+        else {
+            return false
+        }
+    };
+
+    function callCarousel(item) {
+        var $owl = $('.owl-carousel');
+        $owl.trigger('destroy.owl.carousel');
+        //debugger
+        // After destory, the markup is still not the same with the initial.
+        // The differences are:
+        //   1. The initial content was wrapped by a 'div.owl-stage-outer';
+        //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
+        //   We have to remove that before the new initialization.
+        $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
+        //debugger
+        var countItem = item.length
+        $owl.owlCarousel({
+            // your initial option here, again.
+            items: countItem > 4 ? 4 : countItem,
+            loop: true,
+            margin: 10,
+            nav: true,
+            navText: [
+                "<i class='fa fa-caret-left'></i>",
+                "<i class='fa fa-caret-right'></i>"
+            ],
+            autoplay: true,
+            autoplayHoverPause: true,
+        });
+
+        //$('.owl-carousel').owlCarousel({
+        //    items: 4,
+        //    loop: true,
+        //    margin: 10,
+        //    nav: true,
+        //    navText: [
+        //        "<i class='fa fa-caret-left'></i>",
+        //        "<i class='fa fa-caret-right'></i>"
+        //    ],
+        //    //autoplay: true,
+        //    //autoplayHoverPause: true,
+        //})
+    }
+
+    var content = $('#content')
+    var listImg = content
 
         $(document).ready(function ($) {
             getData();
@@ -178,17 +225,57 @@
         cursor: pointer;
     }
 
-    #content img{
-        max-width:100%;
-        max-height:100%;
+    #content img {
+        max-width: 100%;
+        max-height: 100%;
     }
 
     .item {
         position: relative
     }
 
-    .item a:hover{
-        color:aqua
+        .item a:hover {
+            color: aqua
+        }
+
+    .iconb-ccm {
+        background: #9ca7b7;
+        color: #fff !important;
+        font: normal 12px Arial !important;
+        padding: 3px 5px;
+        border-radius: 5px;
+        position: relative;
+        top: -1px;
+        margin-left: 5px;
+        display: inline-block;
     }
 
+    #nextNews {
+        font-size: 14px
+    }
+
+        #nextNews li {
+            padding-left: 5px
+        }
+
+            #nextNews li a {
+                color: #383e54;
+            }
+
+            #nextNews li:hover a {
+                color: deepskyblue
+            }
+
+    ul {
+        list-style: none;
+    }
+
+        ul li::before {
+            content: "\2022";
+            color: orange;
+            font-weight: bold;
+            display: inline-block;
+            width: 2em;
+            margin-left: -1em;
+        }
 </style>

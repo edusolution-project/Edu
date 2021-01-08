@@ -236,6 +236,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             RoleID = _roleService.GetItemByCode("student").ID
                         };
                         _accountService.CreateQuery().InsertOne(account);
+                        //_ = _mailHelper.SendRegisterEmail(account, _defaultPass);
                         createAcc = true;
                     }
 
