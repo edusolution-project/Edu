@@ -40,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonProgressService _lessonProgressService;
 
         private readonly LessonHelper _lessonHelper;
+        private readonly ClassSubjectService _classSubjectService;
+        private readonly ProgressHelper _progressHelper;
 
         //private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -59,6 +61,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonPartAnswerService lessonPartAnswerService,
             LessonProgressService lessonProgressService,
             LessonHelper lessonHelper,
+            ClassSubjectService classSubjectService,
+            ProgressHelper progressHelper,
             IRoxyFilemanHandler roxyFilemanHandler
             )
         {
@@ -79,6 +83,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonProgressService = lessonProgressService;
             _lessonHelper = lessonHelper;
             _roxyFilemanHandler = roxyFilemanHandler;
+            _classSubjectService = classSubjectService;
+            _progressHelper = progressHelper;
         }
 
         [Obsolete]
@@ -326,6 +332,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var currentExam = _service.GetItemByID(oldItem.ExamID);
                     var point = 0.0;
                     var lesson = _lessonService.GetItemByID(currentExam.LessonID);
+                    currentExam.LastPoint = currentExam.Point;
                     currentExam.Point = point;
                     currentExam.Marked = true;
                     currentExam = _lessonHelper.CompleteFull(currentExam, lesson, out point);
@@ -338,7 +345,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     //Dictionary<string, List<MediaResponseModel>> listFilesUpload = _roxyFilemanHandler.UploadAnswerBasis(basis, HttpContext);
                     List<MediaResponseModel> listFileUpload = _roxyFilemanHandler.UploadFileWithGoogleDrive(basis, User.FindFirst("UserID").Value, HttpContext);
-                    if (listFileUpload.Count > 0)
+                    if (listFileUpload != null && listFileUpload.Count > 0)
                     {
                         var listMedia = new List<Media>();
                         for (int i = 0; i < listFileUpload.Count; i++)
@@ -377,5 +384,216 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(response);
             }
         }
+
+        public async Task<JsonResult> GetLessonProgressListInWeek(String basis, String StudentID, String ClassSubjectID, DateTime StartWeek, DateTime EndWeek)
+        {
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+            {
+                return Json("Học sinh không tồn tại");
+            }
+
+            var classSbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (classSbj == null)
+            {
+                return Json("Môn học không có");
+            }
+
+            var result = new List<StudentLessonResultViewModel>();
+            if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj, true);
+            }
+            else
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+            }
+
+            return Json(result);
+        }
+
+        public async Task<JsonResult> GetLessonProgressExam(String basis, String StudentID, String ClassID)
+        {
+            var student = _studentService.GetItemByID(StudentID);
+            if (student == null)
+            {
+                return Json("Không tìm thấy thông tin học viên.");
+            }
+
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+            {
+                return Json("Khong tim thay lop tuong ung");
+            }
+
+            var classSbjExam = _classSubjectService.GetByClassID(@class.ID).Where(x=>x.TypeClass == CLASSSUBJECT_TYPE.EXAM);
+            var result = new List<StudentLessonResultViewModel>();
+            foreach(var item in classSbjExam)
+            {
+                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item);
+            }
+
+            return Json(result);
+        }
+
+        public JsonResult GetDetailProgessExam(String LessonScheduleID)
+        {
+            try
+            {
+                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
+                //    new ExamVM
+                //    {
+                //        StudentID = x.Key,
+                //        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID,
+                //        LessonID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().LessonID,
+                //        ClassSubjectID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassSubjectID,
+                //        TotalLearn = x.ToList().Count,
+                //        ClassID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassID,
+                //    }
+                //);
+
+                var exams = from e in _service.GetItemByLessonScheduleID(LessonScheduleID)
+                           group e by e.StudentID
+                             into g
+                           let item = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+                           select new ExamVM
+                           {
+                               StudentID = g.Key,
+                               StudentName = _studentService.GetItemByID(g.Key).FullName,
+                               TotalLearn = item == null ? 0 : item.Number,
+                               LastPoint = item == null ? 0 : (item.Point == 0 ? 0 : (item.Point * 100) / item.MaxPoint),
+                               Created = item?.Created ?? new DateTime(1900, 1, 1),
+                               ID = item.ID,
+                               Status = item.Status
+                           };
+                if (exams == null)
+                {
+                    return Json(
+                            new Dictionary<String, Object>
+                            {
+                                {"Status",false },
+                                {"Message","Không tìm thấy bài học"}
+                            }
+                        );
+                }
+
+                var examIDs = exams.Select(x => x.ID).ToList();
+                var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
+                var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
+                var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title,Type = x.Type }).ToList();
+                //if(examIDs.Count() == 0)
+                //{
+                //    var result1 = new {
+                //        ExamID = "",
+                //        TitleLessonPart = "",
+                //        CountFalse = 1,
+                //        CountTrue = 0,
+                //        TotalAns = 1
+                //    };
+                //    return Json(
+                //        new Dictionary<String, Object>
+                //        {
+                //            {"Status",true },
+                //            {"Data",result1 },
+                //            {"DetailLesson",exams }
+                //        }
+                //    );
+                //}
+
+                List<ExamDetailEntity> listDetailExams = new List<ExamDetailEntity>();
+                foreach(var item in _examDetailService.GetByExamIDs(examIDs).ToList())
+                {
+                    var cloneLessonPart = listLessonPart.Where(x=>x.ID == item.LessonPartID).FirstOrDefault();
+                    //if (item.LessonPartID == "5f6b11892618882ab86de2f2") { var test1 = ""; }
+                    if(cloneLessonPart.Type == "QUIZ2")
+                    {
+                        if(item.AnswerValue != item.RealAnswerValue)
+                        {
+                            item.AnswerID = "1";
+                            item.RealAnswerID = "2";
+                        }
+                        else
+                        {
+                            item.AnswerID = item.RealAnswerID;
+                        }
+                    }
+                    listDetailExams.Add(item);
+                }
+
+                //var result = from d in _examDetailService.GetByExamIDs(examIDs).ToList()
+                var result = from d in listDetailExams
+                             group d by d.LessonPartID
+                              into g
+                              let detailExams1 = g
+                              select new
+                              {
+                                  ExamID = g.FirstOrDefault().ExamID,
+                                  TitleLessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault().Title,
+                                  CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID ).Count(),
+                                  CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID ).Count(),
+                                  TotalAns = g.Count()
+                              };
+
+                return Json(
+                        new Dictionary<String, Object>
+                        {
+                            {"Status",true },
+                            {"Data",result },
+                            {"DetailLesson",exams }
+                        }
+                    );
+            }
+            catch(Exception ex)
+            {
+                return Json(
+                        new Dictionary<String, Object>
+                        {
+                            {"Status",false },
+                            {"Message",ex.Message }
+                        }
+                    );
+            }
+        }
+
+        protected class ExamVM : ExamEntity
+        {
+            public String StudentName { get; set; }
+            public Int32 TotalLearn { get; set; }
+        }
+
+        //private void GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj, List<StudentLessonResultViewModel> result)
+        //{
+        //    //lay danh sach bai hoc trogn tuan
+        //    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+        //    var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+        //    //danh sach bai luyen tap
+        //    var practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+        //    foreach (var practice in practices)
+        //    {
+        //        var examresult = _service.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+        //        var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, practice.ID);
+        //        var tried = examresult.Count();
+        //        var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+        //        var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+        //        var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+        //        var lastEx = examresult.FirstOrDefault();
+        //        result.Add(new StudentLessonResultViewModel(student)
+        //        {
+        //            LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+        //            MaxPoint = maxpoint,
+        //            MinPoint = minpoint,
+        //            AvgPoint = avgpoint,
+        //            TriedCount = tried,
+        //            LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+        //            OpenCount = progress?.TotalLearnt ?? 0,
+        //            LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+        //            IsCompleted = lastEx != null && lastEx.Status,
+        //            ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
+        //            LessonName = practice.Title
+        //        });
+        //    }
+        //}
     }
 }

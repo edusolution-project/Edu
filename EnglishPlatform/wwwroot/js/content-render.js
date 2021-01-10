@@ -47,7 +47,7 @@ CKEDITOR.on('instanceCreated', function (event) {
         $(e.editor.element.$).removeAttr("title").attr('title', $(e.editor.element.$).attr('data-title'));
     });
 });
-CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
+//CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
 
 var quiz3m_ans = [];
 
@@ -109,7 +109,10 @@ var Lesson = (function () {
                 renderStandardLayout();
                 renderPreview();
                 break;
+            case mod.TEACHERPREVIEW:
             case mod.TEACHERPREVIEWEXAM:
+                redoExam();
+                break;
             case mod.STUDENT_EXAM:
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
@@ -127,7 +130,6 @@ var Lesson = (function () {
                 else
                     renderExam();
                 break;
-            case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 renderStandardLayout();
                 var hash = window.location.hash;
@@ -154,17 +156,6 @@ var Lesson = (function () {
         window.getLocalData = getLocalData
         window.ShowFullScreen = showFullScreen;
         window.openPreview = openPreview;
-        //var hash = window.location.hash;
-        //if (hash.startsWith('#')) {
-        //    hash = hash.split('#')[1]
-        //    //console.log(hash)
-        //    switch (hash) {
-        //        case 'redo':
-        //            redoExam();
-        //            window.history.pushState({ "html": document.html, "pageTitle": document.title }, "", window.location.href.substr(0, window.location.href.indexOf('#')));
-        //            break;
-        //    }
-        //}
     }
 
     var reloadData = function () {
@@ -339,7 +330,6 @@ var Lesson = (function () {
 
         _totalPart = data.Part != null ? data.Part.length : 0;
         //header
-        console.log(config.mod);
         switch (config.mod) {
             case mod.PREVIEW:
                 var headerRow = $("<div>", { "class": "justify-content-between d-none" }).empty();
@@ -373,8 +363,6 @@ var Lesson = (function () {
                 //var iconEdit = $("<i>", { "class": "fas fa-edit mt-2 mb-2 mr-2" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square mt-2 mb-2 mr-2" });
                 var iconTrash = $("<i>", { "class": "fas fa-trash mr-2" });
-                lessonButton.append(iconSort);
-
 
                 lessonButton.append(sort);
                 sort.prepend(iconSort).append("Sắp xếp");
@@ -386,21 +374,27 @@ var Lesson = (function () {
 
 
                 var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
-                var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Thêm nội dung từ file Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word"></i>').append("Thêm nội dung từ file Word");
-                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất ra file Word", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word"></i>').append("Xuất file Word");
+                //var btnAddFileFromWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Input từ Word", "onclick": "ShowCloneQuestion(this,1)" }).append('<i class="far fa-file-word mr-2"></i>').append("Input từ Word");
+                var btnExportFileToWord = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Xuất file", "onclick": "downloadFileWordWitdData()" }).append('<i class="far fa-file-word mr-2"></i>').append("Xuất file");
                 lessonButton.append(btnExplain);
-                lessonButton.append(btnAddFileFromWord);
+                //lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
 
 
+
+
+                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddPartToLesson('" + data.ID + "','" + data.TemplateType + "')" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
+                create.append(iconCreate).append("Thêm nội dung");
+                lessonButton.append(create);
+
                 //lessonButton.append(edit);
                 //edit.prepend(iconEdit).append("Sửa");
-                lessonButton.append(create);
-                create.prepend(iconCreate).append("Thêm nội dung");
+                //lessonButton.append(create);
+                //create.prepend(iconCreate).append("Trực tiếp");
                 //lessonButton.append(remove); //removeLesson
                 //remove.append(iconTrash);
                 //headerRow.append(lessonButton);
-                
 
                 lesson_action_holder.empty().prepend(lessonButton);
 
@@ -428,7 +422,7 @@ var Lesson = (function () {
                 }
 
                 var lessonButton = $("<div>", { "class": "lesson-button" });
-                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Bật chế đô sửa", "onclick": "SwitchMode('" + mod.TEACHEREDIT + "')" });
+                var toggleMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Bật chế độ sửa", "onclick": "SwitchMode('" + mod.TEACHEREDIT + "')" });
                 var iconToggle = $("<i>", { "class": "fas fa-edit mr-2" });
 
                 lessonButton.append(toggleMode);
@@ -466,11 +460,10 @@ var Lesson = (function () {
 
                 var lessonButton = $("<div>", { "class": "lesson-button" });
                 var sort = $("<button>", { "class": "btn btn-primary btn-sort mt-2 mb-2 mr-2", "title": "Sort", "onclick": "SortPart()" });
-                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });
+                //var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "data-target": "#partModal", "onclick": "AddPart('" + data.ID + "','" + data.TemplateType + "')" });                
                 var toggleMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Về chế độ xem", "onclick": "SwitchMode('" + mod.TEACHERVIEW + "')" });
 
                 var iconSort = $("<i>", { "class": "fas fa-sort mr-2" });
-                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
                 var iconToggle = $("<i>", { "class": "fas fa-eye mr-2" });
 
                 if (!(_totalPart > 1)) {
@@ -481,8 +474,13 @@ var Lesson = (function () {
                 toggleMode.append(iconToggle).append("Xem");
                 lessonButton.append(sort);
                 sort.append(iconSort).append("Sắp xếp");
-                lessonButton.append(create);
+
+                var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddPartToLesson('" + data.ID + "','" + data.TemplateType + "')" });
+                var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
                 create.append(iconCreate).append("Thêm nội dung");
+                lessonButton.append(create);
+
+
                 //headerRow.append(lessonButton);
                 lesson_action_holder.find(".lesson-button").remove();
                 lesson_action_holder.append(lessonButton);
@@ -498,21 +496,28 @@ var Lesson = (function () {
                 //no header
                 break;
         }
-        for (var i = 0; data.Part != null && i < data.Part.length; i++) {
-            var item = data.Part[i];
-            switch (item.Type) {
-                case "QUIZ1":
-                case "QUIZ2":
-                case "QUIZ3":
-                case "QUIZ4":
-                case "ESSAY":
-                    switchUIMode(UIMode.EXAM_ONLY);
-                    break;
-                default:
-                    switchUIMode(UIMode.LECTURE_ONLY);
+
+        //UIMode not init
+        if (data.Part != null && data.Part.length > 0) {
+            for (var i = 0; i < data.Part.length; i++) {
+                var item = data.Part[i];
+                switch (item.Type) {
+                    case "QUIZ1":
+                    case "QUIZ2":
+                    case "QUIZ3":
+                    case "QUIZ4":
+                    case "ESSAY":
+                        switchUIMode(UIMode.EXAM_ONLY);
+                        break;
+                    default:
+                        switchUIMode(UIMode.LECTURE_ONLY);
+                        break;
+                }
             }
+            console.log("UI detectd: " + _UImode);
         }
-        //console.log(_UImode);
+
+
         $('.mod_' + config.mod).addClass("uimod_" + _UImode);
         //body
         switch (config.mod) {
@@ -549,6 +554,7 @@ var Lesson = (function () {
                             .empty().append($(this).find('.part-box-header')).append(html).append(media)
                             .appendTo('#leftCol')
                     });
+                    goPartInx(0);
                 }
                 break;
             case mod.TEACHERPREVIEWEXAM:
@@ -583,6 +589,10 @@ var Lesson = (function () {
                             .empty().append($(this).find('.part-box-header')).append(media).append(html)
                             .appendTo('#leftCol')
                     })
+                    goPartInx(0);
+                }
+                if (config.mod == mod.STUDENT_EXAM) {
+                    renderOldAnswer();
                 }
                 break;
             case mod.TEACHERPREVIEW:
@@ -600,27 +610,10 @@ var Lesson = (function () {
                 if (data.Part != null && data.Part.length == 1) {
                     $('.fas.fa-caret-down:first').click();
                 }
+                console.log(_UImode);
                 switch (_UImode) {
                     case UIMode.EXAM_ONLY:
                     case UIMode.BOTH:
-                        if (_UImode == UIMode.EXAM_ONLY) {
-                            $('#rightCol .tab-pane').each(function () {
-                                var media = null;
-                                var html = null;
-                                if ($(this).find(".QUIZ3").length > 0) {
-                                    $(this).addClass("h-100");
-                                    media = $(this).find(".Q3_absrow > .media-holder:first");
-                                }
-                                else {
-                                    media = $(this).find(".quiz-wrapper > .media-holder");
-                                }
-                                html = $(this).find(".part-description");
-                                $(this).addClass("m-0");
-                                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
-                                    .empty().append($(this).find('.part-box-header')).append(html).append(media)
-                                    .appendTo('#leftCol')
-                            });
-                        }
                         var dataform = new FormData();
                         dataform.append("ClassID", config.class_id);
                         dataform.append("ClassSubjectID", config.class_subject_id);
@@ -649,6 +642,8 @@ var Lesson = (function () {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
                                 renderLectureExam(exam, false);
+                                $('li[for=lesson-info]').hide().removeClass('d-flex');
+
                             }
                             else {
                                 console.log("Load current exam....");
@@ -658,15 +653,24 @@ var Lesson = (function () {
                                     //console.log(data);
                                     localStorage.clear();
                                     console.log("New Exam");
+                                    //console.log(_UImode);
+                                    //if (_UImode != UIMode.EXAM_ONLY) 
+
                                     //console.log(getLocalData("CurrentExam"))    
-                                    if (config.mod == mod.STUDENT_LECTURE)
+                                    if (config.mod == mod.STUDENT_LECTURE) {
+                                        $('li[for=lesson-info]').hide().removeClass('d-flex');
                                         renderLectureExam(exam, false);
-                                    else
+
+                                        //renderOldAnswer();
+                                    }
+                                    else {
                                         renderLectureExam(exam, true);
-                                    renderOldAnswer();
+                                        goPartInx(0);
+                                    }
                                 }
                                 else {
-                                    console.log("Exam Continue")
+                                    console.log("Exam Continue");
+                                    $('li[for=lesson-info]').show().addClass('d-flex');
                                     setLocalData("CurrentExam", exam.ID);
                                     $('#ExamID').val(exam.ID);
 
@@ -685,15 +689,20 @@ var Lesson = (function () {
                                         setLocalData("CurrentExam", exam.ID);
                                         $('#ExamID').val(exam.ID);
                                         //render Exam
-                                        var _sec = 59 - moment(timer).second();
-                                        var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                                        var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                                        setLocalData("Timer", _timer);
-                                        $(".time-counter").text(_timer);
-                                        console.log(_timer);
+                                        if (exam.Timer > 0) {
+                                            var _sec = 59 - moment(timer).second();
+                                            var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                            var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                            setLocalData("Timer", _timer);
+                                            $(".time-counter").text(_timer);
+                                            console.log(_timer);
+                                            countdown(false);
+                                        }
                                         renderLectureExam(exam, true);
-                                        countdown(false);
-                                        renderOldAnswer();
+                                        goPartInx(0);
+                                        if (config.mod == mod.STUDENT_LECTURE) {
+                                            renderOldAnswer();
+                                        }
                                     }
                                 }
                             }
@@ -733,7 +742,7 @@ var Lesson = (function () {
                     //_footerLeft.append(prevtab);
                     //var _footerRight = $('<div>', { "class": "col-md-2 text-right" });
                     //var _footerCenter = $('<div>', { "class": "col-md-8 text-center" });
-                    var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
+                    //var btnExplain = $("<button>", { "class": "btn btn-primary mt-2 mb-2", "title": "Bật/tắt giải thích", "onclick": "ToggleExplanation(this)" }).append('<i class="fas fa-info-circle mr-2"></i>').append("Giải thích");
                     //_footerCenter.append(btnExplain);
 
                     lesson_action_holder.find("> button").remove();
@@ -783,10 +792,9 @@ var Lesson = (function () {
                 $(".time-counter").html(getLocalData("Timer"));
                 countdown();
                 nav_bottom.append(nexttab);
-                //debugger
-                if (mod.STUDENT_EXAM == "studentexam") {
-                    renderOldAnswer();
-                }
+                //if (mod.STUDENT_EXAM) {
+                //    renderOldAnswer();
+                //}
                 break;
             case mod.REVIEW:
                 var nav_bottom = lesson_action_holder
@@ -868,35 +876,60 @@ var Lesson = (function () {
                     countdown();
                     nav_bottom.append(nexttab);
                 }
-                if (data.Timer > 0) {
-                    var nav_bottom = lesson_action_holder
-                    nav_bottom.empty();
-                    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
-                        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
-                        .append($("<span>", { class: "time-counter " }));
 
-                    nav_bottom.prepend(timer);
-                    $(".time-counter").html(getLocalData("Timer"));
-                    //countdown(false);
-                }
-                //debugger
-                if (mod.STUDENT_LECTURE == "studentlecture") {
-                    renderOldAnswer();
-                }
+
+                //TODO: CHECK
+                //if (data.Timer > 0) {
+                //    var nav_bottom = lesson_action_holder
+                //    nav_bottom.empty();
+                //    var timer = $('<div>', { id: 'bottom-counter', class: "font-weight-bold m-2 text-danger", style: "font-size:200%" })
+                //        .append('<i class="far fa-clock mr-2" style="font-size:85%"></i>')
+                //        .append($("<span>", { class: "time-counter " }));
+
+                //    nav_bottom.prepend(timer);
+                //    $(".time-counter").html(getLocalData("Timer"));
+                //    //countdown(false);
+                //}
+
+                //if (mod.STUDENT_LECTURE) {
+                //    renderOldAnswer();
+                //}
                 break;
         }
+
+        if (_UImode == UIMode.EXAM_ONLY) {
+            $('#rightCol .tab-pane').each(function () {
+                var media = null;
+                var html = null;
+                if ($(this).find(".QUIZ3").length > 0) {
+                    if (!isMobileDevice()) {
+                        $(this).addClass("h-100");
+                        media = $(this).find(".Q3_absrow > .media-holder:first");
+                    }
+                }
+                else {
+                    media = $(this).find(".quiz-wrapper > .media-holder");
+                }
+                html = $(this).find(".part-description");
+                $(this).addClass("m-0");
+                $(this).clone().removeClass('tab-pane').addClass('tab-pane-quiz')
+                    .empty().append($(this).find('.part-box-header')).append(media).append(html)
+                    .appendTo('#leftCol')
+            })
+        }
+
         if (_openingPart == '') {
             $('#leftCol .fa-caret-down:first()').focus().click()
         }
         else {
             $('#leftCol .fa-caret-down[part=' + _openingPart + ']').focus().click()
         }
-        if (_UImode == UIMode.EXAM_ONLY) {
-            if ($('.tab-pane.show .QUIZ2').length > 0) {
-                $('#pills-tabContent>.scroll-wrapper:first').addClass('col-md-12');
-                $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
-            }
-        }
+        //if (_UImode == UIMode.EXAM_ONLY) {
+        //    if ($('.tab-pane.show .QUIZ2').length > 0) {
+        //        $('#pills-tabContent>.scroll-wrapper:first').addClass('col-md-12');
+        //        $('#pills-tabContent>.scroll-wrapper:last').addClass('d-none');
+        //    }
+        //}
     }
 
     var switchUIMode = function (mode) {
@@ -1001,6 +1034,8 @@ var Lesson = (function () {
 
         var boxHeader = $("<div>", { "class": "part-box-header row" });
 
+        boxHeader.append($("<style type='text/css'> .btn-action{color:#CCC} .btn-action:hover{color:#333} </style>"));
+
         switch (config.mod) {
             case mod.PREVIEW:
             case mod.TEACHEREDIT:
@@ -1013,8 +1048,8 @@ var Lesson = (function () {
                 var iconTrash = $("<i>", { "class": "fas fa-trash" });
 
                 var boxButton = $("<div>", { "class": "text-right col-md-2" });
-                boxButton.append($("<button>", { "class": "btn btn-primary btn-sm mr-1 ml-1", "style": "width: 40px", "title": "Sửa", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
-                boxButton.append($("<button>", { "class": "btn btn-danger btn-sm mr-1 ml-1", "style": "width: 40px", "title": "Xóa", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
+                boxButton.append($("<button>", { "class": "btn btn-action mr-1 ml-1", "style": "width: 30px", "title": "Sửa", "data-toggle": "modal", "data-target": "#partModal", "onclick": "EditPart('" + data.ID + "')" }).append(iconEdit))
+                boxButton.append($("<button>", { "class": "btn btn-action mr-1 ml-1", "style": "width: 30px", "title": "Xóa", "onclick": "RemovePart('" + data.ID + "')" }).append(iconTrash));
                 boxHeader.append(boxButton);
                 break;
             default:
@@ -1218,16 +1253,20 @@ var Lesson = (function () {
 
 
                     CKEDITOR.replace(esid, {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'
+                        //, ckeditor_wiris'
                     });
                     //CKEDITOR.inline(esid, {
                     //    extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                     //});
 
+                    var extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'><i class='text-warning'>Không có giải thích</i></div>" });
+
                     if (data.Questions[0].Description !== null) {
-                        var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Questions[0].Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                        itemBody.append($("<div>", { "class": "quiz-item" }).append(extend));
+                        extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'>" + breakLine(data.Questions[0].Description) + "</div>" });
                     }
+
+                    itemBody.append($("<div>", { "class": "quiz-item" }).append(extend));
 
                     itemBody.append($("<button>", { text: "Đính kèm file", class: "btn btn-primary mt-2 btnAddfile", disabled: "disabled" }));
                     itemBody.append($("<button>", { text: "Lưu đáp án", class: "btn btn-primary mt-2 ml-2", disabled: "disabled" }));
@@ -1294,10 +1333,13 @@ var Lesson = (function () {
 
                     quizitem.append(answer_wrapper);
 
+                    var extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'><i class='text-warning'>Không có giải thích</i></div>" });
+
                     if (data.Description !== null) {
-                        var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                        quizitem.append(extend);
+                        extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'>" + breakLine(data.Description) + "</p>" });
                     }
+
+                    quizitem.append(extend);
 
                     for (var i = 0; data.Answers != null && i < data.Answers.length; i++) {
                         var item = data.Answers[i];
@@ -1324,10 +1366,14 @@ var Lesson = (function () {
                 });
                 quizitem.append(quiz_part);
                 quizitem.append(answer_part);
+
+                var extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'><i class='text-warning'>Không có giải thích</i></div>" });
+
                 if (data.Description !== null) {
-                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                    quizitem.append(extend);
+                    extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'>" + breakLine(data.Description) + "</div>" });
                 }
+
+                quizitem.append(extend);
 
                 var pane_item = $("<div>", { "class": "pane-item" });
                 if (data.Media == null) {
@@ -1390,10 +1436,13 @@ var Lesson = (function () {
 
                 itembox.append(answer_wrapper);
 
+                var extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'><i class='text-warning'>Không có giải thích</i></div>" });
+
                 if (data.Description !== null) {
-                    var extend = $("<div>", { "class": "quiz-extend", "html": breakLine(data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn")) });
-                    itembox.append(extend);
+                    extend = $("<div>", { "class": "quiz-extend", "html": "<div class='m-2'>" + breakLine(data.Description) + "</div>" });
                 }
+
+                itembox.append(extend);
 
                 container.append(itembox);
 
@@ -1424,8 +1473,15 @@ var Lesson = (function () {
             case "QUIZ3":
                 var placeholder = $("#" + data.ParentID).find(".answer-pane");
                 $(placeholder).removeClass("no-child");
-                placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                //placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
                 container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
+                //debugger
+                //if (data.IsCorrect == true) {
+                //    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
+                //}
+                //else {
+                //    placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "text": "Thả câu trả lời ở đây" }));
+                //}
 
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
@@ -1433,9 +1489,22 @@ var Lesson = (function () {
                 if (data.Media != null) {
                     renderMediaContent(data, answer);
                 }
-                else
-                    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                else {
+                    if (!data.IsCorrect) {
+                        answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                    }
+                }
                 container.append(answer);
+                if (data.IsCorrect == true) {
+                    if (data.Media == null) {
+                        placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "text": data.Content }));
+                        document.getElementById(data.ID).style.display = "none";
+                    }
+                    else {
+                        placeholder.empty().append($("<div>", { "class": "pane-item placeholder", "style": "background:#28a745;color:white", "html": $(answer).html() }));
+                        document.getElementById(data.ID).style.display = "none";
+                    }
+                }
                 break;
             case "QUIZ1":
                 //console.log(answer);
@@ -1487,12 +1556,18 @@ var Lesson = (function () {
                     //console.log(data.Media);
                     if (!isMobileDevice()) {
                         if (data.Media.Path.startsWith("https://drive.google.com")) {
+                            //if (data.Media.Extension.toLowerCase().endsWith("ppt") || data.Media.Extension.toLowerCase().endsWith("pptx"))
+                            //    mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=" + replaceGooglePath(data.Media.Path), "class": "embed-frame", "frameborder": "0" }));
+                            //else
                             mediaHolder.append($("<iframe>", { "src": replaceGooglePath(data.Media.Path) + "", "class": "embed-frame", "frameborder": "0" }));
                         }
                         else {
                             if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
                                 data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
-                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx")) {
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
+                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                                data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
+                                data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")) {
                                 mediaHolder.append($("<iframe>", { "src": "https://view.officeapps.live.com/op/embed.aspx?src=https://" + window.location.hostname + data.Media.Path.replace("http:///", "/") + "", "class": "embed-frame", "frameborder": "0" }));
                             }
                             else {
@@ -1515,7 +1590,10 @@ var Lesson = (function () {
                         else if (data.Media.Extension.indexOf("audio") >= 0)
                             mediaHolder.append("<audio id='audio' controls><source src='" + data.Media.Path.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn").replace("http:///", "/") + "' type='" + data.Media.Extension + "' />Your browser does not support the audio tag</audio>");
                         else {
-                            if (data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
+                            if (data.Media.Name.endsWith("doc") || data.Media.Name.endsWith("docx") ||
+                                data.Media.Name.endsWith("ppt") || data.Media.Name.endsWith("pptx") ||
+                                data.Media.Name.endsWith("xls") || data.Media.Name.endsWith("xlsx") ||
+                                data.Media.Path.endsWith("doc") || data.Media.Path.endsWith("docx") ||
                                 data.Media.Path.endsWith("ppt") || data.Media.Path.endsWith("pptx") ||
                                 data.Media.Path.endsWith("xls") || data.Media.Path.endsWith("xlsx")
                             ) {
@@ -1586,14 +1664,19 @@ var Lesson = (function () {
                     }
                 }
 
-                //if (config.mod == mod.STUDENT_EXAM) {
-                var quiz = prevHolder.data("questionId");
-                if (quiz != null) {
-                    delAnswerForStudentNoRender(quiz);
-                }
+                //console.log(config.mod);
 
-                AnswerQuestion(this);
-                //}
+                switch (config.mod) {
+                    case mod.TEACHERVIEW:
+                    case mod.TEACHERPREVIEW:
+                    case mod.TEACHERPREVIEWEXAM:
+                        break;
+                    default:
+                        var quiz = prevHolder.data("questionId");
+                        if (quiz != null) { delAnswerForStudent(quiz); }
+                        AnswerQuestion(this);
+                        break;
+                }
 
                 $(this).find(".placeholder").hide();
             }
@@ -1607,9 +1690,15 @@ var Lesson = (function () {
                 $(this).find(".placeholder").hide();
                 var prevHolder = $(ui.helper).parent();
 
-                if (config.mod == mod.STUDENT_EXAM) {
-                    var quiz = prevHolder.data("questionId");
-                    if (quiz != null) { delAnswerForStudent(quiz); }
+                switch (config.mod) {
+                    case mod.TEACHERVIEW:
+                    case mod.TEACHERPREVIEW:
+                    case mod.TEACHERPREVIEWEXAM:
+                        break;
+                    default:
+                        var quiz = prevHolder.data("questionId");
+                        if (quiz != null) { delAnswerForStudent(quiz); }
+                        break;
                 }
                 prevHolder.remove($(ui.helper));
 
@@ -1630,7 +1719,9 @@ var Lesson = (function () {
     var breakLine = function (data) {
         if (data == null)
             return "";
-        return data.replace(/\n/g, "<br/>");
+        return data.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn");
+
+        //return data.replace(/\n/g, "<br/>");
     }
 
     var toggleExplanation = function (obj) {
@@ -1718,6 +1809,11 @@ var Lesson = (function () {
     }
 
     var modalAddPart = function (lessonID, type) {
+
+        $(".swal2-container").hide();
+        $('#partModal').modal('hide');
+        $('#partModal').modal('show');
+
         var modalForm = window.partForm;
         $(modalForm).empty();
         $('#partModal #modalTitle').html("Thêm nội dung");
@@ -1750,7 +1846,25 @@ var Lesson = (function () {
 
     var renderEditPart = function (data) {
         var modalForm = window.partForm;
-        $('#partModal #modalTitle').html("Update");
+        $('#partModal #modalTitle').html("Cập nhật nội dung");
+        var textType = "";
+        switch (data.Type) {
+            case 'TEXT': textType = "Văn bản"; break;
+            case 'VIDEO': textType = "Video"; break;
+            case 'AUDIO': textType = "Audio"; break;
+            case 'IMG': textType = "Hình ảnh"; break;
+            case 'DOC': textType = "File văn bản (PDF, DOC, PPT, XLS)"; break;
+            case 'VOCAB': textType = "Từ vựng tiếng Anh"; break;
+            case 'QUIZ1': textType = "QUIZ: Chọn 1 đáp án đúng"; break;
+            case 'QUIZ2': textType = "QUIZ: Điền từ"; break;
+            case 'QUIZ3': textType = "QUIZ: Nối đáp án"; break;
+            case 'QUIZ4': textType = "QUIZ: Chọn 1/nhiều đáp án"; break;
+            case 'ESSAY': textType = "QUIZ: Essay"; break;
+            default: textType = "Unknown"; break;
+        }
+
+
+        $(modalForm).append($("<div>", { class: "mt-2 mb-3", html: "Kiểu nội dung: <b style='font-weight:700'>" + textType + "</b>" }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ParentID", "value": data.ParentID }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassID", "value": config.class_id }));
         $(modalForm).append($("<input>", { "type": "hidden", "name": "ClassSubjectID", "value": config.class_subject_id }));
@@ -1872,7 +1986,7 @@ var Lesson = (function () {
         contentholder.append($("<input>", { "type": "text", "name": "Title", "class": "input-text form-control", "placeholder": "Tiêu đề", "required": "required" }));
         if (data != null && data.Title != null)
             contentholder.find("[name=Title]").val(data.Title);
-        contentholder.append($("<label>", { "class": "title", "text": "Mô tả:" }));
+        //contentholder.append($("<label>", { "class": "title", "text": "Mô tả:" }));
         //var desc = $("<textarea>", { "id": "editor", "rows": "5", "name": "Description", "class": "input-text form-control", "placeholder": "Nội dung" });
         var desc = $("<div>", { "id": "editor", class: "editorck mb-3 p-2", "name": "Description", "data-title": "Nội dung giới thiệu", contenteditable: true });
         contentholder.append($("<div>", { class: "mb-2" }).append(desc));
@@ -1915,7 +2029,7 @@ var Lesson = (function () {
                 contentholder.append($("<div>", { "class": "media_preview" }));
                 break;
             case "VOCAB":
-                desc.parent().prev().remove();
+                //desc.parent().prev().remove();??????
                 desc.parent().remove();
                 contentholder.append($("<label>", { "class": "title", "text": "Nhập danh sách từ vựng, cách nhau bởi dấu |" }));
                 contentholder.append($("<input>", { "type": "text", "name": "Description", "class": "input-text form-control", "placeholder": "Danh sách từ vựng" }).val(description));
@@ -1979,7 +2093,7 @@ var Lesson = (function () {
                 //    addNewQuestion();
                 $('.editorck').not('.d-none').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2101,7 +2215,7 @@ var Lesson = (function () {
                     addNewQuestion();
                 $('.editorck').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2114,7 +2228,7 @@ var Lesson = (function () {
             case "QUIZ2":
                 CKEDITOR.replace('editor', {
                     allowedContent: true,
-                    extraPlugins: 'uploadimage,youtube,ckeditor_wiris,fillquiz',
+                    extraPlugins: 'uploadimage,youtube,fillquiz',//ckeditor_wiris,
                     removeDialogTabs: 'textfield',
                     removePlugins: 'forms'
                 });
@@ -2157,7 +2271,7 @@ var Lesson = (function () {
         var status = $(parent).find('.chkToggleExplain').prop('checked');
         if (status == true) {
             CKEDITOR.replace($(cke)[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
         }
         else {
@@ -2194,7 +2308,7 @@ var Lesson = (function () {
 
         if ($(clone).find('.chkToggleExplain').prop('checked'))
             CKEDITOR.replace($(clone).find("[name='Questions.Description']")[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
 
         $(clone).find("[name^='Questions.']").each(function () {
@@ -2271,7 +2385,7 @@ var Lesson = (function () {
                 title: '<strong>Chọn thao tác</strong>',
                 icon: 'question',
                 html:
-                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,1)"><i class="fas fa-upload"></i> Chọn file câu hỏi </button>' +
+                    '<button type="button" class="btn btn-primary mr-2" onclick="ChooseQuestionFile(this,1)"><i class="fas fa-upload"></i> Chọn file Word</button>' +
                     '<input type="file" class="d-none" accept=".docx, .doc"/>' +
                     '<button type="button" class="btn btn-secondary mr-2" onclick="DownloadQuestionTemplate(this,1)"><i class="fas fa-file-download"></i> Tải file mẫu </button>',
                 //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
@@ -2291,6 +2405,7 @@ var Lesson = (function () {
     }
 
     var downloadFileWordWitdData = function () {
+        debugger
         window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
     }
 
@@ -2360,7 +2475,7 @@ var Lesson = (function () {
                         Swal.fire({
                             title: 'Thông báo',
                             icon: 'error',
-                            text: data.Msg
+                            text: data.Msg ? data.Msg : "Code: " + data.code + " Error: " + data.message
                         }).then(() => {
                             showCloneQuestion();
                         })
@@ -2494,10 +2609,20 @@ var Lesson = (function () {
                 part.parentElement.querySelector('.tab-pane.active').classList.remove(...["show", "active"]);
                 part.classList.add(...["show", "active"]);
             }
-            var select = part.querySelector(".selection");
-            if (select != null) {
-                select.classList.remove("selection");
+
+            var isFillQuiz = $(_quiz).find('.fillquiz').length > 0;
+
+            if (isFillQuiz) {
+                el = $('.tab-pane-quiz#pills-part-' + _partid + " [id='" + quizid + "']")[0];
+                //console.log(el);
             }
+
+            $('.quiz-item.selection').removeClass('selection');
+
+            //var select = part.querySelector(".selection");
+            //if (select != null) {
+            //    select.classList.remove("selection");
+            //}
             var aSelect = $('#QuizNav')[0].querySelector('.selection');
             if (aSelect != null) {
                 aSelect.classList.remove("selection");
@@ -2509,9 +2634,9 @@ var Lesson = (function () {
             //console.log(el);
             el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" })
 
-            if (_part.hasClass('active')) {
-                return false;
-            }
+            //if (_part.hasClass('active') && !isFillQuiz) {
+            //    return false;
+            //}
 
             var panes = $('.tab-pane');
             var index = panes.index($('.tab-pane.active'));
@@ -2815,6 +2940,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
+        console.log(data);
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2822,24 +2948,27 @@ var Lesson = (function () {
             this.exam_id = lastExam.ID;
             var lastpoint = (lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0);
             if (isContinue) {
-                $('#rightCol').append($(wrapper));
-                var completeButton = $('<div>', {
-                    "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
-                    "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
-                    "style": "cursor: pointer"
-                }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "ml-2" }).append("Nộp bài"));
-                if (isMobileDevice()) {
-                    $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
-                    $('.top-menu[for=lesson-info]').append(completeButton);
-                    $('.right-content').removeClass("no-info-bar");
+                if (_UImode != UIMode.EXAM_ONLY) {
+                    $('#rightCol').append($(wrapper));
+                    var completeButton = $('<div>', {
+                        "class": "btn btn-primary mt-3 mb-3 btnCompleteExam",
+                        "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
+                        "style": "cursor: pointer"
+                    }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "ml-2" }).append("Nộp bài"));
+                    if (isMobileDevice()) {
+                        $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
+                        $('.top-menu[for=lesson-info]').append(completeButton);
+                        $('.right-content').removeClass("no-info-bar");
+                    }
+                    else
+                        wrapper.append(completeButton);
+                    $('#rightCol').find('.tab-pane').show();
                 }
-                else
-                    wrapper.append(completeButton);
-                $('#rightCol').find('.tab-pane').show();
-                renderQuizCounter();
+                //renderQuizCounter();
                 //renderOldAnswer();
             }
             else {
+                //alert(1);
                 //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
@@ -2863,9 +2992,13 @@ var Lesson = (function () {
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
+
+                //$('#leftCol').addClass('hide');//fix tạm thời
             }
+            //goPartInx(0);
         }
         else {
+
             $('#rightCol').prepend($(wrapper));
             var doButton = $('<div>', {
                 "class": "btn btn-primary m-3",
@@ -2875,6 +3008,11 @@ var Lesson = (function () {
             });
             wrapper.append(doButton);
             $('#rightCol').find('.tab-pane').hide();
+            $('.top-menu[for=lesson-info]').hide();
+            ////fix tạm thời
+            //if (!isContinue) {
+            //    $('#leftCol').addClass('hide');
+            //}
         }
     }
 
@@ -2965,6 +3103,8 @@ var Lesson = (function () {
 
                     renderExamDetail();
 
+                    $('.top-menu[for=lesson-info]').show();
+
                     //console.log(data);
                     if (data.Data.Timer > 0) {
                         var _minutes = data.Data.Timer;
@@ -3012,6 +3152,7 @@ var Lesson = (function () {
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
         }, renderLessonData);
+
     }
 
     //---- 14-10-2020
@@ -3127,6 +3268,8 @@ var Lesson = (function () {
         else {
             //temp fix 20200823
             tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + (_UImode == UIMode.EXAM_ONLY ? " hide" : "") + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
+            //fix tạm thời
+            //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane" + " w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
             //tabsitem = $("<div>", { "id": "pills-part-" + data.ID, "class": "tab-pane w-100", "role": "tabpanel", "aria-labelledby": "pills-" + data.ID });
         }
         var itembox = $("<div>", { "class": "part-box " + data.Type, "id": data.ID });
@@ -3675,18 +3818,40 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
+            }
+        }
+
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
-        }
-        while (__answer_sending) {
-            console.log("wait for complete answering ...");
-            await new Promise(r => setTimeout(r, 500));
+            while (__answer_sending) {
+                console.log("wait for complete answering ...");
+                await new Promise(r => setTimeout(r, 500));
+            }
         }
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         lesson_action_holder.empty();
+
+
+
         if ($('#QuizNav').hasClass("show"))
             toggleNav();
+
+
+
+
         if (isOvertime || true) {
+
             //var exam = document.querySelector("input[name='ExamID']");
             //var exam = getLocalData("CurrentExam");
             if (config.mod != mod.TEACHERPREVIEWEXAM) {
@@ -3722,7 +3887,7 @@ var Lesson = (function () {
     }
 
     var completeLectureExam = async function () {
-        debugger
+        //debugger
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
         }
@@ -4097,7 +4262,7 @@ var Lesson = (function () {
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
                         //} else {
-                            saveAnswerForStudent(questionId, answerID, value, type);
+                        saveAnswerForStudent(questionId, answerID, value, type);
                         //}
                     }
                 })
@@ -4199,7 +4364,7 @@ var Lesson = (function () {
                     //if (value == "") {
                     //    delAnswerForStudent(questionId);
                     //} else {
-                        saveAnswerForStudent(questionId, "", value, type);
+                    saveAnswerForStudent(questionId, "", value, type);
                     //}
                 }
             })
@@ -4469,10 +4634,10 @@ var Lesson = (function () {
         var cloneQuestion = $(_this).parent()[0].cloneNode(true);
         if (showEX) {
             CKEDITOR.replace($(_this).parent().find('.editorck')[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
             CKEDITOR.replace($(cloneQuestion).find('.editorck')[0], {
-                extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
+                extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
             });
             $(cloneQuestion).find('.chkToggleExplain').prop("checked", true);
         }
@@ -4526,6 +4691,364 @@ var Lesson = (function () {
         if ($(obj).text() != $(obj)[0].dataset.oldval) //value change
             AnswerFillQuestion($(obj).attr("id"));
     }
+
+    //Thêm từ bài
+    var showModalAddToLesson = function () {
+        $(".swal2-container").hide();
+        listLessonPartID = [];
+        $('#ModaltoAddExam').modal('show');
+        $('#partModal').modal('hide');
+        var modalForm = window.partModaltoAddExam;
+        var classID = $("#ClassID").val();
+        var dataform = new FormData();
+        dataform.append("ClassID", classID);
+        $(modalForm).empty();
+        Ajax(config.url.load_classsubject, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res).Data;
+                //var selectTemplate = $("<select>", { "class": "templatetype form-control", "name": "ClassSubject", "required": "required", "id": "chooseCourse" }).bind("change", chooseCourse);
+                //$(modalForm).append(selectTemplate);
+                //$(selectTemplate).append("<option value=''>--- Chọn giáo trình ---</option>");
+                //for (var i = 0; i < data.length; i++) {
+                //    var item = data[i];
+                //    if (item.CourseName)
+                //        $(selectTemplate).append("<option value='" + item.ID + "'>" + item.CourseName + "</option>")
+                //}
+                var ulselectTemplate = $("<ul>", { "class": "list ls-practice", "name": "ClassSubject", "id": "chooseCourse" });
+                $(modalForm).append(ulselectTemplate);
+                for (var i = 0; i < data.length; i++) {
+                    var item = data[i];
+                    if (item.CourseName)
+                        $(ulselectTemplate).append("<li style='padding:10px' id='" + item.ID + "' for='" + item.ID + "'><div style='font-size:16px;color:" + item.Color + "'>" + item.CourseName + "<i class='far fa-arrow-alt-circle-down ml-1' style='color:" + item.Color + "' onclick='chooseCourse(\"" + item.ID + "\",this)'></i></div></li>");
+                }
+            })
+    }
+
+    var chooseCourse = function (id, obj) { //chương
+        var containerCourse = $("#" + id);
+        var child = containerCourse.children()[0];
+        var classi = $(obj).attr("class");
+        if (classi.includes("fa-arrow-alt-circle-down")) {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+            containerCourse.empty();
+            containerCourse.append(child);
+            if (id !== undefined) {
+                var dataform = new FormData();
+                dataform.append("ID", id);
+                Ajax(config.url.load_contents, dataform, "POST", false)
+                    .then(function (res) {
+                        var data = JSON.parse(res).Data
+                        var chapters = data.Chapters;
+                        var lessons = data.Lessons;
+
+                        //var selectChapterTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectChapter" }).bind("change", chooseLesson);
+                        //$(containerCourse).append(selectChapterTemplate);
+                        //$(selectChapterTemplate).append("<option value=''>--- Chọn chương ---</option>");
+                        //for (var i = 0; i < chapters.length; i++) {
+                        //    var chapter = chapters[i];
+                        //    $(selectChapterTemplate).append("<option value='" + chapter.ID + "'>" + chapter.Name + "</option>")
+                        //}
+
+                        var ulselectChapterTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectChapter" });
+                        containerCourse.append(ulselectChapterTemplate);
+                        for (var i = 0; i < chapters.length; i++) {
+                            var chapter = chapters[i];
+                            if (chapter.ParentID == "0") {
+                                $(ulselectChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
+                            else {
+                                var containerSubChapter = $("#" + chapter.ParentID);
+                                var firstChilSub = containerSubChapter.children()[0];
+                                var ulselectSubChapterTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectSubChapter" });
+                                containerSubChapter.empty()
+                                containerSubChapter.append(firstChilSub);
+                                containerSubChapter.append(ulselectSubChapterTemplate)
+                                $(ulselectSubChapterTemplate).append('<li style="padding: 5px 10px" class="pr-0 ml-3 chap-item" id="' + chapter.ID + '"></i><div><span style="cursor:pointer" onclick="chooseLesson(\'' + chapter.ID + '\',this)"><i class=" ic far fa-folder mr-2"></i>' + chapter.Name + '<i class="far fa-arrow-alt-circle-down ml-1""></i></span></div></li>')
+                            }
+                            var containerLesson = $("#" + chapter.ID);
+                            var firstChil = containerLesson.children()[0];
+                            var ulselectLessonTemplate = $("<ul>", { "class": "list hide", "required": "required", "id": "selectLesson" });
+                            containerLesson.empty();
+                            containerLesson.append(firstChil);
+                            containerLesson.append(ulselectLessonTemplate);
+                            for (var j = 0; j < lessons.length; j++) {
+                                var lesson = lessons[j];
+                                if (lesson.ChapterID == chapter.ID) {
+                                    $(ulselectLessonTemplate).append('<li class="sub-practice pt-3 pb-1 pl-2" id="' + lesson.ID + '"></i><div class="pb-1"><span style="cursor:pointer" onclick="choosePart(\'' + lesson.ID + '\',\'' + id + '\',this)"><i class="ic far fa-file-alt mr-2"></i>' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1"></i></span></div></li>')
+                                }
+                            }
+                        }
+
+                        //var ulselectLessonTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectLesson" });
+                        //containerCourse.append(ulselectLessonTemplate);
+                        //for (var i = 0; i < lessons.length; i++) {
+                        //    var lesson = lessons[i];
+                        //    $(ulselectLessonTemplate).append('<li class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lesson.ID + '"><div style="font-size: 20px">' + lesson.Title + '<i class="far fa-arrow-alt-circle-down ml-1" onclick="chooseLesson(\'' + chapter.ID + '\',this)"></i></div></li>')
+                        //}
+
+                        //var selectLessonTemplate = $("<select>", { "class": "templatetype form-control", "required": "required", "id": "selectLesson" });
+                        //$(containerCourse).append(selectLessonTemplate);
+                        //$(selectLessonTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                        //for (var i = 0; i < lessons.length; i++) {
+                        //    var lesson = lessons[i];
+                        //    $(selectLessonTemplate).append("<option value='" + lesson.ID + "' data-chapter-id='" + lesson.ChapterID + "' class='hide'>" + lesson.Title + "</option>")
+                        //}
+                    })
+            }
+        }
+        else {
+            containerCourse.empty();
+            containerCourse.append(child);
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+        }
+    }
+
+    var chooseLesson = function (id, obj) { //bài trong chương
+        var chapterParent = $("#" + id);
+        var ul = chapterParent.children()[1];
+        var classUl = $(ul).attr("class");
+        var classi = $(obj).attr("class");
+        if (classi.includes("fa-arrow-alt-circle-down")) {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+        }
+        else {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+        }
+        if (classUl.includes("hide")) {
+            $(ul).removeClass("hide");
+            //var id = $("#selectChapter").val();
+            //var lessons = $("#selectLesson");
+            //for (var i = 0; i < lessons.length; i++) {
+            //    var lesson = lessons[i];
+            //    for (var j = 0; j < lesson.length; j++) {
+            //        var a = lesson[j];
+            //        if ($(a).attr('data-chapter-id') === id) {
+            //            $(a).removeClass('hide');
+            //            //$(a).attr('onclick','choosePart()');
+            //        }
+            //        else {
+            //            if ($(a).attr('class') != 'hide') {
+            //                $(a).addClass('hide');
+            //                //$(a).removeAttr('onclick');
+            //            }
+            //        }
+            //    }
+            //}
+            //$(lessons).attr('onchange', 'choosePart()');
+        }
+        else {
+            $(ul).addClass("hide");
+        }
+    }
+
+    var choosePart = function (lessonid, classsbjid, obj) {
+        var classUl = $(obj).attr("class");
+        if (classUl.includes("fa-arrow-alt-circle-down")) {
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-left ml-1");
+            //var modalForm = window.partModaltoAddExam;
+            //var lessonid = $("#selectLesson").val();
+            var classid = $('#ClassID').val();
+            //var classsbjid = $('#chooseCourse').val();
+            var dataform = new FormData();
+            dataform.append("LessonID", lessonid);
+            dataform.append("ClassID", classid);
+            dataform.append("ClassSubjectID", classsbjid);
+            Ajax(config.url.list_part, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res).Data;
+                    if (data !== undefined) {
+                        var containerLessonPart = $('#' + lessonid);
+                        var firstChild = containerLessonPart.children()[0];
+                        var ulselectLessonPartTemplate = $("<ul>", { "class": "list", "required": "required", "id": "selectLessonPart_" + lessonid });
+                        containerLessonPart.empty();
+                        containerLessonPart.append(firstChild);
+                        containerLessonPart.append(ulselectLessonPartTemplate);
+
+                        //var quiz1 = data.find(x => x.Type == "QUIZ1");
+                        //var quiz2 = data.find(x => x.Type == "QUIZ2");
+                        //var quiz3 = data.find(x => x.Type == "QUIZ3");
+                        //var quiz4 = data.find(x => x.Type == "QUIZ4");
+
+                        //if (quiz1 || quiz2 || quiz3 || quiz4) {
+                        for (var i = 0; i < data.length; i++) {
+                            var lessonPart = data[i];
+                            //if (lessonPart.Type.includes("QUIZ1") || lessonPart.Type.includes("QUIZ2") || lessonPart.Type.includes("QUIZ3") || lessonPart.Type.includes("QUIZ4")) {
+                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 16px">' + lessonPart.Title + '<input type="checkbox" style="float:right" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
+                        }
+                        //var selectLessonPartTemplate = $("<select>", { "class": "templatetype form-control", "name": "LessonPart", "required": "required", "id": "chooseLessonPart" }).bind("change", chooseLessonPart);
+                        //$(modalForm).append(selectLessonPartTemplate);
+                        //$(selectLessonPartTemplate).append("<option value=''>--- Chọn bài ---</option>");
+                        //var html='';
+                        //for (var i = 0; i < data.length; i++) {
+                        //    var item = data[i];
+                        //    switch (item.Type) {
+                        //        case 'QUIZ1': //trac nghiem
+                        //        case 'QUIZ3':
+                        //        case 'QUIZ4':
+                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                        //            html += renderQuestiontoSelectQ(item);
+                        //            $(modalForm).append(html);
+                        //            break;
+                        //        case 'QUIZ2'://dien tu
+                        //            $(selectLessonPartTemplate).append("<option value='" + item.ID + "'>" + item.Title + "</option>")
+                        //            //html += renderQuestiontoSelectQ2(item);
+                        //            break;
+                        //        default:
+                        //    }
+                        //}
+
+                        var parentLesson = $("#" + lessonid);
+
+                        //}
+                        //}
+                        //else {
+                        //    alert("Bài chưa có nội dung!");
+                        //}
+                    }
+                    else {
+                        alert("Bài chưa có dữ liệu. Liên hệ người tạo để biết thêm chi tiết");
+                    }
+                })
+        }
+        else {
+            $("#selectLessonPart_" + lessonid).addClass("hide");
+            $(obj).removeClass();
+            $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
+        }
+    }
+
+    var renderQuestiontoSelectQ = function (item) {
+        var html = '<div class="hide" id="select_' + item.ID + '">';
+        html += '<div class="row"><div class="col-sm-10"></div><div class="col-sm-2">Chọn tất cả <input type="checkbox" onclick="selectAllQuestion(this)" data-lessonpart-id="' + item.ID + '"/></div></div>';
+        for (var i = 0; i < item.Questions.length; i++) {
+            var question = item.Questions[i];
+            html += '<div class="row">';
+            html += '<div class="quiz-item col-sm-11" id=' + question.ID + '><div class="quiz-box-header" data-lessonPart-id=' + question.ParentID + '><h5 class="title blue-color">' + question.Content + '</h5></div><div class="answer-wrapper row">';
+            html += renderAns(question);
+            //html += '</div></div><input type="checkbox" onchange="selectQuestiontoSave(\'' + question.ID+'\')" id="input_id_' + question.ID + '"/></div>';
+            html += '</div></div></div>';
+        }
+        html += "</div>";
+        return html;
+    }
+
+
+    //var renderQuestiontoSelectQ2 = function () {
+
+    //}
+
+    var renderAns = function (item) {
+        var html = '';
+        for (var i = 0; i < item.Answers.length; i++) {
+            var ans = item.Answers[i];
+            html += '<fieldset class="col-sm-3" id="ans2Ex_' + ans.ID + '">' +
+                '<div class="form-check"><input type="hidden"><input id="' + ans.ID + '" type="radio"' +
+                'class="input-checkbox answer-checkbox form-check-input" name="rd_' + ans.ID + '"';
+            if (ans.IsCorrect)
+                html += 'style="pointer-events: none;" checked="checked"><label class="answer-text form-check-label"';
+            else
+                html += 'style="pointer-events: none;"><label class="answer-text form-check-label"';
+
+            html += 'for="' + ans.ID + '">' + ans.Content + '</label></div>' +
+                '</fieldset>';
+        }
+        return html;
+    }
+
+    var chooseLessonPart = function () {
+        var lessonpartid = $("#chooseLessonPart").val();
+        var b = $("#chooseLessonPart")[0];
+        for (var i = 0; i < b.length; i++) {
+            var option = b[i];
+            if (lessonpartid === option.value) {
+                var a = $('#select_' + lessonpartid + '');
+                a.removeClass('hide');
+            }
+            else {
+                var a = $('#select_' + option.value + '');
+                a.addClass('hide');
+            }
+        }
+    }
+
+    //var listQuestionID = [];
+    var listLessonPartID = [];
+
+    var selectQuestiontoSave = function (questionID) {
+    }
+
+    var selectAllQuestion = function (lessonpartID, obj) {
+        //debugger
+        var stt = obj.checked;
+        //var lessonpartID = $(obj).attr('data-lessonpart-id');
+        if (stt) {
+            listLessonPartID.push(lessonpartID);
+        }
+        else {
+            var index = listLessonPartID.indexOf(lessonpartID);
+            if (index > -1) {
+                listLessonPartID.splice(index, 1);
+            }
+        }
+    }
+
+    var saveQAtoExam = function () {
+        if (listLessonPartID.length > 0) {
+            var classSubjectID = $("#ClassSubjectID")[0].value;
+            var lessonID = $("#LessonID")[0].value;
+            var dataform = new FormData();
+            for (var i = 0; i < listLessonPartID.length; i++)
+                dataform.append("ListLessonPartID", listLessonPartID[i]);
+            dataform.append("ClassSubjectID", classSubjectID);
+            dataform.append("LessonID", lessonID);
+            Ajax(config.url.create_exam, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    if (data.Stt) {
+                        location.reload();
+                        alert("Thêm thành công")
+                    }
+                    else {
+                        alert(data.Msg);
+                    }
+                })
+        }
+        else {
+            alert("Bạn chưa chọn câu hỏi");
+        }
+    }
+
+    var ShowAddPartToLesson = function (id, type) {
+        id = "'" + id + "'";
+        type = "'" + type + "'";
+        Swal.fire({
+            title: '<strong>Chọn thao tác</strong>',
+            icon: 'question',
+            html:
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
+                '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>',
+            //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModalAddToLesson()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
+            //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
+            confirmButtonText: 'Đóng',
+        })
+    }
+
+    window.choosePart = choosePart;
+    window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
+    window.renderAns = renderAns;
+    //window.renderQuestiontoSelectQ2 = renderQuestiontoSelectQ2;
+    window.selectQuestiontoSave = selectQuestiontoSave;
+    window.chooseLesson = chooseLesson;
+    window.chooseLessonPart = chooseLessonPart;
+    window.saveQAtoExam = saveQAtoExam;
+    window.selectAllQuestion = selectAllQuestion;
+    window.ShowAddPartToLesson = ShowAddPartToLesson;
+    window.chooseCourse = chooseCourse;
 
     window.LessonInstance = {} || Lesson;
 
@@ -4581,6 +5104,8 @@ var Lesson = (function () {
     window.fillquizFocus = fillquizFocus;
     window.fillquizBlur = fillquizBlur;
     window.downloadFileWordWitdData = downloadFileWordWitdData;
+
+    window.showModalAddToLesson = showModalAddToLesson;
     return LessonInstance;
 }());
 

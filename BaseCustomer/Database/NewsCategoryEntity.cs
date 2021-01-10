@@ -47,6 +47,8 @@ namespace BaseCustomerEntity.Database
 
         public NewsCategoryEntity GetItemByCode(string code) => Collection.Find<NewsCategoryEntity>(x => x.Code.Equals(code)).FirstOrDefault();
 
+        public IEnumerable<NewsCategoryEntity> GetByParentCategoryID(String ParentID) => Collection.Find<NewsCategoryEntity>(x => x.ParentID == ParentID).ToEnumerable();
+
         //public NewsCategoryEntity getNameCategoryByID(string ID) => Collection.Find<NewsCategoryEntity>(x => x.ID.Equals(ID)).FirstOrDefault();
     }
 }

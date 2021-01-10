@@ -16,46 +16,51 @@ namespace BaseCustomerMVC.Controllers.Teacher
     {
         //private readonly GradeService _gradeService;
         //private readonly SubjectService _subjectService;
-        private readonly TeacherService _teacherService;
-        private readonly ClassService _classService;
-        private readonly CourseService _courseService;
+        //private readonly TeacherService _teacherService;
+        //private readonly ClassService _classService;
+        //private readonly CourseService _courseService;
+
+        //private readonly SubjectService _subjectService;
+        //private readonly ExamService _examService;
+        //private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
+        //private readonly LearningHistoryService _learningHistoryService;
+        private readonly CalendarHelper _calendarHelper;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
-        private readonly SubjectService _subjectService;
-        private readonly ExamService _examService;
-        private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _mapping;
-        private readonly CalendarHelper _calendarHelper;
-        private readonly LearningHistoryService _learningHistoryService;
+
 
         public LessonScheduleController(
-            // GradeService gradeservice
-            //, SubjectService subjectService, 
-            TeacherService teacherService,
-            ClassService classService,
-            CourseService courseService,
+            //GradeService gradeservice,
+            //SubjectService subjectService, 
+            //TeacherService teacherService,
+            //ClassService classService,
+            //CourseService courseService,
+            //SubjectService subjectService,
+            //LearningHistoryService learningHistoryService,
+            //ExamService examService,
+
             ChapterService chapterService,
             LessonService lessonService,
             LessonScheduleService service,
-            SubjectService subjectService,
-            LearningHistoryService learningHistoryService,
-            ExamService examService,
             CalendarHelper calendarHelper
             )
         {
             //_gradeService = gradeservice;
             //_subjectService = subjectService;
-            _teacherService = teacherService;
-            _courseService = courseService;
-            _classService = classService;
+            //_teacherService = teacherService;
+            //_courseService = courseService;
+            //_classService = classService;
+            //_subjectService = subjectService;
+            //_learningHistoryService = learningHistoryService;
+            //_mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+            //_examService = examService;
+
+            _calendarHelper = calendarHelper;
             _chapterService = chapterService;
             _lessonService = lessonService;
-            _subjectService = subjectService;
             _lessonScheduleService = service;
-            _examService = examService;
-            _calendarHelper = calendarHelper;
-            _learningHistoryService = learningHistoryService;
-            _mapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
+
         }
 
         //[Obsolete]
@@ -529,6 +534,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
+        public JsonResult ToggleHideAnswer(string ID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var schedule = _lessonScheduleService.GetItemByID(ID);
+            if (schedule == null)
+            {
+                return Json(new { error = "Thông tin không đúng" });
+            }
+            schedule.IsHideAnswer = !schedule.IsHideAnswer;
+            _lessonScheduleService.Save(schedule);
+            return Json(new { schedule.IsHideAnswer });
+        }
+
+        [HttpPost]
+        [Obsolete]
         public JsonResult Update(LessonScheduleEntity entity)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -549,7 +569,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Data",null },
                         {"Error", "Không tìm thấy lịch học" }
                     });
-
+                var oldLesson = _lessonService.GetItemByID(oldItem.LessonID);
+                if(oldLesson == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy bài kiểm tra" }
+                    });
+                }
+                if(oldLesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    oldItem.IsHideAnswer = true;
+                }
                 oldItem.StartDate = entity.StartDate.ToUniversalTime();
                 oldItem.EndDate = entity.EndDate.ToUniversalTime();
 

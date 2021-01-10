@@ -1,0 +1,230 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_LayoutTeacher_noChat.cshtml";
+
+    var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
+    var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
+    var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
+    var currentCenter = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
+
+    ViewData["Title"] = currentLesson.Title + " - " + DateTime.Now.ToString("dd/MM/yyyy");
+
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+@section Sidebar
+{
+}
+<div class="left-col">
+    <div class="main-container">
+        <!-- Begin Page Content -->
+        <div id="exam-teacher" class="h-100">
+        </div>
+        <!-- End of Main Content -->
+        @*<input type="hidden" name="ExamID" id="ExamID" value="" />*@
+    </div>
+
+    <div id="lessonSummary" class="shadow">
+    </div>
+</div>
+@section Scripts{
+    <script src="~/js/lib/jquery.ui.touch-punch.min.js"></script>
+    @if (currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.LECTURE)
+    {
+        <script src="~/js/content-render.js?@DateTime.Now.ToString("yyyyMMddhhmmss")"></script>
+    }
+    else
+    {
+        <script src="~/js/content-render-exam.js"></script>
+        <style>
+            #sidebar, body, html, #exam-teacher {
+                background-color: #e8eff5 !important;
+            }
+
+            #sidebar {
+                display: none;
+            }
+
+            .right-content {
+                top: 45px !important;
+            }
+
+            #QuizNav {
+                display: none !important;
+                top: 46px;
+                right: 5px;
+                left: calc(50% + 522px) !important;
+                position: fixed;
+                bottom: 10px;
+                overflow: auto;
+            }
+
+            #PartNav {
+                border: solid 3px #CCC;
+                background: #FFF;
+                padding: 10px;
+                border-radius: 10px;
+                box-shadow: 1px 2px 7px #999;
+                display: none !important;
+                top: 46px;
+                width: 150px;
+                right: calc(50% + 522px) !important;
+                position: fixed;
+                overflow: auto;
+                max-height: 100%;
+            }
+
+            .card-body {
+                top: 0 !important;
+                position: relative !important;
+                background: #FFF !important;
+                padding-top: 0;
+            }
+
+            .main-container, .left-col, .right-content {
+                position: relative !important;
+            }
+
+            .lesson-box {
+                max-width: 1024px;
+                width: 100%;
+            }
+
+            .btn-answer-idx {
+                background: #6c757d;
+            }
+
+            .selection {
+                background: #d8dee8 !important;
+            }
+
+            .btn-answer-idx.selection {
+                background: #cc7923 !important;
+            }
+
+            .examHeader {
+                border: solid 2px #333;
+            }
+
+            .tab-content > .main-column:first-child {
+                border: none;
+            }
+
+            * {
+                color: #000 !important;
+                border-color: #000 !important;
+                font-size:16px;
+            }
+
+            .title.green-color {
+                color: #000 !important;
+                font-weight: bold;
+            }
+
+            .title.blue-color {
+                color: #000 !important;
+            }
+
+            @@media print {
+                .part-box.QUIZ3 {
+                    page-break-inside: avoid;
+                }
+            }
+        </style>
+        <style media="print">
+
+            * {
+                position: relative !important
+            }
+
+            .btn-close-preview {
+                display: none;
+            }
+
+            div {
+                break-inside: avoid;
+            }
+
+            h2 {
+                page-break-before: always;
+            }
+
+            h3, h4 {
+                page-break-after: avoid;
+            }
+
+            pre, blockquote {
+                page-break-inside: avoid;
+            }
+
+            .part-box.QUIZ3 {
+                page-break-inside: avoid;
+                page-break-before: always;
+            }
+        </style>
+
+
+    }
+
+    <script>
+        var config = {
+            container: "exam-teacher",
+            mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.TEACHERPREVIEWEXAM" : "mod.TEACHERPREVIEW"),
+            url: {
+                load: '@processUrl("GetTemplateLesson", "Lesson")',
+                current: '@processUrl("GetTemplateExam", "Lesson")',
+                start: '@processUrl("CreateTemplateExam", "Lesson")',
+                answer: 'answer',
+                removeans: 'removeans',
+                end: 'endexam',
+                review: 'review',
+                oldAnswer: 'oldanswer'
+            },
+            type: @currentLesson.TemplateType,
+            lesson_id: '@currentLesson.ID',
+            class_id: '@currentClass.ID',
+            class_subject_id: '@currentClassSubject.ID',
+            chap_id: '@currentLesson.ChapterID',
+            class_name: '@currentClass.Name',
+            center_name: '@currentCenter.Name',
+            student_name: '...................................',
+        }
+    var widget = new Lesson.onReady(config);
+    </script>
+    <link href="~/css/detailui.css" rel="stylesheet" />
+    <script>
+        $('#content').append($('<i>', { class: 'btn-close-preview', text: 'X', title: 'Đóng' }).click(function () {
+            window.close();
+            document.history = '/';
+        }));
+    </script>
+    <style>
+        .btn-close-preview {
+            position: absolute;
+            top: 7px;
+            left: 50%;
+            z-index: 999;
+            border: solid 2px #999;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 20px;
+            font-style: normal;
+            border-radius: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
+    <script>
+        var r = setTimeout(function () {
+            window.print();
+        }, 2000);
+
+    </script>
+}

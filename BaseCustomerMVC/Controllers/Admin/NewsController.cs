@@ -17,10 +17,12 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using System.Threading.Tasks;
+using FileManagerCore.Interfaces;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 2)]
+    [BaseAccess.Attribule.AccessCtrl("Quản lý Tin tức", "admin", 4)]
     public class NewsController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;
@@ -30,12 +32,21 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly IHostingEnvironment _env;
         private readonly MappingEntity<NewsCategoryEntity, NewsCategoryViewModel> _mapping;
         private readonly MappingEntity<NewsEntity, NewsViewModel> _mappings;
+        private readonly TeacherService _teacherService;
+        private static MailHelper _mailHelper;
+        private readonly IRoxyFilemanHandler _roxyFilemanHandler;
+        private readonly FileProcess _fileProcess;
         public NewsController(
             NewsCategoryService newsCategoryService, 
             NewsService newsService,
             CenterService centerService, 
             ClassService classService,
-            IHostingEnvironment evn)
+            IHostingEnvironment evn,
+            TeacherService teacherService,
+            MailHelper mailHelper,
+            IRoxyFilemanHandler roxyFilemanHandler,
+            FileProcess fileProcess
+            )
         {
             _serviceNewCate = newsCategoryService;
             _serviceNews = newsService;
@@ -44,6 +55,10 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<NewsCategoryEntity, NewsCategoryViewModel>();
             _mappings = new MappingEntity<NewsEntity, NewsViewModel>();
             _env = evn;
+            _teacherService = teacherService;
+            _mailHelper = mailHelper;
+            _roxyFilemanHandler = roxyFilemanHandler;
+            _fileProcess = fileProcess;
         }
 
         public ActionResult Index()
@@ -82,6 +97,27 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
             else
             {
+                var oldItem = _serviceNewCate.GetItemByID(item.ID);
+                if (oldItem == null)
+                {
+                    Dictionary<string, object> _response = new Dictionary<string, object>()
+                    {
+                        {"Data",null },
+                        {"Error",null },
+                        {"Msg","Không tìm thấy danh mục tương ứng." }
+                    };
+                    return new JsonResult(_response);
+                }
+                if (String.IsNullOrEmpty(oldItem.Code) || !oldItem.Name.Equals(item.Name))
+                {
+                    item.Code = item.Name.ConvertUnicodeToCode("-", true);
+                    int pos = 0;
+                    while (_serviceNewCate.GetItemByCode(item.Code) != null)
+                    {
+                        pos++;
+                        item.Code += ("-" + pos);
+                    }
+                }
                 _serviceNewCate.Save(item);
                 Dictionary<string, object> response = new Dictionary<string, object>()
                     {
@@ -179,12 +215,15 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult CreateNews(NewsEntity item, IFormFile Thumbnail,string CategoryCode)
         {
             if (item.CategoryID == null)
-                item.CategoryID = _serviceNewCate.GetItemByCode(CategoryCode).ID;
-
-            //if (item.Sale != 0)
-            //{
-            //    item.PriceSale = item.Price - item.Price * item.Sale / 100;
-            //}
+            {
+                Dictionary<string, object> response = new Dictionary<string, object>()
+                    {
+                        {"Data",item },
+                        {"Error",null },
+                        {"Msg","Cập nhật thành công" }
+                    };
+                return new JsonResult(response);
+            }    
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
@@ -193,9 +232,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     item.PublishDate = item.CreateDate;//publish now
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.IsActive = true;
-
                 item.Type = "news";
-                
                 var pos = 0;
                 while (_serviceNews.GetItemByCode(item.Code) != null)
                 {
@@ -223,6 +260,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
                 item.LastEdit = DateTime.UtcNow;
+                item.IsActive = olditem.IsActive;
 
                 var pos = 0;
                 var sameUrl = _serviceNews.GetItemByCode(item.Code);
@@ -235,7 +273,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if (Thumbnail != null)
                 {
-                    removeThumbnail(olditem.Thumbnail);
+                    //removeThumbnail(olditem.Thumbnail);
                     item.Thumbnail = urlThumbnail(Thumbnail);
                 }
                 else
@@ -287,15 +325,43 @@ namespace BaseCustomerMVC.Controllers.Admin
                 else
                     data = data.SortBy(tbl => tbl.CreateDate);
             }
+            else
+            {
+                data = data.SortByDescending(x => x.CreateDate);
+            }
+
+            var dataResult = (from d in data.ToList()
+                             let category = _serviceNewCate.GetItemByID(d.CategoryID)
+                             where category != null
+                             select new NewsViewModel
+                             {
+                                 CategoryID = category.ID,
+                                 CenterID = d.CenterID,
+                                 Code = d.Code,
+                                 Content = d.Content,
+                                 CreateDate = d.CreateDate,
+                                 CreateUser = d.CreateUser,
+                                 ID=d.ID,
+                                 IsActive = d.IsActive,
+                                 IsHot = d.IsHot,
+                                 IsPublic = d.IsPublic,
+                                 IsTop = d.IsTop,
+                                 PublishDate = d.PublishDate,
+                                 Summary = d.Summary,
+                                 Thumbnail = d.Thumbnail,
+                                 Type = d.Type,
+                                 Title = d.Title,
+                                 Url = String.IsNullOrEmpty(category.Code) && String.IsNullOrEmpty(d.Code) ? "" : $"{category.Code}/{d.Code}"
+                             }).ToList();
             
-            model.TotalRecord = data.CountDocuments();
-            var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
-                ? data.ToList()
-                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
+            model.TotalRecord = dataResult.Count();
+            var DataResponse = dataResult == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
+                ? dataResult.ToList()
+                : dataResult.Skip((model.PageIndex) * model.PageSize).Take(model.PageSize).ToList();
 
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse },
+                { "Data", DataResponse},
                 { "Model", model }
             };
             return new JsonResult(response);
@@ -312,7 +378,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             else
             {
                 var thumbnail = _serviceNews.GetItemByID(model.ArrID).Thumbnail;
-                removeThumbnail(thumbnail);
+                //removeThumbnail(thumbnail);
                 var delete = _serviceNews.Collection.DeleteMany(o => model.ArrID.Split(',').Contains(o.ID));
                 return new JsonResult(delete);
             }
@@ -359,67 +425,18 @@ namespace BaseCustomerMVC.Controllers.Admin
             return new JsonResult("UnPublish OK");
         }
 
-        public string urlThumbnail(IFormFile formFile)
+        public String urlThumbnail(IFormFile formFile)
         {
             string _fileName = formFile.FileName;
             var timestamp = DateTime.UtcNow.ToFileTime();
             _fileName = timestamp + "_" + _fileName;
-
-            var _dirPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Upload/News");
-            //var folder = ("Image_Ads/");
-            //string uploads = Path.Combine(RootPath, folder);
-            if (!Directory.Exists(_dirPath))
-            {
-                Directory.CreateDirectory(_dirPath);
-            }
-
-            //string _path = Path.Combine(Path.Combine(_dirPath, _fileName));
-            //using (var stream = new FileStream(_path, FileMode.Create))
-            //{
-            //    Banner.CopyTo(stream);
-            //}
-            //return _fileName;
-            var standardSize = new SixLabors.Primitives.Size(1920, 1080);
-
-            using (Stream inputStream = formFile.OpenReadStream())
-            {
-                using (var image = Image.Load<Rgba32>(inputStream))
-                {
-                    var imageEncoder = new JpegEncoder()
-                    {
-                        Quality = 90,
-                        Subsample = JpegSubsample.Ratio444
-                    };
-
-                    int width = image.Width;
-                    int height = image.Height;
-                    if ((width > standardSize.Width) || (height > standardSize.Height))
-                    {
-                        ResizeOptions options = new ResizeOptions
-                        {
-                            Mode = ResizeMode.Max,
-                            Size = standardSize,
-                        };
-                        image.Mutate(x => x
-                         .Resize(options));
-
-                        //.Grayscale());
-                    }
-                    using (var fileStream = new FileStream(Path.Combine(_dirPath, _fileName), FileMode.Create))
-                    {
-                        image.Save(fileStream, imageEncoder);
-                        return $"{_fileName}";
-                    }
-                }
-            }
+            String urlImg =_fileProcess.SaveMediaAsync(formFile, _fileName, "News", "Eduso").Result;
+            return urlImg;
         }
 
-        public void removeThumbnail(string Thumbnail)
+        public void removeThumbnail(String urlImg)
         {
-            if (Thumbnail != null && System.IO.File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Upload", "News", Thumbnail)))
-            {
-                System.IO.File.Delete(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Upload", "News", Thumbnail));
-            }
+            _fileProcess.DeleteFile(urlImg);
         }
         #endregion
 
@@ -439,7 +456,68 @@ namespace BaseCustomerMVC.Controllers.Admin
         #region New functions
         public IActionResult NewFunctions()
         {
+            var centers = _serviceCenter.GetAll();
+            ViewBag.Centers = centers.ToList();
             return View();
+        } //chức năng mới
+
+        public async Task<JsonResult> SendMail(NewsEntity item)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var category = _serviceNewCate.GetItemByCode("gioi-thieu");
+                item.CategoryID = category == null ? "" : category.ID;
+                item.IsActive = false;
+                item.IsHot = false;
+                item.IsPublic = false;
+                item.IsTop = false;
+                item.CreateDate = DateTime.UtcNow;
+                item.CreateUser = UserID;
+
+                _serviceNews.CreateOrUpdate(item);
+                if (item.Targets != null)
+                    foreach (var centerID in item.Targets)
+                    {
+                        var center = _serviceCenter.CreateQuery().Find(x => x.ID == centerID && x.ExpireDate >= DateTime.Now).FirstOrDefault();
+                        if (center != null)
+                        {
+                            //danh sach giao vien trong co so
+                            var listTeacher = _teacherService.GetByCenterID(center.ID);
+                            List<String> emails = listTeacher.Select(x => x.Email).ToList();
+                            var toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com" };
+                            _ = await _mailHelper.SendBaseEmail(toAddress, item.Title, item.Content, MailPhase.NEW_FUNCTION);
+                        }
+                    }
+                return Json("Gửi thành công");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        #endregion
+
+        #region uploadimg
+        public JsonResult GetPathIMG(IFormFile Thumbnail,IFormFile upload,String ckCsrfToken)
+        {
+            try
+            {
+                if (upload != null)
+                {
+                    var filepath = urlThumbnail(upload);
+                    var data = new Dictionary<String, Object>
+                        {
+                            { "FilePath", filepath }
+                        };
+                    return Json(data);
+                }
+                else { return Json("loi"); }
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
         #endregion
     }

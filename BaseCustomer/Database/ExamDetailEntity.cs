@@ -81,6 +81,11 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(o => o.ExamID == ExamID).ToEnumerable();
         }
 
+        public IEnumerable<ExamDetailEntity> GetByExamIDs(List<String> ExamIDs)
+        {
+            return CreateQuery().Find(o => ExamIDs.Contains(o.ExamID)).ToEnumerable();
+        }
+
         public long RemoveAnswer(string ExamID, string QuestionID)
         {
             return CreateQuery().DeleteMany(o => o.ExamID == ExamID && o.QuestionID == QuestionID).DeletedCount;

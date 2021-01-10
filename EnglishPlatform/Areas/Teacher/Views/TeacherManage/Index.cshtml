@@ -33,15 +33,24 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên giáo viên">
             </div>
 
-            <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
-            <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+            <div class="">
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" title="Xuất file Excel" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" title="Thêm giáo viên" v-on:click="showAddModal()"><i class="ti-plus"></i></b-button>
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" title="Thêm từ file" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>
+                @*<b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left:5px" v-on:click="showUploadModal($event.target.value)"><i class="ti-zip"></i></b-button>*@
+            </div>
         </div>
     </div>
     <div class="card-body" v-cloak>
         <table id="ed_table" class="table">
             <thead>
                 <tr>
-                    <th v-for="(field,k) in fields">{{field.label}}</th>
+                    <th style="width:40px">#</th>
+                    <th>Họ tên</th>
+                    <th style="width:300px;">Email</th>
+                    <th>SĐT</th>
+                    <th>Chức danh</th>
+                    <th>Tác vụ</th>
                 </tr>
             </thead>
             <tbody>
@@ -165,36 +174,36 @@
                     pass: "",
                     subjects: [],
                 },
-                fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'name',
-                        label: 'Họ tên'
-                    },
-                    {
-                        key: 'email',
-                        label: 'Email'
-                    },
-                    {
-                        key: 'phone',
-                        label: 'SĐT'
-                    },
-                    //{
-                    //    key: 'subjects',
-                    //    label: 'Chuyên môn'
-                    //},
-                    {
-                        key: 'pos',
-                        label: 'Chức danh'
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
-                ],
+                //fields: [
+                //    {
+                //        key: 'stt',
+                //        label: '#'
+                //    },
+                //    {
+                //        key: 'name',
+                //        label: 'Họ tên'
+                //    },
+                //    {
+                //        key: 'email',
+                //        label: 'Email'
+                //    },
+                //    {
+                //        key: 'phone',
+                //        label: 'SĐT'
+                //    },
+                //    //{
+                //    //    key: 'subjects',
+                //    //    label: 'Chuyên môn'
+                //    //},
+                //    {
+                //        key: 'pos',
+                //        label: 'Chức danh'
+                //    },
+                //    {
+                //        key: 'actions',
+                //        label: 'Tác vụ'
+                //    }
+                //],
                 tableData: [
                 ],
                 //list_subject: [],
@@ -443,13 +452,39 @@
                 },
                 downloadTemplate() {
                     window.open("@processUrl("ExportTemplate", "TeacherManage")");
+                },
+                exportExcel(tableid) {
+                    var _filename = "Danh sách giáo viên";
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
+                    }
                 }
             }
         });
 
         var check = false;
         function showSelect() {
-            
+
             if (check == false) {
                 $('#selectSub').attr('style', 'display:block');
                 check = true;
@@ -477,10 +512,10 @@
             </div>
         </b-col>
         @*<b-col class="form-group">
-            <label for="">Email</label>
-            <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
-            <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
-        </b-col>*@
+                <label for="">Email</label>
+                <input class="form-control" v-model="add_member.email" v-if="add_member.id == ''" />
+                <input class="form-control" v-model="add_member.email" disabled="disabled" v-else />
+            </b-col>*@
         <b-col class="form-group row">
             <div class="col-sm-6">
                 <label for="">Điện thoại</label>
@@ -497,40 +532,40 @@
         </b-col>
         <b-col class="form-group row">
             <!--
-        <div class="col-sm-6" style="position:relative">
-            <label for="">Chọn chuyên môn</label>
-            <div class="row col-md-4 ">
-                @*<div class="input-group">
-                    <div class="input-group-btn row">*@
-                        <div class="col-sm-4">
-                            <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
-                                Chọn <span class="caret"></span>
-                            </button>
+            <div class="col-sm-6" style="position:relative">
+                <label for="">Chọn chuyên môn</label>
+                <div class="row col-md-4 ">
+                    @*<div class="input-group">
+                        <div class="input-group-btn row">*@
+                            <div class="col-sm-4">
+                                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
+                                    Chọn <span class="caret"></span>
+                                </button>
+                            </div>
+                        @*</div>
+                        <div class="subject_wrapper d-none">
                         </div>
-                    @*</div>
-                    <div class="subject_wrapper d-none">
-                    </div>
 
-                </div>*@
-            </div>
-            <div class="col-sm-8">
-                <div id="selectSub" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                    <ul class="subjectSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
-                        @{
-                            for (int i = 0; ViewBag.Subject != null && i < ViewBag.Subject.Count; i++)
-                            {
-                                <li>
-                                    <a>
-                                        <input type="checkbox" id="@ViewBag.Subject[i].ID" value="@ViewBag.Subject[i].ID" v-model="add_member.subjects"><span class="lbl"> @ViewBag.Subject[i].Name </span>
-                                        @*<input type="checkbox" id="@ViewBag.Subject[i].ID" v-model="add_member.subjects" /><span class="lbl"> @ViewBag.Subject[i].Name </span>*@
-                                    </a>
-                                </li>
-                            }
-                        }
-                    </ul>
+                    </div>*@
                 </div>
-            </div>
-        </div>-->
+                <div class="col-sm-8">
+                    <div id="selectSub" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                        <ul class="subjectSelect" role="menu" style="overflow-y:auto;height:100px;list-style:none">
+                            @{
+                                for (int i = 0; ViewBag.Subject != null && i < ViewBag.Subject.Count; i++)
+                                {
+                                    <li>
+                                        <a>
+                                            <input type="checkbox" id="@ViewBag.Subject[i].ID" value="@ViewBag.Subject[i].ID" v-model="add_member.subjects"><span class="lbl"> @ViewBag.Subject[i].Name </span>
+                                            @*<input type="checkbox" id="@ViewBag.Subject[i].ID" v-model="add_member.subjects" /><span class="lbl"> @ViewBag.Subject[i].Name </span>*@
+                                        </a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>-->
         </b-col>
 
         <template v-slot:modal-footer="{ ok, cancel}">

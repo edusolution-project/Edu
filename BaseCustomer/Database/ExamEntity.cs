@@ -137,6 +137,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).FirstOrDefault();
         }
+        public IEnumerable<ExamEntity> GetListByLessonAndStudent(string LessonID, string StudentID)
+        {
+            return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).ToEnumerable();
+        }
 
         //public ExamEntity CompleteNoEssay(ExamEntity exam, LessonEntity lesson, out double point, bool updateTime = true)
         //{
@@ -398,6 +402,11 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<ExamEntity> GetPreviousIncompletedExams(string LessonID, string StudentID, int Number = Int32.MaxValue)
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID && o.Status == false && o.Number < Number).SortBy(t => t.Number).ToEnumerable();
+        }
+
+        public IEnumerable<ExamEntity> GetItemByLessonScheduleID(String LessonScheduleID)
+        {
+            return CreateQuery().Find(x=>x.LessonScheduleID == LessonScheduleID).ToEnumerable();
         }
     }
 }

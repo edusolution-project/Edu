@@ -38,6 +38,14 @@ namespace BaseCustomerMVC.Models
         public bool IsCompleted { get; set; }
         [JsonProperty("ListExam")]
         public List<ExamDetailCompactView> ListExam { get; set; }
+        [JsonProperty("LessonName")]
+        public String LessonName { get; set; }
+        [JsonProperty("LessonID")]
+        public String LessonID { get; set; }
+        [JsonProperty("ClassSubjectID")]
+        public String ClassSubjectID { get; set; }
+        [JsonProperty("CourseName")]
+        public String CourseName { get; set; }
     }
 
     public class ExamDetailCompactView

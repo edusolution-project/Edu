@@ -33,5 +33,7 @@ namespace BaseCustomerMVC.Models
         public string LastExam { get; set; }
         [JsonProperty("IsOnline")]
         public bool IsOnline { get; set; }
+        [JsonProperty("IsHideAnswer")]
+        public bool IsHideAnswer { get; set; }
     }
 }

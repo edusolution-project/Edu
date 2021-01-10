@@ -19,20 +19,21 @@
     <link href="~/css/minify/minify.min.css" rel="stylesheet" />
     <link href="~/css/stylesheet.min.css" rel="stylesheet" />
 
-
     <script src="~/js/minify/common.min.js?20200930"></script>
     <script src="~/js/minify/common.lib.min.js?20200326"></script>
 
 
+
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    @*<script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-178391156-1');
-    </script>*@
+    </script>
 
     <script type="text/javascript">
         const g_CurrentUser = {
@@ -43,8 +44,7 @@
             isAdmin:"huonghl@utc.edu.vn"=="@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value"
         }
     </script>
-    @RenderSection("style", false)
-
+    @RenderSection("style", false)   
 </head>
 <style>
     ::-webkit-scrollbar {
@@ -257,8 +257,7 @@
                             <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
                             <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
                             <i class="fas fa-star red-color" v-else></i>
-                            <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span></a>
-                        </li>
+                            <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}<span v-if="item.ClassName!=null"> ({{item.ClassName}})</span></a>
                     </template>
                 </ul>
             </div>
@@ -341,7 +340,7 @@
 
     @RenderSection("Scripts", false)
     <!--Start of Tawk.to Script-->
-    @*<script type="text/javascript">
+    <script type="text/javascript">
         var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
         (function () {
             var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
@@ -351,22 +350,62 @@
             s1.setAttribute('crossorigin', '*');
             s0.parentNode.insertBefore(s1, s0);
         })();
-    </script>*@
+    </script>
     <!--End of Tawk.to Script-->
 
-    @if (center == "ern")
-    {
-        @*longht them*@
-        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-        @await Html.PartialAsync("_EasyRealtime")
-    }
-    else
-    {
-        @await Html.PartialAsync("_EasyChat")
-    }
 
+    @await Html.PartialAsync("_EasyChat")
+
+    <script>
+
+        var openPoll = function () {
+            $('html').append($('<div>', { id: 'pollPopup', style: 'position:fixed; top: 0; left: 0; right: 0; bottom: 0; background: #333; opacity:0.95; z-index: 99999999999' })
+                .append($('<div>', { style: 'margin-top: 150px; text-align:center;' })
+                    .append($('<p>', { style: 'font-size: 150%; color:#FFF; width: 70%; display:inline-block; line-height: 1.5', html: 'Cảm ơn quý thầy cô đã sử dụng hệ thống của Eduso!<br/> Để Eduso có thể đáp ứng tốt nhất cho hoạt động giảng dạy của quý thầy cô, xin vui lòng cho Eduso biết ý kiến của quý thầy cô về các trải nghiệm trên hệ thống.' }))
+                    .append($('<p>').append($('<button>', { class: 'btn btn-primary mt-3', text: 'Thực hiện khảo sát', onclick: 'gotoPoll()' })))
+                ));
+            $('body').css('overflow', 'hidden');
+        }
+
+        var gotoPoll = function () {
+            $('#pollPopup').remove();
+            $('body').css('overflow', 'auto');
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSc09SsHWOOfAomRg7kRE4RvKmAxPrZKc7T0vIY1uAI5f2uK7A/viewform');
+        }
+
+        var pageCount = getCookie("PageTCCount");
+        if (!pageCount > 0)
+            pageCount = 1
+        else
+            pageCount = parseInt(pageCount);
+        setCookie("PageTCCount", pageCount + 1, 30);
+        if (pageCount == 5) {
+            openPoll();
+        }
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+    </script>
 </body>
 </html>
 

@@ -17,9 +17,12 @@
 
 
 @*<script src="/libs/vuejs-datepicker.min.js"></script>*@
+<script src="~/js/bootstrap-vue.min.js"></script>
 <link href="~/js/lib/datetimepicker/jq.datetimepicker.css" rel="stylesheet" />
 <script src="~/js/lib/datetimepicker/php-date-formatter.min.js"></script>
 <script src="~/js/lib/datetimepicker/jquery.mousewheel.js"></script>
+<script src="~/js/jquery-ui.min.js"></script>
+<link href="~/css/jquery-ui.min.css" rel="stylesheet" />
 <script src="~/js/lib/datetimepicker/jquery.datetimepicker.js"></script>
 
 <script src="/libs/quill-editor/quill.min.js"></script>
@@ -27,7 +30,7 @@
 <link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
-
+@*<script src="~/js/export2excel/jquery.table2excel.js"></script>*@
 <script>
     setActiveMenu("course");
 </script>
@@ -41,9 +44,10 @@
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
-                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Học viên" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>
-                    <li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
+                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>
+                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
+                    @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
                 </ul>
             </div>
             <div class="c-right">
@@ -51,29 +55,62 @@
             </div>
         </div>
         <div class="d-flex align-items-center" v-if="tab[2]">
-            <div class="box filter-box m-1">
+            @*<div class="col-md-12 form-row pb-2" v-if="tab[2]">*@
+            <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="searchCsbj">
                     <option value="">Tổng hợp</option>
-                    <option v-for="(item,k) in classSubjects" :value="item.ID">{{item.CourseName}}</option>
+                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
+                    @*<option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                        {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
+                    </option>*@
+                    <template v-for="(item, k) in classSubjects" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                        @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.CourseName}}</option>*@
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-else>{{item.CourseName}}</option>
+                    </template>
                 </select>
             </div>
-            <div class="m-1 position-relative" v-if="searchCsbj != ''">
-                <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
-                    Xem điểm theo tuần <span class="caret"></span>
-                </button>
-                <div style="position:absolute;left:0;top:40px;z-index:2" v-if="displaySelect">
-                    <div id="selectCenters">
-                        <ul class="chapSelect" role="menu" style="overflow-y:auto; min-width: 200px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
-                            <li>
-                                <input type="checkbox" v-model="filterChap.SelectAll" v-on:change="checkToggleAll()" /><span class="lbl"> Tất cả chương </span>
-                            </li>
-                            <li v-for="(item,k) in scoreSbjChap" class="d-flex flex-row align-items-center">
-                                <input type="checkbox" :value="item.ID" v-model="filterChap.TargetChaps" v-on:change="checkToggle()" /><span class="ml-1 lbl"> {{item.Name}} </span>
-                            </li>
-                        </ul>
+            @*<div class="m-1 position-relative col-md-9 col-sm-12" v-if="searchCsbj != ''">
+                    <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle filter-box" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
+                        Xem điểm theo tuần <span class="caret"></span>
+                    </button>
+                    <div style="position:absolute;left:0;top:40px;z-index:2" v-if="displaySelect">
+                        <div id="selectCenters">
+                            <ul class="chapSelect" role="menu" style="overflow-y:auto; min-width: 200px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                <li>
+                                    <input type="checkbox" v-model="filterChap.SelectAll" v-on:change="checkToggleAll()" /><span class="lbl"> Tất cả chương </span>
+                                </li>
+                                <li v-for="(item,k) in scoreSbjChap" class="d-flex flex-row align-items-center">
+                                    <input type="checkbox" :value="item.ID" v-model="filterChap.TargetChaps" v-on:change="checkToggle()" /><span class="ml-1 lbl"> {{item.Name}} </span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
+                </div>*@
+            <!--<div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
+                <select v-model="searchPoint">
+                    <option value="">Theo phân công giáo viên</option>
+                    <option value="1">Tất cả</option>-->
+            @*<option value="2">Theo thời gian</option>*@
+            <!--</select>
+            </div>-->
+            <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
+                <div class="form-row">
+                    <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
+                    <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
+            @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
+            <!--</div>
             </div>
+            <div class="float-right" v-if="searchCsbj==''">
+                <template v-if="!isLoading">-->
+            <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel('table_point')"><i title="Xuất file" class="ti-import"></i></button>
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
+            <!--</template>
+                <template v-else>
+                    <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" disabled><i title="Xuất file" class="ti-export"></i></button>
+                </template>
+            </div>-->
         </div>
 
     </div>
@@ -105,19 +142,19 @@
             <div class="form-group">
                 <h3 style="font-size:15px;" class="font-weight-bold">Học liệu chính quy</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
-                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1 align-middle" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
                             </a>
                             <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
-                                Chuyển chế độ soạn thảo
+                                Soạn thảo
                             </a>
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -137,19 +174,19 @@
             <div class="form-group">
                 <h3 style="font-size:15px;" class="font-weight-bold pt-3">Học liệu chuyên đề</h3>
                 <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND" :for="obj.ID">
                         <div class="class_row d-flex justify-content-start">
-                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            <a href="javascript:;" v-b-toggle="`collapse-${i}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1 align-middle" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
                             </a>
                             <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark d-none" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
-                                Chuyển chế độ soạn thảo
+                                Soạn thảo
                             </a>
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
@@ -166,144 +203,234 @@
                     </li>
                 </ul>
             </div>
-        </div>
-        <div class="box" v-if="tab[2]">
-            <table id="ed_table" class="table table-hover" v-if="searchCsbj == ''">
-                <thead>
-                    <tr>
-                        <th rowspan="2">#</th>
-                        <th rowspan="2">Họ tên</th>
-                        <th rowspan="2">Tiến độ</th>
-                        <th rowspan="2">Lần học cuối</th>
-                        <th colspan="3">Luyện tập</th>
-                        <th colspan="3">Kiểm tra</th>
-                        <th rowspan="2">Xếp hạng</th>
-                    </tr>
-                    <tr>
-                        <th>Thực hiện</th>
-                        <th>TB</th>
-                        <th>TK</th>
-                        <th>Thực hiện</th>
-                        <th>TB</th>
-                        <th>TK</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item,k) in scoreData">
-                        <td>{{(k+1)}}</td>
-                        <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/@currentClass.ID'" :title="item.FullName">{{item.FullName}}</a></td>
-                        <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                        <td>{{formatTime(item.LastDate)}}</td>
-                        <td class="text-black">{{item.PracticeDone}}/{{item.TotalPractices}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint > 0 ?  item.PracticeAvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.PracticeResult > 50)}">{{item.PracticeResult > 0 ?  item.PracticeResult.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-black">{{item.ExamDone}}/{{item.TotalExams}}</td>
-                        <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint > 0 ? item.AvgPoint.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-danger" v-bind:class="{good : (item.ExamResult > 50)}">{{item.ExamResult > 0 ?  item.ExamResult.toFixed(2) : '0.00'}}%</td>
-                        <td class="text-black" v-bind:class="{good : (item.Rank > 0 && item.Rank < 4)}">{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="w-100 overflow-auto" v-else>
-                <table class="table table-hover" id="ed_table" v-if="filterChap.TargetChaps.length > 0" style="table-layout: fixed">
-                    <thead>
-                        <tr>
-                            <th style="max-width:50px; width: 50px;">#</th>
-                            <th style="max-width:200px; width: 200px;">Họ tên</th>
-                            <th v-for="(item,k) in scoreSbjChap" class="sbjScoreCol" v-if="filterChap.TargetChaps.indexOf(item.ID) !== -1">
-                                {{item.Name}}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(student,i) in scoreSbjStudent">
-                            <td>{{(i+1)}}</td>
-                            <td><a :href="'@processUrl("StudentDetail", "Class")/' + student.ID + '/@currentClass.ID'" :title="student.FullName">{{student.FullName}}</a></td>
-                            <td v-for="(result,k) in scoreSbjChap" class="sbjScoreCol text-danger" v-if="filterChap.TargetChaps.indexOf(result.ID) !== -1" v-bind:class="{good : (getAvgTotal(k, student.ID) > 50)}">{{getSbjScoreText(k, student.ID)}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="form-group">
+                @*<h3 style="font-size:15px;" class="font-weight-bold pt-3">Kiểm tra / đánh giá</h3>*@
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" :for="obj.ID">
+                        <div class="class_row d-flex justify-content-start">
+                            <a href="javascript:;" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2 text-danger" v-on:click="loadContent(obj.ID)" v-on:load="alert(1)">
+                                <h3 style="font-size:15px;" class="font-weight-bold"> Kiểm tra / đánh giá</h3>
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showScoreboard(obj)">
+                                <i class="fas fa-poll-h ml-3"></i>
+                                Bảng điểm
+                            </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")" v-on:click="showEditor(obj)">
+                                <i class="far fa-edit ml-3"></i>
+                                Soạn thảo
+                            </a>
+                        </div>
+                        @*<b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">*@
+                        <ul class="list">
+                            <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                          v-bind:data="item"
+                                          v-bind:classbj="obj.ID"
+                                          v-bind:pos="k"
+                                          v-bind:owner="obj.TeacherID"
+                                          v-bind:listchaps="list_chapters"
+                                          v-bind:type="'exam'"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
+                        </ul>
+                        @*</b-collapse>*@
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="box" v-if="tab[3]">
-            <div class="row ls-doc" v-if="ref.data.length > 0">
-                <div class="col-md-6" v-for="data in ref.data">
-                    <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
-                        <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
-                            <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                            <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
-                        </a>
-                        <div class="entry p-0">
-                            <div>
+        <div class="box" v-if="tab[2]">
+            <div class="container-fluid">
+                <template v-if="table[0] && isLoading == false">
+                    <table id="table_point" class="table">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và tên</th>
+                                <th>Điểm luyện tập</th>
+                                <th>Điểm kiểm tra</th>
+                                @*<th>Xếp hạng</th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in scoreData">
+                                <td>{{k+1}}</td>
+                                <td><a href="javascript:void(0)" v-on:click="showDetailStudent(item.StudentID,item.FullName)">{{item.FullName}}</a></td>
+                                <td>{{roundPoint(item.PracticeAvgPoint,1)}}</td>
+                                <td class="action-cel" v-on:click="loadDetailExam(item)">{{roundPoint(item.AvgPoint,1)}}</td>
+                                @*<td>1/32</td>*@
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else-if="table[1] && isLoading == false">
+                    <div class="view" v-if="fieldsTime">
+                        <div class="wrapper">
+                            <table class="table scoretable" id="table_point">
+                                <thead>
+                                    <tr>
+                                        <th class="sticky-col first-col" rowspan="2">STT</th>
+                                        <th class="sticky-col second-col" rowspan="2">Họ tên</th>
+                                        <th rowspan="2" class="sticky-col third-col">Trung bình</th>
+                                        <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
+
+                                    </tr>
+                                    <tr style="font-size:80%">
+                                        <th v-for="(item,k) in fieldsTime" class="td_hover" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(items,i) in studentSummarySbj">
+                                        <td class="sticky-col first-col">{{i}}</td>
+                                        <td class="sticky-col second-col">{{ list_students[i-1].fullName}}</td>
+                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].avgPointPratice,1)}}</td>
+                                        @*<td>{{calcAvginWeek(items)}}</td>*@
+                                    <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                        <template v-for="item in items">
+                                            @*<template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                            <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>*@
+                                            <td style="width:50px;height:20px" v-if="roundPoint(item.point,1) >= 8" class="action-cel color-minpoint8" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 5 && roundPoint(item.point,1) < 8" class="action-cel color-minpoint5" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 2 && roundPoint(item.point,1) < 5" class="action-cel color-minpoint2" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 0 && roundPoint(item.point,1) < 2" class="action-cel color-minpoint0" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                            <td style="width:50px;height:20px" v-else class="color-dontwork">{{roundPoint(item.point,1)}}</td>
+                                        </template>
+                                    </template>
+                                        <template v-else>
+                                            <td>Chưa đặt lịch</td>
+                                        </template>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="view" v-else style="text-align:center">Chưa có bài</div>
+                </template>
+            </div>
+        </div>
+        @*<div class="box" v-if="tab[3]">
+                <div class="row ls-doc" v-if="ref.data.length > 0">
+                    <div class="col-md-6" v-for="data in ref.data">
+                        <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
+                            <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
+                                <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
+                                <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
+                            </a>
+                            <div class="entry p-0">
                                 <div>
-                                    <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
-                                </div>
-                                @*<div>
+                                    <div>
+                                        <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
+                                    </div>
+                                    *<div>
                                         <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
                                         <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                    </div>*@
-                            </div>
-                            <div class="pt-0 pb-2">
-                                <p>{{domDecoder(data.Description)}}</p>
-                            </div>
-                            <div>
-                                <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
-                                <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                                <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
-                                <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                                <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
+                                    </div>*
+                                </div>
+                                <div class="pt-0 pb-2">
+                                    <p>{{domDecoder(data.Description)}}</p>
+                                </div>
+                                <div>
+                                    <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
+                                    <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
+                                    <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
+                                    <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
+                                    <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row ls-doc text-center d-block" v-else>
-                Không có tài liệu
-            </div>
-        </div>
-        <div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
-            <div class="paging-view">
-                Hiển thị:
-                <select v-model="ref.view" v-on:change="loadPreference()">
-                    <option value="10">10 kết quả</option>
-                    <option value="20">20 kết quả</option>
-                    <option value="30">30 kết quả</option>
-                </select>
-            </div>
-            <div class="page-control">
-                <div class="right">
-                    <b-pagination v-model="ref.page"
-                                  :total-rows="ref.totalRec"
-                                  :per-page="ref.view"
-                                  v-on:input="loadPreference()"></b-pagination>
+                <div class="row ls-doc text-center d-block" v-else>
+                    Không có tài liệu
                 </div>
-            </div>
-        </div>
-        <div class="box" v-show="tab[4]">
-            <ul class="list ls-practice">
-                <li v-for="(obj,i) in classSubjects">
-                    <div class="inner">
-                        <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
-                            <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                            <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                        </a>
-                        <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
-                            <ul class="list">
-                                <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                             v-bind:data="item"
-                                             v-bind:classbj="obj.ID"
-                                             v-bind:pos="k"
-                                             v-bind:owner="obj.TeacherID"
-                                             v-bind:listchaps="list_chapters_result"></chap-result>
-                                <lesson-result v-for="lesson in filterResult({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-result>
-                            </ul>
-                        </b-collapse>
-
+            </div>*@
+        @*<div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
+                <div class="paging-view">
+                    Hiển thị:
+                    <select v-model="ref.view" v-on:change="loadPreference()">
+                        <option value="10">10 kết quả</option>
+                        <option value="20">20 kết quả</option>
+                        <option value="30">30 kết quả</option>
+                    </select>
+                </div>
+                <div class="page-control">
+                    <div class="right">
+                        <b-pagination v-model="ref.page"
+                                      :total-rows="ref.totalRec"
+                                      :per-page="ref.view"
+                                      v-on:input="loadPreference()"></b-pagination>
                     </div>
+                </div>
+            </div>*@
+        @*<div class="box" v-show="tab[4]">
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects">
+                        <div class="inner">
+                            <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
+                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
+                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
+                            </a>
+                            <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
+                                <ul class="list">
+                                    <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                 v-bind:data="item"
+                                                 v-bind:classbj="obj.ID"
+                                                 v-bind:pos="k"
+                                                 v-bind:owner="obj.TeacherID"
+                                                 v-bind:listchaps="list_chapters_result"></chap-result>
+                                    <lesson-result v-for="lesson in filterResult({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-result>
+                                </ul>
+                            </b-collapse>
+
+                        </div>
+                    </li>
+                </ul>
+            </div>*@
+        <div class="box" v-show="tab[5]">
+            <ul class="list ls-practice">
+                <li v-for="(item,k) in lessonToMark.data">
+                    <div class="class_row d-flex justify-content-start">
+                        <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(item.classSubjectID)">
+                            <i class="ic ic-headphone-o mr-1 align-middle"></i>{{item.courseName}}
+                            <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
+                        </a>
+                    </div>
+                    <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
+                        <chap-content v-for="(chapter,i) in list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
+                                      v-bind:data="chapter"
+                                      v-bind:classbj="item.ID"
+                                      v-bind:pos="i"
+                                      v-bind:owner="item.TeacherID"
+                                      v-bind:listchaps="list_chapters"></chap-content>
+                        <ul class="list" v-if="item.listLesson.length > 0">
+                            <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
+                                <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                                    <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title,lesson.ID)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
+                                        <template v-if="lesson.TemplateType === 2">
+                                            <span class="text-danger">
+                                                <i class="ic far fa-edit mr-2"></i>
+                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                            </span>
+                                        </template>
+                                        <template v-else>
+                                            <span>
+                                                <i class="ic far fa-file-alt mr-2"></i>
+                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                            </span>
+                                        </template>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </b-collapse>
                 </li>
             </ul>
         </div>
     </div>
+
+    <template v-if="isLoading">
+        <div style="text-align:center">
+            <span>Đang tải dữ liệu ...</span><br />
+            <b-spinner label="Loading..."></b-spinner>
+        </div>
+    </template>
 </section>
 @section Scripts{
     <style>
@@ -346,14 +473,14 @@
             overflow: visible;
         }
 
-        .ls-practice .date {
+        /*.ls-practice .date {
             width: 160px;
             padding: 2px 12px;
-        }
+        }*/
 
-            .ls-practice .date::after {
-                top: 7px;
-            }
+        .ls-practice .date::after {
+            top: 7px;
+        }
 
         .ls-practice .sub-practice .status {
             padding: 10px
@@ -403,32 +530,275 @@
         .chapSelect .lbl {
             white-space: nowrap;
         }
+
+        .chap-item .chap-row {
+            position: relative;
+        }
+
+            .chap-item .chap-row .row-action {
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 3px 7px;
+                background: #FFF;
+            }
+
+                .chap-item .chap-row .row-action .act_ic {
+                    display: none;
+                }
+
+                .chap-item .chap-row .row-action .indicator {
+                    display: block;
+                    color: #CCC;
+                    font-size: 12px;
+                }
+
+                .chap-item .chap-row:hover .row-action .indicator,
+                .chap-item .chap-row .row-action.active .indicator {
+                    display: none;
+                }
+
+                .chap-item .chap-row:hover .row-action .act_ic,
+                .chap-item .chap-row .row-action.active .act_ic {
+                    display: contents;
+                }
+
+        .ic-ac {
+            color: #CCC;
+            cursor: pointer;
+        }
+
+            .ic-ac.active, .ic-ac:hover {
+                color: #333;
+                cursor: pointer;
+            }
+
+        .chap-item .chap-row .chap-info i {
+            font-size: 75%;
+            font-weight: 500;
+            color: #333;
+            border-radius: 20px;
+            padding: 2px 5px;
+        }
+
+            .chap-item .chap-row .chap-info i span {
+                font-size: 100%;
+                font-family: 'Be Vietnam',sans-serif;
+            }
+
+        .ui-tooltip, .arrow:after {
+            background: black;
+            border: 1px solid white;
+        }
+
+        .ui-tooltip {
+            padding: 2px 7px 5px;
+            color: white;
+            border-radius: 10px;
+            font: normal 12px 'Be Vietnam',sans-serif;
+            box-shadow: none;
+        }
+
+        .arrow {
+            width: 70px;
+            height: 16px;
+            overflow: hidden;
+            position: absolute;
+            left: 50%;
+            margin-left: -35px;
+            bottom: -16px;
+        }
+
+            .arrow.top {
+                top: -16px;
+                bottom: auto;
+            }
+
+            .arrow.left {
+                left: 20%;
+            }
+
+            .arrow:after {
+                content: "";
+                position: absolute;
+                left: 20px;
+                top: -20px;
+                width: 25px;
+                height: 25px;
+                box-shadow: 6px 5px 9px -9px black;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .arrow.top:after {
+                bottom: -20px;
+                top: auto;
+            }
+
+        .converText {
+            mso-number-format: "\@@";
+        }
+
+        #table_point tbody td {
+            padding: 0px;
+        }
+
+        .table td, .table th {
+            padding: 0px
+        }
+
+        .table thead th {
+            border: 0.5px solid gray;
+            text-align: center;
+            vertical-align: middle
+        }
+
+        .table tbody td {
+            text-align: center;
+            border: 0.5px solid gray;
+            vertical-align: middle
+        }
+
+        /*-----------*/
+        .view {
+            margin: auto;
+            /*width: 600px;*/
+        }
+
+        .wrapper {
+            position: relative;
+            overflow: auto;
+            /*border: 1px solid black;*/
+            white-space: nowrap;
+        }
+
+        .sticky-col {
+            position: -webkit-sticky;
+            position: sticky;
+            background-color: white;
+        }
+
+        .first-col {
+            width: 30px;
+            min-width: 30px;
+            max-width: 50px;
+            left: 0px;
+        }
+
+        .second-col {
+            width: 250px;
+            min-width: 150px;
+            max-width: 300px;
+            left: 30px;
+        }
+
+        .third-col{
+            width:50px;
+            min-width:50px;
+            max-width:90px;
+            left:200px
+        }
+
+        /*-----------*/
+        .td_hover {
+            cursor: pointer
+        }
+
+            .td_hover:hover {
+                background-color: lightgray;
+            }
+            @*left: 36px;
+        }*@
+
+        .scoretable th, scoretable.td {
+            padding: 0 5px;
+        }
+
+        .action-cel {
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+            .action-cel:hover {
+                background-color: lightgray;
+            }
+
+        .color-minpoint8 {
+            background-color: #7dcbca
+        }
+
+        .color-minpoint5 {
+            background-color: #cae9e0
+        }
+
+        .color-minpoint2 {
+            background-color: #f3d2ac
+        }
+
+        .color-minpoint0 {
+            background-color: #f3b8b1
+        }
+        .color-dontwork {
+            background-color: #cecbd6
+        }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
         <li class="pr-0 ml-3 chap-item">
             <div class="inner pt-2 pb-2">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+                <div class="chap-row mt-1" onmouseover="$('.row-action.active').removeClass('active')">
                     <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
-                        <span class="align-self-center" style="line-height:24px;"><i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}<i class="ic ic-collapse"></i></span>
-                    </a>
-                    <div class="d-flex" v-if="owner == '@currentuser'">
-                        <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 31px; margin-top: 2px;" v-on:change="updateChapCondition(data)">
-                            <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
-                            <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
-                                <option :value='chap.ID'>{{chap.Title}}</option>
-                            </template>
-                        </select>
-                        <div class="picker-schedule d-flex">
-                            <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                            <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateChapSchedule(data, pos)"></datepicker>
-                            <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                        <div class="align-self-center mb-1" style="line-height:24px">
+                            <i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}
+                            <i class="ic ic-collapse"></i>
                         </div>
-                        <input type="text" class="form-control bg-light text-right basepoint" style="margin: 2px 13.5px; width: 60px;" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
+                    </a>
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start align-items-md-center">
+                            <div class="chap-info ml-3" style="color:#999; white-space: nowrap">
+                                <i class="ti-link" style="background-color: #bee4ef;" v-for="(chap,j) in listchaps" v-if="(data.ConditionChapter != '') && (chap.ID == data.ConditionChapter)"><span class="pl-1">Điều kiện: {{chap.Title}}</span></i>
+                                <i class="ti-target ml-2" v-if="data.BasePoint > 0" style="background-color: #ffe38d"><span class="pl-1">Mục tiêu: {{data.BasePoint}}</span></i>
+                                <i class="ti-control-play ml-2" style="background-color: #c3e2c3" v-if="moment(data.StartDate) > moment(new Date(1900,1,1))"><span class="pl-1">bắt đầu {{formatTime(data.StartDate)}}</span></i>
+                                <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
+                            </div>
+
+                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="owner == '@currentuser'">
+                                <i class="fas fa-ellipsis-h indicator"></i>
+                                <template v-if="type != 'exam'">
+                                    <div class="act_ic">
+                                        <i class="ic-ac fas fa-link ml-2" style="font-size:16px;" title="Chọn nội dung điều kiện" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
+                                        <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 24px; margin:2px; display:none" v-on:change="updateChapCondition(data)" onblur="$(this).hide()" onfocus="$(this).show()">
+                                            <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
+                                            <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
+                                                <option :value='chap.ID'>{{chap.Title}}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-play-circle ml-2" style="font-size:18px;" title="Chọn ngày bắt đầu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
+                                        <datepickerV2 :date="data.StartDate" :idx="0" :obj="data" class="st" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-stop-circle ml-2" style="font-size:18px;" title="Chọn ngày hết hạn" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
+                                        <datepickerV2 :date="data.EndDate" :idx="1" :obj="data" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-dot-circle ml-2" style="font-size:18px;" title="Đặt mục tiêu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
+                                        <input type="text" class="form-control bg-light text-right basepoint" style="margin: 0 3px;padding: 2px; width: 52px; height:24px; display:none;" onblur="$(this).hide()" onfocus="$(this).show()" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
+                                    </div>
+                                </template>
+                                <div class="act_ic">
+                                    <i class="ic-ac fas fa-redo ml-2" style="font-size:16px;" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+
                 <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
-                    <b-card-body class="pr-0">
+                    <b-card-body class="pr-0 pb-1 ">
                         <ul class="list">
                             <template v-if="data.IsLoading">
                                 <li><i class=""></i> Đang nạp dữ liệu</li>
@@ -439,8 +809,9 @@
                                               v-bind:classbj="classbj"
                                               v-bind:pos="j"
                                               v-bind:owner="owner"
-                                              v-bind:listchaps="listchaps"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject"></lesson-item>
+                                              v-bind:listchaps="listchaps"
+                                              v-bind:type="type"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject" v-bind:type="type"></lesson-item>
                             </template>
                         </ul>
                     </b-card-body>
@@ -452,27 +823,38 @@
     <script type="text/x-template" id="lessonItemTemp">
         <li class="sub-practice pt-2 pb-1 pl-2 rounded">
             <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + classSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
-                    <span>
-                        <i v-if="data.TemplateType === 2" class="ic far fa-edit mr-2"></i>
-                        <i v-else class="ic far fa-file-alt mr-2"></i>
-                        {{data.Title}}
-                    </span>
+                <a :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + data.ClassSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+                    <template v-if="data.TemplateType === 2">
+                        <span class="text-danger">
+                            <i class="ic far fa-edit mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span>
+                            <i class="ic far fa-file-alt mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
                 </a>
-                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">
+                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
-                    <i class="ic fas fa-redo ic-clear-schedule d-flex align-items-center" v-bind:class="{active: data.IsOnline == true}" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
-                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" v-on:click="toggleOnlineClass(data)"></i>
+                    <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
+                    <template v-if="type != 'exam'">
+                        <i class="far fa-eye-slash ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsHideAnswer == true}" title="Bật/ tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleHideAnswer(data)"></i>
+                        <i class="fas fa-desktop ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" data-toggle="tooltip" v-on:click="toggleOnlineClass(data)"></i>
+                    </template>
                 </div>
                 <div class="d-flex picker-schedule" v-else>
-                    <div class="input-group date date st bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
-                    <div class="input-group date date ed bg-light"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
-                    <i class="ic ic-online-class" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến"></i>
+                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
+                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
                 </div>
-                @*<div class="status" v-if="owner == '@currentuser'">
+                <div class="status" v-if="owner == '@currentuser'">
                         <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>*@
+                    </div>
             </div>
         </li>
     </script>
@@ -532,9 +914,9 @@
                     </span>
                 </a>
                 <div class="flex-column col-3">
-                    @*<span>
+                    <span>
                             Tỉ lệ mở
-                        </span>*@
+                        </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -547,9 +929,9 @@
                     </div>
                 </div>
                 <div class="flex-column col-3">
-                    @*<span>
+                    <span>
                             Tỉ lệ làm bài
-                        </span>*@
+                        </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -577,6 +959,7 @@
                 data: Object,
                 pos: String,
                 owner: String,
+                type: String
             }
         })
 
@@ -585,7 +968,8 @@
             props: {
                 data: Object,
                 classSubject: String,
-                owner: String
+                owner: String,
+                type: String
             }
         })
 
@@ -613,7 +997,7 @@
         var datepickerComponent = Vue.extend({
           //v-el:select
           template: `<div class="input-group date" ref="inputgroup">` +
-            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly">` +
+            `<input type="text" class="form-control" v-model="dateVal" readonly="readonly" style="font-size:95%">` +
             `</div>`,
             props: {
                 obj: '',
@@ -682,7 +1066,80 @@
             }
         })
 
+        var datepickerComponentV2 = Vue.extend({
+            //v-el:select
+            template: `<div class="date" ref="inputgroup">` +
+                `<input type="text" v-model="dateVal" readonly="readonly" style="width:0px;height:0px; border:none !important; outline:none !important">` +
+                `</div>`,
+            props: {
+                obj: '',
+                idx: '0',
+                date: '2015-01-01'
+            },
+            data: function () {
+                return {};
+            },
+            computed:
+            {
+                dateVal: {
+                    get() {
+                        //var _date = moment(this.date);
+
+                        //if (!_date._isValid || _date <= moment(new Date(1900, 1, 1)))
+                        //    return '';
+                        //return _date.format("DD/MM/YYYY HH:mm");
+                        return formatTime(this.date);
+                    },
+                    set(value) {
+                        var _date = moment(value, "DD/MM/YYYY HH:mm");
+                        if (_date._isValid)
+                            this.date = _date.format();
+                        else
+                            this.date = '';
+                    }
+                }
+            },
+            mounted: function () {
+                let _that = this
+                Vue.nextTick(function () {
+                    //console.log($(_that.$refs.inputgroup))
+                    $($(_that.$refs.inputgroup).find('input')).datetimepicker({
+                        formatTime: 'H:i',
+                        formatDate: 'd/m/Y',
+                        timepickerScrollbar: true,
+                        scrollMonth: false,
+                        defaultTime: '08:00',
+                        step: 15,
+                        onChangeDateTime: function (dp, $input) {
+                            //console.log($input.val())
+                            _that.dateVal = $input.val()
+                            if (moment($input.val(), "DD/MM/YYYY HH:mm").format() == "Invalid date") {
+                                //console.log('false');
+                                return false;
+                            }
+
+                            if (_that.idx == '0') {
+                                if (_that.obj.StartDate != _that.date) {
+                                    _that.obj.StartDate = _that.date
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    _that.$emit('input')
+                                }
+                            }
+                            else {
+                                if (_that.obj.EndDate != _that.date) {
+                                    _that.obj.EndDate = _that.date
+                                    //console.log(_that.obj.StartDate + ' _ ' + _that.obj.EndDate)
+                                    _that.$emit('input')
+                                }
+                            }
+                        }
+                    })
+                })
+            }
+        })
+
         Vue.component('datepicker', datepickerComponent);
+        Vue.component('datepickerV2', datepickerComponentV2);
 
         var mainInstance = new Vue({
             el: "#main_content",
@@ -694,11 +1151,13 @@
                 window.updateSchedule = this.updateSchedule
                 window.updateChapPoint = this.updateChapPoint
                 window.updateChapSchedule = this.updateChapSchedule
+                window.updateSubchapSchedule = this.updateSubchapSchedule
                 window.updateChapCondition = this.updateChapCondition
                 window.clearSchedule = this.clearSchedule
                 window.clearChapSchedule = this.clearChapSchedule
                 window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
+                window.toggleHideAnswer = this.toggleHideAnswer
                 window.filterChap = this.filterChap
                 window.filterLesson = this.filterLesson
                 window.filterResult = this.filterResult
@@ -708,7 +1167,6 @@
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     var hash = hash.split('#')[1];
-
                     switch (hash) {
                         case 'info':
                             this.tabChange(0);
@@ -719,17 +1177,21 @@
                         case 'score':
                             this.tabChange(2);
                             break;
-                        case 'reference':
-                            this.tabChange(3);
-                            break;
+                        //case 'reference':
+                        //    this.tabChange(3);
+                        //    break;
                         case 'result':
                             this.tabChange(4);
+                            break;
+                        case 'mark':
+                            this.tabChange(5);
                             break;
                     }
                 }
                 else {
                     this.tabChange(1);
-                }
+                };
+                this.loadLessonToMark();
             },
             components: {
                 LocalQuillEditor: VueQuillEditor.quillEditor
@@ -739,9 +1201,9 @@
                 editorOption: {
                     theme: 'snow'
                 },
-                searchCsbj:'',
+                searchCsbj: '',
                 classID: '@currentClass.ID',
-                className: '@currentClass.Name',
+                className: "@Html.Raw(currentClass.Name.Replace("'","\'"))",
                 startDate: '@currentClass.StartDate',
                 endDate: '@currentClass.EndDate',
                 classDescription: '@currentClass.Description',
@@ -754,6 +1216,7 @@
                 list_chapters: [],
                 list_chapters_result: [],
                 list_lessons: [],
+                list_students: [],
                 list_lessons_result: [],
                 loaded_chapter: [],
                 loaded_chapter_result: [],
@@ -770,14 +1233,6 @@
                         key: 'name',
                         label: 'Họ tên'
                     },
-                    //{
-                    //    key: 'email',
-                    //    label: 'Email'
-                    //},
-                    //{
-                    //    key: 'phone',
-                    //    label: 'SĐT'
-                    //},
                     {
                         key: 'per',
                         label: 'Tiến độ'
@@ -799,13 +1254,12 @@
                         label: 'Xếp hạng'
                     }
                 ],
-                scoreData: [
-                ],
+                scoreData: [],
                 scoreSbjChap: [],
                 scoreSbjStudent: [],
                 //view: 10,
                 //page: 1,
-                tab: [true, false, false, false, false],
+                tab: [true, false, false, false, false, false],
                 ref: {
                     range: '@BaseCustomerEntity.Database.REF_RANGE.CLASS',
                     target: '@currentClass.ID',
@@ -814,7 +1268,7 @@
                     view: 10,
                     page: 1,
                     gradeID: '',
-                    subjectID:'',
+                    subjectID: '',
                 },
                 addRef: {
                     ID: '',
@@ -865,7 +1319,44 @@
                 allow_doc_ext: [".doc", ".docx", ".xlsx", ".xls", ".ptt", "pttx", ".pdf"],
                 list_subject: [],
                 list_grades_full: [],
-                displaySelect: false
+                displaySelect: false,
+                searchPoint: '',
+                displaySelectTime: false,
+                searchwidthTime: {
+                    startTime: moment(String(new Date())).format('YYYY-MM-DD'),
+                    endTime: moment(String(new Date())).format('YYYY-MM-DD'),
+                },
+                table: [true, false],
+                fieldsTime: [],
+                studentSummary: {
+                    studentID: '',
+                    studentName: '',
+                    className: '',
+                    avgPointPractice: '',
+                    avgPointExam:'',
+                    result: [],
+                    dataPractice: [],
+                    dataExam:[]
+                },
+                studentSummarySbj: [],
+                progessSbj: {
+                    title: '',
+                    startTime: '',
+                    endTime:'',
+                    data:[]
+                },
+                detailProgessLesson: {
+                    isShow: false,
+                    title:'',
+                    data: [],
+                    dataLesson:[]
+                },
+                lessonToMark: {
+                    data: [],
+                    dataDetail: [],
+                    courseName: '',
+                    title: ''
+                }
             },
             watch: {
                 "ref.subjectID": function () {
@@ -875,9 +1366,27 @@
                     this.loadPreference()
                 },
                 searchCsbj: function () {
+                    //debugger
                     this.loadClassScore()
                     this.filterChap.TargetChaps = []
                     this.filterChap.SelectAll = false;
+                },
+                "searchPoint": function () {
+                    if (this.searchPoint == 0) {
+                        if (this.displaySelectTime) {
+                            this.displaySelectTime = !this.displaySelectTime;
+                        }
+                        this.loadClassScore();
+                    }
+                    else if (this.searchPoint == 1) {
+                        if (this.displaySelectTime) {
+                            this.displaySelectTime = !this.displaySelectTime;
+                        }
+                        this.loadClassScore();
+                    }
+                    else if (this.searchPoint == 2) {
+                        this.displaySelectTime = !this.displaySelectTime;
+                    }
                 }
             },
             methods: {
@@ -910,9 +1419,21 @@
                         case 4:
                             history.replaceState({ tab: a }, this.className + " - Kết quả", "#result");
                             this.loadClassSubjects();
+                        case 5:
+                            history.replaceState({ tab: a }, this.className + " - Chấm bài tự luận", "#mark");
+                            //debugger
+                            //this.loadLessonToMark();
                             break;
                     }
                     this.$forceUpdate()
+                },
+                tableChange(a = 0) {
+                    let _that = this
+                    _that.table.forEach(function (item, k) {
+                        _that.table[k] = false;
+                    })
+                    this.table = _that.table
+                    this.table[a] = true
                 },
                 loadClassSubjects() {
                     let _that = this
@@ -926,7 +1447,6 @@
                         .then(response => {
                             var _data = response.data.Data;
                             _that.classSubjects = [];
-                            console.log(_that.classSubject)
                             _data.forEach(function (item, k) {
                                 //debugger
                                 _that.classSubjects.push({
@@ -939,20 +1459,15 @@
                                     Color: item.Color,
                                     Chapters: [],
                                     Lessons: [],
-                                    TypeClass:item.TypeClass
+                                    TypeClass: item.TypeClass,
+                                    HasLessonActive: item.HasLessonActive
                                 });
-                                //loadContent(item.ID);
-                                //_that.changeAddSubject(item)
-                                //_that.changeAddGrade(item)
+                                if (item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM)
+                                    loadContent(item.ID);
                             })
+
                             _that.init = true;
                         }).catch(e => { });
-
-                    //this.$forceUpdate();
-                    //this.$nextTick(function () {
-                    //    console.log($(".list.ls-practice > li > .inner > .parent"));
-                    //    $(".list.ls-practice > li > .inner > .parent").click();
-                    //});
                 },
                 loadContent(subject, chapter) {
 
@@ -995,6 +1510,7 @@
                                 })
                             })
                             _lesson.forEach(function (lesson, k) {
+                                this.list_lessons = []
                                 var parent = '';
                                 if (lesson.ChapterID) {
                                     parent = lesson.ChapterID;
@@ -1011,7 +1527,8 @@
                                     EndDate: moment(lesson.EndDate) > moment(new Date(1900, 1, 1)) ? lesson.EndDate : "",
                                     IsActive: lesson.IsActive,
                                     IsUpdating: false,
-                                    IsOnline: lesson.IsOnline
+                                    IsOnline: lesson.IsOnline,
+                                    IsHideAnswer: lesson.IsHideAnswer
                                 })
 
                             })
@@ -1019,10 +1536,13 @@
                             this.list_chapters = _that.list_chapters
                             this.list_lessons = _that.list_lessons
                             //_that.$forceUpdate()
+                            Vue.nextTick(function () {
+                                //console.log($('.ls-practice [for=' + subject + ']'));
+                                this.toggleTooltips($('.ls-practice [for=' + subject + ']'));
+                            })
                         }).catch(e => { })
                 },
                 loadResult(subject, chapter) {
-
                     let _that = this
                     let key = subject + "_" + chapter
                     if (_that.loaded_chapter_result.includes(key))
@@ -1088,50 +1608,74 @@
                         }).catch(e => { })
                     //console.log(this.list_lessons_result);
                 },
-                loadClassScore() {
+                loadClassScore(isFillter = 0) {
                     let _that = this
                     let _form = new FormData()
 
-                    if (this.searchCsbj == '') {
+                    if (this.searchCsbj == '' || this.searchCsbj == 1) {
+                        this.tableChange(0);
                         _form.append('ClassID', _that.classID)
                         _form.append('PageSize', 1000)
                         _form.append('PageIndex', 1)
                         let _url = '@processUrl("GetClassResult", "Class")'
                         axios.post(_url, _form)
                             .then(response => {
-                                //console.log(response.data);
                                 _that.scoreData = response.data.Data;
                                 this.scoreData = _that.scoreData
                                 this.totalRec = response.data.Model.totalRecord
-                                //var tt = response.data.Model.totalRecord;
-                                //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
                             }).catch(e => { })
+                    @*}
+                    else if (this.searchCsbj == 1) {
+                        this.tableChange(0);
+                        _form.append('ClassID', _that.classID)
+                        _form.append('PageSize', 1000)
+                        _form.append('PageIndex', 1)
+                        let _url = '@processUrl("GetClassResult", "Class")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.scoreData = response.data.Data;
+                                this.scoreData = _that.scoreData
+                                this.totalRec = response.data.Model.totalRecord
+                            }).catch(e => { })*@
                     }
                     else {
-                        _form.append('ClassSubjectID', this.searchCsbj)
+                        this.tableChange(1);
+                        _form.append('ClassSubjectID', this.searchCsbj.ID)
                         _form.append('PageSize', 1000)
                         _form.append('PageIndex', 1)
                         let _url = '@processUrl("GetClassSubjectResult", "Class")'
+                        this.isLoading = true
                         axios.post(_url, _form)
                             .then(response => {
-                                _that.scoreSbjChap = response.data.Chapter;
-                                _that.scoreSbjStudent = response.data.Student;
-                                var result = response.data.Result;
-                                if (_that.scoreSbjChap.length > 0) {
-                                    for (i = 0; i < _that.scoreSbjChap.length; i++) {
-                                        if(i < 2) this.filterChap.TargetChaps.push(_that.scoreSbjChap[i].ID);
-                                        if (result != null)
-                                            _that.scoreSbjChap[i].Result = result[i];
-                                    }
-                                    if(_that.scoreSbjChap.length <= 2)
-                                        this.filterChap.SelectAll = true;
-                                }
-                                this.scoreSbjChap = _that.scoreSbjChap
-                                this.scoreSbjStudent = _that.scoreSbjStudent
-                                this.totalRec = response.data.Model.totalRecord
+                                this.isLoading = false
+                                this.fieldsTime = response.data.DataTime
+                                this.list_students = response.data.ListStudent;
+                                //debugger
+                                this.studentSummarySbj = response.data.DataStudent
+                                //debugger
+                                //if (response.data.Error) {
+                                    this.isLoading = false
+                                    //alert(response.data.Error)
+                                //}
+                                //debugger
+                                //_that.scoreSbjChap = response.data.Chapter;
+                                //_that.scoreSbjStudent = response.data.Student;
+                                //var result = response.data.Result;
+                                //if (_that.scoreSbjChap.length > 0) {
+                                //    for (i = 0; i < _that.scoreSbjChap.length; i++) {
+                                //        if(i < 2) this.filterChap.TargetChaps.push(_that.scoreSbjChap[i].ID);
+                                //        if (result != null)
+                                //            _that.scoreSbjChap[i].Result = result[i];
+                                //    }
+                                //    if(_that.scoreSbjChap.length <= 2)
+                                //        this.filterChap.SelectAll = true;
+                                //}
+                                //this.scoreSbjChap = _that.scoreSbjChap
+                                //this.scoreSbjStudent = _that.scoreSbjStudent
+                                //this.totalRec = response.data.Model.totalRecord
                                 //var tt = response.data.Model.totalRecord;
                                 //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
-                            }).catch(e => { })
+                            }).catch(e => { this.isLoading = false })
                     }
                 },
                 loadPreference() {
@@ -1151,7 +1695,7 @@
                             _that.ref.data = response.data.Data;
                             this.ref.data = _that.ref.data
                             this.ref.totalRec = response.data.Model.totalRecord
-                            console.log(totalRec)
+                            //console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
@@ -1172,7 +1716,7 @@
                             _that.ref.data = response.data.Data;
                             this.ref.data = _that.ref.data
                             this.ref.totalRec = response.data.Model.totalRecord
-                            console.log(totalRec)
+                            //console.log(totalRec)
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
@@ -1182,6 +1726,34 @@
                     @*document.location = '@processUrl("Index","Discuss", new { id = currentClass.ID })'*@
                     //console.log(5)
                     $('.fn-box-chat-eduso').focus().click()
+                },
+                loadResultwTime(objTime, classsbj) {
+
+                    this.detailProgessLesson.isShow = false
+                    this.detailProgessLesson.title = ''
+                    this.detailProgessLesson.data = []
+
+                    let _that = this
+                    let _form = new FormData();
+                    _form.append("StartTime", objTime.startTime)
+                    _form.append("EndTime", objTime.endTime)
+                    if (classsbj) {
+                        _form.append("ClassSubjectID", classsbj)
+                    }
+                    else {
+                        _form.append("ClassSubjectID", this.searchCsbj.ID)
+                    }
+                    this.progessSbj.startTime = objTime.startTime
+                    this.progessSbj.endTime = objTime.endTime
+                    this.progessSbj.title = this.searchCsbj.CourseName
+                    let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
+                    console.log(_url);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.progessSbj.data = response.data.Data
+                            //debugger
+                        }).catch(e => { })
+                    this.$bvModal.show("progessmodal-xl")
                 },
 
                 //MODULE
@@ -1222,7 +1794,7 @@
 
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
+                            //console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -1257,6 +1829,7 @@
                 updateSubchapCondition(parent) {
                     if (parent != null) {
                         var subchaps = this.list_chapters.filter(t => t.Parent == parent.ID);
+
                         if (subchaps.length > 0) {
                             subchaps.forEach(function (item, pos) {
                                 //console.log(item);
@@ -1289,7 +1862,7 @@
 
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
+                            //console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -1301,10 +1874,26 @@
                                 var _container = '#prc-' + chapter.ID + '-' + pos;
                                 var startdate = formatTime(chapter.StartDate);
                                 var enddate = formatTime(chapter.EndDate);
+
                                 $(_container).find('.input-group.date.st > input').val(startdate);
                                 $(_container).find('.input-group.date.ed > input').val(enddate);
+                                this.updateSubchapSchedule(obj);
                             }
                         }).catch(e => { })
+                },
+                updateSubchapSchedule(obj) {
+                    var subchaps = this.list_chapters.filter(t => t.Parent == obj.ID);
+                    if (subchaps.length > 0) {
+                        subchaps.forEach(function (item, pos) {
+                            item.PreventEvent = true;
+                            item.StartDate = obj.StartDate
+                            item.EndDate = obj.EndDate
+                            Vue.nextTick(function () {
+                                this.updateSubchapSchedule(item);
+                                item.PreventEvent = false
+                            })
+                        });
+                    }
                 },
                 clearSchedule(obj) {
                     obj.IsUpdating = true
@@ -1329,7 +1918,7 @@
                     let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
                     axios.post(_url, _form)
                         .then(response => {
-                            console.log(obj);
+                            //console.log(obj);
                             obj.IsUpdating = false;
                             mainInstance.$forceUpdate();
                             var chapter = response.data.Data;
@@ -1358,10 +1947,14 @@
                     })
                 },
                 filterLesson(obj) {
+                    //debugger
+                    //console.log(obj);
+                    //console.log(obj.ClassSubject);
                     var filter = this.list_lessons.filter((p) => {
                         return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
-                        console.log(1);
                     })
+                    if (filter.length > 0)
+                    //debugger
                     return filter;
                 },
                 filterResult(obj) {
@@ -1425,6 +2018,42 @@
                         }).catch(e => { })
                 },
 
+                toggleHideAnswer(obj) {
+                    let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
+                    let _form = new FormData()
+                    _form.append('ID', obj.ScheduleID);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error == null) {
+                                console.log(response.data);
+                                obj.IsHideAnswer = response.data.isHideAnswer;
+                                if (response.data.isHideAnswer == true) {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã bật chế độ ẩn đáp án",
+                                        icon: 'info',
+                                    });
+                                }
+                                else {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã tắt chế độ ẩn đáp án",
+                                        icon: 'info',
+                                    });
+                                }
+                            }
+                            else {
+                                Swal.fire({
+                                    title: "Có lỗi",
+                                    text: response.error,
+                                    icon: 'warning',
+                                });
+                            }
+
+                            //item.IsActive = !item.IsActive;
+                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                        }).catch(e => { })
+                },
                 //REF
                 showRefModal(obj) {
                     let _that = this;
@@ -1661,7 +2290,6 @@
                     })
                 },
                 changeFile() {
-                    //debugger
                     var listFiles = $('#modal_event input[type=file]')
                     if (listFiles[1].files[0] != null) { //file dinh kem
                         if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
@@ -1768,6 +2396,29 @@
                     if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
                     return _time.format("DD/MM/YYYY HH:mm")
                 },
+                formatDatenoYear(date) {
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("DD/MM")
+                },
+                getPeriod(obj) {
+                    var startms = moment(obj.Created);
+                    var endms = moment(obj.EndTime);
+                    console.log(startms);
+                    console.log(endms);
+                    var ret = "";
+                    if (endms.days() - startms.days() > 0)
+                        ret += (endms.days() - startms.days()) + "d ";
+                    if (endms.hours() - startms.hours() > 0)
+                        ret += (endms.hours() - startms.hours()) + "h ";
+                    if (endms.minutes() - startms.minutes() > 0)
+                        ret += (endms.minutes() - startms.minutes()) + "m ";
+                    if (endms.second() - startms.second() > 0)
+                        ret += (endms.second() - startms.second()) + "s ";
+                    if (ret.length == 0)
+                        ret = "0s";
+                    return ret;
+                },
                 domDecoder(str) {
                     if (str == null)
                         return "";
@@ -1825,7 +2476,7 @@
                     window.location.href = '@processUrl("Editor","Class")/' + obj.ID + '/@currentClass.ID';
                 },
                 showScoreboard(obj) {
-                    this.searchCsbj = obj.ID;
+                    this.searchCsbj.ID = obj.ID;
                     this.tabChange(2);
                 },
                 toggleSelect() {
@@ -1843,9 +2494,322 @@
                         })
                     }
                     _that.checkToggle()
+                },
+                export2Excel() {
+                    this.isLoading = true;
+                    var table = $('#ed_table');
+                    if (table && table.length) {
+                        $(table).table2excel({
+                            exclude: ".noExl",
+                            name: "Excel Document Name",
+                            filename: "Bản điểm " + this.className + ".xls",
+                            fileext: ".xls",
+                            exclude_img: true,
+                            exclude_links: true,
+                            exclude_inputs: true,
+                            preserveColors: true
+                        });
+                        this.isLoading = false;
+                    }
+                    else {
+                        this.isLoading = false;
+                    }
+                },
+                format_Date(value) {
+                    if (value) {
+                        return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
+                exportExcel(tableid) {
+                    var _filename = "";
+                    if (this.searchCsbj == "") {
+                        _filename = "Bảng điểm tổng hợp lớp " + this.className;
+                    }
+                    else {
+                        _filename = "Bảng điểm môn " + this.searchCsbj.CourseName + " lớp " + this.className;
+                    }
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
+                    }
+                },
+                export2ExcelV2() { //code server
+                    var classID = this.classID;
+                    var url = '@processUrl("ExportTablePoint", "Class")/?ClassID=' + classID + '&&basic=@center';
+                    window.open(url);
+                },
+
+                //------------
+                convertPoint(value) {
+                    if (value >= 0) {
+                        value = value / 10;
+                        var phannguyen = parseInt(value);
+                        var phanthapphan = value - phannguyen;
+                        if (phanthapphan < 0.5 && phanthapphan > 0) {
+                            var a = phanthapphan;
+                            if (a < 0.25) {
+                                phanthapphan = 0;
+                            }
+                            else {
+                                phanthapphan = 0.5;
+                            }
+                        }
+                        else if (phanthapphan >= 0.5 && phanthapphan < 1.0) {
+                            var a = phanthapphan;
+                            if (a < 0.75) {
+                                phanthapphan = 0.5;
+                            }
+                            else {
+                                phanthapphan = 1;
+                            }
+                        }
+                        var point = phannguyen + phanthapphan;
+                        return point
+                    }
+                    else return value
+                },
+                showDetailStudent(studentID,StudentName) {
+
+                    this.studentSummary.studentID = ''
+                    this.studentSummary.studentName = ''
+                    this.studentSummary.className = ''
+                    this.studentSummary.avgPointPractice = ''
+                    this.studentSummary.avgPointExam = ''
+                    this.studentSummary.result = []
+                    this.studentSummary.dataPractice = []
+                    this.studentSummary.dataExam = []
+
+                    //debugger
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("StudentID", studentID)
+                    _form.append("ClassID", _that.classID)
+                    let _url = '@processUrl("GetStudentSummary", "Class")'
+                    this.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //debugger
+                            var dataPractice = response.data.Practice
+                            var dataExam = response.data.Exam
+                            this.studentSummary.studentName = StudentName
+                            this.studentSummary.className = this.className
+                            this.studentSummary.dataPractice = dataPractice
+                            this.studentSummary.dataExam = dataExam
+                            this.studentSummary.avgPointPractice = this.calcAveragePractice(dataPractice)
+                            this.studentSummary.avgPointExam = this.calcAverageExam(dataExam)
+                            this.isLoading = false
+                            //debugger
+                        }).catch(e => { this.isLoading = false })
+                    this.$bvModal.show("detailStudentSummary_modal")
+                },
+                calcAveragePractice(obj) {
+                    //debugger
+                    if (obj.length > 0) {
+                        var totalPointPractice = 0;
+                        var totalLesson = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i];
+                            //debugger
+                            totalPointPractice += item.PracticeAvgPoint * item.TotalLessons;
+                            //if (item.TotalLessons) {
+                                totalLesson += item.TotalLessons
+                            //}
+                        }
+                        return (totalPointPractice / totalLesson)
+                    }
+                    else return "---"
+                },
+                calcAverageExam(obj) {
+                    if (obj.length > 0) {
+                        var totalPointExam = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i];
+                            totalPointExam += item.point;
+                        }
+                        return (totalPointExam / obj.length)
+                    }
+                    else return "---"
+                },
+                calcAvginWeek(obj) {
+                    //debugger
+                    if (obj.length > 0) {
+                        var total = 0;
+                        var totalLesson = 0;
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i];
+                            var count = item.totalPractice;
+                            var point = parseFloat(item.point);
+                            total += (isNaN(point) ? 0 : point) * count;
+                            //totalLesson += (isNaN(count) ? 0 : count);
+                            totalLesson = item.totalLessons;
+                        }
+                        return this.roundPoint((total / totalLesson), 1);
+                    } else
+                        return "---";
+                },
+                loadDetailinWeek(obj) {
+                    if (obj.point >= 0) {
+                        let _that = this
+                        let _form = new FormData()
+                        _form.append("StartWeek", obj.startTime)
+                        _form.append("EndWeek", obj.endTime)
+                        _form.append("StudentID", obj.studentID)
+                        _form.append("ClassSubjectID", _that.searchCsbj.ID)
+                        let _url = '@processUrl("GetLessonProgressListInWeek", "Exam")'
+                        this.isLoading = true
+                        this.result_data = []
+                        axios.post(_url, _form)
+                            .then(response => {
+                                this.isLoading = false
+                                var data = response.data
+                                //debugger
+                                this.result_data = data
+                                //debugger
+                            }).catch(e => { this.isLoading = false })
+                        this.isLoading = false
+                        this.$bvModal.show("detailLessonInWeek-modal")
+                    }
+                    else return
+                },
+                roundPoint(value, precision) {
+                    if (value > 0) {
+                        value = value / 10
+                        var multiplier = Math.pow(10, precision || 0);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                    }
+                    else return value
+                },
+                loadDetailExam(obj) {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("StudentID", obj.StudentID)
+                    _form.append("ClassID", '@currentClass.ID')
+                    let _url = '@processUrl("GetLessonProgressExam", "Exam")'
+                    this.isLoading = true
+                    this.result_data = []
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.isLoading = false
+                            var data = response.data
+                            this.result_data = data
+                            //debugger
+                        }).catch(e => { this.isLoading = false })
+                    this.isLoading = false
+                    this.$bvModal.show("detailLessonInWeek-modal")
+                },
+                DetailProgessLesson(LessonScheduleID,Title,obj) {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("LessonScheduleID", LessonScheduleID)
+                    let _url = '@processUrl("GetDetailProgessExam", "Exam")'
+                    this.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.isLoading = false
+                            var status = response.data.Status
+                            if (status) {
+                                var data = response.data.Data
+                                this.detailProgessLesson.isShow = true
+                                this.detailProgessLesson.data = data //here
+                                this.detailProgessLesson.title = Title
+                                this.detailProgessLesson.dataLesson = response.data.DetailLesson
+                                if (data.length == 0) this.detailProgessLesson.isShow = false
+                                //debugger
+                            }
+                            else {
+                                alert(response.data.Message)
+                                this.detailProgessLesson.isShow = false
+                                this.detailProgessLesson.data = []
+                                this.detailProgessLesson.title = ''
+                                this.detailProgessLesson.dataLesson = []
+                            }
+                        }).catch(e => { this.isLoading = false })
+                    this.$bvModal.show("detailLessonInClass-modal")
+                },
+                loadLessonToMark() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("ClassID", this.classID)
+                    let _url = '@processUrl("GetLessonToMark", "Class")'
+                    this.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.list_lessons = []
+                            if (response.data.Status) {
+                                this.lessonToMark.data = response.data.Data
+                                //debugger
+                                for (var i = 0; i < this.lessonToMark.data.length; i++) {
+                                    var item = this.lessonToMark.data[i]
+                                    //debugger
+                                    for (var j = 0; j < item.listLesson.length; j++) {
+                                        var lesson = item.listLesson[j]
+                                        this.list_lessons.push(lesson)
+                                    }
+                                }
+                                //debugger
+                            }
+                            else {
+                                //alert(response.data.Error)
+                                console.log(response.data.Error)
+                            }
+                            this.isLoading = false
+                        }).catch(e => { this.isLoading = false })
+                },
+                ShowDetailLessonToMark(listExam, courseName, Title,ID) {
+                    //debugger
+                    this.lessonToMark.courseName = courseName
+                    this.lessonToMark.title = Title
+                    this.lessonToMark.dataDetail = []
+                    if (listExam.length > 0) {
+                        for (var i = 0; i < listExam.length; i++) {
+                            var exam = listExam[i]
+                            if (exam.LessonID == ID) {
+                                this.lessonToMark.dataDetail.push(exam)
+                            }
+                        }
+                    }
+                    //this.lessonToMark.dataDetail = listExam
+                    this.$bvModal.show("LessonToMark-modal")
+                },
+                filterChapter(ChapterID,obj) {
+                    var listChapters = this.list_chapters
+                    if (obj) {
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            var parentItem = []
+                            if (item.ID == ChapterID) {
+                                if (item.ParentID) {
+                                    parentItem = listChapters.find(x => x.ID == item.ParentID)
+                                    return item.Name + " - " + parentItem?.Title 
+                                }
+                                else {
+                                    return item.Name
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            });
+        });
 
         var loadCheckPointData = function (data, questions) {
             var className = data.ClassName;
@@ -1885,7 +2849,26 @@
 
         }
 
-
+        var toggleTooltips = function(obj)
+        {
+            $(obj).find('i').tooltip({
+                position: {
+                    my: "center bottom-10",
+                    at: "center top",
+                    using: function (position, feedback) {
+                        $(this).css(position);
+                        $("<div>")
+                            .addClass("arrow")
+                            .addClass(feedback.vertical)
+                            .addClass(feedback.horizontal)
+                            .appendTo(this);
+                    }
+                },
+                show: {
+                    delay: 25
+                }
+            });
+        }
     </script>
 }
 @section Modals{
@@ -2039,12 +3022,12 @@
                             <td class="text-center">{{k+1}}</td>
                             <td>{{item.StudentName}}</td>
                             <td class="text-center">{{item.TriedCount}}</td>
-                            <td class="text-center">{{item.MinPoint.toFixed(2)}}</td>
-                            <td class="text-center">{{item.MaxPoint.toFixed(2)}}</td>
-                            <td class="text-center">{{item.AvgPoint.toFixed(2)}}</td>
+                            <td class="text-center">{{roundPoint(item.MinPoint,2)}}</td>
+                            <td class="text-center">{{roundPoint(item.MaxPoint,2)}}</td>
+                            <td class="text-center">{{roundPoint(item.AvgPoint,2)}}</td>
                             <td class="text-center">{{formatTime(item.LastTried)}}</td>
                             <td class="text-center">{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
-                            <td class="text-center">{{item.LastPoint.toFixed(2)}}</td>
+                            <td class="text-center">{{roundPoint(item.LastPoint,2)}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -2059,26 +3042,35 @@
     <b-modal :no-close-on-backdrop="true" id="modal_history" size="xl" centered title="Lịch sử làm bài">
         <div class="row">
             <div class="col-md-12">
-                <table id="st_table" class="table">
-                    <thead>
-                        <tr class="text-center">
-                            <th class="align-middle">STT</th>
-                            <th class="align-middle">Thời gian làm</th>
-                            <th>Điểm </th>
-                            <th>Trạng thái </th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item,k) in student_result.History">
-                            <td class="text-center">{{k+1}}</td>
-                            <td>{{formatTime(item.Created)}}</td>
-                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
-                            <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
-                            <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <template v-if="student_result.History.length > 0">
+                    <table id="st_table" class="table">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col" class="text-center">#</th>
+                                <th scope="col" class="text-center">Giờ bắt đầu</th>
+                                <th scope="col" class="text-center">Giờ kết thúc</th>
+                                <th scope="col" class="text-center">Thời gian làm</th>
+                                <th scope="col" class="text-center">Trạng thái</th>
+                                <th scope="col" class="text-center">Điểm</th>
+                                <th scope="col" class="text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in student_result.History">
+                                <td class="text-center">{{k+1}}</td>
+                                <td class="text-center">{{formatTime(item.Created)}}</td>
+                                <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
+                                <td class="text-center">{{getPeriod(item)}}</td>
+                                <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
+                                <td class="text-center">{{item.MaxPoint > 0 ? roundPoint((item.Point * 100 / item.MaxPoint),1) : 0}}</td>
+                                <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>
+                    Chưa có lịch sử học tập
+                </template>
             </div>
         </div>
 
@@ -2100,6 +3092,244 @@
             <template>
                 <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
             </template>
+        </template>
+    </b-modal>
+
+    <b-modal id="detailStudentSummary_modal" size="xl" :title="studentSummary.studentName + ' - ' + studentSummary.className">
+        <div class="modal-body">
+            <template v-if="isLoading">
+                <div style="text-align:center">
+                    <span>Đang tải dữ liệu ...</span><br />
+                    <b-spinner label="Loading..."></b-spinner>
+                </div>
+            </template>
+            <template v-else>
+                <div style="padding-bottom:5px;font-size:80%;color:red;font-style:italic">Điểm trung bình được tính trên tổng các bài đã giao của các môn</div>
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width:50px">STT</th>
+                            <th rowspan="2">Môn học</th>
+                            <th rowspan="2" style="width:130px">Điểm luyện tập</th>
+                            <th :colspan="studentSummary.dataExam.length > 0 ? studentSummary.dataExam.length : 1" style="width:390px">Điểm kiểm tra</th>
+                        </tr>
+                        <tr>
+                            @*<th style="width:130px">Bài kiểm tra 1</th>
+                            <th style="width:130px">Bài kiểm tra 2</th>
+                            <th style="width:130px">Bài kiểm tra 3</th>*@
+                            <th v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0">Bài số {{k+1}}</th>
+                            <th v-if="studentSummary.dataExam.length == 0">Chưa có dữ liệu kiểm tra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template>
+                            <tr v-for="(itemSummary,i) in studentSummary.dataPractice">
+                                <td>{{itemSummary.Order}}</td>
+                                <td v-on:click="test(itemSummary)">{{itemSummary.CourseName}} (Đã giao: {{itemSummary.TotalLessons}})</td>
+                                <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
+                                <template v-if="studentSummary.dataExam.length == 0 && itemSummary.Order == 1">
+                                    <td>---</td>
+                                </template>
+                                <template v-else-if="itemSummary.Order == 1">
+                                    <td v-for="(item,k) in studentSummary.dataExam">{{roundPoint(item.point,1)}}</td>
+                                    @*<td>{{roundPoint(studentSummary.dataExam[0].multiple1,1)}}</td>
+                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
+                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>*@
+                                </template>
+                                <template v-else>
+                                    <td v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0"></td>
+                                    <td v-if="studentSummary.dataExam.length == 0"></td>
+                                </template>
+                            </tr>
+                            <tr style="font-weight:bold">
+                                <td colspan="2">Điểm trung bình</td>
+                                <td>{{roundPoint(studentSummary.avgPointPractice,1)}}</td>
+                                <td colspan="3">{{roundPoint(studentSummary.avgPointExam,1)}}</td>
+                            </tr>
+
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="detailLessonInWeek-modal" size="xl" :title=" result_data.length > 0 ? result_data[0].StudentName : ''">
+        <div class="modal-body">
+            <template v-if="result_data.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th style="width:100px">Số lượt làm</th>
+                            <th style="width:150px">Thời gian</th>
+                            <th style="width:150px">Trạng thái</th>
+                            <th style="width:50px">Điểm</th>
+                            <th style="width:100px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in result_data">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover" v-on:click="openHistory(item)">{{item.LessonName}}</td>
+                            <td>{{item.TriedCount}}</td>
+                            @*<td>{{convertPoint(item.MinPoint)}}</td>
+                                <td>{{convertPoint(item.MaxPoint)}}</td>
+                                <td>{{convertPoint(item.AvgPoint)}}</td>*@
+                            <td>{{formatTime(item.LastTried)}}</td>
+                            <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
+                            <td>{{roundPoint(item.LastPoint,1)}}</td>
+                            <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có dữ liệu
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="progessmodal-xl" size="xl" :title="progessSbj.title +' (' + formatShortDate(progessSbj.startTime) + ' - ' + formatShortDate(progessSbj.endTime) +')'">
+        <div class="modal-body">
+            <table class="table" id="id_table">
+                <thead>
+                    <tr>
+                        <th rowspan="2">STT</th>
+                        <th rowspan="2">Chương</th>
+                        <th rowspan="2">Bài</th>
+                        <th colspan="4">Điểm</th>
+                        <th rowspan="2">Chưa làm</th>
+                    </tr>
+                    <tr>
+                        <th>8.0 - 10</th>
+                        <th>5.0 - 7.9</th>
+                        <th>2.0 - 4.9</th>
+                        <th>0.0 - 1.9</th>
+                       @* <th>Tổng</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in progessSbj.data">
+                        <td>{{k+1}}</td>
+                        <td class="td_hover" v-on:click="DetailProgessLesson(item.scheduleID,item.title,item)">{{item.chapterName}}</td>
+                        <td class="td_hover" v-on:click="DetailProgessLesson(item.scheduleID,item.title,item)">{{item.title}}</td>
+                        <td class="color-minpoint8">{{item.minPoint8}}</td>
+                        <td class="color-minpoint5">{{item.minPoint5}}</td>
+                        <td class="color-minpoint2">{{item.minPoint2}}</td>
+                        <td class="color-minpoint0">{{item.minPoint0}}</td>
+                        <td class="color-dontwork">{{parseInt(@currentClass.TotalStudents) - item.minPoint8 - item.minPoint5 - item.minPoint2 - item.minPoint0}}/@currentClass.TotalStudents</td>
+                        @*<td>{{item.examCount}}/@currentClass.TotalStudents</td>*@
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal('progessmodal-xl')">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="detailLessonInClass-modal" size="xl" :title="detailProgessLesson.title">
+        <div class="modal-body">
+            <template v-if="detailProgessLesson.dataLesson.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Họ tên</th>
+                            <th style="width:100px">Số lượt làm</th>
+                            <th style="width:150px">Thời gian</th>
+                            <th style="width:150px">Trạng thái</th>
+                            <th style="width:50px">Điểm</th>
+                            <th style="width:100px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in detailProgessLesson.dataLesson">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover">{{item.studentName}}</td>
+                            <td>{{item.totalLearn}}</td>
+                            <td>{{formatTime(item.Created)}}</td>
+                            <td>{{item.Status ? "Hoàn thành": (item.totalLearn > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
+                            <td>{{roundPoint(item.LastPoint,1)}}</td>
+                            <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ID" target="_blank">Xem chi tiết</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có dữ liệu
+            </template>
+        </div>
+
+        <div class="modal-body" v-if="detailProgessLesson.isShow">
+            <table class="table" id="id_table">
+                <thead>
+                    <tr>
+                        <td colspan="4" style="text-align:center;border:0.5px solid gray">{{detailProgessLesson.title}}</td>
+                    </tr>
+                    <tr>
+                        <td style="width:30px;text-align:center;border:0.5px solid gray">#</td>
+                        <td></td>
+                        <td style="width:100px;text-align:center;border:0.5px solid gray">Tỉ lệ làm đúng</td>
+                        <td style="width:100px;text-align:center;border:0.5px solid gray">Tỉ lệ làm sai</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in detailProgessLesson.data">
+                        <td>{{k+1}}</td>
+                        <td style="text-align:left;padding-left:10px">{{item.titleLessonPart}}</td>
+                        <td :style="[getPercent(item.countTrue,item.totalAns)>50 ? {'background-color':'lightgreen'}:{'background-color':''}]">{{getPercent(item.countTrue,item.totalAns).toFixed(2)}}%</td>
+                        <td :style="[getPercent(item.countFalse,item.totalAns)>50 ? {'background-color':'#ff454d'}:{'background-color':''}]">{{getPercent(item.countFalse,item.totalAns).toFixed(2)}}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="LessonToMark-modal" size="xl" :title="lessonToMark.title + ' - ' + lessonToMark.courseName">
+        <div class="modal-body">
+            <template v-if="lessonToMark.dataDetail.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Họ tên</th>
+                            <th>Bài</th>
+                            <th style="width:100px">Điểm</th>
+                            <th style="width:100px">Trạng thái</th>
+                            <th style="width:100px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in lessonToMark.dataDetail">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover">{{item.StudentName}}</td>
+                            <td>{{lessonToMark.title}}</td>
+                            <td>{{roundPoint(item.Point,1)}}</td>
+                            <td>{{item.Marked == false? "Chưa chấm" : "Đã chấm"}}</td>
+                            <td><a :href="'@processUrl("CheckPoint","Class")?ID=' + item.ID" target="_blank">Chấm bài</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có dữ liệu
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
         </template>
     </b-modal>
 }

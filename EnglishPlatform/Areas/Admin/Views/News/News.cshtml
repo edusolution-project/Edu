@@ -5,8 +5,8 @@
     var newscategory = ViewBag.newscategory as List<BaseCustomerEntity.Database.NewsCategoryEntity>;
     var listCenter = ViewBag.ListCenter as List<BaseCustomerEntity.Database.CenterEntity>;
 }
-<script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js">
-</script>
+<script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js"></script>
+
 <!-- Begin Page Content -->
 <div class="container-fluid">
     @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
@@ -89,7 +89,7 @@
 
 <!-- Modal Create Form -->
 <div class="modal fade " id="ModalNews" role="dialog" aria-labelledby="ModalNewsTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         @using (Html.BeginForm("CreateNews", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
         {
             <div class="modal-content">
@@ -101,6 +101,7 @@
                 </div>
                 <div class="modal-body">
                     <form>
+
                         <div class="form-row">
                             <div class="form-group col-md-8">
                                 <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" required>
@@ -109,11 +110,11 @@
                                 <div class="form-row">
                                     <div class="col-sm-12">
                                         @*<select id="CategoryCode" name="CategoryCode" class="form-control" onchange="renderProduct()" required>*@
-                                        <select id="CategoryCode" name="CategoryCode" class="form-control" required>
+                                        <select id="CategoryID" name="CategoryID" class="form-control" required>
                                             <option value="">--- Lựa chọn danh mục ---</option>
                                             @{ for (int i = 0; newscategory != null && i < newscategory.Count; i++)
                                                 {
-                                                    <option value="@newscategory[i].Code">@newscategory[i].Name</option>
+                                                    <option value="@newscategory[i].ID">@newscategory[i].Name</option>
                                                 } }
                                         </select>
                                     </div>
@@ -121,30 +122,10 @@
                             </div>
                         </div>
 
-                        @*<div class="form-row">
-                            <div class="form-group col-sm-12">
-                                <select id="CenterID" name="CenterID" class="form-control" onchange="renderProduct()" required>
-                                    <option value="">--- Lựa chọn cơ sở ---</option>
-                                    @{ for (int i = 0; listCenter != null && i < listCenter.Count; i++)
-                                        {
-                                            <option value="@listCenter[i].ID">@listCenter[i].Name</option>
-                                        } }
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row hide" id="salePrice">
-                            <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Price" id="Price" placeholder="Giá sản phẩm" />
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <input type="number" class="form-control" name="Discount" id="Discount" placeholder="Giảm giá(%)" />
-                            </div>
-                        </div>*@
-
                         <div class="form-row">
                             <div class="form-group col-sm-12">
                                 <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt" required>
+
                             </div>
                         </div>
 
@@ -153,6 +134,21 @@
                                 <textarea name="Content" id="Content" class="form-control" required></textarea>
                             </div>
                         </div>
+
+                        @*<div class="form-row">
+                            <div class="col-sm-8 form-group">
+                                <input type="text" class="form-control" id="pathImg" placeholder="Copy link ảnh tại đây">
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="custom-file">
+                                    @using (Html.BeginForm("GetPathIMG", "News", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                    {
+                                        <input type="file" class="custom-file-input form-control" id="get_PathIMG" onchange="getPathIMG(this)" accept="image/*" name="IMG">
+                                    }
+                                        <label class="custom-file-label form-control">Chọn đường dẫn</label>
+                                    </div>
+                            </div>
+                        </div>*@
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
@@ -199,15 +195,15 @@
                                 </div>
 
                                 @*<div class="form-row">
-                                        <div class="input-group col-md-6">
-                                            <div class="col-sm-10">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
-                                                    <label class="form-check-label">Hoạt động</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>*@
+                    <div class="input-group col-md-6">
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive">
+                                <label class="form-check-label">Hoạt động</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
                             </div>
                             <div class="form-group col-md-4">
                                 <div class="form-row"><img id="img" style="max-height:200px;max-width:200px;margin:auto" /></div>
@@ -233,6 +229,23 @@
 </style>
 
 <script>
+
+    //var test = function () {
+    //    debugger
+    //    editor = CKEDITOR.replace('Content')
+    //    editor.addCommand("mySimpleCommand", {
+    //        exec: function (edt) {
+    //            alert(edt.getData());
+    //        }
+    //    });
+    //    editor.ui.addButton('SuperButton', {
+    //        label: "Click me",
+    //        command: 'mySimpleCommand',
+    //        toolbar: 'insert',
+    //        icon: 'https://img.vn/uploads/thuvien/viber-image-2019-08-06-10-40-38-jpg-20190807145944LO3qbinQdG.jpg'
+    //    });
+    //};
+
     //$('.datepicker').each(function () {
     //    var fieldID = $(this).next().attr("id");
     //    $(this).datepicker({
@@ -243,6 +256,27 @@
     //        altFormat: 'yy-mm-dd'
     //    }).val("");
     //})
+
+    var getPathIMG = function (obj) {
+        var file = obj.files[0];
+        var form_data = new FormData();
+        var _url = '/admin/News/GetPathIMG'
+        form_data.append("Thumbnail", file)
+        $.ajax({
+            type: "POST",
+            data: form_data,
+            url: _url,
+            contentType: false,
+            processData: false,
+            headers: { "X-CSRF-Token": $("meta[name='csrf-token']").attr("content") },
+            success: function (data) {
+                var path = "https://static.eduso.vn/" + data.FilePath;
+                $("#pathImg").val(path);
+            },
+            error: function (data) {
+            }
+        });
+    }
 
     function LoadData() {
         var searchText = $('#searchText').val();
@@ -290,16 +324,16 @@
                         else {
                             isActive = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','@Url.Action("publish", "News")',LoadData,'IsActive')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'name='isActive'> <div class='handle'></div> </button></td>";
                         }
-
+                        //debugger
                         var createdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.CreateDate));
                         var publishdate = $.datepicker.formatDate('dd/mm/yy', new Date(item.PublishDate));
                         body.append("<tr>" +
                             "<td class='text-center'>" + (data.Model.pageSize*data.Model.pageIndex + i+1) + "</td>" +
                             "<td class='text-center'>" +
-                            "<img src='/Upload/News/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
+                            "<img src='https://static.eduso.vn/"+item.Thumbnail+"' style='max-height:50px;max-width:50px;' />"+
                             "</td>" +
                             "<td 'text-center'>" + item.Title + "</td>" +
-                            "<td 'text-center'>" + item.Code + "</td>" +
+                            "<td 'text-center'>https://test.eduso.vn/tin-tuc/" + item.Url + "</td>" +
                             "<td class='text-center' stye='max-height:'>" + item.Summary + "</td>" +
                             "<td class='text-center'>"+createdate+"</td>" +
                             "<td class='text-center'>" + publishdate + "</td>" +
@@ -403,7 +437,6 @@
         data.delete("Content");
         data.append("Content", CKEDITOR.instances.Content.getData());
 
-    //data.append("Content", CKEDITOR.instances.Content.getData());
         showLoading("Sending data ...");
 
     Ajax(_url, _method, data, true)
@@ -419,6 +452,7 @@
     }
 
     function Edits(id, urlGetData, urlPostData, _this) {
+
         Adds(_this);
         while (parseInt($(".modal-body").find(".Class").length > 0)) {
             $(".modal-body").find(".Class").remove();
@@ -445,7 +479,7 @@
 
             var item = JSON.parse(res);
             var listinput = $(form).find('input');
-            debugger
+
             //debugger
             for (var i = 0; i < listinput.length; i++) {
                 if ($(listinput[i]).attr("type") == "file") continue;
@@ -490,10 +524,10 @@
 
             var time = item.Data.PublishDate.toLocaleString().toString().substring(0, item.Data.PublishDate.toLocaleString().toString().length - 1);
             document.getElementById("PublishDate").value = time;
-            debugger
+
         });
         //if (ClassID != "") {
-        debugger
+
         $("#ClassID").val(ClassID).find("option[value=" + ClassID + "]").attr('selected', true);
             //}
     }
@@ -523,6 +557,12 @@
             CKEDITOR.instances[name].destroy(true);
         }
         CKEDITOR.replace("Content");
+        //CKEDITOR.replace('Content', {
+        //    //filebrowserBrowseUrl: '/ckfinder/ckfinder.html',
+        //    //filebrowserImageUploadUrl: '/admin/News/GetPathIMG?command=QuickUpload&type=Files'
+        //    filebrowserImageUploadUrl: '/admin/News/GetPathIMG'
+        //});
+
 
         var txtarea = form.querySelector('textarea');
         if (txtarea.value != null) {
@@ -601,4 +641,5 @@
             $('#salePrice').attr('class', 'form-row hide');
         }
     }
+    window.getPathIMG = getPathIMG;
 </script>

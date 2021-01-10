@@ -3,6 +3,7 @@ using BaseCustomerMVC.Globals;
 using BaseCustomerMVC.Models;
 using Core_v2.Globals;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonHelper _lessonHelper;
+        private readonly CenterService _centerService;
 
         //private readonly LessonPartQuestionService _lessonPartQuestionService;
         //private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -69,7 +71,8 @@ namespace BaseCustomerMVC.Controllers.Student
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
-            VocabularyService vocabularyService
+            VocabularyService vocabularyService,
+            CenterService centerService
             )
         {
             _subjectService = subjectService;
@@ -96,6 +99,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _vocabularyService = vocabularyService;
             _progressHelper = progressHelper;
+            _centerService = centerService;
         }
 
         //public IActionResult Index()
@@ -257,7 +261,7 @@ namespace BaseCustomerMVC.Controllers.Student
         /// <param name="id">LessonID</param>
         /// <param name="ClassID">ClassID</param>
         /// <returns></returns>
-        public IActionResult Detail(DefaultModel model, string basis, string ClassID, int newui = 0)
+        public IActionResult Detail(DefaultModel model, string basis, string ClassID)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (ClassID == null)
@@ -277,7 +281,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.Lesson = lesson;
             ViewBag.Type = lesson.TemplateType;
             string condChap = "";
-            if (!String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
+            if (chapter != null && !String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
             {
                 var conditionchap = _chapterService.GetItemByID(chapter.ConditionChapter);
                 if (conditionchap != null)
@@ -317,6 +321,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ViewBag.NextLesson = nextLesson;
                 ViewBag.Chapter = chapter;
             }
+            ViewBag.Center = _centerService.GetItemByCode(basis);
             //if (newui == 1)
             return View("Detail_new");
             //return View();
@@ -361,39 +366,55 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var ExamTypes = quizType;
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
-            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
-            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-            var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
+            var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
+            var isHideAnswer = schedule.IsHideAnswer;
+            if (schedule.EndDate < DateTime.UtcNow)
+                isHideAnswer = false;
+            ViewBag.IsHideAnswer = isHideAnswer;
 
-            var examview = mapExam.AutoOrtherType(exam, new ExamReviewViewModel()
+            if (!isHideAnswer)
             {
-                Details = _examDetailService.Collection.Find(t => t.ExamID == exam.ID).ToList()
-            });
+                var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
 
-            var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
-            {
-                Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+                var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+                var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+                var mapExam = new MappingEntity<ExamEntity, ExamReviewViewModel>();
+
+                var examview = mapExam.AutoOrtherType(exam, new ExamReviewViewModel()
                 {
-                    Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
-                        .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
-                        {
-                            CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
-                            AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
-                            Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
-                            TypeAnswer = o.Type,
-                            RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
-                            PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
-                            ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
-                            MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
-                            MaxPoint = z.Point
-                        }))?.ToList()
-                })).ToList()
-            });
+                    Details = _examDetailService.Collection.Find(t => t.ExamID == exam.ID).ToList()
+                });
 
-            ViewBag.Lesson = lessonview;
+                var lessonview = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                {
+                    Part = listParts.Select(o => mapPart.AutoOrtherType(o, new PartViewModel()
+                    {
+                        Questions = _cloneLessonPartQuestionService.CreateQuery().Find(x => x.ParentID == o.ID).ToList()
+                            .Select(z => mapQuestion.AutoOrtherType(z, new QuestionViewModel()
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == z.ID).ToList(),
+                                AnswerEssay = o.Type == "ESSAY" ? _examDetailService.CreateQuery().Find(e => e.QuestionID == z.ID && e.ExamID == exam.ID)?.FirstOrDefault()?.AnswerValue : string.Empty,
+                                Medias = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Medias,
+                                TypeAnswer = o.Type,
+                                RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
+                                PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
+                                ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
+                                MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
+                                MaxPoint = z.Point
+                            }))?.ToList()
+                    })).ToList()
+                });
+                ViewBag.Lesson = lessonview;
+                ViewBag.Exam = examview;
+            }
+            else
+            {
+                ViewBag.Lesson = new StudentLessonViewModel { Title = lesson.Title, ID = lesson.ID };
+            }
+
+
             ViewBag.Class = currentClass;
             if (string.IsNullOrEmpty(currentCs.CourseName))
                 currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
@@ -401,7 +422,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ViewBag.NextLesson = nextLesson;
             ViewBag.Chapter = chapter;
             ViewBag.Type = lesson.TemplateType;
-            ViewBag.Exam = examview;
+
 
             return View();
         }
@@ -563,12 +584,15 @@ namespace BaseCustomerMVC.Controllers.Student
         private string RenderVocab(string description)
         {
             string result = "";
+            if (string.IsNullOrEmpty(description))
+                return "";
             var vocabs = description.Split('|');
             if (vocabs == null || vocabs.Count() == 0)
                 return description;
             foreach (var vocab in vocabs)
             {
-                var vocabularies = _vocabularyService.GetItemByCode(vocab.Trim().Replace("-", ""));
+                var code = vocab.ToLower().Replace(" ", "-");
+                var vocabularies = _vocabularyService.GetItemByCode(code);
                 if (vocabularies != null && vocabularies.Count > 0)
                 {
                     result +=

@@ -35,7 +35,7 @@
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
             </div>
-            <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
+            <div class="box filter-box col-12 col-md-3 ml-0 mb-1 d-none">
                 <select v-model="subject">
                     <option value="">Chọn chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
@@ -48,7 +48,11 @@
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
                 <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
             </div>
-            <b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+            <div class="col-12 col-md-4 ml-auto text-md-right">
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
+                <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
+                @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
+            </div>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -61,16 +65,16 @@
             <tbody>
                 <tr v-if="tableData == null || tableData.length <= 0">
                     <template v-if="isLoading">
-                        <td colspan="8">Đang gửi dữ liệu...</td>
+                        <td colspan="7">Đang lấy dữ liệu...</td>
                     </template>
                     <template v-else>
-                        <td colspan="8">Không có thông tin phù hợp</td>
+                        <td colspan="7">Không có thông tin phù hợp</td>
                     </template>
                 </tr>
                 <tr v-else v-for="(item,k) in tableData">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td><a :href="'@processUrl("Detail", "Class")/' + item.ID" :title="item.Name">{{item.Name}}</a></td>
-                    <td>{{item.SkillName}}</td>
+                    @*<td>{{item.SkillName}}</td>*@
                     <td>{{item.Teachers}}</td>
                     <td>{{item.Students}}</td>
                     <td><span>{{formatShortDate(item.StartDate)}}</span><span>{{formatShortDate(item.EndDate)}}</span></td>
@@ -139,7 +143,7 @@
                     Đang gửi dữ liệu ...
                 </li>
                 <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
-                    {{ result.Name }}
+                    {{ result.Name + " (" + result.Email + ")" }}
                 </li>
             </ul>
 
@@ -335,7 +339,6 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                this.view = 30
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 //console.log(this.list_subject);
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
@@ -353,7 +356,17 @@
                         InitDate();
                     }
                 });
-                this.getData()
+
+                var hash = window.location.hash;
+                if (hash.startsWith('#')) {
+                    var hash = hash.split('#')[1];
+                    if (hash.startsWith("page")) {
+                        var cr = hash.split('-')[1]
+                        this.page = cr;
+                    }
+                }
+                else
+                    this.getData()
             },
             components: {
                 vuejsDatepicker
@@ -373,10 +386,10 @@
                         key: 'class_name',
                         label: 'Tên lớp'
                     },
-                    {
-                        key: 'skills',
-                        label: 'Môn học'
-                    },
+                    //{
+                    //    key: 'skills',
+                    //    label: 'Môn học'
+                    //},
                     {
                         key: 'teacher_name',
                         label: 'Giáo viên'
@@ -428,8 +441,8 @@
                 courseSource: [],
                 loaded_teacher: [],
                 loaded_course: [],
-                view: 20,
-                totalRec: 0,
+                view: 30,
+                totalRec: 9999,
                 page: 1,
                 student_data: {
                     data: [],
@@ -468,10 +481,10 @@
                             ID: '',
                             SubjectID: '',
                             GradeID: '',
-                            SkillID: '',
+                            //SkillID: '',
                             TeacherID: '',
                             CourseID: '',
-                            TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                            TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                         }
                     ],
                     IsOwner: false
@@ -525,6 +538,16 @@
                     _form.append('EndDate', _that.eDate)
                     _form.append('SearchText', _that.searchTerm)
                     _form.append('Center', '@center')
+                    if (_that.page > 1) {
+                        history.replaceState({ currentPage: _that.page }, "Quản lý lớp học - Trang " + (_that.page), "#page-" + _that.page);
+                        document.title = "Quản lý lớp học - Trang " + (_that.page)
+                    }
+                    else {
+                        history.replaceState({ currentPage: 1 }, "Quản lý lớp học", "#");
+                        document.title = "Quản lý lớp học";
+                    }
+
+
                     @if(!isHeadTeacher)
                     {
                     @:let _url = '@processUrl("GetClassList", "Class")'
@@ -546,7 +569,7 @@
                             this.tableData = _that.tableData
                             //console.log(this.tableData);
                             this.totalRec = response.data.Model.totalRecord
-
+                            this.page = _that.page;
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = tt / this.view + (tt % this.view > 0 ? 1 : 0);
                             //console.log(_that.active_course);
@@ -630,7 +653,7 @@
                     var notify = false
                     if (_that.class_info.subject != null) {
                         _that.class_info.subject.forEach(function (item, k) {
-                            if (item.Skill == '' || item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
+                            if (item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
                                 alert("Vui lòng nhập đầy đủ thông tin cho môn học " + (k + 1));
                                 valid = false
                                 return false;
@@ -754,19 +777,18 @@
                             subject: [
                                 {
                                     ID: '',
-                                    SkillID: '',
+                                    //SkillID: '',
                                     SubjectID: '',
                                     GradeID: '',
                                     TeacherID: '',
                                     CourseID: '',
-                                    TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                                    TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                                 }
                             ],
                             IsOwner: true
                         }
                     }
                     else {
-
                         _that.class_info.ID = obj.ID;
                         _that.class_info.Description = obj.Description;
                         _that.class_info.Name = obj.Name;
@@ -788,7 +810,6 @@
                         axios.post(_url, _form)
                             .then(response => {
                                 var _data = response.data.Data;
-
                                 _data.forEach(function (item, k) {
                                     var lock = false
                                     var valid_subject = _that.list_subject.filter(c => c.ID == item.SubjectID);
@@ -813,35 +834,41 @@
                                     else {
                                         lock = !valid_subject[0].IsActive
                                     }
+
                                     //_that.class_info.IsOwner = item.TeacherID == '@userid';
                                     _that.class_info.subject.push({
                                         UID: moment().format("DDMMYYYYhhmmssSSS") + k,
                                         ID: item.ID,
-                                        SkillID: item.SkillID,
+                                        //SkillID: item.SkillID,
                                         SubjectID: item.SubjectID,
                                         GradeID: item.GradeID,
                                         TeacherID: item.TeacherID,
                                         CourseID: item.CourseID,
                                         IsLock: lock,
-                                        IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND',
+                                        IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND',
                                         TypeClass: item.TypeClass
                                     })
 
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
 
-                                    if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
-                                        _that.courseSource.push({
-                                            ID: item.CourseID,
-                                            SkillID: item.SkillID,
-                                            Name: item.CourseName,
-                                            SubjectID: item.SubjectID,
-                                            GradeID: item.GradeID,
-                                            IsActive: false
-                                        })
-                                    }
+                                    console.log(_that.courseSource);
+
+                                    var r = setTimeout(function () {
+                                        if (_that.courseSource.findIndex(c => c.ID == item.CourseID) == -1) {
+                                            _that.courseSource.push({
+                                                ID: item.CourseID,
+                                                //SkillID: item.SkillID,
+                                                Name: item.CourseName,
+                                                SubjectID: item.SubjectID,
+                                                GradeID: item.GradeID,
+                                                IsActive: false
+                                            })
+                                            this.courseSource = _that.courseSource
+                                        }
+                                    }, 200);
                                 })
-                                //_that.$forceUpdate()
+
                             }).catch(e => { })
                     }
                     //debugger
@@ -873,7 +900,7 @@
                                 sbj.GradeID = ''
                                 sbj.CourseID = ''
                                 sbj.TeacherID = ''
-                                sbj.SkillID = ''
+                                //sbj.SkillID = ''
                                 return
                             }
                         });
@@ -920,41 +947,70 @@
                         }
                     }
                 },
-                changeAddGrade(obj) {
-                    let _that = this;
-                    if (obj.GradeID == '') return;
-                    let key = obj.SubjectID + "_" + obj.GradeID
-                    if (_that.loaded_course.includes(key)) return;
-                    //load course
-                    let _form = new FormData()
-                    _form.append('SubjectID', obj.SubjectID)
-                    _form.append('GradeID', obj.GradeID)
-                    _form.append('Center', '@center')
-                    let _url = '@processUrl("GetActiveList", "Curriculum")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            var _data = response.data.Data;
-                            _data.forEach(function (item, k)
-                            {
-                                var oldIdx = _that.courseSource.findIndex(i => i.ID == item.ID)
-                                if (oldIdx == -1) {
-                                    _that.courseSource.push({
-                                        ID: item.ID,
-                                        Name: item.Name,
-                                        SubjectID: obj.SubjectID,
-                                        GradeID: obj.GradeID,
-                                        SkillID: item.SkillID,
-                                        IsActive: true
-                                    })
-                                }
-                                else {
-                                    _that.courseSource[oldIdx].IsActive = true
-                                }
-                                //console.log(_that.courseSource);
-                            })
+                changeAddGrade(obj, reset = false) {
 
-                            _that.loaded_course.push(key);
-                        }).catch(e => { })
+                    let _that = this;
+                    if (obj.GradeID == '') {
+                        _that.class_info.subject.forEach(function (sbj) {
+                            if (sbj.UID == obj.UID) {
+                                sbj.CourseID = ''
+                                return
+                            }
+                        });
+                        return;
+                    }
+                    let key = obj.SubjectID + "_" + obj.GradeID
+                    if (!_that.loaded_course.includes(key)) {
+                        //load course
+                        let _form = new FormData()
+                        _form.append('SubjectID', obj.SubjectID)
+                        _form.append('GradeID', obj.GradeID)
+                        _form.append('Center', '@center')
+                        let _url = '@processUrl("GetActiveList", "Curriculum")'
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var _data = response.data.Data;
+                                //console.log(_that.courseSource);
+                                _data.forEach(function (item, k) {
+                                    var oldIdx = _that.courseSource.findIndex(i => i.ID == item.ID)
+
+                                    if (oldIdx == -1) {
+                                        _that.courseSource.push({
+                                            ID: item.ID,
+                                            Name: item.Name,
+                                            SubjectID: obj.SubjectID,
+                                            GradeID: obj.GradeID,
+                                            //SkillID: item.SkillID,
+                                            IsActive: true
+                                        })
+                                    }
+                                    else {
+                                        _that.courseSource[oldIdx].IsActive = true
+                                    }
+
+                                    //console.log(_that.courseSource);
+                                })
+                                if (reset) {
+                                    _that.class_info.subject.forEach(function (sbj) {
+                                        if (sbj.UID == obj.UID) {
+                                            sbj.CourseID = ''
+                                            return
+                                        }
+                                    });
+                                }
+                                _that.loaded_course.push(key);
+                            }).catch(e => { })
+                    }
+                    else {
+                        if (reset) {
+                            _that.class_info.subject.forEach(function (sbj) {
+                                if (sbj.UID == obj.UID) {
+                                    sbj.CourseID = ''
+                                    return
+                                }
+                            });
+                        }
+                    }
                 },
                 changeAddSkill(obj) {
                    obj.CourseID = ''
@@ -965,12 +1021,12 @@
                     let _subject = {
                         UID: moment().format("DDMMYYYYhhmmssSSS"),
                         ID: '',
-                        SkillID: '',
+                        //SkillID: '',
                         SubjectID: '',
                         GradeID: '',
                         TeacherID: '',
                         CourseID: '',
-                        TypeClass: '@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD'
+                        TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                     }
                     this.class_info.subject.push(_subject)
                     this.$forceUpdate();
@@ -1168,7 +1224,7 @@
                                 alert(response.data.msg)
                                 this.search_class_id = _that.add_student.class_id
                                 this.search_grade_id = ''
-                                this.search_skill_id = ''
+                                //this.search_skill_id = ''
                                 this.search_subject_id = ''
                                 this.loadStudent()
                                 this.$bvModal.hide('modal_student_add')
@@ -1230,8 +1286,8 @@
                             }
                             else {
                                 alert(response.data.msg)
-                                this.getData()
-                                this.hideModal()
+                                this.loadStudent()
+                                //this.hideModal()
                             }
                             //var tt = response.data.Model.totalRecord;
                             //this.max_page = Math.floor(tt / this.view) + (tt % this.view > 0 ? 1 : 0);
@@ -1265,7 +1321,9 @@
                 },
                 matchCourse(obj, item) {
                     //console.log(this.courseSource)
-                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID && item.SkillID == obj.SkillID && (item.IsActive || (item.ID == obj.CourseID))
+                    return item.SubjectID == obj.SubjectID && item.GradeID == obj.GradeID
+                        //&& item.SkillID == obj.SkillID
+                        && (item.IsActive || (item.ID == obj.CourseID))
                 },
                 domDecoder(str) {
                     if (str == null)
@@ -1278,6 +1336,32 @@
                 formatDate(value) {
                     if (value) {
                         return moment(String(value)).format('YYYY-MM-DD')
+                    }
+                },
+                exportExcel(tableid) {
+                    var _filename = "Danh sách lớp học";
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
                     }
                 },
                 a(obj, userid) {
@@ -1314,13 +1398,13 @@
                     <label class="label">Mô tả</label>
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription" :disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
-                <b-col class="form-group d-none">
-                    <label class="label">Cho phép học sinh tự động tham gia:</label>
-                    <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
-                        <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
-                    </select>
-                </b-col>
+                @*<b-col class="form-group d-none">
+                        <label class="label">Cho phép học sinh tự động tham gia:</label>
+                        <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
+                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
+                        </select>
+                    </b-col>*@
                 <b-col class="form-group">
                     <label class="label">Ảnh lớp học</label>
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
@@ -1333,7 +1417,7 @@
                 </b-col>
             </div>
             <div class="col-md-8">
-                <ul class="list list-subject" v-for="(sub,k) in class_info.subject">
+                <ul class="list list-subject" v-for="(sub,k) in class_info.subject" :class="sub.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM' ? 'd-none':''">
                     <li class="flex" :id="sub.UID">
                         <div class="width-100 mr-2">
                             <label for="">Chương trình</label>
@@ -1344,18 +1428,18 @@
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn môn học</option>
-                                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
+                        @*<div class="width-100 mr-2 d-none">
+                                <label for="">Môn học</label>
+                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn môn học</option>
+                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>*@
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
                             <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
@@ -1366,8 +1450,8 @@
                         <div class="width-100 mr-2">
                             <label for="">Loại học liệu</label>
                             <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
@@ -1379,10 +1463,8 @@
                         </div>
 
                         <div class="btn-group mt-4">
-
                             <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
                             <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
-
                             <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                             <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
                         </div>
@@ -1397,18 +1479,18 @@
                         </div>
                         <div class="width-100 mr-2">
                             <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub)" :disabled="sub.IsLock">
+                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock">
                                 <option value="">Chọn cấp độ</option>
                                 <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                             </select>
                         </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Môn học</label>
-                            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
-                                <option value="">Chọn môn học</option>
-                                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
+                        @*<div class="width-100 mr-2">
+                                <label for="">Môn học</label>
+                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                                    <option value="">Chọn môn học</option>
+                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>*@
                         <div class="width-100 mr-2">
                             <label for="">Bài giảng</label>
                             <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
@@ -1419,8 +1501,8 @@
                         <div class="width-100 mr-2">
                             <label for="">Loại học liệu</label>
                             <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASS_TYPE.EXTEND">Chuyên đề</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                             </select>
                         </div>
                         <div class="width-100 mr-2">
@@ -1451,7 +1533,6 @@
             </template>
         </template>
     </b-modal>
-
 
     <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Cập nhật danh sách học viên" style="width:800px">
         <div class="row">
@@ -1551,7 +1632,6 @@
         </template>
     </b-modal>
 
-
     @* Modal Clone *@
     <b-modal :no-close-on-backdrop="true" id="CloneModal" centered title="Nhân bản">
         <b-col class="form-group">
@@ -1573,6 +1653,4 @@
             </template>
         </template>
     </b-modal>
-
-
 }

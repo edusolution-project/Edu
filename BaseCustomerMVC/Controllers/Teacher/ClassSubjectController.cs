@@ -32,6 +32,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonService _lessonService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonProgressService _lessonProgressService;
+        private readonly ClassService _classService;
 
         private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
@@ -53,7 +54,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonScheduleService lessonScheduleService,
             ExamService examService,
             ChapterService chapterService,
-            LessonProgressService lessonProgressService
+            LessonProgressService lessonProgressService,
+            ClassService classService
             )
         {
             _gradeService = gradeservice;
@@ -67,6 +69,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
             _lessonProgressService = lessonProgressService;
             _examService = examService;
+            _classService = classService;
 
             _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
             _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
@@ -81,15 +84,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var teacherID = "";
             if (User.IsInRole("teacher"))
                 teacherID = User.Claims.GetClaimByType("UserID").Value;
+
+            var @class = _classService.GetItemByID(ClassID);
+            if(@class == null)
+            {
+                return Json("Lop khong ton tai");
+            }
+
+            var watch1 = new System.Diagnostics.Stopwatch();
+            var watch2 = new System.Diagnostics.Stopwatch();
+            watch1.Start();
+            var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x=>new {x.ID,x.ClassSubjectID }).ToList();
+            watch1.Stop();
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID
-                          let subject = _subjectService.GetItemByID(r.SubjectID)
-                          let grade = _gradeService.GetItemByID(r.GradeID)
-                          let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
+                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
+                          let subject = r.SubjectID != null?  _subjectService.GetItemByID(r.SubjectID): new SubjectEntity()
+                          let grade = r.GradeID != null? _gradeService.GetItemByID(r.GradeID): new GradeEntity()
+                          let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}
                           let teacher = _teacherService.GetItemByID(r.TeacherID)
                           let skill = r.SkillID == null? null: _skillService.GetItemByID(r.SkillID)
+                          let countActiveLesson = activeLesson.Any(x=>x.ClassSubjectID == r.ID)
                           select new ClassSubjectViewModel
                           {
                               ID = r.ID,
@@ -105,10 +121,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               CourseName = string.IsNullOrEmpty(course.Name) ? skill?.Name : course.Name,
                               TeacherID = r.TeacherID,
                               TeacherName = teacher.FullName,
-                              TypeClass = r.TypeClass
+                              TypeClass = r.TypeClass,
+                              HasLessonActive = countActiveLesson
                           }).ToList()
                 },
             };
+            watch2.Stop();
             return new JsonResult(response);
         }
 
@@ -149,6 +167,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                ScheduleID = schedule.ID,
                                StartDate = schedule.StartDate,
                                EndDate = schedule.EndDate,
+                               IsHideAnswer = schedule.IsHideAnswer,
                                IsActive = schedule.IsActive,
                                IsOnline = schedule.IsOnline
                            })).ToList();
@@ -186,7 +205,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var courseDetail = new Dictionary<string, object>
             {
                 { "Chapters", _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
-                { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() }
+                { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
+                {"TypeClass",currentCs.TypeClass }
             };
 
             var response = new Dictionary<string, object>
@@ -235,8 +255,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            select _resultMapping.AutoOrtherType(r, new LessonResultViewModel()
                            {
                                ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
+                               //StartDate = schedule.StartDate,
+                               //EndDate = schedule.EndDate,
                                LearntCount = progressCount,
                                ExamCount = examCount,
                                AvgPoint = progressCount > 0 ? (r.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0,
@@ -260,6 +280,75 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //        {"Error", ex.Message }
             //    });
             //}
+        }
+
+        public JsonResult GetResultsWithTime(String basis, String ClassSubjectID, DateTime StartTime, DateTime EndTime)
+        {
+            try
+            {
+                var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
+                if (currentCs == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        {"Error", "Không tìm thấy lớp học" }
+                    });
+                }
+
+                var avtiveLessons = _lessonScheduleService.GetActiveLesson(StartTime, EndTime, currentCs.ID);
+                var activeLessonIDs = avtiveLessons.Select(x => x.LessonID);
+                var progress = _lessonProgressService.CreateQuery().Find(o => activeLessonIDs.Contains(o.LessonID) && o.ClassSubjectID == currentCs.ID).ToList();
+                List<LessonResultVM> lessonResult = new List<LessonResultVM>();
+
+                foreach (var item in avtiveLessons)
+                {
+                    //var progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == item.LessonID && o.ClassSubjectID == currentCs.ID);
+                    var lesson = _lessonService.GetItemByID(item.LessonID);
+                    //var exam = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.StudentID);
+                    //var _progessResult = progress.Where(x => x.LessonID == item.LessonID).ToList();
+                    var examCount = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).Project(t => t.StudentID).ToList().Distinct().Count();
+                    var progessResult = progress.Where(x => x.LessonID == item.LessonID && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { x.Key, Point = x.ToList().Average(y => y.LastPoint) });
+                    //var avgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
+                    //var avgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
+                    var result = new LessonResultVM()
+                    {
+                        ScheduleID = item.ID,
+                        //StartDate = item.StartDate,
+                        //EndDate = item.EndDate,
+                        //LearntCount = progress.Count(),
+                        ExamCount = examCount,
+                        //AvgPoint = avgPoint,
+                        //AvgPracticePoint = avgPracticePoint,
+                        Title = lesson.Title,
+                        ChapterName = _chapterService.GetItemByID(lesson.ChapterID)?.Name,
+                        MinPoint8 = progessResult.Where(x => x.Point >= 80).Count(),
+                        MinPoint5 = progessResult.Where(x => x.Point >= 50 && x.Point < 80).Count(),
+                        MinPoint2 = progessResult.Where(x => x.Point >= 20 && x.Point < 50).Count(),
+                        MinPoint0 = progessResult.Where(x => x.Point >= 00 && x.Point < 20).Count(),
+                    };
+                    lessonResult.Add(result);
+                }
+                return new JsonResult(new Dictionary<String, Object> {
+                    {"Data",lessonResult }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public class LessonResultVM
+        {
+            public String ScheduleID { get; set; }
+            public Int32 ExamCount { get; set; }
+            public String Title { get; set; }
+            public String ChapterName { get; set; }
+            public Double MinPoint0 { get; set; }
+            public Double MinPoint2 { get; set; }
+            public Double MinPoint5 { get; set; }
+            public Double MinPoint8 { get; set; }
+
         }
     }
 }

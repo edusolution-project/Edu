@@ -129,6 +129,7 @@
                     <i class="ti-arrow-circle-left" id="ti-arrow-circle" onclick="openNav()" style="font-size:20px"></i>
                     <div id="myDropdown" class="dropdown-content">
                         <a href="@processUrl("Profile","Home")#myprofile" class="dropdown-item" onclick="openNav()"><i class="ti-user"></i> Thông tin cá nhân</a>
+                        <a href="@processUrl("Learningoutcomes","Course")" class="dropdown-item" onclick="openNav()"><i class="ti-stats-up"></i> Kết quả học tập</a>
                         <a href="@processUrl("Profile","Home")#changlepassword" class="dropdown-item" onclick="openNav()"><i class="ti-key"></i> Đổi mật khẩu</a>
                     </div>
                 </div>
@@ -242,7 +243,7 @@
                 <i class="fas fa-star" style="font-size:160%"></i>
                 <i class="fas fa-star" style="font-size:110%"></i>
             </div>
-            <div id="top_star" class="box p-3">
+            <div id="top_star" class="box p-3" style="padding-bottom: 0 !important;">
                 <div class="heading flex pb-2">
                     <h4 class="box-head text-center" style="font-size:110%;">Ngôi sao đang lên</h4>
                 </div>
@@ -253,12 +254,12 @@
                             <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
                             <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
                             <i class="fas fa-star red-color" v-else></i>
-                            <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}</span>
+                            <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}<span v-if="item.ClassName!=null"> ({{item.ClassName}})</span></span>
                         </li>
                     </template>
                 </ul>
             </div>
-            <div class="box p-3" style="margin: 10px;border-radius: 15px; background: #D0DFE8;">
+            <div class="box p-3 ml-3 mr-3" style="border-radius: 15px; background: #D0DFE8;">
                 <div class="heading flex">
                     <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmctaHwtxAHU4oP4zcsPB7wx"><h4 class="box-head text-danger" target="_blank" style="font-size:110%">Hướng dẫn sử dụng</h4></a>
                 </div>
@@ -340,19 +341,60 @@
         })();
     </script>
     <!--End of Tawk.to Script-->
-    @if (center == "ern")
-    {
-        @*longht them*@
-        <link href="~/easy-real-time/css/easy-real-time.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/sweetalert.css" rel="stylesheet" />
-        <link href="~/js/calendar/css/style.css" rel="stylesheet" />
-        @await Html.PartialAsync("_EasyRealtime")
-    }
-    else
-    {
-        @await Html.PartialAsync("_EasyChat")
-    }
-    @await Html.PartialAsync("_Notification")
+
+    @await Html.PartialAsync("_EasyChat")
+
+    <script>
+        var openPoll = function () {
+            $('html').append($('<div>', { id: 'pollPopup', style: 'position:fixed; top: 0; left: 0; right: 0; bottom: 0; background: #333; opacity:0.95; z-index: 99999999999' })
+                .append($('<div>', { style: 'margin-top: 150px; text-align:center;' })
+                    .append($('<p>', { style: 'font-size: 150%; color:#FFF; width: 70%; display:inline-block; line-height: 1.5', html: 'Cảm ơn bạn đã sử dụng hệ thống của Eduso!<br/> Để Eduso có thể hỗ trợ tốt nhất cho hoạt động học tập của bạn, vui lòng cho Eduso biết ý kiến của bạn về các trải nghiệm trên hệ thống.' }))
+                    .append($('<p>').append($('<button>', { class: 'btn btn-primary mt-3', text: 'Thực hiện khảo sát', onclick: 'gotoPoll()' })))
+                ));
+            $('body').css('overflow', 'hidden');
+        }
+
+        var gotoPoll = function () {
+            $('#pollPopup').remove();
+            $('body').css('overflow', 'auto');
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLScWFpuctPBXcnlwq3jQ7cFw5Juzc8gw9_L0sNriimpAt-qZIQ/viewform');
+        }
+
+        var pageCount = getCookie("PageStudentCount");
+        console.log(pageCount);
+        if (!pageCount > 0)
+            pageCount = 1
+        else
+            pageCount = parseInt(pageCount);
+        setCookie("PageStudentCount", pageCount + 1, 30);
+        if (pageCount == 3) {
+            openPoll();
+        }
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            var expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+    </script>
+
 </body>
 </html>
 

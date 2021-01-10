@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using BaseEasyRealTime.Entities;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Google.Apis.Drive.v3.Data;
+using System.IO;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using System.Diagnostics;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -57,6 +61,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly StudentHelper _studentHelper;
         private readonly TeacherHelper _teacherHelper;
         private readonly MailHelper _mailHelper;
+
         private readonly MappingEntity<LessonEntity, StudentModuleViewModel> _moduleViewMapping;
         private readonly MappingEntity<LessonEntity, StudentAssignmentViewModel> _assignmentViewMapping;
 
@@ -91,6 +96,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseService courseService,
             CourseHelper courseHelper,
             ClassHelper classHelper,
+
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ProgressHelper progressHelper,
@@ -233,7 +239,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var vm = new ClassViewModel(currentClass);
             var subjects = _classSubjectService.GetByClassID(currentClass.ID);
             var skillIDs = subjects.Select(t => t.SkillID).Distinct();
-            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct();
+            var subjectIDs = subjects.Select(t => t.SubjectID).Distinct().Where(s => s != "").ToList();
             vm.SkillName = string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList());
             vm.SubjectName = string.Join(", ", _subjectService.Collection.Find(t => subjectIDs.Contains(t.ID)).Project(t => t.Name).ToList());
             vm.TotalStudents = _studentService.CountByClass(currentClass.ID);
@@ -383,13 +389,251 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetClassResult(DefaultModel model, string ClassID)
+        public JsonResult GetClassResult(String basis, String ClassID, DefaultModel model)
         {
-            var @class = _service.GetItemByID(ClassID);
+            var @class = _classService.GetItemByID(ClassID);
             if (@class == null)
-                return null;
-            var data = new List<StudentSummaryViewModel>();
+            {
+                return Json("Lớp không tồn tại.");
+            }
 
+            //Lay danh sach ID hoc sinh trong lop
+            var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+            if (students.Count == 0)
+            {
+                return Json("Lớp chưa có học viên.");
+            }
+            var studentIds = students.Select(t => t.ID).ToList();
+
+            //lay danh sach classsubject trong lop
+            var classsubjects = _classSubjectService.GetByClassID(@class.ID);
+            if (classsubjects.Count == 0)
+            {
+                return Json("Lớp chưa có môn học");
+            }
+            var classsubjectsIDs = classsubjects.Select(x => x.ID).ToList();
+
+            var progess = _lessonProgressService.CreateQuery().Find(x => classsubjectsIDs.Contains(x.ClassSubjectID) && x.Tried > 0);
+            var activelesson = _lessonScheduleService.CreateQuery().Find(o => classsubjectsIDs.Contains(o.ClassSubjectID) && (o.StartDate <= DateTime.Now || o.StartDate <= @class.EndDate) && o.EndDate >= @class.StartDate).ToList();
+            var litsIds = activelesson.Select(x => x.LessonID);
+            var listIdsPractice = _lessonService.CreateQuery().Find(x => litsIds.Contains(x.ID) && x.IsPractice == true).ToList().Select(x => x.ID);
+            var listIdsExam = _lessonService.CreateQuery().Find(x => litsIds.Contains(x.ID) && x.TemplateType == 2).ToList().Select(x => x.ID);
+            var progessPractice = progess.ToList().Where(x => listIdsPractice.Contains(x.LessonID) && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { StudentID = x.Key, Point = x.ToList().Sum(y => y.LastPoint) / listIdsPractice.Count() });
+            var progessExam = progess.ToList().Where(x => listIdsExam.Contains(x.LessonID) && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { StudentID = x.Key, Point = x.ToList().Sum(y => y.LastPoint) / listIdsExam.Count() });
+
+            var data = new List<StudentSummaryViewModel>();
+            //var _dataResult = progess.ToList().GroupBy(x => x.StudentID).Select(x =>
+            //new StudentSummaryViewModel
+            //{
+            //    StudentID = x.Key,
+            //    FullName = students.Where(y => y.ID == x.Key).FirstOrDefault().FullName,
+            //    PracticeAvgPoint = listIdsPractice.Count() > 0 ? x.ToList().Where(y => listIdsPractice.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsPractice.Count() : 0,
+            //    AvgPoint = listIdsExam.Count() > 0 ? x.ToList().Where(y => listIdsExam.Contains(y.LessonID)).Sum(y => y.LastPoint) / listIdsExam.Count() : 0
+            //});
+
+            var dataResult = from p in progess.ToList()
+                             group p by p.StudentID
+                             into g
+                             let student = students.Where(x => x.ID == g.Key).FirstOrDefault()
+                             let countPratice = listIdsPractice.Count()
+                             let countExam = listIdsExam.Count()
+                             let sumLastPointPractice = g.ToList().Where(x => listIdsPractice.Contains(x.LessonID)).Sum(x => x.LastPoint)
+                             let sumLastPointExam = g.ToList().Where(x => listIdsExam.Contains(x.LessonID)).Sum(x => x.LastPoint)
+                             select new StudentSummaryViewModel
+                             {
+                                 StudentID = g.Key,
+                                 FullName = student == null ? "" : student.FullName,
+                                 PracticeAvgPoint = countPratice > 0 ? sumLastPointPractice / countPratice : 0,
+                                 AvgPoint = countExam > 0 ? sumLastPointExam / countExam : 0
+                             };
+
+            if (dataResult.Count() != students.Count())
+            {
+                foreach (var st in students)
+                {
+                    var item = dataResult.Where(x => x.StudentID == st.ID).FirstOrDefault();
+                    if (item == null)
+                    {
+                        item = new StudentSummaryViewModel
+                        {
+                            StudentID = st.ID,
+                            FullName = st.FullName,
+                            PracticeAvgPoint = 0,
+                            AvgPoint = 0
+                        };
+                    }
+                    data.Add(item);
+                }
+            }
+            else
+            {
+                data.AddRange(dataResult);
+            }
+            //data.AddRange(dataResult);
+
+            Dictionary<String, Object> dataresponse = new Dictionary<string, object>
+            {
+                {"Data",data },
+                {"Model",model }
+            };
+            return Json(dataresponse);
+        }
+
+        //public JsonResult GetClassResult(DefaultModel model, string ClassID, DateTime startTime, DateTime endTime, Boolean isFillter = false)
+        //{
+        //    var @class = _service.GetItemByID(ClassID);
+        //    if (@class == null)
+        //        return null;
+        //    var data = new List<StudentSummaryViewModel>();
+        //    if (!isFillter)
+        //    {
+        //        List<StudentSummaryViewModel> listSummary = ClassResultSummary(@class);
+        //        var response = new Dictionary<string, object>
+        //            {
+        //                { "Data", listSummary},
+        //                { "Model", model }
+        //            };
+        //        return new JsonResult(response);
+        //    }
+        //    else
+        //    {
+        //        startTime = startTime.AddMilliseconds(1);
+        //        endTime = endTime.AddHours(23).AddMinutes(59).AddMilliseconds(59);
+        //        //Lay danh sach ID hoc sinh trong lop
+        //        var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+        //        var studentIds = students.Select(t => t.ID).ToList();
+        //        //totalStudent += studentIds.Count();
+
+        //        var classStudent = studentIds.Count();
+
+        //        //Lay danh sach ID bai hoc duoc mo trong tuan
+        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+        //        var totalPractice = 0;
+        //        var totalExam = 0;
+        //        foreach (var item in activeLessonIds)
+        //        {
+        //            var lesson = _lessonService.GetItemByID(item);
+        //            if (lesson.IsPractice)
+        //            {
+        //                totalPractice++;
+        //            }
+        //            else if (lesson.TemplateType == 2)
+        //            {
+        //                totalExam++;
+        //            }
+        //        }
+
+        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
+        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+        //            && x.LastDate <= endTime && x.LastDate >= startTime).ToEnumerable();
+
+        //        // danh sach bai kiem tra
+        //        var listExam = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2) && activeLessonIds.Contains(x.ID)).ToList();
+        //        var examIds = listExam.Select(x => x.ID).ToList();
+
+        //        var exams = (from e in _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).ToList()
+        //                     group e by e.StudentID
+        //                     into ge
+        //                     select new
+        //                     {
+        //                         StudentID = ge.Key,
+        //                         CompletedExam = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
+        //                         test = ge
+        //                     }).ToList();
+
+        //        //danh sach bai luyen tap
+        //        var listPractice = _lessonService.CreateQuery().Find(x => (x.IsPractice == true) && activeLessonIds.Contains(x.ID)).ToList();
+        //        var practiceIds = listPractice.Select(x => x.ID).ToList();
+
+        //        var practices = (from e in _examService.CreateQuery().Find(x => practiceIds.Contains(x.LessonID)).ToList()
+        //                         group e by e.StudentID
+        //                     into ge
+        //                         select new
+        //                         {
+        //                             StudentID = ge.Key,
+        //                             CompletedPractice = ge.ToList().Select(x => x.LessonID).Distinct().Count(),
+        //                             test = ge
+        //                         }).ToList();
+
+        //        //ket qua lam bai kiem tra cua hoc sinh trong lop
+        //        var classResult1 = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+        //                            group r by r.StudentID
+        //                           into g
+        //                            let _CompletedExam = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedExam
+        //                            select new StudentResult
+        //                            {
+        //                                StudentID = g.Key,
+        //                                AvgPoint = g.Average(t => t.LastPoint),
+        //                                StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+        //                                CompletedExam = _CompletedExam,
+        //                                TotalLesson = activeLessonIds.Count,
+        //                                isExam = true
+        //                            }).ToList();
+
+        //        //ket qua lam bai luyen tap cua hoc sinh trong lop
+        //        var classResult2 = (from r in activeProgress.Where(t => practiceIds.Contains(t.LessonID) && t.Tried > 0)
+        //                            group r by r.StudentID
+        //                           into g
+        //                            let _CompletedPractice = practices.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedPractice
+        //                            select new StudentResult
+        //                            {
+        //                                StudentID = g.Key,
+        //                                AvgPoint = g.Average(t => t.LastPoint),
+        //                                StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+        //                                CompletedPractice = _CompletedPractice,
+        //                                TotalPractice = activeLessonIds.Count,
+        //                                isExam = false
+        //                            }).ToList();
+
+        //        var results = _progressHelper.GetClassResults(@class.ID)
+        //        .OrderByDescending(t => t.RankPoint).ToList();
+
+        //        List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
+        //        foreach (var item in students)
+        //        {
+        //            var totalStudent = students.Count();
+        //            var result = results.FirstOrDefault(t => t.StudentID == item.ID) ?? new StudentRankingViewModel();
+        //            var rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count);
+        //            var exam = classResult1.Find(x => x.StudentID == item.ID);
+        //            var practice = classResult2.Find(x => x.StudentID == item.ID);
+
+        //            var studentSummary = new StudentSummaryViewModel
+        //            {
+        //                ExamDone = exam != null ? exam.CompletedExam : 0,
+        //                Completed = result.Count,
+        //                PracticeDone = practice != null ? practice.CompletedPractice : 0,
+        //                StudentID = item.ID,
+        //                FullName = item.FullName?.ToString(),
+        //                RankPoint = rankPoint,
+        //                Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+        //                ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+        //                PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+        //                TotalPoint = result.TotalPoint,
+        //                PracticePoint = result.PracticePoint,
+        //                PracticeAvgPoint = practice != null && practice.CompletedPractice > 0 ? practice.AvgPoint : 0,
+        //                AvgPoint = exam != null && exam.CompletedExam > 0 ? exam.AvgPoint : 0,
+        //                TotalExams = totalExam,
+        //                TotalLessons = @class.TotalLessons,
+        //                TotalPractices = totalPractice,
+        //                TotalStudents = totalStudent,
+        //                LastDate = result.LastDate
+        //            };
+        //            studentSummaryViewModels.Add(studentSummary);
+        //        }
+        //        var response = new Dictionary<string, object>
+        //            {
+        //                { "Data", studentSummaryViewModels},
+        //                { "Model", model }
+        //            };
+        //        return new JsonResult(response);
+        //    }
+        //}
+
+        private List<StudentSummaryViewModel> ClassResultSummary(ClassEntity @class)
+        {
             var students = _studentService.GetStudentsByClassId(@class.ID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
             var total_students = students.Count();
 
@@ -420,66 +664,457 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                    TotalStudents = total_students,
                                    LastDate = result.LastDate
                                }).ToList();
-            var response = new Dictionary<string, object>
-            {
-                { "Data", listSummary},
-                { "Model", model }
-            };
-            return new JsonResult(response);
+            return listSummary;
         }
 
-        public JsonResult GetClassSubjectResult(DefaultModel model, string ClassSubjectID)
+        public JsonResult GetClass_Result(DefaultModel model, string ClassID, DateTime startTime, DateTime endTime)
         {
-            var csbj = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (csbj == null)
-                return null;
-            var data = new List<StudentSummaryViewModel>();
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+            {
+                var dataresponse = new Dictionary<String, Object>
+                {
+                    {"Stt",false },
+                    { "Msg","Không tìm thấy lớp"}
+                };
+                return new JsonResult(dataresponse);
+            }
+            else
+            {
+                startTime = startTime.AddMilliseconds(1);
+                endTime = endTime.AddHours(23).AddMilliseconds(59);
+                //Lay danh sach ID hoc sinh trong lop
+                var students = _studentService.GetStudentsByClassId(@class.ID).ToList();
+                var studentIds = students.Select(t => t.ID).ToList();
+                //totalStudent += studentIds.Count();
 
-            var students = _studentService.GetStudentsByClassId(csbj.ClassID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName }); ;
+                var classStudent = studentIds.Count();
 
-            var total_students = students.Count();
+                //Lay danh sach ID bai hoc duoc mo trong tuan
+                var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+                var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
-            var csbjResults = _progressHelper.GetClassSubjectResults(csbj.ID)
+                //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+                var activeProgress = _lessonProgressService.CreateQuery().Find(
+                    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                    && x.LastDate <= endTime && x.LastDate >= startTime).ToEnumerable();
+
+                // danh sach bai kiem tra + luyen tap
+                var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).ToList();
+
+                var exams = (from e in _examService.CreateQuery().Find(x => examIds.Select(y => y.ID).Contains(x.LessonID)).ToList()
+                             group e by e.StudentID
+                             into ge
+                             select new
+                             {
+                                 StudentID = ge.Key,
+                                 CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count()
+                             }).ToList();
+
+                //ket qua lam bai cua hoc sinh trong lop
+                var classResult = (from r in activeProgress.Where(t => examIds.Select(y => y.ID).Contains(t.LessonID) && t.Tried > 0)
+                                   group r by r.StudentID
+                                   into g
+                                   let _CompletedLesson = exams.Where(x => x.StudentID == g.Key).FirstOrDefault().CompletedLesson
+                                   select new StudentResult
+                                   {
+                                       StudentID = g.Key,
+                                       ExamCount = g.Count() == 0 ? 0 : g.Count(),
+                                       AvgExamPoint = g.Average(t => t.LastPoint),
+                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
+                                       CompletedLesson = _CompletedLesson,
+                                       TotalLesson = activeLessonIds.Count,
+
+                                   }).ToList();
+
+                foreach (var item in students)
+                {
+                    var studentResult = classResult.Where(x => x.StudentID == item.ID).FirstOrDefault();
+                    if (studentResult == null)
+                    {
+                        studentResult = new StudentResult { StudentID = item.ID, ExamCount = 0, AvgExamPoint = 0, StudentName = item.FullName.Trim(), AvgTimeDoExam = "--", CompletedLesson = 0, TotalLesson = activeLessonIds.Count() };
+                        classResult.Add(studentResult);
+                    }
+                }
+
+                List<StudentResult> _classResult = new List<StudentResult>();
+                foreach (var item in students)
+                {
+                    var studentResult = classResult.Where(x => x.StudentID == item.ID).FirstOrDefault();
+                    _classResult.Add(studentResult);
+                }
+
+                var results = _progressHelper.GetClassResults(@class.ID)
                 .OrderByDescending(t => t.RankPoint).ToList();
 
-            var listSummary = (from student in students
-                               let result = csbjResults.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
-                               let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
-                               select new StudentSummaryViewModel
-                               {
-                                   ExamDone = result.ExamDone,
-                                   PracticeDone = result.PracticeDone,
-                                   Completed = result.Count,
-                                   StudentID = student.ID,
-                                   FullName = student.FullName,
-                                   RankPoint = rankPoint,
-                                   Rank = csbjResults.FindIndex(t => t.RankPoint == rankPoint) + 1,
-                                   ExamResult = csbj.TotalExams > 0 ? result.TotalPoint / csbj.TotalExams : 0,
-                                   PracticeResult = csbj.TotalPractices > 0 ? result.PracticePoint / csbj.TotalPractices : 0,
-                                   TotalPoint = result.TotalPoint,
-                                   PracticePoint = result.PracticePoint,
-                                   PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
-                                   AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
-                                   TotalExams = csbj.TotalExams,
-                                   TotalLessons = csbj.TotalLessons,
-                                   TotalPractices = csbj.TotalPractices,
-                                   TotalStudents = total_students,
-                                   LastDate = result.LastDate
-                               }).ToList();
-            var rootChapters = _chapterService.GetSubChapters(ClassSubjectID, "0").ToList();
-            var chapterSummary = from r in rootChapters
-                                 select _progressHelper.GetChapterResults(r.ID).ToList();
-
-            var response = new Dictionary<string, object>
-            {
-                { "Data", listSummary},
-                { "Chapter", rootChapters },
-                { "Student", students },
-                { "Result", chapterSummary }
-            };
-            return new JsonResult(response);
+                List<StudentSummaryViewModel> studentSummaryViewModels = new List<StudentSummaryViewModel>();
+                foreach (var item in _classResult)
+                {
+                    var totalStudent = _classResult.Count();
+                    var result = results.FirstOrDefault(t => t.StudentID == item.StudentID) ?? new StudentRankingViewModel();
+                    var rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count);
+                    var studentSummary = new StudentSummaryViewModel
+                    {
+                        ExamDone = item.CompletedLesson,
+                        Completed = result.Count,
+                        PracticeDone = result.PracticeDone,
+                        StudentID = item.StudentID,
+                        FullName = item.StudentName,
+                        RankPoint = rankPoint,
+                        Rank = results.FindIndex(t => t.RankPoint == rankPoint) + 1,
+                        ExamResult = @class.TotalExams > 0 ? result.TotalPoint / @class.TotalExams : 0,
+                        PracticeResult = @class.TotalPractices > 0 ? result.PracticePoint / @class.TotalPractices : 0,
+                        TotalPoint = result.TotalPoint,
+                        PracticePoint = result.PracticePoint,
+                        PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+                        AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
+                        TotalExams = @class.TotalExams,
+                        TotalLessons = @class.TotalLessons,
+                        TotalPractices = @class.TotalPractices,
+                        TotalStudents = totalStudent,
+                        LastDate = result.LastDate
+                    };
+                    studentSummaryViewModels.Add(studentSummary);
+                }
+                var response = new Dictionary<string, object>
+                    {
+                        { "Data", studentSummaryViewModels},
+                        { "Model", model }
+                    };
+                return new JsonResult(response);
+            }
         }
 
+        public async Task<JsonResult> GetClassSubjectResult(DefaultModel model, string ClassSubjectID)
+        {
+            try
+            {
+                var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID == ClassSubjectID).FirstOrDefault();
+                if (lesson == null)
+                {
+                    return new JsonResult(new Dictionary<String, Object> {
+                                        {"Error","Chưa có bài học" },
+                                        {"DataStudent",""},
+                                        {"DataTime","" }
+                                    });
+                }
+                var @class = _classService.GetItemByID(lesson.ClassID);
+                var sbj = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
+                var startDate = sbj.StartDate;
+                var listStudent = _studentService.GetStudentsByClassId(@class.ID);
+                var listTime = GetListWeek(startDate);
+                Dictionary<String, Object> dataResponse = new Dictionary<string, object>();
+                Dictionary<String, Object> dataTime = new Dictionary<string, object>();
+
+                var start = listTime.FirstOrDefault().Value.StartTime;
+                var end = listTime.LastOrDefault().Value.EndTime;
+
+                var progress = _lessonProgressService.CreateQuery().Find(t => t.ClassSubjectID == sbj.ID).ToList();
+                var activeLessons = _lessonScheduleService.GetActiveLesson(start, end, sbj.ID).ToList();
+                var a = activeLessons.Select(y => y.LessonID).ToList();
+                var activelessonPractice = _lessonService.CreateQuery().Find(x => a.Contains(x.ID) && x.IsPractice).ToList();
+
+                var index = 1;
+
+                var activeLessonDic = new Dictionary<int, List<string>>();
+
+                var allWeekActiveIds = activeLessons.Where(t => t.EndDate > listTime.FirstOrDefault().Value.StartTime && t.StartDate <= listTime.LastOrDefault().Value.EndTime).Select(t => t.LessonID).ToList();
+                var allWeekactivePractice = _lessonService.CreateQuery().Find(t => allWeekActiveIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
+                var _listStudent = new List<InforStudent>();
+
+                foreach (var student in listStudent)
+                {
+                    List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
+                    List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
+
+                    foreach (var item in listTime)
+                    {
+                        if (!activeLessonDic.ContainsKey(item.Key))
+                        {
+                            var activeIds = activeLessons.Where(t => t.EndDate > item.Value.StartTime && t.StartDate <= item.Value.EndTime).Select(t => t.LessonID).ToList();
+                            var activePractice = _lessonService.CreateQuery().Find(t => activeIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
+                            activeLessonDic[item.Key] = activePractice;
+                        }
+
+                        var lessonids = activeLessonDic[item.Key];
+
+                        var data = new StudentDetailVM();
+                        data.StudentName = student.FullName;
+                        data.StudentID = student.ID;
+                        data.Week = item.Key;
+
+                        var presult = progress.Where(t => t.StudentID == student.ID && lessonids.Contains(t.LessonID));
+                        if (lessonids.Count() == 0) continue;
+                        var point = presult.Count() > 0 ? (presult.Sum(x => x.LastPoint) / lessonids.Count()).ToString() : "---";
+                        data.Point = point.ToString();
+
+                        data.StartTime = item.Value.StartTime;
+                        data.EndTime = item.Value.EndTime;
+                        data.TotalPractice = lessonids.Count();
+                        data.TotalLessons = activelessonPractice.ToList().Count();
+
+                        dataresponse.Add(data);
+
+                        if (!dataTime.ContainsKey((item.Key - 1).ToString()))
+                        {
+                            dataTime.Add((item.Key - 1).ToString(), new { item.Value.StartTime, item.Value.EndTime });
+                        }
+                    }
+
+                    //tinh diem trung binh
+                    var _presult = progress.Where(t => t.StudentID == student.ID && allWeekactivePractice.Contains(t.LessonID));
+                    _listStudent.Add(new InforStudent()
+                    {
+                        StudentID = student.ID,
+                        FullName = student.FullName,
+                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---"
+                    });
+
+                    dataResponse.Add(index.ToString(), dataresponse);
+                    index++;
+                }
+
+                //var _listStudent = listStudent.Select(x => new { StudentID = x.ID, FullName = x.FullName });
+
+                return new JsonResult(new Dictionary<String, Object> {
+                                        {"DataStudent",dataResponse },
+                                        {"DataTime",dataTime },
+                                        {"ListStudent",_listStudent }
+                                    });
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        //public JsonResult GetClassSubjectResult(DefaultModel model, string ClassSubjectID)
+        //{
+        //    var csbj = _classSubjectService.GetItemByID(ClassSubjectID);
+        //    if (csbj == null)
+        //        return null;
+        //    var data = new List<StudentSummaryViewModel>();
+
+        //    var students = _studentService.GetStudentsByClassId(csbj.ClassID).Select(t => new StudentEntity { ID = t.ID, FullName = t.FullName });
+
+        //    var total_students = students.Count();
+
+        //    var csbjResults = _progressHelper.GetClassSubjectResults(csbj.ID)
+        //        .OrderByDescending(t => t.RankPoint).ToList();
+
+        //    var listSummary = (from student in students
+        //                       let result = csbjResults.FirstOrDefault(t => t.StudentID == student.ID) ?? new StudentRankingViewModel()
+        //                       let rankPoint = _progressHelper.CalculateRankPoint(result.TotalPoint, result.PracticePoint, result.Count)
+        //                       select new StudentSummaryViewModel
+        //                       {
+        //                           ExamDone = result.ExamDone,
+        //                           PracticeDone = result.PracticeDone,
+        //                           Completed = result.Count,
+        //                           StudentID = student.ID,
+        //                           FullName = student.FullName,
+        //                           RankPoint = rankPoint,
+        //                           Rank = csbjResults.FindIndex(t => t.RankPoint == rankPoint) + 1,
+        //                           ExamResult = csbj.TotalExams > 0 ? result.TotalPoint / csbj.TotalExams : 0,
+        //                           PracticeResult = csbj.TotalPractices > 0 ? result.PracticePoint / csbj.TotalPractices : 0,
+        //                           TotalPoint = result.TotalPoint,
+        //                           PracticePoint = result.PracticePoint,
+        //                           PracticeAvgPoint = result.PracticeDone > 0 ? result.PracticePoint / result.PracticeDone : 0,
+        //                           AvgPoint = result.ExamDone > 0 ? result.TotalPoint / result.ExamDone : 0,
+        //                           TotalExams = csbj.TotalExams,
+        //                           TotalLessons = csbj.TotalLessons,
+        //                           TotalPractices = csbj.TotalPractices,
+        //                           TotalStudents = total_students,
+        //                           LastDate = result.LastDate
+        //                       }).ToList();
+        //    var rootChapters = _chapterService.GetSubChapters(ClassSubjectID, "0").ToList();
+        //    var chapterSummary = from r in rootChapters
+        //                         select _progressHelper.GetChapterResults(r.ID).ToList();
+
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", listSummary},
+        //        { "Chapter", rootChapters },
+        //        { "Student", students },
+        //        { "Result", chapterSummary }
+        //    };
+        //    return new JsonResult(response);
+        //}
+
+        public JsonResult GetStudentSummary(String basis, String StudentID, String ClassID)
+        {
+            try
+            {
+                var student = _studentService.GetItemByID(StudentID);
+                if (student == null)
+                {
+                    return Json("Không tìm thấy học viên.");
+                }
+
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                {
+                    return Json("Cơ sở không tồn tại.");
+                }
+
+                var listClass = new List<ClassEntity>();
+
+                if (string.IsNullOrEmpty(ClassID))
+                {
+                    listClass.AddRange(_classService.GetItemsByIDs(student.JoinedClasses).Where(t => t.IsActive && t.Center == center.ID).ToList());
+                }
+                else
+                {
+                    listClass.Add(_classService.GetItemByID(ClassID));
+                }
+                //var @class = _classService.GetItemByID(ClassID);
+                if (listClass.Count == 0)
+                {
+                    return Json("Lớp không tồn tại");
+                }
+
+                Dictionary<String, Object> data_response = new Dictionary<String, Object>();
+                var data = new List<StudentSummaryViewModel>();
+                //var dataExam = new List<StudentSummaryExamViewModel>();
+                var dataExam = new List<StudentExamVM>();
+                var subjects = new List<ClassSubjectEntity>();
+                List<String> ClassSbjIDs = new List<string>();
+
+                List<LessonScheduleEntity> activelesson = new List<LessonScheduleEntity>();
+                foreach (var @class in listClass)
+                {
+                    subjects.AddRange(_classSubjectService.GetByClassID(@class.ID));
+                    ClassSbjIDs.AddRange(subjects.Select(x => x.ID).ToList());
+                    activelesson.AddRange(_lessonScheduleService.CreateQuery().Find(x => ClassSbjIDs.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now && x.EndDate >= @class.StartDate).ToList());
+                }
+
+                //var ClassSbjIDs = subjects.Select(x => x.ID).ToList();
+
+                var progess = _lessonProgressService.CreateQuery().Find(x => ClassSbjIDs.Contains(x.ClassSubjectID) && x.StudentID == StudentID).ToList();
+                //var activelesson = _lessonScheduleService.CreateQuery().Find(x => ClassSbjIDs.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now && x.EndDate >= @class.StartDate).ToList();
+                var activelessonIDs = activelesson.Select(x => x.LessonID).ToList();
+                var lessonExam = _lessonService.CreateQuery().Find(x => activelessonIDs.Contains(x.ID) && x.TemplateType == 2).ToList();
+                var lessonIDsExam = lessonExam.Select(x => x.ID);
+                var lessonPractice = _lessonService.CreateQuery().Find(x => activelessonIDs.Contains(x.ID) && x.IsPractice).ToList();
+                var lessonIDsPractice = lessonPractice.Select(x => x.ID);
+                var practiceResult = progess.Where(x => x.StudentID == StudentID && lessonIDsPractice.Contains(x.LessonID)).GroupBy(x => x.ClassSubjectID).Select(x =>
+                      new StudentSummaryViewModel
+                      {
+                          StudentID = StudentID,
+                          ClassSubjectID = x.Key,
+                          CourseName = subjects.Where(y => y.ID == x.Key).FirstOrDefault().CourseName,
+                          ClassID = subjects.Find(y => y.ID == x.Key).ClassID,
+                          ClassName = listClass.Find(z => z.ID == subjects.Find(y => y.ID == x.Key).ClassID)?.Name,
+                          TypeClassSbj = subjects.Where(y => y.ID == x.Key).FirstOrDefault().TypeClass,
+                          TotalLessons = lessonPractice.Where(y => y.ClassSubjectID == x.Key).Count(),
+                          PracticeAvgPoint = lessonPractice.Where(y => y.ClassSubjectID == x.Key).Count() > 0 ? x.ToList().Select(y => y.LastPoint).Sum() / lessonPractice.Where(y => y.ClassSubjectID == x.Key).Count() : 0,
+                      });
+
+                var examResult = progess.Where(x => x.StudentID == StudentID && lessonIDsExam.Contains(x.LessonID) && x.Tried > 0);
+                foreach (var item in examResult)
+                {
+                    var _item = new StudentExamVM()
+                    {
+                        StudentID = StudentID,
+                        ClassSubjectID = item.ClassSubjectID,
+                        ClassID = subjects.Find(y=>y.ClassID == item.ClassID).ClassID,
+                        TypeClassSbj = subjects.Where(y => y.ID == item.ClassSubjectID).FirstOrDefault().TypeClass,
+                        LessonID = item.LessonID,
+                        Point = item.LastPoint
+                    };
+                    dataExam.Add(_item);
+                }
+
+                for (int i = 0; i < practiceResult.Count(); i++)
+                {
+                    var item = practiceResult.ElementAtOrDefault(i);
+                    item.Order = i + 1;
+                    data.Add(item);
+                }
+                //}
+
+
+                data_response.Add("Practice", data);
+                data_response.Add("Exam", dataExam);
+                data_response.Add("ListClass", listClass);
+                return Json(data_response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(ex.Message);
+            }
+        }
+
+        private Dictionary<Int32, DateTimeVM> GetListWeek(DateTime StartDate)
+        {
+            var currentTime = DateTime.Now;
+            Dictionary<Int32, DateTimeVM> listDateTime = new Dictionary<int, DateTimeVM>();
+
+            var dt = StartDate;
+            var day = dt.Day;
+            var month = dt.Month;
+            var year = dt.Year;
+            var today = new DateTime(year, month, day, 0, 0, 0);
+            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek + 1);
+            var endWeek = startWeek.AddDays(7).AddMinutes(-1);
+            var Week1 = new DateTimeVM { StartTime = startWeek, EndTime = endWeek };
+            listDateTime.Add(1, Week1);
+
+            var index = 2;
+            while (endWeek < currentTime)
+            {
+                startWeek = endWeek.AddMinutes(1);
+                endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(59);
+                var weekn = new DateTimeVM { StartTime = startWeek, EndTime = endWeek };
+                listDateTime.Add(index, weekn);
+                index++;
+            }
+            listDateTime[index - 1].EndTime = DateTime.Now;
+            return listDateTime;
+        }
+
+        public class DateTimeVM
+        {
+            public DateTime StartTime { get; set; }
+            public DateTime EndTime { get; set; }
+        }
+
+        protected class StudentDetailVM
+        {
+            public int Week { get; set; }
+            public String Point { get; set; }
+            public DateTime StartTime { get; set; }
+            public DateTime EndTime { get; set; }
+            public Int32 PracticeDone { get; set; }
+            public Int32 TotalPractice { get; set; }
+            public String StudentName { get; set; }
+            public String StudentID { get; set; }
+            public int TotalLessons { get; set; }
+            public Boolean inWeek { get; set; }
+        }
+
+        public class StudentExamVM
+        {
+            public Double Point { get; set; }
+            public String LessonID { get; set; }
+            public String ClassSubjectID { get; set; }
+            public String StudentID { get; set; }
+            public String ClassID { get; set; }
+            public Double TypeClassSbj { get; set; }
+        }
+
+        public class InforStudent
+        {
+            public String StudentID { get; set; }
+            public String FullName { get; set; }
+            public String AvgPointPratice { get; set; }
+        }
+
+        public class Type_Filter
+        {
+            public const Int32 LESSONSCHEDULE = 1, //Theo lịch giáo viên phân công
+           SHOWALL = 2, //Tất cả
+           TIME = 3; //Theo thời gian
+        }
         #endregion
 
         #region Homepage
@@ -577,9 +1212,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            //filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.IsActive));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -603,6 +1235,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
+            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
             filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
             //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
@@ -616,9 +1250,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                        let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
                        where _class != null
                        let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
+                       where _sbj != null
                        let skill = _skillService.GetItemByID(_sbj.SkillID)
-                       let studentCount = //_classStudentService.GetClassStudents(_class.ID).Count
-                       _studentService.CountByClass(_class.ID)
+                       let studentCount = _studentService.CountByClass(_class.ID)
                        select new
                        {
                            id = o.ID,
@@ -630,7 +1264,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            startDate = o.StartDate,
                            endDate = o.EndDate,
                            students = studentCount,
-                           skill = skill
+                           skill = skill,
+                           bookName = _sbj.CourseName
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
 
@@ -864,6 +1499,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 _service.Save(item);
 
+                var subjects = _classSubjectService.CreateQuery().Find(t => t.ClassID == item.ID && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+                if (subjects.Count() == 0)
+                {
+                    var newSbj = new ClassSubjectEntity
+                    {
+                        ClassID = item.ID,
+                        CourseName = "Bài kiểm tra",
+                        Description = "Bài kiểm tra",
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        TypeClass = CLASSSUBJECT_TYPE.EXAM,
+                        TeacherID = item.TeacherID
+                    };
+                    _classSubjectService.Save(newSbj);
+                    classSubjects.Add(newSbj);
+                }
+
+
                 //Create class subjects
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
@@ -926,7 +1579,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     {"Error", "Không tìm thấy lớp" }
                 });
-
+                
                 oldData.Updated = DateTime.UtcNow;
                 var mustUpdateName = false;
                 if (oldData.Name != item.Name)
@@ -938,6 +1591,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.StartDate = item.StartDate.ToUniversalTime();
                 oldData.EndDate = item.EndDate.ToUniversalTime();
                 oldData.Description = item.Description;
+                if (item.EndDate <= DateTime.Now)
+                {
+                    oldData.IsActive = false;
+                }
                 //_service.Save(oldData);
 
                 oldData.Skills = new List<string>();
@@ -957,93 +1614,96 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     foreach (var oSbj in oldSubjects)
                     {
-                        var nSbj = classSubjects.Find(t => t.ID == oSbj.ID);
-                        if (!isHeadTeacher && oSbj.TeacherID != userId) //other teacher's class => skip
-                            nSbj = oSbj;
-
-                        var update = false;
-
-                        if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
-                        //delete oldSubject
+                        if (oSbj.TypeClass != CLASSSUBJECT_TYPE.EXAM)
                         {
-                            _ = RemoveClassSubject(oSbj);
-                            if (nSbj != null)
-                                nSbj.ID = null;//remove ID to create new
-                        }
+                            var nSbj = classSubjects.Find(t => t.ID == oSbj.ID);
+                            if (!isHeadTeacher && oSbj.TeacherID != userId) //other teacher's class => skip
+                                nSbj = oSbj;
 
-                        if (nSbj != null)
-                        {
-                            var newMember = new ClassMemberEntity();
-                            long lessoncount = 0;
-                            long examcount = 0;
-                            long practicecount = 0;
+                            var update = false;
 
-                            if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
+                            if (nSbj == null || (nSbj.CourseID != oSbj.CourseID))
+                            //delete oldSubject
                             {
-                                update = true;
-                                nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
-                                if (string.IsNullOrEmpty(nSbj.ID))//Error
-                                    continue;
+                                _ = RemoveClassSubject(oSbj);
+                                if (nSbj != null)
+                                    nSbj.ID = null;//remove ID to create new
                             }
-                            else //Not change
-                            {
-                                //update period
-                                oSbj.StartDate = item.StartDate.ToUniversalTime();
-                                oSbj.EndDate = item.EndDate.ToUniversalTime();
-                                oSbj.TypeClass = nSbj.TypeClass;
-                                var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
-                                if (teacher == null) continue;
 
-                                if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
+                            if (nSbj != null)
+                            {
+                                var newMember = new ClassMemberEntity();
+                                long lessoncount = 0;
+                                long examcount = 0;
+                                long practicecount = 0;
+
+                                if (nSbj.CourseID != oSbj.CourseID)//SkillID ~ CourseID
                                 {
                                     update = true;
-                                    oSbj.TeacherID = nSbj.TeacherID;
-                                    var skill = _skillService.GetItemByID(oSbj.SkillID);
-                                    if (skill == null) continue;
-                                    var course = _courseService.GetItemByID(nSbj.CourseID);
-                                    var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
-                                    if (tc == null)
-                                        tc_sj.Add(new TeacherSubjectsViewModel
-                                        {
-                                            TeacherId = teacher.ID,
-                                            FullName = teacher.FullName,
-                                            Email = teacher.Email,
-                                            SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
-                                        });
-                                    else
-                                        tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
-                                    _ = Task.Run(() =>
+                                    nSbj.ID = CreateNewClassSubject(nSbj, oldData, out newMember, out lessoncount, out examcount, out practicecount);
+                                    if (string.IsNullOrEmpty(nSbj.ID))//Error
+                                        continue;
+                                }
+                                else //Not change
+                                {
+                                    //update period
+                                    oSbj.StartDate = item.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                    oSbj.TypeClass = nSbj.TypeClass;
+                                    var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
+                                    if (teacher == null) continue;
+
+                                    if (oSbj.TeacherID != nSbj.TeacherID) //change teacher
                                     {
-                                        _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
-                                    });
+                                        update = true;
+                                        oSbj.TeacherID = nSbj.TeacherID;
+                                        var skill = _skillService.GetItemByID(oSbj.SkillID);
+                                        if (skill == null) continue;
+                                        var course = _courseService.GetItemByID(nSbj.CourseID);
+                                        var tc = tc_sj.SingleOrDefault(t => t.TeacherId == teacher.ID);
+                                        if (tc == null)
+                                            tc_sj.Add(new TeacherSubjectsViewModel
+                                            {
+                                                TeacherId = teacher.ID,
+                                                FullName = teacher.FullName,
+                                                Email = teacher.Email,
+                                                SubjectList = new List<SubjectModel> { new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" } }
+                                            });
+                                        else
+                                            tc.SubjectList.Add(new SubjectModel { SkillName = skill.Name, BookName = course != null ? course.Name : "" });
+                                        _ = Task.Run(() =>
+                                        {
+                                            _ = _mailHelper.SendTeacherJoinClassNotify(teacher.FullName, teacher.Email, item.Name, skill.Name, item.StartDate, item.EndDate, center.Name);
+                                        });
+                                    }
+
+                                    if (isHeadTeacher || update) // head-teacher | owned classsubject => update
+                                        _classSubjectService.Save(oSbj);
+
+                                    examcount = oSbj.TotalExams;
+                                    lessoncount = oSbj.TotalLessons;
+                                    practicecount = oSbj.TotalPractices;
+                                    newMember = new ClassMemberEntity
+                                    {
+                                        TeacherID = teacher.ID,
+                                        Name = teacher.FullName,
+                                        Type = ClassMemberType.TEACHER
+                                    };
                                 }
 
-                                if (isHeadTeacher || update) // head-teacher | owned classsubject => update
-                                    _classSubjectService.Save(oSbj);
+                                processCS.Add(nSbj.ID);
+                                if (!oldData.Skills.Contains(nSbj.SkillID))
+                                    oldData.Skills.Add(nSbj.SkillID);
+                                if (!oldData.Subjects.Contains(nSbj.SubjectID))
+                                    oldData.Subjects.Add(nSbj.SubjectID);
+                                if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
+                                    oldData.Members.Add(newMember);
+                                //add counter
 
-                                examcount = oSbj.TotalExams;
-                                lessoncount = oSbj.TotalLessons;
-                                practicecount = oSbj.TotalPractices;
-                                newMember = new ClassMemberEntity
-                                {
-                                    TeacherID = teacher.ID,
-                                    Name = teacher.FullName,
-                                    Type = ClassMemberType.TEACHER
-                                };
+                                oldData.TotalLessons += lessoncount;
+                                oldData.TotalExams += examcount;
+                                oldData.TotalPractices += practicecount;
                             }
-
-                            processCS.Add(nSbj.ID);
-                            if (!oldData.Skills.Contains(nSbj.SkillID))
-                                oldData.Skills.Add(nSbj.SkillID);
-                            if (!oldData.Subjects.Contains(nSbj.SubjectID))
-                                oldData.Subjects.Add(nSbj.SubjectID);
-                            if (!oldData.Members.Any(t => t.TeacherID == newMember.TeacherID && t.Type == ClassMemberType.TEACHER))
-                                oldData.Members.Add(newMember);
-                            //add counter
-
-                            oldData.TotalLessons += lessoncount;
-                            oldData.TotalExams += examcount;
-                            oldData.TotalPractices += practicecount;
                         }
                     }
                 }
@@ -1433,7 +2093,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 classSubject.GradeID = Course.GradeID;
                 classSubject.SubjectID = Course.SubjectID;
                 classSubject.TeacherID = teacher.ID;
-                classSubject.TypeClass = CLASS_TYPE.EXTEND;
+                classSubject.TypeClass = CLASSSUBJECT_TYPE.EXTEND;
 
                 oldSubjects.Add(classSubject);
 
@@ -1469,7 +2129,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     classSubject.GradeID = Course.GradeID;
                     classSubject.SubjectID = Course.SubjectID;
                     classSubject.TeacherID = teacher.ID;
-                    classSubject.TypeClass = CLASS_TYPE.EXTEND;
+                    classSubject.TypeClass = CLASSSUBJECT_TYPE.EXTEND;
 
                     listclassSubject.Add(classSubject);
 
@@ -1589,9 +2249,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = _lessonProgressService.GetByClassSubjectID_StudentID(ClassSubjectID, StudentID);
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
+            var activeLesson = _lessonScheduleService.GetActiveLesson(currentClass.StartDate, DateTime.Now, ClassSubjectID);
+            var activeLessonIDs = activeLesson.Select(x => x.LessonID).ToList();
+            data = data.Where(x => activeLessonIDs.Contains(x.LessonID)).ToList();
 
             var lessons = (from progress in data
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           let schedule = activeLesson.Where(x=>x.LessonID == progress.LessonID && x.ClassID == currentClass.ID).FirstOrDefault()
                            where schedule != null
                            let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
                            where classsubject != null
@@ -1600,7 +2264,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            {
                                ScheduleID = schedule.ID,
                                ScheduleStart = schedule.StartDate,
-                               Skill = _skillService.GetItemByID(classsubject.SkillID).Name,
+                               //Skill = String.IsNullOrEmpty(classsubject.SkillID) ?"":_skillService.GetItemByID(classsubject.SkillID).Name,
                                ScheduleEnd = schedule.EndDate,
                                IsActive = schedule.IsActive,
                                LearnCount = progress.TotalLearnt,
@@ -1648,9 +2312,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var subjects = _classSubjectService.GetByClassID(ClassID);
+            var activeLesson = _lessonScheduleService.GetActiveLesson(currentClass.StartDate, DateTime.Now, ClassSubjectID);
+            var activeLessonIDs = activeLesson.Select(x => x.LessonID).ToList();
 
             var lessons = (
-                            from lesson in passExams
+                            from lesson in passExams.Where(x=>activeLessonIDs.Contains(x.ID))
                             let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
                             //from progress in data
                             //where progress.Tried > 0
@@ -1706,7 +2372,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 rank = results.FindIndex(t => t.TotalPoint == studentresult.TotalPoint) + 1;
             var response = new Dictionary<string, object>
             {
-                { "Result", new { pos =  1, total = total_students, avg = avgpoint } },
+                { "Result", new { pos = rank, total = total_students, avg = avgpoint } },
                 { "Data", GetClassSubjectSummary(currentClass, StudentID, total_students)},
                 { "Model", model }
             };
@@ -1714,58 +2380,58 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return new JsonResult(response);
         }
 
-        public JsonResult GetStudentSummary(DefaultModel model)
-        {
-            var StudentID = model.ID;
-            var student = _studentService.GetItemByID(StudentID);
-            var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID);
-            if (student == null)
-                return null;
+        //public JsonResult GetStudentSummary(DefaultModel model)
+        //{
+        //    var StudentID = model.ID;
+        //    var student = _studentService.GetItemByID(StudentID);
+        //    var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, StudentID);
+        //    if (student == null)
+        //        return null;
 
-            var data = new List<StudentSummaryViewModel>();
-            if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
-            {
-                if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
+        //    var data = new List<StudentSummaryViewModel>();
+        //    if (student.JoinedClasses != null && student.JoinedClasses.Count > 0)
+        //    {
+        //        if (MyClass != null) { student.JoinedClasses.RemoveAt(student.JoinedClasses.IndexOf(MyClass.ID)); }
 
-                foreach (var ClassID in student.JoinedClasses)
-                {
-                    var @class = _service.GetItemByID(ClassID);
-                    if (@class == null) continue;
-                    var total_students = _studentService.CountByClass(@class.ID);
-                    var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
-                        .AutoOrtherType(_classProgressService.GetItemByClassID(ClassID, StudentID) ?? new ClassProgressEntity
-                        {
-                            ClassID = ClassID,
-                            StudentID = StudentID,
-                        }, new StudentSummaryViewModel()
-                        {
-                            ClassName = @class.Name,
-                            Rank = -1,
-                            TotalStudents = (int)total_students,
-                            TotalLessons = @class.TotalLessons,
-                            TotalExams = @class.TotalExams,
-                            TotalPractices = @class.TotalPractices
-                        });
+        //        foreach (var ClassID in student.JoinedClasses)
+        //        {
+        //            var @class = _service.GetItemByID(ClassID);
+        //            if (@class == null) continue;
+        //            var total_students = _studentService.CountByClass(@class.ID);
+        //            var summary = new MappingEntity<ClassProgressEntity, StudentSummaryViewModel>()
+        //                .AutoOrtherType(_classProgressService.GetItemByClassID(ClassID, StudentID) ?? new ClassProgressEntity
+        //                {
+        //                    ClassID = ClassID,
+        //                    StudentID = StudentID,
+        //                }, new StudentSummaryViewModel()
+        //                {
+        //                    ClassName = @class.Name,
+        //                    Rank = -1,
+        //                    TotalStudents = (int)total_students,
+        //                    TotalLessons = @class.TotalLessons,
+        //                    TotalExams = @class.TotalExams,
+        //                    TotalPractices = @class.TotalPractices
+        //                });
 
-                    var results = _progressHelper.GetClassResults(ClassID).OrderByDescending(t => t.RankPoint).ToList();
+        //            var results = _progressHelper.GetClassResults(ClassID).OrderByDescending(t => t.RankPoint).ToList();
 
-                    summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
-                    summary.AvgPoint = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
+        //            summary.RankPoint = _progressHelper.CalculateRankPoint(summary.TotalPoint, summary.PracticePoint, summary.Completed);
+        //            summary.AvgPoint = @class.TotalExams > 0 ? summary.TotalPoint / @class.TotalExams : 0;
 
-                    if (results != null && (results.FindIndex(t => t.StudentID == summary.StudentID) >= 0))
-                        summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
+        //            if (results != null && (results.FindIndex(t => t.StudentID == summary.StudentID) >= 0))
+        //                summary.Rank = results.FindIndex(t => t.RankPoint == summary.RankPoint) + 1;
 
-                    data.Add(summary);
-                    data.AddRange(GetClassSubjectSummary(@class, StudentID, total_students));
-                }
-            }
-            var response = new Dictionary<string, object>
-            {
-                { "Data", data},
-                { "Model", model }
-            };
-            return new JsonResult(response);
-        }
+        //            data.Add(summary);
+        //            data.AddRange(GetClassSubjectSummary(@class, StudentID, total_students));
+        //        }
+        //    }
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        { "Data", data},
+        //        { "Model", model }
+        //    };
+        //    return new JsonResult(response);
+        //}
 
         private List<StudentSummaryViewModel> GetClassSubjectSummary(ClassEntity @class, string StudentID, long total_students)
         {
@@ -1849,7 +2515,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var UserID = User.Claims.GetClaimByType("UserID").Value;
 
             var chapters = _chapterService.GetByClassSubject(ID).ToList();
-
             ViewBag.Chapter = chapters;
             ViewBag.User = UserID;
 
@@ -1861,7 +2526,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                var data = _lessonService.GetItemByID(item.ID);
+                LessonEntity data = null;
+                if (!string.IsNullOrEmpty(item.ID))
+                    data = _lessonService.GetItemByID(item.ID);
                 if (data == null)
                 {
                     item.Created = DateTime.UtcNow;
@@ -1881,6 +2548,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+                    if (!_lessonHelper.isExamined(data))
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học đã bị khóa, không điều chỉnh được" }
+                            });
+                    }
+
                     item.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
                     item.Order = data.Order;
@@ -1961,16 +2637,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 if (!string.IsNullOrEmpty(model.ArrID))
                     ID = model.ArrID;
+                //check if lesson is lock: taken exam || practiced
                 var lesson = _lessonService.GetItemByID(ID);//TODO: check permission
                 if (lesson != null)
                 {
+                    if (!_lessonHelper.isExamined(lesson))
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học đã bị khóa, không điều chỉnh được" }
+                            });
+                    }
+
                     await _classHelper.IncreaseLessonCounter(lesson, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-
-                    //if (lesson.ChapterID == "0")
-                    //    await _classHelper.IncreaseClassSubjectCounter(lesson.ClassSubjectID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-                    //else
-                    //    await _classHelper.IncreaseChapterCounter(lesson.ChapterID, -1, lesson.TemplateType == LESSON_TEMPLATE.EXAM ? -1 : 0, lesson.IsPractice ? -1 : 0);
-
                     ChangeLessonPosition(lesson, int.MaxValue);//chuyển lesson xuống cuối của đối tượng chứa
                     await _lessonHelper.RemoveSingleLesson(lesson.ID);
 
@@ -1985,7 +2665,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", null },
-                                { "Error", "Item Not Found" }
+                                { "Error", "Bài học không tồn tại" }
                             });
                 }
             }
@@ -2034,6 +2714,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var rootItem = _lessonService.GetItemByID(ID);
                 var joinItem = _lessonService.GetItemByID(JoinLesson);
+
+
                 if (rootItem == null || joinItem == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -2042,6 +2724,25 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Error", "Dữ liệu không đúng" }
                     });
                 }
+
+                if (!_lessonHelper.isExamined(rootItem))
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học " + rootItem.Title + " đã bị khóa, không điều chỉnh được" }
+                            });
+                }
+
+                if (!_lessonHelper.isExamined(joinItem))
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", null },
+                                { "Error", "Bài học " + joinItem.Title + " đã bị khóa, không điều chỉnh được" }
+                            });
+                }
+
                 var currentIndex = _cloneLessonPartService.CreateQuery().CountDocuments(o => o.ParentID == rootItem.ID);
                 var joinParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == joinItem.ID).SortBy(o => o.Order).ToList();
 
@@ -2454,6 +3155,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     RealAnswerEssay = o.Type == "ESSAY" ? examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.RealAnswerValue : string.Empty,
                                     PointEssay = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.Point ?? 0,
                                     ExamDetailID = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.ID ?? "",
+                                    //ExamDetailID = examview.Details.Count > 0 ? examview.Details.FirstOrDefault().ID : "",
                                     MediasAnswer = examview.Details.FirstOrDefault(e => e.QuestionID == z.ID)?.MediasAnswers,
                                     MaxPoint = z.Point
                                 }))?.ToList()
@@ -2471,6 +3173,421 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             ViewBag.Model = model;
             return View();
+        }
+
+        public JsonResult GetLessonToMark(String ClassID)
+        {
+            Boolean Status = false;
+            try
+            {
+                if (String.IsNullOrEmpty(ClassID))
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin lớp học tương ứng" },
+                        {"Data",null}
+                    });
+                }
+
+                var @class = _classService.GetItemByID(ClassID);
+                if (@class == null)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin lớp học tương ứng" },
+                        {"Data",null}
+                    });
+                }
+
+                var classSbjs = _classSubjectService.CreateQuery().Find(x=>x.ClassID == @class.ID);
+                if(classSbjs == null || classSbjs.Count() == 0)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin môn học trong lớp" },
+                        {"Data",null}
+                    });
+                }
+                var classSbjIDs = classSbjs.ToList().Select(x => x.ID).ToList();
+                var lesonpartEssay = _cloneLessonPartService.GetLessonIDByTypeEssay(@class.ID, classSbjIDs);
+                var exams = from e in _examService.CreateQuery().Find(x => lesonpartEssay.Contains(x.LessonID) && x.Marked == false).ToList()
+                            group e by e.StudentID
+                            into g
+                            let exam = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+                            where exam != null
+                            select new ExamViewModel
+                            {
+                                ID = exam.ID,
+                                ClassID = exam.ClassID,
+                                ClassSubjectID = exam.ClassSubjectID,
+                                LessonID = exam.LessonID,
+                                StudentID = exam.StudentID,
+                                StudentName = _studentService.GetItemByID(exam.StudentID)?.FullName,
+                                Point = exam.Point == 0 ? 0 : (exam.Point / exam.MaxPoint) * 100,
+                                LastPoint = exam.LastPoint,
+                                MaxPoint = exam.MaxPoint
+                            };
+                if (exams == null || exams.Count() == 0)
+                {
+                    Status = false;
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",Status },
+                        {"Error","Không tìm thấy thông tin bài kiểm tra." },
+                        {"Data",null}
+                    });
+                }
+
+                var lessonIDs = exams.Select(x => x.LessonID).ToList();
+                var lessons = _lessonService.CreateQuery().Find(x => lessonIDs.Contains(x.ID));
+                var chapterIDs = lessons.Project(x => x.ChapterID).ToList();
+                var chapters = _chapterService.CreateQuery().Find(x => chapterIDs.Contains(x.ID));
+
+                var result = from e in exams.ToList()
+                             group e by e.ClassSubjectID
+                             into g
+                             let classSbj = classSbjs.ToList().Where(x => x.ID == g.Key).FirstOrDefault()
+                             let lesson = lessons.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
+                             let chapter = chapters.ToList().Where(x=>x.ClassSubjectID == g.Key).ToList()
+                             let course = _courseService.GetItemByID(classSbj.CourseID)
+                             select new LessonToMarkVM
+                             {
+                                 classSubjectID = g.Key,
+                                 CourseName = classSbj == null ? "": classSbj.CourseName,
+                                 ListLesson = lesson == null ? new List<LessonEntity>() : lesson,
+                                 ListExam = g == null ?  new List<ExamViewModel>() : g.ToList(),
+                                 ListChapter = g == null ?  new List<ChapterEntity>() : chapter,
+                                 Image = course == null ? "" : course.Image,
+                                 TeacherID = classSbj.TeacherID
+                             };
+
+                return Json(new Dictionary<String, Object> {
+                        {"Status",true },
+                        {"Error",null },
+                        {"Data",result }
+                    });
+            }
+            catch(Exception ex)
+            {
+                Status = false;
+                return Json(new Dictionary<String, Object> {
+                    {"Status",Status },
+                    {"Error",ex.Message },
+                    {"Data",null}
+                });
+            }
+        }
+
+        private class StudentResult
+        {
+            public string StudentID { get; set; }
+            public int ExamCount { get; set; }
+            public double AvgPracticePoint { get; set; }
+            public double AvgExamPoint { get; set; }
+            public string StudentName { get; set; }
+            public string AvgTimeDoExam { get; set; }
+            public int CompletedExam { get; set; }
+            public int CompletedPractice { get; set; }
+            public int CompletedLesson { get; set; }
+            public int TotalLesson { get; set; }
+            public int TotalPractice { get; set; }
+            public Boolean isExam { get; set; }
+        }
+
+        private class LessonToMarkVM
+        {
+            public String classSubjectID { get; set; }
+            public String CourseName { get; set; }
+            public List<LessonEntity> ListLesson { get; set; }
+            public List<ExamViewModel> ListExam { get; set; }
+            public List<ChapterEntity> ListChapter { get; set; }
+            public String TeacherName { get; set; }
+            public String TeacherID { get; set; }
+            public String Image { get; set; }
+            public String Color { get; set; }
+        }
+
+        #region File Excel
+        //[HttpPost]
+        public IActionResult ExportTablePoint(String basis, String ClassID)
+        {
+            var center = _centerService.GetItemByCode(basis);
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();
+            if (String.IsNullOrEmpty(ClassID))
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Data","Không tìm thấy lớp tương ứng" }
+                });
+            }
+
+            var @class = _classService.GetItemByID(ClassID);
+            List<StudentSummaryViewModel> listSummary = ClassResultSummary(@class);
+
+            var stream = new MemoryStream();
+
+            //xuat file excel
+            try
+            {
+                using (ExcelPackage p = new ExcelPackage(stream))
+                {
+                    // đặt tên người tạo file
+                    p.Workbook.Properties.Author = teacher.FullName;
+
+                    // đặt tiêu đề cho file
+                    p.Workbook.Properties.Title = $"Bảng điểm {@class.Name}";
+
+                    //Tạo một sheet để làm việc trên đó
+                    p.Workbook.Worksheets.Add($"{@class.Name}");
+
+                    // lấy sheet vừa add ra để thao tác
+                    ExcelWorksheet ws = p.Workbook.Worksheets[1];
+
+                    // đặt tên cho sheet
+                    ws.Name = $"Bảng điểm {@class}";
+                    // fontsize mặc định cho cả sheet
+                    ws.Cells.Style.Font.Size = 11;
+                    // font family mặc định cho cả sheet
+                    ws.Cells.Style.Font.Name = "Calibri";
+
+                    // Tạo danh sách các column header
+                    string[] arrColumnHeader1 = new string[]{
+                        "STT",
+                        "Họ tên",
+                        "Tiến độ",
+                        "Lần học cuối",
+                        "Luyện tập",
+                        "",
+                        "Kiểm tra",
+                        "",
+                        "Xếp hạng"
+                    };
+
+                    string[] arrColumnHeader2 = new string[]{
+                        "Tiến độ",
+                        "Điểm trung bình",
+                        "Tiến độ",
+                        "Điểm trung bình",
+                    };
+
+                    // lấy ra số lượng cột cần dùng dựa vào số lượng header
+                    var countColHeader = arrColumnHeader1.Count();
+
+                    // merge các column lại từ column 1 đến số column header
+                    // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
+                    // ws.Cells[1, 1].Value = ClassID == null ? $"Thống kê danh sách học viên {center.Name}" : $"Thống kê danh sách học viên lớp @class";
+                    ws.Cells[1, 1, 1, countColHeader].Merge = true;
+                    // in đậm
+                    ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
+                    // căn giữa
+                    ws.Cells[1, 1, 1, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                    int colIndex = 1;
+                    int rowIndex = 2;
+
+                    //tạo các header từ column header đã tạo từ bên trên
+                    foreach (var item in arrColumnHeader1)
+                    {
+                        var cell = ws.Cells[rowIndex, colIndex];
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                        //set màu thành gray
+                        var fill = cell.Style.Fill;
+                        fill.PatternType = ExcelFillStyle.Solid;
+                        fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+
+                        //căn chỉnh các border
+                        var border = cell.Style.Border;
+                        border.Bottom.Style =
+                            border.Top.Style =
+                            border.Left.Style =
+                            border.Right.Style = ExcelBorderStyle.Thin;
+                        cell.AutoFitColumns();
+                        //gán giá trị
+                        cell.Value = item;
+                        if (colIndex <= 4 || colIndex >= 9)
+                            ws.Cells[rowIndex, colIndex, rowIndex + 1, colIndex].Merge = true;
+                        colIndex++;
+                    }
+                    ws.Cells[2, 5, 2, 6].Merge = true;
+                    ws.Cells[2, 7, 2, 8].Merge = true;
+
+                    Int32 rowIndex1 = 3, colIndex1 = 5;
+                    foreach (var item in arrColumnHeader2)
+                    {
+                        var cell = ws.Cells[rowIndex1, colIndex1];
+                        cell.AutoFitColumns();
+                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                        //set màu thành gray
+                        var fill = cell.Style.Fill;
+                        fill.PatternType = ExcelFillStyle.Solid;
+                        fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+
+                        //căn chỉnh các border
+                        var border = cell.Style.Border;
+                        border.Bottom.Style =
+                            border.Top.Style =
+                            border.Left.Style =
+                            border.Right.Style = ExcelBorderStyle.Thin;
+
+                        //gán giá trị
+                        cell.Value = item;
+                        colIndex1++;
+                    }
+
+                    Int32 rowIndexData = 4;
+                    foreach (var item in listSummary)
+                    {
+                        Int32 colIndexData = 1;
+                        //gan gia tri cho tung cell
+                        ws.Cells[rowIndexData, colIndexData++].Value = rowIndexData - 3;
+                        ws.Cells[rowIndexData, colIndexData++].Value = item.FullName;
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(((Double)item.Completed / item.TotalLessons) * 100, 2)}% ({item.Completed}/{item.TotalLessons})";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.LastDate.ToString()}";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.PracticeDone}/{item.TotalPractices}";
+                        if (item.PracticeAvgPoint > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(item.PracticeAvgPoint, 2)}%";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"0.00%";
+                        ws.Cells[rowIndexData, colIndexData++].Value = $"{item.ExamDone}/{item.TotalExams}";
+                        if (item.AvgPoint > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{Math.Round(item.AvgPoint, 2)}%";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"0.00%";
+                        if (item.Rank > 0)
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"{item.Rank}/{item.TotalStudents}";
+                        else
+                            ws.Cells[rowIndexData, colIndexData++].Value = $"---";
+
+                        rowIndexData++;
+                    }
+
+                    for (Int32 i = 1; i < listSummary.Count + 4; i++)
+                    {
+                        for (Int32 j = 1; j <= arrColumnHeader1.Count(); j++)
+                        {
+                            var cell = ws.Cells[i, j];
+                            //căn chỉnh các border
+                            var border = cell.Style.Border;
+                            border.Bottom.Style =
+                                border.Top.Style =
+                                border.Left.Style =
+                                border.Right.Style = ExcelBorderStyle.Thin;
+                            cell.AutoFitColumns();
+
+                            if (i == 3 && (j < 5 || j > 8))
+                            {
+                                ws.Cells[2, j, i, j].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                ws.Cells[2, j, i, j].Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                            }
+                            else
+                            {
+                                if (j == 1 || j >= 5)
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                                else if (j == 2)
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                                else
+                                {
+                                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Justify;
+                                }
+                            }
+
+                        }
+                    }
+                    p.Save();
+                }
+                stream.Position = 0;
+                string excelName = $"Bảng điểm {@class.Name}.xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+        #endregion
+
+        public class TablePoint
+        {
+            public String StudentName { get; set; }
+            public String Progress { get; set; }
+            public String LastLearn { get; set; }
+            public String ProgressPractice { get; set; }
+            public String AvgPointPractice { get; set; }
+            public String ProgressExam { get; set; }
+            public String AvgPointExam { get; set; }
+            public String Rank { get; set; }
+        }
+
+        //test
+        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressListTest(DateTime StartWeek, DateTime EndWeek, List<String> studentIDs, ClassSubjectEntity classSbj, Boolean isExam = false)
+        {
+            List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
+            if (StartWeek > classSbj.EndDate) return result;
+            if (StartWeek == new DateTime(2020, 10, 12))
+            {
+                var test = "";
+            }
+            //lay danh sach bai hoc trogn tuan
+            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate >= StartWeek).ToList();
+            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+            //danh sach bai luyen tap
+            List<LessonEntity> practices = new List<LessonEntity>();
+
+            if (isExam)
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).ToList();
+            }
+            else
+            {
+                practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+            }
+
+            if (practices.Count > 0)
+            {
+                var a = "";
+            }
+
+            foreach (var practice in practices)
+            {
+                var examresult = _examService.CreateQuery().Find(t => studentIDs.Contains(t.StudentID) && t.LessonID == practice.ID).SortByDescending(t => t.ID).ToList();
+                var progress = _lessonProgressService.CreateQuery().Find(t => studentIDs.Contains(t.StudentID) && t.LessonID == practice.ID).FirstOrDefault(); ;
+                var tried = examresult.Count();
+                var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+                var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
+
+                var lastEx = examresult.FirstOrDefault();
+                result.Add(new StudentLessonResultViewModel(new StudentEntity())
+                {
+                    LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
+                    MaxPoint = maxpoint,
+                    MinPoint = minpoint,
+                    AvgPoint = avgpoint,
+                    TriedCount = tried,
+                    LastOpen = progress?.LastDate ?? new DateTime(1900, 1, 1),
+                    OpenCount = progress?.TotalLearnt ?? 0,
+                    LastPoint = lastEx != null ? (lastEx.MaxPoint > 0 ? lastEx.Point * 100 / lastEx.MaxPoint : 0) : 0,
+                    IsCompleted = lastEx != null && lastEx.Status,
+                    ListExam = examresult.Select(t => new ExamDetailCompactView(t)).ToList(),
+                    LessonName = practice.Title,
+                    LessonID = practice.ID,
+                    ClassSubjectID = practice.ClassSubjectID
+                });
+            }
+            return result;
         }
     }
 }

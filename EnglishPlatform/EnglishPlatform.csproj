@@ -5,6 +5,8 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
 	<PreserveCompilationContext>true</PreserveCompilationContext>
 	<MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<UserSecretsId>b0adcfcf-9257-4849-ab2b-3543df99e7e0</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -131,7 +133,6 @@
     <None Include="Areas\Teacher\Views\Schedule\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Class\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
@@ -233,13 +234,6 @@
     <None Include="wwwroot\js\lib\teacher.config.url.base.js" />
     <None Include="wwwroot\js\lib\xhr.js" />
     <None Include="wwwroot\js\masonry.pkgd.min.js" />
-    <None Include="wwwroot\js\minify\common.lib.min.js" />
-    <None Include="wwwroot\js\minify\common.lib.min.js.map" />
-    <None Include="wwwroot\js\minify\common.min.js" />
-    <None Include="wwwroot\js\minify\common.min.js.map" />
-    <None Include="wwwroot\js\minify\detail.fn.min.js" />
-    <None Include="wwwroot\js\minify\detail.min.js" />
-    <None Include="wwwroot\js\minify\detail.min.js.map" />
     <None Include="wwwroot\js\moment-with-locales.min.js" />
     <None Include="wwwroot\js\moment.js" />
     <None Include="wwwroot\js\moment.min.js" />
@@ -2331,6 +2325,7 @@
     <Folder Include="Properties\" />
     <Folder Include="wwwroot\css\minify\" />
     <Folder Include="wwwroot\Drive.Storge\" />
+    <Folder Include="wwwroot\js\minify\" />
   </ItemGroup>
 
 </Project>

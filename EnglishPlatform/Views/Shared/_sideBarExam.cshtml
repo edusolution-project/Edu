@@ -45,6 +45,7 @@
     .top-menu {
         /*min-width: 130px;*/
         margin-top: 2px;
+        z-index: 1000;
     }
 
         .top-menu:hover a, .top-menu.active a {
@@ -194,9 +195,10 @@
         border-radius: 10px;
         box-shadow: 1px 2px 7px #999;
         display: none;
+        max-height: 100%;
     }
 
-        #QuizNav.show {
+        #QuizNav.show, #PartNav.show {
             display: block;
         }
 
@@ -284,7 +286,7 @@
             </li>
             <i class="fa fa-chevron-left mt-1"></i>
             <li for="path_menu" class="top-menu">
-                <a title="@ClassSubject.CourseName"><i class="ic fas fa-list-ol"></i>@ClassSubject.CourseName</a>
+                <a title="@ClassSubject.CourseName" href="@processUrl("Editor", "Class")/@ClassSubject.ID/@Class.ID><i class="ic fas fa-list-ol"></i>@ClassSubject.CourseName</a>
                 <div class="sub-menu">
                     <div class="content-holder">
                         <ul class="chap_content"></ul>

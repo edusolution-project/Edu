@@ -690,7 +690,7 @@ namespace EmailTemplate.Controllers
         //                        $"<td style='text-align: left'>{sbj.CourseName} - Bài học cuối: {sbj.LastLessonTitle} ({sbj.LastTime.ToLocalTime().ToString("dd-MM-yyyy")})</td>" +
         //                    "</tr>" +
         //                    "</table>";
-        //            if (sbj.Type == CLASS_TYPE.STANDARD)
+        //            if (sbj.Type == CLASSSUBJECT_TYPE.STANDARD)
         //                standardSbj += content;
         //            else
         //                extendSbj += content;

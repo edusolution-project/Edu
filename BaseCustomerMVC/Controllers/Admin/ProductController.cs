@@ -50,7 +50,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _mapping = new MappingEntity<NewsEntity, NewsViewModel>();
         }
 
-        public ActionResult Index()
+        public IActionResult Index()
         {
             var center = _serviceCenter.GetAll();
             var listClass = _serviceClass.GetAll();

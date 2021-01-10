@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+    var Account = ViewBag.Account as BaseCustomerEntity.Database.AccountEntity;
 }
 
 <!-- Begin Page Content -->
@@ -12,74 +14,28 @@
     </div>
 
     <!-- Content Row -->
+    
     <div class="row">
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Account")">Quản trị viên</a></h6>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index", "Product")">Quản lý Gói học</a></h6>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Center")">Quản lý cơ sở</a></h6>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index", "News")">Quản lý Tin tức</a></h6>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Teacher")">Quản lý giáo viên</a></h6>
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index", "CustomerCare")">Chăm sóc khách hàng</a></h6>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Student")">Quản lý học viên</a></h6>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Course")">Quản lý khóa học</a></h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Subjects")">Quản lý Môn học</a></h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Grade")">Quản lý Cấp độ</a></h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","Product")">Quản lý Gói học</a></h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary"><a href="@Url.Action("Index","News")">Quản lý Tin tức</a></h6>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
 <!-- End of Main Content -->

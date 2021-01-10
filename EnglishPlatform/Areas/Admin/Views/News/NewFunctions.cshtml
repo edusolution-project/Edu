@@ -5,6 +5,9 @@
     ViewData["Title"] = "Thông báo chức năng mới";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+@{ 
+    var listCenters = ViewBag.Centers as List<BaseCustomerEntity.Database.CenterEntity>;
+}
 <script type="text/javascript" src="~/js/plugins/ck4/ckeditor.js"></script>
 
 <div class="container-fluid" id="main_content">
@@ -15,121 +18,130 @@
         </div>
     </div>
 
-    @using (Html.BeginForm(FormMethod.Post, new { name = "FormControl" }))
+    @using (Html.BeginForm("SendMail", "News", FormMethod.Post, new { enctype = "multipart/form-data", name = "AddForm" }))
     {
-<form>
-    <div class="form-row">
-        <div class="form-group col-sm-12">
-            <input name="Subject" id="Subject" class="form-control" placeholder="Chủ để" v-model="contentToSendMail.subject" required>
-        </div>
-    </div>
-
-    <!--Chon mail-->
-    <div class="form-row">
-        <div class="form-group col-sm-2">Người nhận</div>
-        <div class="form-group col-sm-10">
+        <form>
             <div class="form-row">
-                <div class="form-group col-sm-12 row">
-                    <div class="col-sm-2" style="margin:auto">
-                        <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(2)">Cơ sở<span class="caret"></span></button>
+                <div class="form-group col-sm-12">
+                    <input name="Subject" id="Subject" class="form-control" placeholder="Chủ để" v-model="contentToSendMail.subject" required>
+                </div>
+            </div>
+
+            <!--Chon mail-->
+            <div class="form-row">
+                <div class="form-group col-sm-2">Người nhận</div>
+                <div class="form-group col-sm-10">
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 row">
+                            <div class="col-sm-2" style="margin:auto">
+                                <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(2)">Cơ sở<span class="caret"></span></button>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" v-model="contentToSendMail.centersName" disabled />
+                            </div>
+                            <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectCenters">
+                                <div id="selectMailinCenters">
+                                    <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                        <li>
+                                            <a>
+                                                <input type="checkbox" v-model="sellectCenterAll" /><span class="lbl"> Chọn tất cả </span>
+                                            </a>
+                                        </li>
+                                        <li v-for="(item,k) in list_centers">
+                                            <a>
+                                                <input type="checkbox" :value="item.ID" v-model="contentToSendMail.toCenters" /><span class="lbl"> {{item.Name}} </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control " disabled />
-                    </div>
-                    <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectCenters">
-                        <div id="selectMailinCenters">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
-                                <li>
-                                    <a>
-                                        <input type="checkbox" /><span class="lbl"> Chọn tất cả </span>
-                                    </a>
-                                </li>
-                                @*<li v-for="(item,k) in list_centers">
+                    <!--
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 row">
+                            <div class="col-sm-2" style="margin:auto">
+                                <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(1)">Cc<span class="caret"></span></button>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control " disabled />
+                            </div>
+                            <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectCc">
+                                <div id="selectMailtoCc">
+                                    <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                        <li>
+                                            <a>
+                                                <input type="checkbox" /><span class="lbl"> Chọn tất cả </span>
+                                            </a>
+                                        </li>
+                                        @*<li v-for="(item,k) in list_centers">
                                         <a>
                                             <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
                                         </a>
                                     </li>*@
-                            </ul>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-sm-12 row">
-                    <div class="col-sm-2" style="margin:auto">
-                        <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(1)">Cc<span class="caret"></span></button>
-                    </div>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control " disabled />
-                    </div>
-                    <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectCc">
-                        <div id="selectMailtoCc">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
-                                <li>
-                                    <a>
-                                        <input type="checkbox" /><span class="lbl"> Chọn tất cả </span>
-                                    </a>
-                                </li>
-                                @*<li v-for="(item,k) in list_centers">
+                    <div class="form-row">
+                        <div class="form-group col-sm-12 row">
+                            <div class="col-sm-2" style="margin:auto">
+                                <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(0)">Bcc<span class="caret"></span></button>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control " disabled />
+                            </div>
+                            <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectBcc">
+                                <div id="selectMailtoBcc">
+                                    <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
+                                        <li>
+                                            <a>
+                                                <input type="checkbox" /><span class="lbl"> Chọn tất cả </span>
+                                            </a>
+                                        </li>
+                                        @*<li v-for="(item,k) in list_centers">
                                         <a>
                                             <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
                                         </a>
                                     </li>*@
-                            </ul>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
+
+            <!--Viet noi dung-->
             <div class="form-row">
-                <div class="form-group col-sm-12 row">
-                    <div class="col-sm-2" style="margin:auto">
-                        <button type="button" tabindex="-1" class="btn btn-default dropdown-toggle" v-on:click="toggleSelect(0)">Bcc<span class="caret"></span></button>
-                    </div>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control " disabled />
-                    </div>
-                    <div class="col-md-10" style="position:absolute;right:0;top:40px;z-index:2" v-if="displaySelectBcc">
-                        <div id="selectMailtoBcc">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto; height:150px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
-                                <li>
-                                    <a>
-                                        <input type="checkbox" /><span class="lbl"> Chọn tất cả </span>
-                                    </a>
-                                </li>
-                                @*<li v-for="(item,k) in list_centers">
-                                        <a>
-                                            <input type="checkbox" :value="item.ID" v-model="addItem.TargetCenters" /><span class="lbl"> {{item.Name}} </span>
-                                        </a>
-                                    </li>*@
-                            </ul>
-                        </div>
-                    </div>
+                <div class="form-group col-sm-12">
+                    <label>Nội dung:</label>
+                </div>
+                <div class="form-group col-sm-12">
+                    <textarea name="Content" id="Content" class="form-control" required></textarea>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!--Viet noi dung-->
-    <div class="form-row">
-        <div class="form-group col-sm-12">
-            <textarea name="Content" id="Content" class="form-control" required></textarea>
-        </div>
-    </div>
+            @*<div class="form-group">
+                <div class="form-group col-sm-12">
+                    <input type="file" class="custom-file-input" name="validatedCustomFile" id="validatedCustomFile" accept="video/*" required>
+                    <label class="custom-file-label" for="validatedCustomFile">Chọn video hướng dẫn chức năng mới</label>
+                </div>
+            </div>*@
 
-    <div class="form-group">
-        <div class="form-group col-sm-12">
-            <input type="file" class="custom-file-input" id="validatedCustomFile" accept="video/*" required>
-            <label class="custom-file-label" for="validatedCustomFile">Chọn video hướng dẫn chức năng mới</label>
-        </div>
-    </div>
-
-    <div class="form-row">
-        @*<div class="form-group col-sm-10"></div>*@
-        <div class="form-group col-sm-12" style="text-align:center">
-            <button type="button" class="btn btn-outline-success" v-on:click="SendMail()">Gửi</button>
-        </div>
-    </div>
-</form>
+            <div class="form-row">
+                <div class="form-group col-sm-12" style="text-align:center">
+                    <template v-if="isLoading" disabled>
+                        <button type="button" class="btn btn-secondary">Đang gửi ...</button>
+                        </template>
+                        <template v-else>
+                        <button type="button" class="btn btn-success" v-on:click="SendMail()">Gửi</button>
+                    </template>
+                </div>
+            </div>
+        </form>
     }
 </div>
 
@@ -138,6 +150,7 @@
         el: "#main_content",
         mounted() {
             CKEDITOR.replace("Content");
+            this.list_centers = @Html.Raw(Json.Serialize(listCenters));
         },
         components: {},
         data: {
@@ -151,11 +164,39 @@
                 subject: "",
                 toMailsCc: [],
                 toMailsBcc: [],
-                content:""
-            }
+                content: "",
+                toCenters: [],
+                centersName:"",
+            },
+            list_centers: [],
+            sellectCenterAll: false,
+            isLoading: false
         },
         computed: {},
-        watch: {},
+        watch: {
+            "contentToSendMail.toCenters": function () {
+                for (var i = 0; i < this.list_centers.length; i++) {
+                    var item = this.list_centers[i];
+                    if (this.contentToSendMail.toCenters[this.contentToSendMail.toCenters.length - 1] == item.ID) {
+                        this.contentToSendMail.centersName += item.Name +", "
+                    }
+                }
+            },
+            sellectCenterAll: function () {
+                if (this.sellectCenterAll) {
+                    for (var i = 0; i < this.list_centers.length; i++) {
+                        var item = this.list_centers[i];
+                        this.contentToSendMail.toCenters.push(item.ID);
+                        if (this.contentToSendMail.centersName.includes(item.Name)) continue;
+                        this.contentToSendMail.centersName += item.Name + ", ";
+                    }
+                }
+                else {
+                    this.contentToSendMail.centersName = "";
+                    this.contentToSendMail.toCenters = [];
+                }
+            }
+        },
         methods: {
             toggleSelect(st = 0) {
                 if (st == 0) { //chon Bcc
@@ -181,10 +222,45 @@
             },
             SendMail() {
                 let _that = this;
-                let _form = new FormData()
+                let _form = new FormData();
+                var content = CKEDITOR.instances.Content.getData();
+                _that.isLoading = true;
 
-                _form.append('Subject', _that.contentToSendMail.subject)
-                //alert("Gửi Mail thành công" + _that.contentToSendMail.subject);
+                if (_that.contentToSendMail.subject == "") {
+                    alert("Tiêu đề không được để trống");
+                    _that.isLoading = false;
+                    return false;
+                }
+
+                if (content == "") {
+                    alert("Nội dung không được để trống");
+                    _that.isLoading = false;
+                    return false;
+                }
+                if (_that.contentToSendMail.toCenters.length == 0) {
+                    alert("Chưa chọn cơ sở");
+                    _that.isLoading = false;
+                    return false;
+                }
+
+                for (var i = 0; i < _that.contentToSendMail.toCenters.length; i++) {
+                    var item = _that.contentToSendMail.toCenters[i];
+                    _form.append('Targets', item)
+                }
+
+                _form.append('Title', _that.contentToSendMail.subject)
+                _form.append('Content', content)
+                Ajax('@Url.Action("SendMail","News")', "POST", _form, true).then(function (res) {
+                    alert(res);
+                    _that.isLoading = false;
+                    setNull();
+                })
+            },
+            setNull() {
+                this.contentToSendMail.subject = "";
+                this.contentToSendMail.content = "";
+                this.contentToSendMail.centersName = "";
+                this.contentToSendMail.toCenters = [];
             }
         }
     });

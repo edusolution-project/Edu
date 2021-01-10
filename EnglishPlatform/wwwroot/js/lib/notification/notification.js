@@ -7,7 +7,7 @@ var notification = (function () {
     var config = {
         type: "success",
         msg: "",
-        timeOut:2000
+        timeOut: 2000
     }
     notification.prototype.show = function (options) {
         groupConfig(options);

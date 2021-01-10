@@ -51,5 +51,15 @@ namespace BaseCustomerEntity.Database
                                 .SortBy(q => q.Order)
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
+
+        public IEnumerable<CloneLessonPartEntity> GetByIDs(List<String> IDs)
+        {
+            return Collection.Find(x => IDs.Contains(x.ID)).ToEnumerable();
+        }
+
+        public List<String> GetLessonIDByTypeEssay(String ClassID, List<string> ClassSbjIDs)
+        {
+            return CreateQuery().Find(x=>x.ClassID == ClassID && ClassSbjIDs.Contains(x.ClassSubjectID) && x.Type == "ESSAY").Project(x=>x.ParentID).ToList();
+        }
     }
 }

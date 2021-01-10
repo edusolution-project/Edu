@@ -13,7 +13,6 @@
         return $"/{center}{url}";
     }
 }
-
 <style>
     .red-color {
         color: #D03239 !important;
@@ -172,7 +171,7 @@
                         <input type="hidden" name="CourseID" value="@Data.ID" />
                         <input type="hidden" name="ChapterID" value="" />
                         <div class="row">
-                            <div class="form-group col-md-12">
+                            <div class="form-group col-md-12 d-none">
                                 <label class="col-form-label">Kiểu bài:</label>
                                 <select name="TemplateType" class="form-control" onchange="SelectTemplate()" @if (isLock) { @: readonly="true"
                                         }>
@@ -194,7 +193,7 @@
                                 <input type="text" class="form-control" name="Timer" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
                                        }>
                             </div>
-                            <div class="form-group col-md-6" for="examOnly">
+                            <div class="form-group col-md-6">
                                 <label class="col-form-label">Giới hạn số lượt làm bài:</label>
                                 <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required @if (isLock) { @: readonly="true"
                                        }>
@@ -727,14 +726,13 @@
     function AddLessonCallback(res) {
         if (res != null) {
             var result = $.parseJSON(res);
-            if (result.Error != null) {
+            if (result.Error != null && result.Error != "") {
                 alert(result.Error);
                 return false;
             }
             else {
                 lesson = result.Data;
                 RenderLesson(lesson);
-
                 hideModal();
             }
         }
@@ -847,13 +845,14 @@
     {
         var modal = $("#lessonModal");
         var modalTitle = modal.find("#modalTitle");
-        modalTitle.text("Add Lesson");
+        modalTitle.text("Thêm bài");
         modal.find(".chooseOrder").hide();
         modal.find("[name=Title]").val("");
         modal.find("[name=ChapterID]").val(ID);
         modal.find("[name=ID]").val("");
         modal.find("[name=Point]").val("0");
         modal.find("[name=Timer]").val("0");
+        modal.find("[name=Limit]").val("0");
         SelectTemplate("1");
         return false;
     }

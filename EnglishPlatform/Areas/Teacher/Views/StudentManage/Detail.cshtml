@@ -31,11 +31,11 @@
                 </div>*@
         </div>
     </div>
-    <div class="card-body" v-cloak>
-        <template>
+    <template v-if="sumarryData.length > 0">
+        <div class="card-body" v-cloak>
             <div class="box">
-                <table id="s_table" class="table">
-                    <thead>
+                <table id="s_table" class="table" v-for="(itemClass,i) in list_class">
+                    <!--<thead>
                         <tr>
                             <th v-for="(field,k) in summaryFields">{{field.label}}</th>
                         </tr>
@@ -44,27 +44,96 @@
                         <template v-for="(item,k) in sumarryData">
                             <tr :class="item.ClassName != null ? 'font-weight-bold bg-light' : ''">
                                 <template v-if="item.ClassName != null">
-                                    <td colspan="2">
+                                    <td colspan="1">
                                         <a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID" :title="item.FullName">{{item.ClassName}}</a>
                                     </td>
+                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
                                 </template>
                                 <template v-else>
                                     <td></td>
-                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.SkillName" class="title">{{item.SkillName}}</a></td>
-                                </template>
-                                <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                                <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
+                                    <td><a :href="'@processUrl("StudentDetail", "Class")/' + item.StudentID + '/' + item.ClassID + '#' + item.ClassSubjectID" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
+                                </template>-->
+                                    @*<td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>*@
+                                    <!--<td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{roundPoint(item.PracticeAvgPoint,1)}}</td>
                                 <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
                             </tr>
+                        </template>
+                    </tbody>-->
+                    <thead>
+                        <tr>
+                            <th colspan="6" style="border:0px;text-align:left;padding-left:10px">
+                                <span style="color:black;font-size:14px;font-weight:bold">{{itemClass.Name}}</span> ({{formatShortDate(itemClass.StartDate)}} - {{formatShortDate(itemClass.EndDate)}})
+                            </th>
+                        </tr>
+                        <tr>
+                            <th rowspan="2" style="width:50px">STT</th>
+                            <th rowspan="2">Môn học</th>
+                            <th rowspan="2" style="width:130px">Điểm luyện tập</th>
+                            <th :colspan="summaryExam.length > 0 ? summaryExam.length : 1" style="width:390px">Điểm kiểm tra</th>
+                        </tr>
+                        <tr>
+                            <th v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0">Bài số {{k+1}}</th>
+                            <th v-if="summaryExam.length == 0">Chưa có dữ liệu kiểm tra</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template>
+                            <tr v-for="(itemSummary,i) in sumarryData" v-if="itemSummary.ClassID == itemClass.ID">
+                                <td>{{itemSummary.Order}}</td>
+                                <td><a :href="'@processUrl("StudentDetail", "Class")/' + itemSummary.StudentID + '/' + itemSummary.ClassID + '#' + itemSummary.ClassSubjectID" :title="itemSummary.CourseName" class="title">{{itemSummary.CourseName}} (Đã giao: {{itemSummary.TotalLessons}})</a></td>
+                                <td>{{roundPoint(itemSummary.PracticeAvgPoint,1)}}</td>
+                                <template v-if="summaryExam.length == 0 && itemSummary.Order == 1">
+                                    <td>---</td>
+                                </template>
+                                <template v-else-if="itemSummary.Order == 1">
+                                    <td v-for="(item,k) in summaryExam">{{roundPoint(item.point,1)}}</td>
+                                </template>
+                                <template v-else>
+                                    <td v-for="(item,k) in summaryExam" v-if="summaryExam.length > 0"></td>
+                                    <td v-if="summaryExam.length == 0"></td>
+                                </template>
+                            </tr>
+                            <tr style="font-weight:bold">
+                                <td colspan="2">Điểm trung bình</td>
+                                <td v-for="(point,x) in avgPointPractice" v-if="point.ClassID == itemClass.ID">{{roundPoint(point.AvgPointPractice,1)}}</td>
+                                <td v-for="(point,x) in avgPointExam" v-if="point.ClassID == itemClass.ID" :colspan="summaryExam.length > 0 ? summaryExam.length : 1">{{roundPoint(point.AvgPointExam,1)}}</td>
+                            </tr>
+
                         </template>
                     </tbody>
                 </table>
             </div>
-        </template>
-    </div>
+        </div>
+    </template>
+    <template v-else>
+        <div class="card-body" v-cloak style="text-align:center;font-size:120%">
+            Chưa có dữ liệu đối với học sinh @currentStudent.FullName
+        </div>
+    </template>
 </section>
 
 @section Scripts {
+<style>
+    #s_table tbody td {
+        padding: 0px;
+    }
+
+    .table td, .table th {
+        padding: 0px
+    }
+
+    .table thead th {
+        border: 0.5px solid gray;
+        text-align: center;
+        vertical-align: middle
+    }
+
+    .table tbody td {
+        text-align: center;
+        border: 0.5px solid gray;
+        vertical-align: middle
+    }
+</style>
     <script>
         new Vue({
             el: "#main_content",
@@ -86,10 +155,10 @@
                         key: 'subject',
                         label: 'Môn học'
                     },
-                    {
-                        key: 'progress',
-                        label: 'Tiến độ'
-                    },
+                    //{
+                    //    key: 'progress',
+                    //    label: 'Tiến độ'
+                    //},
                     {
                         key: 'score',
                         label: 'Kết quả'
@@ -100,6 +169,10 @@
                     },
                 ],
                 sumarryData: [],
+                avgPointPractice:[],
+                summaryExam: [],
+                avgPointExam: [],
+                list_class:[],
                 view: 10,
                 page: 1,
                 avgPoint: 0,
@@ -113,11 +186,18 @@
                 loadSummary() {
                     let _that = this
                     let _form = new FormData()
-                    _form.append('ID', '@currentStudent.ID')
+                    _form.append('StudentID', '@currentStudent.ID')
+                    _form.append('ClassID', '')
                     let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.sumarryData = response.data.Data;
+                            //_that.sumarryData = response.data.Data;
+                            _that.sumarryData = response.data.Practice
+                            _that.summaryExam = response.data.Exam
+                            this.list_class = response.data.ListClass
+                            this.avgPointPractice = this.calcAveragePractice(_that.sumarryData)
+                            this.avgPointExam = this.calcAverageExam(_that.summaryExam)
+                            //debugger
                         }).catch(e => { })
                 },
                 domDecoder(str) {
@@ -138,7 +218,86 @@
                     if (a > 0)
                         result = a * 100 / b;
                     return result;
-                }
+                },
+                roundPoint(value, precision) {
+                    if (value > 0) {
+                        value = value / 10
+                        var multiplier = Math.pow(10, precision || 0);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                    }
+                    else return value
+                },
+                calcAveragePractice(obj) {
+                    var array = []
+                    if (obj.length > 0) {
+                        for (var j = 0; j < this.list_class.length; j++) {
+                            var idclass = this.list_class[j].ID;
+                            var totalPointPractice = 0;
+                            var totalLesson = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                var item = obj[i];
+                                if (idclass == item.ClassID) {
+                                    totalPointPractice += item.PracticeAvgPoint * item.TotalLessons;
+                                    totalLesson += item.TotalLessons
+                                }
+                            }
+                            if (totalLesson != 0) {
+                                array.push({ ClassID: idclass, AvgPointPractice: (totalPointPractice / totalLesson) })
+                            }
+                            else {
+                                array.push({ ClassID: idclass, AvgPointPractice: "---" })
+                            }
+                        }
+                        return array
+                    }
+                    else {
+                        for (var i = 0; i < this.list_class.length; i++) {
+                            var idclass = this.list_class[i].ID;
+                            array.push({ ClassID: idclass, AvgPointPractice: "---" })
+                        }
+                        return array
+                    }
+                    //if (obj.length > 0) {
+                    //    var totalPointPractice = 0;
+                    //    for (var i = 0; i < obj.length; i++) {
+                    //        var item = obj[i];
+                    //        totalPointPractice += item.PracticeAvgPoint;
+                    //    }
+                    //    return (totalPointPractice / obj.length)
+                    //}
+                    //else return "---"
+                },
+                calcAverageExam(obj) {
+                    var array = []
+                    if (obj.length > 0) {
+                        for (var j = 0; j < this.list_class.length; j++) {
+                            var idclass = this.list_class[j].ID;
+                            var totalPointExam = 0;
+                            var totalLesson = 0;
+                            for (var i = 0; i < obj.length; i++) {
+                                var item = obj[i];
+                                if (idclass == item.classID) {
+                                    totalPointExam += item.point
+                                    totalLesson += 1
+                                }
+                            }
+                            if (totalLesson != 0) {
+                                array.push({ ClassID: idclass, AvgPointExam: (totalPointExam / totalLesson) })
+                            }
+                            else {
+                                array.push({ ClassID: idclass, AvgPointExam: "---" })
+                            }
+                        }
+                        return array
+                    }
+                    else {
+                        for (var i = 0; i < this.list_class.length; i++) {
+                            var idclass = this.list_class[i].ID;
+                            array.push({ ClassID: idclass, AvgPointExam: "---" })
+                        }
+                        return array
+                    }
+                },
             }
         });
     </script>

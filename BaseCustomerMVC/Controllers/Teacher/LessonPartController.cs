@@ -11,12 +11,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 using HtmlAgilityPack;
+using OfficeOpenXml;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Microsoft.CodeAnalysis.CSharp;
 using MongoDB.Bson.Serialization.Serializers;
 using System.Net;
 using System.IO;
 using FileManagerCore.Interfaces;
+using Spire.Doc;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Spire.Doc.Fields;
+using Spire.Doc.Documents;
+using System.Drawing;
+using System.Drawing.Imaging;
+using SkiaSharp;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -32,17 +41,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
+
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
         private readonly CourseHelper _courseHelper;
+        private readonly LessonHelper _lessonHelper;
+
+        private readonly IHostingEnvironment _env;
+
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> partDSP = new List<string> { "Văn bản", "File văn bản", "Audio", "Video", "Ảnh", "Từ vựng tiếng anh", "Chọn 1 đáp án đúng", "Điền từ", "Nối đáp án", "Chọn 1/nhiều đáp án đúng", "Essay" };
+
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
         private readonly string[] typeVideo = { ".ogm", ".wmv", ".mpg", ".webm", ".ogv", ".mov", ".asx", ".mpge", ".mp4", ".m4v", ".avi" };
         private readonly string[] typeAudio = { ".opus", ".flac", ".weba", ".webm", ".wav", ".ogg", ".m4a", ".oga", ".mid", ".mp3", ".aiff", ".wma", ".au" };
         private readonly string[] typeImage = { ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg", ".png", ".gif", ".bmp", ".dip" };
+
+        private string RootPath { get; }
+        private string StaticPath { get; }
+        private string currentHost { get; }
 
         public LessonPartController(
             //GradeService gradeservice,
@@ -60,7 +81,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             FileProcess fileProcess,
             VocabularyService vocabularyService,
             CourseHelper courseHelper,
+            LessonHelper lessonHelper,
 
+            IConfiguration config,
+            IHostingEnvironment env,
+            IHttpContextAccessor httpContextAccessor,
             IRoxyFilemanHandler roxyFilemanHandler
             )
         {
@@ -79,8 +104,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _fileProcess = fileProcess;
             _vocabularyService = vocabularyService;
             _courseHelper = courseHelper;
+            _lessonHelper = lessonHelper;
+            _env = env;
 
             _roxyFilemanHandler = roxyFilemanHandler;
+            RootPath = (config.GetValue<string>("SysConfig:StaticPath") ?? env.WebRootPath) + "/Files";
+            StaticPath = (config.GetValue<string>("SysConfig:StaticPath") ?? env.WebRootPath);
+            currentHost = httpContextAccessor.HttpContext.Request.Host.Value;
         }
 
         [HttpPost]
@@ -221,6 +251,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             //        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
                             //    }
                             //}
+
                             if (item.Type == "IMG")
                             {
                                 if (item.Media.Name.ToLower().StartsWith("http")) //file url (import)
@@ -253,21 +284,29 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 item.Media.Name = item.Media.OriginalName = file.FileName;
                                 item.Media.Created = DateTime.UtcNow;
                                 item.Media.Size = file.Length;
-                                if(!typeImage.Contains(extension))
+                                if (!typeImage.Contains(extension))
                                 {
-                                    var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
-                                    item.Media.Path = mediarsp.Path;
-                                    if (typeVideo.Contains(extension))
+                                    if (file.FileName.ToLower().EndsWith(".ppt") || file.FileName.ToLower().EndsWith(".pptx"))
                                     {
-                                        item.Media.Extension = "video/mp4";
-                                    }
-                                    else if (typeAudio.Contains(extension))
-                                    {
-                                        item.Media.Extension = "audio/mp3";
+                                        item.Media.Path = await _fileProcess.SaveMediaAsync(file, item.Media.OriginalName, "", basis);
+                                        item.Media.Extension = extension;
                                     }
                                     else
                                     {
-                                        item.Media.Extension = extension;
+                                        var mediarsp = _roxyFilemanHandler.UploadSingleFileWithGoogleDrive(basis, UserID, file);
+                                        item.Media.Path = mediarsp.Path;
+                                        if (typeVideo.Contains(extension))
+                                        {
+                                            item.Media.Extension = "video/mp4";
+                                        }
+                                        else if (typeAudio.Contains(extension))
+                                        {
+                                            item.Media.Extension = "audio/mp3";
+                                        }
+                                        else
+                                        {
+                                            item.Media.Extension = extension;
+                                        }
                                     }
                                 }
                                 else
@@ -429,7 +468,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             isPractice = true;
                             break;
-                        default://QUIZ1,3,4
+                        case "QUIZ1":
+                        case "QUIZ3":
+                        case "QUIZ4":
                             if (RemovedQuestions != null & RemovedQuestions.Count > 0)
                             {
                                 _questionService.CreateQuery().DeleteMany(o => RemovedQuestions.Contains(o.ID));
@@ -450,6 +491,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             }
                             isPractice = true;
                             break;
+                        default://lecture type
+
+                            return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", item },
+                                {"Error", null }
+                            });
+                            break;
                     }
 
                     if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
@@ -459,7 +508,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //increase practice counter
                         await _courseHelper.ChangeLessonPracticeState(parentLesson);
                     }
-                    calculateLessonPoint(item.ParentID);
+                    _lessonHelper.calculateLessonPoint(item.ParentID);
                     IDictionary<string, object> valuePairs = new Dictionary<string, object>
                         {
                             { "Data", item },
@@ -636,7 +685,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        calculateLessonPoint(parentLesson.ID);
+                        _lessonHelper.calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _lessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
@@ -1294,66 +1343,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             org = org.Trim();
             while (org.IndexOf("  ") >= 0)
                 org = org.Replace("  ", " ");
-
-            //dau ‘’
-            int[] beginning = { 24, 25, 96 };
-            //dau “”
-            int[] quotation = { 29, 28 };
-            for (int i = 0; i < org.Length; i++)
-            {
-                if (beginning.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\'');
-                }
-                if (quotation.Contains((byte)org[i]))
-                {
-                    org = org.Replace(org[i], '\"');
-                }
-                if ((byte)org[i] == 125 || (byte)org[i] == 141)
-                {
-                    org = org.Replace(org[i], '(');
-                }
-                if ((byte)org[i] == 126 || (byte)org[i] == 142)
-                {
-                    org = org.Replace(org[i], ')');
-                }
-            }
-
-            for (int i = 0; i < KyTuDacBiet.Length; i++)
-            {
-                if (org.Contains(KyTuDacBiet[i]))
-                {
-                    org = org.Replace(KyTuDacBiet[i], KyTuThuong[i]);
-                }
-            }
-
-            //return ReplaceSpecialCharacters(org.Trim());
-            return org;
+            return StringHelper.ReplaceSpecialCharacters(org);
+            //return org;
         }
-        //TODO: Need update later
-        private double calculateLessonPoint(string lessonId)
-        {
-            var point = 0.0;
-            var parts = _lessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
-            if (parts != null && parts.Count() > 0)
-                foreach (var part in parts)
-                {
-                    if (part.Type == "ESSAY")
-                    {
-                        point += part.Point;
-                    }
-                    else
-                    {
-                        point += _questionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
-                    }
-                }
-            _lessonService.UpdateLessonPoint(lessonId, point);
-            return point;
-        }
-
-        private static readonly String[] KyTuDacBiet = { "&amp;quot;","&amp;","&quot;", "&lt;", "&gt;", "&nbsp;", "&ensp;", "&emsp;", "&thinsp;", "&zwnj;", "&zwj;","&lrm;", "&rlm;",
-                                                            "&lsquo;","&rsquo;","&sbquo;","&ldquo;","&rdquo;"};
-        private static readonly String[] KyTuThuong = { "\"", "&", "\"", "<", ">", " ", " ", " ", " ", " ", " ", " ", " ", "\'", "\'", ",", "\"", "\"" };
     }
 
     public class PronunExplain

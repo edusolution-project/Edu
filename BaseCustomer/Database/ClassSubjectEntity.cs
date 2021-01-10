@@ -94,6 +94,11 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => t.ClassID == ClassID).Project(t => t.ID).ToList();
         }
 
+        public List<ClassSubjectEntity> GetByTypeClass(String ClassID,Int32 typeClass)
+        {
+            return Collection.Find(x => x.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+        }
+
 
         public Task RemoveByClass(string ClassID)
         {
@@ -124,12 +129,18 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.CourseID == CourseID).ToList();
         }
+
+        public ClassSubjectEntity GetClassSubjectExamByClassID(String ClassID)
+        {
+            return Collection.Find(x => x.ClassID == ClassID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
+        }
     }
 
-    public class CLASS_TYPE
+    public class CLASSSUBJECT_TYPE
     {
         public const int STANDARD = 0, //chính khóa
-            EXTEND = 1; //bổ trợ
+            EXTEND = 1, //bổ trợ
+            EXAM = 2; //kiểm tra
     }
 
 }

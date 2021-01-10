@@ -327,7 +327,7 @@ namespace BaseCustomerMVC.Globals
 
     public class MailPhase
     {
-        public const int REGISTER = 1, RESET_PASS = 2, JOIN_CLASS = 3, LEAVE_CLASS = 4, WEEKLY_SCHEDULE = 5, STUDENT_JOIN_CLASS = 6;
+        public const int REGISTER = 1, RESET_PASS = 2, JOIN_CLASS = 3, LEAVE_CLASS = 4, WEEKLY_SCHEDULE = 5, STUDENT_JOIN_CLASS = 6,NEW_FUNCTION = 7;
     }
 
     public class ResultState

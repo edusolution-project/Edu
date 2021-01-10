@@ -88,6 +88,10 @@
         </div>
     </div>
     <div class="card-body pt-2" v-cloak>
+        <div v-if="tab[1]" class="pt-0 pb-2 text-danger">
+            <i>Lưu ý: Học liệu nội bộ, biên soạn theo yêu cầu của giáo viên & học viên</i><br />
+            <i>Các thầy cô có thể vào "Xem chi tiết" và tải học liệu về lớp của mình.</i>
+        </div>
         <div class="row ls-doc" v-if="tableData.length > 0">
             <div class="col-md-6" v-for="data in tableData">
                 <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
@@ -219,7 +223,7 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                this.getData();
+                //this.getData();
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.getMyClass();
@@ -238,7 +242,7 @@
                     }
                 }
                 else {
-                    this.tabChange(0);
+                    this.tabChange(1);
                 }
             },
             components: {
@@ -315,18 +319,10 @@
                 searchTerm: function(){
                     if(this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
-                    //debugger
-                    //var fn = this.getData
-                    if (this.tab[1]) {
-                        fn1 = this.getData
-                    }
-                    else {
-                        fn1 = this.getData
-                    }
-                    if (this.tab[1])
-                        fn = this.getMyClass
+                    var fn = this.getData
+                    //if (this.tab[1])
+                    //    fn = function () { this.getData; }
                     this.searchTimeout = setTimeout(function(){
-                        fn1();
                         fn()
                     }, 500)
                 },
@@ -349,7 +345,6 @@
                     this.getData()
                 },
                 "docsInteractive.ClassID": function () {
-                    debugger
                     if (this.docsInteractive.ClassID=="true") {
                         this.isCreateNewClass = true
                         //alert(this.docsInteractive.NewClass)
@@ -678,13 +673,13 @@
                             history.replaceState({ tab: a }, "Tài liệu thường", "#docsnormal");
                             this.isInteractive = false;
                             this.loadDocsNormal();
-                            this.searchTerm = '';
+                            //this.searchTerm = '';
                             break;
                         case 1:
                             history.replaceState({ tab: a }, "Tài liệu tương tác", "#docsinteractive");
                             this.isInteractive = true;
                             this.loadDocsInteractive();
-                            this.searchTerm = '';
+                            //this.searchTerm = '';
                             break;
                     }
                     this.$forceUpdate()

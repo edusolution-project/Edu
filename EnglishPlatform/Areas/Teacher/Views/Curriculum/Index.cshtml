@@ -53,7 +53,11 @@
                 <button><i class="ic ic-find"></i></button>
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
             </div>
-            <b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+            <div class="ml-0 ml-md-auto">
+                <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
+                <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
+            </div>
         </div>
     </div>
     <div class="card-body" v-cloak>
@@ -83,7 +87,7 @@
                     <td>{{formatShortDate(item.Created)}}</td>
                     <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
-                        <div class="d-flex btn-group">
+                        <div class="btn-group" style="display:block">
                             <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
                             <a class="btn-act btn-edit" title="Ghép bài giảng" href="javascript:;" v-on:click="showMergeItem(item)"><i class="fa fa-first-aid"></i></a>
@@ -120,6 +124,10 @@
         #ed_table tr td:first-child {
             width: 50px;
             max-width: 50px;
+        }
+
+        .btn-act {
+            display: inline-block;
         }
     </style>
     <script>
@@ -392,7 +400,8 @@
                         _that.addItem.TeacherID = obj.TeacherID;
                         //_that.addItem.IsPublic = obj.IsPublic;
                         //_that.addItem.PublicWStudent = obj.PublicWStudent;
-                        if (obj.TargetCenters != null) {
+                        //debugger
+                        if (obj.TargetCenters != null || obj.TargetCenters.length > 0) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
                             if (obj.TargetCenters.length == this.list_centers.length) {
                                 _that.addItem.SelectAll = true;
@@ -475,10 +484,10 @@
                         return false;
                     }
 
-                    if (_that.addItem.SkillID == '') {
-                        alert("Chưa chọn kỹ năng");
-                        return false;
-                    }
+                    //if (_that.addItem.SkillID == '') {
+                    //    alert("Chưa chọn kỹ năng");
+                    //    return false;
+                    //}
 
                     if (_that.addItem.GradeID == '') {
                         alert("Chưa chọn cấp độ");
@@ -787,7 +796,33 @@
                         }
                     }
                     _that.checkToggle(st)
-                }
+                },
+                exportExcel(tableid) {
+                    var _filename = "Danh sách bài giảng";
+                    var uri = 'data:application/vnd.ms-excel;base64,'
+                        , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv=Content-Type content="text/html; charset=utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><style>.text-style{mso-number-format:"#?/?"}</style></head><body><table>{table}</table></body></html>'
+                        , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                        , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+                    //var table = document.getElementById("ed_table");
+                    var table = document.getElementById(tableid);
+                    //console.log(tableid);
+                    //var table = $('#' + tableid);
+                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    //window.location.href = uri + base64(format(template, ctx));
+                    var link = document.createElement('a');
+                    if (typeof link.download === 'string') {
+                        link.href = uri + base64(format(template, ctx));
+                        link.download = _filename;
+                        //Firefox requires the link to be in the body
+                        document.body.appendChild(link);
+                        //simulate click
+                        link.click();
+                        //remove the link when done
+                        document.body.removeChild(link);
+                    } else {
+                        window.open(uri + base64(format(template, ctx)));
+                    }
+                },
             }
         });
 
@@ -823,7 +858,7 @@
                     <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>
                 </select>
             </b-col>
-            <b-col class="form-group">
+            <b-col class="form-group d-none">
                 <label for="">Môn học</label>
                 <select class="form-control" v-model="addItem.SkillID">
                     <option value="">Chọn môn học</option>
@@ -1064,3 +1099,4 @@
         </template>
     </b-modal>
 }
+

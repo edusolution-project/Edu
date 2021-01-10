@@ -60,11 +60,12 @@
                 <template v-if="item.ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group" :id="item.ID">
                         <h2 style="font-size:16px" class="font-weight-bold border-b pb-2 red-color">{{item.Name}} <span style="font-size:80%;">({{formatShortDate(item.StartDate)}} - {{formatShortDate(item.EndDate)}}) </span></h2>
+                        <h3 style="font-size:14px" class="" v-if="item.Description != null">{{item.Description}}</h3>
                     </div>
-                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD).length > 0">
+                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD).length > 0">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chính quy</h2>
                         <ul class="list ls-practice row">
-                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.STANDARD && csbj.ClassID == item.ID">
+                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD && csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
@@ -92,11 +93,10 @@
                             </li>
                         </ul>
                     </div>
-
-                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND).length > 0">
+                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND).length > 0">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu chuyên đề</h2>
                         <ul class="list ls-practice row">
-                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASS_TYPE.EXTEND && csbj.ClassID == item.ID">
+                            <li v-for="(csbj,j) in classSubjects" class="form-row col-md-6 col-sm-12 mb-3" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND && csbj.ClassID == item.ID">
                                 <div class="inner d-flex w-100" style="max-height:150px">
                                     <div class="align-top" style="width:102px">
                                         <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName">
@@ -124,8 +124,41 @@
                             </li>
                         </ul>
                     </div>
+
+                    @* exam *@
+                    <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
+
+                        <a v-for="(csbj,j) in classSubjects" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID" :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-danger font-weight-bold">
+                            <h2 style="font-size:15px;" class="font-weight-bold pb-3">
+                                Bài kiểm tra
+                            </h2>
+                        </a>
+                        <ul class="list ls-practice">
+                            <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && obj.ClassID == item.ID" :for="obj.ID">
+                                <ul class="list">
+                                    <chap-content v-for="(item,k) in list_chapters" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
+                                                  v-bind:data="item"
+                                                  v-bind:classbj="obj.ID"
+                                                  v-bind:pos="k"
+                                                  v-bind:owner="obj.TeacherID"
+                                                  v-bind:listchaps="list_chapters"
+                                                  v-bind:type="'exam'"></chap-content>
+                                    <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
+                                </ul>
+                            </li>
+                        </ul>
+                        @*<ul class="list ls-practice row">
+                                <liclass ="form-row col-md-6 col-sm-12 mb-3" >
+                                    <div class="inner d-flex w-100">
+                                        <div class="flex-fill ml-2">
+
+                                        </div>
+                                    </div>
+                                    </li>
+                            </ul>*@
+                    </div>
                 </template>
-                <template v-else>
+                <template v-else-if="item.ClassMechanism == @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
                     <div class="form-group">
                         <h2 style="font-size:15px;" class="font-weight-bold pb-3 blue-color">Học liệu cá nhân</h2>
                         <ul class="list ls-practice row">
@@ -207,7 +240,148 @@
             border-radius: 2px;
         }
     </style>
+
+    <script type="text/x-template" id="chapContentTemp">
+        <li class="pr-0 ml-3 chap-item">
+            <div class="inner pt-2 pb-2">
+                <div class="chap-row mt-1" onmouseover="$('.row-action.active').removeClass('active')">
+                    <a href="javascript:;" v-b-toggle="`prc-${data.ID}-${pos}`" class="blue-color btn-collapse flex-grow-1 mb-0" v-on:click="loadContent(data.ClassSubject, data.ID)">
+                        <div class="align-self-center mb-1" style="line-height:24px">
+                            <i class=" ic far fa-folder mr-2"></i>{{data.Title + ' (' + data.TotalLessons +  ')'}}
+                            <i class="ic ic-collapse"></i>
+                        </div>
+                    </a>
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start align-items-md-center">
+                            <div class="chap-info ml-3" style="color:#999; white-space: nowrap">
+                                <i class="ti-link" style="background-color: #bee4ef;" v-for="(chap,j) in listchaps" v-if="(data.ConditionChapter != '') && (chap.ID == data.ConditionChapter)"><span class="pl-1">Điều kiện: {{chap.Title}}</span></i>
+                                <i class="ti-target ml-2" v-if="data.BasePoint > 0" style="background-color: #ffe38d"><span class="pl-1">Mục tiêu: {{data.BasePoint}}</span></i>
+                                <i class="ti-control-play ml-2" style="background-color: #c3e2c3" v-if="moment(data.StartDate) > moment(new Date(1900,1,1))"><span class="pl-1">bắt đầu {{formatTime(data.StartDate)}}</span></i>
+                                <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
+                            </div>
+
+                            <div class="row-action d-flex align-items-start align-items-md-center">
+                                <i class="fas fa-ellipsis-h indicator"></i>
+                                <template v-if="type != 'exam'">
+                                    <div class="act_ic">
+                                        <i class="ic-ac fas fa-link ml-2" style="font-size:16px;" title="Chọn nội dung điều kiện" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
+                                        <select v-model="data.ConditionChapter" style="max-width:200px; font-size:90%; height: 24px; margin:2px; display:none" v-on:change="updateChapCondition(data)" onblur="$(this).hide()" onfocus="$(this).show()">
+                                            <option value="">-- Chọn nội dung điều kiện (nếu có) --</option>
+                                            <template v-for="(chap,j) in listchaps" v-if="(chap.ID != data.ID && chap.Parent == data.Parent) || (chap.ID == data.ConditionChapter)">
+                                                <option :value='chap.ID'>{{chap.Title}}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-play-circle ml-2" style="font-size:18px;" title="Chọn ngày bắt đầu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
+                                        <datepickerV2 :date="data.StartDate" :idx="0" :obj="data" class="st" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-stop-circle ml-2" style="font-size:18px;" title="Chọn ngày hết hạn" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().find("input").focus().click()'></i>
+                                        <datepickerV2 :date="data.EndDate" :idx="1" :obj="data" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
+                                    </div>
+                                    <div class="act_ic">
+                                        <i class="ic-ac far fa-dot-circle ml-2" style="font-size:18px;" title="Đặt mục tiêu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
+                                        <input type="text" class="form-control bg-light text-right basepoint" style="margin: 0 3px;padding: 2px; width: 52px; height:24px; display:none;" onblur="$(this).hide()" onfocus="$(this).show()" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
+                                    </div>
+                                </template>
+                                <div class="act_ic">
+                                    <i class="ic-ac fas fa-redo ml-2" style="font-size:16px;" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <b-collapse :id="`prc-${data.ID}-${pos}`" :accordion="`my-accordion-${data.Parent}`" role="tabpanel">
+                    <b-card-body class="pr-0 pb-1 ">
+                        <ul class="list">
+                            <template v-if="data.IsLoading">
+                                <li><i class=""></i> Đang nạp dữ liệu</li>
+                            </template>
+                            <template v-else>
+                                <chap-content v-for="(subItem,j) in listchaps" v-if="subItem.ClassSubject + '-' + subItem.Parent == classbj + '-' + data.ID"
+                                              v-bind:data="subItem"
+                                              v-bind:classbj="classbj"
+                                              v-bind:pos="j"
+                                              v-bind:owner="owner"
+                                              v-bind:listchaps="listchaps"
+                                              v-bind:type="type"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject" v-bind:type="type"></lesson-item>
+                            </template>
+                        </ul>
+                    </b-card-body>
+                </b-collapse>
+            </div>
+        </li>
+    </script>
+
+    <script type="text/x-template" id="lessonItemTemp">
+        <li class="sub-practice pt-2 pb-1 pl-2 rounded">
+            <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                <a target="_blank" :href="'@processUrl("Detail", "Lesson")/' + data.ID + '/' + data.ClassSubject" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="data.Title">
+                    <template v-if="data.TemplateType === 2">
+                        <span class="text-danger">
+                            <i class="ic far fa-edit mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span>
+                            <i class="ic far fa-file-alt mr-2"></i>
+                            {{data.Title}}
+                        </span>
+                    </template>
+                </a>
+                @*<div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">*@
+                @*<div class="picker-schedule d-flex align-items-center">
+                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
+                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
+                    <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
+                    <template v-if="type != 'exam'">
+                        <i class="far fa-eye-slash ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsHideAnswer == true}" title="Bật/ tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleHideAnswer(data)"></i>
+                        <i class="fas fa-desktop ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" data-toggle="tooltip" v-on:click="toggleOnlineClass(data)"></i>
+                    </template>
+                </div>
+                <div class="d-flex picker-schedule" v-else>
+                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
+                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
+                </div>
+                <div class="status">
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                </div>*@
+            </div>
+        </li>
+    </script>
+
     <script>
+
+        Vue.component('chap-content', {
+            template: '#chapContentTemp',
+            props: {
+                listchaps: Array,
+                classbj: String,
+                lessons: Array,
+                data: Object,
+                pos: String,
+                owner: String,
+                type: String
+            }
+        })
+
+        Vue.component('lesson-item', {
+            template: '#lessonItemTemp',
+            props: {
+                data: Object,
+                classSubject: String,
+                owner: String,
+                type: String
+            }
+        })
+
         var isSearchDate = false;
         new Vue({
             el: "#main_content",
@@ -229,6 +403,7 @@
                 //this.loadClassSubjects();
                 //console.log(this.list_grades_full);
                 this.changeSubject();
+                //window.filterLesson = this.filterLesson
                 //window.ChooseCalendar = this.chooseCalendar
                 //window.GetCourse = this.getCourse
                 //window.InitDate = this.initDate
@@ -276,7 +451,7 @@
                     let _url = '@processUrl("GetClassSubjects", "ClassSubject")'
                         axios.post(_url, _form)
                             .then(response => {
-                                //var _data = response.data.Data;
+                                var _data = response.data.Data;
                                 if (response.data.Classes.length == 0) {
                                     swal({
                                         title: "Bạn chưa có trong lớp học nào, liên hệ với giáo viên hoặc chuyển đến học liệu để thêm vào lớp cá nhân của bạn",
@@ -295,6 +470,15 @@
                                 else {
                                     this.classes = response.data.Classes;
                                     this.classSubjects = response.data.Data;
+                                    for (var i = 0; i < this.classSubjects.length; i++) {
+                                        var itemcsbj = this.classSubjects[i]
+                                        if (itemcsbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                                            //debugger
+                                            this.loadContent(itemcsbj.ID);
+                                        }
+                                    }
+                                    //var classSbjExam = this.classSubjects.find(x => x.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM)
+                                    //debugger
                                 }
                                 //_data.forEach(function (item, k) {
                                 //    _that.classSubjects.push({
@@ -319,7 +503,10 @@
                                 //})
                                 //_that.$forceUpdate()
                             }).catch(e => { })
-                }
+                },
+                list_chapters: [],
+                loaded_chapter: [],
+                list_lessons:[]
             },
             //computed: {
             //    sDate: {
@@ -492,7 +679,81 @@
                         console.log("Desktop detected");
                         return false;
                     }
-                }
+                },
+                filterLesson(obj) {
+                    //var filter = this.list_lessons.filter((p) => {
+                    //    debugger
+                    //    return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
+                    //})
+                    var filter = []
+                    for (var i = 0; i < this.list_lessons.length; i++) {
+                        var item = this.list_lessons[i]
+                        if (item.ClassSubject == obj.ClassSubject) {
+                            debugger
+                            filter.push(item)
+                        }
+                    }
+                    return filter;
+                },
+                loadContent(subject, chapter) {
+                    let _that = this
+                    let key = subject + "_" + chapter
+                    if (_that.loaded_chapter.includes(key))
+                        return;
+                    let _form = new FormData()
+                    _form.append('ID', subject)
+                    if (chapter)
+                        _form.append('Parent', chapter)
+                    let _url = '@processUrl("GetContents", "ClassSubject")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var _data = response.data.Data;
+                            var _lesson = response.data.Lesson;
+                            _data.forEach(function (chapter, k) {
+                                var parent = chapter.ParentID;
+                                if (parent == "0") { parent = ""; }
+                                _that.list_chapters.push({
+                                    ID: chapter.ID,
+                                    Title: chapter.Name,
+                                    ClassSubject: subject,
+                                    Parent: parent,
+                                    TotalLessons: chapter.TotalLessons,
+                                    StartDate: chapter.StartDate,
+                                    EndDate: chapter.EndDate,
+                                    BasePoint: chapter.BasePoint,
+                                    ConditionChapter: chapter.ConditionChapter == null ? '' : chapter.ConditionChapter
+                                })
+                            })
+                            _lesson.forEach(function (lesson, k) {
+                                var parent = '';
+                                if (lesson.ChapterID) {
+                                    parent = lesson.ChapterID;
+                                }
+
+                                _that.list_lessons.push({
+                                    ID: lesson.ID,
+                                    ScheduleID: lesson.ScheduleID,
+                                    Title: lesson.Title,
+                                    TemplateType: lesson.TemplateType,
+                                    ClassSubject: subject,
+                                    Parent: parent,
+                                    StartDate: moment(lesson.StartDate) > moment(new Date(1900, 1, 1)) ? lesson.StartDate : "",
+                                    EndDate: moment(lesson.EndDate) > moment(new Date(1900, 1, 1)) ? lesson.EndDate : "",
+                                    IsActive: lesson.IsActive,
+                                    IsUpdating: false,
+                                    IsOnline: lesson.IsOnline,
+                                    IsHideAnswer: lesson.IsHideAnswer
+                                })
+
+                            })
+                            this.loaded_chapter.push(key);
+                            this.list_chapters = _that.list_chapters
+                            this.list_lessons = _that.list_lessons
+                            Vue.nextTick(function () {
+                                this.toggleTooltips($('.ls-practice [for=' + subject + ']'));
+                            })
+                        }).catch(e => { })
+                },
             }
         });
 
@@ -509,6 +770,26 @@
         @*$(document).ready(function () {
             alert(@TempData["message"])
         });*@
+
+        var toggleTooltips = function (obj) {
+            $(obj).find('i').tooltip({
+                position: {
+                    my: "center bottom-10",
+                    at: "center top",
+                    using: function (position, feedback) {
+                        $(this).css(position);
+                        $("<div>")
+                            .addClass("arrow")
+                            .addClass(feedback.vertical)
+                            .addClass(feedback.horizontal)
+                            .appendTo(this);
+                    }
+                },
+                show: {
+                    delay: 25
+                }
+            });
+        }
 
     </script>
 }

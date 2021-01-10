@@ -107,9 +107,12 @@
                                     <div class="col-sm-12">
                                         <select id="CenterID" name="CenterID" class="form-control" onchange="renderClass()" required>
                                             <option value="0">--- Lựa chọn cơ sở ---</option>
-                                            @foreach (var item in listcenter)
+                                            @if (listcenter!=null)
                                             {
-                                                <option value="@item.ID">@item.Name</option>
+                                                foreach (var item in listcenter)
+                                                {
+                                                    <option value="@item.ID">@item.Name</option>
+                                                }
                                             }
                                         </select>
                                     </div>
@@ -124,15 +127,19 @@
                                         </button>
                                         <ul class="dropdown-menu subjectSelect" role="menu">
                                             @{
-                                                for (int i = 0; listcenter != null && i < listcenter.Count; i++)
+                                                if (listcenter != null)
                                                 {
+
+                                                    for (int i = 0; listcenter != null && i < listcenter.Count; i++)
+                                                    {
                                                     <li>
                                                         <a>
                                                             <input type="checkbox" id="@listcenter[i].ID" /><span class="lbl"> @listcenter[i].Name </span>
                                                         </a>
                                                     </li>
+                                                        }
+                                                    }
                                                 }
-                                            }
                                         </ul>
                                     </div>
                                     <div class="subject_wrapper d-none">

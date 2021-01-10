@@ -25,7 +25,7 @@
     </div>
     <div class="card-header" v-cloak>
         <div class="flex mb-2">
-            <h2 class="title"><a href="@processUrl("Detail", "Class")/@currentClass.ID#student" title="Quản lý môn học"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
+            <h2 class="title"><a href="@processUrl("Detail", "Class")/@currentClass.ID#score" title="Bảng điểm"><i class="ti-arrow-left d-none"></i>{{domDecoder(className)}}</a>/ @currentStudent.FullName</h2>
             @*<div class="search-box">
                     <button><i class="ic ic-find"></i></button>
                     <input type="text" name="" placeholder="Search">
@@ -36,10 +36,11 @@
                 <div class="box filter-box w-152">
                     <select v-model="search_subject">
                         <option value="">-- Tất cả học liệu ---</option>
-                        <option v-for="(item, k) in classSubjects"
-                                :value="item.ID">
-                            {{item.Title}}
-                        </option>
+                        <template v-for="(item, k) in classSubjects">
+                            @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.Title}}</option>*@
+                            <option :value="item.ID" v-if="item.HasLessonActive">{{item.Title}} ___ [ĐÃ GIAO]</option>
+                            <option :value="item.ID" v-else>{{item.Title}}</option>
+                        </template>
                     </select>
                 </div>
                 @*<div class="box filter-box w-250" v-if="search_subject != ''">
@@ -47,9 +48,9 @@
                         <span class="ic ic-picker"></span>
                     </div>*@
             </div>
-            <div class="flex rate" v-if="tab[1] || search_subject == ''">
+            <div class="flex rate d-none" v-if="tab[1] || search_subject == ''">
                 <span><i class="ic ic-paper-yet"></i>Điểm: <b class="text-danger" v-bind:class="{good : (avgPoint > 50)}">{{avgPoint.toFixed(2)}}%</b></span>
-                <span><i class="ic ic-award"></i>Xếp hạng: {{rank.pos + '/' + rank.total}}</span>
+                @*<span><i class="ic ic-award"></i>Xếp hạng: {{ checkrank() + '/' + rank.total}}</span>*@
             </div>
         </div>
         <div class="flex j-between border-b" v-if="search_subject != ''">
@@ -76,9 +77,9 @@
                             <td colspan="4">Chưa có lịch sử học tập</td>
                         </tr>
                         <tr v-for="(item,k) in progressData" v-else>
-                            <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title">{{item.Title}}</a></td>
+                            <td><a v-bind:href="'@processUrl("Detail", "Lesson")/'+item.ID+'/'+item.ClassSubjectID" :title="item.Title" class="title" target="_blank">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                            <td>{{formatFullDate(item.LearnLast)}}</td>
+                            <td>{{formatTime(item.LearnLast)}}</td>
                             <td>{{item.LearnCount}}</td>
                         </tr>
                     </tbody>
@@ -90,8 +91,8 @@
                         <tr>
                             <th>
                                 <select class="form-control" v-on:change="loadResult()" id="examType">
-                                    <option selected value="2">Bài kiểm tra</option>
-                                    <option value="1">Bài luyện tập</option>
+                                    <option selected value="1">Bài luyện tập</option>
+                                    <option value="2">Bài kiểm tra</option>
                                 </select>
                             </th>
                             <th v-for="(field,k) in resultFields">{{field.label}}</th>
@@ -104,8 +105,8 @@
                         <tr v-for="(item,k) in resultData">
                             <td><a href="#" v-on:click="openHistory(item)" :title="item.Title" class="title">{{item.Title}}</a></td>
                             <td>{{formatShortDate(item.ScheduleStart)}} - {{formatShortDate(item.ScheduleEnd)}}</td>
-                            <td>{{formatFullDate(item.LearnLast)}}</td>
-                            <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (item.Result.toFixed(2) + '%')}}</td>
+                            <td>{{formatTime(item.LearnLast)}}</td>
+                            <td class="text-danger" v-bind:class="{good : (item.Result > 50)}">{{item.Result == null ? '---' : (roundPoint(item.Result,1))}}</td>
                             <td>{{item.LearnCount}}</td>
                         </tr>
                     </tbody>
@@ -122,11 +123,11 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in summaryData">
-                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName}}</a></td>
-                            <td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>
-                            <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{item.PracticeAvgPoint.toFixed(2)}}%</td>
-                            <td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>
-                            <td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>
+                            <td><a href="#" v-on:click="showSkillSummary(item.ClassSubjectID)" :title="item.CourseName" class="title">{{item.CourseName}}</a></td>
+                            @*<td class="text-danger" v-bind:class="{good : (getPercent(item.Completed, item.TotalLessons) > 50)}"> {{getPercent(item.Completed, item.TotalLessons).toFixed(2)}}%  ({{item.Completed}}/{{item.TotalLessons}})</td>*@
+                        <td class="text-danger" v-bind:class="{good : (item.PracticeAvgPoint > 50)}">{{roundPoint(item.PracticeAvgPoint,1)}}</td>
+                            @*<td class="text-danger" v-bind:class="{good : (item.AvgPoint > 50)}">{{item.AvgPoint.toFixed(2)}}%</td>*@
+                            @*<td>{{item.Rank > 0 ? (item.Rank + '/' + item.TotalStudents)  : '---'}}</td>*@
                         </tr>
                     </tbody>
                 </table>
@@ -149,7 +150,8 @@
                         <tr>
                             <th scope="col" class="text-center">#</th>
                             <th scope="col" class="text-center">Điểm</th>
-                            <th scope="col" class="text-center">Giờ làm bài</th>
+                            <th scope="col" class="text-center">Giờ bắt đầu</th>
+                            <th scope="col" class="text-center">Giờ kết thúc</th>
                             <th scope="col" class="text-center">Thời gian làm</th>
                             <th scope="col" class="text-center">Trạng thái</th>
                             <th scope="col" class="text-center"></th>
@@ -158,8 +160,9 @@
                     <tbody>
                         <tr v-for="(item,k) in studentResult.history" v-if="studentResult.history.length > 0">
                             <td class="text-center">{{k+1}}</td>
-                            <td class="text-center">{{ (item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0) .toFixed(2)}}</td>
-                            <td class="text-center">{{formatFullDate(item.Created)}}</td>
+                            <td class="text-center">{{ roundPoint((item.MaxPoint > 0 ? item.Point * 100 / item.MaxPoint : 0),1)}}</td>
+                            <td class="text-center">{{formatTime(item.Created)}}</td>
+                            <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
                             <td class="text-center">{{getPeriod(item)}}</td>
                             <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
                             <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
@@ -176,6 +179,27 @@
 </section>
 
 @section Scripts {
+    <style>
+        #s_table tbody td {
+            padding: 0px;
+        }
+
+        .table td, .table th {
+            padding: 0px
+        }
+
+        .table thead th {
+            border: 0.5px solid gray;
+            text-align: center;
+            vertical-align: middle
+        }
+
+        .table tbody td {
+            text-align: center;
+            border: 0.5px solid gray;
+            vertical-align: middle
+        }
+    </style>
     <script>
         new Vue({
             el: ".module",
@@ -212,22 +236,22 @@
                         key: 'subject',
                         label: 'Học liệu'
                     },
-                    {
-                        key: 'progress',
-                        label: 'KL đã hoàn thành'
-                    },
-                    {
-                        key: 'score',
-                        label: 'Điểm luyện tập'
-                    },
+                    //{
+                    //    key: 'progress',
+                    //    label: 'KL đã hoàn thành'
+                    //},
                     {
                         key: 'score',
-                        label: 'Điểm kiểm tra'
+                        label: 'Điểm'
                     },
-                    {
-                        key: 'rank',
-                        label: 'Xếp hạng'
-                    },
+                    //{
+                    //    key: 'score',
+                    //    label: 'Điểm kiểm tra'
+                    //},
+                    //{
+                    //    key: 'rank',
+                    //    label: 'Xếp hạng'
+                    //},
                 ],
                 progressFields: [
                     {
@@ -254,7 +278,7 @@
                     //},
                     {
                         key: 'schedule',
-                        label: 'Lịch kiểm tra'
+                        label: 'Lịch làm bài'
                     },
                     {
                         key: 'last_update',
@@ -339,13 +363,23 @@
                     _form.append('ID', '@currentStudent.ID')
                     _form.append('ClassSubjectID', _that.search_subject)
                     _form.append('StartDate', moment(_that.startdate).format("MM/DD/YYYY"))
-                    _form.append('EndDate',  moment(_that.enddate).format("MM/DD/YYYY"))
-                    _form.append('IsPractice', $("#examType").val() == '1')
+                    _form.append('EndDate', moment(_that.enddate).format("MM/DD/YYYY"))
+                    var isPractice = true
+                    if ($("#examType").val() == undefined || $("#examType").val() == '1') {
+                        isPractice = true
+                    }
+                    //else if ($("#examType").val() == '1') {
+                    //    isPractice = true
+                    //}
+                    else if ($("#examType").val() == '2') {
+                        isPractice = false
+                    }
+                    _form.append('IsPractice', isPractice)
                     let _url = '@processUrl("GetLearningResult", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
                             _that.resultData = response.data.Data;
-                            console.log(_that.resultData);
+                            //console.log(_that.resultData);
                             _that.avgPoint = 0;
 
                             if (_that.resultData.length > 0) {
@@ -354,6 +388,7 @@
                                 });
                                 _that.avgPoint = _that.avgPoint / _that.resultData.length
                             }
+
                             //this.fillTypeExam();
                             //console.log(_that.avgPoint)
                         }).catch(e => { })
@@ -377,11 +412,14 @@
                     let _that = this
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
-                    _form.append('ID', '@currentStudent.ID')
-                    let _url = '@processUrl("GetLearningSummary", "Class")'
+                    _form.append('StudentID', '@currentStudent.ID')
+                    //let _url = '@processUrl("GetLearningSummary", "Class")'
+                    let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {
-                            _that.summaryData = response.data.Data;
+                            //_that.summaryData = response.data.Data;
+                            _that.summaryData = response.data.Practice;
+                            //debugger
                             _that.rank = response.data.Result;
                             _that.avgPoint = response.data.Result.avg;
                         }).catch(e => { })
@@ -403,6 +441,7 @@
                                     ID: item.ID,
                                     Title: item.CourseName == null ? ("(" + item.SkillName + ")") : item.CourseName,
                                     Image: item.SkillImage,
+                                    HasLessonActive: item.HasLessonActive
                                 })
 
                                 var hash = window.location.hash.replace('#', '');
@@ -434,9 +473,10 @@
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
-                formatFullDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY hh:mm A")
+                formatTime(time) {
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY hh:mm A")
                 },
                 getPeriod(obj) {
                     var startms = moment(obj.Created);
@@ -531,7 +571,22 @@
                     //    });
                     //    _that.avgPoint = _that.avgPoint / _that.fillterResultData.length
                     //}
-                }
+                },
+                checkrank() {
+                    //if (this.search_subject == "")
+                    //    return this.rank.pos;
+                    //var rank = this.summaryData.filter(t => t.ClassSubjectID == this.search_subject)[0].Rank;
+                    //if (rank > 0) return rank;
+                    //return '-';
+                },
+                roundPoint(value, precision) {
+                    if (value > 0) {
+                        value = value / 10
+                        var multiplier = Math.pow(10, precision || 0);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                    }
+                    else return value
+                },
             }
         });
     </script>

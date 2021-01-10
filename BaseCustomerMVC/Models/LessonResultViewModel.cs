@@ -24,6 +24,8 @@ namespace BaseCustomerMVC.Models
         public double AvgPoint { get; set; }
         [JsonProperty("IsExam")]
         public bool IsExam { get; set; }
+        [JsonProperty("ChapterName")]
+        public String ChapterName { get; set; }
 
     }
 }

@@ -46,9 +46,6 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Discount")]
         public double Discount { get; set; }
 
-        //[JsonProperty("PriceSale")]
-        //public double PriceSale { get; set; }
-
         [JsonProperty("Type")]
         public string Type { get; set; }
         [JsonProperty("IsPublic")]
@@ -59,6 +56,8 @@ namespace BaseCustomerEntity.Database
         public List<string> Targets { get; set; }
         [JsonProperty("Limit")]
         public int Limit { get; set; }
+        [JsonProperty("CreateUser")]
+        public String CreateUser { get; set; }
     }
 
     public class NewsService : ServiceBase<NewsEntity>
@@ -71,20 +70,6 @@ namespace BaseCustomerEntity.Database
             var indexs = new List<CreateIndexModel<NewsEntity>> { };
             Collection.Indexes.CreateManyAsync(indexs);
         }
-
-        //public new NewsEntity Save(NewsEntity entity)
-        //{
-        //    if (entity.ID == null || entity.ID == "")
-        //    {
-        //        entity.UID = _indexService.GetNewIndex("News").ToString();
-        //        Collection.InsertOne(entity);
-        //    }
-        //    else
-        //    {
-        //        Collection.ReplaceOne(t => t.ID == entity.ID, entity);
-        //    }
-        //    return entity;
-        //}
 
         public void ChangeStatus(List<string> IDs, bool status, string check)
         {
@@ -113,5 +98,10 @@ namespace BaseCustomerEntity.Database
 
         public NewsEntity GetItemByCode(string Code) => Collection.Find<NewsEntity>(x => x.Code.Equals(Code)// && x.IsActive==true
         ).FirstOrDefault();
+
+        public IEnumerable<NewsEntity> GetAllNews()
+        {
+            return Collection.Find<NewsEntity>(x => x.Type.Equals("news")).ToEnumerable();
+        }
     }
 }
