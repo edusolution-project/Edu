@@ -1,6 +1,17 @@
 ﻿self.importScripts('/scripts/push-notifications-controller.js');
 
 var pushNotificationTitle = 'EnglishPlatform';
+var CACHE_NAME = 'eduso-cache-v1';
+self.addEventListener('install', function (event) {
+    //console.log(event.target.location.search);
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(function (cache) {
+                console.log('Opened cache');
+                return cache.addAll([event.target.location.search]);
+            })
+    );
+})
 
 self.addEventListener('push', function (event) {
     console.log(event);
