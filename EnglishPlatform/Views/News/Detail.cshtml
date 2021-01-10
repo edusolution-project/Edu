@@ -6,67 +6,119 @@
 }
 <section style="font-family:Open Sans" id="section">
     <div class="container">
-        <div class="row form-group">
+        <div class="form-group">
+            @*<div class="inner-content">*@
             <div class="inner-content">
-                <div class="content-box">
-                    <div class="box-title d-flex justify-content-center mb-5">
+                <div class="content-box pt-3">
+                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
                         @news.Title
-                        <div class="underline"></div>
-                    </div> <div class="news-list flex-md-row pb-3"></div>
+                        <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="row form-group">
-            <div class="col-md-2"></div>
-            <div class="col-md-8 col-sm-12" id="summary" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:26px">
-                @news.Summary
-            </div>
-            <div class="col-md-2"></div>
-            <div class="col-md-2"></div>
-            <div class="col-md-8 col-sm-12" style="padding-top:5px">
+        <!--<div class="row form-group">
+            <div class="inner-content">
+                <div class="content-box">-->
+        @*<div class="col-md-2"></div>*@
+        <!--<div class="col-md-12 col-sm-12" id="summary" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:17px">
+            @news.Summary
+        </div>-->
+        @*<div class="col-md-2"></div>
+            <div class="col-md-2"></div>*@
+        @*<div class="col-md-12 col-sm-12" style="padding-top:5px">
                 <ul id="nextNews">
                     <li v-for="(item,k) in items" v-if="k <= 1"><a :href="item.Url" style="margin: 0px 0px 6px -9px;text-decoration:none" :title="item.Title">{{item.Title}}</a></li>
                 </ul>
+            </div>*@
+        <!--</div>
             </div>
-        </div>
-
-        <div class="media-container-row row">
-            <div class="col-md-2"></div>
-            <div class="col-md-8 col-sm-12" id="content" style="text-align:justify;font-size:18px;font-family:'Be Vietnam',sans-serif">
-                @Html.Raw(news.Content)
-                <div class="float-right" style="font-style:italic">@news.PublishDate.ToString("dd/MM/yyyy")</div>
-            </div>
-        </div>
-    </div>
-    <div class="row form-group" id="related_news">
-        <div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 30px;font-weight: bold;">
-            Tin cùng chuyên mục
-        </div>
-
-        <div class="col-sm-12">
-            <div class="carousel-wrap" id="partner" style="text-align:center">
-                <div class="owl-carousel">
-                    <div class="item" v-for="img in items">
-                        <a :href="img.Url">
-                            <img :src="cacheStatic(img.Thumbnail,200,120)" :title="img.Title">
-                            <div class=" col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700">
-                                {{img.Title}}
-                                <template v-if="img.IsHot">
-                                    <span class="iconb-ccm">Nổi bật</span>
-                                </template>
-                                <template v-else>
-                                    <span class="iconb-ccm" v-if="getHourse(img.PublishDate) != false">{{getHourse(img.PublishDate)}} giờ trước</span>
-                                </template>
-                            </div>
-                        </a>
+        </div>-->
+        @*<div class="media-container-row row">*@
+        <div class="form-group">
+            <div class="inner-content">
+                <div class="content-box">
+                    <div class="row col-md-12 col-sm-12" id="content" style="text-align:justify;font-size:14px;font-family:'Be Vietnam',sans-serif">
+                        @Html.Raw(news.Content)
+                        <div class="col-md-12 col-sm-12 ">
+                            <div class="float-right" style="font-style:italic;font-size:12px">@news.PublishDate.ToString("dd/MM/yyyy")</div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
-
     </div>
+    <div class="container">
+        <div class="form-group" id="related_news" style="padding-top:20px">
+            @*<div class="inner-content">*@
+            <div class="content-box">
+                @*<div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 18px;font-weight: bold;">
+                        Tin cùng chuyên mục
+                    </div>*@
+                <div class="inner-content">
+                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
+                        Tin cùng chuyên mục
+                        <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="carousel-wrap" id="partner" style="text-align:center">
+                    <div class="owl-carousel">
+                        <div class="item" v-for="item in items">
+                            <a :href="item.Url">
+                                <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
+                                <div class="col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
+                                    {{item.Title}}
+                                </div>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            @*</div>*@
+        </div>
+    </div>
+    <template v-if="itemsHot.length > 0">
+        <div class="container">
+            <div class="form-group" style="padding-top:20px">
+                <div class="content-box">
+                    <div class="inner-content">
+                        <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
+                            Tin nổi bật
+                            <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                    <div class="news-top media-body pl-md-4 pr-md-4">
+                        <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in itemsHot" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code">
+                            <div class="thumb">
+                                <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                    <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
+                                </a>
+                            </div> <div class=" media-body">
+                                <div class="news-title">
+                                    <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code" style="text-decoration:none">
+                                        {{item.Title}}
+                                    </a>
+                                </div>
+                                <div class="news-desc" style="overflow: hidden;">
+                                    {{item.Summary}}
+                                </div>
+                                <div class="news-time">
+                                    {{formatShortDate(item.PublishDate)}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    @*</div>*@
 </section>
 <script>
     @if(news.Code == "ve-eduso")
@@ -79,34 +131,117 @@
     }
 
     function getData() {
-        $.ajax({
-            url: '@Url.Action("getlist", "news")',
-            type: "post",
-            dataType: "json",
-            data: { catID: '@news.CategoryID',CurrentNewsCode: '@news.Code' },
-            success: function (result) {
-                var hrefOrigin = window.location.origin;
-                if (result.Data.length > 0) {
-                    for (var i = 0; i < result.Data.length; i++) {
-                        var item = result.Data[i]
-                        item.Url = hrefOrigin + "/tin-tuc/" + item.CategoryCode + "/" + item.Code
+        try {
+            $.ajax({
+                url: '@Url.Action("getlist", "news")',
+                type: "post",
+                dataType: "json",
+                data: { catID: '@news.CategoryID', CurrentNewsCode: '@news.Code' },
+                success: function (result) {
+                    var hrefOrigin = window.location.origin;
+                    if (result.Data.length > 0) {
+                        for (var i = 0; i < result.Data.length; i++) {
+                            var item = result.Data[i]
+                            item.Url = hrefOrigin + "/tin-tuc/" + item.CategoryCode + "/" + item.Code
+                        }
                     }
+                    //else {
+                    //    $('#related_news').attr('style', 'display:none')
+                    //}
+                    new Vue({
+                        el: '#section',
+                        data: {
+                            items: result.Data,
+                            itemsHot: result.DataNewsH,
+                            //categorys: result.Category
+                        },
+                        mounted() {
+                            callCarousel(result.Data)
+                        }
+                    })
+                }
+            });
+        }
+        catch (e) {
+            console.log(e)
+        }
+    }
+
+    @*new Vue({
+        el: '#section',
+        mounted() {
+            this.getData()
+        },
+        data: {
+            items: [],
+            itemsHot: []
+        },
+        watch: {},
+        methods: {
+            getData() {
+                let _that = this;
+                let _url = '@Url.Action("getlist", "news")'
+                let _form = new FormData()
+                _form.append('catID', '@news.CategoryID');
+                _form.append('CurrentNewsCode', '@news.Code');
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.items = response.data.Data
+                            //_that.itemsHot = response.data.DataNewsH
+                            this.items = _that.items
+                            //this.itemsHot = _that.itemsHot
+                            this.callCarousel(this.items)
+                        }).catch(e => { })
+            },
+            callCarousel(item) {
+                debugger
+                var $owl = $('.owl-carousel');
+                $owl.trigger('destroy.owl.carousel');
+                //debugger
+                // After destory, the markup is still not the same with the initial.
+                // The differences are:
+                //   1. The initial content was wrapped by a 'div.owl-stage-outer';
+                //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
+                //   We have to remove that before the new initialization.
+                $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
+                //debugger
+                var countItem = item.length
+                $owl.owlCarousel({
+                    // your initial option here, again.
+                    items: countItem > 4 ? 4 : countItem,
+                    loop: true,
+                    margin: 10,
+                    nav: true,
+                    navText: [
+                        '<i class="fas fa-chevron-left"></i>',
+                        '<i class="fas fa-chevron-right"></i>'
+                    ],
+                    autoplay: true,
+                    autoplayHoverPause: true,
+                });
+            },
+            formatShortDate(date) {
+                var _date = moment(date);
+                if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                return _date.format("DD/MM/YYYY")
+            },
+            formatTime(time) {
+                var _time = moment(time);
+                if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                return _time.format("DD/MM/YYYY HH:mm")
+            },
+            getHourse(time) {
+                var _time = moment(time)._d;
+                var today = new Date();
+                if (_time.getDate() == today.getDate()) {
+                    return today.getHours() - _time.getHours()
                 }
                 else {
-                    $('#related_news').attr('style', 'display:none')
+                    return false
                 }
-                new Vue({
-                    el: '#section',
-                    data: {
-                        items: result.Data
-                    },
-                    mounted() {
-                        callCarousel(result.Data)
-                    }
-                })
             }
-        });
-    }
+        }
+    })*@
 
     function formatShortDate(date) {
         var _date = moment(date);
@@ -150,8 +285,8 @@
             margin: 10,
             nav: true,
             navText: [
-                "<i class='fa fa-caret-left'></i>",
-                "<i class='fa fa-caret-right'></i>"
+                '<i class="fas fa-chevron-left"></i>',
+                '<i class="fas fa-chevron-right"></i>'
             ],
             autoplay: true,
             autoplayHoverPause: true,
@@ -179,10 +314,15 @@
         });
 </script>
 <style>
+
+    #content * {
+        font-family: 'Be Vietnam',sans-serif !important;
+    }
+
     .carousel-wrap {
         margin: auto;
-        padding: 10px 6%;
-        /*        width: 80%;*/
+        padding: 20px 0;
+        /*width: 80%;*/
         position: relative;
     }
 
@@ -196,7 +336,7 @@
     /* end fix */
     .owl-nav {
         position: absolute;
-        top: 34%;
+        top: 40%;
         width: 100%;
     }
 
@@ -208,8 +348,18 @@
         }
 
         .owl-nav i {
-            font-size: 52px;
+            font-size: 30px;
+            opacity: 0.3
         }
+
+            .owl-nav i:hover {
+                opacity: 1
+            }
+
+            .owl-nav i::outside {
+                border: 0px
+            }
+
 
         .owl-nav .owl-prev {
             left: -30px;
@@ -221,6 +371,18 @@
             position: absolute
         }
 
+    /*.owl-carousel:hover .owl-nav i{
+        opacity:1
+    }*/
+
+    .owl-prev:hover {
+        opacity: 1
+    }
+
+    .owl-next:hover {
+        opacity: 1
+    }
+
     .owl-carousel .item:hover {
         cursor: pointer;
     }
@@ -231,11 +393,27 @@
     }
 
     .item {
-        position: relative
+        position: relative;
+        padding: 5px;
+        background-color: rgb(255 255 255);
+        /*border:1px solid none;*/
+        border-radius: 5px;
+        opacity: 0.9;
+        width: 285px;
+        height: 275px;
+        margin: auto
     }
 
+        .item:hover {
+            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);
+            opacity: 1
+        }
+
         .item a:hover {
-            color: aqua
+            /*color: cornflowerblue;*/
+            /*text-shadow: 1px 1px 2px #676aad, 0 0 1em blue, 0 0 0.2em darkblue;*/
+            text-decoration: none;
+            font-weight: bold
         }
 
     .iconb-ccm {
@@ -251,7 +429,7 @@
     }
 
     #nextNews {
-        font-size: 14px
+        font-size: 13px
     }
 
         #nextNews li {
@@ -278,4 +456,44 @@
             width: 2em;
             margin-left: -1em;
         }
+
+    #related_news {
+        background-color: #f2f2f2;
+        margin-top: 30px
+    }
+
+    .container {
+        width: 1200px
+    }
+
+    .news-item {
+        /*width:1140px;*/
+        height: 150px !important;
+        opacity:0.9;
+        border-radius:5px
+    }
+
+        .news-item:hover {
+            opacity: 1;
+            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .news-top .news-item .thumb {
+            width: 21%;
+            height: 100%;
+            margin-right: -5px
+        }
+
+    .thumb img{
+        max-height:100%;
+        max-width:220px
+    }
+
+    .news-title a {
+        text-decoration:none
+    }
+
+    /*.thumb a:hover{
+        text-decoration:none
+    }*/
 </style>

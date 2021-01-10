@@ -33,5 +33,5 @@ CKEDITOR.editorConfig = function( config ) {
 	config.extraPlugins = 'youtube';
 	config.imageUploadUrl = '/Home/UploadImage';
 	//config.extraAllowedContent = 'fillquiz';
-	config.extraPlugins = 'lineheight';
+	//config.extraPlugins = 'lineheight';
 };

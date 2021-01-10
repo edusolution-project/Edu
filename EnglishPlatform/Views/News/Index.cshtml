@@ -18,7 +18,7 @@
                         <div class="news-item w-100 pb-3">
                             <div class="thumb w-100 pb-2" >
                                 <a href="/tin-tuc/tin-tuc/@item.Code" style="font-size:20px;font-weight:bold">
-                                    <img :src="cacheStatic('@item.Thumbnail',545,345)" class="w-100 h-50" style="max-width:100%;max-height:100%"/>
+                                    <img :src="cacheStatic('@item.Thumbnail',545,300)" class="w-100" style="max-width:100%;max-height:100%"/>
                                 </a>
                             </div>
                             <div class="news-title">
@@ -26,7 +26,7 @@
                                     @item.Title
                                 </a>
                             </div>
-                            <div class="news-desc">
+                            <div class="news-desc" style="height:40px;overflow:hidden">
                                @item.Summary
                             </div>
                             <div class="news-time">
@@ -50,7 +50,7 @@
                                        @item.Title
                                     </a>
                                 </div>
-                                <div class="news-desc">
+                                <div class="news-desc" style="height:40px;overflow:hidden">
                                     @item.Summary
                                 </div>
                                 <div class="news-time">

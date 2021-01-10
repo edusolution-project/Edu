@@ -26,12 +26,29 @@
                     @category.Name
                     <div class="underline"></div>
                 </div>
+                
                 <template v-if="tableData != null">
-                    <div class="news-list flex-md-row pb-3">
+
+                    @*<div class="col-sm-12">
+            <div class="carousel-wrap" id="partner" style="text-align:center">
+                <div class="owl-carousel">
+                    <div class="item" v-for="item in tableData" v-if="item.Hot == true">
+                        <a :href="item.Url">
+                            <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
+                            <div class=" col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
+                                {{item.Title}}
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+                    @*<div class="news-list flex-md-row pb-3">
                         <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
                             <div class="thumb " style="width:216px;height:122px;text-align:center">
                                 <a :href="'/tin-tuc/@category.Code/' + item.Code">
-                                    <img :src="cacheStatic(img.Thumbnail)" style="max-width:100%;max-height:100%;text-align:center" />
+                                    <img :src="cacheStatic(item.Thumbnail)" style="max-width:100%;max-height:100%;text-align:center" />
                                 </a>
                             </div>
                             <div class="ml-3 media-body">
@@ -48,12 +65,36 @@
                                 </div>
                             </div>
                         </div>
+                    </div>*@
+
+                    <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                        <div class="news-top media-body pl-md-4 pr-md-4">
+                            <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in tableData">
+                                <div class="thumb">
+                                    <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                        <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
+                                    </a>
+                                </div> <div class=" media-body">
+                                    <div class="news-title">
+                                        <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code">
+                                            {{item.Title}}
+                                        </a>
+                                    </div>
+                                    <div class="news-desc" style="height: 40px; overflow: hidden;">
+                                        {{item.Summary}}
+                                    </div>
+                                    <div class="news-time">
+                                        {{formatShortDate(item.PublishDate)}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </template>
                 <template v-else>
                     <div class="news-list flex-md-row pb-3" style="text-align:center">
                         <h2>Chưa có tin mới, vui lòng quay lại sau.</h2>
-                        </div>
+                    </div>
                 </template>
             </div>
         </div>
@@ -71,6 +112,7 @@
             el: ".category-box",
             mounted() {
                 this.getData();
+                //callCarousel(result.Data)
             },
             data: {
                 isLoading: false,
@@ -94,14 +136,128 @@
                         .then(response => {
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
-                            if (this.tableData.length == 1) {
-                                window.location.href = window.location.href + "/" + this.tableData[0].Code
-                            }
-                            this.totalRec = response.data.Model.totalRecord
-                            console.log(totalRec)
-                        }).catch(e => { })
+                            //this.totalRec = response.data.Model.totalRecord
+                            debugger
+                            //this.callCarousel(this.tableData)
+                            //console.log(totalRec)
+                        }).catch(e => {
+                            debugger
+                        })
                 },
+                //callCarousel(item) {
+                //    var $owl = $('.owl-carousel');
+                //    $owl.trigger('destroy.owl.carousel');
+                //    //debugger
+                //    // After destory, the markup is still not the same with the initial.
+                //    // The differences are:
+                //    //   1. The initial content was wrapped by a 'div.owl-stage-outer';
+                //    //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
+                //    //   We have to remove that before the new initialization.
+                //    $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
+                //    //debugger
+                //    var countItem = item.length
+                //    $owl.owlCarousel({
+                //        // your initial option here, again.
+                //        items: countItem > 4 ? 4 : countItem,
+                //        loop: true,
+                //        margin: 10,
+                //        nav: true,
+                //        navText: [
+                //            "<i class='fa fa-caret-left'></i>",
+                //            "<i class='fa fa-caret-right'></i>"
+                //        ],
+                //        autoplay: true,
+                //        autoplayHoverPause: true,
+                //    });
+                //}
             }
         });
+    //}
+
+    //function formatShortDate(date) {
+    //    var _date = moment(date);
+    //    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+    //    return _date.format("DD/MM/YYYY")
+    //};
+
+    //function formatTime(time) {
+    //    var _time = moment(time);
+    //    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+    //    return _time.format("DD/MM/YYYY HH:mm")
+    //};
+
+    //function getHourse(time) {
+    //    var _time = moment(time)._d;
+    //    var today = new Date();
+    //    if (_time.getDate() == today.getDate()) {
+    //        return today.getHours() - _time.getHours()
+    //    }
+    //    else {
+    //        return false
+    //    }
+    //};
+
+    //function callCarousel(item) {
+    //    var $owl = $('.owl-carousel');
+    //    $owl.trigger('destroy.owl.carousel');
+    //    //debugger
+    //    // After destory, the markup is still not the same with the initial.
+    //    // The differences are:
+    //    //   1. The initial content was wrapped by a 'div.owl-stage-outer';
+    //    //   2. The '.owl-carousel' itself has an '.owl-loaded' class attached;
+    //    //   We have to remove that before the new initialization.
+    //    $owl.html($owl.find('.owl-stage-outer').html()).removeClass('owl-loaded');
+    //    //debugger
+    //    var countItem = item.length
+    //    $owl.owlCarousel({
+    //        // your initial option here, again.
+    //        items: countItem > 4 ? 4 : countItem,
+    //        loop: true,
+    //        margin: 10,
+    //        nav: true,
+    //        navText: [
+    //            "<i class='fa fa-caret-left'></i>",
+    //            "<i class='fa fa-caret-right'></i>"
+    //        ],
+    //        autoplay: true,
+    //        autoplayHoverPause: true,
+    //    });
+
+    //    //$('.owl-carousel').owlCarousel({
+    //    //    items: 4,
+    //    //    loop: true,
+    //    //    margin: 10,
+    //    //    nav: true,
+    //    //    navText: [
+    //    //        "<i class='fa fa-caret-left'></i>",
+    //    //        "<i class='fa fa-caret-right'></i>"
+    //    //    ],
+    //    //    //autoplay: true,
+    //    //    //autoplayHoverPause: true,
+    //    //})
+    //}
+
+        function formatShortDate(date) {
+            var _date = moment(date);
+            if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+            return _date.format("DD/MM/YYYY")
+        };
     </script>
+<style>
+    .news-item {
+        /*width:1140px;*/
+        height: 150px !important
+    }
+
+    .news-top .news-item .thumb {
+        width: 21%;
+        height: 100%;
+        margin-right: 0px
+    }
+
+    .thumb img {
+        max-height: 100%;
+        max-width: 220px
+    }
+</style>
 }

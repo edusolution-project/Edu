@@ -104,7 +104,7 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-8">
-                                <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" onchange="tes" required>
+                                <input type="text" class="form-control" name="Title" id="Title" placeholder="Tiêu đề" maxlength="250" required>
                             </div>
                             <div class="form-group col-md-4">
                                 <div class="form-row">
@@ -124,7 +124,7 @@
 
                         <div class="form-row">
                             <div class="form-group col-sm-12">
-                                <input name="Summary" id="Summary" class="form-control" placeholder="Tóm tắt" required>
+                                <input name="Summary" id="Summary" class="form-control" maxlength="250" placeholder="Tóm tắt" required>
 
                             </div>
                         </div>
@@ -359,7 +359,8 @@
     $(document).ready(function () {
         LoadData();
         CKEDITOR.config.height = 500;
-        //CKEDITOR.config.extraPlugins = 'lineheight';
+        CKEDITOR.config.extraPlugins = 'lineheight';
+        //CKEDITOR.config.removeDialogTabs = 'lineheight';
     });
 
     $('form').submit(function (e) {
@@ -532,12 +533,15 @@
         for (name in CKEDITOR.instances) {
             CKEDITOR.instances[name].destroy(true);
         }
-        CKEDITOR.replace("Content");
-        //CKEDITOR.replace('Content', {
-        //    //filebrowserBrowseUrl: '/ckfinder/ckfinder.html',
-        //    //filebrowserImageUploadUrl: '/admin/News/GetPathIMG?command=QuickUpload&type=Files'
-        //    filebrowserImageUploadUrl: '/admin/News/GetPathIMG'
-        //});
+        CKEDITOR.replace("Content", {
+            extraPlugins: 'lineheight,uploadimage,youtube',
+            removeButtons: 'CreateDiv,Language,Anchor,Flash,Smiley,About,Print,NewPage,Save,TextField,Subscript,Superscript',
+            removeDialogTabs: 'image:advanced;link:advanced;textfield',
+            //imageUploadUrl = '/Home/UploadImage'
+        });
+        CKEDITOR.stylesSet.add('my_styles', [
+            { name: 'Paragraph', element: 'p', styles: { 'margin': '0' } },
+        ]);
 
 
         var txtarea = form.querySelector('textarea');
