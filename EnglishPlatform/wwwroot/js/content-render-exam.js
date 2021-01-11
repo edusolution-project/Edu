@@ -4914,10 +4914,6 @@ var Lesson = (function () {
         return html;
     }
 
-    //var renderQuestiontoSelectQ2 = function () {
-
-    //}
-
     var renderAns = function (item) {
         var html = '';
         for (var i = 0; i < item.Answers.length; i++) {
@@ -4955,9 +4951,6 @@ var Lesson = (function () {
 
     //var listQuestionID = [];
     var listLessonPartID = [];
-
-    var selectQuestiontoSave = function (questionID) {
-    }
 
     var select1LessonPart = function (lessonpartID, obj) {
         //debugger
@@ -5055,11 +5048,13 @@ var Lesson = (function () {
         })
     }
 
+    //-----------------------
+
     window.choosePart = choosePart;
     window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
     window.renderAns = renderAns;
     //window.renderQuestiontoSelectQ2 = renderQuestiontoSelectQ2;
-    window.selectQuestiontoSave = selectQuestiontoSave;
+    //window.selectQuestiontoSave = selectQuestiontoSave;
     window.chooseLesson = chooseLesson;
     window.chooseLessonPart = chooseLessonPart;
     window.saveQAtoExam = saveQAtoExam;

@@ -200,6 +200,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
                 }
 
+                student.Email = student.Email.ToLower().Trim();
+
                 if (!ExistEmail(student.Email))//if student account not exist => create new student
                 {
                     student.CreateDate = DateTime.Now;
@@ -236,7 +238,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             RoleID = _roleService.GetItemByCode("student").ID
                         };
                         _accountService.CreateQuery().InsertOne(account);
-                        //_ = _mailHelper.SendRegisterEmail(account, _defaultPass);
+                        _ = _mailHelper.SendRegisterEmail(account, _defaultPass);
                         createAcc = true;
                     }
 

@@ -1271,11 +1271,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     if (!String.IsNullOrEmpty(item.Description) && item.Description.ToLower().IndexOf("<fillquiz ") >= 0)
                     {
-                        var newdescription = "";
                         if (item.Questions == null || item.Questions.Count == 0)
+                        {
+                            var newdescription = "";
                             item.Questions = ExtractFillQuestionList(item, createduser, out newdescription);
-                        lessonpart.Description = newdescription;
-                        _cloneLessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                            lessonpart.Description = newdescription;
+                            _cloneLessonPartService.CreateQuery().ReplaceOne(t => t.ID == lessonpart.ID, lessonpart);
+                        }
                     }
                     else
                     {

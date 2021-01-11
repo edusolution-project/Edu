@@ -220,16 +220,16 @@ namespace EnglishPlatform.Controllers
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                //return Redirect($"{centerCode}/{type.Value}");
+                return Redirect($"{centerCode}/{type.Value}");
             }
             else
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
                 HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                //return RedirectToAction("Login");
+                return RedirectToAction("Login");
                 
             }
-            return View();
+            //return View();
         }
 
 
