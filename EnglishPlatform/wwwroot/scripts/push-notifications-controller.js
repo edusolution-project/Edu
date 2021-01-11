@@ -26,6 +26,7 @@
             });
         },
         storePushSubscription: function (pushSubscription) {
+            console.log(pushSubscription);
             return fetch('/push-notifications-api/subscriptions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
