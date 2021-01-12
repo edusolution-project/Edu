@@ -32,8 +32,9 @@ namespace WebPush.Controllers
 
         // POST push-notifications-api/subscriptions
         [HttpPost("subscriptions")]
-        public async Task<IActionResult> StoreSubscription([FromBody] PushSubscription subscription)
+        public async Task<IActionResult> StoreSubscription([FromBody] PushSubscriptionEntity subscription)
         {
+            subscription.UserId = HttpContext.User.FindFirst("UserID")?.Value;
             await _subscriptionStore.StoreSubscriptionAsync(subscription);
 
             return NoContent();
@@ -52,10 +53,11 @@ namespace WebPush.Controllers
         [HttpPost("notifications")]
         public IActionResult SendNotification([FromBody] PushMessageViewModel message)
         {
-            _pushNotificationsQueue.Enqueue(new PushMessage(message.Notification)
+            _pushNotificationsQueue.Enqueue(new PushMessageEntity(message.Notification)
             {
                 Topic = message.Topic,
-                Urgency = message.Urgency
+                Urgency = message.Urgency,
+                UserId = message.UserId
             });
 
             return NoContent();

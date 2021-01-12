@@ -85,8 +85,8 @@
             userVisibleOnly: true,
             applicationServerKey: applicationServerPublicKey
         })
-        .then(function (pushSubscription) {
-            PushNotificationsController.storePushSubscription(pushSubscription)
+            .then(function (pushSubscription) {
+                PushNotificationsController.storePushSubscription(pushSubscription, g_CurrentUser.id)
                 .then(function (response) {
                     if (response.ok) {
                         writeToConsole('Successfully subscribed for Push Notifications');
@@ -133,7 +133,7 @@
     }
 
     function sendPushNotification() {
-        var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value };
+        var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value, userId: g_CurrentUser.id };
 
         fetch('/push-notifications-api/notifications', {
             method: 'POST',
@@ -174,6 +174,10 @@
                     }
                 });
             }
+            topicInput = document.getElementById('topic');
+            notificationInput = document.getElementById('notification');
+            urgencySelect = document.getElementById('urgency');
+            document.getElementById('send').addEventListener('click', sendPushNotification);
         }
     };
 })();

@@ -4,6 +4,7 @@ namespace WebPush.Models
 {
     public class PushMessageViewModel
     {
+        public string UserId { get; set; }
         public string Topic { get; set; }
 
         public string Notification { get; set; }

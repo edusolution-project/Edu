@@ -1,6 +1,7 @@
 ﻿using Lib.Net.Http.WebPush;
 using System.Threading;
 using System.Threading.Tasks;
+using WebPush.Models;
 
 namespace WebPush.Interfaces
 {
