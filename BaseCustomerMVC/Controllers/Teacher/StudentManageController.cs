@@ -1039,7 +1039,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (rtn == null)
             {
                 rtn = new List<StudentRankingViewModel>();
-                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
                 var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
                 {
                     StudentID = g.Key,
