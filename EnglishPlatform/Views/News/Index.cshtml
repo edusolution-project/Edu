@@ -26,10 +26,10 @@
                                     @item.Title
                                 </a>
                             </div>
-                            <div class="news-desc" style="height:40px;overflow:hidden">
+                            <div class="news-desc" style="max-height:40px;overflow:hidden">
                                @item.Summary
                             </div>
-                            <div class="news-time">
+                            <div class="news-time" style="padding-bottom:10px">
                                @item.PublishDate.ToString("dd-MM-yyyy")
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                                        @item.Title
                                     </a>
                                 </div>
-                                <div class="news-desc" style="height:40px;overflow:hidden">
+                                <div class="news-desc" style="max-height:40px;overflow:hidden">
                                     @item.Summary
                                 </div>
                                 <div class="news-time">

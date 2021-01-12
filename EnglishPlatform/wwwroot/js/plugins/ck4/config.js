@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see https://ckeditor.com/legal/ckeditor-oss-license
  */
@@ -32,6 +32,5 @@ CKEDITOR.editorConfig = function( config ) {
 	config.extraPlugins = 'uploadimage';
 	config.extraPlugins = 'youtube';
 	config.imageUploadUrl = '/Home/UploadImage';
-	//config.extraAllowedContent = 'fillquiz';
-	//config.extraPlugins = 'lineheight';
+	//config.specialChars = config.specialChars.concat([['&uarr;', 'Mũi tên hướng lên trên'],['&darr;','Mũi tên hướng xuống dưới']]);
 };

@@ -8,8 +8,11 @@
 }
 
 
-<script src="~/js/minify/common.min.js?20200604"></script>
-<script src="~/js/minify/common.lib.min.js?20200604"></script>
+<link href="~/css/minify/minify.min.css" rel="stylesheet" />
+<link href="~/css/stylesheet.min.css" rel="stylesheet" />
+
+<script src="~/js/minify/common.min.js?20200930"></script>
+<script src="~/js/minify/common.lib.min.js?20200326"></script>
 
 <script>
     setActiveMenu('@category.Code');
@@ -20,31 +23,31 @@
     }
 </style>
 <div class="category-box pt-5 pb-5">
-        <div class="inner-content">
-            <div class="content-box">
-                <div class="box-title d-flex justify-content-center mb-5">
-                    @category.Name
-                    <div class="underline"></div>
-                </div>
-                
-                <template v-if="tableData != null">
-
-                    @*<div class="col-sm-12">
-            <div class="carousel-wrap" id="partner" style="text-align:center">
-                <div class="owl-carousel">
-                    <div class="item" v-for="item in tableData" v-if="item.Hot == true">
-                        <a :href="item.Url">
-                            <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
-                            <div class=" col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
-                                {{item.Title}}
-                            </div>
-                        </a>
-                    </div>
-                </div>
+    <div class="inner-content">
+        <div class="content-box">
+            <div class="box-title d-flex justify-content-center mb-5">
+                @category.Name
+                <div class="underline"></div>
             </div>
-        </div>*@
 
-                    @*<div class="news-list flex-md-row pb-3">
+            <template v-if="tableData != null">
+
+                @*<div class="col-sm-12">
+                        <div class="carousel-wrap" id="partner" style="text-align:center">
+                            <div class="owl-carousel">
+                                <div class="item" v-for="item in tableData" v-if="item.Hot == true">
+                                    <a :href="item.Url">
+                                        <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
+                                        <div class=" col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
+                                            {{item.Title}}
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+
+                @*<div class="news-list flex-md-row pb-3">
                         <div v-for="(item,k) in tableData" class="news-item pb-3 pt-3 d-flex">
                             <div class="thumb " style="width:216px;height:122px;text-align:center">
                                 <a :href="'/tin-tuc/@category.Code/' + item.Code">
@@ -67,44 +70,46 @@
                         </div>
                     </div>*@
 
-                    <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
-                        <div class="news-top media-body pl-md-4 pr-md-4">
-                            <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in tableData">
-                                <div class="thumb">
-                                    <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
-                                        <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
+                <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                    <div class="news-top media-body pl-md-4 pr-md-4">
+                        <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in tableData">
+                            <div class="thumb">
+                                <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                    <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
+                                </a>
+                            </div>
+                            <div class=" media-body">
+                                <div class="news-title">
+                                    <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code">
+                                        {{item.Title}}
                                     </a>
                                 </div>
-                                <div class=" media-body">
-                                    <div class="news-title">
-                                        <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code">
-                                            {{item.Title}}
-                                        </a>
-                                    </div>
-                                    <div class="news-desc" style="height: 40px; overflow: hidden;">
-                                        {{item.Summary}}
-                                    </div>
-                                    <div class="news-time">
-                                        {{formatShortDate(item.PublishDate)}}
-                                    </div>
+                                <div class="news-desc" style="height: 40px; overflow: hidden;">
+                                    {{item.Summary}}
+                                </div>
+                                <div class="news-time">
+                                    {{formatShortDate(item.PublishDate)}}
                                 </div>
                             </div>
                         </div>
                     </div>
-                </template>
-                <template v-else>
-                    <div class="news-list flex-md-row pb-3" style="text-align:center">
-                        <h2>Chưa có tin mới, vui lòng quay lại sau.</h2>
-                    </div>
-                </template>
-            </div>
+                </div>
+            </template>
+            <template v-else>
+                <div class="news-list flex-md-row pb-3" style="text-align:center">
+                    <h2>Chưa có tin mới, vui lòng quay lại sau.</h2>
+                </div>
+            </template>
         </div>
+    </div>
 
-                <div class="page-control d-flex justify-content-lg-center">
-                    <b-pagination v-model="page"
-                                  :total-rows="totalRec"
-                                  :per-page="view"
-                                  v-on:input="getData()"></b-pagination>
+    <div class="page-control d-flex justify-content-lg-center">
+        <div class="right">
+            <b-pagination v-model="page"
+                          :total-rows="totalRec"
+                          :per-page="view"
+                          v-on:input="getData()"></b-pagination>
+        </div>
     </div>
 </div>
 @section Scripts{
@@ -138,11 +143,11 @@
                             _that.tableData = response.data.Data;
                             this.tableData = _that.tableData
                             //this.totalRec = response.data.Model.totalRecord
-                            debugger
+                            //debugger
                             //this.callCarousel(this.tableData)
                             //console.log(totalRec)
                         }).catch(e => {
-                            debugger
+                            //debugger
                         })
                 },
                 //callCarousel(item) {
@@ -244,21 +249,27 @@
             return _date.format("DD/MM/YYYY")
         };
     </script>
-<style>
-    .news-item {
-        /*width:1140px;*/
-        height: 150px !important
-    }
+    <style>
+        .news-item {
+            /*width:1140px;*/
+            height: 150px !important
+        }
 
-    .news-top .news-item .thumb {
-        width: 21%;
-        height: 100%;
-        margin-right: 0px
-    }
+        .news-top .news-item .thumb {
+            width: 21%;
+            height: 100%;
+            margin-right: 0px
+        }
 
-    .thumb img {
-        max-height: 100%;
-        max-width: 220px
-    }
-</style>
+        .thumb img {
+            max-height: 100%;
+            max-width: 220px
+        }
+
+        /*.page-item.active .page-link {
+            color: #d03239 !important;
+            background-color: white !important;
+            border-color: white !important
+        }*/
+    </style>
 }
