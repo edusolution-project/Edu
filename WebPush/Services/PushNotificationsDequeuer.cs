@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Lib.Net.Http.WebPush;
 using WebPush.Interfaces;
+using WebPush.Services.Sqlite;
+using PushSubscription = WebPush.Services.Sqlite.PushSubscription;
+using WebPush.Models;
 
 namespace WebPush.Services
 {
@@ -40,7 +43,7 @@ namespace WebPush.Services
         {
             while (!_stopTokenSource.IsCancellationRequested)
             {
-                PushMessage message = await _messagesQueue.DequeueAsync(_stopTokenSource.Token);
+                PushMessageEntity message = await _messagesQueue.DequeueAsync(_stopTokenSource.Token);
 
                 if (!_stopTokenSource.IsCancellationRequested)
                 {
@@ -48,8 +51,33 @@ namespace WebPush.Services
                     {
                         await subscriptionStoreAccessor.PushSubscriptionStore.ForEachSubscriptionAsync((PushSubscription subscription) =>
                         {
-                            // Fire-and-forget 
-                            _notificationService.SendNotificationAsync(subscription, message, _stopTokenSource.Token);
+                            // send all
+                            if (string.IsNullOrEmpty(message.UserId))
+                            {
+                                subscription.Keys.Remove("UserId");
+                                Lib.Net.Http.WebPush.PushSubscription pushSubscription = new Lib.Net.Http.WebPush.PushSubscription()
+                                {
+                                    Endpoint = subscription.Endpoint,
+                                    Keys = subscription.Keys
+                                };
+                                // Fire-and-forget 
+                                _notificationService.SendNotificationAsync(pushSubscription, message, _stopTokenSource.Token);
+                            }
+                            // send for user
+                            else
+                            {
+                                if(subscription.UserId == message.UserId)
+                                {
+                                    subscription.Keys.Remove("UserId");
+                                    Lib.Net.Http.WebPush.PushSubscription pushSubscription = new Lib.Net.Http.WebPush.PushSubscription()
+                                    {
+                                        Endpoint = subscription.Endpoint,
+                                        Keys = subscription.Keys
+                                    };
+                                    _notificationService.SendNotificationAsync(pushSubscription, message, _stopTokenSource.Token);
+                                }
+                            }
+                            
                         }, _stopTokenSource.Token);
                     }
 

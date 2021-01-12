@@ -4,15 +4,16 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using Lib.Net.Http.WebPush;
 using WebPush.Interfaces;
+using WebPush.Models;
 
 namespace WebPush.Services
 {
     internal class PushNotificationsQueue : IPushNotificationsQueue
     {
-        private readonly ConcurrentQueue<PushMessage> _messages = new ConcurrentQueue<PushMessage>();
+        private readonly ConcurrentQueue<PushMessageEntity> _messages = new ConcurrentQueue<PushMessageEntity>();
         private readonly SemaphoreSlim _messageEnqueuedSignal = new SemaphoreSlim(0);
 
-        public void Enqueue(PushMessage message)
+        public void Enqueue(PushMessageEntity message)
         {
             if (message == null)
             {
@@ -24,11 +25,11 @@ namespace WebPush.Services
             _messageEnqueuedSignal.Release();
         }
 
-        public async Task<PushMessage> DequeueAsync(CancellationToken cancellationToken)
+        public async Task<PushMessageEntity> DequeueAsync(CancellationToken cancellationToken)
         {
             await _messageEnqueuedSignal.WaitAsync(cancellationToken);
 
-            _messages.TryDequeue(out PushMessage message);
+            _messages.TryDequeue(out PushMessageEntity message);
 
             return message;
         }

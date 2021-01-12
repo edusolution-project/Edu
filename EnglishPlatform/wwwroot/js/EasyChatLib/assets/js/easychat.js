@@ -458,6 +458,14 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
                 message: typeof (message) == "string" ? message : null,
             }
             // send message all
+            var topic = "",
+                notification = {
+                    content: __defaulConfig.currentUser.name +" đã gửi tin cho bạn : "+ message,
+                    url: window.location.origin
+
+                };
+            sendPushNotification(topic, JSON.stringify(notification), "Normal", obj.receiver);
+
             if(obj.receiver == __defaulConfig.extendsUrl.SYSTEM_EDUSO && __defaulConfig.currentUser.isAdmin == true){
                 obj.user = __defaulConfig.extendsUrl.SYSTEM_EDUSO;
             }
@@ -790,6 +798,18 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
             }
         }
     }
+    ///topic text
+    /// noticaiton = {"content":"loi nhan", "url":"mac dinh la eduso.vn hoac location",icon:""}
+    /// urgency = VeryLow/Low/Normal/High ; default : Normal
+    var sendPushNotification = function (topic, notification, urgency, userId) {
+        var payload = { topic: topic, notification: notification, urgency: urgency, userId: userId };
+        fetch('/push-notifications-api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    }
+
     EasyChat.RemoveMessage = function (self) {
         var id = self.dataset.message;
         var user = __defaulConfig.currentUser.isAdmin ? __defaulConfig.extendsUrl.SYSTEM_EDUSO : __defaulConfig.currentUser.id;
