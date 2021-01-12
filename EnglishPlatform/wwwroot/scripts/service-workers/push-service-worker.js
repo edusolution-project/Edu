@@ -23,13 +23,16 @@ self.addEventListener('push', function (event) {
 
     }
     if (dataObj) {
-        var text, url;
+        var text, url, tag,icon;
         text = dataObj.content;
         url = dataObj.url;
+        tag = dataObj.tag;
+        icon = dataObj.icon ? dataObj.icon : '/images/push-notification-icon.png';
         self.registration.showNotification(pushNotificationTitle, {
             body: text,
             data: url,
-            icon: '/images/push-notification-icon.png'
+            tag: tag,
+            icon: icon
         });
     }
     else {
@@ -73,19 +76,21 @@ self.addEventListener('pushsubscriptionchange', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
     var url = event.notification.data;
-    event.waitUntil(clients.matchAll({ type: "window" })
-        .then(function (clientList) {
-            for (var i = 0; i < clientList.length; i++) {
-                var client = clientList[i];
-                if (client.url == self.registration.scope && 'focus' in client) {
-                    return client.focus();
+    if (url) {
+        event.waitUntil(clients.matchAll({ type: "window" })
+            .then(function (clientList) {
+                for (var i = 0; i < clientList.length; i++) {
+                    var client = clientList[i];
+                    if (client.url == self.registration.scope && 'focus' in client) {
+                        return client.focus();
+                    }
                 }
-            }
-            if (clients.openWindow) {
-                return clients.openWindow(url);
-            }
-        })
-    );
+                if (clients.openWindow) {
+                    return clients.openWindow(url);
+                }
+            })
+        );
+    }
     event.notification.close();
     //window.open(event.notification.url, '_blank');
 });
