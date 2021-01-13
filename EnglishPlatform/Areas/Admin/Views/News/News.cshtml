@@ -539,10 +539,13 @@
             removeDialogTabs: 'image:advanced;link:advanced;textfield',
             //imageUploadUrl = '/Home/UploadImage'
         });
-        CKEDITOR.stylesSet.add('my_styles', [
-            { name: 'Paragraph', element: 'p', styles: { 'margin': '0' } },
-        ]);
-
+        var styleParagraph = CKEDITOR.stylesSet.registered.styleParagraph
+        //debugger
+        if (styleParagraph == null) {
+            CKEDITOR.stylesSet.add('styleParagraph', [
+                { name: 'Paragraph', element: 'p', styles: { 'margin': '0' } },
+            ]);
+        }
 
         var txtarea = form.querySelector('textarea');
         if (txtarea.value != null) {
