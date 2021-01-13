@@ -23,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using FileManagerCore.Interfaces;
+using System.Drawing;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -52,12 +53,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly FileProcess _fileProcess;
         private readonly VocabularyService _vocabularyService;
 
-        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
-        private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
-
         private readonly string[] typeVideo = { ".ogm", ".wmv", ".mpg", ".webm", ".ogv", ".mov", ".asx", ".mpge", ".mp4", ".m4v", ".avi" };
         private readonly string[] typeAudio = { ".opus", ".flac", ".weba", ".webm", ".wav", ".ogg", ".m4a", ".oga", ".mid", ".mp3", ".aiff", ".wma", ".au" };
         private readonly string[] typeImage = { ".jfif", ".pjpeg", ".jpeg", ".pjp", ".jpg", ".png", ".gif", ".bmp", ".dip" };
+
+
+        private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> partDSP = new List<string> { "Văn bản", "File văn bản", "Audio", "Video", "Ảnh", "Từ vựng tiếng anh", "Chọn 1 đáp án đúng", "Điền từ", "Nối đáp án", "Chọn 1/nhiều đáp án đúng", "Essay" };
 
         private readonly IHostingEnvironment _env;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -1324,7 +1327,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         ////////////////////////////////////////////////////////////////////
-
+        #region Import By Word
         public async Task<JsonResult> ImportFromWord(string basis = "", string ParentID = "")
         {
             Boolean Status = false;
@@ -2344,5 +2347,420 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _vocabularyService.Save(vocal);
             return;
         }
+        #endregion
+
+        #region Export to Word
+        public IActionResult ExportToWord(String basis, String LessonID)
+        {
+            var lesson = _lessonService.GetItemByID(LessonID);
+            if (lesson == null)
+                return Json(new Dictionary<String, object> {
+                    {"Stt",false },
+                    {"Msg","Không tìm thấy bài học." }
+                });
+            var lessonPart = _cloneLessonPartService.GetByLessonID(LessonID);
+            if (lessonPart.Count() == 0)
+                return Json(new Dictionary<String, object> {
+                    {"Stt",false },
+                    {"Msg","Nội dung bài học chưa có." }
+                });
+            var lessonPartIDs = lessonPart.Select(x => x.ID);
+            var lessonPartQuestion = _cloneQuestionService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ParentID)).ToEnumerable();
+            var lessonPartQuestionIDs = lessonPartQuestion.Select(x => x.ID);
+            var lessonPartAnswer = _cloneAnswerService.CreateQuery().Find(x => lessonPartQuestionIDs.Contains(x.ParentID)).ToEnumerable();
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            try
+            {
+                byte[] toArray = null;
+                using (var stream = new MemoryStream())
+                {
+                    Document doc = new Document();
+                    Section s = doc.AddSection();
+                    s.PageSetup.Orientation = PageOrientation.Landscape;
+
+                    var defStyle = doc.AddParagraphStyle("DefStyle");
+                    defStyle.CharacterFormat.FontName = "Calibri";
+                    defStyle.CharacterFormat.FontSize = 13;
+
+                    var defStyleCenter = doc.AddParagraphStyle("DefStyleCenter");
+                    defStyleCenter.ApplyBaseStyle(defStyle.Name);
+                    defStyleCenter.ParagraphFormat.HorizontalAlignment = HorizontalAlignment.Center;
+
+                    for (int x = 0; x < lessonPart.Count(); x++)
+                    {
+
+                        var _lessonPart = lessonPart.ElementAtOrDefault(x);
+
+                        RenderWordLessonPart(ref s, _lessonPart);
+                    }
+
+                    Paragraph paragraph = s.AddParagraph();
+                    TextRange TR4 = paragraph.AppendText(Note);
+                    TR4.CharacterFormat.Italic = true;
+                    TR4.CharacterFormat.FontSize = 12;
+                    TR4.CharacterFormat.TextColor = Color.Red;
+
+                    //Save
+                    doc.SaveToStream(stream, FileFormat.Docx);
+                    toArray = stream.ToArray();
+                };
+                string wordName = $"{lesson.Title}.docx";
+                return File(toArray, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", wordName);
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart)
+        {
+
+            Table table = s.AddTable(true);
+
+            table.PreferredWidth = new PreferredWidth(WidthType.Percentage, 100);
+            table.ResetCells(1, partTypes.Count + 1);
+
+            var titleRow = table.Rows[0];
+            var typeRow = table.AddRow();
+            var typeRow2 = table.AddRow();
+            var descriptionRow = table.AddRow();
+            var attachmentRow = table.AddRow();
+
+
+            #region Title
+            var titleRow_Cel1_Content = titleRow.Cells[0].AddParagraph();
+            titleRow_Cel1_Content.ApplyStyle("DefStyleCenter");
+            titleRow_Cel1_Content.AppendText("Tiêu đề");
+
+            table.ApplyHorizontalMerge(titleRow.GetRowIndex(), 1, partTypes.Count);
+            var titleRow_Cel2_Content = titleRow.Cells[1].AddParagraph();
+            titleRow_Cel2_Content.ApplyStyle("DefStyle");
+            titleRow_Cel2_Content.AppendText(_lessonPart.Title).CharacterFormat.Bold = true;
+            #endregion
+
+            #region Type
+
+            var typeRow_cell1 = typeRow.Cells[0];
+            typeRow_cell1.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+
+            var p1 = typeRow_cell1.AddParagraph();
+            p1.ApplyStyle("DefStyleCenter");
+            p1.AppendText("Kiểu ND");
+            var p2 = typeRow_cell1.AddParagraph();
+            p2.ApplyStyle("DefStyleCenter");
+            p2.AppendText("(x)");
+
+            for (int i = 0; i < partTypes.Count; i++)
+            {
+                var cell1 = typeRow.Cells[i + 1];
+                cell1.CellFormat.HorizontalMerge = CellMerge.None;//prevent previous merge
+                cell1.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                var cell_content = cell1.AddParagraph();
+                cell_content.ApplyStyle("DefStyleCenter");
+                cell_content.AppendText(partDSP[i]).CharacterFormat.FontSize = 12;
+
+                var cell2 = typeRow2.Cells[i + 1];
+                cell2.CellFormat.VerticalMerge = CellMerge.None;
+                cell2.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                var prg = cell2.AddParagraph();
+                prg.ApplyStyle("DefStyleCenter");
+                if (_lessonPart.Type == partTypes[i])
+                    prg.AppendText("x").CharacterFormat.Bold = true;
+                //else
+                //    prg.AppendText("").CharacterFormat.Bold = true;
+            }
+            table.ApplyVerticalMerge(0, typeRow.GetRowIndex(), typeRow2.GetRowIndex());
+
+            #endregion
+
+            #region Description
+            var descriptionRow_Cel1 = descriptionRow.Cells[0];
+            descriptionRow_Cel1.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+            var descriptionRow_Cel1_Content = descriptionRow_Cel1.AddParagraph();
+            descriptionRow_Cel1_Content.ApplyStyle("DefStyleCenter");
+            switch (_lessonPart.Type)
+            {
+                //case "QUIZ1":
+                //case "QUIZ2":
+                //case "QUIZ3":
+                //case "QUIZ4":
+                //case "ESSAY":
+                //    descriptionRow_Cel1_Content.AppendText("Nội dung");
+                //    break;
+                //case "VOCAB":
+                //    descriptionRow_Cel1_Content.AppendText("Danh sách từ");
+                //    break;
+                default:
+                    descriptionRow_Cel1_Content.AppendText("Nội dung");
+                    break;
+            }
+
+            table.ApplyHorizontalMerge(descriptionRow.GetRowIndex(), 1, partTypes.Count);
+            var descriptionRow_Cel2 = descriptionRow.Cells[1];
+            var descriptionRow_Cel2_Content = descriptionRow_Cel2.AddParagraph();
+            descriptionRow_Cel2_Content.ApplyStyle("DefStyle");
+
+
+            //var newdoc = ConvertHtmlToWordDoc(_lessonPart.Description, basis, userid, _lessonPart.Type);
+            var html = _lessonPart.Description;
+            if (html != null)
+                html = html.Replace("src=\"/", "src=\"https://" + currentHost + "/");
+            descriptionRow_Cel2_Content.ApplyStyle("DefStyle");
+            var answer = "";
+            switch (_lessonPart.Type)
+            {
+                case "QUIZ2":
+                    if (!string.IsNullOrEmpty(_lessonPart.Description))
+                    {
+                        html = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderQuiz2ForWord(_lessonPart, out answer) + "</p>";
+                        answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
+                        descriptionRow_Cel2_Content.AppendHTML(html + answer);
+                        //var aGrp2 = descriptionRow_Cel2.AddParagraph();
+                        //aGrp2.ApplyStyle("DefStyle");
+                        //descriptionRow_Cel2_Content.AppendHTML(answer);
+                        //aGrp2.ApplyStyle("DefStyle");
+                        //foreach (var childprg in aGrp2.ChildObjects)
+                        //{
+                        //    if (childprg is Paragraph)
+                        //    {
+                        //        (childprg as Paragraph).ApplyStyle("DefStyle");
+                        //    }
+                        //}
+                    }
+                    break;
+                case "QUIZ1":
+                case "QUIZ3":
+                case "QUIZ4":
+                    if (!string.IsNullOrEmpty(_lessonPart.Description))
+                        descriptionRow_Cel2_Content.AppendHTML("<p style='margin:0pt'>" + html + "</p>");
+                    var question = "<p style='margin:0pt'><b style='color:red'>[Câu hỏi]</b></p><p style='margin:0pt'>" + RenderTQuizForWord(_lessonPart, out answer) + "</p>";
+                    answer = "<p style='margin:0pt;margin-top:2pt'><b style='color:red'>[Đáp án]</b></p>" + answer;
+                    var qGrp = descriptionRow_Cel2.AddParagraph();
+                    qGrp.ApplyStyle("DefStyle");
+                    qGrp.AppendHTML(question);
+                    var aGrp = descriptionRow_Cel2.AddParagraph();
+                    aGrp.ApplyStyle("DefStyle");
+                    aGrp.AppendHTML(answer);
+                    break;
+                case "ESSAY":
+                    //html = $"<p>[Des]</p>{html}";
+                    var lessonPartQuestion = _cloneQuestionService.GetByPartID(_lessonPart.ID).FirstOrDefault();
+                    if (lessonPartQuestion != null)
+                    {
+                        html += $"<p style='margin:0pt'>[E]</p>{lessonPartQuestion.Description}";
+                        html += $"<p style='margin:0pt;margin-top:2pt'>[P] {lessonPartQuestion.Point}</p>";
+                    }
+                    descriptionRow_Cel2_Content.AppendHTML(html);
+                    break;
+                default:
+                    if (!string.IsNullOrEmpty(_lessonPart.Description))
+                        descriptionRow_Cel2_Content.AppendHTML(html);
+                    break;
+            }
+            #endregion
+
+            #region Attachment
+            var attachmentRow_Cel1 = attachmentRow.Cells[0];
+            attachmentRow_Cel1.CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+            var attachmentRow_Cel1_Content = attachmentRow_Cel1.AddParagraph();
+            attachmentRow_Cel1_Content.ApplyStyle("DefStyleCenter");
+            attachmentRow_Cel1_Content.AppendText("File");
+
+            table.ApplyHorizontalMerge(attachmentRow.GetRowIndex(), 1, partTypes.Count);
+            var attachmentRow_Cel2_Content = attachmentRow.Cells[1].AddParagraph();
+            attachmentRow_Cel2_Content.ApplyStyle("DefStyle");
+
+            if (_lessonPart.Media != null && !string.IsNullOrEmpty(_lessonPart.Media.Path))
+            {
+
+                var ext = _lessonPart.Media.Extension;
+
+                if (_lessonPart.Media.Path.ToLower().StartsWith("http"))//external
+                {
+                    attachmentRow_Cel2_Content.AppendHyperlink(_lessonPart.Media.Path, _lessonPart.Media.OriginalName, HyperlinkType.WebLink);
+                }
+                else
+                {
+                    var path = _lessonPart.Media.Path.Replace("/Files/", "Files\\").Replace("/", "\\");
+                    var objPath = Path.Combine(StaticPath, path);
+
+                    var maxWidth = 360; var maxHeight = 240;
+
+
+                    if (ext.ToLower().Contains("image"))
+                    {
+                        var img = attachmentRow_Cel2_Content.AppendPicture(FileProcess.ImageToByteArray(Image.FromFile(objPath)));
+                        var scale = 100;
+                        if (img.Width > 0 && img.Height > 0)
+                        {
+                            if (img.Width / img.Height > maxWidth / maxHeight)
+                            {
+                                if (img.Width > maxWidth)
+                                    scale = (int)(maxWidth * 100.0 / img.Width);
+                            }
+                            else
+                                if (img.Height > maxHeight)
+                                scale = (int)(maxHeight * 100.0 / img.Height);
+                        }
+
+                        img.WidthScale = scale;
+                        img.HeightScale = scale;
+                    }
+                    else
+                    {
+                        Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(objPath);
+                        var byteIcon = IconToBytes(icon);
+                        Document document = new Document();
+                        Section section = document.AddSection();
+                        Paragraph p = section.AddParagraph();
+                        //DocPicture Pic = p.AppendPicture(byteIcon);
+                        DocPicture Pic = p.AppendPicture(FileProcess.ImageToByteArray(Image.FromFile($"{StaticPath}\\images\\default-Icon-File.png.jpg")));
+                        Pic.Width = 100;
+                        Pic.Height = 50;
+                        if (ext.Contains("audio"))
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
+                            ole.Width = Pic.Width;
+                            ole.Height = Pic.Height;
+                        }
+                        else if (ext.Contains("video"))
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic, OleObjectType.VideoClip);
+                            ole.Width = maxWidth;
+                            ole.Height = maxHeight;
+                        }
+                        else
+                        {
+                            var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
+                            ole.Width = maxWidth;
+                            ole.Height = maxHeight;
+                        }
+                    }
+                }
+            }
+
+            #endregion
+
+            //break part
+            s.AddParagraph();
+        }
+
+        private string RenderQuiz2ForWord(LessonPartEntity lessonPart, out string answer)
+        {
+            answer = "";
+            var description = lessonPart.Description.Replace("src=\"/", "src=\"https://" + currentHost + "/");
+            var returnHtml = "";
+            var quizOpen = "<fillquiz>";
+            var quizClose = "</fillquiz>";
+
+            var questions = _cloneQuestionService.GetByPartID(lessonPart.ID).ToList();
+            if (questions == null || questions.Count() == 0)
+                return description;
+
+            var firstOccurIndex = description.IndexOf(quizOpen);
+            var i = 0;
+            while (firstOccurIndex >= 0 && questions.Count() > 0)
+            {
+                i++;
+                var quiz = questions.First();
+                returnHtml += description.Substring(0, firstOccurIndex) + "_Q" + i + "";
+                //if (!string.IsNullOrEmpty(quiz.Content))
+                //    returnHtml += (":" + quiz.Content);
+                returnHtml += "_";
+                var ans = _cloneAnswerService.GetByQuestionID(quiz.ID);
+
+                if (ans != null && ans.Count() > 0)
+                {
+                    answer += "<p style='margin:0pt'>[A" + i + "] ";
+                    answer += string.Join(" | ", ans.Select(t => t.Content));
+                    answer += "</p>";
+                }
+                if (!string.IsNullOrEmpty(quiz.Content))
+                {
+                    answer += ($"<p style='margin:0pt'>[H{i}]" + quiz.Content + "</p>");
+                }
+                if (!string.IsNullOrEmpty(quiz.Description))
+                {
+                    answer += ("<p style='margin:0pt'>[E" + i + "]" + quiz.Description + "</p>");
+                }
+
+                description = description.Substring(description.IndexOf(quizClose) + quizClose.Length);
+                firstOccurIndex = description.IndexOf(quizOpen);
+                questions.RemoveAt(0);
+            }
+
+            return returnHtml;
+        }
+
+        private string RenderTQuizForWord(LessonPartEntity lessonPart, out string answer)
+        {
+            answer = "";
+            var returnHtml = "";
+
+            var questions = _cloneQuestionService.GetByPartID(lessonPart.ID).ToList();
+            if (questions == null || questions.Count() == 0)
+                return returnHtml;
+            var i = 0;
+            foreach (var quiz in questions)
+            {
+                i++;
+                returnHtml += "<p style='margin:0pt'>[Q" + i + "] " + RenderHtmlContent(quiz.Content, quiz.Media) + "</p>";
+                var ans = _cloneAnswerService.GetByQuestionID(quiz.ID);
+
+                answer += "<p style='margin:0pt'>";
+
+                if (ans != null && ans.Count() > 0)
+                {
+                    answer += "[A" + i + "] ";
+                    answer += string.Join(" | ", ans.Select(t => RenderHtmlContent(t.Content, t.Media) + (t.IsCorrect ? " (x)" : "")));
+                }
+                answer += "</p>";
+                if (!string.IsNullOrEmpty(quiz.Description))
+                    answer += ("<p style='margin:0pt'>[E" + i + "] " + quiz.Description + "</p>");
+
+            }
+
+            returnHtml = returnHtml.Replace("src=\"/", "src=\"https://" + currentHost + "/");
+            return returnHtml;
+        }
+
+        private static byte[] IconToBytes(Icon icon)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                icon.Save(ms);
+                return ms.ToArray();
+            }
+        }
+
+        private string RenderHtmlContent(string text, Media img)
+        {
+            string returnHTML = "";
+            if (!string.IsNullOrEmpty(text))
+                returnHTML += text;
+            if (img != null)
+            {
+                if (img.Path.ToLower().StartsWith("http"))
+                    returnHTML += "<img src='" + img.Path + "'/>";
+                else
+                    returnHTML += "<img src='https://static.eduso.vn/" + img.Path + "'/>";
+            }
+            return returnHTML;
+        }
+
+        private static String Note = $"\nGiải thích kí hiệu" +
+            $"\n1. [Câu hỏi] : Bắt đầu câu hỏi" +
+            $"\n2. [Đáp án] : Bắt đầu đáp án" +
+            $"\n3. [Qxxx] : Nội dung câu hỏi (Đối với các dạng câu hỏi trắc nghiệm)." +
+            $"\n4. _Qxxx_ : Nội dung câu hỏi (Đối với dạng điền từ - đánh dấu vị trí điền từ)." +
+            $"\n5. [Axxx] : Nội dung câu trả lời; các câu hỏi có nhiều đáp án được viết trên cùng một dòng, cách nhau bởi dấu |" +
+            $"\n6. (x) : Đánh dấu câu trả lời đúng (Đối với các dạng trắc nghiệm)." +
+            $"\n7. [Exxx] : Giải thích cho đáp án đúng" +
+            $"\n8. [Hxxx] : Phần hiển thị với học viên tại vị trí điền từ" +
+            $"\n9. [P] : Điểm (Đối với dạng essay)" +
+            $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
+            $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";
+        #endregion
     }
 }
