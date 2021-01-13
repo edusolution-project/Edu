@@ -158,6 +158,7 @@ var Lesson = (function () {
         window.ShowFullScreen = showFullScreen;
         window.openPreview = openPreview;
         window.openPrint = openPrint;
+        window.export2Word = export2Word;
     }
 
     var reloadData = function () {
@@ -453,6 +454,11 @@ var Lesson = (function () {
                 var printMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xem trước", "onclick": "openPrint()" });
                 var iconPrint = $("<i>", { "class": "fa fa-print mr-2" });
                 printMode.append(iconPrint).append("In đề");
+                lessonButton.append(printMode);
+
+                var printMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xuất file word", "onclick": "export2Word()" });
+                var iconPrint = $("<i>", { "class": "far fa-file-word mr-2" });
+                printMode.append(iconPrint).append("Xuất file word");
                 lessonButton.append(printMode);
 
                 //headerRow.append(lessonButton);
@@ -935,6 +941,10 @@ var Lesson = (function () {
 
     var openPrint = function () {
         window.open(document.location.href.replace("/Detail", "/Print"));
+    }
+
+    var export2Word = function () {
+        window.open(config.url.download_word + "?LessonID=" + config.lesson_id);
     }
 
     //Preview: view + edit

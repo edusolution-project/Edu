@@ -107,6 +107,43 @@
             .examHeader {
                 border: solid 2px #333;
             }
+
+            @@media print {
+                .h-100 {
+                    height: auto !important
+                }
+
+                #rightCol {
+                    height: auto !important;
+                    max-height: none !important
+                }
+
+                .right-content {
+                    position: relative !important;
+                }
+
+                .position-absolute, .left-col, .main-container {
+                    position: relative !important;
+                }
+
+                .card-body {
+                    top: 0px !important
+                }
+
+                #sidebar, body, html, #lessonContainer {
+                    background-color: white !important
+                }
+
+                #sidebar {
+                    display: none !important
+                }
+
+                *, .green-color, .blue-color {
+                    color: #000 !important;
+                    border-color: #000 !important;
+                    font-size: 16px;
+                }
+            }
         </style>
     }
 <script>
@@ -126,7 +163,8 @@
                 load_contents: '@processUrl("GetFullStructure", "ClassSubject")',
                 create_exam: '@processUrl("CreateExamPart", "CloneLessonPart")',
                 export_quiztemp_with_word: '@processUrl("ExportWordTemplate", "Curriculum")',
-                import_quiz_with_word: '@processUrl("ImportFromWord", "CloneLessonPart")'
+                import_quiz_with_word: '@processUrl("ImportFromWord", "CloneLessonPart")',
+                download_word: '@processUrl("ExportToWord", "CloneLessonPart")',
             },
             type: @Data.TemplateType,
             lesson_id: '@Data.ID',
