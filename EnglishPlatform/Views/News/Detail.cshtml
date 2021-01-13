@@ -57,7 +57,7 @@
                         Tin cùng chuyên mục
                     </div>*@
                 <div class="inner-content">
-                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
+                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px;text-align:justify">
                         Tin cùng chuyên mục
                         <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
                     </div>
@@ -290,6 +290,22 @@
             ],
             autoplay: true,
             autoplayHoverPause: true,
+            responsiveClass: true,
+            responsive: {
+                0: {
+                    items: 1,
+                    nav: true
+                },
+                600: {
+                    items: 2,
+                    nav: false
+                },
+                1000: {
+                    items: 4,
+                    nav: true,
+                    loop: false
+                }
+            }
         });
 
         //$('.owl-carousel').owlCarousel({
@@ -493,7 +509,20 @@
         text-decoration:none
     }
 
-    /*.thumb a:hover{
-        text-decoration:none
-    }*/
+    p{
+        width:100%;
+    }
+
+    @@media screen and (max-width: 600px) {
+        .container {
+            width: 100%; /* The width is 100%, when the viewport is 800px or smaller */
+            padding-left:7px;
+            padding-right:7px;
+        }
+
+        #content{
+            margin:0px;
+            padding:0px
+        }
+    }
 </style>
