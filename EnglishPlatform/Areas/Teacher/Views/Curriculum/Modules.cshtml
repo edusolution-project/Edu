@@ -61,6 +61,112 @@
         @*<div class="sub-sidebar">
                 @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
             </div>*@
+
+        <div class="time_line">
+            <style>
+                .time_item {
+                    width: 10px;
+                    display: inline-block;
+                }
+            </style>
+        </div>
+        <div id="main-route" class="main-route mb-3 mt-2">
+            <ul class="route_holder" id="cid_0" cid="0">
+                @*<div class="lane_header">
+                        <div class="lane_title">Begin</div>
+                        <div class="lane_toggle" onclick="toggleLane(this)"></div>
+                    </div>*@
+            </ul>
+        </div>
+
+        <style>
+            #main-route {
+                overflow: auto;
+            }
+
+            .route_holder {
+                text-align: left;
+                white-space: nowrap;
+                height: 2px;
+                margin: 50px 0 60px;
+            }
+
+            .route_item {
+                display: inline-block;
+                width: 100px;
+                height: 4px;
+                overflow: visible;
+                margin: 0;
+                background: #969696;
+                position: relative;
+                font-weight: bold;
+            }
+
+                .route_item.start {
+                    width: 50px;
+                    margin-left: 20px;
+                }
+
+                .route_item::after {
+                    content: "";
+                    position: absolute;
+                    left: 50%;
+                    right: auto;
+                    -webkit-transform: translateX(-50%);
+                    -moz-transform: translateX(-50%);
+                    -ms-transform: translateX(-50%);
+                    -o-transform: translateX(-50%);
+                    transform: translateX(-50%);
+                    bottom: -12px;
+                    height: 20px;
+                    width: 20px;
+                    border-radius: 50%;
+                    border: 2px solid #969696;
+                    background: #969696 url(/images/calendar.png) no-repeat center center;
+                    -webkit-background-size: 14px auto;
+                    background-size: 14px auto;
+                    -webkit-transition: background-color .3s,border-color .3s;
+                    -moz-transition: background-color .3s,border-color .3s;
+                    -o-transition: background-color .3s,border-color .3s;
+                    transition: background-color .3s,border-color .3s;
+                    top: -8px;
+                }
+
+                .route_item.start::after {
+                    left: 10px;
+                }
+
+                .route_item .route_title {
+                    bottom: 20px;
+                    position: absolute;
+                    left: 50%;
+                    margin-left: -35px;
+                    width: 70px;
+                    text-align: center;
+                    overflow: hidden;
+                    max-height: 28px;
+                    white-space: break-spaces;
+                    line-height: 14px;
+                    font-size: 70%;
+                    font-weight: bold;
+                }
+
+                .route_item.start .route_title {
+                    margin-left: 0;
+                    left: -6px;
+                    text-align: left;
+                }
+
+                .route_item .route_period {
+                    top: 20px;
+                    position: absolute;
+                    left: 50%;
+                    margin-left: -100px;
+                    width: 200px;
+                    text-align: center;
+                }
+        </style>
+
         <div class="main-content" data-spy="scroll" data-target="#tableContents">
             <div class="detail pb-3 row">
                 <div class="text-left col-md-10">
@@ -146,6 +252,21 @@
                                 <input type="text" class="form-control" name="Order" placeholder="Thứ tự hiển thị" value="---">
                             </div>
                         </div>
+                        <div class="row chooseConnect">
+                            <div class="form-group col-md-4">
+                                <label class="col-form-label">Thời lượng (ngày):</label>
+                                <input type="text" class="form-control" name="Period" placeholder="Thời lượng (ngày)" value="0">
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label class="col-form-label">Bắt đầu sau:</label>
+                                <select name="ConnectID" class="form-control" @if (isLock) { @: readonly="true"
+                                        } onchange="setConnectType(this)">
+                                    <option value="0" type="">--- Tự động---</option>
+                                </select>
+                                <input type="hidden" name="ConnectType" value="0" />
+                            </div>
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -206,11 +327,11 @@
                                 <select name="Etype" class="form-control" onchange="showCoefficient(this)" required @if (isLock) { @: readonly="true"
                                         }>
                                     @*<option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Practice</option>
-                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
-                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Checkpoint Exam</option>
-                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Experiment</option>
-                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Intership report</option>
-                <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">End-of-course Exam</option>*@
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Weekly Exam</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Checkpoint Exam</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.EXPERIMENT">Experiment</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.INTERSHIP">Intership report</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.END">End-of-course Exam</option>*@
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
                                     <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
@@ -225,7 +346,21 @@
                         <div class="row chooseOrder" style="display:none">
                             <div class="form-group col-md-12">
                                 <label class="col-form-label">Thứ tự:</label>
-                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng" >
+                                <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
+                            </div>
+                        </div>
+                        <div class="row chooseConnect">
+                            <div class="form-group col-md-4">
+                                <label class="col-form-label">Thời lượng (ngày):</label>
+                                <input type="text" class="form-control" name="Period" placeholder="Thời lượng (ngày)" value="0">
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label class="col-form-label">Bắt đầu sau:</label>
+                                <select name="ConnectID" class="form-control" @if (isLock) { @: readonly="true"
+                                        } onchange="setConnectType(this)">
+                                    <option value="" type="">--- Tự động---</option>
+                                </select>
+                                <input type="hidden" name="ConnectType" value="0" />
                             </div>
                         </div>
                     </form>
@@ -267,7 +402,7 @@
                                 <label class="col-form-label">Chương:</label>
                                 <select name="ParentID" id="ParentID" class="form-control" @if (isLock) { @: readonly="true"
                                         }>
-                                    <option value="0">------</option>
+                                    <option value="">------</option>
                                     @{ for (int i = 0; listChapter != null && i < listChapter.Count; i++)
                                         {
                                             <option value="@listChapter[i].ID">@listChapter[i].Name</option>
@@ -388,11 +523,21 @@
 </style>
 
 <script>
+    var connectType = {
+        CHAPTER: @BaseCustomerEntity.Database.CONNECT_TYPE.CHAPTER,
+        LESSON: @BaseCustomerEntity.Database.CONNECT_TYPE.LESSON
+    }
 
     var chapters = [];
     var lessons = [];
     var wrapper = $('#course-detail ul');
     var modulesBody = $('.modules-wrapper');
+    var pendingChap = [];
+
+
+    function toggleLane(obj) {
+        $(obj).parent().parent().toggleClass('expand');
+    }
 
     var RenderLesson = function (item) {
         var oldItem = $('#' + item.ID);
@@ -429,7 +574,10 @@
             "etype": item.Etype,
             "mul": item.Multiple,
             "limit": item.Limit,
-            "order": item.Order + 1
+            "order": item.Order + 1,
+            "connectid": item.ConnectID,
+            "connecttype": item.ConnectType,
+            "period": item.Period
         }));
         @if(!isLock)
         {
@@ -493,12 +641,17 @@
             }));
         title_cPart.append($("<input>", { "type": "hidden", "name": "Description", "value": chapter.Description }));
         title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
+        title_cPart.append($("<input>", { "type": "hidden", "name": "ConnectID", "value": chapter.ConnectID}));
+        title_cPart.append($("<input>", { "type": "hidden", "name": "ConnectType", "value": chapter.ConnnectType}));
+        title_cPart.append($("<input>", { "type": "hidden", "name": "Period", "value": chapter.Period }));
+
         @if (!isLock)
         {
             @:title_ePart.append($("<i>", { "class": "far fa-folder", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm chương", "onclick": "AddChapter('" + chapter.ID + "'); return false;" }));
             @:title_ePart.append($("<i>", { "class": "far fa-file", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm bài", "onclick": "AddLesson('" + chapter.ID + "');" }));
             //title_ePart.append($("<i>", { "class": "fas fa-sort", "title": "Sắp xếp", "onclick": "Sort('" + chapter.ID + "'); return false;" }));
         }
+
         title_ePart.append($("<i>", { "class": "fas fa-edit", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Sửa", "pid": chapter.ParentID, "onclick": "EditChapter(this, '" + chapter.ID + "'); return false;" }));
         @if (!isLock)
         {
@@ -596,6 +749,80 @@
         }
     }
 
+    var RenderRoute = function (routeList) {
+        console.log(routeList)
+
+        var wrapper = $('.route_holder');
+        if (routeList != null && routeList.length > 0) {
+            $(wrapper).append($('<li>', { class: 'route_item start' }).append($('<a>', { class: 'route_title', text: "Bắt đầu" })).append($('<span>', { class: 'route_period', text: "" })))
+            routeList.forEach(function (obj, idx) {
+                if (obj.cid != "") {
+                    var root = routeList.find(t => t.id == obj.cid);
+                    if(root != null)
+                        obj.start = root.start + root.period;
+                }
+                else
+                if (obj.parent != "0") {
+                    var parent = routeList.find(t => t.id == obj.parent);
+                    obj.start = parent.start;
+                };
+            })
+        }
+        routeList.sort((a,b) => compareRouteFinal(a,b))
+        routeList.forEach(function (obj, idx) {
+            $(wrapper).append($('<li>', { class: 'route_item' }).append($('<a>', { class: 'route_title', text: obj.text })).append($('<span>', { class: 'route_period', text: obj.start + (obj.period > 0 ? (' (+' + obj.period + ')') : '') })))
+        })
+        //if(routeList != null)
+        //var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
+        //    .append($('<div>', { class: 'lane_header' })
+        //        .append($('<div>', { class: 'lane_title', text: chapter.Name }))
+        //        .append($('<div>', { class: 'lane_toggle', onclick: 'toggleLane(this)' })));
+
+        //if (chapter.ConnectID == null) {
+        //    if (chapter.ParentID != null) {
+        //        var laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+        //        if (laneList.length == 0) {
+        //            $('.lane_holder#cid_' + chapter.ParentID).addClass('hasChild');
+        //            $('.lane_holder#cid_' + chapter.ParentID).append($('<div>', { class: 'lane_list' }));
+        //            laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+        //        }
+        //        laneList.append($('<div>', { class: 'lane-item route_lane' }).append(chaproute));
+        //    }
+        //}
+        //else {
+        //    if ($('#cid_' + chapter.ConnectID) != null)
+        //        $('#cid_' + chapter.ConnectID).after(chaproute);
+
+        //    pendingChap.push(chapter);
+        //}
+    }
+
+
+    var RenderRouteChap = function (chapter) {
+        var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
+            .append($('<div>', { class: 'lane_header' })
+                .append($('<div>', { class: 'lane_title', text: chapter.Name }))
+                .append($('<div>', { class: 'lane_toggle', onclick: 'toggleLane(this)' })));
+
+        if (chapter.ConnectID == null) {
+            if (chapter.ParentID != null) {
+                var laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+                if (laneList.length == 0) {
+                    $('.lane_holder#cid_' + chapter.ParentID).addClass('hasChild');
+                    $('.lane_holder#cid_' + chapter.ParentID).append($('<div>', { class: 'lane_list' }));
+                    laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+                }
+                laneList.append($('<div>', { class: 'lane-item route_lane' }).append(chaproute));
+            }
+        }
+        else {
+            if ($('#cid_' + chapter.ConnectID) != null)
+                $('#cid_' + chapter.ConnectID).after(chaproute);
+
+            pendingChap.push(chapter);
+        }
+    }
+
     function LoadData() {
         chapters = [];
         lessons = [];
@@ -630,13 +857,18 @@
                 rootContent.append(rootLessons);
                 modulesBody.append(rootContent);
 
+                var listRoute = []
 
                 if (chapters.length > 0) {
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
                         RenderChapter(chapter);
+                        listRoute.push({ id: chapter.ID, start: 0, text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                     }
                 }
+
+
+
                 @*//else {
                     var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
                     var chapTitle = $("<div>", { "class": "modules-title row item-row" });
@@ -657,8 +889,16 @@
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
                         RenderLesson(item);
+                        listRoute.push({ id: item.ID,start: 0, text: item.Title, cid: item.ConnectID == null ? "" : item.ConnectID, period : item.Period, parent : item.ChapterID, order: item.Order })
                     }
                 }
+
+                listRoute.sort((a, b) => compareRoute(a,b))
+
+                RenderRoute(listRoute);
+                //RenderRouteChap(chapter);
+                //RenderRouteLesson(item);
+
                 $('.row-action i').tooltip();
 
                 renderTableContents();
@@ -667,6 +907,27 @@
             }
         });
     };
+
+    function compareRoute(obj1, obj2) {
+        if (obj1.parent > obj2.parent) return 1;
+        if (obj1.parent < obj2.parent) return -1;
+        if (obj1.cid > obj2.cid) return 1;
+        if (obj1.cid < obj2.cid) return -1;
+        if (obj1.order > obj2.order) return 1;
+        if (obj1.order < obj2.order) return -1;
+    }
+
+    function compareRouteFinal(obj1, obj2) {
+        if (obj1.start > obj2.start) return 1;
+        if (obj1.start < obj2.start) return -1;
+        if (obj1.parent > obj2.parent) return 1;
+        if (obj1.parent < obj2.parent) return -1;
+        if (obj1.cid > obj2.cid) return 1;
+        if (obj1.cid < obj2.cid) return -1;
+        if (obj1.order > obj2.order) return 1;
+        if (obj1.order < obj2.order) return -1;
+    }
+
 
     function ChangeGrade(obj, wrapper) {
         var subject = $(obj).val();
@@ -802,7 +1063,13 @@
         var name = $(obj).parent().parent().find("[name=Name]").text().trim();
         var description = $(obj).parent().parent().find("[name=Description]").val().trim();
         var order = $(obj).parent().parent().find("[name=Order]").val().trim();
+
+        var connectid = $(obj).parent().parent().find("[name=ConnectID]").val().trim();
+        var connecttype = $(obj).parent().parent().find("[name=ConnectType]").val().trim();
+        var period = $(obj).parent().parent().find("[name=Period]").val().trim();
+
         var parent = $(obj).attr("pid");
+        console.log(connectid);
 
         //console.log(obj);
         modal.find("[name=Name]").val(name);
@@ -811,6 +1078,34 @@
         modal.find("[name=ParentID] option[value=" +  ID + "]").hide();
         modal.find("[name=Order]").val(order);
         modal.find("[name=ID]").val(ID);
+
+        var connectHolder = modal.find('[name=ConnectID]');
+        $(connectHolder).find('option:gt(0)').remove();
+        $(connectHolder).val('');
+        var siblingsChaps = $('.modules[pid=' + parent + ']');
+        if (siblingsChaps.length > 0) {
+            siblingsChaps.each(function (idx, obj) {
+                var title = $(obj).find('.modules-title .action-link:first()')
+
+                if (title != null && title.length > 0) {
+                    var _id = $(title).attr('value');
+                    if (_id != ID) {
+                        $(connectHolder).append($('<option>', { value: _id, type: connectType.CHAPTER, text: $(title).text() }));
+                    }
+                }
+
+            });
+        }
+
+        var siblingsLessons = $('.modules[id=' + parent + '] > .modules-content > .modules-content-item > .col-md-10 > .modules-content-item-info > .action-link[lid]')
+        console.log(siblingsLessons);
+        if (siblingsLessons.length > 0) {
+            siblingsLessons.each(function (idx, obj) {
+                $(connectHolder).append($('<option>', { value: $(obj).attr('lid'), type: connectType.LESSON, text: $(obj).text() }));
+            });
+        }
+        if(connectid != null && connectid.length > 0)
+            $(connectHolder).val(connectid).change();
     }
 
     function AddChapter(parentchap) {
@@ -821,6 +1116,15 @@
         modal.find("[name=ID]").val("");
         modal.find("[name=Order]").val("---");
         modal.find("[name=ParentID]").val(parentchap);
+        var connectHolder = modal.find('[name=ConnectID]');
+        $(connectHolder).val('');
+        $(connectHolder).find('option:gt(0)').remove();
+        var siblingsChaps = $('.modules[pid=' + parentchap + ']');
+        if (siblingsChaps.length > 0) {
+            siblingsChaps.each(function (obj) {
+                console.log(obj);
+            });
+        }
     }
 
     function DeleteChapter(ID) {
@@ -854,6 +1158,42 @@
         modal.find("[name=Timer]").val("0");
         modal.find("[name=Limit]").val("0");
         SelectTemplate("1");
+
+        var connectHolder = modal.find('[name=ConnectID]');
+        $(connectHolder).find('option:gt(0)').remove();
+        $(connectHolder).val('');
+
+        var parent = ID;
+        var siblingsChaps = $('.modules[pid=' + parent + ']');
+        if (siblingsChaps.length > 0) {
+            siblingsChaps.each(function (idx, obj) {
+
+                var title = $(obj).find('.modules-title .action-link:first()')
+
+                if (title != null && title.length > 0) {
+                    //console.log($(title).text());
+                    $(connectHolder).append($('<option>', { value: $(title).attr('value'), type: connectType.CHAPTER, text: $(title).text() }));
+                }
+
+            });
+        }
+
+        var siblingsLessons = $('.modules[id=' + parent + '] > .modules-content > .modules-content-item > .col-md-10 > .modules-content-item-info > .action-link[lid]')
+
+        if (siblingsLessons.length > 0) {
+            siblingsLessons.each(function (idx, obj) {
+
+                var title = $(obj);
+                console.log(obj);
+                if (title != null && title.length > 0) {
+                    console.log(connectHolder);
+                    console.log($(title).text());
+                    $(connectHolder).append($('<option>', { value: $(title).attr('value'), type: connectType.LESSON, text: $(title).text() }));
+                }
+
+            });
+        }
+
         return false;
     }
 
@@ -873,6 +1213,13 @@
         var etype = $(obj).attr("etype");
         var order = $(obj).attr("order");
 
+        var connectid = $(obj).attr("connectid");;
+        var connecttype = $(obj).attr("connecttype");
+        var period = $(obj).attr("period");
+
+        //console.log(connectid);
+
+
         modal.find("[name=Title]").val(title);
         modal.find("[name=ChapterID]").val(chapter);
         modal.find("[name=ID]").val(ID);
@@ -882,8 +1229,47 @@
         modal.find("[name=Multiple]").val(multiple);
         modal.find("[name=Etype]").val(etype);
         modal.find("[name=Order]").val(order);
+        modal.find("[name=Period]").val(period);
+        modal.find("[name=ConnectType]").val(0);
 
         SelectTemplate(type);
+
+
+        var connectHolder = modal.find('[name=ConnectID]');
+        $(connectHolder).find('option:gt(0)').remove();
+        $(connectHolder).val('');
+
+        var parent = chapter;
+        var siblingsChaps = $('.modules[pid=' + parent + ']');
+        if (siblingsChaps.length > 0) {
+            siblingsChaps.each(function (idx, obj) {
+
+                var title = $(obj).find('.modules-title .action-link:first()')
+
+                if (title != null && title.length > 0) {
+                    //console.log($(title).text());
+                    $(connectHolder).append($('<option>', { value: $(title).attr('value'), type: connectType.CHAPTER, text: $(title).text() }));
+                }
+
+            });
+        }
+        var siblingsLessons = $('.modules[id=' + parent + '] > .modules-content > .modules-content-item > .col-md-10 > .modules-content-item-info > .action-link[lid]')
+        if (siblingsLessons.length > 0) {
+            siblingsLessons.each(function (idx, obj) {
+                var title = $(obj);
+                if (title != null && title.length > 0) {
+                    var _id = $(title).parent().parent().parent().attr('id');
+                    console.log(title);
+                    if (_id != ID) {
+                        $(connectHolder).append($('<option>', { value: _id, type: connectType.LESSON, text: $(title).text() }));
+                    }
+                }
+
+            });
+        }
+        if (connectid != null && connectid.length > 0)
+            $(connectHolder).val(connectid).change();
+
         return false;
     }
 
@@ -1214,6 +1600,11 @@
     //    //debugger
     //    $(obj).parent().attr('class', 'active')
     //}
+
+    var setConnectType = function (obj) {
+        $(obj).siblings("[name=ConnectType]").val($(obj).find('option[value=' + $(obj).val() + ']').attr('type'));
+        console.log($(obj).siblings("[name=ConnectType]").val());
+    }
 
 </script>
 

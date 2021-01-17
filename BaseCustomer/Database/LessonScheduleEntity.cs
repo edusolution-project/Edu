@@ -15,7 +15,6 @@ namespace BaseCustomerEntity.Database
         public string LessonID { get; set; }
         [JsonProperty("Type")]
         public int? Type { get; set; }
-
         [JsonProperty("StartDate")]
         public DateTime StartDate { get; set; }
         [JsonProperty("EndDate")]
@@ -30,6 +29,9 @@ namespace BaseCustomerEntity.Database
         public bool IsOnline { get; set; }
         [JsonProperty("IsHideAnswer")]
         public bool IsHideAnswer { get; set; }
+        [JsonProperty("TeacherID")]
+        public string TeacherID { get; set; }
+
     }
 
     public class SCHEDULE_TYPE

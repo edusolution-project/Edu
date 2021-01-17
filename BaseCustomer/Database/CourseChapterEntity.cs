@@ -65,6 +65,13 @@ namespace BaseCustomerEntity.Database
         public long TotalExams { get; set; }
         [JsonProperty("TotalPractices")]
         public long TotalPractices { get; set; }
+
+        [JsonProperty("ConnectID")] //liên kết lộ trình
+        public string ConnectID { get; set; }
+        [JsonProperty("ConnectType")] //kiểu đối tượng liên kết (chapter/lesson)
+        public int ConnectType { get; set; }
+        [JsonProperty("Period")] //thời lượng
+        public double Period { get; set; }
     }
     public class CourseChapterService : ServiceBase<CourseChapterEntity>
     {

@@ -313,6 +313,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
 
+        public IActionResult Route(string basis, string ID)
+        {
+            if (string.IsNullOrEmpty("ID"))
+                return Redirect($"/{basis}{Url.Action("Index")}");
+
+            var data = _service.GetItemByID(ID);
+            if (data == null)
+                return Redirect($"/{basis}{Url.Action("Index")}");
+
+            //var isUsed = isCourseUsed(data.ID);
+            //Cap nhat IsUsed
+            //if (data.IsUsed != isUsed)
+            //{
+            //    data.IsUsed = isUsed;
+            //    _service.Save(data);
+            //}
+
+            ViewBag.Data = data;
+            ViewBag.Title = data.Name;
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+
+            ViewBag.Chapter = chapters;
+            ViewBag.User = UserID;
+            ViewBag.Course = data;
+
+            return View();
+        }
+
         //[BaseAccess.Attribule.AccessCtrl("Bài giảng chung", "teacher")]
         public IActionResult Lesson(DefaultModel model, string basis, string CourseID, string ClassID, int frameview = 0)
         {
@@ -984,6 +1015,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Name = item.Name;
                     data.ParentID = item.ParentID;
                     data.Description = item.Description;
+                    data.ConnectID = item.ConnectID;
+                    data.ConnectType = item.ConnectType;
+                    data.Period = item.Period;
 
                     _chapterService.Save(data);
                     if (oldParent != item.ParentID)//Change Root chapter
@@ -1372,6 +1406,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Multiple = item.Multiple;
                     data.Etype = item.Etype;
                     data.Limit = item.Limit;
+
+                    data.ConnectID = item.ConnectID;
+                    data.ConnectType = item.ConnectType;
+                    data.Period = item.Period;
+
 
                     //if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
                     //    data.Limit = 0;
@@ -2194,17 +2233,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        private string GetContentType(string fileName)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
-            string contentType;
-            if (!provider.TryGetContentType(fileName, out contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
 
         #region Import with Word
         /// <summary>
@@ -2486,12 +2514,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             ole.Width = Pic.Width;
                             ole.Height = Pic.Height;
                         }
-                        else if(ext.Contains("video"))
+                        else if (ext.Contains("video"))
                         {
                             var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic, OleObjectType.VideoClip);
                             ole.Width = maxWidth;
                             ole.Height = maxHeight;
-                        }    
+                        }
                         else
                         {
                             var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
@@ -4265,7 +4293,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-       
+
 
         private string validateFill(string org)
         {
@@ -4292,7 +4320,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
             $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";
 
-        #endregion
+        #endregion        
+        private string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
+
     }
 
     public class Counter
