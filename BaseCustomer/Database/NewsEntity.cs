@@ -101,7 +101,7 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<NewsEntity> GetAllNews()
         {
-            return Collection.Find<NewsEntity>(x => x.Type.Equals("news")).ToEnumerable();
+            return Collection.Find<NewsEntity>(x => x.Type.Equals("news") && (x.IsPublic || x.PublishDate <= DateTime.Now)).ToEnumerable();
         }
     }
 }

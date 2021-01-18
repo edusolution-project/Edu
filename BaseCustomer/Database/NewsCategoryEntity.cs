@@ -18,6 +18,9 @@ namespace BaseCustomerEntity.Database
         public string Code { get; set; }
         [JsonProperty("ParentID")]
         public string ParentID { get; set; }
+
+        [JsonProperty("IsShow")]
+        public Boolean IsShow { get; set; }
     }
 
     public class NewsCategoryService : ServiceBase<NewsCategoryEntity>
@@ -48,6 +51,18 @@ namespace BaseCustomerEntity.Database
         public NewsCategoryEntity GetItemByCode(string code) => Collection.Find<NewsCategoryEntity>(x => x.Code.Equals(code)).FirstOrDefault();
 
         public IEnumerable<NewsCategoryEntity> GetByParentCategoryID(String ParentID) => Collection.Find<NewsCategoryEntity>(x => x.ParentID == ParentID).ToEnumerable();
+
+        public void ChangeStatus(List<string> IDs, bool status)
+        {
+            if (status) // có hiển thị
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsCategoryEntity>.Update.Set(t => t.IsShow, status));
+            }
+            else
+            {
+                CreateQuery().UpdateMany(t => IDs.Contains(t.ID), Builders<NewsCategoryEntity>.Update.Set(t => t.IsShow, status));
+            }
+        }
 
         //public NewsCategoryEntity getNameCategoryByID(string ID) => Collection.Find<NewsCategoryEntity>(x => x.ID.Equals(ID)).FirstOrDefault();
     }
