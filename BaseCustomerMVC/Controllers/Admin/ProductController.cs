@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Admin
 {
-    [BaseAccess.Attribule.AccessCtrl("Quản lý Gói học", BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 2)]
+    //[BaseAccess.Attribule.AccessCtrl("Quản lý Gói học", BaseCustomerEntity.Database.ACCOUNT_TYPE.ADMINISTRATOR_NEWS, 2)]
     public class ProductController : AdminController
     {
         private readonly NewsCategoryService _serviceNewCate;

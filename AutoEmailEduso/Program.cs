@@ -91,14 +91,20 @@ namespace AutoEmailEduso
                         Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
                         await SendTeacherScheduleToLesson();
                         break;
-                    case "sendmail":
-                        Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
-                        await sendmail();
+                    //case "sendmail":
+                    //    Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
+                    //    await sendmail();
+                    //    break;
+                    //case "ReportToExcel":
+                    //    Console.WriteLine("Dang xuat bao cao");
+                    //    await ReportToExcel();
+                    //    break;
+                    case "ServiceRenewalNotice":
+                        Console.WriteLine(ServiceRenewalNotice().Result);
                         break;
-                    case "ReportToExcel":
-                        Console.WriteLine("Dang xuat bao cao");
-                        await ReportToExcel();
-                        break;
+                    //case "BenTre":
+                    //    await BenTre();
+                    //    break;
                     default:
                         break;
                 }
@@ -230,13 +236,20 @@ namespace AutoEmailEduso
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
                                 x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                                //&& x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                                ).ToEnumerable();
 
                             //var a = activeProgress.ToList();
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-                            var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                                x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                                && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                            //var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                            //    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+                            //    && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+                            var activeStudents = _lessonProgressService.CreateQuery().Find(x => 
+                            studentIds.Contains(x.StudentID) 
+                                && x.TotalLearnt > 0)
+                                .ToList()
+                                .Select(x => x.StudentID)
+                                .Distinct();
 
                             var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                                 x => studentIds.Contains(x.StudentID)).ToEnumerable();
@@ -300,11 +313,11 @@ namespace AutoEmailEduso
                             //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren2}</td>" +
                             //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren0}</td>" +
                             //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
-                            tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:lightgreen'>{diemtren8}</td>" +
-                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:lightblue'>{diemtren5}</td>" +
-                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#ffff33'>{diemtren2}</td>" +
-                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#ff454d'>{diemtren0}</td>" +
-                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:rgb(194,194,216)'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
+                            tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#7dcbca'>{diemtren8}</td>" +
+                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#cae9e0'>{diemtren5}</td>" +
+                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#f3d2ac'>{diemtren2}</td>" +
+                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#f3b8b1'>{diemtren0}</td>" +
+                                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#cecbd6'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
                             tren8 += min8;
                             tren5 += min5;
                             tren2 += min2;
@@ -394,7 +407,6 @@ namespace AutoEmailEduso
                 foreach (var center in centersActive)
                 {
                     //var percent = "";
-                    //if (center.Abbr != "eduso")//test truong Vinh Yen
                     //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                     {
                         var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
@@ -677,7 +689,7 @@ namespace AutoEmailEduso
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;vertical-align: middle'>{student.StudentName}</td>";
                     if (point >= 8)
                     {
-                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:lightgreen'>{point.ToString("#0.00")}</td>" +
+                        tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:#7dcbca'>{point.ToString("#0.00")}</td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
@@ -685,7 +697,7 @@ namespace AutoEmailEduso
                     else if (point < 8 && point >= 5)
                     {
                         tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:lightblue;'>{point.ToString("#0.00")}</td>" +
+                                $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:#cae9e0;'>{point.ToString("#0.00")}</td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                 $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
                     }
@@ -693,7 +705,7 @@ namespace AutoEmailEduso
                     {
                         tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:#FFFF33;'>{point.ToString("#0.00")}</td>" +
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color:#f3d2ac;'>{point.ToString("#0.00")}</td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>";
                     }
                     else if (point < 2 && point >= 0)
@@ -703,14 +715,14 @@ namespace AutoEmailEduso
                             tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;'>--</td>";
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #cecbd6'>--</td>";
                         }
                         else
                         {
                             tbody += $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
                                     $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black'></td>" +
-                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #ff454d;'>{point.ToString("#0.00")}</td>";
+                                    $"<td style='text-align:center;border:solid 1px #333;border-collapse:collapse;color: black;background-color: #f3b8b1;'>{point.ToString("#0.00")}</td>";
                         }
                     }
                     else
@@ -820,71 +832,78 @@ namespace AutoEmailEduso
 
         public static async Task SendIncomingLesson()
         {
-            var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
-            Console.WriteLine(currentTime);
-            var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
-            var period = 60;
-            if (activeClasses != null && activeClasses.Count() > 0)
+            try
             {
-                foreach (var @class in activeClasses)
+                var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
+                Console.WriteLine(currentTime);
+                var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
+                var period = 60;
+                if (activeClasses != null && activeClasses.Count() > 0)
                 {
-                    var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
-                        .OrderBy(t => t.ClassID)
-                        .ThenBy(t => t.ClassSubjectID)
-                        .ThenBy(t => t.StartDate).ToList();
-                    if (activeSchedules != null && activeSchedules.Count() > 0)
+                    foreach (var @class in activeClasses)
                     {
-                        string subjectID = "";
-                        string classID = "";
-                        ClassEntity currentClass = null;
-                        ClassSubjectEntity currentSubject = null;
-                        TeacherEntity currentTeacher = null;
-                        var studentList = new List<StudentEntity>();
-                        var schedules = new List<ScheduleView>();
-                        var center = new CenterEntity();
-                        foreach (var schedule in activeSchedules)
+                        var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                            .OrderBy(t => t.ClassID)
+                            .ThenBy(t => t.ClassSubjectID)
+                            .ThenBy(t => t.StartDate).ToList();
+                        if (activeSchedules != null && activeSchedules.Count() > 0)
                         {
-                            if (classID != schedule.ClassID)
+                            string subjectID = "";
+                            string classID = "";
+                            ClassEntity currentClass = null;
+                            ClassSubjectEntity currentSubject = null;
+                            TeacherEntity currentTeacher = null;
+                            var studentList = new List<StudentEntity>();
+                            var schedules = new List<ScheduleView>();
+                            var center = new CenterEntity();
+                            foreach (var schedule in activeSchedules)
                             {
-                                studentList = _studentService.GetStudentsByClassId(schedule.ClassID).ToList();
-                                if (studentList == null || studentList.Count == 0) // no student in class
-                                    continue;
-                                currentClass = _classService.GetItemByID(schedule.ClassID);
-                                classID = schedule.ClassID;
-                                center = _centerService.GetItemByID(currentClass.Center);
-                            }
-                            if (subjectID != schedule.ClassSubjectID)//change subject
-                            {
-                                if (!string.IsNullOrEmpty(subjectID))
+                                if (classID != schedule.ClassID)
                                 {
-                                    var skill = _skillService.GetItemByID(currentSubject.ID);
-                                    count++;
-                                    //Send Mail for lastest class subject
-                                    _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                    _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                    studentList = _studentService.GetStudentsByClassId(schedule.ClassID).ToList();
+                                    if (studentList == null || studentList.Count == 0) // no student in class
+                                        continue;
+                                    currentClass = _classService.GetItemByID(schedule.ClassID);
+                                    classID = schedule.ClassID;
+                                    center = _centerService.GetItemByID(currentClass.Center);
                                 }
-                                subjectID = schedule.ClassSubjectID;
-                                currentSubject = _classSubjectService.GetItemByID(subjectID);
-                                currentTeacher = _teacherService.GetItemByID(currentSubject.TeacherID);
-                                var newsubject = _classSubjectService.GetItemByID(schedule.ClassSubjectID);
-                                schedules = new List<ScheduleView>();
+                                if (subjectID != schedule.ClassSubjectID)//change subject
+                                {
+                                    if (!string.IsNullOrEmpty(subjectID))
+                                    {
+                                        var skill = _skillService.GetItemByID(currentSubject.ID);
+                                        count++;
+                                        //Send Mail for lastest class subject
+                                        _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                        _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                    }
+                                    subjectID = schedule.ClassSubjectID;
+                                    currentSubject = _classSubjectService.GetItemByID(subjectID);
+                                    currentTeacher = _teacherService.GetItemByID(currentSubject.TeacherID);
+                                    var newsubject = _classSubjectService.GetItemByID(schedule.ClassSubjectID);
+                                    schedules = new List<ScheduleView>();
+                                }
+                                schedules.Add(new ScheduleView(schedule)
+                                {
+                                    LessonName = _lessonService.GetItemByID(schedule.LessonID).Title
+                                });
                             }
-                            schedules.Add(new ScheduleView(schedule)
+                            //send last Class subject
+                            if (!string.IsNullOrEmpty(subjectID))
                             {
-                                LessonName = _lessonService.GetItemByID(schedule.LessonID).Title
-                            });
-                        }
-                        //send last Class subject
-                        if (!string.IsNullOrEmpty(subjectID))
-                        {
-                            var skill = _skillService.GetItemByID(currentSubject.SkillID);
-                            count++;
-                            //Send Mail for lastest class subject
-                            _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                            _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                var skill = _skillService.GetItemByID(currentSubject.SkillID);
+                                count++;
+                                //Send Mail for lastest class subject
+                                //_ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                //_ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                            }
                         }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"SendIncomingLesson : {ex.Message}");
             }
         }
 
@@ -945,7 +964,7 @@ namespace AutoEmailEduso
                                     body += extendTeacher;
 
                                     var toAddress = isTest ? new List<string> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { inforTeacher.Email };
-                                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+                                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
                                     Console.WriteLine("Send to " + inforTeacher.FullName + " is done");
                                 }
                             }
@@ -1024,7 +1043,8 @@ namespace AutoEmailEduso
         {
             try
             {
-                var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
+                //var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
+                var activeCenters = _centerService.GetActiveCenter(new DateTime(2020,12,31));
                 if (activeCenters.Count() == 0)
                 {
                     Console.WriteLine($"active Centers = 0");
@@ -1032,9 +1052,9 @@ namespace AutoEmailEduso
 
                 foreach (var center in activeCenters)
                 {
-                    if (center.Abbr.Contains("utc"))
+                    //if (center.Abbr.Contains("utc"))
                     //if (center.Abbr.Contains("c3vyvp"))
-                    //if (center.Abbr.Contains("vp"))
+                    if (center.Abbr.Contains("c3cvpvp"))
                     {
                         var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
                         var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
@@ -1098,12 +1118,13 @@ namespace AutoEmailEduso
                             var studentsinClass = Students.Where(x => x.JoinedClasses.Contains(@class.ID));
                             var studentIDsinClass = studentsinClass.Select(x => x.ID).ToList();
 
-                            //var listTime = GetListTime(center.StartDate);
+                            //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
                             var listTime = new Dictionary<Int32, DataTime>(){
-                                {9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
-                                {10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
-                                {11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
-                                {12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
+                                //{8,new DataTime{ StartTime = new DateTime(2020,8,1,0,0,0),EndTime = new DateTime(2020,8,31,23,59,0)} },
+                                //{9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
+                                //{10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
+                                //{11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
+                                //{12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
                             };
                             foreach (var time in listTime)
                             {
@@ -1112,9 +1133,9 @@ namespace AutoEmailEduso
                                 dataResponse.Add(dataClass);
                             }
                         }
-                        var error = Export2Excelv2(dataResponse, dataCenter).Result;
-                        Console.WriteLine(error);
-                        //var test1 = Export2Excel(dataResponse, dataCenter,"12").Result;
+                        //var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
+                        var test1 = Export2Excel(dataResponse, dataCenter,"8").Result;
+                        //Console.WriteLine(error);
                     }
                 }
             }
@@ -1343,7 +1364,7 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\SentToHuonghl\\{dataCenter.CenterName}Month{month}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Hoa\\ChuyenVP\\Month{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
                 }
                 return "";
             }
@@ -1353,7 +1374,7 @@ namespace AutoEmailEduso
             }
         }
 
-        private static async Task<String> Export2Excelv2(List<Class4Report2Excel> data, Center4Report2Excel dataCenter)
+        private static async Task<String> Export2Excelv2(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String Month)
         {
             try
             {
@@ -1825,7 +1846,7 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\SentToHuonghl\\{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
                 }
                 return "";
             }
@@ -1852,6 +1873,103 @@ namespace AutoEmailEduso
                 data.Add(key, new DataTime { StartTime = firstDayofMonth, EndTime = lastDayofMonth });
             }
             return data;
+        }
+        #endregion
+
+        #region Service renewal notice
+        private static async Task<String> ServiceRenewalNotice()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                //lay danh sach co so dang hoat dong
+                var centers = _centerService.CreateQuery().Find(x=>x.Status == true).ToList();
+                //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
+                foreach (var item in centers)
+                {
+                    //lay danh sach lop dang hoat dong
+                    var classesActive = _classService.GetActiveClass4Report(item.StartDate, item.ExpireDate, item.ID);
+                    if (classesActive.Count() == 0) continue;
+
+                    var endTime = item.ExpireDate;
+                    var totalTotalMilliseconds = currentTime.Subtract(endTime).TotalMilliseconds;
+                    var totalTotalDays = currentTime.Subtract(endTime).TotalDays;
+                    if (totalTotalDays >= 0 && totalTotalDays <= 7 && item.ExpireDate.Month == currentTime.Month)
+                    {
+                        //gui mail thong bao het han
+                        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == item.ID)).ToList().FindAll(y => HasRole(y.ID, item.ID, "head-teacher")).ToList();
+                        if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
+                        {
+                            listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
+                        }
+
+                        if (listTeacherHeader.Count == 0) continue;
+
+                        String listNameTeachers = "";
+                        List<String> listEmailTeachers = new List<string>();
+                        foreach(var teacher in listTeacherHeader)
+                        {
+                            listNameTeachers += $"{teacher.FullName}, ";
+                            listEmailTeachers.Add(teacher.Email);
+                        }
+                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim() + ".";
+                        String subject = "THÔNG BÁO GIA HẠN DỊCH VỤ";
+
+                        var thead = "<thead>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:18pt;font-family:Arial,sans-serif;font-weight:bold;text-align: center'>THƯ THÔNG BÁO GIA HẠN DỊCH VỤ</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center;font-style: italic'>(Thành thật xin lỗi, nếu trong thời gian thư đang chuyển đi mà quý thầy cô đã thực hiện gia hạn)</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center'>Ngày gửi: {DateTime.Now.ToString("dd-MM-yyyy")}</td>" +
+                            "</tr>" +
+                            "</thead>";
+                        var tbody = "<tbody>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Kính gửi: thầy/cô <span style='font-weight: bold;font-family:\"Segoe UI\",sans-serif; color: black; background-image:initial; background-position:initial; background-size:initial; background-repeat:initial; background-origin:initial; background-clip:initial'>{listNameTeachers}<span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Lời đầu tiên, <span style='font-weight:bold'>EDUSO</span> xin trân trọng cảm ơn sự hợp tác giữa <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> về việc sử dụng Eduso Platform trong giảng dạy và học tập.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Theo như thời gian sử dụng dịch vụ của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> từ <span style='font-weight:bold'>{item.StartDate.ToUniversalTime().ToString("HH:mm dd/MM/yyyy")}</span> đến <span style='font-weight:bold'>{item.ExpireDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")}.</span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'><span style='font-weight:bold'>EDUSO</span> nhận thấy <span style='font-weight:bold'>{item.Name}</span> sắp đến ngày hết hạn sử dụng, sau ngày hết hạn thì các dịch vụ trên hệ thống Eduso sẽ tạm dừng hoạt động.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Để gia hạn dịch vụ, vui lòng liên hệ bộ phận chăm sóc khách hàng theo số điện thoại 0989085398 - 02432444439</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Chân thành cảm ơn sự hợp tác của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span>.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>Trân trọng!</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>----------------o0o-----------</td>" +
+                            "</tr>" +
+                            "</tbody>";
+
+                        var table2 = @"<table cellpadding='0' cellspacing='0' style='margin:auto;border-spacing:0px; border-collapse:collapse; color: rgb(68, 68, 68); width: 480px; font-size:9pt; font-family:Arial,sans-serif; line-height:14px'><tbody><tr><td colspan='2' style='padding: 0px 0px 5px; width: 480px'><font color='#134f5c'><font face='Arial, sans-serif'><span style='font-size:14.6667px'><b>EDU</b></span><span style='font-weight:bold;font-size:14.6667px'>SO</span></font><b style='font-size:9pt'>.,JSC</b></font><font color='#ff9900'><font face='Arial, sans-serif'><b><span style='font-size:14.6667px'><br></span></b></font></font></td></tr><tr><td colspan='2' style='padding:0px 0px 5px;width:480px;color:rgb(23,147,210)'></td></tr><tr><td colspan='2' style='padding:0px 0px 2px;width:480px;border-top:1px dotted rgb(19,19,19)'>&nbsp;</td></tr><tr><td valign='middle' style='padding:0px;width:120px;vertical-align:middle'><img src='https://ci3.googleusercontent.com/proxy/QAgPRZBFrmIBlGmpla2ITc2bGA9bDK-jAclDqfTcfevFuuKJSYrVRL3tBSDbre6GDcdcRw7fRTECfG5ANvDxMvkQiXZbAd56B4pNx3a8cSg2THUFbi0kScAaG8p1jrykO5s4=s0-d-e1-ft#https://drive.google.com/uc?id=1P2PWW0Do8B1PfWW-r1Kjy_tDK2mp92ma&amp;export=download' width='96' height='95' class='CToWUd'></td><td valign='middle' style='font-family:Arial,sans-serif;padding:0px;width:360px;color:rgb(19,19,19);vertical-align:middle'><table cellpadding='0' cellspacing='0' style='border-spacing:0px;border-collapse:collapse;background-color:transparent'><tbody><tr><td style='padding:1px'><br></td></tr><tr><td style='padding:1px'><span style='font-family:Arial,sans-serif;font-size:9pt'>Hotline: (+84)989 085 398</span></td></tr><tr><td style='font-family:Arial,sans-serif;padding:1px;font-size:9pt'><span style='font-size:9pt'>Mail:&nbsp;<a href='http://buithihong98@gmail.com/' target='_blank' data-saferedirecturl='https://www.google.com/url?q=http://buithihong98@gmail.com/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNETDHvUCqOIe01CJEJwgt6gTrPCkw'>eduso.vn@gmail.com</a></span>&nbsp;</td></tr><tr><td style='padding:1px'><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Trường&nbsp;</span></font><span style='font-size:9pt'>Đại học Giao thông vận tải -&nbsp;</span></span><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Số 3 Phố Cầu Giâ</span></font></span><font style='background-color:transparent;font-size:12px' face='Arial, sans-serif'>y <br>-&nbsp;</font><font face='Arial, sans-serif' style='background-color:transparent'><span style='font-size:12px'>Láng Thượng - Đống Đa -&nbsp;</span></font><span style='background-color:transparent;font-size:9pt'>Hà Nội -&nbsp; Việt Nam</span><font face='Arial, sans-serif' style='background-color:transparent;font-size:9pt'><br></font></td></tr><tr><td style='padding:2px 0px 0px 1px'><span style='display:inline-block;height:23px'><a href='https://www.facebook.com/engcooacademy/' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.facebook.com/engcooacademy/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGKOaTRls1lZt_lcFHOqghSGBtnLQ'><img alt='Facebook icon' border='0' width='23' height='23' src='https://ci3.googleusercontent.com/proxy/mjiWTZdOYIWVF9PvTDENxZ6wQOuPAlFcn8ifTjfAuWRilo8dSpvX4l41IZgRY291qHCNVuF42W5YnOsux7SW-_NZ_nzBFoyx9RXY096p16IIPundLZxXuJgdlBEEyn-qrPROAmxOkxQ=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/fb.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;<a href='https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as=subscriber' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as%3Dsubscriber&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGfTeFFzglJMtBFYrt1A1mPlgwklw'><img alt='Youtbue icon' border='0' width='23' height='23' src='https://ci4.googleusercontent.com/proxy/3yJ04s_GTj8Eck5ACth9ub3_mXYz9hUld0f6NMft-hC_i9M91dE06tpBbNOnc--l8okk-gS8GKbpichkfW88R2CG3u_8n0H_bU6tVdcUcTjLX8JkjbKpSJuY2xg2PWulNFSbyAuW60M=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/yt.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;</span></td></tr></tbody></table></td></tr><tr><td colspan='2' style='padding:2px 0px 0px;width:480px;border-bottom:1px dotted rgb(19,19,19)'>&nbsp;</td></tr></tbody></table>";
+
+                        var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
+
+                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com","k.chee.dinh@gmail.com", "vietphung.it@gmail.com" } : listEmailTeachers;
+                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                        var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+                    }
+                }
+                return "Thong bao thanh cong";
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
         }
         #endregion
 
@@ -2286,8 +2404,52 @@ namespace AutoEmailEduso
                 return subject;
             }
         }
-    }
 
+        private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime,DateTime endTime)
+        {
+            var month = startTime.Month;
+            var year = startTime.Year;
+            var firstTime = new DateTime(year, month, 1, 0, 0, 0);
+            //List<DataTime> data = new List<DataTime>();
+            Dictionary<Int32, DataTime> data = new Dictionary<Int32, DataTime>();
+            var timeMonth = new DataTime()
+            {
+                StartTime = firstTime,
+                EndTime = firstTime.AddMonths(1).AddMinutes(-1)
+            };
+            data.Add(month,timeMonth);
+
+            while(timeMonth.EndTime.Month <= 12 && year == 2020)
+            {
+                firstTime = timeMonth.StartTime.AddMonths(1);
+                var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
+                month = firstTime.Month;
+                timeMonth.StartTime = firstTime;
+                timeMonth.EndTime = lastTime;
+                data.Add(month,timeMonth);
+            }
+            return data;
+        }
+
+        #region ds hoc sinh chua lam cs ben tre
+        public static async Task BenTre()
+        {
+            var center = _centerService.CreateQuery().Find(x=>x.Abbr == "c3btvp").FirstOrDefault();
+            var listClass = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
+            foreach(var item in listClass)
+            {
+                var students = _studentService.GetStudentsByClassId(item.ID);
+                var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == item.ID && x.TotalLearnt == 0).ToList().GroupBy(x => x.StudentID)
+                    .Select(x => new 
+                    {
+                        StudentName = _studentService.GetItemByID(x.Key).FullName,
+                        ClassName = item.Name
+                    });
+                var a = "";
+            }
+        }
+        #endregion
+    }
 
     #region class
     public class ScheduleView : LessonScheduleEntity

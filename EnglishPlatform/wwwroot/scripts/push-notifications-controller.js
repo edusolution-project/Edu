@@ -25,10 +25,11 @@
                 }
             });
         },
-        storePushSubscription: function (pushSubscription) {
-            return fetch('/push-notifications-api/subscriptions', {
+        storePushSubscription: function (pushSubscription, userId) {
+            pushSubscription["UserId"] = userId;
+            return fetch('/push-notifications-api/subscriptions?userid=' + userId, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json'},
                 body: JSON.stringify(pushSubscription)
             });
         },

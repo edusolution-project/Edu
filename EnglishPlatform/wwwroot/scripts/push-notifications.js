@@ -26,12 +26,11 @@
     }
 
     function registerPushServiceWorker() {
-        navigator.serviceWorker.register('/scripts/service-workers/push-service-worker.js', { scope: '/scripts/service-workers/push-service-worker/' })
+        navigator.serviceWorker.register('/scripts/service-workers/push-service-worker.js?' + g_CurrentUser.id, { scope: '/scripts/service-workers/push-service-worker/' })
             .then(function (serviceWorkerRegistration) {
                 pushServiceWorkerRegistration = serviceWorkerRegistration;
-
+                subscribeForPushNotifications();
                 initializeUIState();
-
                 writeToConsole('Push Service Worker has been registered successfully');
             }).catch(function (error) {
                 writeToConsole('Push Service Worker registration has failed: ' + error);
@@ -87,25 +86,25 @@
             applicationServerKey: applicationServerPublicKey
         })
             .then(function (pushSubscription) {
-                PushNotificationsController.storePushSubscription(pushSubscription)
-                    .then(function (response) {
-                        if (response.ok) {
-                            writeToConsole('Successfully subscribed for Push Notifications');
-                        } else {
-                            writeToConsole('Failed to store the Push Notifications subscrition on server');
-                        }
-                    }).catch(function (error) {
-                        writeToConsole('Failed to store the Push Notifications subscrition on server: ' + error);
-                    });
+                PushNotificationsController.storePushSubscription(pushSubscription, g_CurrentUser.id)
+                .then(function (response) {
+                    if (response.ok) {
+                        writeToConsole('Successfully subscribed for Push Notifications');
+                    } else {
+                        writeToConsole('Failed to store the Push Notifications subscrition on server');
+                    }
+                }).catch(function (error) {
+                    writeToConsole('Failed to store the Push Notifications subscrition on server: ' + error);
+                });
 
-                changeUIState(false, true);
-            }).catch(function (error) {
-                if (Notification.permission === 'denied') {
-                    changeUIState(true, false);
-                } else {
-                    writeToConsole('Failed to subscribe for Push Notifications: ' + error);
-                }
-            });
+            changeUIState(false, true);
+        }).catch(function (error) {
+            if (Notification.permission === 'denied') {
+                changeUIState(true, false);
+            } else {
+                writeToConsole('Failed to subscribe for Push Notifications: ' + error);
+            }
+        });
     }
 
     function unsubscribeFromPushNotifications() {
@@ -134,7 +133,7 @@
     }
 
     function sendPushNotification() {
-        var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value };
+        var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value, userId: g_CurrentUser.id };
 
         fetch('/push-notifications-api/notifications', {
             method: 'POST',
@@ -165,8 +164,20 @@
                 writeToConsole('Push API not supported');
                 return;
             }
-
-            registerPushServiceWorker();
+            if (Notification.permission != 'granted') {
+                Notification.requestPermission(function (result) {
+                    if (result === 'granted') {
+                        registerPushServiceWorker();
+                    }
+                    else {
+                        unsubscribeFromPushNotifications();
+                    }
+                });
+            }
+            topicInput = document.getElementById('topic');
+            notificationInput = document.getElementById('notification');
+            urgencySelect = document.getElementById('urgency');
+            document.getElementById('send').addEventListener('click', sendPushNotification);
         }
     };
 })();

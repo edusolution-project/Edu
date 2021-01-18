@@ -41,7 +41,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ProgressHelper _progressHelper;
         private readonly CalendarHelper _calendarHelper;
 
-        private readonly CourseLessonService _lessonService;
+        private readonly CourseLessonService _courseLessonService;
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
@@ -70,6 +70,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly LearningHistoryService _learningHistoryService;
 
         private readonly AccountService _accountService;
+        private readonly LessonService _lessonService;
 
         private string host;
         private string staticPath;
@@ -77,7 +78,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly IHostingEnvironment _env;
 
         public HomeController(
-                CourseLessonService lessonService,
+                CourseLessonService courseLessonService,
                 LessonPartService lessonPartService,
                 LessonPartQuestionService questionService,
                 LessonPartAnswerService answerService,
@@ -114,10 +115,11 @@ namespace BaseCustomerMVC.Controllers.Admin
                 CalendarService calendarService,
                 LessonScheduleService lessonScheduleService,
                 LearningHistoryService learningHistoryService,
-                AccountService accountService
+                AccountService accountService,
+                LessonService lessonService
             )
         {
-            _lessonService = lessonService;
+            _courseLessonService = _courseLessonService;
             _lessonPartService = lessonPartService;
             _questionService = questionService;
             _answerService = answerService;
@@ -155,6 +157,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _learningHistoryService = learningHistoryService;
 
             _accountService = accountService;
+            _lessonService = lessonService;
 
             _env = env;
 
@@ -185,7 +188,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         //    str += "Phase 0: ";
         //    //Clear orphan part: Run Once
 
-        //    //var ids = _lessonService.GetAll().Project(t => t.ID).ToList();
+        //    //var ids = _courseLessonService.GetAll().Project(t => t.ID).ToList();
 
 
         //    //long delpart = 0;
@@ -194,7 +197,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         //    //foreach (var partid in delIds)
         //    //{
         //    //    var part = _lessonPartService.GetItemByID(partid);
-        //    //    if (_lessonService.GetItemByID(part.ParentID) == null)
+        //    //    if (_courseLessonService.GetItemByID(part.ParentID) == null)
         //    //    {
         //    //        _lessonPartService.Remove(partid);
         //    //        var quizs = _questionService.GetByPartID(partid);
@@ -248,11 +251,11 @@ namespace BaseCustomerMVC.Controllers.Admin
         //    //start = DateTime.UtcNow;
 
         //    //calculate lesson maxpoint
-        //    var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
+        //    var clids = _courseLessonService.GetAll().Project(t => t.ID).ToList();
         //    var listclass = new List<string>();
         //    foreach (var clid in clids)
         //    {
-        //        var cl = _lessonService.GetItemByID(clid);
+        //        var cl = _courseLessonService.GetItemByID(clid);
         //        var oldpoint = cl.Point;
         //        //if (oldpoint == 0)
         //        //{
@@ -416,17 +419,17 @@ namespace BaseCustomerMVC.Controllers.Admin
             var change = 0;
 
 
-            var clids = _lessonService.GetAll().Project(t => t.ID).ToList();
+            var clids = _courseLessonService.GetAll().Project(t => t.ID).ToList();
             foreach (var clid in clids)
             {
-                var cl = _lessonService.GetItemByID(clid);
+                var cl = _courseLessonService.GetItemByID(clid);
                 var oldpoint = cl.Point;
                 var isPrac = cl.IsPractice;
                 var newPrac = isPrac;
                 var point = calculateLessonPoint(cl, newPrac);
                 if ((isPrac != newPrac) || (point != oldpoint))
                 {
-                    _lessonService.Save(cl);
+                    _courseLessonService.Save(cl);
                     change++;
                 }
             }
@@ -610,7 +613,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public async Task<JsonResult> FixExam()
         {
-            _lessonService.CreateQuery().UpdateMany(t => t.TemplateType == LESSON_TEMPLATE.EXAM,
+            _courseLessonService.CreateQuery().UpdateMany(t => t.TemplateType == LESSON_TEMPLATE.EXAM,
                 Builders<CourseLessonEntity>.Update.Set(t => t.IsPractice, true).Set(t => t.TemplateType, LESSON_TEMPLATE.LECTURE)
                 );
 
@@ -816,7 +819,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 else
                     lesson.IsPractice = false;
             }
-            _lessonService.Save(lesson);
+            _courseLessonService.Save(lesson);
             isPrac = lesson.IsPractice;
             return point;
         }
@@ -1103,7 +1106,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 if (ids.Length > 0)
                 {
                     _chapterService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
-                    _lessonService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
+                    _courseLessonService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
                     _lessonPartService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
                     _questionService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
                     _answerService.CreateQuery().DeleteMany(o => ids.Contains(o.CourseID));
@@ -1655,5 +1658,55 @@ namespace BaseCustomerMVC.Controllers.Admin
         }
 
         #endregion
+
+        public IActionResult FixDataPractice()
+        {
+            var lesson = _courseLessonService.CreateQuery().Find(x => x.IsPractice == false && x.TemplateType == 1);
+            var lessonIDs = lesson.ToList().Select(x => x.ID).ToList();
+            var lessonparts = _lessonPartService.CreateQuery().Find(x => lessonIDs.Contains(x.ParentID)).ToList();
+            var glessonparts = lessonparts.GroupBy(x => x.Type).ToList();
+            var clonelessonparts = _clonelessonPartService.CreateQuery().Find(x => lessonIDs.Contains(x.ParentID)).ToList();
+            var gclonelessonparts = clonelessonparts.GroupBy(x => x.Type).ToList();
+            return Content("");
+        }
+
+        //public IActionResult FixData()
+        //{
+        //    try
+        //    {
+        //        var lessons = _lessonService.CreateQuery().Find(x => x.TemplateType == 1 && x.IsPractice == false).ToList();
+        //        foreach(var item in lessons)
+        //        {
+        //            item.IsPractice = true;
+        //            _lessonService.Save(item);
+        //        }
+        //        return Content($"OK - {lessons.Count()}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Content(ex.Message);
+        //    }
+        //}
+
+        //public IActionResult Center()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetAll();
+        //        foreach (var item in centers.ToList())
+        //        {
+        //            if (item.ExpireDate <= DateTime.Now)
+        //            {
+        //                item.ExpireDate = new DateTime(2021,1,31);
+        //                _centerService.Save(item);
+        //            }
+        //        }
+        //        return Content("done");
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return Content(ex.Message);
+        //    }
+        //}
     }
 }

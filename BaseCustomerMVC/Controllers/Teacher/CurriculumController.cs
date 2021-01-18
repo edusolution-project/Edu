@@ -1045,8 +1045,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (connected == null)
                                 {
                                     item.ConnectID = "";//remove connected
-                                    connected = _chapterService.GetItemByID(item.ParentID);
-                                    item.Start = connected.Start;
+                                    if (data.ParentID == "0")
+                                        item.Start = 0;
+                                    else
+                                    {
+                                        var parent = _chapterService.GetItemByID(item.ParentID);
+                                        item.Start = parent.Start;
+                                    }
                                 }
                                 else
                                 {
@@ -1140,16 +1145,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     UpdateRoute(chap);
                 }
             }
-            var subChaps = _chapterService.GetSubChapters(data.CourseID, data.ID);
-            if (subChaps != null && subChaps.Count() > 0)
-            {
-                foreach (var chap in connectedChaps)
-                {
-                    chap.Start = data.Start + data.Period;
-                    _chapterService.Save(chap);
-                    UpdateRoute(chap);
-                }
-            }
 
             var connectedLessons = _lessonService.GetItemByConnectID(data.CourseID, data.ParentID, data.ID);
             if (connectedLessons != null && connectedLessons.Count() > 0)
@@ -1157,6 +1152,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 foreach (var lesson in connectedLessons)
                 {
                     lesson.Start = data.Start + data.Period;
+                    UpdateRoute(lesson);
+                }
+            }
+
+            var subChaps = _chapterService.GetSubChapters(data.CourseID, data.ID);
+            if (subChaps != null && subChaps.Count() > 0)
+            {
+                foreach (var chap in subChaps)
+                {
+                    if (!string.IsNullOrEmpty(chap.ConnectID))//direct child
+                        chap.Start = data.Start;
+                    if (chap.Period > 0)//route set
+                        if (chap.Start + chap.Period > data.Start + data.Period)
+                            chap.Period = data.Start + data.Period - chap.Start;
+                    _chapterService.Save(chap);
+                    UpdateRoute(chap);
+                }
+            }
+
+            var subLessons = _lessonService.GetChapterLesson(data.ID);
+            if (subLessons != null && subLessons.Count() > 0)
+            {
+                foreach (var lesson in subLessons)
+                {
+                    if(!string.IsNullOrEmpty(lesson.ConnectID))//direct child
+                    {
+                        lesson.Start = data.Start;
+                    }
+                    if (lesson.Period > 0)//route set
+                        if (lesson.Start + lesson.Period > data.Start + data.Period)
+                            lesson.Period = data.Start + data.Period - lesson.Start;
+                    lesson.Period = data.Period;
                     UpdateRoute(lesson);
                 }
             }
@@ -1566,8 +1593,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 if (connected == null)
                                 {
                                     item.ConnectID = "";//remove connected
-                                    connected = _chapterService.GetItemByID(item.ChapterID);
-                                    item.Start = connected.Start;
+                                    if (item.ChapterID == "0")
+                                        item.Start = 0;
+                                    else
+                                    {
+                                        var parent = _chapterService.GetItemByID(item.ChapterID);
+                                        item.Start = parent.Start;
+                                    }
                                 }
                                 else
                                 {

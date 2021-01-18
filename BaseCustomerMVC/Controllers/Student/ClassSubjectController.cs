@@ -330,7 +330,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json("Sinh viên chưa có trong lớp.");
             }
 
-            var lclass = _classService.GetItemsByIDs(student.JoinedClasses).Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL)).OrderBy(t => t.ClassMechanism).ThenByDescending(t => t.StartDate).AsEnumerable();
+            var lclass = _classService.GetItemsByIDs(student.JoinedClasses)
+                .Where(t => (t.Center == center.ID && t.EndDate >= DateTime.UtcNow) || (t.ClassMechanism == CLASS_MECHANISM.PERSONAL))
+                .OrderBy(t => t.ClassMechanism)
+                .ThenByDescending(t => t.StartDate)
+                .AsEnumerable();
             if (lclass.Count() == 0)
             {
                 return Json("lclass = 0");
@@ -342,13 +346,29 @@ namespace BaseCustomerMVC.Controllers.Student
             var listClassSbjIds = listClassSbj.ToList().Select(x => x.ID);
             var classSbjExam = listClassSbj.ToList().Where(x => x.TypeClass == CLASSSUBJECT_TYPE.EXAM);
             var classSbjPractices = listClassSbj.ToList().Where(x => x.TypeClass != CLASSSUBJECT_TYPE.EXAM);
-            var activelessonTemp = _lessonScheduleService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now).ToList();
-            var progess = _lessonProgressService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StudentID == student.ID).ToList();
             List<LessonScheduleEntity> activelesson = new List<LessonScheduleEntity>();
+            List<LessonScheduleEntity> activelessonTemp = new List<LessonScheduleEntity>();
+            if (TypeFilter == 1) //gv giao bai
+            {
+                activelessonTemp = _lessonScheduleService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now).ToList();
+            }
+            else
+            {
+                activelessonTemp = _lessonScheduleService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID)).ToList();
+            }
+            var progess = _lessonProgressService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StudentID == student.ID).ToList();
             foreach (var item in lclass)
             {
-                var _activelesson = activelessonTemp.Where(x => x.EndDate >= item.StartDate && x.ClassID == item.ID).ToList();
-                activelesson.AddRange(_activelesson);
+                if (TypeFilter == 1)
+                {
+                    var _activelesson = activelessonTemp.Where(x => x.EndDate >= item.StartDate && x.ClassID == item.ID).ToList();
+                    activelesson.AddRange(_activelesson);
+                }
+                else
+                {
+                    var _activelesson = activelessonTemp.Where(x => x.ClassID == item.ID).ToList();
+                    activelesson.AddRange(_activelesson);
+                }
             }
             //data Practice
             List<StudentSummaryViewModel> practiceResult = new List<StudentSummaryViewModel>();

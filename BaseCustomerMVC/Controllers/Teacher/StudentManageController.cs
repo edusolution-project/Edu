@@ -200,6 +200,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //return Json(new { error = "Cơ sở " + center.Name + " đã hết hạn mức." });
                 }
 
+                student.Email = student.Email.ToLower().Trim();
+
                 if (!ExistEmail(student.Email))//if student account not exist => create new student
                 {
                     student.CreateDate = DateTime.Now;
@@ -236,6 +238,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             RoleID = _roleService.GetItemByCode("student").ID
                         };
                         _accountService.CreateQuery().InsertOne(account);
+                        _ = _mailHelper.SendRegisterEmail(account, _defaultPass);
                         createAcc = true;
                     }
 
@@ -1036,7 +1039,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (rtn == null)
             {
                 rtn = new List<StudentRankingViewModel>();
-                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
                 var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
                 {
                     StudentID = g.Key,

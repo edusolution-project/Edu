@@ -187,7 +187,7 @@ var ExamReview = (function () {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;
                 var title = "Làm đúng";
                 var _class = "success";
-              debugger
+              //debugger
                 if (item.TypeAnswer != "ESSAY") {
                     // câu trắc nghiệm
                     if (detail) {
@@ -889,7 +889,7 @@ var ExamReview = (function () {
         if (data.Description != null)
             html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
-        html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+        html += '<div class="col-md-6 d-inline-block align-top h-100 overflow-auto"><div class="quiz-wrapper part-column">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             var itemContent = item.Content == null ? "Quiz " + (i + 1) + " : " : item.Content;
@@ -927,7 +927,7 @@ var ExamReview = (function () {
         if (data.Description != null)
             html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
-        html += '<div class="col-md-6 d-inline-block align-top h-100 p-0">';
+        html += '<div class="col-md-6 d-inline-block align-top h-100 p-0 overflow-auto">';
         html += '<div class="h-100 align-top p-0"><div class="quiz-wrapper align-top part-column">';
 
         html += '<div class="row m-0">';
@@ -981,7 +981,7 @@ var ExamReview = (function () {
         if (data.Description != null)
             html += '<div class="description">' + data.Description.replace("http://publisher.edusolution.vn", "https://publisher.eduso.vn") + '</div>';
         html += renderMedia(data.Media) + toggleButton + '</div></div>';
-        html += '<div class="col-md-6 d-inline-block align-top h-100"><div class="quiz-wrapper part-column">';
+        html += '<div class="col-md-6 d-inline-block align-top h-100 overflow-auto"><div class="quiz-wrapper part-column">';
         for (var i = 0; data.Questions != null && i < data.Questions.length; i++) {
             var item = data.Questions[i];
             html += '<div class="quiz-item" id="' + item.ID + '" data-part-id="' + item.ParentID + '" data-quiz-type="QUIZ4">';

@@ -1,15 +1,14 @@
-﻿using Lib.Net.Http.WebPush;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WebPush.Models;
+using WebPush.Services.Sqlite;
 
 namespace WebPush.Interfaces
 {
     public interface IPushSubscriptionStore
     {
-        Task StoreSubscriptionAsync(PushSubscription subscription);
+        Task StoreSubscriptionAsync(PushSubscriptionEntity subscription);
 
         Task DiscardSubscriptionAsync(string endpoint);
 

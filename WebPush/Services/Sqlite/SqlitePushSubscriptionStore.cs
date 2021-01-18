@@ -2,9 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Lib.Net.Http.WebPush;
-using WebPush.Services.Sqlite;
 using WebPush.Interfaces;
+using WebPush.Models;
 
 namespace WebPush.Services.Sqlite
 {
@@ -17,16 +16,17 @@ namespace WebPush.Services.Sqlite
             _context = context;
         }
 
-        public Task StoreSubscriptionAsync(PushSubscription subscription)
+        public Task StoreSubscriptionAsync(PushSubscriptionEntity subscription)
         {
-            _context.Subscriptions.Add(new PushSubscriptionContext.PushSubscription(subscription));
+            subscription.Keys.Add("UserId", subscription.UserId);
+            _context.Subscriptions.Add(new PushSubscription(subscription));
 
             return _context.SaveChangesAsync();
         }
 
         public async Task DiscardSubscriptionAsync(string endpoint)
         {
-            PushSubscriptionContext.PushSubscription subscription = await _context.Subscriptions.FindAsync(endpoint);
+            PushSubscription subscription = await _context.Subscriptions.FindAsync(endpoint);
 
             _context.Subscriptions.Remove(subscription);
 

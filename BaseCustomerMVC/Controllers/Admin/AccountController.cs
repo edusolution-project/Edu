@@ -24,12 +24,14 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
         private readonly RoleService _roleService;
+        private readonly AccountService _accountService;
         private readonly IHostingEnvironment _env;
 
         public AccountController(AccountService service
             , RoleService roleService
             , TeacherService teacherService
             , StudentService studentService
+            , AccountService accountService
             , IHostingEnvironment evn)
         {
             _env = evn;
@@ -37,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _teacherService = teacherService;
             _studentService = studentService;
             _roleService = roleService;
+            _accountService = accountService;
         }
 
         public ActionResult Index(DefaultModel model)
@@ -52,7 +55,27 @@ namespace BaseCustomerMVC.Controllers.Admin
         public JsonResult GetList(DefaultModel model)
         {
             var filter = new List<FilterDefinition<AccountEntity>>();
-            var roleList = new List<string> { "admin", "superadmin", "tin_tuc" };
+            //var roleList = new List<string> { "admin", "superadmin"};
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var ListRoleIDs = _accountService.CreateQuery().Find(x => x.ID == UserID).Project(x => x.RoleID).ToList();
+            var _roles = _roleService.GetAll().ToList();
+            var roleList = new List<String>();
+            var currentRole = _roles.Where(x => ListRoleIDs.Contains(x.ID)).Select(x => x.Code).ToList();
+            if (currentRole.Contains("superadmin"))
+            {
+                roleList.AddRange(_roles.Where(x=>x.Type != "student" && x.Type != "teacher").Select(x => x.Code).ToList());
+            }
+            else if (currentRole.Contains("head-teacher"))
+            {
+                var listStr = new List<String>() { "teacher", "head-teacher" };
+                roleList.AddRange(listStr);
+            }
+            else if (currentRole.Contains("admin"))
+            {
+                var listStr = _roles.Where(x => x.Code != "superadmin").Select(x=>x.Code);
+                roleList.AddRange(listStr);
+            }
 
             if (!string.IsNullOrEmpty(model.SearchText))
             {
@@ -67,7 +90,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 filter.Add(Builders<AccountEntity>.Filter.Where(o => o.CreateDate <= new DateTime(model.EndDate.Year, model.EndDate.Month, model.EndDate.Day, 23, 59, 59)));
             }
 
-            filter.Add(Builders<AccountEntity>.Filter.Where(o => o.Type == ACCOUNT_TYPE.ADMIN || o.Type==ACCOUNT_TYPE.ADMINISTRATOR_NEWS));
+            filter.Add(Builders<AccountEntity>.Filter.Where(o => roleList.Contains(o.Type)));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<AccountEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.Count();

@@ -151,7 +151,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (rtn == null)
             {
                 rtn = new List<StudentRankingViewModel>();
-                var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID).Project(t => t.ID).ToEnumerable();
+                var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
                 var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
                 {
                     StudentID = g.Key,

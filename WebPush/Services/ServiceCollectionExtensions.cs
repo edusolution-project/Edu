@@ -1,11 +1,8 @@
-﻿using System;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebPush.Interfaces;
 using WebPush.Services.Sqlite;
-using WebPush.Services.LiteDB;
-using WebPush.Services.Cosmos;
 using WebPush.Services.PushService;
 
 namespace WebPush.Services
@@ -14,21 +11,7 @@ namespace WebPush.Services
     {
         public static IServiceCollection AddPushSubscriptionStore(this IServiceCollection services, IConfiguration configuration)
         {
-            switch (configuration.GetSubscriptionStoreType())
-            {
-                case SubscriptionStoreTypes.Sqlite:
-                    services.AddSqlitePushSubscriptionStore(configuration);
-                    break;
-                case SubscriptionStoreTypes.LiteDB:
-                    services.AddLiteDatabasePushSubscriptionStore();
-                    break;
-                case SubscriptionStoreTypes.CosmosDB:
-                    services.AddCosmosDbPushSubscriptionStore();
-                    break;
-                default:
-                    throw new NotSupportedException($"Not supported {nameof(IPushSubscriptionStore)} type.");
-            }
-
+            services.AddSqlitePushSubscriptionStore(configuration);
             return services;
         }
 

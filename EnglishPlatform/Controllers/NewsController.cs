@@ -91,18 +91,22 @@ namespace EnglishPlatform.Controllers
             }
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type == null));
 
-            var listnews = _newsService.CreateQuery().Find(x => x.Type == "news" || x.Type==null).ToList();
-            foreach(var item in listnews)
+            var listnews = _newsService.CreateQuery().Find(x => x.Type == "news" || x.Type == null).ToList();
+            foreach (var item in listnews)
             {
                 if (item.Code == null)
                 {
                     item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 }
+                if (item.Code[item.Code.Length - 1].ToString() == "?")
+                {
+                    item.Code = item.Code.Remove(item.Code.Length - 1);
+                }
             }
 
             //var news = _newsService.CreateQuery().Find(Builders<NewsEntity>.Filter.And(filter)).FirstOrDefault();
-            var news = listnews.Find(x=>x.Code==newscode);
-            
+            var news = listnews.Find(x => x.Code == newscode);
+
             ViewBag.News = news;
             if (news == null || !news.IsActive)
             {
@@ -116,7 +120,7 @@ namespace EnglishPlatform.Controllers
 
         [HttpPost]
         [Route("/news/getlist")]
-        public JsonResult GetList(DefaultModel model, string catID, bool isHot = false, bool isTop = false)
+        public JsonResult GetList(DefaultModel model, string catID, string CurrentNewsCode, bool isHot = false, bool isTop = false)
         {
             var filter = new List<FilterDefinition<NewsEntity>>();
 
@@ -132,27 +136,80 @@ namespace EnglishPlatform.Controllers
             {
                 filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsTop));
             }
+            if (!string.IsNullOrEmpty(CurrentNewsCode))
+            {
+                filter.Add(Builders<NewsEntity>.Filter.Where(t => !t.Code.Equals(CurrentNewsCode)));
+            }
             filter.Add(Builders<NewsEntity>.Filter.Lte(t => t.PublishDate, DateTime.Now));
             filter.Add(Builders<NewsEntity>.Filter.Where(t => t.IsActive == true));
-            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type==null));
+            filter.Add(Builders<NewsEntity>.Filter.Where(t => t.Type == "news" || t.Type == null));
 
-            var data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
+            var categories = _newsCategoryService.GetAll().ToList();
+
+            var _data = (filter.Count > 0 ? _newsService.Collection.Find(Builders<NewsEntity>.Filter.And(filter)) : _newsService.GetAll())
                 .SortByDescending(t => t.PublishDate);
-            model.TotalRecord = data.CountDocuments();
-            foreach(var item in data.ToList())
-            {
-                if (item.Code == null)
-                {
-                    item.Code = item.Title.ConvertUnicodeToCode("-", true);
-                }
-            }
+            model.TotalRecord = _data.CountDocuments();
+
+
+            var categoryCode = categories.Find(t => t.ID == catID)?.Code;
+
+            var data = from d in _data.ToList()
+                           //let categoryCode = !string.IsNullOrEmpty(d.CategoryID) ? categorys.Where(x => x.ID == d.CategoryID).FirstOrDefault().Code : ""
+                       select new NewsViewModel
+                       {
+                           CategoryID = d.CategoryID,
+                           CategoryCode = categoryCode,
+                           Code = string.IsNullOrEmpty(d.Code) ? d.Title.ConvertUnicodeToCode("-", true) : d.Code,
+                           Content = d.Content,
+                           CreateDate = d.CreateDate,
+                           ID = d.ID,
+                           PublishDate = d.PublishDate,
+                           Summary = d.Summary,
+                           Thumbnail = d.Thumbnail,
+                           Title = d.Title,
+                           Type = d.Type,
+                           IsHot = d.IsHot
+                       };
             var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord <= model.PageSize
                 ? data.ToList()
-                : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize).ToList();
+                : data.Skip((model.PageIndex) * model.PageSize).Take(model.PageSize).ToList();
+
+            var listCurrentNewsID = DataResponse.Select(x => x.ID).ToList();
+
+            var _dataHot = _newsService.CreateQuery().Find(x =>
+            !listCurrentNewsID.Contains(x.ID) && 
+            (x.IsActive || x.PublishDate >= DateTime.Now) && 
+            x.IsHot == true && x.Type == "news")
+                .Limit(6)
+                .ToList()
+                .OrderByDescending(x=>x.PublishDate);
+
+            var dataResult = new List<NewsViewModel>();
+            var datahot = (from d in _dataHot
+                           where categories.Where(x => x.ID == d.CategoryID).FirstOrDefault() != null
+                           let categoryCode1 =
+                            (categories.Where(x => x.ID == d.CategoryID).FirstOrDefault() ?? new NewsCategoryEntity { Code = d.CategoryID }).Code ?? "Khong co code"
+                           //select d.ID).ToList();
+                           select new NewsViewModel
+                           {
+                               CategoryID = d.CategoryID,
+                               CategoryCode = categoryCode1,
+                               Code = string.IsNullOrEmpty(d.Code) ? d.Title.ConvertUnicodeToCode("-", true) : d.Code,
+                               Content = "",
+                               CreateDate = d.CreateDate,
+                               ID = d.ID,
+                               PublishDate = d.PublishDate,
+                               Summary = d.Summary,
+                               Thumbnail = d.Thumbnail,
+                               Title = d.Title,
+                               Type = d.Type,
+                               IsHot = d.IsHot
+                           }).ToList();
 
             var response = new Dictionary<string, object>
             {
                 { "Data", DataResponse },
+                { "DataNewsH", datahot },
                 { "Model", model }
             };
             return new JsonResult(response);

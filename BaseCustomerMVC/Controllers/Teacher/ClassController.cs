@@ -3242,12 +3242,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var lessonIDs = exams.Select(x => x.LessonID).ToList();
                 var lessons = _lessonService.CreateQuery().Find(x => lessonIDs.Contains(x.ID));
+                var chapterIDs = lessons.Project(x => x.ChapterID).ToList();
+                var chapters = _chapterService.CreateQuery().Find(x => chapterIDs.Contains(x.ID));
 
                 var result = from e in exams.ToList()
                              group e by e.ClassSubjectID
                              into g
                              let classSbj = classSbjs.ToList().Where(x => x.ID == g.Key).FirstOrDefault()
                              let lesson = lessons.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
+                             let chapter = chapters.ToList().Where(x=>x.ClassSubjectID == g.Key).ToList()
                              let course = _courseService.GetItemByID(classSbj.CourseID)
                              select new LessonToMarkVM
                              {
@@ -3255,6 +3258,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  CourseName = classSbj == null ? "": classSbj.CourseName,
                                  ListLesson = lesson == null ? new List<LessonEntity>() : lesson,
                                  ListExam = g == null ?  new List<ExamViewModel>() : g.ToList(),
+                                 ListChapter = g == null ?  new List<ChapterEntity>() : chapter,
                                  Image = course == null ? "" : course.Image,
                                  TeacherID = classSbj.TeacherID
                              };
@@ -3298,6 +3302,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String CourseName { get; set; }
             public List<LessonEntity> ListLesson { get; set; }
             public List<ExamViewModel> ListExam { get; set; }
+            public List<ChapterEntity> ListChapter { get; set; }
             public String TeacherName { get; set; }
             public String TeacherID { get; set; }
             public String Image { get; set; }

@@ -303,27 +303,27 @@ namespace EnglishPlatform
                  template: "{controller=home}/{action=index}/{id?}"
                 );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas0",
                    template: "{area:exists}/{controller=Home}/{action=Index}"
                 );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas1",
                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
                  );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas2",
                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas3",
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}"
                  );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas4",
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}"
                  );
                 routes.MapRoute(
-                   name: "areas",
+                   name: "areas5",
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
                  );
             });
