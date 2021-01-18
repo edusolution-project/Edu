@@ -1,6 +1,8 @@
 ﻿using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +29,6 @@ namespace BaseCustomerMVC.Globals
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
-
 
         public CourseHelper(
             CourseService courseService,
@@ -122,15 +123,16 @@ namespace BaseCustomerMVC.Globals
 
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
         {
-            _ = CloneChapterForClassSubject(classSubject);
+            _ = CloneChapterForClassSubject(classSubject, classSubject.StartDate);
             //_courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
-        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
+        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, DateTime start, CourseChapterEntity originChapter = null)
         {
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
 
+            var endperiod = start;
             long lessoncounter = 0;
             if (originChapter != null)
             {
@@ -140,23 +142,39 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
 
+                if (!string.IsNullOrEmpty(originChapter.ConnectID) || originChapter.Period > 0) // set lo trinh
+                {
+                    newchapter.StartDate = start;
+                    if (originChapter.Period > 0)
+                    {
+                        newchapter.EndDate = newchapter.StartDate.AddDays(originChapter.Period);
+                        endperiod = newchapter.EndDate;
+                    }
+                }
                 _chapterService.Save(newchapter);
-
                 newID = newchapter.ID;
             }
 
-            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID);
+
+            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID).OrderBy(t => t.ConnectID).ToList();
             if (lessons != null && lessons.Count() > 0)
             {
                 foreach (var courselesson in lessons)
                 {
+                    var lstart = start;
+
+                    if (!string.IsNullOrEmpty(courselesson.ConnectID))
+                    {
+                        
+                    }
+
                     await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
                         ChapterID = newID,
                         OriginID = courselesson.ID,
                         ClassID = classSubject.ClassID,
-                        ClassSubjectID = classSubject.ID
-                    });
+                        ClassSubjectID = classSubject.ID,
+                    }, start, endperiod);
                 }
                 lessoncounter = lessons.Count();
             }
@@ -166,7 +184,7 @@ namespace BaseCustomerMVC.Globals
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
-                    lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
+                    lessoncounter += await CloneChapterForClassSubject(classSubject, classSubject.StartDate, chap);
                 }
 
             return lessoncounter;

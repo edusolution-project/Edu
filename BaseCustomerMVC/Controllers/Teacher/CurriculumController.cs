@@ -34,6 +34,10 @@ using RestSharp.Extensions;
 using MongoDB.Bson.Serialization.Serializers;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
+//using Spire.Pdf.Exporting.XPS.Schema;
+using GoogleLib.Services;
+using MongoDB.Driver.Linq;
+using Spire.Doc.Collections;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -641,7 +645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                         item.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
 
@@ -671,7 +675,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                         olditem.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
                     _service.Save(olditem);
@@ -924,7 +928,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var file = files[0];
 
-                    var filename = currentCourse.ID + "_" + DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                    var filename = currentCourse.ID + "_" + DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                     currentCourse.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER", basis);
                 }
                 _service.CreateOrUpdate(currentCourse);
@@ -1015,11 +1019,82 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Name = item.Name;
                     data.ParentID = item.ParentID;
                     data.Description = item.Description;
-                    data.ConnectID = item.ConnectID;
+
                     data.ConnectType = item.ConnectType;
-                    data.Period = item.Period;
+
+                    var needUpdate = false;
+
+                    if (data.ConnectID != item.ConnectID)
+                    {
+                        data.ConnectID = item.ConnectID;
+                        if (data.ConnectType == CONNECT_TYPE.CHAPTER)
+                        {
+                            if (string.IsNullOrEmpty(item.ConnectID))
+                            {
+                                if (data.ParentID == "0")
+                                    item.Start = 0;
+                                else
+                                {
+                                    var parent = _chapterService.GetItemByID(item.ParentID);
+                                    item.Start = parent.Start;
+                                }
+                            }
+                            else
+                            {
+                                var connected = _chapterService.GetItemByID(item.ConnectID);
+                                if (connected == null)
+                                {
+                                    item.ConnectID = "";//remove connected
+                                    connected = _chapterService.GetItemByID(item.ParentID);
+                                    item.Start = connected.Start;
+                                }
+                                else
+                                {
+                                    item.Start = connected.Start + connected.Period;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(item.ConnectID))
+                            {
+                                //????
+                            }
+                            else
+                            {
+                                var connected = _lessonService.GetItemByID(item.ConnectID);
+                                if (connected == null)
+                                {
+                                    item.ConnectID = "";//remove connected
+                                    if (data.ParentID == "0")
+                                        item.Start = 0;
+                                    else
+                                    {
+                                        var parent = _chapterService.GetItemByID(item.ParentID);
+                                        item.Start = parent.Start;
+                                    }
+                                }
+                                else
+                                {
+                                    item.Start = connected.Start + connected.Period;
+                                }
+                            }
+                        }
+                        needUpdate = true;
+                    }
+                    if (data.Period != item.Period)
+                    {
+                        data.Period = item.Period;
+                        needUpdate = true;
+                    }
 
                     _chapterService.Save(data);
+
+                    if (needUpdate)
+                    {
+                        UpdateRoute(data);
+                    }
+
                     if (oldParent != item.ParentID)//Change Root chapter
                     {
                         if (item.TotalLessons > 0)
@@ -1050,6 +1125,64 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     { "Data", null },
                     {"Error",ex.Message }
                 });
+            }
+        }
+
+        private void UpdateRoute(CourseChapterEntity data)
+        {
+            var connectedChaps = _chapterService.GetItemByConnectID(data.CourseID, data.ParentID, data.ID);
+            if (connectedChaps != null && connectedChaps.Count() > 0)
+            {
+                foreach (var chap in connectedChaps)
+                {
+                    chap.Start = data.Start + data.Period;
+                    _chapterService.Save(chap);
+                    UpdateRoute(chap);
+                }
+            }
+            var subChaps = _chapterService.GetSubChapters(data.CourseID, data.ID);
+            if (subChaps != null && subChaps.Count() > 0)
+            {
+                foreach (var chap in connectedChaps)
+                {
+                    chap.Start = data.Start + data.Period;
+                    _chapterService.Save(chap);
+                    UpdateRoute(chap);
+                }
+            }
+
+            var connectedLessons = _lessonService.GetItemByConnectID(data.CourseID, data.ParentID, data.ID);
+            if (connectedLessons != null && connectedLessons.Count() > 0)
+            {
+                foreach (var lesson in connectedLessons)
+                {
+                    lesson.Start = data.Start + data.Period;
+                    UpdateRoute(lesson);
+                }
+            }
+        }
+
+        private void UpdateRoute(CourseLessonEntity data)
+        {
+            var connectedChaps = _chapterService.GetItemByConnectID(data.CourseID, data.ChapterID, data.ID);
+            if (connectedChaps != null && connectedChaps.Count() > 0)
+            {
+                foreach (var chap in connectedChaps)
+                {
+                    chap.Start = data.Start + data.Period;
+                    _chapterService.Save(chap);
+                    UpdateRoute(chap);
+                }
+            }
+
+            var connectedLessons = _lessonService.GetItemByConnectID(data.CourseID, data.ChapterID, data.ID);
+            if (connectedLessons != null && connectedLessons.Count() > 0)
+            {
+                foreach (var lesson in connectedLessons)
+                {
+                    lesson.Start = data.Start + data.Period;
+                    UpdateRoute(lesson);
+                }
             }
         }
 
@@ -1407,9 +1540,76 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Etype = item.Etype;
                     data.Limit = item.Limit;
 
-                    data.ConnectID = item.ConnectID;
                     data.ConnectType = item.ConnectType;
-                    data.Period = item.Period;
+
+
+                    var needUpdate = false;
+
+                    if (data.ConnectID != item.ConnectID)
+                    {
+                        data.ConnectID = item.ConnectID;
+                        if (data.ConnectType == CONNECT_TYPE.CHAPTER)
+                        {
+                            if (string.IsNullOrEmpty(item.ConnectID))
+                            {
+                                if (data.ChapterID == "0")
+                                    item.Start = 0;
+                                else
+                                {
+                                    var parent = _chapterService.GetItemByID(item.ChapterID);
+                                    item.Start = parent.Start;
+                                }
+                            }
+                            else
+                            {
+                                var connected = _chapterService.GetItemByID(item.ConnectID);
+                                if (connected == null)
+                                {
+                                    item.ConnectID = "";//remove connected
+                                    connected = _chapterService.GetItemByID(item.ChapterID);
+                                    item.Start = connected.Start;
+                                }
+                                else
+                                {
+                                    item.Start = connected.Start + connected.Period;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(item.ConnectID))
+                            {
+                                //????
+                            }
+                            else
+                            {
+                                var connected = _lessonService.GetItemByID(item.ConnectID);
+                                if (connected == null)
+                                {
+                                    item.ConnectID = "";//remove connected
+                                    if (data.ChapterID == "0")
+                                        item.Start = 0;
+                                    else
+                                    {
+                                        var parent = _chapterService.GetItemByID(item.ChapterID);
+                                        item.Start = parent.Start;
+                                    }
+                                }
+                                else
+                                {
+                                    item.Start = connected.Start + connected.Period;
+                                }
+                            }
+                        }
+                        needUpdate = true;
+                    }
+                    if (data.Period != item.Period)
+                    {
+                        data.Period = item.Period;
+                        needUpdate = true;
+                    }
+
+
 
 
                     //if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
@@ -1442,7 +1642,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _ = _courseHelper.IncreaseCourseCounter(data.CourseID, 0, examInc, pracInc);
                     }
 
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
+                    _lessonService.Save(data);
+
+                    if (needUpdate)
+                    {
+                        UpdateRoute(data);
+                    }
+
+                    //_lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
 
                     if (data.Order != newOrder)//change Position
                     {
@@ -2303,7 +2510,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart)
+        private void RenderWordLessonPart(ref Spire.Doc.Section s, LessonPartEntity _lessonPart)
         {
 
             Table table = s.AddTable(true);

@@ -70,6 +70,8 @@ namespace BaseCustomerEntity.Database
         public string ConnectID { get; set; }
         [JsonProperty("ConnectType")] //kiểu đối tượng liên kết (chapter/lesson)
         public int ConnectType { get; set; }
+        [JsonProperty("Start")] //bắt đầu
+        public double Start { get; set; }
         [JsonProperty("Period")] //thời lượng
         public double Period { get; set; }
     }
@@ -109,6 +111,15 @@ namespace BaseCustomerEntity.Database
         public List<CourseChapterEntity> GetCourseChapters(string CourseID)
         {
             return Collection.Find(x => x.CourseID == CourseID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+        }
+
+        public IEnumerable<CourseChapterEntity> GetItemByConnectID(string courseID, string parentID, string connectID)
+        {
+            if (!string.IsNullOrEmpty(parentID))
+                return Collection.Find(x => x.ParentID == parentID && x.ConnectID == connectID).ToEnumerable();
+            else
+                return Collection.Find(x => (x.CourseID == courseID && x.ParentID == "0") && x.ConnectID == connectID).ToEnumerable();
+
         }
     }
 }

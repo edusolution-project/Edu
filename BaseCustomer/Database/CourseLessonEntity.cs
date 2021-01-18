@@ -55,6 +55,8 @@ namespace BaseCustomerEntity.Database
         public string ConnectID { get; set; }
         [JsonProperty("ConnectType")] //kiểu đối tượng liên kết (chapter/lesson)
         public int ConnectType { get; set; }
+        [JsonProperty("Start")] //bắt đầu
+        public double Start { get; set; }
         [JsonProperty("Period")] //thời lượng
         public double Period { get; set; }
 
@@ -105,6 +107,14 @@ namespace BaseCustomerEntity.Database
         public void UpdateLessonPoint(string ID, double point)
         {
             CreateQuery().UpdateOne(t => t.ID == ID, Builders<CourseLessonEntity>.Update.Set(t => t.Point, point));
+        }
+
+        public IEnumerable<CourseLessonEntity> GetItemByConnectID(string courseID, string parentID, string connectID)
+        {
+            if (!string.IsNullOrEmpty(parentID))
+                return Collection.Find(x => x.ChapterID == parentID && x.ConnectID == connectID).ToEnumerable();
+            else
+                return Collection.Find(x => (x.CourseID == courseID && x.ChapterID == "0") && x.ConnectID == connectID).ToEnumerable();
         }
     }
 

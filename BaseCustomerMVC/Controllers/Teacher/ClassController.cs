@@ -2539,7 +2539,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Updated = DateTime.UtcNow;
                     item.Order = 0;
 
-                    _lessonHelper.InitLesson(item);//insert + create schedule
+                    _lessonHelper.InitLesson(item);//insert + create schedule (no route)
 
                     ChangeLessonPosition(item, Int32.MaxValue);//move lesson to bottom of parent
 
