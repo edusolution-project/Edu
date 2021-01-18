@@ -78,7 +78,7 @@
                                     <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
                                 </a>
                             </div>
-                            <div class=" media-body">
+                            <div class=" media-body pl-md-3 pl-sm-1">
                                 <div class="news-title">
                                     <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code">
                                         {{item.Title}}
@@ -271,5 +271,8 @@
             background-color: white !important;
             border-color: white !important
         }*/
+        body{
+            background-color:#f2f2f2
+        }
     </style>
 }
