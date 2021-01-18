@@ -836,7 +836,11 @@ namespace BaseCustomerMVC.Globals
                 var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
                 var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
 
-                var coursename = _chapterService.CreateQuery().Find(x => x.ID == practice.ChapterID).FirstOrDefault();
+                var coursename = new ChapterEntity();
+                if (!isExam)
+                {
+                    coursename = _chapterService.CreateQuery().Find(x => x.ID == practice.ChapterID).FirstOrDefault();
+                }
 
                 var lastEx = examresult.FirstOrDefault();
                 result.Add(new StudentLessonResultViewModel(student)

@@ -1936,7 +1936,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Remove(DefaultModel model)
+        public async Task<JsonResult> Remove(DefaultModel model)
         {
             if (model.ArrID.Length <= 0)
             {

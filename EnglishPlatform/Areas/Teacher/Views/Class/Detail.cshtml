@@ -45,7 +45,8 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>
+                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài từ luận</a></li>
+                    @*<li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>*@
                     @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
                     @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
                 </ul>
@@ -384,44 +385,47 @@
                 </ul>
             </div>*@
         <div class="box" v-show="tab[5]">
-            <ul class="list ls-practice">
-                <li v-for="(item,k) in lessonToMark.data">
-                    <div class="class_row d-flex justify-content-start">
-                        <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(item.classSubjectID)">
-                            <i class="ic ic-headphone-o mr-1 align-middle"></i>{{item.courseName}}
-                            <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
-                        </a>
-                    </div>
-                    <b-collapse :id="`collapse-${k}`" accordion="my-accordion-0" role="tabpanel">
-                        <chap-content v-for="(chapter,i) in list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
-                                      v-bind:data="chapter"
-                                      v-bind:classbj="item.ID"
-                                      v-bind:pos="i"
-                                      v-bind:owner="item.TeacherID"
-                                      v-bind:listchaps="list_chapters"></chap-content>
-                        <ul class="list" v-if="item.listLesson.length > 0">
-                            <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
-                                <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
-                                    <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title,lesson.ID)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
-                                        <template v-if="lesson.TemplateType === 2">
-                                            <span class="text-danger">
-                                                <i class="ic far fa-edit mr-2"></i>
-                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
-                                            </span>
-                                        </template>
-                                        <template v-else>
-                                            <span>
-                                                <i class="ic far fa-file-alt mr-2"></i>
-                                                {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
-                                            </span>
-                                        </template>
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </b-collapse>
-                </li>
-            </ul>
+            <template v-if="lessonToMark.data.length == 0">Không có bài tự luận cần chấm điểm.</template>
+            <template v-else>
+                <ul class="list ls-practice">
+                    <li v-for="(item,k) in lessonToMark.data">
+                        <div class="class_row d-flex justify-content-start">
+                            <a href="javascript:;" v-b-toggle="`collapse-${k}`" class="btn-collapse parent flex-row align-items-center pb-2 mb-0 pt-2" v-on:click="loadContent(item.classSubjectID)">
+                                <i class="ic ic-headphone-o mr-1 align-middle"></i>{{item.courseName}}
+                                <i class="far fa-arrow-alt-circle-down ml-1 align-middle"></i>
+                            </a>
+                        </div>
+                        <b-collapse :id="`collapse-${k}`" :accordion="'my-accordion-'+ k" role="tabpanel">
+                            @*<chap-content v-for="(chapter,i) in lessonToMark.list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
+                    v-bind:data="chapter"
+                    v-bind:classbj="item.ID"
+                    v-bind:pos="i"
+                    v-bind:owner="item.TeacherID"
+                    v-bind:listchaps="lessonToMark.list_chapters"></chap-content>*@
+                            <ul class="list" v-if="item.listLesson.length > 0">
+                                <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
+                                    <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
+                                        <a v-on:click="ShowDetailLessonToMark(item.listExam,item.courseName,lesson.Title,lesson.ID)" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis" :title="lesson.Title">
+                                            <template v-if="lesson.TemplateType === 2">
+                                                <span class="text-danger">
+                                                    <i class="ic far fa-edit mr-2"></i>
+                                                    {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                                </span>
+                                            </template>
+                                            <template v-else>
+                                                <span>
+                                                    <i class="ic far fa-file-alt mr-2"></i>
+                                                    {{lesson.Title}} - {{filterChapter(lesson.ChapterID,item.listChapter)}}
+                                                </span>
+                                            </template>
+                                        </a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </b-collapse>
+                    </li>
+                </ul>
+            </template>
         </div>
     </div>
 
@@ -742,6 +746,16 @@
         .color-dontwork {
             background-color: #cecbd6
         }
+
+        .noselect {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+        }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
@@ -837,7 +851,8 @@
                         </span>
                     </template>
                 </a>
-                <div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")">
+                @*<div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">*@
+                <div class="picker-schedule d-flex align-items-center" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
                     <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
@@ -847,14 +862,16 @@
                     </template>
                 </div>
                 <div class="d-flex picker-schedule" v-else>
-                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
-                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
-                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
-                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
+                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light noselect" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light noselect" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                    <template v-if="type != 'exam'">
+                        <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2 noselect" v-bind:class="{active: data.IsHideAnswer == true}"></i>
+                        <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2 noselect" v-bind:class="{active: data.IsOnline == true}"></i>
+                    </template>
                 </div>
-                <div class="status" v-if="owner == '@currentuser'">
-                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                    </div>
+                @*<div class="status" v-if="owner == '@currentuser'">
+                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                </div>*@
             </div>
         </li>
     </script>
@@ -1191,7 +1208,7 @@
                 else {
                     this.tabChange(1);
                 };
-                this.loadLessonToMark();
+                //this.loadLessonToMark();
             },
             components: {
                 LocalQuillEditor: VueQuillEditor.quillEditor
@@ -1355,7 +1372,8 @@
                     data: [],
                     dataDetail: [],
                     courseName: '',
-                    title: ''
+                    title: '',
+                    list_chapters:[]
                 }
             },
             watch: {
@@ -1422,7 +1440,7 @@
                         case 5:
                             history.replaceState({ tab: a }, this.className + " - Chấm bài tự luận", "#mark");
                             //debugger
-                            //this.loadLessonToMark();
+                            this.loadLessonToMark();
                             break;
                     }
                     this.$forceUpdate()
@@ -2753,18 +2771,19 @@
                     this.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
-                            this.list_lessons = []
+                            //this.list_lessons = [] //đoạn này không hiểu sao lúc code lại viết ntn
+                            //this.lessonToMark.list_chapters = this.list_chapters
                             if (response.data.Status) {
                                 this.lessonToMark.data = response.data.Data
                                 //debugger
-                                for (var i = 0; i < this.lessonToMark.data.length; i++) {
-                                    var item = this.lessonToMark.data[i]
-                                    //debugger
-                                    for (var j = 0; j < item.listLesson.length; j++) {
-                                        var lesson = item.listLesson[j]
-                                        this.list_lessons.push(lesson)
-                                    }
-                                }
+                                //for (var i = 0; i < this.lessonToMark.data.length; i++) {
+                                //    var item = this.lessonToMark.data[i]
+                                //    //debugger
+                                //    for (var j = 0; j < item.listLesson.length; j++) {
+                                //        var lesson = item.listLesson[j]
+                                //        this.list_lessons.push(lesson) //xong rồi push vào để làm gì
+                                //    }
+                                //}
                                 //debugger
                             }
                             else {
@@ -2797,7 +2816,7 @@
                             var item = obj[i]
                             var parentItem = []
                             if (item.ID == ChapterID) {
-                                if (item.ParentID) {
+                                if (item.ParentID != "0") {
                                     parentItem = listChapters.find(x => x.ID == item.ParentID)
                                     return item.Name + " - " + parentItem?.Title 
                                 }

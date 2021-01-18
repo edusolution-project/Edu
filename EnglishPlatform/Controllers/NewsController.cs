@@ -281,7 +281,7 @@ namespace EnglishPlatform.Controllers
                 var listNews = new List<NewsEntity>();
                 foreach(var item  in news.GroupBy(x => x.CategoryID))
                 {
-                    listNews.AddRange(item.ToList().Take(6));
+                    listNews.AddRange(item.ToList().Take(3));
                 }
 
                 return Json(
