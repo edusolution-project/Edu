@@ -1670,6 +1670,120 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Content("");
         }
 
+        public IActionResult FixPoint()
+        {
+            //try
+            //{
+            //    var listLessonID = new List<String> {
+            //    "600553e8712e02232c6d4983",
+            //    "6005580c712e02232c6ddf31",
+            //    "6005544e712e02232c6d4a99",
+            //    "6005582c712e02232c6de042",
+            //    "60055867712e02232c6de25e",
+            //    "6005584b712e02232c6de153",
+            //    "600554e6712e02232c6d4bbc",
+            //    "60055730712e02232c6d6a1c"
+            //    };
+
+            //    foreach (var id in listLessonID)
+            //    {
+            //        var old = _lessonService.GetItemByID(id);
+            //        old.Point = 50;
+            //        _lessonService.Save(old);
+
+            //        var es = _examService.CreateQuery().Find(x => x.LessonID == id).ToList();
+            //        foreach (var e in es)
+            //        {
+            //            if (e.MaxPoint == 0)
+            //            {
+            //                e.MaxPoint = old.Point;
+            //                _examService.Save(e);
+            //            }
+            //        }
+            //    }
+
+            //    //var center = _centerService.GetItemByID("5f531183e4f8492394f600b9");//vinh yen
+            //    //var @class = _classService.CreateQuery().Find(x => x.Center.Equals(center.ID));
+            //    //var listClassID = @class.Project(x => x.ID).ToList();
+
+            //    //var listStudent = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID) && x.JoinedClasses.Any(y => listClassID.Contains(y)));
+            //    //var listStudentID = listStudent.Project(x => x.ID).ToList();
+
+            //    foreach (var lessonid in listLessonID)
+            //    {
+            //        var lesson = _lessonService.GetItemByID(lessonid);
+            //        var progess = _lessonProgressService.CreateQuery().Find(x => x.LessonID == lessonid);
+            //        var exams = _examService.CreateQuery().Find(x => x.LessonID == lessonid).ToList().GroupBy(x => x.StudentID);
+            //        foreach (var exam in exams)
+            //        {
+            //            var stid = exam.Key;
+            //            var lexam = exam.ToList().OrderByDescending(x => x.Number);
+
+            //            var item = progess.ToList().Where(x => x.StudentID == stid).ToList();
+            //            //if (item.Count() > 1)
+            //            //{
+            //            //    var a = "";
+            //            //}
+            //            if (lexam.Count() == 1)
+            //            {
+            //                var a = item.FirstOrDefault();
+            //                //if(a.StudentID == "5f5f2fbeef17391d0c61f1e9")
+            //                //{
+            //                //    var a1 = "";
+            //                //}
+            //                a.LastPoint = lesson.Point == 0 ? 0 : (lexam.FirstOrDefault().Point / lesson.Point) * 100;
+            //                a.AvgPoint = a.LastPoint;
+            //                a.LastTry = lexam.FirstOrDefault().Updated;
+            //                _lessonProgressService.Save(a);
+            //            }
+            //            else
+            //            {
+            //                var a = item.FirstOrDefault();
+            //                a.LastPoint = lesson.Point == 0 ? 0 : (lexam.FirstOrDefault().Point / lesson.Point) * 100;
+            //                a.AvgPoint = lexam.Average(x => x.Point / x.MaxPoint);
+            //                a.LastTry = lexam.FirstOrDefault().Updated;
+            //                _lessonProgressService.Save(a);
+            //            }
+            //        }
+            //        //    //var progess = _lessonProgressService.CreateQuery().Find(x => lessonid.Equals(x.LessonID) && listClassID.Contains(x.ClassID) && listStudentID.Contains(x.StudentID)).ToList();
+            //        //    ////var progess = _lessonProgressService.CreateQuery().Find(x => lessonid.Contains(x.LessonID) && listClassID.Contains(x.ClassID) && listStudentID.Contains(x.StudentID)).ToList();
+            //        //    ////var exams = (from e in _examService.CreateQuery().Find(x => listLessonID.Contains(x.LessonID) && listStudentID.Contains(x.StudentID)).ToList()
+            //        //    ////            group e by e.StudentID
+            //        //    ////            into g
+            //        //    ////            let maxExam = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+            //        //    ////            where maxExam != null
+            //        //    ////            select maxExam).ToList();
+
+            //        //    ////var exams = _examService.CreateQuery().Find(x => lessonid.Contains(x.LessonID) && listStudentID.Contains(x.StudentID)).ToList();
+            //        //    //var exams = _examService.CreateQuery().Find(x => lessonid.Equals(x.LessonID) && listStudentID.Contains(x.StudentID)).ToList();
+
+            //        //    //foreach (var item in progess)
+            //        //    //{
+            //        //    //    if (item.LessonID == "60015fc3782f4335041235ac")
+            //        //    //    {
+            //        //    //        var student123 = exams.Where(x => x.StudentID == "5f5f2fbeef17391d0c61f1e9" && x.LessonID == "60015fc3782f4335041235ac").ToList();
+            //        //    //    }
+            //        //    //    var exam = exams.Where(x => x.LessonID == item.LessonID && x.StudentID == item.StudentID).OrderByDescending(x => x.Number).ToList();
+            //        //    //    var max = exam.FirstOrDefault().Point / lesson.Point;
+            //        //    //    var min = exam.Count > 0 ? exam.LastOrDefault().Point / lesson.Point : 0;
+            //        //    //    item.MaxPoint = max;
+            //        //    //    item.MinPoint = min;
+            //        //    //    item.AvgPoint = exam.Average(x => x.LastPoint) / lesson.Point;
+            //        //    //    item.PointChange = max - item.LastPoint;
+            //        //    //    item.LastTry = exam.FirstOrDefault().Updated;
+            //        //    //    item.LastPoint = max / lesson.Point;
+            //        //    //    _ = _lessonProgressService.Save(item);
+            //        //    //}
+
+            //        }
+            //        return Content("OK");
+            //}
+            //catch(Exception ex)
+            //{
+            //    return Content(ex.Message);
+            //}
+        }
+
         //public IActionResult FixData()
         //{
         //    try
