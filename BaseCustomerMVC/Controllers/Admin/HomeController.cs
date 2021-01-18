@@ -1672,6 +1672,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public IActionResult FixPoint()
         {
+            return Content("");
             //try
             //{
             //    var listLessonID = new List<String> {
