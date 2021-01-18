@@ -6,6 +6,7 @@
     var currentClassSubject = ViewBag.Subject as BaseCustomerEntity.Database.ClassSubjectEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerEntity.Database.LessonEntity;
     var currentCenter = ViewBag.Center as BaseCustomerEntity.Database.CenterEntity;
+    var currentUser = ViewBag.CurrentUser as BaseCustomerEntity.Database.StudentEntity;
 
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
@@ -204,7 +205,7 @@ else
                 chap_id: '@currentLesson.ChapterID',
                 class_name: '@currentClass.Name',
                 center_name: '@currentCenter.Name',
-                student_name: '...................................'
+                student_name: '@currentUser' == null ? '...................................' : '@currentUser.FullName'
             }
             var widget = new Lesson.onReady(config);
         </script>

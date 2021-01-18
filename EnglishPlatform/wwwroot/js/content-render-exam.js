@@ -333,7 +333,7 @@ var Lesson = (function () {
         var dateInfo = $("<div>", { class: "col-6 text-right font-italic", style: "font-size:90%", text: "Ngày " + date.getDate() + " tháng " + (date.getMonth() + 1) + " năm " + date.getFullYear() });
         var lessonTitle = $("<div>", { class: "col-6 font-weight-bold text-right", text: _data.Title + " - Thời gian: " + _data.Timer + "p" });
         var studentInfo = $("<div>", { class: "col-6 text-center", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span>" });
-
+        debugger
         infoHolder.append($("<div>", { class: "col-12 row" }).append(centerInfo).append(dateInfo));
         infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle));
 
@@ -456,10 +456,10 @@ var Lesson = (function () {
                 printMode.append(iconPrint).append("In đề");
                 lessonButton.append(printMode);
 
-                var printMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xuất file word", "onclick": "export2Word()" });
-                var iconPrint = $("<i>", { "class": "far fa-file-word mr-2" });
-                printMode.append(iconPrint).append("Xuất file word");
-                lessonButton.append(printMode);
+                var export2Word = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xuất file word", "onclick": "export2Word()" });
+                var iconWord = $("<i>", { "class": "far fa-file-word mr-2" });
+                export2Word.append(iconWord).append("Xuất file word");
+                lessonButton.append(export2Word);
 
                 //headerRow.append(lessonButton);
                 lesson_action_holder.prepend(lessonButton);
