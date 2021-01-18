@@ -61,6 +61,10 @@ namespace BaseCustomerEntity.Database
                     new IndexKeysDefinitionBuilder<ExamDetailEntity>()
                     .Ascending(t=> t.ExamID)
                     .Ascending(t => t.QuestionID)
+                    ),
+                new CreateIndexModel<ExamDetailEntity>(
+                    new IndexKeysDefinitionBuilder<ExamDetailEntity>()
+                    .Ascending(t=> t.ClassID)
                     )
             };
 
