@@ -5,49 +5,75 @@
     List<BaseCustomerEntity.Database.CenterEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string mtype = ViewBag.Type as string;
 }
-<div class="topbar d-flex align-items-center">
+<div class="topbar d-flex align-items-center" id="top-menu">
     <div class="container bg-transparent">
         <div class="d-flex text-light align-items-center justify-content-between">
             <div class="ml-2 ml-md-0">
                 <span class="hotline d-flex align-items-center"><i class="ic ic-phone mr-1"></i> HOTLINE: <a href="tel:+84989085398" class="action-link ml-1">+ 84 989.085.398</a></span>
             </div>
             <div class="d-flex align-items-center">
-                @if (allcenters == null)
-                {
-                    if (mtype == "admin")
-                    {
+                @*@if (allcenters == null)
+        {
+            if (mtype == "admin")
+            {
 
-                    }
-                    else
+            }
+            else
+            {
+                <a href="/login" title="Đăng nhập" class="action-link mr-3">Đăng nhập</a>
+                <span class="divider align-self-lg-stretch bg-light"></span>
+                <a href="/login" class="action-link ml-3">Đăng ký</a>
+            }
+        }
+        else
+        {
+            if (allcenters.Count == 1)
+            {
+                <a href="/@allcenters[0].Code/@mtype" title="@allcenters[0].Name" class="action-link mr-3">Đến @allcenters[0].Name</a>
+                <span class="divider align-self-lg-stretch bg-light"></span>
+                <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
+            }
+            else
+            {
+                <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="border: solid 2px green; font-size: 12px;">
+                    <option value="">-- Đến cơ sở --</option>
+                    @foreach (var ct in allcenters)
                     {
+                        <option value="@ct.Code">@ct.Name</option>
+                    }
+                </select>
+                <span class="divider align-self-lg-stretch bg-light"></span>
+                <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
+                @:<script>var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/teacher" }</script>
+            }
+        }*@
+
+                <template v-if="currentInfor.length > 0">
+
+                    <template v-if="currentInfor.length == 1">
+                        <a :href="'/'+currentInfor[0].Code+'/' + mtype" :title="currentInfor[0].Name" class="action-link mr-3">Đến {{currentInfor[0].Name}}</a>
+                        <span class="divider align-self-lg-stretch bg-light"></span>
+                        <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
+                    </template>
+
+                    <template v-else>
+                        <select id="owncenter" class="p-1 rounded" v-on:change="changeCenter()" style="border: solid 2px green; font-size: 12px;">
+                            <option value="">-- Đến cơ sở --</option>
+                            <option v-for="(item,k) in currentInfor" :value="item.Code">{{item.Name}}</option>
+                        </select>
+                        <span class="divider align-self-lg-stretch bg-light"></span>
+                        <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
+                    </template>
+
+                </template>
+
+                <template v-else>
+                    <template v-if="mtype == ''">
                         <a href="/login" title="Đăng nhập" class="action-link mr-3">Đăng nhập</a>
                         <span class="divider align-self-lg-stretch bg-light"></span>
                         <a href="/login" class="action-link ml-3">Đăng ký</a>
-                    }
-                }
-                else
-                {
-                    if (allcenters.Count == 1)
-                    {
-                        <a href="/@allcenters[0].Code/@mtype" title="@allcenters[0].Name" class="action-link mr-3">Đến @allcenters[0].Name</a>
-                    }
-                    else
-                    {
-                        <select id="owncenter" class="p-1 rounded" onchange="changeCenter()" style="border: solid 2px green; font-size: 12px;">
-                            <option value="">-- Đến cơ sở --</option>
-                            @foreach (var ct in allcenters)
-                            {
-                                <option value="@ct.Code">@ct.Name</option>
-                            }
-                        </select>
-                        <a href="/logout" title="Đăng xuất" class="action-link ml-3">Đăng xuất</a>
-                        @:<script>var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/teacher" }</script>
-
-
-
-
-                    }
-                }
+                    </template>
+                </template>
             </div>
         </div>
 
@@ -66,9 +92,9 @@
         </div>
         <div class="nav-link d-flex flex-wrap">
             <a for="home" href="/" class="m-1 mr-md-4">Trang chủ</a>
-            <a for="aboutus" href="@Url.RouteUrl("news-about-us")" class="m-1 mr-md-4 ml-md-4">Về EDUSO</a>
-            <a for="san-pham" href="@Url.RouteUrl("news-product")" class="m-1 mr-md-4 ml-md-4">Sản phẩm</a>
-            <a for="su-kien" href="@Url.RouteUrl("news-event")" class="m-1 mr-md-4 ml-md-4">Sự kiện</a>
+            <a for="aboutus" href="@Url.RouteUrl("news-about-us")" class="m-1 mr-md-4 ml-md-4">Giới thiệu</a>
+            <a for="san-pham" href="\#our-product" class="m-1 mr-md-4 ml-md-4">Sản phẩm</a>
+            <a for="su-kien" href="@Url.RouteUrl("news-event")" class="m-1 mr-md-4 ml-md-4">Hoạt động</a>
             <a for="news" href="@Url.RouteUrl("news-default")" class="m-1 mr-md-4 ml-md-4">Tin tức</a>
             <a for="tuyen-dung" href="@Url.RouteUrl("news-recruitment")" class="m-1 ml-md-4">Tuyển dụng</a>
         </div>
@@ -140,7 +166,7 @@
         }
 
     .menubar .nav-link a {
-        font-size: 14px;
+        font-size: 16px;
         line-height: 20px;
         color: #08486B;
     }
@@ -159,3 +185,50 @@
         color: #C1272C;
     }
 </style>
+<script>
+    new Vue({
+        el: "#top-menu",
+        mounted() {
+            this.GetInforCurrent()
+        },
+        components: {
+        },
+        data: {
+            currentInfor:@Html.Raw(Json.Serialize(allcenters)),
+            mtype: '@mtype'
+        },
+        methods: {
+            GetInforCurrent() {
+                var centers = this.currentInfor
+                //debugger
+                if (centers == null) {
+                    this.currentInfor = []
+                    centers = []
+                }
+                if (centers.length == 0) {
+                    let _that = this
+                    let _url = '@Url.Action("GetCurrentInfor", "News")'
+                    let _form = new FormData()
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var a = response.data.AllCenters
+                            var type = response.data.Mtype
+                            if (a.length > 0) {
+                                this.currentInfor = a
+                                this.mtype = type
+                            }
+                            else {
+                                this.currentInfor = []
+                                this.mtype = type
+                            }
+                        }).catch(e => { })
+                }
+            },
+            changeCenter() {
+                //window.location.href = 
+                document.location = "/" + $('#owncenter').val() + "/" + this.mtype
+            }
+        }
+    })
+</script>

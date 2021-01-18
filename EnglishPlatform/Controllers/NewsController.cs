@@ -31,20 +31,27 @@ namespace EnglishPlatform.Controllers
     {
         private readonly NewsService _newsService;
         private readonly NewsCategoryService _newsCategoryService;
+        private readonly CenterService _centerService;
+        private readonly StudentService _studentService;
+        private readonly TeacherService _teacherService;
 
         public NewsController(
             NewsService newsService,
-            NewsCategoryService newsCategoryService
+            NewsCategoryService newsCategoryService,
+            CenterService centerService,
+            StudentService studentService,
+            TeacherService teacherService
             )
         {
             _newsService = newsService;
             _newsCategoryService = newsCategoryService;
+            _centerService = centerService;
+            _studentService = studentService;
+            _teacherService = teacherService;
         }
         //[Route("tin-tuc")]
         public IActionResult Index()
         {
-            ViewBag.newsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(5).ToList();
-            ViewBag.newsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.IsActive == true).SortByDescending(tbl => tbl.PublishDate).Limit(2).ToList();
             return View();
         }
 
@@ -243,6 +250,158 @@ namespace EnglishPlatform.Controllers
                 return Json(dataResponse);
             }
         }
+
+        #region get all news
+        public JsonResult GetAllNews(List<String> oldNewsID)
+        {
+            try
+            {
+                var categories = _newsCategoryService.CreateQuery().Find(x=>x.IsShow).ToList();
+                if(categories.Count() == 0 || categories == null)
+                {
+                    return Json("");
+                }
+
+                List<NewsEntity> news = new List<NewsEntity>();
+                if(oldNewsID.Count() == 0)
+                {
+                    news = _newsService.GetAllNews().ToList();
+                }
+                else
+                {
+                    news = _newsService.CreateQuery().Find(x =>
+                    x.Type == "news" &&
+                    oldNewsID.Contains(x.ID) &&
+                    (x.IsPublic || x.PublishDate <= DateTime.Now))
+                        .ToList()
+                        .OrderByDescending(x => x.PublishDate)
+                        .ToList();
+                }
+
+                var listNews = new List<NewsEntity>();
+                foreach(var item  in news.GroupBy(x => x.CategoryID))
+                {
+                    listNews.AddRange(item.ToList().Take(6));
+                }
+
+                return Json(
+                        new Dictionary<String, Object>
+                        {
+                            {"News",listNews },
+                            {"Categories",categories.ToList() }
+                        }
+                    );
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public JsonResult GetNewsList()
+        {
+            try
+            {
+                var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x => x.PublishDate).Take(3);
+                var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x=>x.PublishDate).Take(1);
+                var response = new Dictionary<string, object>
+                    {
+                        {"NewsTop",NewsTop.ToList() },
+                        {"NewsHot",NewsHot.ToList() }
+                    };
+
+                return Json(response);
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        #endregion
+
+        #region getCurrentInfor
+        public JsonResult GetCurrentInfor()
+        {
+            try
+            {
+                var type = User.Claims.GetClaimByType("Type");
+                var center = _centerService.GetDefault();
+                string centerCode = center.Code;
+                //string roleCode = "";
+                var user = User.FindFirst("UserID");
+                if(user == null)
+                {
+                    return Json(new Dictionary<String, object>
+                            {
+                                {"AllCenters",new List<CenterEntity>() },
+                                {"Mtype","" }
+                            });
+                }
+
+                var userID = user.Value;
+                var tc = _teacherService.GetItemByID(userID);
+                var st = _studentService.GetItemByID(userID);
+                var listCenters = new List<CenterEntity>();
+                switch (type.Value)
+                {
+                    case ACCOUNT_TYPE.ADMIN:
+                        centerCode = center.Code;
+                        listCenters.Add(center);
+                        break;
+                    case ACCOUNT_TYPE.TEACHER:
+                        if (tc != null)
+                        {
+                            var centers = tc.Centers
+                                .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
+                                .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
+                            if (centers != null)
+                            {
+                                centerCode = centers.FirstOrDefault().Code;
+                                //ViewBag.AllCenters = centers; //????
+                            }
+                            else
+                            {
+                                centerCode = center.Code;
+                                centers.Add(center);
+                                //ViewBag.AllCenters = listCenters.Add(center); //????
+                            }
+                            listCenters.AddRange(centers);
+                        }
+                        break;
+                    default:
+                        if (st != null)
+                        {
+                            if (st.Centers != null && st.Centers.Count > 0)
+                            {
+                                var allcenters = st.Centers
+                                    .Where(ct => _centerService.GetItemByID(ct)?.ExpireDate > DateTime.Now)
+                                    .Select(t => _centerService.GetItemByID(t)).ToList();
+                                centerCode = allcenters.Count > 0 ? allcenters.FirstOrDefault().Code : center.Code;
+                                listCenters.AddRange(allcenters);
+                            }
+                            else
+                            {
+                                centerCode = center.Code;
+                                //var a = new List<CenterEntity>();
+                                //a.Add(center);
+                                listCenters.Add(center);
+                            }
+                        }
+                        break;
+                }
+
+                return Json(new Dictionary<String, object> 
+                {
+                    {"AllCenters",listCenters },
+                    {"Mtype",type.Value }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+        #endregion
     }
 
 }

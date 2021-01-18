@@ -9,7 +9,7 @@ var ui = new UI({
     navigation: urlBase + "assets/Icon/Fill/navigation-2.svg"
 });
 var connectionHubChat = new signalR.HubConnectionBuilder()
-    .withUrl("https://easychat.eduso.vn/chathub")
+    .withUrl("https://teasychat.eduso.vn/chathub")
     .build();
 (function (message, member, group, signalR, UI) {
     "use strict";
@@ -717,28 +717,28 @@ var connectionHubChat = new signalR.HubConnectionBuilder()
 
     }
     var showNoti = function (data) {
-        setNotiCount(data);
-        try{
-            if(_notification){
-                if(data){
-                    var el = _notification.show({
-                        type: "success",
-                        msg: "bạn có "+data.length+" tin nhắn",
-                        timeOut: 5000
-                    });
-                    if(el){
-                        el.addEventListener("click",function(){
-                            var content = getRoot().querySelector('.easy-chat__content');
-                            if(!content.classList.contains("open")){
-                                content.classList.add('open');
-                            }
-                        });
-                    }
-                }
-            }
-        }catch(ex){
-            console.log(ex);
-        }
+        //setNotiCount(data);
+        //try{
+        //    if(_notification){
+        //        if(data){
+        //            var el = _notification.show({
+        //                type: "success",
+        //                msg: "bạn có "+data.length+" tin nhắn",
+        //                timeOut: 5000
+        //            });
+        //            if(el){
+        //                el.addEventListener("click",function(){
+        //                    var content = getRoot().querySelector('.easy-chat__content');
+        //                    if(!content.classList.contains("open")){
+        //                        content.classList.add('open');
+        //                    }
+        //                });
+        //            }
+        //        }
+        //    }
+        //}catch(ex){
+        //    console.log(ex);
+        //}
     }
     var setNotiCount = function (data) {
         var boxNoti = getRoot().querySelector('.easy-chat__ball .box-noti');
