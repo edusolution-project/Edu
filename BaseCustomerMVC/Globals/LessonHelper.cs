@@ -274,7 +274,7 @@ namespace BaseCustomerMVC.Globals
         #endregion
 
         #region Copy Lesson From CourseLesson
-        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem, DateTime start, DateTime end)
+        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem, DateTime begin)
         {
             var lesson = _courseLessonMapping.AutoOrtherType(orgItem, new LessonEntity());
             lesson.ChapterID = cloneItem.ChapterID;
@@ -285,7 +285,10 @@ namespace BaseCustomerMVC.Globals
             lesson.Updated = DateTime.UtcNow;
             lesson.ID = null;
 
-            lesson = InitLesson(lesson, start, end, cloneItem.Period);
+            //lesson.Start = orgItem.Start;
+            //lesson.Period
+
+            lesson = InitLesson(lesson, begin.AddDays(orgItem.Start), begin.AddDays(orgItem.Start + orgItem.Period));
 
             var lessonParts = _lessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
@@ -390,7 +393,7 @@ namespace BaseCustomerMVC.Globals
             lesson.Order = cloneItem.Order;
             lesson.ID = null;
 
-            var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
+            var schedule = _lessonScheduleService.GetItemByLessonID(orgLesson.ID);
             lesson = InitLesson(lesson, schedule.StartDate, schedule.EndDate);
 
             var lessonParts = _cloneLessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
@@ -653,7 +656,7 @@ namespace BaseCustomerMVC.Globals
         }
         #endregion
 
-        public LessonEntity InitLesson(LessonEntity lesson, DateTime? start = null, DateTime? end = null, double period = 0)
+        public LessonEntity InitLesson(LessonEntity lesson, DateTime? start = null, DateTime? end = null)
         {
             _lessonService.Save(lesson);
             var schedule = new LessonScheduleEntity
@@ -669,11 +672,7 @@ namespace BaseCustomerMVC.Globals
             {
                 schedule.StartDate = (DateTime)start;
             }
-            if (period > 0)
-            {
-                schedule.EndDate = schedule.StartDate.AddDays(period);
-            }
-            else if (end > invalidTime)
+            if (end > invalidTime)
             {
                 schedule.EndDate = (DateTime)end;
             }

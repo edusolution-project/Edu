@@ -102,6 +102,10 @@
                 font-weight: bold;
             }
 
+                .route_item:hover::after {
+                    border-color: green;
+                }
+
                 .route_item.start {
                     width: 50px;
                     margin-left: 20px;
@@ -130,6 +134,7 @@
                     -o-transition: background-color .3s,border-color .3s;
                     transition: background-color .3s,border-color .3s;
                     top: -8px;
+                    cursor: pointer;
                 }
 
                 .route_item.start::after {
@@ -492,7 +497,7 @@
     </div>
 
     <div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" id="lessonFrameModal">
-        <div class="modal-dialog modal-lg w-100 m-0" style="max-width:100%; display: flex; height: 100%;">
+        <div class="modal-dialog modal-lg w-100 m-0" style="max-width: 100%;display: flex;height: 100%;">
             <div class="modal-content">
                 <div class="modal-header p-2">
                     <h5 class="modal-title" id="modalTitle">Cập nhật nội dung</h5>
@@ -750,7 +755,7 @@
     }
 
     var RenderRoute = function (routeList) {
-        console.log(routeList)
+        //console.log(routeList)
 
         var wrapper = $('.route_holder');
         if (routeList != null && routeList.length > 0) {
@@ -770,7 +775,14 @@
         }
         routeList.sort((a,b) => compareRouteFinal(a,b))
         routeList.forEach(function (obj, idx) {
-            $(wrapper).append($('<li>', { class: 'route_item' }).append($('<a>', { class: 'route_title', text: obj.text })).append($('<span>', { class: 'route_period', text: obj.start + (obj.period > 0 ? (' (+' + obj.period + ')') : '') })))
+            $(wrapper).append($('<li>', {
+                class: 'route_item',
+                onclick: "editRoute('" + obj.id + "','" + obj.type + "')"
+            })
+                .append($('<a>', { class: 'route_title', text: obj.text })).append($('<span>', {
+                class: 'route_period',
+                text: obj.start + (obj.period > 0 ? (' (+' + obj.period + ')') : '')
+            })))
         })
         //if(routeList != null)
         //var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
@@ -797,31 +809,41 @@
         //}
     }
 
+    var editRoute = function (id, type) {
 
-    var RenderRouteChap = function (chapter) {
-        var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
-            .append($('<div>', { class: 'lane_header' })
-                .append($('<div>', { class: 'lane_title', text: chapter.Name }))
-                .append($('<div>', { class: 'lane_toggle', onclick: 'toggleLane(this)' })));
-
-        if (chapter.ConnectID == null) {
-            if (chapter.ParentID != null) {
-                var laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
-                if (laneList.length == 0) {
-                    $('.lane_holder#cid_' + chapter.ParentID).addClass('hasChild');
-                    $('.lane_holder#cid_' + chapter.ParentID).append($('<div>', { class: 'lane_list' }));
-                    laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
-                }
-                laneList.append($('<div>', { class: 'lane-item route_lane' }).append(chaproute));
-            }
-        }
-        else {
-            if ($('#cid_' + chapter.ConnectID) != null)
-                $('#cid_' + chapter.ConnectID).after(chaproute);
-
-            pendingChap.push(chapter);
-        }
+        if(type == 'lesson')
+            $('#' + id + ' .far.fa-edit').first().focus().click();
+        else
+            $('#' + id + ' .fas.fa-edit').first().focus().click();
+        //if (type == "chapter")
+        //    return EditChapter($('#' + id + ' .far.fa-edit').first(), id);
+        //return EditChapter($('#' + id + ' .far.fa-edit').first(), id);
     }
+
+    //var RenderRouteChap = function (chapter) {
+    //    var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
+    //        .append($('<div>', { class: 'lane_header' })
+    //            .append($('<div>', { class: 'lane_title', text: chapter.Name }))
+    //            .append($('<div>', { class: 'lane_toggle', onclick: 'toggleLane(this)' })));
+
+    //    if (chapter.ConnectID == null) {
+    //        if (chapter.ParentID != null) {
+    //            var laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+    //            if (laneList.length == 0) {
+    //                $('.lane_holder#cid_' + chapter.ParentID).addClass('hasChild');
+    //                $('.lane_holder#cid_' + chapter.ParentID).append($('<div>', { class: 'lane_list' }));
+    //                laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
+    //            }
+    //            laneList.append($('<div>', { class: 'lane-item route_lane' }).append(chaproute));
+    //        }
+    //    }
+    //    else {
+    //        if ($('#cid_' + chapter.ConnectID) != null)
+    //            $('#cid_' + chapter.ConnectID).after(chaproute);
+
+    //        pendingChap.push(chapter);
+    //    }
+    //}
 
     function LoadData() {
         chapters = [];
@@ -863,7 +885,7 @@
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
                         RenderChapter(chapter);
-                        listRoute.push({ id: chapter.ID, start: 0, text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
+                        listRoute.push({ id: chapter.ID, start: 0, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                     }
                 }
 
@@ -889,7 +911,7 @@
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
                         RenderLesson(item);
-                        listRoute.push({ id: item.ID,start: 0, text: item.Title, cid: item.ConnectID == null ? "" : item.ConnectID, period : item.Period, parent : item.ChapterID, order: item.Order })
+                        listRoute.push({ id: item.ID, start: 0, type: "lesson", text: item.Title, cid: item.ConnectID == null ? "" : item.ConnectID, period : item.Period, parent : item.ChapterID, order: item.Order })
                     }
                 }
 
@@ -992,9 +1014,10 @@
                 return false;
             }
             else {
-                lesson = result.Data;
-                RenderLesson(lesson);
-                hideModal();
+                document.location = document.location;
+                //lesson = result.Data;
+                //RenderLesson(lesson);
+                //hideModal();
             }
         }
     }
@@ -1009,17 +1032,18 @@
                 return false;
             }
             else {
-                chapter = result.Data;
-                //console.log("chapter " + chapter.ID);
-                $('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
-                var o = new Option(chapter.Name, chapter.ID);
+                document.location = document.location;
+                //chapter = result.Data;
+                ////console.log("chapter " + chapter.ID);
+                //$('[name=chapterForm] [name=ParentID] option[value=' + chapter.ID + ']').before($('<option>', { value: chapter.ID, text: chapter.Name })).remove();
+                //var o = new Option(chapter.Name, chapter.ID);
 
-                /// jquerify the DOM object 'o' so we can use the html method
-                $(o).html(chapter.Name);
-                $("#ParentID").append(o);
-                RenderChapter(chapter);
-                LoadData();
-                hideModal();
+                ///// jquerify the DOM object 'o' so we can use the html method
+                //$(o).html(chapter.Name);
+                //$("#ParentID").append(o);
+                //RenderChapter(chapter);
+                //LoadData();
+                //hideModal();
             }
         }
     }
@@ -1071,6 +1095,9 @@
         var parent = $(obj).attr("pid");
         console.log(connectid);
 
+        console.log(period);
+
+
         //console.log(obj);
         modal.find("[name=Name]").val(name);
         modal.find("[name=Description]").val(description);
@@ -1078,6 +1105,7 @@
         modal.find("[name=ParentID] option[value=" +  ID + "]").hide();
         modal.find("[name=Order]").val(order);
         modal.find("[name=ID]").val(ID);
+        modal.find("[name=Period]").val(period);
 
         var connectHolder = modal.find('[name=ConnectID]');
         $(connectHolder).find('option:gt(0)').remove();
@@ -1259,7 +1287,7 @@
                 var title = $(obj);
                 if (title != null && title.length > 0) {
                     var _id = $(title).parent().parent().parent().attr('id');
-                    console.log(title);
+                    //console.log(title);
                     if (_id != ID) {
                         $(connectHolder).append($('<option>', { value: _id, type: connectType.LESSON, text: $(title).text() }));
                     }

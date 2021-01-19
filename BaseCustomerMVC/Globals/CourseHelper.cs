@@ -123,16 +123,15 @@ namespace BaseCustomerMVC.Globals
 
         internal void CloneForClassSubject(ClassSubjectEntity classSubject)
         {
-            _ = CloneChapterForClassSubject(classSubject, classSubject.StartDate);
+            _ = CloneChapterForClassSubject(classSubject);
             //_courseService.Collection.UpdateOneAsync(t => t.ID == classSubject.CourseID, new UpdateDefinitionBuilder<CourseEntity>().Set(t => t.IsUsed, true));
         }
 
-        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, DateTime start, CourseChapterEntity originChapter = null)
+        internal async Task<long> CloneChapterForClassSubject(ClassSubjectEntity classSubject, CourseChapterEntity originChapter = null)
         {
             var orgID = originChapter == null ? "0" : originChapter.ID;
             var newID = "0";
 
-            var endperiod = start;
             long lessoncounter = 0;
             if (originChapter != null)
             {
@@ -144,12 +143,8 @@ namespace BaseCustomerMVC.Globals
 
                 if (!string.IsNullOrEmpty(originChapter.ConnectID) || originChapter.Period > 0) // set lo trinh
                 {
-                    newchapter.StartDate = start;
-                    if (originChapter.Period > 0)
-                    {
-                        newchapter.EndDate = newchapter.StartDate.AddDays(originChapter.Period);
-                        endperiod = newchapter.EndDate;
-                    }
+                    newchapter.StartDate = classSubject.StartDate.AddDays(originChapter.Start);
+                    newchapter.EndDate = newchapter.StartDate.AddDays(originChapter.Period);
                 }
                 _chapterService.Save(newchapter);
                 newID = newchapter.ID;
@@ -161,11 +156,11 @@ namespace BaseCustomerMVC.Globals
             {
                 foreach (var courselesson in lessons)
                 {
-                    var lstart = start;
+                    var lstart = courselesson.Start;
 
                     if (!string.IsNullOrEmpty(courselesson.ConnectID))
                     {
-                        
+
                     }
 
                     await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
@@ -174,7 +169,7 @@ namespace BaseCustomerMVC.Globals
                         OriginID = courselesson.ID,
                         ClassID = classSubject.ClassID,
                         ClassSubjectID = classSubject.ID,
-                    }, start, endperiod);
+                    }, classSubject.StartDate);
                 }
                 lessoncounter = lessons.Count();
             }
@@ -184,7 +179,7 @@ namespace BaseCustomerMVC.Globals
                 foreach (var chap in subchaps)
                 {
                     chap.ParentID = newID;
-                    lessoncounter += await CloneChapterForClassSubject(classSubject, classSubject.StartDate, chap);
+                    lessoncounter += await CloneChapterForClassSubject(classSubject, chap);
                 }
 
             return lessoncounter;
