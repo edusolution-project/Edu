@@ -26,7 +26,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using RestSharp;
-using WebPush.Services;
+//using WebPush.Services;
 
 namespace EnglishPlatform
 {
@@ -42,9 +42,9 @@ namespace EnglishPlatform
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddPushSubscriptionStore(Configuration)
-                .AddPushNotificationService(Configuration)
-                .AddPushNotificationsQueue();
+            //services.AddPushSubscriptionStore(Configuration)
+            //    .AddPushNotificationService(Configuration)
+            //    .AddPushNotificationsQueue();
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -270,8 +270,8 @@ namespace EnglishPlatform
                 );
                 routes.MapRoute(
                    name: "news-event",
-                   template: "tin-tuc/su-kien",
-                   defaults: new { controller = "News", action = "Category", catcode = "su-kien" }
+                   template: "tin-tuc/hoat-dong",
+                   defaults: new { controller = "News", action = "Category", catcode = "hoat-dong" }
                );
                 routes.MapRoute(
                     name: "news-product",

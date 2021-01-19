@@ -2422,19 +2422,39 @@
                 getPeriod(obj) {
                     var startms = moment(obj.Created);
                     var endms = moment(obj.EndTime);
-                    console.log(startms);
-                    console.log(endms);
+                    //console.log(startms);
+                    //console.log(endms);
+                    //debugger
+                    //var ret = "";
+                    //if (endms.days() - startms.days() > 0)
+                    //    ret += (endms.days() - startms.days()) + "d ";
+                    //if (endms.hours() - startms.hours() > 0)
+                    //    ret += (endms.hours() - startms.hours()) + "h ";
+                    //if (endms.minutes() - startms.minutes() > 0)
+                    //    ret += (endms.minutes() - startms.minutes()) + "m ";
+                    //if (endms.second() - startms.second() > 0)
+                    //    ret += (endms.second() - startms.second()) + "s ";
+                    //if (ret.length == 0)
+                    //    ret = "0s";
+                    //return ret;
+                    //debugger
                     var ret = "";
-                    if (endms.days() - startms.days() > 0)
-                        ret += (endms.days() - startms.days()) + "d ";
-                    if (endms.hours() - startms.hours() > 0)
-                        ret += (endms.hours() - startms.hours()) + "h ";
-                    if (endms.minutes() - startms.minutes() > 0)
-                        ret += (endms.minutes() - startms.minutes()) + "m ";
-                    if (endms.second() - startms.second() > 0)
-                        ret += (endms.second() - startms.second()) + "s ";
-                    if (ret.length == 0)
-                        ret = "0s";
+                    var totalSeconds = (endms - startms) / 1000;
+                    var totalMinutes = totalSeconds / 60;
+                    var totalHouse = totalSeconds / 3600;
+
+                    var h = parseInt(totalHouse);
+                    var m = parseInt(totalMinutes) - 60 * h;
+                    var s = parseInt(totalSeconds) - m * 60 - h * 3600;
+                    if (h > 0) {
+                        ret += h + "h ";
+                    }
+                    if (m > 0) {
+                        ret += m + "m ";
+                    }
+                    if (s > 0) {
+                        ret += s + "s ";
+                    }
                     return ret;
                 },
                 domDecoder(str) {
