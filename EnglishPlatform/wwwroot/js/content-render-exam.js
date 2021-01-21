@@ -1796,12 +1796,12 @@ var Lesson = (function () {
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value=''>--- Chọn kiểu nội dung ---</option>");
         //if (type == TEMPLATE_TYPE.LESSON) {
-        $(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
-            .append("<option value='VIDEO'>Video</option>")
-            .append("<option value='AUDIO'>Audio</option>")
-            .append("<option value='IMG'>Hình ảnh</option>")
-            .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
-            .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
+        //$(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
+        //    .append("<option value='VIDEO'>Video</option>")
+        //    .append("<option value='AUDIO'>Audio</option>")
+        //    .append("<option value='IMG'>Hình ảnh</option>")
+        //    .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
+        //    .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
         //}
         //else {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn 1 đáp án đúng</option>")

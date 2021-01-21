@@ -436,7 +436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     {
                                         var vocabulary = vocab.Trim().ToLower();
                                         _ = GetVocabByCambridge(vocabulary);
-                                        _ = GetVocabByTraTu(vocabulary);
+                                        //_ = GetVocabByTraTu(vocabulary);
                                     }
                                 }
                             }

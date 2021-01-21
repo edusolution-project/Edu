@@ -945,11 +945,19 @@
         _url = "@processUrl("CopyChapter", "Curriculum")";
         _method = "POST";
         fn = LoadData;
-        Ajax(_url, "POST", data, true).then(function (res) {
-            if (fn != void 0) fn(res);
+        Ajax(_url, "POST", data, true)
+            .then(function (res) {
+                var data = JSON.parse(res)
+                if (data.Error == null) {
+                    alert("Nhân bản " + data.Data.Name + " thành công.")
+                }
+                else {
+                    alert("Lỗi " + data.Error)
+                }
+            if(fn != void 0) fn(res);
             //console.log(res);
             return false;
-        });
+            }).catch(e => { alert(e)});
         //debugger
     }
 
@@ -1074,6 +1082,7 @@
                 return false;
             }
             else {
+                alert("Xoá thành công.")
                 $('.modules#' + result.Data).remove();
                 //debugger
                 $("#ParentID option[value=" + result.Data+"]").remove();
@@ -1253,8 +1262,8 @@
     #backToTop {
         display: none;
         position: fixed;
-        bottom: 40px;
-        right: 30px;
+        bottom: 65px;
+        right: 15px;
         z-index: 99;
         font-size: 30px;
         border: none;
@@ -1266,5 +1275,9 @@
         border-radius: 4px;
         position: fixed;
         opacity: 0.8;
+    }
+
+    #backToTop:hover{
+        opacity:1
     }
 </style>
