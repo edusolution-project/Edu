@@ -111,6 +111,10 @@
                     margin-left: 20px;
                 }
 
+                    .route_item.start .route_period {
+                        left: 10px;
+                    }
+
                 .route_item::after {
                     content: "";
                     position: absolute;
@@ -166,10 +170,16 @@
                     top: 20px;
                     position: absolute;
                     left: 50%;
-                    margin-left: -100px;
-                    width: 200px;
+                    margin-left: -25px;
+                    width: 50px;
                     text-align: center;
                 }
+
+            .wkIdx {
+                user-select: none;
+                font-size: 110%;
+                color: #007bff;
+            }
         </style>
 
         <div class="main-content" data-spy="scroll" data-target="#tableContents">
@@ -201,7 +211,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modules-wrapper mb-5">
+            <div class="modules-wrapper mb-5 pl-3">
                 <div class="p-3">
                     <i class="fas fa-circle-notch fa-spin"></i> Loading ...
                 </div>
@@ -259,10 +269,11 @@
                         </div>
                         <div class="row chooseConnect">
                             <div class="form-group col-md-4">
-                                <label class="col-form-label">Thời lượng (ngày):</label>
-                                <input type="text" class="form-control" name="Period" placeholder="Thời lượng (ngày)" value="0">
+                                <label class="col-form-label">Tuần:</label>
+                                <input type="text" class="form-control" name="Week" placeholder="Tuần" value="0" onchange="SetPeriod(this)">
+                                <input type="hidden" class="form-control" name="Start" value="0">
                             </div>
-                            <div class="form-group col-md-8">
+                            <div class="form-group col-md-8 d-none">
                                 <label class="col-form-label">Bắt đầu sau:</label>
                                 <select name="ConnectID" class="form-control" @if (isLock) { @: readonly="true"
                                         } onchange="setConnectType(this)">
@@ -356,10 +367,11 @@
                         </div>
                         <div class="row chooseConnect">
                             <div class="form-group col-md-4">
-                                <label class="col-form-label">Thời lượng (ngày):</label>
-                                <input type="text" class="form-control" name="Period" placeholder="Thời lượng (ngày)" value="0">
+                                <label class="col-form-label">Tuần</label>
+                                <input type="text" class="form-control" name="Week" placeholder="Tuần" value="0" onchange="SetPeriod(this)">
+                                <input type="hidden" class="form-control" name="Start" value="0">
                             </div>
-                            <div class="form-group col-md-8">
+                            <div class="form-group col-md-8 d-none">
                                 <label class="col-form-label">Bắt đầu sau:</label>
                                 <select name="ConnectID" class="form-control" @if (isLock) { @: readonly="true"
                                         } onchange="setConnectType(this)">
@@ -377,7 +389,6 @@
             </div>
         </div>
     </div>
-
     <!--    Hòa thêm 8/7/2020    -->
     <div class="modal fade" role="dialog" id="copyLessonModel">
         <div class="modal-dialog">
@@ -417,12 +428,7 @@
                             </div>
                         </div>
 
-                        @*<div class="row chooseOrder">
-                                <div class="form-group col-md-12">
-                                    <label class="col-form-label">Thứ tự:</label>
-                                    <input type="text" class="form-control" name="Order" placeholder="Thứ tự bài giảng">
-                                </div>
-                            </div>*@
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -525,9 +531,21 @@
         position: relative;
         display: block;
     }
+
+    .right-content .left-col .main-container .modules-wrapper .modules {
+        padding: 12px 24px 0 0 !important;
+    }
 </style>
 
 <script>
+
+    Date.prototype.addDays = function (days) {
+        var date = new Date(this.valueOf());
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+
+
     var connectType = {
         CHAPTER: @BaseCustomerEntity.Database.CONNECT_TYPE.CHAPTER,
         LESSON: @BaseCustomerEntity.Database.CONNECT_TYPE.LESSON
@@ -547,10 +565,14 @@
     var RenderLesson = function (item) {
         var oldItem = $('#' + item.ID);
 
-        var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0", id: item.ID });
+        var wPart = $("<div>", { "class": "col-md-1 text-center" }).append($("<span>", { class: "align-middle wkIdx", text: getWeek(item.Start)}));
+        var rowData = $("<div>", { "class": "modules-content-item row item-row ml-0 col-md-11", id: item.ID });
+
         var leftPart = $("<div>", { "class": "col-md-10" });
         var rightPart = $("<div>", { "class": "col-md-2 text-right row-action" });
-        leftPart.append($("<span>", { "class": "modules-content-item-icon" + (item.TemplateType === 2 ? (" assignment atype" + item.Etype) : "") }));
+        leftPart
+            //.append("<span class='align-middle mr-2'> W" + + " </span>")
+            .append($("<span>", { "class": "modules-content-item-icon" + (item.TemplateType === 2 ? (" assignment atype" + item.Etype) : "") }));
         rightPart.append();
         var itemData = $("<div>", { "class": "modules-content-item-info" });
         itemData.append($("<a>", {
@@ -582,7 +604,7 @@
             "order": item.Order + 1,
             "connectid": item.ConnectID,
             "connecttype": item.ConnectType,
-            "period": item.Period
+            "start": item.Start
         }));
         @if(!isLock)
         {
@@ -590,6 +612,7 @@
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
+        rowData.append(wPart);
         rowData.append(leftPart);
         rowData.append(rightPart);
 
@@ -614,11 +637,14 @@
         else {
 
             if (item.ChapterID == null) {
-                modulesBody.append(rowData);
+                modulesBody.addClass("row")
+                    .append(wPart)
+                    .append(rowData);
             }
             else {
                 parent = modulesBody.find(".modules[id=" + item.ChapterID + "] .modules-content:first");
-                parent.append(rowData);
+                parent.addClass("row").append(wPart)
+                    .append(rowData);
             }
         }
     }
@@ -634,9 +660,11 @@
 
         var chapContent = $("<div>", { "id": chapter.ID, "pid": chapter.ParentID, "class": "modules" });
         var chapTitle = $("<div>", { "class": "modules-title row item-row blue-color", "data-target": "#" + chapter.ID + " .modules-content:first" });
-        var title_cPart = $("<div>", { "class": "col-md-10" });
+        var title_wPart = $("<div>", { "class": "col-md-1 text-center" }).append($("<span>", { class: "wkIdx", text: getWeek(chapter.Start) }));
+        var title_cPart = $("<div>", { "class": "col-md-9" });
         var title_ePart = $("<div>", { "class": "col-md-2 text-right row-action pr-0" })
         title_cPart.append($("<i>", { "class": "fa pr-1 fa-caret-down fa-caret-right", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }))
+            //.append($('<span>', { class: "align-top mr-2", text: 'Week ' + (chapter.Start / 7 + 1) + ": " }))
             .append($("<a>", {
                 "class": "action-link",
                 "name": "Name",
@@ -648,7 +676,7 @@
         title_cPart.append($("<input>", { "type": "hidden", "name": "Order", "value": chapter.Order + 1 }));
         title_cPart.append($("<input>", { "type": "hidden", "name": "ConnectID", "value": chapter.ConnectID}));
         title_cPart.append($("<input>", { "type": "hidden", "name": "ConnectType", "value": chapter.ConnnectType}));
-        title_cPart.append($("<input>", { "type": "hidden", "name": "Period", "value": chapter.Period }));
+        title_cPart.append($("<input>", { "type": "hidden", "name": "Start", "value": chapter.Start }));
 
         @if (!isLock)
         {
@@ -665,6 +693,7 @@
             @:title_ePart.append($("<i>", { "class": "far fa-trash-alt", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteChapter('" + chapter.ID + "')" }));
         }
         title_ePart.append($("<i>", { "class": "far fa-minus-square show", "title": "Thu gọn", "onclick": "toggleCollapse(this, '" + chapter.ID + "')" }));
+        chapTitle.append(title_wPart);
         chapTitle.append(title_cPart);
         chapTitle.append(title_ePart);
 
@@ -764,7 +793,7 @@
                 if (obj.cid != "") {
                     var root = routeList.find(t => t.id == obj.cid);
                     if(root != null)
-                        obj.start = root.start + root.period;
+                        obj.start =  root.start + 7;
                 }
                 else
                 if (obj.parent != "0") {
@@ -773,6 +802,7 @@
                 };
             })
         }
+        var begin = new Date(new Date().getYear(), 0, 1);
         routeList.sort((a,b) => compareRouteFinal(a,b))
         routeList.forEach(function (obj, idx) {
             $(wrapper).append($('<li>', {
@@ -781,7 +811,7 @@
             })
                 .append($('<a>', { class: 'route_title', text: obj.text })).append($('<span>', {
                 class: 'route_period',
-                text: obj.start + (obj.period > 0 ? (' (+' + obj.period + ')') : '')
+                    text: obj.start > 0 ?  "Tuần " +  (parseInt(obj.start / 7) + 1): "---"
             })))
         })
         //if(routeList != null)
@@ -809,7 +839,13 @@
         //}
     }
 
+    var formatShortDate = function(obj)
+    {
+        return obj.getDate() + "/" + (obj.getMonth() + 1);
+    }
+
     var editRoute = function (id, type) {
+        console.log(id);
 
         if(type == 'lesson')
             $('#' + id + ' .far.fa-edit').first().focus().click();
@@ -863,18 +899,24 @@
 
                 var rootContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
                 var rootLessons = $("<div>", {"class": "modules-content collapse show" });
-
+                var title_wPart = $("<div>", { "class": "col-md-1 text-center" }).append("Tuần");
                 @if(!isLock)
                 {
                     @:var chapContent = $("<div>", { "id": "0", "pid": "0", "class": "modules" });
                     @:var rootAction = $("<div>", { "class": "modules-title row item-row blue-color" });
-                    @:title_cPart = $("<div>", { "class": "col-md-12" });
+
+                    @:title_cPart = $("<div>", { "class": "col-md-11" });
                     @:title_cPart.append($("<i>", { "class": "far fa-folder mr-1 mt-1", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
                     @:title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm chương", "data-toggle": "modal", "data-target": "#chapterModal", "data-placement": "top", "title": "Thêm Chương", "onclick": "AddChapter('0'); return false;" }));
                     @*@:title_cPart.append($("<i>", { "class": "far fa-file ml-5 mr-1 mt-1", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm nội dung", "onclick": "AddLesson('0'); return false;" }));
                     @:title_cPart.append($("<span>", { "class": "align-top", "text": "Thêm nội dung", "data-toggle": "modal", "data-target": "#lessonModal", "data-placement": "top", "title": "Thêm nội dung", "onclick": "AddLesson('0'); return false;" }));*@
+                    @:rootAction.append(title_wPart);
                     @:rootAction.append(title_cPart);
                     @:rootContent.append(rootAction);
+                }
+                else
+                {
+                    @:rootContent.append(title_wPart);
                 }
                 rootContent.append(rootLessons);
                 modulesBody.append(rootContent);
@@ -885,7 +927,8 @@
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
                         RenderChapter(chapter);
-                        listRoute.push({ id: chapter.ID, start: 0, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
+                        if(chapter.ParentID == "0")
+                            listRoute.push({ id: chapter.ID, start: chapter.Start, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                     }
                 }
 
@@ -911,7 +954,8 @@
                     for (j = 0; j < lessons.length; j++) {
                         var item = lessons[j];
                         RenderLesson(item);
-                        listRoute.push({ id: item.ID, start: 0, type: "lesson", text: item.Title, cid: item.ConnectID == null ? "" : item.ConnectID, period : item.Period, parent : item.ChapterID, order: item.Order })
+                        if(item.ChapterID == "0")
+                            listRoute.push({ id: item.ID, start: item.Start, type: "lesson", text: item.Title, cid: item.ConnectID == null ? "" : item.ConnectID,period : item.Period, parent : item.ChapterID, order: item.Order })
                     }
                 }
 
@@ -921,9 +965,25 @@
                 //RenderRouteChap(chapter);
                 //RenderRouteLesson(item);
 
+                var wkIdx = '';
+                $('.wkIdx').each(function (idx, obj) {
+                    if (wkIdx != $(obj).text()) {
+                        wkIdx = $(obj).text();
+                        $(obj).show();
+                    }
+                    else {
+                        $(obj).hide();
+                    }
+                });
+
+                //var wkWrapper = $('.modules-wrapper').clone().removeClass('modules-wrapper').addClass('wk-wrapper');
+                //$('.modules-wrapper').wrap("<div></div>")
+                //$('.modules-wrapper').before(wkWrapper);
+                //$(wkWrapper).find('.modules-title .col-md-9,.modules-content-item').remove();
+
                 $('.row-action i').tooltip();
 
-                renderTableContents();
+                //renderTableContents();
             },
             error: function() {
             }
@@ -949,7 +1009,6 @@
         if (obj1.order > obj2.order) return 1;
         if (obj1.order < obj2.order) return -1;
     }
-
 
     function ChangeGrade(obj, wrapper) {
         var subject = $(obj).val();
@@ -1090,12 +1149,16 @@
 
         var connectid = $(obj).parent().parent().find("[name=ConnectID]").val().trim();
         var connecttype = $(obj).parent().parent().find("[name=ConnectType]").val().trim();
-        var period = $(obj).parent().parent().find("[name=Period]").val().trim();
+        var start = $(obj).parent().parent().find("[name=Start]").val().trim();
+        var week = 0;
+
+        if(start > 0)
+            week = parseInt(start / 7) + 1;
 
         var parent = $(obj).attr("pid");
-        console.log(connectid);
+        //console.log(connectid);
 
-        console.log(period);
+        //console.log(period);
 
 
         //console.log(obj);
@@ -1105,7 +1168,8 @@
         modal.find("[name=ParentID] option[value=" +  ID + "]").hide();
         modal.find("[name=Order]").val(order);
         modal.find("[name=ID]").val(ID);
-        modal.find("[name=Period]").val(period);
+        modal.find("[name=Start]").val(start);
+        modal.find("[name=Week]").val(week);
 
         var connectHolder = modal.find('[name=ConnectID]');
         $(connectHolder).find('option:gt(0)').remove();
@@ -1126,7 +1190,7 @@
         }
 
         var siblingsLessons = $('.modules[id=' + parent + '] > .modules-content > .modules-content-item > .col-md-10 > .modules-content-item-info > .action-link[lid]')
-        console.log(siblingsLessons);
+        //console.log(siblingsLessons);
         if (siblingsLessons.length > 0) {
             siblingsLessons.each(function (idx, obj) {
                 $(connectHolder).append($('<option>', { value: $(obj).attr('lid'), type: connectType.LESSON, text: $(obj).text() }));
@@ -1242,8 +1306,10 @@
         var order = $(obj).attr("order");
 
         var connectid = $(obj).attr("connectid");;
-        var connecttype = $(obj).attr("connecttype");
-        var period = $(obj).attr("period");
+        var start = $(obj).attr("start");
+        var week = 0;
+        if (start > 0)
+            week = parseInt(start / 7 + 1);
 
         //console.log(connectid);
 
@@ -1257,8 +1323,8 @@
         modal.find("[name=Multiple]").val(multiple);
         modal.find("[name=Etype]").val(etype);
         modal.find("[name=Order]").val(order);
-        modal.find("[name=Period]").val(period);
-        modal.find("[name=ConnectType]").val(0);
+        modal.find("[name=Start]").val(start);
+        modal.find("[name=Week]").val(week);
 
         SelectTemplate(type);
 
@@ -1566,6 +1632,19 @@
     //-------------------
     //Get the button
     var btnScroll = $("#backToTop");
+
+    var SetPeriod = function (obj) {
+        var value = $(obj).val();
+        //if (value < 1)
+        //    value = 1;
+        $(obj).siblings("[name=Start]").val((value - 1) * 7 + 1);
+    }
+
+    var getWeek = function (start) {
+        if (start > 0)
+            return parseInt(start / 7) + 1;
+        return "";
+    }
 
     // When the user scrolls down 20px from the top of the document, show the button
     $(document).ready(function () {

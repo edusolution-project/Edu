@@ -2799,7 +2799,7 @@
                             if (item.ID == ChapterID) {
                                 if (item.ParentID) {
                                     parentItem = listChapters.find(x => x.ID == item.ParentID)
-                                    return item.Name + " - " + parentItem?.Title 
+                                    return item.Name + " - " + (parentItem == null ? '' : parentItem.Title)
                                 }
                                 else {
                                     return item.Name

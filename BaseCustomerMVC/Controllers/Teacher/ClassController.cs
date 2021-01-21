@@ -1016,7 +1016,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         StudentID = StudentID,
                         ClassSubjectID = item.ClassSubjectID,
-                        ClassID = subjects.Find(y=>y.ClassID == item.ClassID).ClassID,
+                        ClassID = subjects.Find(y => y.ClassID == item.ClassID).ClassID,
                         TypeClassSbj = subjects.Where(y => y.ID == item.ClassSubjectID).FirstOrDefault().TypeClass,
                         LessonID = item.LessonID,
                         Point = item.LastPoint
@@ -1401,7 +1401,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              let skillIDs = _classSubjectService.GetByClassID(o.ID).Select(t => t.SkillID).Distinct()
                              let creator = _teacherService.GetItemByID(o.TeacherID) //Todo: Fix
                              let sname = skillIDs == null ? "" : string.Join(", ", _skillService.GetList().Where(t => skillIDs.Contains(t.ID)).Select(t => t.Name).ToList())
-                             let teachers = (o.Members == null || o.Members.Count == 0) ? "" : string.Join(", ", o.Members.Where(t => t.Type != ClassMemberType.OWNER).Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
+                             let teachers = (o.Members == null || o.Members.Count == 0) ? "" : string.Join(", ", o.Members.Where(t => t.Type != ClassMemberType.OWNER && t.Type != 0).Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
                              select new Dictionary<string, object>
                                 {
                                  { "ID", o.ID },
@@ -1579,7 +1579,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     {"Error", "Không tìm thấy lớp" }
                 });
-                
+
                 oldData.Updated = DateTime.UtcNow;
                 var mustUpdateName = false;
                 if (oldData.Name != item.Name)
@@ -2254,8 +2254,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             data = data.Where(x => activeLessonIDs.Contains(x.LessonID)).ToList();
 
             var lessons = (from progress in data
-                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
-                           let schedule = activeLesson.Where(x=>x.LessonID == progress.LessonID && x.ClassID == currentClass.ID).FirstOrDefault()
+                               //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == progress.LessonID && o.ClassID == currentClass.ID).FirstOrDefault()
+                           let schedule = activeLesson.Where(x => x.LessonID == progress.LessonID && x.ClassID == currentClass.ID).FirstOrDefault()
                            where schedule != null
                            let classsubject = subjects.Single(t => t.ID == schedule.ClassSubjectID)
                            where classsubject != null
@@ -2316,7 +2316,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var activeLessonIDs = activeLesson.Select(x => x.LessonID).ToList();
 
             var lessons = (
-                            from lesson in passExams.Where(x=>activeLessonIDs.Contains(x.ID))
+                            from lesson in passExams.Where(x => activeLessonIDs.Contains(x.ID))
                             let progress = data.FirstOrDefault(t => t.StudentID == model.ID && t.LessonID == lesson.ID) ?? new LessonProgressEntity()
                             //from progress in data
                             //where progress.Tried > 0
@@ -3201,8 +3201,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var classSbjs = _classSubjectService.CreateQuery().Find(x=>x.ClassID == @class.ID);
-                if(classSbjs == null || classSbjs.Count() == 0)
+                var classSbjs = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID);
+                if (classSbjs == null || classSbjs.Count() == 0)
                 {
                     Status = false;
                     return Json(new Dictionary<String, Object> {
@@ -3250,15 +3250,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                              into g
                              let classSbj = classSbjs.ToList().Where(x => x.ID == g.Key).FirstOrDefault()
                              let lesson = lessons.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
-                             let chapter = chapters.ToList().Where(x=>x.ClassSubjectID == g.Key).ToList()
+                             let chapter = chapters.ToList().Where(x => x.ClassSubjectID == g.Key).ToList()
                              let course = _courseService.GetItemByID(classSbj.CourseID)
                              select new LessonToMarkVM
                              {
                                  classSubjectID = g.Key,
-                                 CourseName = classSbj == null ? "": classSbj.CourseName,
+                                 CourseName = classSbj == null ? "" : classSbj.CourseName,
                                  ListLesson = lesson == null ? new List<LessonEntity>() : lesson,
-                                 ListExam = g == null ?  new List<ExamViewModel>() : g.ToList(),
-                                 ListChapter = g == null ?  new List<ChapterEntity>() : chapter,
+                                 ListExam = g == null ? new List<ExamViewModel>() : g.ToList(),
+                                 ListChapter = g == null ? new List<ChapterEntity>() : chapter,
                                  Image = course == null ? "" : course.Image,
                                  TeacherID = classSbj.TeacherID
                              };
@@ -3269,7 +3269,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Data",result }
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Status = false;
                 return Json(new Dictionary<String, Object> {

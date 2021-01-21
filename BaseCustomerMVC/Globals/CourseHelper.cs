@@ -158,11 +158,6 @@ namespace BaseCustomerMVC.Globals
                 {
                     var lstart = courselesson.Start;
 
-                    if (!string.IsNullOrEmpty(courselesson.ConnectID))
-                    {
-
-                    }
-
                     await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
                         ChapterID = newID,

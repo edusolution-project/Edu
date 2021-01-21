@@ -288,7 +288,12 @@ namespace BaseCustomerMVC.Globals
             //lesson.Start = orgItem.Start;
             //lesson.Period
 
-            lesson = InitLesson(lesson, begin.AddDays(orgItem.Start), begin.AddDays(orgItem.Start + orgItem.Period));
+            if (orgItem.Start == 0 && orgItem.Period == 0)//route not set
+            {
+                lesson = InitLesson(lesson, invalidTime, invalidTime);
+            }
+            else
+                lesson = InitLesson(lesson, begin.AddDays(orgItem.Start), begin.AddDays(orgItem.Start + orgItem.Period));
 
             var lessonParts = _lessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
