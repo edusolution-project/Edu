@@ -1092,26 +1092,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return StringHelper.ReplaceSpecialCharacters(org);
         }
 
-        //private double calculateLessonPoint(string lessonId)
-        //{
-        //    var point = 0.0;
-        //    var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
-        //    foreach (var part in parts)
-        //    {
-        //        if (part.Type == "ESSAY")
-        //        {
-        //            point += part.Point;
-        //            _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
-        //        }
-        //        else
-        //        {
-        //            point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
-        //            _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
-        //        }
-        //    }
-        //    _lessonService.UpdateLessonPoint(lessonId, point);
-        //    return point;
-        //}
+        //ai laij cmt ham nay vao the @@
+        private double calculateLessonPoint(string lessonId)
+        {
+            var point = 0.0;
+            var parts = _cloneLessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            foreach (var part in parts)
+            {
+                if (part.Type == "ESSAY")
+                {
+                    point += part.Point;
+                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+                }
+                else
+                {
+                    point += _cloneQuestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                    _cloneQuestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+                }
+            }
+            _lessonService.UpdateLessonPoint(lessonId, point);
+            return point;
+        }
 
         #region
         public JsonResult CreateExamPart(string basis, List<string> ListLessonPartID, string LessonID)
@@ -1648,8 +1649,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //increase practice counter
                         await _classHelper.ChangeLessonPracticeState(parentLesson);
                     }
-                    //calculateLessonPoint(item.ParentID);
-
+                    parentLesson.Point = calculateLessonPoint(item.ParentID);
+                    _lessonService.Save(parentLesson);
                 }
                 else
                 {

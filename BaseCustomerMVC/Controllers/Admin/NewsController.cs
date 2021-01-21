@@ -201,6 +201,23 @@ namespace BaseCustomerMVC.Controllers.Admin
             };
             return new JsonResult(response);
         }
+
+        [HttpPost]
+        public JsonResult ChangeStatus(DefaultModel model,Boolean isShow)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(model.ArrID) || model.ArrID.Length <= 0)
+                    return new JsonResult(null);
+                // isshow == true => chuyển sang hiển thị
+                _serviceNewCate.ChangeStatus(model.ArrID.Split(',').ToList(), isShow);
+                return Json("OK");
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
         #endregion
 
         #region News
@@ -227,7 +244,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                item.CreateDate = DateTime.UtcNow;
+                item.CreateDate = DateTime.Now;
                 if (item.PublishDate < new DateTime(1900, 1, 1))
                     item.PublishDate = item.CreateDate;//publish now
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
@@ -259,7 +276,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 item.Code = item.Title.ConvertUnicodeToCode("-", true);
                 item.CreateDate = olditem.CreateDate;
-                item.LastEdit = DateTime.UtcNow;
+                item.LastEdit = DateTime.Now;
                 item.IsActive = olditem.IsActive;
 
                 var pos = 0;
@@ -428,7 +445,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         public String urlThumbnail(IFormFile formFile)
         {
             string _fileName = formFile.FileName;
-            var timestamp = DateTime.UtcNow.ToFileTime();
+            var timestamp = DateTime.Now.ToFileTime();
             _fileName = timestamp + "_" + _fileName;
             String urlImg =_fileProcess.SaveMediaAsync(formFile, _fileName, "News", "Eduso").Result;
             return urlImg;
@@ -472,7 +489,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 item.IsHot = false;
                 item.IsPublic = false;
                 item.IsTop = false;
-                item.CreateDate = DateTime.UtcNow;
+                item.CreateDate = DateTime.Now;
                 item.CreateUser = UserID;
 
                 _serviceNews.CreateOrUpdate(item);

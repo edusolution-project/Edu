@@ -187,7 +187,6 @@ var ExamReview = (function () {
                 var detail = examDetail.length > 0 ? examDetail[0] : null;
                 var title = "Làm đúng";
                 var _class = "success";
-              //debugger
                 if (item.TypeAnswer != "ESSAY") {
                     // câu trắc nghiệm
                     if (detail) {
@@ -214,7 +213,6 @@ var ExamReview = (function () {
                 } else {
                     if (detail) {
                         console.log(item);
-                        debugger
                         if (item.RealAnswerEssay || item.PointEssay >= 0) {
                             _class = "essay success";
                             if (item.PointEssay <= 0) {
@@ -384,7 +382,7 @@ var ExamReview = (function () {
         if (index != void 0 && index == 0) {
             active = "show active";
         }
-
+        //debugger
         var styleTeacher = config.isTeacher ? "height: 80vh;overflow: auto;" : "";
 
         var html = '<div id="pills-part-' + data.ID + '" style="' + styleTeacher + '"  class="tab-pane fade ' + active + '" role="tabpanel" aria-labelledby="pills-' + data.ID + '">';
@@ -1064,37 +1062,53 @@ var ExamReview = (function () {
 
             var content = item.RealAnswerEssay;// cau tra loi cua giao vien
             var point = item.PointEssay; // điểm giáo viên chấm
+            var contentEssay = item.AnswerEssay; //cau tra loi cua hoc vien
+            //debugger
             //console.log(data);
             //console.log(item);
             if (config.isTeacher) {
                 html += '<fieldset data-last="false" class="answer-item col-md-12" id="essay-teacher-' + item.ID + '" style="padding:10px; border:1px solid #ccc">';
-                if (content != "" && content != null) {
-                    html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
-                } else {
-                    html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
+                //debugger
+                if (contentEssay != null && contentEssay != "") {
+                    if (content != "" && content != null) {
+                        html += '<div class="alert alert-success"><span class="text-success">Đã chấm</span></div>';
+                    } else {
+                        html += '<div class="alert alert-danger"><span class="text-danger">Chưa chấm</span></div>';
+                    }
+                    html += '<div> Điểm :<input onkeyup="validate(this)" max="' + data.Point + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + data.Point + '</div>';
                 }
-                html += '<div> Điểm :<input onkeyup="validate(this)" max="' + data.Point + '" min="0" type="number" value="' + point + '" style="width:40px;text-align:right;margin-bottom:10px"> /' + data.Point + '</div>';
+                else {
+                    html += '<div class="alert alert-danger"><span class="text-danger">Không có nội dung câu trả lời</span></div>';
+                    html += '<div> Điểm :<input onkeyup="validate(this)" max="' + data.Point + '" min="0" type="number" value="' + point + '"disabled style="width:40px;text-align:right;margin-bottom:10px"> /' + data.Point + '</div>';
+                }
+                
                 html += '<i>Bài chữa :</i>';
                 var realContent = content == null ? "" : content;
                 html += '<div><textarea style="width:100%; padding:5px" rows="6" name="TEXT_CKEDITOR_' + item.ID + '">' + realContent + '</textarea></div>';
 
-                //upload file
-                var type = "type='file'";
-                var strFile = "this.parentElement.querySelector('input[" + type + "]')";
-                html += '<div data-target="' + item.ID + '"><input type="file" name="files" multiple style="display:none">';
-                html += '<button class="btn btn-sm btn-success" onclick="uploadFile(this)">Upload file</button>';
-                html += '<div class="preview">';
-                for (var x = 0; anwerMedia != null && x < anwerMedia.length; x++) {
-                    var mediaFile = anwerMedia[x];
-                    html += renderMediaAnswer(mediaFile);
+                if (contentEssay != null && contentEssay != "") {
+                    //upload file
+                    var type = "type='file'";
+                    var strFile = "this.parentElement.querySelector('input[" + type + "]')";
+                    html += '<div data-target="' + item.ID + '"><input type="file" name="files" multiple style="display:none">';
+                    html += '<button class="btn btn-sm btn-success" onclick="uploadFile(this)">Upload file</button>';
+                    html += '<div class="preview">';
+                    for (var x = 0; anwerMedia != null && x < anwerMedia.length; x++) {
+                        var mediaFile = anwerMedia[x];
+                        html += renderMediaAnswer(mediaFile);
+                    }
+                    html += '</div>'
+                    var textBtn = ((content == null || content == '') && point == 0) ? "chấm điểm" : "chấm lại";
+                    var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
+
+                    html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
                 }
-                html += '</div>'
-                debugger
-                var textBtn = ((content == null || content == '') && point == 0) ? "chấm điểm" : "chấm lại";
-                var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
+                else {
+                    var textBtn = "Xác nhận điểm";
+                    var updatEvent = "updatePoint(this,'" + item.ExamDetailID + "')";
 
-                html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
-
+                    html += '<div style="margin-top:20px"><button type="button" class="btn btn-sm btn-success" onclick="' + updatEvent + '"> ' + textBtn + ' </button></div>';
+                }
                 html += '</fieldset>';
                 html += "<script>if (CKEDITOR) {CKEDITOR.replace('TEXT_CKEDITOR_" + item.ID + "',{extraPlugins: '',image2_alignClasses: ['image-align-left', 'image-align-center', 'image-align-right'],image2_disableResizer: true});}</script>";
             } else {
@@ -1206,6 +1220,7 @@ var ExamReview = (function () {
             var item = data.Part[i];
             var icon = arrIcon[item.Type];
             if (icon == void 0) icon = arrIcon["TEXT"];
+            //debugger
             var content = renderLessonPart(item, i, data.TemplateType);
             tabList += content;
             var title = item.Title == void 0 || item.Title == null || item.Title == "null" ? "" : item.Title;
@@ -1259,6 +1274,7 @@ var ExamReview = (function () {
             _form.append("Point", point);
             _form.append("RealAnswerValue", answer);
             _form.append("isLast", isLAst);
+            //_form.append("ExamID", config.exam.ID);
 
             var files = document.querySelector('[data-target="' + qID + '"]>input[type="file"]');
             if (files == null) {
@@ -1296,6 +1312,7 @@ var ExamReview = (function () {
                 var _form = new FormData();
                 _form.append("ID", obj);
                 _form.append("isLast", true);
+                _form.append("ExamID", config.exam.ID);
                 var _ajax = new MyAjax();
                 _ajax.proccess("POST", _url, _form).then(function (res) {
                     var dataJson = JSON.parse(res);

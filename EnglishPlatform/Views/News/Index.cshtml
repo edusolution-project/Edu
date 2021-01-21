@@ -1,68 +1,117 @@
 ﻿@{
-    var newshot = ViewBag.newsHot as List<BaseCustomerEntity.Database.NewsEntity>;
-    var newstop = ViewBag.newsTop as List<BaseCustomerEntity.Database.NewsEntity>;
     ViewData["Title"] = "Tin tức";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="category-box pt-5 pb-5">
-    <div class="inner-content">
-        <div class="content-box">
-            <div class="box-title d-flex justify-content-center mb-5">
-                {{mainTitle}}
-                <div class="underline"></div>
-            </div>
-            <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
-                <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC" id="newshot">
-                    @foreach (var item in newshot)
-                    {
-                        <div class="news-item w-100 pb-3">
-                            <div class="thumb w-100 pb-2" >
-                                <a href="/tin-tuc/tin-tuc/@item.Code" style="font-size:20px;font-weight:bold">
-                                    <img :src="cacheStatic('@item.Thumbnail',545,300)" class="w-100" style="max-width:100%;max-height:100%"/>
+    <div class="container pr-xs">
+        <div class="inner-content">
+            <div class="content-box">
+                <div class="box-title d-flex justify-content-center mb-5">
+                    {{mainTitle}}
+                    <div class="underline"></div>
+                </div>
+                <div class="news-list d-flex flex-column flex-md-row pt-3 pb-3" style="border-top:solid 0.5px #CCC">
+                    <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC" id="newshot">
+                        <div class="news-item w-100 pb-3" v-for="(item,k) in newshot">
+                            <div class="thumb w-100 pb-2">
+                                <a :href="'/tin-tuc/tin-tuc/' + item.Code" style="font-size:20px;font-weight:bold">
+                                    <img :src="cacheStatic(item.Thumbnail,545,300)" class="w-100" style="max-width:100%;max-height:100%" />
                                 </a>
                             </div>
                             <div class="news-title">
-                                <a href="/tin-tuc/tin-tuc/@item.Code" style="font-size:18px;font-weight:bold">
-                                    @item.Title
+                                <a :href="'/tin-tuc/tin-tuc/'+item.Code" style="font-size:18px;font-weight:bold">
+                                    {{item.Title}}
                                 </a>
                             </div>
                             <div class="news-desc" style="max-height:40px;overflow:hidden">
-                               @item.Summary
+                                {{item.Summary}}
                             </div>
                             <div class="news-time" style="padding-bottom:10px">
-                               @item.PublishDate.ToString("dd-MM-yyyy")
+                                {{formatShortDate(item.PublishDate)}}
                             </div>
                         </div>
-                    }
-                </div>
-                <div class="news-top  media-body pl-md-4">
-                    @foreach (var item in newstop)
-                    {
-                        <div class="news-item pb-3 pt-3 d-flex">
-                            <div class="thumb" >
-                                <a href="/tin-tuc/tin-tuc/@item.Code" style="font-size:20px;font-weight:bold">
-                                    <img :src="cacheStatic('@item.Thumbnail',220,120)" class="w-100" style="max-width:100%;max-height:100%"/>
+                    </div>
+                    <div class="news-top  media-body pl-md-4">
+                        <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in newstop">
+                            <div class="thumb">
+                                <a :href="'/tin-tuc/tin-tuc/'+item.Code" style="font-size:20px;font-weight:bold">
+                                    <img :src="cacheStatic(item.Thumbnail,220,120)" class="w-100" style="max-width:100%;max-height:100%" />
                                 </a>
                             </div>
                             <div class=" media-body">
                                 <div class="news-title">
-                                    <a href="/tin-tuc/tin-tuc/@item.Code">
-                                       @item.Title
+                                    <a :href="'/tin-tuc/tin-tuc/'+item.Code">
+                                        {{item.Title}}
                                     </a>
                                 </div>
                                 <div class="news-desc" style="max-height:40px;overflow:hidden">
-                                    @item.Summary
+                                    {{item.Summary}}
                                 </div>
                                 <div class="news-time">
-                                    @item.PublishDate.ToString("dd-MM-yyyy")
+                                    {{formatShortDate(item.PublishDate)}}
                                 </div>
                             </div>
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="" style="padding:20px;background-color:#f2f2f2">
+
+    </div>
+
+<template v-for="(category,k) in otherNews.listCategory" v-if="otherNews.listCategory.length > 0">
+    <div class="container" v-if="filterNews(category.ID,otherNews.listNews).length > 0">
+        @* :style="[k%2==0?{'background-color':'#f2f2f2'}:{'':''}]" *@
+        <div class="inner-content">
+            <div class="form-group">
+                <div class="content-box" style="padding-top:20px">
+                    <div class="inner-content">
+                        <div class="box-title d-flex justify-content-start mb-3 w-100 row" style="font-size:20px;margin:0px !important">
+                            <div class="col-md-6 col-sm-12" style="padding:0px">{{category.Name}}</div>
+                            <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                            <div class="col-md-6 col-sm-12" id="seemore"><a :href="'/tin-tuc/' + category.Code" >Xem thêm >>></a></div>
+                        </div>
+                        @*<div id="seemore" class="box-title d-flex justify-content-start mb-3 w-50" style="text-align:right">
+                            <a href="/">Xem thêm >>></a>
+                        </div>*@
+                    </div>
+                </div>
+                <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                    <div class="news-top media-body">
+                        <template v-for="(item,k) in otherNews.listNews">
+                            <div class="news-item pb-3 pt-3 d-flex" v-if="item.CategoryID == category.ID" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" :title="item.Title">
+                                <div class="thumb">
+                                    <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                        <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
+                                    </a>
+                                </div>
+                                <div class="media-body pr-4 pt-2">
+                                    <div class="news-title">
+                                        <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code" style="text-decoration:none">
+                                            {{item.Title}}
+                                        </a>
+                                    </div>
+                                    <div class="news-desc" style="overflow: hidden;">
+                                        {{item.Summary}}
+                                    </div>
+                                    <div class="news-time">
+                                        {{formatShortDate(item.PublishDate)}}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="" style="padding:20px;background-color:#f2f2f2">
+
+    </div>
+</template>
 </div>
 
 <script>
@@ -74,41 +123,113 @@
         new Vue({
             el: ".category-box",
             mounted() {
+                this.LoadData()
+                this.GetAllNews()
             },
             data: {
                 mainTitle: 'Tin tức',
                 catID: '0',
-                listnews: []
+                listnews: [],
+                otherNews: {
+                    listCategory: [],
+                    listNews:[]
+                },
+                newshot: [],
+                newstop:[]
             },
             methods: {
+                LoadData() {
+                    let _that = this
+                    let _form = new FormData()
+                    //_form.append("GetNewsList", LessonScheduleID)
+                    let _url = '@Url.Action("GetNewsList", "News")'
+                     axios.post(_url, _form)
+                         .then(response => {
+                             this.newshot = response.data.NewsHot
+                             this.newstop = response.data.NewsTop
+                        }).catch(e => console.log(e))
+                },
+                GetAllNews() {
+                    let _that = this
+                    let _form = new FormData()
+
+                    //_form.append("oldNewsID", LessonScheduleID)
+                    let _url = '@Url.Action("GetAllNews", "News")'
+                     axios.post(_url, _form)
+                         .then(response => {
+                             this.otherNews.listCategory = response.data.Categories
+                             this.otherNews.listNews = response.data.News
+                         }).catch(e => console.log(e))
+                },
+                formatShortDate(date) {
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("DD-MM-YYYY")
+                },
+                filterNews(CategoryID, listNews) {
+                    var array = []
+                    for (var i = 0; i < listNews.length; i++) {
+                        var news = listNews[i]
+                        if (news.CategoryID == CategoryID) {
+                            array.push(news)
+                        }
+                    }
+
+                    return array;
+                }
             }
         });
-
-        function loadData() {
-           $.ajax({
-                url: '@Url.Action("getnewslist", "home")',
-                type: "post",
-                dataType: "json",
-               success: function (result) {
-
-                    var data=new Vue({
-                        el: '#newshot',
-                        data: {
-
-                            newshot: result.NewsHot
-                        },
-
-                        el: '#newstop',
-                        data: {
-                            newstop: result.NewsTop
-                        }
-                    })
-                }
-            });
-    };
-
-    $(document).ready(function () {
-        loadData();
-    });
     </script>
+<style>
+    .thumb img {
+        max-height: 100%;
+        max-width: 220px
+    }
+
+    .thumb img {
+        max-height: 100%;
+        max-width: 220px
+    }
+
+    .news-top .news-item .thumb{
+        width:auto
+    }
+
+    .news-item.pb-3.pt-3.d-flex{
+        opacity:0.9
+    }
+
+    .news-item.pb-3.pt-3.d-flex:hover {
+        opacity: 1
+    }
+
+    .news-title a {
+        color: #08486b !important;
+        opacity: 0.9;
+        text-transform: capitalize !important
+    }
+
+        .news-title a:hover{
+            opacity:1
+        }
+
+        /*a {
+            color: #08486b !important;
+        }*/
+
+        #seemore{
+            text-align:right;
+        }
+
+        #seemore a{
+            font-size:12px;
+            font-style:italic;
+            text-decoration:none;
+            color:gray
+        }
+
+            #seemore a:hover {
+                color: lawngreen
+            }
+</style>
 }

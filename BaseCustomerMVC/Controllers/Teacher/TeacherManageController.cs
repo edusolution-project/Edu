@@ -260,14 +260,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
             else
             {
                 if (ExistEmail(tc.Email))
-                    return Json(new { error = "Email đã được sử dụng" });
-
-                var teacher = new TeacherEntity
+                //return Json(new { error = "Email đã được sử dụng" });
                 {
-                    CreateDate = DateTime.UtcNow,
-                    Email = tc.Email,
-                    FullName = tc.FullName,
-                    Centers = new List<CenterMemberEntity>
+                    var teacher = _teacherService.GetItemByEmail(tc.Email);
+                    var inCenter = teacher.Centers.Any(x => x.CenterID == center.ID);
+                    if (inCenter)
+                    {
+                        return Json(new { error = "Tài khoản đã tồn tại trong cơ sở." });
+                    }
+
+                    teacher.Centers.Add(new CenterMemberEntity { 
+                        CenterID = center.ID,
+                        Code = center.Code,
+                        Name = center.Name,
+                        RoleID = RoleID
+                    });
+                    teacher.Subjects.AddRange(from item in currentTeacher.Subjects
+                                              where !teacher.Subjects.Contains(item)
+                                              select item);
+                    _teacherService.Save(teacher);
+                    _ = Task.Run(() =>
+                    {
+                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, "", center.Name);
+                    });
+                }
+                else
+                {
+                    var teacher = new TeacherEntity
+                    {
+                        CreateDate = DateTime.UtcNow,
+                        Email = tc.Email,
+                        FullName = tc.FullName,
+                        Centers = new List<CenterMemberEntity>
                     {
                         new CenterMemberEntity
                         {
@@ -277,34 +301,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             RoleID = RoleID
                         }
                     },
-                    Phone = tc.Phone,
-                    IsActive = true,
-                    Subjects = currentTeacher.Subjects,//copy creator subjects
-                    UserCreate = currentUser
-                };
-                _teacherService.CreateQuery().InsertOne(teacher);
-                var acc = _accountService.GetAccountByEmail(teacher.Email);
-                {
-                    if (acc == null)
+                        Phone = tc.Phone,
+                        IsActive = true,
+                        Subjects = currentTeacher.Subjects,//copy creator subjects
+                        UserCreate = currentUser
+                    };
+                    _teacherService.CreateQuery().InsertOne(teacher);
+                    var acc = _accountService.GetAccountByEmail(teacher.Email);
                     {
-                        var account = new AccountEntity()
+                        if (acc == null)
                         {
-                            CreateDate = DateTime.UtcNow,
-                            IsActive = true,
-                            PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                            PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
-                            UserCreate = teacher.UserCreate,
-                            Type = ACCOUNT_TYPE.TEACHER,
-                            UserID = teacher.ID,
-                            UserName = teacher.Email,
-                            Name = teacher.FullName,
-                            RoleID = teacher.ID
-                        };
-                        _accountService.CreateQuery().InsertOne(account);
-                        _ = Task.Run(() =>
-                        {
-                            _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
-                        });
+                            var account = new AccountEntity()
+                            {
+                                CreateDate = DateTime.UtcNow,
+                                IsActive = true,
+                                PassTemp = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                PassWord = Core_v2.Globals.Security.Encrypt(_defaultPass),
+                                UserCreate = teacher.UserCreate,
+                                Type = ACCOUNT_TYPE.TEACHER,
+                                UserID = teacher.ID,
+                                UserName = teacher.Email,
+                                Name = teacher.FullName,
+                                RoleID = teacher.ID
+                            };
+                            _accountService.CreateQuery().InsertOne(account);
+                            _ = Task.Run(() =>
+                            {
+                                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, _defaultPass, center.Name);
+                            });
+                        }
                     }
                 }
             }

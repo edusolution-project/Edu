@@ -178,11 +178,14 @@ namespace EnglishPlatform.Controllers
                 var st = _studentService.GetItemByID(userID);
                 //var user = _accountService.GetItemByID(userID);
                 //var defaultUser = new UserModel() { };
+                var listCenters = new List<CenterEntity>();
 
                 switch (type.Value)
                 {
                     case ACCOUNT_TYPE.ADMIN:
                         centerCode = center.Code;
+                        listCenters.Add(center);
+                        ViewBag.AllCenters = listCenters;
                         break;
                     case ACCOUNT_TYPE.TEACHER:
                         if (tc != null)
@@ -191,9 +194,17 @@ namespace EnglishPlatform.Controllers
                                 .Where(ct => _centerService.GetItemByID(ct.CenterID)?.ExpireDate > DateTime.Now)
                                 .Select(t => new CenterEntity { Code = t.Code, Name = t.Name }).ToList();
                             if (centers != null)
+                            {
                                 centerCode = centers.FirstOrDefault().Code;
+                                //ViewBag.AllCenters = centers; //????
+                            }
                             else
+                            {
                                 centerCode = center.Code;
+                                centers.Add(center);
+                                //ViewBag.AllCenters = listCenters.Add(center); //????
+                            }
+                            ViewBag.AllCenters = centers; //????
 
                             _session.SetString("userAvatar", tc.Avatar == null ? "/images/no-avatar.png" : tc.Avatar);
                         }
@@ -212,6 +223,9 @@ namespace EnglishPlatform.Controllers
                             else
                             {
                                 centerCode = center.Code;
+                                var a = new List<CenterEntity>();
+                                a.Add(center);
+                                ViewBag.AllCenters = a;
                             }
 
                             _session.SetString("userAvatar", st.Avatar == null ? "/images/no-avatar.png" : st.Avatar);
@@ -220,16 +234,17 @@ namespace EnglishPlatform.Controllers
                 }
                 ViewBag.Type = type.Value;
                 //cache
-                return Redirect($"{centerCode}/{type.Value}");
+                //return Redirect($"{centerCode}/{type.Value}");
             }
             else
             {
                 _authenService.SignOut(HttpContext, Cookies.DefaultLogin);
-                HttpContext.SignOutAsync(Cookies.DefaultLogin);
-                return RedirectToAction("Login");
-                
+                //HttpContext.SignOutAsync(Cookies.DefaultLogin);
+                //return RedirectToAction("Login");
+                //return View();
+
             }
-            //return View();
+            return View();
         }
 
 
@@ -889,31 +904,31 @@ namespace EnglishPlatform.Controllers
             return View();
         }
 
-        #region LoadNews
-        [HttpPost]
-        [Route("/home/getnewslist")]
-        public JsonResult getNewsList()
-        {
-            var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(5);
-            var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(2);
-            var response = new Dictionary<string, object>
-            {
-                {"NewsTop",NewsTop.ToList() },
-                {"NewsHot",NewsHot.ToList() }
-            };
+        //#region LoadNews
+        //[HttpPost]
+        //[Route("/home/getnewslist")]
+        //public JsonResult getNewsList()
+        //{
+        //    var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(5);
+        //    var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && tbl.PublishDate < DateTime.Now && tbl.IsActive == true).Limit(2);
+        //    var response = new Dictionary<string, object>
+        //    {
+        //        {"NewsTop",NewsTop.ToList() },
+        //        {"NewsHot",NewsHot.ToList() }
+        //    };
 
-            return Json(response);
-        }
+        //    return Json(response);
+        //}
 
-        public JsonResult getDataForPartner(string CatCode)
-        {
-            var category = _newsCategoryService.Collection.Find(tbl => tbl.Code.Equals(CatCode)).FirstOrDefault();
-            List<NewsEntity> data = null;
-            if (category != null)
-                data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(category.ID)).Limit(10).SortByDescending(tbl => tbl.PublishDate).ToList();
-            return Json(data);
-        }
-        #endregion
+        //public JsonResult getDataForPartner(string CatCode)
+        //{
+        //    var category = _newsCategoryService.Collection.Find(tbl => tbl.Code.Equals(CatCode)).FirstOrDefault();
+        //    List<NewsEntity> data = null;
+        //    if (category != null)
+        //        data = _newsService.Collection.Find(tbl => tbl.CategoryID.Equals(category.ID)).Limit(10).SortByDescending(tbl => tbl.PublishDate).ToList();
+        //    return Json(data);
+        //}
+        //#endregion
 
         #region load Banner
         public JsonResult getDataForBanner()

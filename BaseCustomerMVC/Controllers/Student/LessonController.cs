@@ -264,6 +264,7 @@ namespace BaseCustomerMVC.Controllers.Student
         public IActionResult Detail(DefaultModel model, string basis, string ClassID)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(UserID);
             if (ClassID == null)
                 return Redirect($"/{basis}{Url.Action("Index", "Course")}");
             var currentCs = _classSubjectService.GetItemByID(ClassID);
@@ -322,6 +323,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 ViewBag.Chapter = chapter;
             }
             ViewBag.Center = _centerService.GetItemByCode(basis);
+            ViewBag.CurrentUser = student;
             //if (newui == 1)
             return View("Detail_new");
             //return View();

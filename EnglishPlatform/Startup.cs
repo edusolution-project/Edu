@@ -270,8 +270,8 @@ namespace EnglishPlatform
                 );
                 routes.MapRoute(
                    name: "news-event",
-                   template: "tin-tuc/su-kien",
-                   defaults: new { controller = "News", action = "Category", catcode = "su-kien" }
+                   template: "tin-tuc/hoat-dong",
+                   defaults: new { controller = "News", action = "Category", catcode = "hoat-dong" }
                );
                 routes.MapRoute(
                     name: "news-product",

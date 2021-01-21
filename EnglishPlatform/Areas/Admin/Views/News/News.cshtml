@@ -163,7 +163,7 @@
                                 <div class="form-row">
                                     <div class="input-group col-md-12">
                                         <div class="custom-file">
-                                            <input type="file" class="custom-file-input form-control" id="Thumbnail" name="Thumbnail">
+                                            <input type="file" class="custom-file-input form-control" onchange="changeFile(this)" id="Thumbnail" name="Thumbnail">
                                             <label class="custom-file-label form-control" for="inputGroupFile02">Chọn đường dẫn</label>
                                         </div>
                                         <div class="input-group-append">
@@ -544,6 +544,7 @@
         if (styleParagraph == null) {
             CKEDITOR.stylesSet.add('styleParagraph', [
                 { name: 'Paragraph', element: 'p', styles: { 'margin': '0' } },
+                //{ name: 'Images', element: 'img', styles: { 'max-width': '100%' } },
             ]);
         }
 
@@ -573,6 +574,68 @@
         //console.log(res);
         return false;
     })
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            file = input.files && input.files[0];
+            checkSizeIMG(file)
+            reader.onload = function (e) {
+                $('#img').attr('src', e.target.result);
+            }
+
+            reader.readAsDataURL(input.files[0]); // convert to base64 string
+        }
+    }
+
+    function checkSizeIMG(file) {
+        if (file) {
+            var img = new Image();
+
+            img.src = window.URL.createObjectURL(file);
+
+            img.onload = function () {
+                var width = img.naturalWidth,
+                    height = img.naturalHeight;
+                var ratio = Math.round(width / height * 1000) / 1000;
+                window.URL.revokeObjectURL(img.src);
+
+
+                if (ratio >= Math.round(16 / 9 * 1000) / 1000) {
+                    return true
+                }
+                else {
+                    //fail
+                    alert("Ảnh không đúng tỉ lệ 16/9, hình ảnh khi lên bài sẽ bị xấu ^^.");
+                    hideLoading();
+                    return false
+                }
+            };
+        }
+        else { //No file was input or browser doesn't support client side reading
+            //Ajax(_url, _method, data, true)
+            //    .then(function (res) {
+            //        hideLoading();
+            //        if (fn != void 0) fn(res);
+            //    }).catch(function (res) {
+            //        hideLoading();
+            //        //notification("err", "Có lỗi, vui lòng thực hiện lại", 2000);
+            //        alert('Có lỗi, vui lòng thực hiện lại');
+            //        //console.log(actionName, res);
+            //    });
+            return false
+        }
+    }
+
+    //$("#Thumbnail").change(function () {
+    //    document.getElementById("linkImage").setAttribute("class", "hide")
+    //    readURL(this);
+    //});
+
+    function changeFile(obj) {
+        document.getElementById("linkImage").setAttribute("class", "hide")
+        readURL(obj);
     }
 
     var renderProduct = function (CategoryCode = "", CenterID = "") {

@@ -37,6 +37,7 @@
                                                         <th class='text-center'>Tên danh mục</th>
                                                         <th class='text-center'>Url</th>
                                                         <th class='text-center'>Danh mục cha</th>
+                                                        <th class='text-center'>Hiển thị</th>
                                                         @*<th class='text-center'>Ngày bắt đầu</th>
                                                             <th class='text-center'>Ngày hết hạn</th>
                                                             <th class='text-center'>Hạn mức tài khoản</th>
@@ -141,6 +142,13 @@
                             }
                         }
 
+                        var isShow = "";
+                        if (item.IsShow) {
+                            isShow = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','/admin/News/ChangeStatus',LoadData,'false')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle active btn-success'> <div class='handle'></div> </button></td>";
+                        } else {
+                            isShow = "<td class='text-center'><button onclick=\"ExcuteOnlyItems('" + item.ID + "','/admin/News/ChangeStatus',LoadData,'true')\" type='button' data-toggle='button' aria-pressed='true' autocomplete='off' class='btn btn-lg btn-toggle btn-danger'> <div class='handle'></div> </button></td>";
+                        }
+
                         body.append("<tr>" +
                             //"<td class='text-center'><div class='input-group'><input name='cid' type='checkbox' value='" + item.ID +"' onclick=\"setToggle('dataTable')\"/></div></td>"+
                             "<td class='text-center'>" + (i + 1) + "</td>" +
@@ -148,6 +156,7 @@
                             "<td>" + item.Name + "</td>" +
                             "<td>" + item.Code + "</td>" +
                             "<td class='text-center'>" + parentName + "</td>" +
+                            isShow +
                             "<td class='text-center'><button onclick=\"Edit('" + item.ID + "','@Url.Action("getdetails","News")','@Url.Action("create","NewsCategory")',this)\" type='button' class='btn btn-primary' data-placement='top' title='Sửa' data-toggle='modal' data-target='#ModalCenter'> <i class='fas fa-edit'></i> </button>" +
                             "<button onclick=\"var result = confirm('bạn muốn xóa danh mục " + item.Name + " ? '); if(result) ExcuteOnlyItem('" + item.ID + "','@Url.Action("Delete","News")',LoadData); else return;\" type='button' data-placement='top' title='Xóa' class='btn btn-danger'> <i class='fas fa-trash'></i> </button>" +
                             "</td > " +
@@ -204,6 +213,18 @@
             alert(result.Error)
         else
             hideModal();
+    }
+
+    function ExcuteOnlyItems(id, url, fn, check) {
+        var data = new FormData();
+        data.append("ArrID", id);
+        data.append("isShow", check);
+        //data.append("LangID", "1346");
+        Ajax(url, "POST", data, true).then(function (res) {
+            if (fn != void 0) fn(res);
+            //console.log(res);
+            return false;
+        })
     }
 
     $('form').submit(function (e) {

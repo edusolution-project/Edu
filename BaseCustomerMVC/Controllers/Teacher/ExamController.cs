@@ -322,14 +322,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] bool isLast = false)
+        public JsonResult UpdatePoint([FromForm]string ID, [FromForm]string RealAnswerValue, [FromForm] double Point, string basis, [FromForm] String ExamID, [FromForm] bool isLast = false)
         {
             try
             {
                 var oldItem = _examDetailService.GetItemByID(ID);
                 if (isLast)
                 {
-                    var currentExam = _service.GetItemByID(oldItem.ExamID);
+                    ExamEntity currentExam = new ExamEntity();
+                    if (oldItem == null)
+                    {
+                        currentExam = _service.GetItemByID(ExamID);
+                    }
+                    else { 
+                        currentExam = _service.GetItemByID(oldItem.ExamID);
+                    }
                     var point = 0.0;
                     var lesson = _lessonService.GetItemByID(currentExam.LessonID);
                     currentExam.LastPoint = currentExam.Point;
@@ -338,7 +345,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     currentExam = _lessonHelper.CompleteFull(currentExam, lesson, out point);
                     return new JsonResult(new Dictionary<string, object>
                         {
-                            { "Data", _service.GetItemByID(oldItem.ExamID) }
+                            { "Data", currentExam }
                         });
                 }
                 else
@@ -363,9 +370,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         oldItem.MediasAnswers = listMedia;
                     }
 
-                    oldItem.RealAnswerValue = RealAnswerValue;
-                    oldItem.Point = Point;
-                    _examDetailService.CreateOrUpdate(oldItem);
+                    if (oldItem != null)
+                    {
+                        oldItem.RealAnswerValue = RealAnswerValue;
+                        oldItem.Point = Point;
+                        _examDetailService.CreateOrUpdate(oldItem);
+                    }
                 }
                 var response = new Dictionary<string, object>
                 {
@@ -430,7 +440,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var result = new List<StudentLessonResultViewModel>();
             foreach(var item in classSbjExam)
             {
-                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item);
+                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item,true);
             }
 
             return Json(result);

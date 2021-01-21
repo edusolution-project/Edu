@@ -373,3 +373,6 @@ Math/formulas/
 /EasyChatApp/Properties/launchSettings.json
 /EnglishPlatform/Areas/Student/Views/Course/Learningoutcomes_o.cshtml
 /EnglishPlatform/eduso.sqlitedb
+/EmailTemplate/Views/Email/Point.cshtml
+/EnglishPlatform/appsettings.json
+*.cshtml

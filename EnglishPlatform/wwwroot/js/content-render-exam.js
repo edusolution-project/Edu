@@ -456,10 +456,10 @@ var Lesson = (function () {
                 printMode.append(iconPrint).append("In đề");
                 lessonButton.append(printMode);
 
-                var printMode = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xuất file word", "onclick": "export2Word()" });
-                var iconPrint = $("<i>", { "class": "far fa-file-word mr-2" });
-                printMode.append(iconPrint).append("Xuất file word");
-                lessonButton.append(printMode);
+                var export2Word = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Xuất file word", "onclick": "export2Word()" });
+                var iconWord = $("<i>", { "class": "far fa-file-word mr-2" });
+                export2Word.append(iconWord).append("Xuất file word");
+                lessonButton.append(export2Word);
 
                 //headerRow.append(lessonButton);
                 lesson_action_holder.prepend(lessonButton);
@@ -1796,12 +1796,12 @@ var Lesson = (function () {
         $(modalForm).append(selectTemplate);
         $(selectTemplate).append("<option value=''>--- Chọn kiểu nội dung ---</option>");
         //if (type == TEMPLATE_TYPE.LESSON) {
-        $(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
-            .append("<option value='VIDEO'>Video</option>")
-            .append("<option value='AUDIO'>Audio</option>")
-            .append("<option value='IMG'>Hình ảnh</option>")
-            .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
-            .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
+        //$(selectTemplate).append("<option value='TEXT'>Văn bản</option>")
+        //    .append("<option value='VIDEO'>Video</option>")
+        //    .append("<option value='AUDIO'>Audio</option>")
+        //    .append("<option value='IMG'>Hình ảnh</option>")
+        //    .append("<option value='DOC'>File văn bản (PDF, DOC, PPT, XLS)</option>")
+        //    .append("<option value='VOCAB'>Từ vựng tiếng Anh</option>")
         //}
         //else {
         $(selectTemplate).append("<option value='QUIZ1'>QUIZ: Chọn 1 đáp án đúng</option>")

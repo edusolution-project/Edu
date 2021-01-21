@@ -6,6 +6,7 @@
     var skills = ViewBag.Skills as List<BaseCustomerEntity.Database.SkillEntity>;
     var allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterEntity>;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var currentCenter = allcenters.Where(x => x.Code.Equals(center)).FirstOrDefault();
     var courses = ViewBag.Courses as List<BaseCustomerEntity.Database.CourseEntity>;
     var teachers = ViewBag.Teachers as List<BaseCustomerMVC.Models.UserViewModel>;
     var defTeacher = ViewBag.User;
@@ -56,6 +57,7 @@
             <div class="ml-0 ml-md-auto">
                 <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
                 <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1" onclick="window.location.href = '@processUrl("Index", "ExamManage")'">Kho đề</b-button>*@
                 @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
             </div>
         </div>
@@ -230,7 +232,7 @@
                     GradeID: '',
                     SkillID: '',
                     Description: '',
-                    Center: ''
+                    Center: '@currentCenter.ID'
                 },
                 mergeItem: {
                     OriginID: '',
@@ -241,7 +243,7 @@
                     GradeID: '',
                     SkillID: '',
                     Description: '',
-                    Center: ''
+                    Center: '@currentCenter.ID'
                 },
                 subject: '',
                 grade: '',
@@ -705,7 +707,7 @@
                     else return 'Cập nhật nội dung';
                 },
                 removeItem(obj) {
-                    if (confirm('Confirm delete "' + obj.Name  + '"')) {
+                    if (confirm('Bạn có muốn xoá "' + obj.Name  + '"')) {
                     let _that = this
                     let _form = new FormData()
                     _form.append('ArrID', obj.ID)
@@ -805,9 +807,27 @@
                         , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
                     //var table = document.getElementById("ed_table");
                     var table = document.getElementById(tableid);
+                    var cloneTable = table.cloneNode(true);;
+                    cloneTable.children[0].children[0].lastElementChild.remove() //remove tác vụ
+                    for (var i = 0; i < cloneTable.children[1].childElementCount; i++) {
+                        cloneTable.children[1].children[i].lastElementChild.remove()
+                        var a = cloneTable.children[1].children[i].lastElementChild
+                        var stt = $(a).find("input").prop("checked")
+                        if (stt) {
+                            $(a).find("lable").remove()
+                            $(a).find("input").remove()
+                            $(a).text("Đang bật")
+                        }
+                        else {
+                            $(a).find("lable").remove()
+                            $(a).find("input").remove()
+                            $(a).text("Đang tắt")
+                        }
+                        //debugger
+                    }
                     //console.log(tableid);
                     //var table = $('#' + tableid);
-                    var ctx = { worksheet: 'Worksheet', table: table.innerHTML }
+                    var ctx = { worksheet: 'Worksheet', table: cloneTable.innerHTML }
                     //window.location.href = uri + base64(format(template, ctx));
                     var link = document.createElement('a');
                     if (typeof link.download === 'string') {

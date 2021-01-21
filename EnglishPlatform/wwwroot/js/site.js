@@ -199,8 +199,10 @@ function Edit(id, urlGetData, urlPostData, _this) {
 function ExcuteOnlyItem(id, url, fn) {
     var data = new FormData();
     data.append("ArrID", id);
+    showLoading("Sending data ...");
     Ajax(url, "POST", data, true).then(function (res) {
         if (fn != void 0) fn(res);
+        hideLoading()
         console.log(res);
         return false;
     })
