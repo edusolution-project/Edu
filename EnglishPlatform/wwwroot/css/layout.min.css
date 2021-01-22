@@ -395,7 +395,19 @@ table.table-hover tbody tr:hover {
     display: inline-block;
 }
 
-footer {
+/*footer {
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    z-index: 2 !important;
+    filter: opacity(.8);
+    background-color: #004085;
+    color: #fff;
+    font-size: 13px;
+}*/
+
+
+#footer {
     height: 28px;
     line-height: 28px;
     text-align: center;
