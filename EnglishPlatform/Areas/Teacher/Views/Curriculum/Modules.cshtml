@@ -62,14 +62,6 @@
                 @await Html.PartialAsync("_subSidebarTeacher-Curriculum")
             </div>*@
 
-        <div class="time_line">
-            <style>
-                .time_item {
-                    width: 10px;
-                    display: inline-block;
-                }
-            </style>
-        </div>
         <div id="main-route" class="main-route mb-3 mt-2">
             <ul class="route_holder" id="cid_0" cid="0">
                 @*<div class="lane_header">
@@ -814,29 +806,6 @@
                     text: obj.start > 0 ?  "Tuần " +  (parseInt(obj.start / 7) + 1): "---"
             })))
         })
-        //if(routeList != null)
-        //var chaproute = $('<div>', { class: 'lane_holder', id: 'cid_' + chapter.ID, cid: chapter.ID })
-        //    .append($('<div>', { class: 'lane_header' })
-        //        .append($('<div>', { class: 'lane_title', text: chapter.Name }))
-        //        .append($('<div>', { class: 'lane_toggle', onclick: 'toggleLane(this)' })));
-
-        //if (chapter.ConnectID == null) {
-        //    if (chapter.ParentID != null) {
-        //        var laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
-        //        if (laneList.length == 0) {
-        //            $('.lane_holder#cid_' + chapter.ParentID).addClass('hasChild');
-        //            $('.lane_holder#cid_' + chapter.ParentID).append($('<div>', { class: 'lane_list' }));
-        //            laneList = $('.lane_holder#cid_' + chapter.ParentID + ' > .lane_list');
-        //        }
-        //        laneList.append($('<div>', { class: 'lane-item route_lane' }).append(chaproute));
-        //    }
-        //}
-        //else {
-        //    if ($('#cid_' + chapter.ConnectID) != null)
-        //        $('#cid_' + chapter.ConnectID).after(chaproute);
-
-        //    pendingChap.push(chapter);
-        //}
     }
 
     var formatShortDate = function(obj)

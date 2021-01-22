@@ -45,16 +45,24 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài từ luận</a></li>
-                    @*<li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>*@
-                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
-                    @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
+                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
             <div class="c-right">
                 <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
             </div>
         </div>
+
+
+        <div id="main-route" class="main-route mb-3 mt-2">
+            <ul class="route_holder" id="cid_0" cid="0">
+                @*<div class="lane_header">
+                        <div class="lane_title">Begin</div>
+                        <div class="lane_toggle" onclick="toggleLane(this)"></div>
+                    </div>*@
+            </ul>
+        </div>
+
         <div class="d-flex align-items-center" v-if="tab[2]">
             @*<div class="col-md-12 form-row pb-2" v-if="tab[2]">*@
             <div class="box filter-box m-1 col-12 col-md-2">
@@ -89,16 +97,16 @@
                     </div>
                 </div>*@
             <!--<div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
-                <select v-model="searchPoint">
-                    <option value="">Theo phân công giáo viên</option>
-                    <option value="1">Tất cả</option>-->
+            <select v-model="searchPoint">
+                <option value="">Theo phân công giáo viên</option>
+                <option value="1">Tất cả</option>-->
             @*<option value="2">Theo thời gian</option>*@
             <!--</select>
             </div>-->
             <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
-                <div class="form-row">
-                    <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
-                    <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
+            <div class="form-row">
+                <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
+                <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
             @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
             <!--</div>
             </div>
@@ -385,7 +393,9 @@
                 </ul>
             </div>*@
         <div class="box" v-show="tab[5]">
-            <template v-if="lessonToMark.data.length == 0">Không có bài tự luận cần chấm điểm.</template>
+            <template v-if="lessonToMark.data.length == 0">
+                Không có bài tự luận cần chấm điểm.
+            </template>
             <template v-else>
                 <ul class="list ls-practice">
                     <li v-for="(item,k) in lessonToMark.data">
@@ -397,11 +407,11 @@
                         </div>
                         <b-collapse :id="`collapse-${k}`" :accordion="'my-accordion-'+ k" role="tabpanel">
                             @*<chap-content v-for="(chapter,i) in lessonToMark.list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
-                    v-bind:data="chapter"
-                    v-bind:classbj="item.ID"
-                    v-bind:pos="i"
-                    v-bind:owner="item.TeacherID"
-                    v-bind:listchaps="lessonToMark.list_chapters"></chap-content>*@
+                                v-bind:data="chapter"
+                                v-bind:classbj="item.ID"
+                                v-bind:pos="i"
+                                v-bind:owner="item.TeacherID"
+                                v-bind:listchaps="lessonToMark.list_chapters"></chap-content>*@
                             <ul class="list" v-if="item.listLesson.length > 0">
                                 <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
                                     <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
@@ -438,6 +448,110 @@
 </section>
 @section Scripts{
     <style>
+
+        #main-route {
+            overflow: auto;
+        }
+
+        .route_holder {
+            text-align: left;
+            white-space: nowrap;
+            height: 2px;
+            margin: 50px 0 60px;
+        }
+
+        .route_item {
+            display: inline-block;
+            width: 100px;
+            height: 4px;
+            overflow: visible;
+            margin: 0;
+            background: #969696;
+            position: relative;
+            font-weight: bold;
+        }
+
+            .route_item:hover::after {
+                border-color: green;
+            }
+
+            .route_item.start {
+                width: 50px;
+                margin-left: 20px;
+            }
+
+                .route_item.start .route_period {
+                    left: 10px;
+                }
+
+            .route_item::after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                right: auto;
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                -o-transform: translateX(-50%);
+                transform: translateX(-50%);
+                bottom: -12px;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                border: 2px solid #969696;
+                background: #969696 url(/images/calendar.png) no-repeat center center;
+                -webkit-background-size: 14px auto;
+                background-size: 14px auto;
+                -webkit-transition: background-color .3s,border-color .3s;
+                -moz-transition: background-color .3s,border-color .3s;
+                -o-transition: background-color .3s,border-color .3s;
+                transition: background-color .3s,border-color .3s;
+                top: -8px;
+                cursor: pointer;
+            }
+
+            .route_item.start::after {
+                left: 10px;
+            }
+
+            .route_item .route_title {
+                bottom: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -35px;
+                width: 70px;
+                text-align: center;
+                overflow: hidden;
+                max-height: 28px;
+                white-space: break-spaces;
+                line-height: 14px;
+                font-size: 70%;
+                font-weight: bold;
+            }
+
+            .route_item.start .route_title {
+                margin-left: 0;
+                left: -6px;
+                text-align: left;
+            }
+
+            .route_item .route_period {
+                top: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -25px;
+                width: 50px;
+                text-align: center;
+            }
+
+        .wkIdx {
+            user-select: none;
+            font-size: 110%;
+            color: #007bff;
+        }
+
+
+
         .class_row a:nth-child(n+2) {
             display: none;
         }
@@ -870,8 +984,8 @@
                     </template>
                 </div>
                 @*<div class="status" v-if="owner == '@currentuser'">
-                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                </div>*@
+                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                    </div>*@
             </div>
         </li>
     </script>
@@ -2908,6 +3022,36 @@
                 }
             });
         }
+
+
+        var RenderRoute = function (routeList) {
+            //console.log(routeList)
+
+            var period = @((currentClass.EndDate - currentClass.StartDate).TotalDays);
+            var start = new Date(@currentClass.StartDate.Year, @currentClass.StartDate.Month, @currentClass.StartDate.Day);
+
+
+            var wrapper = $('.route_holder');
+            //if (routeList != null && routeList.length > 0) {
+            $(wrapper).append($('<li>', { class: 'route_item start' }).append($('<a>', { class: 'route_title', text: "Bắt đầu" })).append($('<span>', { class: 'route_period', text: "" })))
+            for (var i = 0; i < period; i = i + 7) {
+                $(wrapper).append($('<li>', {
+                    class: 'route_item',
+                })
+                    .append($('<a>', { class: 'route_title', text: "" })).append($('<span>', {
+                        class: 'route_period',
+                        text: "Tuần " + (parseInt(i / 7) + 1)
+                    })))
+            }
+        }
+
+
+        var formatShortDate = function (obj) {
+            return obj.getDate() + "/" + (obj.getMonth() + 1);
+        }
+        $(document).ready(function () {
+            RenderRoute();
+        })
     </script>
 }
 @section Modals{
