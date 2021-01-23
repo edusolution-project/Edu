@@ -409,19 +409,21 @@ namespace BaseCustomerMVC.Controllers.Admin
             foreach (var classSbj in classSbjs)
             {
                 //copy course
+                //if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM) continue;
                 var orgCourse = _courseService.GetItemByID(classSbj.CourseID);
 
                 var newClassSbj = new MappingEntity<ClassSubjectEntity, ClassSubjectEntity>().Clone(classSbj, new ClassSubjectEntity());
                 newClassSbj.ClassID = newClass.ID;
                 newClassSbj.TeacherID = hc.ID;
-                newClassSbj.CourseID = orgCourse.ID;
-                newClassSbj.CourseName = string.IsNullOrEmpty(classSbj.CourseName) ? orgCourse.Name : classSbj.CourseName;
-                newClassSbj.Image = string.IsNullOrEmpty(classSbj.Image) ? orgCourse.Image : classSbj.Image;
+                newClassSbj.CourseID = orgCourse == null ? "" : orgCourse.ID;
+                newClassSbj.CourseName = string.IsNullOrEmpty(classSbj.CourseName) ? (orgCourse == null ? "" : orgCourse.Name) : classSbj.CourseName;
+                newClassSbj.Image = string.IsNullOrEmpty(classSbj.Image) ? (orgCourse == null ? "" : orgCourse.Image) : classSbj.Image;
 
                 if (orgCourse != null)//origin course is exist => copy course to new center & share to ref
                 {
-                    if (!orgCourse.TargetCenters.Contains(center.ID))
-                        _courseService.ShareToCenter(orgCourse.ID, center.ID);
+                    if (orgCourse.TargetCenters != null)
+                        if (!orgCourse.TargetCenters.Contains(center.ID))
+                            _courseService.ShareToCenter(orgCourse.ID, center.ID);
 
                     var copied = _courseService.GetCopiedItemInCenter(orgCourse.ID, center.ID);
                     if (copied != null)
