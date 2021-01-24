@@ -107,6 +107,25 @@
                         left: 10px;
                     }
 
+                .route_item.end {
+                    width: 50px;
+                    text-align: right;
+                    /*margin-right: 20px;*/
+                }
+
+                    .route_item.end .route_title {
+                        text-align: right;
+                    }
+
+                    .route_item.end .route_period {
+                        right: 10px;
+                    }
+
+                    .route_item.end::after {
+                        right: -10px;
+                        left: auto;
+                    }
+
                 .route_item::after {
                     content: "";
                     position: absolute;
@@ -779,8 +798,8 @@
         //console.log(routeList)
 
         var wrapper = $('.route_holder');
+        $(wrapper).append($('<li>', { class: 'route_item start' }).append($('<a>', { class: 'route_title', text: "Bắt đầu" })).append($('<span>', { class: 'route_period', text: "" })))
         if (routeList != null && routeList.length > 0) {
-            $(wrapper).append($('<li>', { class: 'route_item start' }).append($('<a>', { class: 'route_title', text: "Bắt đầu" })).append($('<span>', { class: 'route_period', text: "" })))
             routeList.forEach(function (obj, idx) {
                 if (obj.cid != "") {
                     var root = routeList.find(t => t.id == obj.cid);
@@ -806,6 +825,7 @@
                     text: obj.start > 0 ?  "Tuần " +  (parseInt(obj.start / 7) + 1): "---"
             })))
         })
+        $(wrapper).append($('<li>', { class: 'route_item end' }).append($('<a>', { class: 'route_title', text: "Kết thúc" })).append($('<span>', { class: 'route_period', text: "" })))
     }
 
     var formatShortDate = function(obj)
@@ -938,10 +958,10 @@
                 $('.wkIdx').each(function (idx, obj) {
                     if (wkIdx != $(obj).text()) {
                         wkIdx = $(obj).text();
-                        $(obj).show();
+                        $(obj).css('color','#007bff').css('opacity',1);
                     }
                     else {
-                        $(obj).hide();
+                        $(obj).css('color','#657586').css('opacity',0.5);
                     }
                 });
 
@@ -969,6 +989,9 @@
     }
 
     function compareRouteFinal(obj1, obj2) {
+        console.log(obj1.start + ' - ' + obj2.start);
+        debugger;
+        if (obj1.start == 0) return 1;
         if (obj1.start > obj2.start) return 1;
         if (obj1.start < obj2.start) return -1;
         if (obj1.parent > obj2.parent) return 1;

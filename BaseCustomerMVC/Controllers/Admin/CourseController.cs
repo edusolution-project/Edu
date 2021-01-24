@@ -361,7 +361,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         [HttpPost]
         [Obsolete]
-        public async Task<JsonResult> Clone(string ID, string CenterCode, string ClassNameName)
+        public async Task<JsonResult> Clone(string ID, string CenterCode, string Name)
         {
 
             var orgClass = _service.GetItemByID(ID);
@@ -391,6 +391,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             //Copy Class
             var newClass = new MappingEntity<ClassEntity, ClassEntity>().Clone(orgClass, new ClassEntity());
+            if (!string.IsNullOrEmpty(Name))
+                newClass.Name = Name;
             newClass.Center = center.ID;
             newClass.Created = DateTime.UtcNow;
             newClass.TeacherID = hc.ID;
@@ -408,15 +410,18 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             foreach (var classSbj in classSbjs)
             {
+                //if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+                //    continue;
+
                 //copy course
                 var orgCourse = _courseService.GetItemByID(classSbj.CourseID);
 
                 var newClassSbj = new MappingEntity<ClassSubjectEntity, ClassSubjectEntity>().Clone(classSbj, new ClassSubjectEntity());
                 newClassSbj.ClassID = newClass.ID;
                 newClassSbj.TeacherID = hc.ID;
-                newClassSbj.CourseID = orgCourse.ID;
+                newClassSbj.CourseID = orgCourse?.ID;
                 newClassSbj.CourseName = string.IsNullOrEmpty(classSbj.CourseName) ? orgCourse.Name : classSbj.CourseName;
-                newClassSbj.Image = string.IsNullOrEmpty(classSbj.Image) ? orgCourse.Image : classSbj.Image;
+                newClassSbj.Image = string.IsNullOrEmpty(classSbj.Image) ? orgCourse?.Image : classSbj.Image;
 
                 if (orgCourse != null)//origin course is exist => copy course to new center & share to ref
                 {
@@ -440,6 +445,23 @@ namespace BaseCustomerMVC.Controllers.Admin
                 _classSubjectService.Save(newClassSbj);
 
                 _courseHelper.CloneForClassSubject(newClassSbj);
+            }
+
+
+            var subjects = _classSubjectService.CreateQuery().Find(t => t.ClassID == newClass.ID && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+            if (subjects.Count() == 0)
+            {
+                var newSbj = new ClassSubjectEntity
+                {
+                    ClassID = newClass.ID,
+                    CourseName = "Bài kiểm tra",
+                    Description = "Bài kiểm tra",
+                    StartDate = newClass.StartDate,
+                    EndDate = newClass.EndDate,
+                    TypeClass = CLASSSUBJECT_TYPE.EXAM,
+                    TeacherID = newClass.TeacherID
+                };
+                _classSubjectService.Save(newSbj);
             }
 
             Dictionary<string, object> DataResponse = new Dictionary<string, object>()

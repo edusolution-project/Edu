@@ -433,6 +433,7 @@
                         label: 'Tác vụ'
                     }
                 ],
+                tab: [true, false],
                 subject: '',
                 list_subject: [],
                 list_grades_full: [],
@@ -469,7 +470,8 @@
                     StartDate: '',
                     EndDate: '',
                     Description: '',
-                    ClassMechanism:'@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN',//mặc định là lớp mở
+                    ClassMechanism: '@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN',//mặc định là lớp mở
+                    Teachers: [],
                     thumbnail: {
                         src: '',
                         file: null,
@@ -775,6 +777,7 @@
                                 height: 90,
                                 width: 160
                             },
+                            Teachers:[],
                             subject: [
                                 {
                                     ID: '',
@@ -800,6 +803,9 @@
                             height: 90,
                             width: 160
                         }
+                        _that.class_info.Teachers = obj.Members.filter(t => t.Type == 1);
+                        console.log(obj.Members);
+                        console.log(_that.class_info.Teachers)
                         _that.class_info.StartDate = this.formatDate(obj.StartDate);
                         _that.class_info.EndDate = this.formatDate(obj.EndDate);
                         _that.class_info.IsOwner = (obj.TeacherID == '@userid');
@@ -1301,6 +1307,18 @@
                 downloadTemplate() {
                     window.open("@processUrl("ExportTemplate", "StudentManage")");
                 },
+                tabChange(a = 0) {
+                    // có thể load data theo từng tab để tối ưu hiệu năng
+                    // this.getData()
+                    let _that = this
+                    this.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    //console.log(_that.tab);
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    this.$forceUpdate()
+                },
                 //support
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
@@ -1319,6 +1337,11 @@
                 matchTeacher(obj, item) {
                     return (item.SubjectID == obj.SubjectID)
                         && (item.IsActive || item.ID == obj.TeacherID)
+                },
+                matchCommonTeacher(obj, item) {
+                    //console.log(obj);
+                    console.log(item);
+                    return (item.ID == obj.TeacherID)
                 },
                 matchCourse(obj, item) {
                     //console.log(this.courseSource)
@@ -1418,109 +1441,157 @@
                 </b-col>
             </div>
             <div class="col-md-8">
-                <ul class="list list-subject" v-for="(sub,k) in class_info.subject" :class="sub.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM' ? 'd-none':''">
-                    <li class="flex" :id="sub.UID">
-                        <div class="width-100 mr-2">
-                            <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn chương trình</option>
-                                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn cấp độ</option>
-                                <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        @*<div class="width-100 mr-2 d-none">
-                                <label for="">Môn học</label>
-                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                    <option value="">Chọn môn học</option>
-                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                                </select>
-                            </div>*@
-                        <div class="width-100 mr-2">
-                            <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn bài giảng</option>
-                                <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Loại học liệu</label>
-                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                <option value="">Chọn giáo viên</option>
-                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
-                            </select>
-                        </div>
+                <div class="flex j-between border-b mb-2">
+                    <div class="tab bg-none">
+                        <ul class="flex flex-row">
+                            <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu" v-on:click="tabChange()">Học liệu</a></li>
+                            <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Giáo viên" v-on:click="tabChange(1)">Giáo viên</a></li>
+                        </ul>
+                    </div>
+                    <div class="c-right">
+                        <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
+                    </div>
+                </div>
 
-                        <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
-                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
-                            <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
-                        </div>
-                    </li>
-                    <li class="flex" :id="sub.UID" v-else>
-                        <div class="width-100 mr-2">
-                            <label for="">Chương trình</label>
-                            <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
-                                <option value="">Chọn chương trình</option>
-                                <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Cấp độ</label>
-                            <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock">
-                                <option value="">Chọn cấp độ</option>
-                                <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        @*<div class="width-100 mr-2">
-                                <label for="">Môn học</label>
-                                <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
-                                    <option value="">Chọn môn học</option>
-                                    <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                <div class="courseTab" v-if="tab[0]">
+                    <ul class="list list-subject mb-1">
+                        <li class="flex pb-0">
+                            <div class="width-100 mr-2">
+                                <label for="">Chương trình</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Cấp độ</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Bài giảng</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Loại học liệu</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Giáo viên</label>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="list list-subject mb-1 pt-1" v-for="(sub,k) in class_info.subject" :class="sub.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM' ? 'd-none':''">
+                        <li class="flex pb-0" :id="sub.UID">
+                            <div class="width-100 mr-2">
+                                @*<label for="">Chương trình</label>*@
+                                <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn chương trình</option>
+                                    <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
                                 </select>
-                            </div>*@
-                        <div class="width-100 mr-2">
-                            <label for="">Bài giảng</label>
-                            <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
-                                <option value="">Chọn bài giảng</option>
-                                <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Loại học liệu</label>
-                            <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
-                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
-                                <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
-                            </select>
-                        </div>
-                        <div class="width-100 mr-2">
-                            <label for="">Giáo viên</label>
-                            <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
-                                <option value="">Chọn giáo viên</option>
-                                <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
-                            </select>
-                        </div>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Cấp độ</label>*@
+                                <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn cấp độ</option>
+                                    <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            @*<div class="width-100 mr-2 d-none">
+                                    <label for="">Môn học</label>
+                                    <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                        <option value="">Chọn môn học</option>
+                                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                    </select>
+                                </div>*@
+                            <div class="width-100 mr-2">
+                                @*<label for="">Bài giảng</label>*@
+                                <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn bài giảng</option>
+                                    <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Loại học liệu</label>*@
+                                <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
+                                </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Giáo viên</label>*@
+                                <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option value="">Chọn giáo viên</option>
+                                    <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
+                                </select>
+                            </div>
 
-                        <div class="btn-group mt-4">
-                            <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
-                            <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
-                        </div>
-                    </li>
-                </ul>
-                <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>
+                            <div class="btn-group">
+                                <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
+                                <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
+                                <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                                <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
+                            </div>
+                        </li>
+                        <li class="flex pb-0" :id="sub.UID" v-else>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Chương trình</label>*@
+                                <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
+                                    <option value="">Chọn chương trình</option>
+                                    <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Cấp độ</label>*@
+                                <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock">
+                                    <option value="">Chọn cấp độ</option>
+                                    <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            @*<div class="width-100 mr-2">
+                                    <label for="">Môn học</label>
+                                    <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
+                                        <option value="">Chọn môn học</option>
+                                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+                                    </select>
+                                </div>*@
+                            <div class="width-100 mr-2">
+                                @*<label for="">Bài giảng</label>*@
+                                <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
+                                    <option value="">Chọn bài giảng</option>
+                                    <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
+                                </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Loại học liệu</label>*@
+                                <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
+                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
+                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
+                                </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                @*<label for="">Giáo viên</label>*@
+                                <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
+                                    <option value="">Chọn giáo viên</option>
+                                    <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
+                                </select>
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
+                                <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>
+                </div>
+                <div class="courseTab" v-if="tab[1]">
+                    <ul class="list list-subject pt-1 mb-1" v-for="(sub,k) in class_info.Teachers">
+                        <li class="flex pb-0" :id="sub.UID">
+                            <div class="width-100 mr-2 mb-0">
+                                <select v-model="sub.TeacherID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                    <option v-for="(item,k) in teacherSource" :value="item.ID">{{item.FullName}}</option>
+                                </select>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa giáo viên"><i class="ti-trash"></i></button>
+                            </div>
+                        </li>
+                    </ul>
+                    <a href="javascript:;" title="Thêm viên" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i>Thêm giáo viên</a>
+                </div>
             </div>
         </div>
 
@@ -1538,7 +1609,6 @@
     <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Cập nhật danh sách học viên" style="width:800px">
         <div class="row">
             <div class="col-md-12">
-
                 <div class="flex border-b padding-b25 justify-content-between">
                     <div class="flex width-100">
                         <label class="label">Lớp: {{class_info.Name}} </label>

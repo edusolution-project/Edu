@@ -1204,12 +1204,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return Json(new { Data = std });
         }
 
-        public JsonResult GetThisWeekLesson(DateTime today, string Center)
+        public JsonResult GetThisWeekLesson(DateTime today, string Center, string ClassID = "", bool seekStart = true)
         {
             today = today.ToUniversalTime();
             if (today < new DateTime(1900, 1, 1))
                 return Json(new { });
-            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+            var startWeek = today;
+            if (seekStart)
+                startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -1223,36 +1225,58 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             var classFilter = new List<FilterDefinition<ClassEntity>>();
-            if (!string.IsNullOrEmpty(Center))
+
+            var data = new List<LessonScheduleEntity>();
+
+            var classes = new List<ClassEntity>();
+            var classSbjs = new List<ClassSubjectEntity>();
+
+            if (string.IsNullOrEmpty(ClassID))
             {
-                var @center = _centerService.GetItemByCode(Center);
-                if (@center == null) return new JsonResult(new Dictionary<string, object>
+                if (!string.IsNullOrEmpty(Center))
+                {
+                    var @center = _centerService.GetItemByCode(Center);
+                    if (@center == null) return new JsonResult(new Dictionary<string, object>
                 {
                     { "Error", "Cơ sở không đúng"}
                 });
-                classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == @center.ID));
+                    classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == @center.ID));
+                }
+
+                var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
+
+                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
+
+                //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+
+                data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                classes = _service.GetItemsByIDs(classIds).ToList();
+                classSbjs = _classSubjectService.GetByClassIds(classIds);
             }
-
-            var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
-
-            var filter = new List<FilterDefinition<LessonScheduleEntity>>();
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-            filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
-
-            //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
-
-            var data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+            else
+            {
+                var currentClass = _service.GetItemByID(ClassID);
+                if (currentClass == null) return Json(new { });
+                var filter = new List<FilterDefinition<LessonScheduleEntity>>();
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                filter.Add(Builders<LessonScheduleEntity>.Filter.Where(t => t.ClassID == ClassID));
+                data = _lessonScheduleService.Collection.Find(Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
+                classes.Add(currentClass);
+                classSbjs = _classSubjectService.GetByClassID(ClassID);
+            }
 
             //var data = _classSubjectService.Collection.Find(t => csIds.Contains(t.ID));
             var std = (from o in data.ToList()
                        let _lesson = _lessonService.Collection.Find(t => t.ID == o.LessonID).SingleOrDefault()
                        where _lesson != null
-                       let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                       let _class = classes.Find(t => t.ID == o.ClassID)
                        where _class != null
-                       let _sbj = _classSubjectService.GetItemByID(o.ClassSubjectID)
+                       let _sbj = classSbjs.Find(t => t.ID == o.ClassSubjectID)
                        where _sbj != null
-                       let skill = _skillService.GetItemByID(_sbj.SkillID)
-                       let studentCount = _studentService.CountByClass(_class.ID)
+                       //let skill = _skillService.GetItemByID(_sbj.SkillID)
+                       //let studentCount = _studentService.CountByClass(_class.ID)
                        select new
                        {
                            id = o.ID,
@@ -1263,8 +1287,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            lessonID = _lesson.ID,
                            startDate = o.StartDate,
                            endDate = o.EndDate,
-                           students = studentCount,
-                           skill = skill,
+                           //students = studentCount,
+                           //skill = skill,
                            bookName = _sbj.CourseName
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
@@ -1417,7 +1441,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "EndDate", o.EndDate },
                                  { "Order", o.Order },
                                  { "Skills", o.Skills },
-                                 { "Members", o.Members },
+                                 { "Members", o.Members.Where(t=> !string.IsNullOrEmpty(t.TeacherID)).ToList() },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
                                  { "Teachers", teachers },

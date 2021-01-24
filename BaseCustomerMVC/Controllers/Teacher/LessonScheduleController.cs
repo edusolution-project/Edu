@@ -635,6 +635,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+
         private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
         {
             var lessonids = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
