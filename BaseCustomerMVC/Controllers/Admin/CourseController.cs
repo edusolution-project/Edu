@@ -414,6 +414,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 //    continue;
 
                 //copy course
+                //if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM) continue;
                 var orgCourse = _courseService.GetItemByID(classSbj.CourseID);
 
                 var newClassSbj = new MappingEntity<ClassSubjectEntity, ClassSubjectEntity>().Clone(classSbj, new ClassSubjectEntity());
@@ -425,8 +426,9 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if (orgCourse != null)//origin course is exist => copy course to new center & share to ref
                 {
-                    if (!orgCourse.TargetCenters.Contains(center.ID))
-                        _courseService.ShareToCenter(orgCourse.ID, center.ID);
+                    if (orgCourse.TargetCenters != null)
+                        if (!orgCourse.TargetCenters.Contains(center.ID))
+                            _courseService.ShareToCenter(orgCourse.ID, center.ID);
 
                     var copied = _courseService.GetCopiedItemInCenter(orgCourse.ID, center.ID);
                     if (copied != null)
