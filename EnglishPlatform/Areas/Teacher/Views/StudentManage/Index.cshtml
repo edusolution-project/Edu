@@ -382,11 +382,15 @@
                     }, 500)
                 },
                 "createStudent.listClass": function () {
-                    this.createStudent.listNameClass = ''
-                    for (i = 0; i < this.createStudent.listClass.length; i++) {
-                        for (j = 0; j < this.list_active_class.length; j++) {
-                            if (this.list_active_class[j].ID == this.createStudent.listClass[i]) {
-                                this.createStudent.listNameClass += this.list_active_class[j].Name + '; '
+                    var data = this.createStudent.listClass
+                    //debugger
+                    if (data != null) {
+                        this.createStudent.listNameClass = ''
+                        for (i = 0; i < this.createStudent.listClass.length; i++) {
+                            for (j = 0; j < data.length; j++) {
+                                if (this.list_active_class[j].ID == this.createStudent.listClass[i]) {
+                                    this.createStudent.listNameClass += this.list_active_class[j].Name + '; '
+                                }
                             }
                         }
                     }
@@ -478,7 +482,10 @@
                         this.createStudent.nameStudent = data.FullName
                         this.createStudent.phoneStudent = data.Phone
                         this.createStudent.birthdayStudent = this.formatDate(data.DateBorn)
-                        this.createStudent.listClass = data.JoinedClasses
+                        if (data.JoinedClasses != null)
+                            this.createStudent.listClass = data.JoinedClasses
+                        else 
+                            this.createStudent.listClass = []
                     }
                     else {
                         this.createStudent.idStudent = ''
@@ -667,11 +674,14 @@
                     _form.append('Phone', _that.createStudent.phoneStudent)
                     _form.append('DateBorn', this.formatDate(_that.createStudent.birthdayStudent))
                     var classes = _that.createStudent.listClass;
-                    if (classes != null) {
+                    //debugger
+                    if (classes.length > 0) {
                         var joinedClasses = classes.toString().split(',');
                         if (joinedClasses.length > 0)
                             joinedClasses.forEach(function (item, pos) {
-                                if (item != "") { _form.append('JoinedClasses', item) }
+                                if (item != "") {
+                                    _form.append('JoinedClasses', item)
+                                }
                             });
                     }
                     //_form.append('JoinedClasses', _that.createStudent.listClass)

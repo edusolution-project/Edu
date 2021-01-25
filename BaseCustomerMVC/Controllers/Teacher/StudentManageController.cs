@@ -213,6 +213,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var listClass = student.JoinedClasses;
                         student.JoinedClasses = listClass.ToList();
                     }
+                    else student.JoinedClasses = new List<string>();
                     _studentService.CreateQuery().InsertOne(student);
                     Status = true;
                     Dictionary<string, object> response = new Dictionary<string, object>()
@@ -295,14 +296,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
 
-                foreach (var newClass in student.JoinedClasses)
+                if (student.JoinedClasses != null)
                 {
-                    if (!string.IsNullOrEmpty(newClass))
-                        if (oldStudent.JoinedClasses.IndexOf(newClass) < 0)
-                        {
-                            oldStudent.JoinedClasses.Add(newClass);
-                            newClasses.Add(newClass);
-                        }
+                    foreach (var newClass in student.JoinedClasses)
+                    {
+                        if (!string.IsNullOrEmpty(newClass))
+                            if (oldStudent.JoinedClasses.IndexOf(newClass) < 0)
+                            {
+                                oldStudent.JoinedClasses.Add(newClass);
+                                newClasses.Add(newClass);
+                            }
+                    }
                 }
 
                 var infochange = false;
@@ -453,95 +457,102 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public JsonResult GetList(DefaultModel model, string basis, string SubjectID, string ClassID, string TeacherID, string SkillID, string GradeID, string Sort = "ASC")
         {
-            var center = _centerService.GetItemByCode(basis);
-            if (center == null) return new JsonResult(new Dictionary<string, object>
+            try
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null) return new JsonResult(new Dictionary<string, object>
                     {
                         { "Error", "Cơ sở không đúng"}
                     });
 
-            var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
-            if (!HasRole(User.Claims.GetClaimByType("UserID").Value, basis, "head-teacher"))
-            {
-                TeacherID = User.Claims.GetClaimByType("UserID").Value;
-            }
-            var classids = new List<string>();
-            var checkClass = false;
-            if (!string.IsNullOrEmpty(ClassID))
-            {
-                checkClass = true;
-                classids.Add(ClassID);
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(SubjectID))
-                { filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID)); checkClass = true; }
-
-                if (!string.IsNullOrEmpty(TeacherID))
+                var filterCs = new List<FilterDefinition<ClassSubjectEntity>>();
+                if (!HasRole(User.Claims.GetClaimByType("UserID").Value, basis, "head-teacher"))
                 {
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
-                    checkClass = true;
+                    TeacherID = User.Claims.GetClaimByType("UserID").Value;
                 }
-                if (!string.IsNullOrEmpty(SkillID))
+                var classids = new List<string>();
+                var checkClass = false;
+                if (!string.IsNullOrEmpty(ClassID))
                 {
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
                     checkClass = true;
+                    classids.Add(ClassID);
                 }
-                if (!string.IsNullOrEmpty(GradeID))
+                else
                 {
+                    if (!string.IsNullOrEmpty(SubjectID))
+                    { filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID)); checkClass = true; }
 
-                    filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
-                    checkClass = true;
+                    if (!string.IsNullOrEmpty(TeacherID))
+                    {
+                        filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.TeacherID == TeacherID));
+                        checkClass = true;
+                    }
+                    if (!string.IsNullOrEmpty(SkillID))
+                    {
+                        filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SkillID == SkillID));
+                        checkClass = true;
+                    }
+                    if (!string.IsNullOrEmpty(GradeID))
+                    {
+
+                        filterCs.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.GradeID == GradeID));
+                        checkClass = true;
+                    }
+                    classids =
+                        filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
+                    : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
                 }
-                classids =
-                    filterCs.Count > 0 ? _classSubjectService.Collection.Distinct(t => t.ClassID, Builders<ClassSubjectEntity>.Filter.And(filterCs)).ToList()
-                : _classService.Collection.Find(t => true).Project(t => t.ID).ToList();
-            }
 
-            if (checkClass && classids == null || classids.Count() == 0)
-                return new JsonResult(new Dictionary<string, object>
+                if (checkClass && classids == null || classids.Count() == 0)
+                    return new JsonResult(new Dictionary<string, object>
                 {
                     { "Model", model }
                 });
 
-            var stfilter = new List<FilterDefinition<StudentEntity>>();
+                var stfilter = new List<FilterDefinition<StudentEntity>>();
 
 
-            stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
+                stfilter.Add(Builders<StudentEntity>.Filter.Where(o => o.Centers.Contains(@center.ID)));
 
-            if (checkClass)
-                stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
-            if (!string.IsNullOrEmpty(model.SearchText))
+                if (checkClass)
+                    stfilter.Add(Builders<StudentEntity>.Filter.AnyIn(t => t.JoinedClasses, classids));
+                if (!string.IsNullOrEmpty(model.SearchText))
 
-                stfilter.Add(Builders<StudentEntity>.Filter.And(
-                        Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
-            var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter));
+                    stfilter.Add(Builders<StudentEntity>.Filter.And(
+                            Builders<StudentEntity>.Filter.Text("\"" + model.SearchText + "\"")));
+                var list = _studentService.Collection.Find(Builders<StudentEntity>.Filter.And(stfilter));
 
-            if (Sort == "ASC")
-                list = list.SortBy(t => t.ID);
-            else
-                list = list.SortByDescending(t => t.ID);
-            //var list = _studentService.GetAll().SortByDescending(t => t.ID);
+                if (Sort == "ASC")
+                    list = list.SortBy(t => t.ID);
+                else
+                    list = list.SortByDescending(t => t.ID);
+                //var list = _studentService.GetAll().SortByDescending(t => t.ID);
 
-            model.TotalRecord = list.CountDocuments();
+                model.TotalRecord = list.CountDocuments();
 
-            var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
+                var _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
 
-            var retStudents = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList()
-                .Select(t => _mapping.AutoOrtherType(t, new ClassStudentViewModel()
-                {
-                    ClassID = ClassID,
-                    ClassName = string.IsNullOrEmpty(ClassID) ?
-                       (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID, center.ID))) :
-                        _classService.GetItemByID(ClassID).Name,
-                    LastJoinDate = (_learningHistoryService.GetStudentLastLearn(t.ID) ?? new LearningHistoryEntity()).Time
-                }));
+                var retStudents = list.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).ToList()
+                    .Select(t => _mapping.AutoOrtherType(t, new ClassStudentViewModel()
+                    {
+                        ClassID = ClassID,
+                        ClassName = string.IsNullOrEmpty(ClassID) ?
+                           (t.JoinedClasses == null ? "" : string.Join("; ", _classService.GetMultipleClassName(t.JoinedClasses, t.ID, center.ID))) :
+                            _classService.GetItemByID(ClassID).Name,
+                        LastJoinDate = (_learningHistoryService.GetStudentLastLearn(t.ID) ?? new LearningHistoryEntity()).Time
+                    }));
 
-            var response = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
+                    {
+                        { "Data", retStudents.ToList() },
+                        { "Model", model },
+                    };
+                return new JsonResult(response);
+            }
+            catch(Exception ex)
             {
-                { "Data", retStudents.ToList() },
-                { "Model", model },
-            };
-            return new JsonResult(response);
+                return Json(ex.Message);
+            }
         }
 
         public JsonResult Search(string term, string Center)
