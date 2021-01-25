@@ -1028,14 +1028,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     _chapterService.Save(item);
 
-                    ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
+                    item.Order = ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
 
                     //needUpdate = true;
                 }
                 else
                 {
                     item.Updated = DateTime.UtcNow;
-                    var newOrder = item.Order - 1;
+                    item.Order = item.Order - 1;
+                    var newOrder = item.Order;
+
                     var oldParent = data.ParentID;
 
                     data.Name = item.Name;
@@ -1075,10 +1077,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _ = _courseHelper.IncreaseCourseChapterCounter(item.ParentID, data.TotalLessons, data.TotalExams, data.TotalPractices);
                         }
                         //move chapter to bottom of new parent chap
-                        ChangeChapterPosition(data, int.MaxValue);
+                        item.Order = ChangeChapterPosition(data, int.MaxValue);
                     }
                     else if (data.Order != newOrder)
-                        ChangeChapterPosition(data, newOrder);
+                        item.Order = ChangeChapterPosition(data, newOrder);
                 }
                 //update route
                 if (needUpdate)
@@ -1674,7 +1676,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.Start = 0;
                         item.Period = 0;
                     }
-                    
+
 
                     //if (item.Start > 0)
                     //    needUpdate = true;
