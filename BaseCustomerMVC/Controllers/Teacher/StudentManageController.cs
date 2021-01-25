@@ -266,14 +266,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    Dictionary<string, object> response = new Dictionary<string, object>()
+                    //
+                    var oldStudent = _studentService.GetStudentByEmail(student.Email);
+                    if (!oldStudent.Centers.Contains(center.ID))
                     {
-                        {"Data",null },
-                        {"Error",student },
-                        {"Msg","Email đã được sử dụng" },
-                        {"Status",Status }
-                    };
-                    return new JsonResult(response);
+                        oldStudent.Centers.Add(center.ID);
+                        _studentService.CreateQuery().ReplaceOne(Builders<StudentEntity>.Filter.Where(x => x.ID == oldStudent.ID), oldStudent);
+                        Dictionary<string, object> response = new Dictionary<string, object>()
+                        {
+                            {"Data",student },
+                            {"Error",null },
+                            {"Msg","Thêm thành công" },
+                            {"Status",Status }
+                        };
+                        return new JsonResult(response);
+                    }
+                    else
+                    {
+
+                        Dictionary<string, object> response = new Dictionary<string, object>()
+                        {
+                            {"Data",null },
+                            {"Error",student },
+                            {"Msg","Email đã được sử dụng" },
+                            {"Status",Status }
+                        };
+                        return new JsonResult(response);
+                    }
+                    
                 }
             }
             else
