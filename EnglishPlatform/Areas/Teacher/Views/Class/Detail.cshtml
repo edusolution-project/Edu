@@ -864,7 +864,7 @@
                                 <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
                             </div>
 
-                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="owner == '@currentuser'">
+                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="true || owner == '@currentuser'">
                                 <i class="fas fa-ellipsis-h indicator"></i>
                                 <template v-if="type != 'exam'">
                                     <div class="act_ic">

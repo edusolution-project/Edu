@@ -822,8 +822,8 @@
                             width: 160
                         }
                         _that.class_info.Teachers = obj.Members.filter(t => t.Type == 1);
-                        console.log(obj.Members);
-                        console.log(_that.class_info.Teachers)
+                        //console.log(obj.Members);
+                        //console.log(_that.class_info.Teachers)
                         _that.class_info.StartDate = this.formatDate(obj.StartDate);
                         _that.class_info.EndDate = this.formatDate(obj.EndDate);
                         _that.class_info.IsOwner = (obj.TeacherID == '@userid');
@@ -1376,6 +1376,16 @@
                         //&& item.SkillID == obj.SkillID
                         && (item.IsActive || (item.ID == obj.CourseID))
                 },
+                uniqueList(listtc) {
+                    //console.log(listtc);
+                    var ret = [];
+                    listtc.forEach(function (item, index) {
+                        if (ret.findIndex(t => t.ID == item.ID) < 0)
+                            ret.push(item);
+                    });
+                    //console.log(ret);
+                    return ret;
+                },
                 domDecoder(str) {
                     if (str == null)
                         return "";
@@ -1618,11 +1628,11 @@
                         <li class="flex pb-0" :id="sub.UID">
                             <div class="width-100 mr-2 mb-0">
                                 <select v-model="sub.TeacherID" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
-                                    <option v-for="(item,k) in teacherSource" :value="item.ID">{{item.FullName}}</option>
+                                    <option v-for="(item,k) in uniqueList(teacherSource)" :value="item.ID">{{item.FullName}}</option>
                                 </select>
                             </div>
                             <div class="btn-group">
-                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="!(isHeadTeacher || class_info.IsOwner)" title="Xóa giáo viên"><i class="ti-trash"></i></button>
+                                <button class="btn-act" v-on:click="removeTeacher(k)" :disabled="!(isHeadTeacher || class_info.IsOwner)" title="Xóa giáo viên"><i class="ti-trash"></i></button>
                             </div>
                         </li>
                     </ul>
