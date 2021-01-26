@@ -383,7 +383,7 @@
         }));
         rightPart.append($("<i>", { "class": "fas fa-copy", "data-toggle": "modal", "data-target": "#copyLessonModel", "data-placement": "top", "title": "Nhân bản", "onclick": "showCloneLesson('" + item.ID + "',this);return false" }));
         rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
-        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item + "'); return false;" }));
+        rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         rowData.append(leftPart);
         rowData.append(rightPart);
 
@@ -830,7 +830,8 @@
     }
 
     function DeleteLesson(obj) {
-        if (obj.HasPoint) {
+        debugger
+        @*if (obj.HasPoint) {
             Swal.fire({
                 title: 'Xác nhận xóa?',
                 text: "Bài kiểm tra đã có điểm,xoá sẽ mất hết điểm và bạn sẽ không thể khôi phục lại dữ liệu này!",
@@ -847,7 +848,7 @@
                 }
             })
         }
-        else {
+        else {*@
             Swal.fire({
                 title: 'Xác nhận xóa?',
                 text: "Bạn sẽ không thể khôi phục lại dữ liệu này!",
@@ -860,10 +861,10 @@
                 confirmButtonText: 'Đồng ý xóa!'
             }).then((result) => {
                 if (result.value) {
-                    ExcuteOnlyItem(obj.ID, '@processUrl("RemoveLesson", "Class")', DeleteLessonCallback);
+                    ExcuteOnlyItem(obj, '@processUrl("RemoveLesson", "Class")', DeleteLessonCallback);
                 }
             })
-        }
+        //}
     }
 
     function CloneLesson(ID) {
