@@ -489,6 +489,7 @@
                             TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                         }
                     ],
+                    Level: 0,
                     IsOwner: false
                 },
                 curr: 0,
@@ -639,6 +640,7 @@
                     if(_that.class_info.ID != null)
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', _that.class_info.Name)
+                    _form.append('Level', _that.class_info.Level)
                     _form.append('StartDate', _startdate)
                     _form.append('EndDate', _enddate)
                     _form.append('CenterCode', '@center')
@@ -672,14 +674,17 @@
                         })
                     }
 
+                    var addTeacher = []
                     if (_that.class_info.Teachers != null) {
-                        var addTeacher = []
                         idx = 0;
+
                         _that.class_info.Teachers.forEach(function (item, k) {
-                            if(item != null && item.TeacherID != '')
-                            if (addTeacher.findIndex(t => t == item.ID) < 0) {
-                                addTeacher.push(item.ID);
-                                _form.append('Teachers[' + idx + ']', item.ID)
+
+                            if (item != null && item.TeacherID != '') {
+                                if (addTeacher.findIndex(t => t == item.TeacherID) < 0) {
+                                    addTeacher.push(item.TeacherID);
+                                    _form.append('Teachers[' + idx++ + ']', item.TeacherID)
+                                }
                             }
                         })
                     }
@@ -1424,9 +1429,18 @@
     <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%">
         <div class="row">
             <div class="col-md-4">
-                <b-col class="form-group">
-                    <label class="label">Tên lớp học*</label>
-                    <input type="text" v-model="class_info.Name" class="form-control" ref="addName" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                <b-col class="form-group row col pr-0">
+                    <b-col class="col-sm-6">
+                        <label class="label">Tên lớp học*</label>
+                        <input type="text" v-model="class_info.Name" class="form-control" ref="addName" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                    </b-col>
+                    <b-col class="col-sm-6">
+                        <label class="label">Khối</label>
+                        <select v-model="class_info.Level" class="form-control pr-0" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                            <option value="0">-- Không xếp --</option>
+                            <option v-for="i in 12" :value="i">Khối {{i}}</option>
+                        </select>
+                    </b-col>
                 </b-col>
                 <b-col class="form-group row col pr-0">
                     <b-col class="col-sm-6">
@@ -1499,10 +1513,10 @@
                         <li class="flex pb-0" :id="sub.UID">
                             <div class="width-100 mr-2">
                                 @*<label for="">Chương trình</label>*@
-                                    <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" >
-                                        <option value="">Chọn chương trình</option>
-                                        <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
-                                    </select>
+                                <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)">
+                                    <option value="">Chọn chương trình</option>
+                                    <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
+                                </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Cấp độ</label>*@
@@ -1520,21 +1534,21 @@
                                 </div>*@
                             <div class="width-100 mr-2">
                                 @*<label for="">Bài giảng</label>*@
-                                <select v-model="sub.CourseID" class="form-control" >
+                                <select v-model="sub.CourseID" class="form-control">
                                     <option value="">Chọn bài giảng</option>
                                     <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                                 </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Loại học liệu</label>*@
-                                <select v-model="sub.TypeClass" class="form-control" >
+                                <select v-model="sub.TypeClass" class="form-control">
                                     <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
                                     <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                                 </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Giáo viên</label>*@
-                                <select v-model="sub.TeacherID" class="form-control" >
+                                <select v-model="sub.TeacherID" class="form-control">
                                     <option value="">Chọn giáo viên</option>
                                     <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                                 </select>

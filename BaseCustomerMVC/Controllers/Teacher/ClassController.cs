@@ -1454,7 +1454,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload)
+        public JsonResult Create(ClassEntity item, string CenterCode, List<ClassSubjectEntity> classSubjects, IFormFile fileUpload, List<string> Teachers = null)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
 
@@ -1540,7 +1540,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     classSubjects.Add(newSbj);
                 }
 
-
                 //Create class subjects
                 if (classSubjects != null && classSubjects.Count > 0)
                 {
@@ -1584,6 +1583,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {
                                 _ = _mailHelper.SendTeacherJoinClassNotify(tc, item, center.Name);
                             });
+                    if (Teachers != null && Teachers.Count > 0)
+                    {
+                        foreach (var tc in Teachers)
+                        {
+                            if (item.Members.Any(t => t.TeacherID == tc && t.Type == ClassMemberType.TEACHER))
+                                continue;
+                            var newtc = _teacherService.GetItemByID(tc);
+                            if (tc != null)
+                                item.Members.Add(new ClassMemberEntity() { Name = newtc.FullName, TeacherID = newtc.ID, Type = ClassMemberType.TEACHER });
+                        }
+                    }
+
 
                     _service.Save(item);
                 }
@@ -1631,6 +1642,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 oldData.TotalExams = 0;
                 oldData.TotalPractices = 0;
                 oldData.ClassMechanism = item.ClassMechanism;
+                oldData.Level = item.Level;
 
                 var oldSubjects = _classSubjectService.GetByClassID(item.ID);
 
@@ -1674,6 +1686,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     oSbj.StartDate = item.StartDate.ToUniversalTime();
                                     oSbj.EndDate = item.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
+
+
+
                                     var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
                                     if (teacher == null) continue;
 
@@ -1763,6 +1778,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var pathImage = _fileProcess.SaveMediaAsync(fileUpload, "", "CLASSIMG", center.Code).Result;
                     oldData.Image = pathImage;
+                }
+
+
+                if (Teachers != null && Teachers.Count > 0)
+                {
+                    foreach (var tc in Teachers)
+                    {
+                        if (oldData.Members.Any(t => t.TeacherID == tc && t.Type == ClassMemberType.TEACHER))
+                            continue;
+                        var newtc = _teacherService.GetItemByID(tc);
+                        if (tc != null)
+                            oldData.Members.Add(new ClassMemberEntity() { Name = newtc.FullName, TeacherID = newtc.ID, Type = ClassMemberType.TEACHER });
+                    }
                 }
 
                 //update data

@@ -815,8 +815,22 @@
                 };
             })
         }
-        var begin = new Date(new Date().getYear(), 0, 1);
-        listRoute.sort((a,b) => compareRouteFinal(a,b))
+        //var begin = new Date(new Date().getYear(), 0, 1);
+
+         //listRoute.sort((a, b) => compareRouteFinal(a, b))
+
+        for (var i = 0; i < listRoute.length - 1; i++) {
+            for (var j = i; j < listRoute.length; j++) {
+                if (((listRoute[i].start == 0) && (listRoute[j].start > 0)) || ((listRoute[i].start > listRoute[j].start) && (listRoute[j].start > 0)))
+                {
+                    var a = listRoute[i];
+                    listRoute[i] = listRoute[j];
+                    listRoute[j] = a;
+                }
+            }
+        }
+
+
         listRoute.forEach(function (obj, idx) {
             $(wrapper).append($('<li>', {
                 class: 'route_item',
@@ -872,8 +886,6 @@
     //    }
     //}
 
-
-
     function LoadData() {
         chapters = [];
         lessons = [];
@@ -920,7 +932,8 @@
                     for (i = 0; i < chapters.length; ++i) {
                         var chapter = chapters[i];
                         RenderChapter(chapter);
-                        if(chapter.ParentID == "0" && chapter.Start > 0)
+                        if (chapter.ParentID == "0")
+                            //if(chapter.Start > 0)
                             listRoute.push({ id: chapter.ID, start: chapter.Start, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                     }
                 }
@@ -993,16 +1006,16 @@
     //}
 
     function compareRouteFinal(obj1, obj2) {
-        //console.log(obj1.start + ' - ' + obj2.start);
-        if (obj1.start == 0) return 1;
-        if (obj1.start > obj2.start) return 1;
+        if ((obj1.start == 0) && (obj2.start > 0)) return 1;
+
+        if ((obj1.start > obj2.start) && (obj2.start == 0)) return 1;
         if (obj1.start < obj2.start) return -1;
-        if (obj1.parent > obj2.parent) return 1;
-        if (obj1.parent < obj2.parent) return -1;
-        if (obj1.cid > obj2.cid) return 1;
-        if (obj1.cid < obj2.cid) return -1;
+        //if (obj1.parent > obj2.parent) return 1;
+        //if (obj1.parent < obj2.parent) return -1;
         if (obj1.order > obj2.order) return 1;
         if (obj1.order < obj2.order) return -1;
+        //if (obj1.cid > obj2.cid) return 1;
+        //if (obj1.cid < obj2.cid) return -1;
     }
 
     function ChangeGrade(obj, wrapper) {
@@ -1103,15 +1116,15 @@
                         listRoute.splice(index, 1);
                     }
 
-                    if (chapter.Start > 0) {
+                    //if (chapter.Start > 0) {
                         listRoute.push({ id: chapter.ID, start: chapter.Start, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                         RenderRoute();
-                    }
+                    //}
                 }
 
-                if (chapter.Start > 0) {
+                //if (chapter.Start > 0) {
                     $('#' + chapter.ID + ' .wkIdx').text( parseInt(chapter.Start / 7) + 1)
-                }
+                //}
 
                 //LoadData();
                 hideModal();
@@ -1144,10 +1157,10 @@
                         console.log(index)
                     }
 
-                    if (chapter.Start > 0) {
+                    //if (chapter.Start > 0) {
                         listRoute.push({ id: chapter.ID, start: chapter.Start, type: "chapter", text: chapter.Name, cid: (chapter.ConnectID == null || chapter.ConnectID == "0") ? "" : chapter.ConnectID, period: chapter.Period, parent: chapter.ParentID, order: chapter.Order })
                         RenderRoute();
-                    }
+                    //}
                 }
                 hideModal();
             }
