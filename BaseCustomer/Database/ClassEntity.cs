@@ -40,6 +40,9 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TeacherID")]//CreatorID
         public string TeacherID { get; set; }
 
+        [JsonProperty("Level")]
+        public string Level { get; set; }
+
         //[JsonProperty("CreatorName")]//CreatorID
         //public string CreatorName { get; set; }
 
@@ -66,6 +69,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("OriginID")]
         public string OriginID { get; set; }
         [JsonProperty("ClassMechanism")]
+
         public int ClassMechanism { get; set; } //cơ chế lớp
     }
 
@@ -153,9 +157,9 @@ namespace BaseCustomerEntity.Database
                 return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
         }
 
-        public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime,DateTime lastTime,String centerID )
+        public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime, DateTime lastTime, String centerID)
         {
-                return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime).ToEnumerable();
+            return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime).ToEnumerable();
         }
 
         /// <summary>
@@ -175,5 +179,23 @@ namespace BaseCustomerEntity.Database
         public const int CLOSE = 0, //Lop dong
             OPEN = 1, //Lop mo
             PERSONAL = 2;//Lop ca nhan
+    }
+
+    public class CLASS_LEVEL //Khoi
+    {
+        public const int
+            UNSET = 0,
+            K1 = 1,
+            K2 = 2,
+            K3 = 3,
+            K4 = 4,
+            K5 = 5,
+            K6 = 6,
+            K7 = 7,
+            K8 = 8,
+            K9 = 9,
+            K10 = 10,
+            K11 = 11,
+            K12 = 12;
     }
 }

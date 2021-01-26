@@ -48,9 +48,18 @@ namespace BaseCustomerEntity.Database
         public int Limit { get; set; }
         [JsonProperty("Multiple")] // hệ số 
         public double Multiple { get; set; }
-
         [JsonProperty("Etype")] // kiểu bài thi (thành phần / cuối kì) 
         public int Etype { get; set; }
+
+        [JsonProperty("ConnectID")] //liên kết lộ trình
+        public string ConnectID { get; set; }
+        [JsonProperty("ConnectType")] //kiểu đối tượng liên kết (chapter/lesson)
+        public int ConnectType { get; set; }
+        [JsonProperty("Start")] //bắt đầu
+        public double Start { get; set; }
+        [JsonProperty("Period")] //thời lượng
+        public double Period { get; set; }
+
     }
 
     public class CourseLessonService : ServiceBase<CourseLessonEntity>
@@ -99,5 +108,19 @@ namespace BaseCustomerEntity.Database
         {
             CreateQuery().UpdateOne(t => t.ID == ID, Builders<CourseLessonEntity>.Update.Set(t => t.Point, point));
         }
+
+        public IEnumerable<CourseLessonEntity> GetItemByConnectID(string courseID, string parentID, string connectID)
+        {
+            if (!string.IsNullOrEmpty(parentID))
+                return Collection.Find(x => x.ChapterID == parentID && x.ConnectID == connectID).ToEnumerable();
+            else
+                return Collection.Find(x => (x.CourseID == courseID && x.ChapterID == "0") && x.ConnectID == connectID).ToEnumerable();
+        }
     }
+
+    public class CONNECT_TYPE
+    {
+        public const int CHAPTER = 0, LESSON = 1;
+    }
+
 }

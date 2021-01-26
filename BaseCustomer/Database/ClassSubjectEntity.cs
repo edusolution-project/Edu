@@ -72,8 +72,6 @@ namespace BaseCustomerEntity.Database
             
         }
 
-
-
         public List<ClassSubjectEntity> GetByClassID(string ClassID)
         {
             return Collection.Find(t => t.ClassID == ClassID).ToList();
@@ -133,6 +131,11 @@ namespace BaseCustomerEntity.Database
         public ClassSubjectEntity GetClassSubjectExamByClassID(String ClassID)
         {
             return Collection.Find(x => x.ClassID == ClassID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
+        }
+
+        public List<ClassSubjectEntity> GetByClassIds(List<string> classIds)
+        {
+            return Collection.Find(t => classIds.Contains(t.ClassID)).ToList();
         }
     }
 

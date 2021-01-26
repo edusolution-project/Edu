@@ -9,7 +9,7 @@ var ui = new UI({
     navigation: urlBase + "assets/Icon/Fill/navigation-2.svg"
 });
 var connectionHubChat = new signalR.HubConnectionBuilder()
-    .withUrl("https://teasychat.eduso.vn/chathub")
+    .withUrl("https://tchat.eduso.vn/chathub")
     .build();
 (function (message, member, group, signalR, UI) {
     "use strict";

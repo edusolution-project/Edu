@@ -1,6 +1,7 @@
 ﻿using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,7 @@ namespace BaseCustomerMVC.Globals
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _courseLessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
         private readonly MappingEntity<LessonEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonEntity, LessonEntity>();
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly DateTime invalidTime = new DateTime(1900, 1, 1);
 
         public LessonHelper(
             LessonService lessonService,
@@ -272,7 +274,7 @@ namespace BaseCustomerMVC.Globals
         #endregion
 
         #region Copy Lesson From CourseLesson
-        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem)
+        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem, DateTime begin)
         {
             var lesson = _courseLessonMapping.AutoOrtherType(orgItem, new LessonEntity());
             lesson.ChapterID = cloneItem.ChapterID;
@@ -283,7 +285,15 @@ namespace BaseCustomerMVC.Globals
             lesson.Updated = DateTime.UtcNow;
             lesson.ID = null;
 
-            lesson = InitLesson(lesson);
+            //lesson.Start = orgItem.Start;
+            //lesson.Period
+
+            if (orgItem.Start == 0 && orgItem.Period == 0)//route not set
+            {
+                lesson = InitLesson(lesson, invalidTime, invalidTime);
+            }
+            else
+                lesson = InitLesson(lesson, begin.AddDays(orgItem.Start), begin.AddDays(orgItem.Start + orgItem.Period));
 
             var lessonParts = _lessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
@@ -388,7 +398,8 @@ namespace BaseCustomerMVC.Globals
             lesson.Order = cloneItem.Order;
             lesson.ID = null;
 
-            lesson = InitLesson(lesson);
+            var schedule = _lessonScheduleService.GetItemByLessonID(orgLesson.ID);
+            lesson = InitLesson(lesson, schedule.StartDate, schedule.EndDate);
 
             var lessonParts = _cloneLessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
@@ -650,7 +661,7 @@ namespace BaseCustomerMVC.Globals
         }
         #endregion
 
-        public LessonEntity InitLesson(LessonEntity lesson)
+        public LessonEntity InitLesson(LessonEntity lesson, DateTime? start = null, DateTime? end = null)
         {
             _lessonService.Save(lesson);
             var schedule = new LessonScheduleEntity
@@ -661,6 +672,15 @@ namespace BaseCustomerMVC.Globals
                 Type = lesson.TemplateType,
                 IsActive = true
             };
+
+            if (start > invalidTime)
+            {
+                schedule.StartDate = (DateTime)start;
+            }
+            if (end > invalidTime)
+            {
+                schedule.EndDate = (DateTime)end;
+            }
             _lessonScheduleService.Save(schedule);
             _calendarHelper.ConvertCalendarFromSchedule(schedule, "");
             return lesson;

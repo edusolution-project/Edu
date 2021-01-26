@@ -34,6 +34,13 @@ using RestSharp.Extensions;
 using MongoDB.Bson.Serialization.Serializers;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
+//using Spire.Pdf.Exporting.XPS.Schema;
+using GoogleLib.Services;
+using MongoDB.Driver.Linq;
+using Spire.Doc.Collections;
+using System.Runtime.CompilerServices;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using OfficeOpenXml.Style;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -283,6 +290,37 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         public IActionResult Modules(string basis, string ID)
+        {
+            if (string.IsNullOrEmpty("ID"))
+                return Redirect($"/{basis}{Url.Action("Index")}");
+
+            var data = _service.GetItemByID(ID);
+            if (data == null)
+                return Redirect($"/{basis}{Url.Action("Index")}");
+
+            //var isUsed = isCourseUsed(data.ID);
+            //Cap nhat IsUsed
+            //if (data.IsUsed != isUsed)
+            //{
+            //    data.IsUsed = isUsed;
+            //    _service.Save(data);
+            //}
+
+            ViewBag.Data = data;
+            ViewBag.Title = data.Name;
+
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+
+            var chapters = _chapterService.CreateQuery().Find(t => t.CourseID == ID).ToList();
+
+            ViewBag.Chapter = chapters;
+            ViewBag.User = UserID;
+            ViewBag.Course = data;
+
+            return View();
+        }
+
+        public IActionResult Route(string basis, string ID)
         {
             if (string.IsNullOrEmpty("ID"))
                 return Redirect($"/{basis}{Url.Action("Index")}");
@@ -610,7 +648,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                         item.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
 
@@ -640,7 +678,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         var file = files[0];
 
-                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                        var filename = DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                         olditem.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER");
                     }
                     _service.Save(olditem);
@@ -893,7 +931,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     var file = files[0];
 
-                    var filename = currentCourse.ID + "_" + DateTime.UtcNow.ToString("yyyyMMddhhmmss") + Path.GetExtension(file.FileName);
+                    var filename = currentCourse.ID + "_" + DateTime.UtcNow.ToString("yyyyMMddhhmmss") + System.IO.Path.GetExtension(file.FileName);
                     currentCourse.Image = await _fileProcess.SaveMediaAsync(file, filename, "BOOKCOVER", basis);
                 }
                 _service.CreateOrUpdate(currentCourse);
@@ -965,6 +1003,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var data = _chapterService.GetItemByID(item.ID);
+
+                CourseChapterEntity parent = null;
+                if (data.ParentID != "0")
+                {
+                    parent = _chapterService.GetItemByID(data.ParentID);
+                }
+
+                var needUpdate = true;
                 if (data == null)
                 {
                     item.Created = DateTime.UtcNow;
@@ -972,20 +1018,54 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.IsActive = false;
                     item.Updated = DateTime.UtcNow;
                     item.Order = int.MaxValue - 1;
+                    item.Period = 7;
+
+                    if (item.Start <= 0) //unset
+                    {
+                        item.Start = 0;
+                        item.Period = 0;
+                    }
+
                     _chapterService.Save(item);
-                    ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
+
+                    item.Order = ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
+
+                    //needUpdate = true;
                 }
                 else
                 {
                     item.Updated = DateTime.UtcNow;
-                    var newOrder = item.Order - 1;
+                    item.Order = item.Order - 1;
+                    var newOrder = item.Order;
+
                     var oldParent = data.ParentID;
 
                     data.Name = item.Name;
                     data.ParentID = item.ParentID;
                     data.Description = item.Description;
 
+                    data.ConnectType = item.ConnectType;
+                    data.ConnectID = "";
+                    data.Period = 7;
+
+                    if (item.Start <= 0)
+                    {
+                        item.Start = 0;
+                        data.Period = 0;
+                    }
+
+                    data.Start = item.Start;
+
+                    //if (data.Period != item.Period)
+                    //{
+                    //    needUpdate = true;
+                    //}
+
+                    data.ConnectID = "";
+                    //data.Period = item.Period;
+
                     _chapterService.Save(data);
+
                     if (oldParent != item.ParentID)//Change Root chapter
                     {
                         if (item.TotalLessons > 0)
@@ -997,10 +1077,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _ = _courseHelper.IncreaseCourseChapterCounter(item.ParentID, data.TotalLessons, data.TotalExams, data.TotalPractices);
                         }
                         //move chapter to bottom of new parent chap
-                        ChangeChapterPosition(data, int.MaxValue);
+                        item.Order = ChangeChapterPosition(data, int.MaxValue);
                     }
                     else if (data.Order != newOrder)
-                        ChangeChapterPosition(data, newOrder);
+                        item.Order = ChangeChapterPosition(data, newOrder);
+                }
+                //update route
+                if (needUpdate)
+                {
+                    UpdateRoute(data, parent);
                 }
 
                 return new JsonResult(new Dictionary<string, object>
@@ -1014,10 +1099,233 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Data", null },
-                    {"Error",ex.Message }
+                    {"Error", ex.Message}
                 });
             }
         }
+
+        private void UpdateRoute(CourseChapterEntity obj, CourseChapterEntity parent)
+        {
+            //if (string.IsNullOrEmpty(obj.ConnectID))
+            //{
+            //    obj.Start = 0;
+            //    if (parent != null)
+            //        obj.Start = parent.Start;
+            //}
+            //else
+            //{
+            //    if (obj.ConnectType == CONNECT_TYPE.CHAPTER)
+            //    {
+            //        var prev = _chapterService.GetItemByID(obj.ConnectID);
+            //        if (prev == null) // move to root
+            //        {
+            //            if (parent != null)
+            //                obj.Start = parent.Start;
+            //        }
+            //        else
+            //            obj.Start = prev.Start + prev.Period;
+            //    }
+            //    else
+            //    {
+            //        var prev = _lessonService.GetItemByID(obj.ConnectID);
+            //        if (prev == null) // move to root
+            //        {
+            //            if (parent != null)
+            //                obj.Start = parent.Start;
+            //        }
+            //        else
+            //            obj.Start = prev.Start + prev.Period;
+            //    }
+            //}
+
+            _chapterService.Save(obj);
+
+            //var linked_period = obj.Period;
+            //linked_period = Math.Max((double)obj.Period + UpdateConnectedRoute(obj), linked_period);
+
+            UpdateParentRoute(parent, obj.Start + obj.Period);
+            UpdateSubRoute(obj);
+        }
+
+        private void UpdateRoute(CourseLessonEntity obj, CourseChapterEntity parent)
+        {
+            //if (string.IsNullOrEmpty(obj.ConnectID))
+            //{
+            //    obj.Start = 0;
+            //    if (parent != null)
+            //        obj.Start = parent.Start;
+            //}
+            //else
+            //{
+            //    if (obj.ConnectType == CONNECT_TYPE.CHAPTER)
+            //    {
+            //        var prev = _chapterService.GetItemByID(obj.ConnectID);
+            //        if (prev == null) // move to root
+            //        {
+            //            if (parent != null)
+            //                obj.Start = parent.Start;
+            //        }
+            //        else
+            //            obj.Start = prev.Start + prev.Period;
+            //    }
+            //    else
+            //    {
+            //        var prev = _lessonService.GetItemByID(obj.ConnectID);
+            //        if (prev == null) // move to root
+            //        {
+            //            if (parent != null)
+            //                obj.Start = parent.Start;
+            //        }
+            //        else
+            //            obj.Start = prev.Start + prev.Period;
+            //    }
+            //}
+
+            _lessonService.Save(obj);
+
+            //var linked_period = obj.Period;
+            //linked_period = Math.Max((double)obj.Period + UpdateConnectedRoute(new CourseChapterEntity { ID = obj.ID, ParentID = obj.ChapterID, CourseID = obj.CourseID, Start = obj.Start, Period = obj.Period }), linked_period);
+
+            UpdateParentRoute(parent, obj.Start + obj.Period);
+        }
+
+
+        private double UpdateConnectedRoute(CourseChapterEntity data)
+        {
+            double linked_period = data.Period;
+            var connectedChaps = _chapterService.GetItemByConnectID(data.CourseID, data.ParentID, data.ID);
+            if (connectedChaps != null && connectedChaps.Count() > 0)
+            {
+                foreach (var chap in connectedChaps)
+                {
+                    chap.Start = data.Start + data.Period;
+                    linked_period = Math.Max((double)chap.Period + UpdateConnectedRoute(chap), linked_period);
+                    _chapterService.Save(chap);
+                    UpdateSubRoute(chap);
+                }
+            }
+
+            var connectedLessons = _lessonService.GetItemByConnectID(data.CourseID, data.ParentID, data.ID);
+            if (connectedLessons != null && connectedLessons.Count() > 0)
+            {
+                foreach (var lesson in connectedLessons)
+                {
+                    lesson.Start = data.Start + data.Period;
+                    linked_period = Math.Max((double)lesson.Period + UpdateConnectedRoute(new CourseChapterEntity { ID = lesson.ID, ParentID = lesson.ChapterID, CourseID = lesson.CourseID, Start = lesson.Start, Period = lesson.Period }), linked_period);
+                    _lessonService.Save(lesson);
+                }
+            }
+            return linked_period;
+        }
+
+
+        private void UpdateParentRoute(CourseChapterEntity data, double expected_size)
+        {
+            if (data == null) return;
+            if (data.Start <= 0)//unset
+                return;
+            if (data.Start + data.Period < expected_size)
+            {
+                data.Period = expected_size - data.Start;
+                _chapterService.Save(data);
+                var linked_period = UpdateConnectedRoute(data);
+                if (data.ParentID != "0")
+                {
+                    var parent = _chapterService.GetItemByID(data.ParentID);
+                    UpdateParentRoute(parent, data.Start + linked_period);
+                }
+            }
+        }
+
+        private void UpdateSubRoute(CourseChapterEntity data)
+        {
+            var subChaps = _chapterService.GetSubChapters(data.CourseID, data.ID);
+            if (subChaps != null && subChaps.Count() > 0)
+            {
+                foreach (var chap in subChaps)
+                {
+                    chap.Start = data.Start;
+                    chap.Period = data.Period;
+                    //if (string.IsNullOrEmpty(chap.ConnectID))//direct child
+                    //{
+                    //    chap.Start = data.Start;
+                    //    if (chap.Period == 0 || chap.Period + chap.Start > data.Start + data.Period)
+                    //        chap.Period = data.Period;
+                    //}
+                    //else
+                    //{
+                    //    if (chap.Start > data.Start + data.Period)
+                    //    {
+                    //        chap.Start = data.Start + data.Period;
+                    //        chap.Period = 0;
+                    //    }
+                    //    if (chap.Start + chap.Period > data.Start + data.Period)
+                    //        chap.Period = data.Start + data.Period - chap.Start;//resize route to fit parent
+                    //}
+                    _chapterService.Save(chap);
+                    UpdateSubRoute(chap);
+                }
+            }
+
+            var subLessons = _lessonService.GetChapterLesson(data.ID);
+            if (subLessons != null && subLessons.Count() > 0)
+            {
+                foreach (var lesson in subLessons)
+                {
+                    //if (string.IsNullOrEmpty(lesson.ConnectID))//direct child
+                    //{
+                    //    lesson.Start = data.Start;
+                    //    if (lesson.Period == 0 || lesson.Period + lesson.Start > data.Start + data.Period)
+                    //        lesson.Period = data.Period;
+                    //}
+                    //else
+                    //{
+                    //    if (lesson.Start > data.Start + data.Period)
+                    //    {
+                    //        lesson.Start = data.Start + data.Period;
+                    //        lesson.Period = 0;
+                    //    }
+                    //    if (lesson.Start + lesson.Period > data.Start + data.Period)
+                    //        lesson.Period = data.Start + data.Period - lesson.Start;//resize route to fit parent
+                    //}
+                    //if (string.IsNullOrEmpty(lesson.ConnectID))//direct child
+                    //{
+                    //    lesson.Start = data.Start;
+                    //}
+                    //if (lesson.Period > 0)//route set
+                    //    if (lesson.Start + lesson.Period > data.Start + data.Period)
+                    //        lesson.Period = data.Start + data.Period - lesson.Start;//resize route to fit parent
+                    //lesson.Period = data.Period;
+                    lesson.Start = data.Start;
+                    lesson.Period = data.Period;
+                    _lessonService.Save(lesson);
+                }
+            }
+        }
+
+        //private void UpdateRoute(CourseLessonEntity data)
+        //{
+        //    var connectedChaps = _chapterService.GetItemByConnectID(data.CourseID, data.ChapterID, data.ID);
+        //    if (connectedChaps != null && connectedChaps.Count() > 0)
+        //    {
+        //        foreach (var chap in connectedChaps)
+        //        {
+        //            chap.Start = data.Start + data.Period;
+        //            _chapterService.Save(chap);
+        //            UpdateRoute(chap);
+        //        }
+        //    }
+
+        //    var connectedLessons = _lessonService.GetItemByConnectID(data.CourseID, data.ChapterID, data.ID);
+        //    if (connectedLessons != null && connectedLessons.Count() > 0)
+        //    {
+        //        foreach (var lesson in connectedLessons)
+        //        {
+        //            lesson.Start = data.Start + data.Period;
+        //            UpdateRoute(lesson);
+        //        }
+        //    }
+        //}
 
         [HttpPost]
         public async Task<JsonResult> JoinChapter(string ID, string JoinChapter, string newName, string CreateNewChapter = "off")
@@ -1291,7 +1599,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (oldPos == pos && (item.Order == pos))
                 return oldPos;
 
-            if (pos > parts.Count())
+            if (pos > parts.Count() + 1)
                 pos = parts.Count() - 1;
             item.Order = pos;
 
@@ -1341,8 +1649,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             try
             {
+                var needUpdate = true;
+
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var data = _lessonService.GetItemByID(item.ID);
+
+                CourseChapterEntity parent = null;
+                if (data.ChapterID != "0")
+                {
+                    parent = _chapterService.GetItemByID(data.ChapterID);
+                }
+
                 if (data == null)
                 {
                     item.Created = DateTime.UtcNow;
@@ -1353,6 +1670,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.Updated = DateTime.UtcNow;
                     item.Order = 0;
                     _lessonService.CreateQuery().InsertOne(item);
+                    item.Period = 7;
+                    if (item.Start <= 0)
+                    {
+                        item.Start = 0;
+                        item.Period = 0;
+                    }
+
+
+                    //if (item.Start > 0)
+                    //    needUpdate = true;
 
                     ChangeLessonPosition(item, Int32.MaxValue);//move lesson to bottom of parent
 
@@ -1372,6 +1699,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     data.Multiple = item.Multiple;
                     data.Etype = item.Etype;
                     data.Limit = item.Limit;
+                    data.ConnectType = item.ConnectType;
+
+                    data.Period = 7;
+
+                    //if (data.Start != data.Start)
+                    //{
+                    //    needUpdate = true;
+                    //}
+                    if (item.Start < 0)//unset
+                    {
+                        item.Start = 0;
+                        data.Period = 0;
+                    }
+
+                    data.Start = item.Start;
+                    data.ConnectID = "";
+
 
                     //if (data.TemplateType == LESSON_TEMPLATE.LECTURE)
                     //    data.Limit = 0;
@@ -1403,7 +1747,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             _ = _courseHelper.IncreaseCourseCounter(data.CourseID, 0, examInc, pracInc);
                     }
 
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
+                    _lessonService.Save(data);
+
+                    if (needUpdate)
+                    {
+                        UpdateRoute(data, parent);
+                    }
+
+                    //_lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
 
                     if (data.Order != newOrder)//change Position
                     {
@@ -1422,7 +1773,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return new JsonResult(new Dictionary<string, object>
                 {
                     { "Data", null },
-                    {"Error",ex.Message }
+                    {"Error", ex.Message }
                 });
             }
         }
@@ -1567,7 +1918,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             if (oldPos == pos && oldPos == item.Order)
                 return oldPos;
 
-            if (pos > parts.Count())
+            if (pos > parts.Count() + 1)
                 pos = parts.Count() - 1;
             item.Order = pos;
 
@@ -2194,17 +2545,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        private string GetContentType(string fileName)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
-            string contentType;
-            if (!provider.TryGetContentType(fileName, out contentType))
-            {
-                contentType = "application/octet-stream";
-            }
-            return contentType;
-        }
 
         #region Import with Word
         /// <summary>
@@ -2275,7 +2615,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private void RenderWordLessonPart(ref Section s, LessonPartEntity _lessonPart)
+        private void RenderWordLessonPart(ref Spire.Doc.Section s, LessonPartEntity _lessonPart)
         {
 
             Table table = s.AddTable(true);
@@ -2486,12 +2826,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             ole.Width = Pic.Width;
                             ole.Height = Pic.Height;
                         }
-                        else if(ext.Contains("video"))
+                        else if (ext.Contains("video"))
                         {
                             var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic, OleObjectType.VideoClip);
                             ole.Width = maxWidth;
                             ole.Height = maxHeight;
-                        }    
+                        }
                         else
                         {
                             var ole = attachmentRow_Cel2_Content.AppendOleObject(objPath, Pic);
@@ -4373,6 +4713,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
         #endregion
+        private string GetContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+            provider.Mappings.Add(".dnct", "application/dotnetcoretutorials");
+            string contentType;
+            if (!provider.TryGetContentType(fileName, out contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+            return contentType;
+        }
+
     }
 
     public class Counter

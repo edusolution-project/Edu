@@ -13,6 +13,7 @@
 
         return $"/{center}{url}";
     }
+    var startdate = currentClass.StartDate.ToLocalTime();
 }
 
 
@@ -45,16 +46,25 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài từ luận</a></li>
-                    @*<li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)" v-if="lessonToMark.data.length > 0">Chấm bài từ luận</a></li>*@
-                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Tài liệu tham khảo" v-on:click="tabChange(3)">Tài liệu tham khảo</a></li>*@
-                    @*<li v-bind:class="{active : tab[4]}"><a href="javascript:;" title="Tiến độ học tập" v-on:click="tabChange(4)">Tiến độ học tập</a></li>*@
+                    <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
             <div class="c-right">
                 <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
             </div>
         </div>
+
+
+        <div id="main-route" class="main-route mb-3 mt-2">
+            <ul class="route_holder" id="cid_0" cid="0">
+                <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
+                <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
+                    v-on:click="showWeekLesson(addDays(startDate, index * 7))"
+                    :class="addDays(startDate, index * 7 + 1) < moment() ? 'passed' : (addDays(startDate, index * 7 - 6) > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(addDays(startDate, index * 7))}} - {{formatDatenoYear(addDays(startDate, (index * 7 + 6) > period ? period : (index * 7 + 6)))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+                <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
+            </ul>
+        </div>
+
         <div class="d-flex align-items-center" v-if="tab[2]">
             @*<div class="col-md-12 form-row pb-2" v-if="tab[2]">*@
             <div class="box filter-box m-1 col-12 col-md-2">
@@ -62,8 +72,8 @@
                     <option value="">Tổng hợp</option>
                     <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
                     @*<option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
-                        {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
-                    </option>*@
+                            {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
+                        </option>*@
                     <template v-for="(item, k) in classSubjects" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                         @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.CourseName}}</option>*@
                         <option :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
@@ -89,16 +99,16 @@
                     </div>
                 </div>*@
             <!--<div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
-                <select v-model="searchPoint">
-                    <option value="">Theo phân công giáo viên</option>
-                    <option value="1">Tất cả</option>-->
+            <select v-model="searchPoint">
+                <option value="">Theo phân công giáo viên</option>
+                <option value="1">Tất cả</option>-->
             @*<option value="2">Theo thời gian</option>*@
             <!--</select>
             </div>-->
             <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
-                <div class="form-row">
-                    <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
-                    <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
+            <div class="form-row">
+                <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
+                <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
             @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
             <!--</div>
             </div>
@@ -113,7 +123,6 @@
                 </template>
             </div>-->
         </div>
-
     </div>
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -283,17 +292,17 @@
                                         <td class="sticky-col second-col">{{ list_students[i-1].fullName}}</td>
                                         <td class="sticky-col third-col">{{roundPoint(list_students[i-1].avgPointPratice,1)}}</td>
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
-                                    <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
-                                        <template v-for="item in items">
-                                            @*<template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
-                                            <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>*@
-                                            <td style="width:50px;height:20px" v-if="roundPoint(item.point,1) >= 8" class="action-cel color-minpoint8" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 5 && roundPoint(item.point,1) < 8" class="action-cel color-minpoint5" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 2 && roundPoint(item.point,1) < 5" class="action-cel color-minpoint2" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 0 && roundPoint(item.point,1) < 2" class="action-cel color-minpoint0" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
-                                            <td style="width:50px;height:20px" v-else class="color-dontwork">{{roundPoint(item.point,1)}}</td>
+                                        <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                            <template v-for="item in items">
+                                                @*<template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
+                                                    <td v-for="item in items" style="width:50px;height:20px" :class="item.point >= 0 ? 'action-cel':''" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>*@
+                                                <td style="width:50px;height:20px" v-if="roundPoint(item.point,1) >= 8" class="action-cel color-minpoint8" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 5 && roundPoint(item.point,1) < 8" class="action-cel color-minpoint5" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 2 && roundPoint(item.point,1) < 5" class="action-cel color-minpoint2" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else-if="roundPoint(item.point,1) >= 0 && roundPoint(item.point,1) < 2" class="action-cel color-minpoint0" v-on:click="loadDetailinWeek(item)">{{roundPoint(item.point,1)}}</td>
+                                                <td style="width:50px;height:20px" v-else class="color-dontwork">{{roundPoint(item.point,1)}}</td>
+                                            </template>
                                         </template>
-                                    </template>
                                         <template v-else>
                                             <td>Chưa đặt lịch</td>
                                         </template>
@@ -306,86 +315,10 @@
                 </template>
             </div>
         </div>
-        @*<div class="box" v-if="tab[3]">
-                <div class="row ls-doc" v-if="ref.data.length > 0">
-                    <div class="col-md-6" v-for="data in ref.data">
-                        <div class="flex p-2 mb-2 inner" style="border-top: dotted 1px #DDD">
-                            <a href="#" title="" class="thumb" style="max-width:130px; min-width:130px;" v-on:click="showPreview(data)">
-                                <img :src="cacheStatic(data.Image,130)" alt="" v-if="data.Image != null" class="w-100">
-                                <img :src="cacheStatic('/pictures/book.jpg',130)" alt="" v-else class="w-100">
-                            </a>
-                            <div class="entry p-0">
-                                <div>
-                                    <div>
-                                        <a href="#" title="" class="title" v-on:click="showPreview(data)">{{data.Title}}</a>
-                                    </div>
-                                    *<div>
-                                        <div class="rating"><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i><i class="icofont icofont-star"></i></div>
-                                        <div class="author pt-2"><i class="icofont icofont-teacher"></i> {{data.OwnerName}}</div>
-                                    </div>*
-                                </div>
-                                <div class="pt-0 pb-2">
-                                    <p>{{domDecoder(data.Description)}}</p>
-                                </div>
-                                <div>
-                                    <a href="#" title="Mở link" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="openLink(data)" v-if="data.Link != null && data.Link.length > 0"><i class="fas fa-link"></i> ({{data.Linked}})</a>
-                                    <a href="#" title="Mở file" class="text-success font-weight-bold mr-2" style="min-width:auto" v-on:click="showPreview(data)" v-if="data.Media!= null && isDocType(data.Media.Extension)"><i class="far fa-eye font-weight-bold"></i> ({{data.Viewed}})</a>
-                                    <a href="#" class="text-success font-weight-bold mr-2" v-if="data.Media != null && data.isDownload" v-on:click="download(data)" :title="data.Media.Name"><i class="fas fa-cloud-download-alt"></i> ({{data.Downloaded}})</a>
-                                    <a href="#" title="Xóa" class="text-danger mr-2" v-on:click="deleteData(data)" v-if="data.OwnerID == '@currentuser'"><i class="far fa-trash-alt font-weight-bold"></i></a>
-                                    <a href="#" title="Sửa" class="text-secondary mr-2" v-on:click="updateRef(data)" v-if="data.OwnerID == '@currentuser'"><i class="fas fa-edit font-weight-bold"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row ls-doc text-center d-block" v-else>
-                    Không có tài liệu
-                </div>
-            </div>*@
-        @*<div class="box margin-t20 flex" v-if="tab[3] && ref.data.length > 0">
-                <div class="paging-view">
-                    Hiển thị:
-                    <select v-model="ref.view" v-on:change="loadPreference()">
-                        <option value="10">10 kết quả</option>
-                        <option value="20">20 kết quả</option>
-                        <option value="30">30 kết quả</option>
-                    </select>
-                </div>
-                <div class="page-control">
-                    <div class="right">
-                        <b-pagination v-model="ref.page"
-                                      :total-rows="ref.totalRec"
-                                      :per-page="ref.view"
-                                      v-on:input="loadPreference()"></b-pagination>
-                    </div>
-                </div>
-            </div>*@
-        @*<div class="box" v-show="tab[4]">
-                <ul class="list ls-practice">
-                    <li v-for="(obj,i) in classSubjects">
-                        <div class="inner">
-                            <a href="javascript:;" v-b-toggle="`collapse-result-${i}`" class="btn-collapse parent flex align-items-center pb-2 mb-0 pt-2 collapsed" v-on:click="loadResult(obj.ID)" :style="'color: ' + obj.Color">
-                                <i class="ic ic-headphone-o mr-1" :style="'background-image:url(' + cacheStatic(obj.Image,48) + ')'"></i>{{obj.Title + ' (' + obj.CourseName + ' - GV: ' + obj.Teacher + ')'}}
-                                <i class="far fa-arrow-alt-circle-down ml-1"></i>
-                            </a>
-                            <b-collapse :id="`collapse-result-${i}`" accordion="my-accordion-1" role="tabpanel">
-                                <ul class="list">
-                                    <chap-result v-for="(item,k) in list_chapters_result" v-if="item.ClassSubject + '-' + item.Parent == obj.ID + '-'"
-                                                 v-bind:data="item"
-                                                 v-bind:classbj="obj.ID"
-                                                 v-bind:pos="k"
-                                                 v-bind:owner="obj.TeacherID"
-                                                 v-bind:listchaps="list_chapters_result"></chap-result>
-                                    <lesson-result v-for="lesson in filterResult({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-result>
-                                </ul>
-                            </b-collapse>
-
-                        </div>
-                    </li>
-                </ul>
-            </div>*@
         <div class="box" v-show="tab[5]">
-            <template v-if="lessonToMark.data.length == 0">Không có bài tự luận cần chấm điểm.</template>
+            <template v-if="lessonToMark.data.length == 0">
+                Không có bài tự luận cần chấm điểm.
+            </template>
             <template v-else>
                 <ul class="list ls-practice">
                     <li v-for="(item,k) in lessonToMark.data">
@@ -397,11 +330,11 @@
                         </div>
                         <b-collapse :id="`collapse-${k}`" :accordion="'my-accordion-'+ k" role="tabpanel">
                             @*<chap-content v-for="(chapter,i) in lessonToMark.list_chapters" v-if="chapter.ClassSubject + '-' + chapter.Parent == item.ID + '-'"
-                    v-bind:data="chapter"
-                    v-bind:classbj="item.ID"
-                    v-bind:pos="i"
-                    v-bind:owner="item.TeacherID"
-                    v-bind:listchaps="lessonToMark.list_chapters"></chap-content>*@
+                                v-bind:data="chapter"
+                                v-bind:classbj="item.ID"
+                                v-bind:pos="i"
+                                v-bind:owner="item.TeacherID"
+                                v-bind:listchaps="lessonToMark.list_chapters"></chap-content>*@
                             <ul class="list" v-if="item.listLesson.length > 0">
                                 <li class="sub-practice pt-2 pb-1 pl-2 rounded" v-for="lesson in item.listLesson">
                                     <div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center">
@@ -438,6 +371,160 @@
 </section>
 @section Scripts{
     <style>
+
+        #main-route {
+            overflow: auto;
+        }
+
+        .route_holder {
+            text-align: left;
+            white-space: nowrap;
+            height: 2px;
+            margin: 50px 0 60px;
+            font-size:0;
+        }
+
+        .route_item {
+            display: inline-block;
+            width: 100px;
+            height: 4px;
+            overflow: visible;
+            margin: 0;
+            background: #969696;
+            position: relative;
+            font-weight: bold;
+            opacity: 0.7;
+            cursor:pointer;
+            font-size:14px;
+        }
+
+            .route_item:hover {
+                opacity: 1;
+                background: #13a6fb;
+            }
+
+            .route_item:hover::after {
+                border-color: #13a6fb;
+            }
+
+            .route_item.start {
+                width: 50px;
+                margin-left: 20px;
+            }
+
+                .route_item.passed,
+                .route_item.start
+                {
+                    background: #13a6fb;
+                }
+
+                    .route_item.start::after,
+                    .route_item.passed::after {
+                        border-color: #13a6fb;
+                        background-color: #13a6fb;
+                    }
+
+            .route_item.now {
+                background-color: #D03239;
+            }
+                .route_item.now::after {
+                    background-color: #D03239;
+                    border-color: #D03239;
+                }
+
+                .route_item.start .route_period {
+                    left: 10px;
+                }
+
+            .route_item.end {
+                width: 50px;
+                text-align: right;
+                /*margin-right: 20px;*/
+            }
+
+                .route_item.end .route_title {
+                    text-align: right;
+                    left:auto;
+                    right:0px;
+                }
+
+                .route_item.end .route_period {
+                    right: 10px;
+                }
+
+                .route_item.end::after {
+                    right: -10px;
+                    left: auto;
+                }
+
+            .route_item::after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                right: auto;
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                -o-transform: translateX(-50%);
+                transform: translateX(-50%);
+                bottom: -12px;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                border: 2px solid #969696;
+                background: #969696 url(/images/calendar.png) no-repeat center center;
+                -webkit-background-size: 14px auto;
+                background-size: 14px auto;
+                -webkit-transition: background-color .3s,border-color .3s;
+                -moz-transition: background-color .3s,border-color .3s;
+                -o-transition: background-color .3s,border-color .3s;
+                transition: background-color .3s,border-color .3s;
+                top: -8px;
+                cursor: pointer;
+            }
+
+            .route_item.start::after {
+                left: 10px;
+            }
+
+            .route_item .route_title {
+                bottom: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -35px;
+                width: 70px;
+                text-align: center;
+                overflow: hidden;
+                max-height: 28px;
+                white-space: break-spaces;
+                line-height: 14px;
+                font-size: 70%;
+                font-weight: bold;
+            }
+
+            .route_item.start .route_title {
+                margin-left: 0;
+                left: -6px;
+                text-align: left;
+            }
+
+            .route_item .route_period {
+                top: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -25px;
+                width: 50px;
+                text-align: center;
+            }
+
+        .wkIdx {
+            user-select: none;
+            font-size: 110%;
+            color: #007bff;
+        }
+
+
+
         .class_row a:nth-child(n+2) {
             display: none;
         }
@@ -870,8 +957,8 @@
                     </template>
                 </div>
                 @*<div class="status" v-if="owner == '@currentuser'">
-                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                </div>*@
+                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                    </div>*@
             </div>
         </li>
     </script>
@@ -932,8 +1019,8 @@
                 </a>
                 <div class="flex-column col-3">
                     <span>
-                            Tỉ lệ mở
-                        </span>
+                        Tỉ lệ mở
+                    </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -947,8 +1034,8 @@
                 </div>
                 <div class="flex-column col-3">
                     <span>
-                            Tỉ lệ làm bài
-                        </span>
+                        Tỉ lệ làm bài
+                    </span>
                     <div class="progress m-0 p-0" style="height:1.5rem; font-size:110%;">
                         @if (currentClass.TotalStudents > 0)
                         {
@@ -1181,6 +1268,10 @@
                 window.openLessonResult = this.openLessonResult
                 window.formatTime = this.formatTime
                 window.openHistory = this.openHistory
+
+                window.getWeekLesson = this.getWeekLesson
+                $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
+                console.log($(".route_item").index($('.route_item.now')) * 100);
                 var hash = window.location.hash;
                 if (hash.startsWith('#')) {
                     var hash = hash.split('#')[1];
@@ -1221,8 +1312,9 @@
                 searchCsbj: '',
                 classID: '@currentClass.ID',
                 className: "@Html.Raw(currentClass.Name.Replace("'","\'"))",
-                startDate: '@currentClass.StartDate',
-                endDate: '@currentClass.EndDate',
+                startDate: '@currentClass.StartDate.ToLocalTime()',
+                endDate: '@currentClass.EndDate.ToLocalTime()',
+                period: @((currentClass.EndDate - currentClass.StartDate).TotalDays),
                 classDescription: '@currentClass.Description',
                 classImg: '@currentClass.Image',
                 subjectName: '@currentClass.SubjectName',
@@ -1240,6 +1332,8 @@
                 loaded_subject: [],
                 loaded_subject_result: [],
                 result_data: [],
+                lesson_week: [],
+                weekTitle: '',
                 init: true,
                 fields: [
                     {
@@ -2561,6 +2655,12 @@
                         return moment(String(value)).format('YYYY-MM-DD')
                     }
                 },
+                addDays(value, inc) {
+                    if (value) {
+                        return moment(String(value)).add(inc, 'days');
+                    }
+                    return moment();
+                },
                 exportExcel(tableid) {
                     var _filename = "";
                     if (this.searchCsbj == "") {
@@ -2849,7 +2949,29 @@
                             }
                         }
                     }
+                },
+                showWeekLesson(start) {
+                    let _that = this
+                    let _form = new FormData()
+                    var _date = moment(start);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
+                        _date = moment();
+                    date = _date.format("MM/DD/YYYY")
+                    _form.append('today', date)
+                    _form.append('ClassID', '@currentClass.ID')
+                    _form.append('seekStart', false)
+                    let _url = '@processUrl("GetThisWeekLesson", "Class")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //console.log("Week")
+                        _that.lesson_week = response.data.data;
+                        }).catch(e => { })
+
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+                    this.$bvModal.show("model_week_lesson")
                 }
+
             }
         });
 
@@ -2911,9 +3033,11 @@
                 }
             });
         }
+
     </script>
 }
 @section Modals{
+
     <b-modal :no-close-on-backdrop="true" id="modal_event" centered title="Cập nhật tài liệu tham khảo" size="xl">
         <b-col class="form-group">
             <label for="">Tên tài liệu</label>
@@ -2991,6 +3115,7 @@
             </template>
         </template>
     </b-modal>
+
     <b-modal :no-close-on-backdrop="true" id="modal_essay" centered title="Check point">
         <b-col class="form-group">
             <label>Bài tự luận của {{checkpoint.StudentName}}</label>
@@ -3157,8 +3282,8 @@
                         </tr>
                         <tr>
                             @*<th style="width:130px">Bài kiểm tra 1</th>
-                            <th style="width:130px">Bài kiểm tra 2</th>
-                            <th style="width:130px">Bài kiểm tra 3</th>*@
+                                <th style="width:130px">Bài kiểm tra 2</th>
+                                <th style="width:130px">Bài kiểm tra 3</th>*@
                             <th v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0">Bài số {{k+1}}</th>
                             <th v-if="studentSummary.dataExam.length == 0">Chưa có dữ liệu kiểm tra</th>
                         </tr>
@@ -3175,8 +3300,8 @@
                                 <template v-else-if="itemSummary.Order == 1">
                                     <td v-for="(item,k) in studentSummary.dataExam">{{roundPoint(item.point,1)}}</td>
                                     @*<td>{{roundPoint(studentSummary.dataExam[0].multiple1,1)}}</td>
-                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
-                                    <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>*@
+                                        <td>{{roundPoint(studentSummary.dataExam[0].multiple2,1)}}</td>
+                                        <td>{{roundPoint(studentSummary.dataExam[0].multiple3,1)}}</td>*@
                                 </template>
                                 <template v-else>
                                     <td v-for="(item,k) in studentSummary.dataExam" v-if="studentSummary.dataExam.length > 0"></td>
@@ -3192,6 +3317,37 @@
                         </template>
                     </tbody>
                 </table>
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
+        <div class="modal-body">
+            <template v-if="lesson_week.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th>Học liệu</th>
+                            <th>Thời gian mở</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in lesson_week">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classsubjectID" target="_blank">{{item.title}}</a></td>
+                            <td>{{item.bookName}}</td>
+                            <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có bài
             </template>
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -3255,7 +3411,7 @@
                         <th>5.0 - 7.9</th>
                         <th>2.0 - 4.9</th>
                         <th>0.0 - 1.9</th>
-                       @* <th>Tổng</th>*@
+                        @* <th>Tổng</th>*@
                     </tr>
                 </thead>
                 <tbody>
@@ -3273,7 +3429,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal('progessmodal-xl')">Đóng</b-button>
         </template>

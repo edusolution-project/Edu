@@ -213,7 +213,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var listClass = student.JoinedClasses;
                         student.JoinedClasses = listClass.ToList();
                     }
-                    else student.JoinedClasses = new List<string>();
+                    else
+                        student.JoinedClasses = new List<string> { };
+
                     _studentService.CreateQuery().InsertOne(student);
                     Status = true;
                     Dictionary<string, object> response = new Dictionary<string, object>()

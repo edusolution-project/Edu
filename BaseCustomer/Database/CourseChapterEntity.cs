@@ -65,6 +65,15 @@ namespace BaseCustomerEntity.Database
         public long TotalExams { get; set; }
         [JsonProperty("TotalPractices")]
         public long TotalPractices { get; set; }
+
+        [JsonProperty("ConnectID")] //liên kết lộ trình
+        public string ConnectID { get; set; }
+        [JsonProperty("ConnectType")] //kiểu đối tượng liên kết (chapter/lesson)
+        public int ConnectType { get; set; }
+        [JsonProperty("Start")] //bắt đầu
+        public double Start { get; set; }
+        [JsonProperty("Period")] //thời lượng
+        public double Period { get; set; }
     }
     public class CourseChapterService : ServiceBase<CourseChapterEntity>
     {
@@ -107,6 +116,15 @@ namespace BaseCustomerEntity.Database
         public List<CourseChapterEntity> GetCourseChapters(List<String> CourseIDs)
         {
             return Collection.Find(x => CourseIDs.Contains(x.CourseID)).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+        }
+
+        public IEnumerable<CourseChapterEntity> GetItemByConnectID(string courseID, string parentID, string connectID)
+        {
+            if (!string.IsNullOrEmpty(parentID))
+                return Collection.Find(x => x.ParentID == parentID && x.ConnectID == connectID).ToEnumerable();
+            else
+                return Collection.Find(x => (x.CourseID == courseID && x.ParentID == "0") && x.ConnectID == connectID).ToEnumerable();
+
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using MongoDB.Driver;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Logical;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +29,6 @@ namespace BaseCustomerMVC.Globals
         private readonly MappingEntity<CourseChapterEntity, ChapterEntity> _chapterMapping = new MappingEntity<CourseChapterEntity, ChapterEntity>();
         private readonly MappingEntity<CourseLessonEntity, CourseLessonEntity> _cloneCourseLessonMapping = new MappingEntity<CourseLessonEntity, CourseLessonEntity>();
         private readonly MappingEntity<CourseLessonEntity, LessonEntity> _lessonMapping = new MappingEntity<CourseLessonEntity, LessonEntity>();
-
 
         public CourseHelper(
             CourseService courseService,
@@ -140,23 +141,30 @@ namespace BaseCustomerMVC.Globals
                 newchapter.ClassSubjectID = classSubject.ID;
                 newchapter.ID = null;
 
+                if (!string.IsNullOrEmpty(originChapter.ConnectID) || originChapter.Period > 0) // set lo trinh
+                {
+                    newchapter.StartDate = classSubject.StartDate.AddDays(originChapter.Start);
+                    newchapter.EndDate = newchapter.StartDate.AddDays(originChapter.Period);
+                }
                 _chapterService.Save(newchapter);
-
                 newID = newchapter.ID;
             }
 
-            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID);
+
+            var lessons = _courseLessonService.GetChapterLesson(classSubject.CourseID, orgID).OrderBy(t => t.ConnectID).ToList();
             if (lessons != null && lessons.Count() > 0)
             {
                 foreach (var courselesson in lessons)
                 {
+                    var lstart = courselesson.Start;
+
                     await _lessonHelper.CopyLessonFromCourseLesson(courselesson, new LessonEntity
                     {
                         ChapterID = newID,
                         OriginID = courselesson.ID,
                         ClassID = classSubject.ClassID,
-                        ClassSubjectID = classSubject.ID
-                    });
+                        ClassSubjectID = classSubject.ID,
+                    }, classSubject.StartDate);
                 }
                 lessoncounter = lessons.Count();
             }

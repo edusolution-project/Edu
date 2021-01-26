@@ -305,7 +305,7 @@ namespace EnglishPlatform
                 routes.MapRoute(
                    name: "areas0",
                    template: "{area:exists}/{controller=Home}/{action=Index}"
-                 );
+                );
                 routes.MapRoute(
                    name: "areas1",
                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
