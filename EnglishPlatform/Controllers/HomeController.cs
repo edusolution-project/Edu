@@ -440,112 +440,112 @@ namespace EnglishPlatform.Controllers
             }
         }
 
-        public JsonResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
-        {
-            var _username = UserName.Trim().ToLower();
-            if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
-            {
-                return Json(new ReturnJsonModel
-                {
-                    StatusCode = ReturnStatus.ERROR,
-                    StatusDesc = "Please fill your information",
-                });
-            }
-            else
-            {
-                string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
-                if (_accountService.IsAvailable(_username))
-                {
-                    return Json(new ReturnJsonModel
-                    {
-                        StatusCode = ReturnStatus.ERROR,
-                        StatusDesc = "Account exist",
-                    });
-                }
-                else
-                {
-                    var defCenter = _centerService.GetItemByCode("eduso");
+        //public JsonResult RegisterAPI(string UserName, string Name, string Phone, string PassWord, string Type)
+        //{
+        //    var _username = UserName.Trim().ToLower();
+        //    if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(PassWord))
+        //    {
+        //        return Json(new ReturnJsonModel
+        //        {
+        //            StatusCode = ReturnStatus.ERROR,
+        //            StatusDesc = "Please fill your information",
+        //        });
+        //    }
+        //    else
+        //    {
+        //        string _sPass = Core_v2.Globals.Security.Encrypt(PassWord);
+        //        if (_accountService.IsAvailable(_username))
+        //        {
+        //            return Json(new ReturnJsonModel
+        //            {
+        //                StatusCode = ReturnStatus.ERROR,
+        //                StatusDesc = "Account exist",
+        //            });
+        //        }
+        //        else
+        //        {
+        //            var defCenter = _centerService.GetItemByCode("eduso");
 
-                    var user = new AccountEntity()
-                    {
-                        PassWord = _sPass,
-                        UserName = _username,
-                        Name = Name ?? _username,
-                        Phone = Phone,
-                        Type = Type,
-                        IsActive = false,
-                        CreateDate = DateTime.Now,
-                        UserCreate = null,
-                    };
-                    switch (Type)
-                    {
-                        case ACCOUNT_TYPE.TEACHER:
-                            user.RoleID = _roleService.GetItemByCode("teacher").ID;
-                            break;
-                        default:
-                            user.IsActive = true;// active student
-                            user.RoleID = _roleService.GetItemByCode("student").ID;
-                            break;
-                    }
-                    _accountService.CreateQuery().InsertOne(user);
-                    switch (Type)
-                    {
-                        case ACCOUNT_TYPE.TEACHER:
-                            //create teacher
-                            var teacher = new TeacherEntity()
-                            {
-                                FullName = user.Name,
-                                Email = _username,
-                                Phone = user.Phone,
-                                IsActive = false,
-                                CreateDate = DateTime.Now,
-                                Centers = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name, RoleID = user.RoleID } }
-                            };
-                            _teacherService.CreateQuery().InsertOne(teacher);
-                            user.UserID = teacher.ID;
-                            //send email for teacher
-                            _ = Task.Run(() =>
-                            {
-                                _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
-                            });
-                            break;
-                        default: //temporary block
-                            //create student
-                            var student = new StudentEntity()
-                            {
-                                FullName = user.Name,
-                                Email = _username,
-                                Phone = user.Phone,
-                                IsActive = true,// active student
-                                CreateDate = DateTime.Now
-                            };
+        //            var user = new AccountEntity()
+        //            {
+        //                PassWord = _sPass,
+        //                UserName = _username,
+        //                Name = Name ?? _username,
+        //                Phone = Phone,
+        //                Type = Type,
+        //                IsActive = false,
+        //                CreateDate = DateTime.Now,
+        //                UserCreate = null,
+        //            };
+        //            switch (Type)
+        //            {
+        //                case ACCOUNT_TYPE.TEACHER:
+        //                    user.RoleID = _roleService.GetItemByCode("teacher").ID;
+        //                    break;
+        //                default:
+        //                    user.IsActive = true;// active student
+        //                    user.RoleID = _roleService.GetItemByCode("student").ID;
+        //                    break;
+        //            }
+        //            _accountService.CreateQuery().InsertOne(user);
+        //            switch (Type)
+        //            {
+        //                case ACCOUNT_TYPE.TEACHER:
+        //                    //create teacher
+        //                    var teacher = new TeacherEntity()
+        //                    {
+        //                        FullName = user.Name,
+        //                        Email = _username,
+        //                        Phone = user.Phone,
+        //                        IsActive = false,
+        //                        CreateDate = DateTime.Now,
+        //                        Centers = new List<CenterMemberEntity> { new CenterMemberEntity { CenterID = defCenter.ID, Code = defCenter.Code, Name = defCenter.Name, RoleID = user.RoleID } }
+        //                    };
+        //                    _teacherService.CreateQuery().InsertOne(teacher);
+        //                    user.UserID = teacher.ID;
+        //                    //send email for teacher
+        //                    _ = Task.Run(() =>
+        //                    {
+        //                        _ = _mailHelper.SendTeacherJoinCenterNotify(teacher.FullName, teacher.Email, PassWord, defCenter.Name);
+        //                    });
+        //                    break;
+        //                default: //temporary block
+        //                    //create student
+        //                    var student = new StudentEntity()
+        //                    {
+        //                        FullName = user.Name,
+        //                        Email = _username,
+        //                        Phone = user.Phone,
+        //                        IsActive = true,// active student
+        //                        CreateDate = DateTime.Now
+        //                    };
 
-                            _studentService.CreateQuery().InsertOne(student);
-                            user.UserID = student.ID;
-                            //send email for student
-                            //add default class
-                            var testClassIDs = _default.defaultClassID;
-                            if (!string.IsNullOrEmpty(testClassIDs))
-                            {
-                                foreach (var id in testClassIDs.Split(';'))
-                                    if (!string.IsNullOrEmpty(id))
-                                        _classService.AddStudentToClass(id, student.ID);
-                            }
-                            break;
-                    }
-                    var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
-                    _accountService.CreateQuery().ReplaceOne(filter, user);
-                    ViewBag.Data = user;
-                    _ = _mailHelper.SendRegisterEmail(user, PassWord);
-                    return Json(new ReturnJsonModel
-                    {
-                        StatusCode = ReturnStatus.SUCCESS,
-                        StatusDesc = "Tài khoản đã được tạo, mời bạn đăng nhập để trải nghiệm ngay!",
-                        Location = "/Login"
-                    });
-                }
-            }
-        }
+        //                    _studentService.CreateQuery().InsertOne(student);
+        //                    user.UserID = student.ID;
+        //                    //send email for student
+        //                    //add default class
+        //                    var testClassIDs = _default.defaultClassID;
+        //                    if (!string.IsNullOrEmpty(testClassIDs))
+        //                    {
+        //                        foreach (var id in testClassIDs.Split(';'))
+        //                            if (!string.IsNullOrEmpty(id))
+        //                                _classService.AddStudentToClass(id, student.ID);
+        //                    }
+        //                    break;
+        //            }
+        //            var filter = Builders<AccountEntity>.Filter.Where(o => o.ID == user.ID);
+        //            _accountService.CreateQuery().ReplaceOne(filter, user);
+        //            ViewBag.Data = user;
+        //            _ = _mailHelper.SendRegisterEmail(user, PassWord);
+        //            return Json(new ReturnJsonModel
+        //            {
+        //                StatusCode = ReturnStatus.SUCCESS,
+        //                StatusDesc = "Tài khoản đã được tạo, mời bạn đăng nhập để trải nghiệm ngay!",
+        //                Location = "/Login"
+        //            });
+        //        }
+        //    }
+        //}
 
         //Quên mật khẩu
         public async Task<JsonResult> ForgotAPI(string UserName)
