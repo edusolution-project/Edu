@@ -137,7 +137,7 @@
     <None Include="Areas\Teacher\Views\Schedule\Detail.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Schedule\Lesson.cshtml" />
-    <None Include="Areas\Teacher\Views\Class\Index.cshtml" />
+    <None Include="Areas\Teacher\Views\Class\Index12.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Index.cshtml" />
     <None Include="Areas\Teacher\Views\Curriculum\Lesson.cshtml" />
     <None Include="Areas\Teacher\Views\Discuss\Index_o.cshtml" />
@@ -2264,6 +2264,12 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
@@ -2297,7 +2303,7 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Update="Areas\Teacher\Views\Class\Index.cshtml">
+    <Content Update="Areas\Teacher\Views\Class\Index12.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
