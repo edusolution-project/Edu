@@ -46,16 +46,36 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Tên lớp cần tìm">
             </div>
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
-                <input type="checkbox" v-model="isPrivate" /><span> Chỉ hiện lớp của tôi</span>
+                <template v-if="tab[0]">
+                    <input type="checkbox" v-model="isPrivate" />
+                    <span> Chỉ hiện lớp của tôi</span>
+                </template>
+                <template v-if="tab[1]">
+                    <select v-model="filterReport" class="form-control">
+                        <option value="allCenters" selected>Toàn cơ sở</option>
+                        <option value="teacher">Theo giáo viên</option>
+                    </select>
+                </template>
             </div>
             <div class="col-12 col-md-4 ml-auto text-md-right">
                 <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
                 <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
                 @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
             </div>
+            @if (isHeadTeacher)
+            {
+                <div class="flex flex-wrap align-items-center">
+                    <div class="tab bg-none col-md-12 m-1">
+                        <ul class="flex flex-row">
+                            <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Danh sách lớp" v-on:click="tabChange(0)">Danh sách lớp</a></li>
+                            <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Báo cáo" v-on:click="tabChange(1)">Báo cáo</a></li>
+                        </ul>
+                    </div>
+                </div>
+            }
         </div>
     </div>
-    <div class="card-body" v-cloak>
+    <div class="card-body" v-cloak v-if="tab[0]">
         <table id="ed_table" class="table">
             <thead>
                 <tr>
@@ -131,6 +151,35 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="card-body" v-cloak v-if="tab[1]">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th v-if="filterReport == 'allCenters'">Khối</th>
+                    <th v-else>Giáo viên</th>
+                    <th>Tổng số lớp</th>
+                    <th>Tổng sĩ số</th>
+                    <th>10 - 8.0</th>
+                    <th>7.9 - 5.0</th>
+                    <th>4.9 - 2.0</th>
+                    <th>1.9 - 0.0</th>
+                </tr>
+            </thead>
+            <thead>
+                <tr v-for="(item,k) in dataReport">
+                    <td v-if="filterReport == 'allCenters'">Khối {{(item.NameBlock == 99 ? "Khác" : item.NameBlock)}}</td>
+                    <td v-else>{{item.NameBlock}}</td>
+                    <td>{{item.TotalClass}}</td>
+                    <td>{{item.TotalStudent}}</td>
+                    <td>{{getPersent(item.MinPoint8,item.TotalStudent)}}%</td>
+                    <td>{{getPersent(item.MinPoint5,item.TotalStudent)}}%</td>
+                    <td>{{getPersent(item.MinPoint2,item.TotalStudent)}}%</td>
+                    <td>{{getPersent(item.MinPoint0,item.TotalStudent)}}%</td>
+                </tr>
+            </thead>
+        </table>
     </div>
 </section>
 
@@ -364,6 +413,14 @@
                         var cr = hash.split('-')[1]
                         this.page = cr;
                     }
+                    switch (hash) {
+                        case 'listclasses':
+                            this.tabChange(0);
+                            break;
+                        case 'report':
+                            this.tabChange(1);
+                            break;
+                    }
                 }
                 else
                     this.getData()
@@ -490,7 +547,10 @@
                     IsOwner: false
                 },
                 curr: 0,
-                isHeadTeacher: @(isHeadTeacher? "true": "false")
+                isHeadTeacher: @(isHeadTeacher? "true": "false"),
+                tab: [true, false],
+                dataReport: [],
+                filterReport:'allCenters'
             },
             computed: {
                 sDate: {
@@ -526,6 +586,16 @@
                         fn = null
                     }, 500)
                 },
+                filterReport: function () {
+                    switch (this.filterReport) {
+                        case 'allCenters':
+                            this.getReport('allCenters')
+                            break;
+                        case 'teacher':
+                            this.getReport('teacher')
+                            break;
+                    }
+                }
             },
             methods: {
                 getData() {
@@ -1365,10 +1435,50 @@
                         window.open(uri + base64(format(template, ctx)));
                     }
                 },
-                a(obj, userid) {
-                    //debugger
-                    //if (obj.TeacherID == userid) return true
-                    //else return false
+                tabChange(a = 0) {
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Danh sách lớp học", "#listclasses");
+                            this.getData()
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Báo cáo", "#report");
+                            this.getReport();
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
+                getReport(defaultFilter = 'allCenters') {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = ''
+                    if (defaultFilter.includes('allCenters'))
+                        _url = '@processUrl("GetManageReport","Class")'
+                    else if(defaultFilter.includes('teacher'))
+                        _url = '@processUrl("GetTeacherReport","Class")'
+                    _that.dataReport = []
+                    axios.post(_url, _form)
+                        .then(response =>
+                        {
+                            //debugger
+                            var data = response.data.Data;
+                            this.dataReport = data
+                            //var data10 = response.data[10] //khoi 10
+                            //var data11 = response.data[11] //khoi 11
+                            //var data12 = response.data[12] //khoi 12
+                            //var data99 = response.data[99] //khoi khac
+                        })
+                        .catch(e => { alert(e) })
+                },
+                getPersent(point, total) {
+                    if (total == 0) return 0
+                    else return ((point / total) * 100).toFixed(2)
                 }
             }
         });

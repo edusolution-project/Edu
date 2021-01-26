@@ -17,6 +17,7 @@ using System.IO;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -2557,47 +2558,54 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             });
                     }
 
-                    item.Updated = DateTime.UtcNow;
+                    data.Updated = DateTime.UtcNow;
                     var newOrder = item.Order - 1;
-                    item.Order = data.Order;
-                    item.ClassID = data.ClassID;
-                    item.ClassSubjectID = data.ClassSubjectID;
+                    data.Order = item.Order;
+                    data.ClassID = item.ClassID;
+                    data.ClassSubjectID = item.ClassSubjectID;
+                    data.Timer = item.Timer;
+                    data.Limit = item.Limit;
+                    data.Title = item.Title;
+                    data.Multiple = item.Multiple;
+                    data.Etype = item.Etype;
+                    //item.Point = data.Point;
 
                     //update counter if type change
                     if (item.TemplateType != data.TemplateType)
                     {
+                        data.TemplateType = item.TemplateType;
                         var examInc = 0;
                         var pracInc = 0;
-                        if (_lessonHelper.IsQuizLesson(item.ID)) pracInc = 1;
-                        if (item.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
+                        if (_lessonHelper.IsQuizLesson(data.ID)) pracInc = 1;
+                        if (data.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
                         {
                             examInc = -1;
-                            item.IsPractice = pracInc == 1;
+                            data.IsPractice = pracInc == 1;
                         }
                         else
                         {
                             examInc = 1;
-                            item.IsPractice = false;
+                            data.IsPractice = false;
                             pracInc = pracInc == 1 ? -1 : 0;
                         }
-                        await _classHelper.IncreaseLessonCounter(item, 0, examInc, pracInc);
+                        await _classHelper.IncreaseLessonCounter(data, 0, examInc, pracInc);
                         //if (!string.IsNullOrEmpty(item.ChapterID) && item.ChapterID != "0")
                         //    _ = _classHelper.IncreaseChapterCounter(item.ChapterID, 0, examInc, pracInc);
                         //else
                         //    _ = _classHelper.IncreaseClassSubjectCounter(item.ClassSubjectID, 0, examInc, pracInc);
                     }
 
-                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+                    _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
 
-                    if (item.Order != newOrder)//change Position
+                    if (data.Order != newOrder)//change Position
                     {
-                        ChangeLessonPosition(item, newOrder);
+                        ChangeLessonPosition(data, newOrder);
                     }
                 }
 
                 return new JsonResult(new Dictionary<string, object>
                 {
-                    { "Data", item },
+                    { "Data", data },
                     {"Error",null }
                 });
             }
@@ -3280,6 +3288,236 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        #region Report
+        public JsonResult GetManageReport(String basis,DateTime startTime,DateTime endTime)
+        {
+            try
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                {
+                    return Json(new Dictionary<String, Object> 
+                    {
+                        {"Data", null },
+                        {"Msg","Cơ sở không tồn tại." },
+                        {"Status",false }
+                    });
+                }
+
+                if(startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
+                {
+                    startTime = center.Created;
+                    endTime = center.ExpireDate;
+                }
+
+                var listclass = _classService.GetActiveClass4Report(startTime,endTime, center.ID);
+                if (!listclass.Any())
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Data", null },
+                        {"Msg","Không có lớp đang hoạt động." },
+                        {"Status",false }
+                    });
+                }
+
+                var centerResult10 = new CenterResult(); //khoi 10
+                var centerResult11 = new CenterResult(); //khoi 11
+                var centerResult12 = new CenterResult(); //khoi 12
+                var centerResult99 = new CenterResult(); //khoi khac
+
+                foreach (var @class in listclass)
+                {
+                    var students = _studentService.GetStudentsByClassId(@class.ID);
+                    if (!students.Any()) continue;
+                    var studentIds = students.Select(x => x.ID).ToList();
+                    var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= endTime && o.EndDate >= startTime && o.ClassID == @class.ID).ToList();
+                    if (!activeLesson.Any()) continue;
+                    var activeLessonIDs = activeLesson.Select(x => x.LessonID);
+                    var lessonprogess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == @class.ID && activeLessonIDs.Contains(x.LessonID)).ToList();
+                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x=>x.StudentID);
+                    //var b = lessonprogess.Where(x => x.Tried > 0);
+                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x=>x.StudentID);
+                    Int32 minpoint8 = 0, minpoint5 = 0, minpoint2 = 0, minpoint0 = 0;
+                    foreach (var st in students)
+                    {
+                        var item = result.Where(x => x.Key == st.ID).FirstOrDefault();
+                        if (item == null) minpoint0++;
+                        else
+                        {
+                            var point = item.Average(x => x.LastPoint);
+                            if (point >= 80) minpoint8++;
+                            else if (point >= 50 && point < 80) minpoint5++;
+                            else if (point >= 20 && point < 50) minpoint2++;
+                            else if (point >= 0 && point < 20) minpoint0++;
+                        }
+                    }
+
+                    if(@class.Name.Contains("10"))
+                    {
+                        centerResult10.MinPoint0 += minpoint0;
+                        centerResult10.MinPoint2 += minpoint2;
+                        centerResult10.MinPoint5 += minpoint5;
+                        centerResult10.MinPoint8 += minpoint8;
+                        centerResult10.TotalStudent += studentIds.Count();
+                        centerResult10.TotalClass++;
+                        centerResult10.NameBlock = "10";
+                    }
+                    else if (@class.Name.Contains("11"))
+                    {
+                        centerResult11.MinPoint0 += minpoint0;
+                        centerResult11.MinPoint2 += minpoint2;
+                        centerResult11.MinPoint5 += minpoint5;
+                        centerResult11.MinPoint8 += minpoint8;
+                        centerResult11.TotalStudent += studentIds.Count();
+                        centerResult11.TotalClass++;
+                        centerResult11.NameBlock = "11";
+                    }
+                    else if (@class.Name.Contains("12"))
+                    {
+                        centerResult12.MinPoint0 += minpoint0;
+                        centerResult12.MinPoint2 += minpoint2;
+                        centerResult12.MinPoint5 += minpoint5;
+                        centerResult12.MinPoint8 += minpoint8;
+                        centerResult12.TotalStudent += studentIds.Count();
+                        centerResult12.TotalClass++;
+                        centerResult12.NameBlock = "12";
+                    }
+                    else
+                    {
+                        centerResult99.MinPoint0 += minpoint0;
+                        centerResult99.MinPoint2 += minpoint2;
+                        centerResult99.MinPoint5 += minpoint5;
+                        centerResult99.MinPoint8 += minpoint8;
+                        centerResult99.TotalStudent += studentIds.Count();
+                        centerResult99.TotalClass++;
+                        centerResult99.NameBlock = "99";
+                    }
+
+                }
+
+                var dic = new Dictionary<String, Object>();
+                dic.Add("10", centerResult10);
+                dic.Add("11", centerResult11);
+                dic.Add("12", centerResult12);
+                dic.Add("99", centerResult99);
+                //return Json(dic);
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Data",dic }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                    {
+                        {"Data", null },
+                        {"Msg",ex.Message },
+                        {"Status",false }
+                    });
+            }
+        }
+
+        public JsonResult GetTeacherReport(String basis, DateTime startTime, DateTime endTime)
+        {
+            try
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Data", null },
+                        {"Msg","Cơ sở không tồn tại." },
+                        {"Status",false }
+                    });
+                }
+
+                if (startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
+                {
+                    startTime = center.Created;
+                    endTime = center.ExpireDate;
+                }
+
+                var listclass = _classService.GetActiveClass4Report(startTime, endTime, center.ID);
+                if (!listclass.Any())
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Data", null },
+                        {"Msg","Không có lớp đang hoạt động." },
+                        {"Status",false }
+                    });
+                }
+
+                List<CenterResult> resultTeacher = new List<CenterResult>();
+
+                foreach (var @class in listclass)
+                {
+                    if (@class.Members == null) continue;
+                    var students = _studentService.GetStudentsByClassId(@class.ID);
+                    if (!students.Any()) continue;
+                    var studentIds = students.Select(x => x.ID).ToList();
+                    var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= endTime && o.EndDate >= startTime && o.ClassID == @class.ID).ToList();
+                    if (!activeLesson.Any()) continue;
+                    var activeLessonIDs = activeLesson.Select(x => x.LessonID);
+                    var lessonprogess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == @class.ID && activeLessonIDs.Contains(x.LessonID)).ToList();
+                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x => x.StudentID);
+                    //var b = lessonprogess.Where(x => x.Tried > 0);
+                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x => x.StudentID);
+                    Int32 minpoint8 = 0, minpoint5 = 0, minpoint2 = 0, minpoint0 = 0;
+                    foreach (var st in students)
+                    {
+                        var item = result.Where(x => x.Key == st.ID).FirstOrDefault();
+                        if (item == null) minpoint0++;
+                        else
+                        {
+                            var point = item.Average(x => x.LastPoint);
+                            if (point >= 80) minpoint8++;
+                            else if (point >= 50 && point < 80) minpoint5++;
+                            else if (point >= 20 && point < 50) minpoint2++;
+                            else if (point >= 0 && point < 20) minpoint0++;
+                        }
+                    }
+
+                    var centerResult = new CenterResult();
+                    var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER).FirstOrDefault();
+                    var _teacher = _teacherService.GetItemByID(members.TeacherID);
+                    if (!resultTeacher.Any(x => x.TeacherID == _teacher.ID))
+                    {
+                        centerResult.TeacherID = _teacher.ID;
+                        centerResult.NameBlock = _teacher.FullName;
+                        resultTeacher.Add(centerResult);
+                        resultTeacher.Add(centerResult);
+                    }
+
+                    var abc = resultTeacher.Where(x => x.TeacherID == _teacher.ID).FirstOrDefault();
+                    if (abc == null) continue;
+                    abc.MinPoint0 += minpoint0;
+                    abc.MinPoint2 += minpoint2;
+                    abc.MinPoint5 += minpoint5;
+                    abc.MinPoint8 += minpoint8;
+                    abc.TotalStudent += studentIds.Count();
+                    abc.TotalClass++;
+                }
+
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Data",resultTeacher.Distinct() }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                    {
+                        {"Data", null },
+                        {"Msg",ex.Message },
+                        {"Status",false }
+                    });
+            }
+        }
+        #endregion
+
         private class StudentResult
         {
             public string StudentID { get; set; }
@@ -3528,6 +3766,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String ProgressExam { get; set; }
             public String AvgPointExam { get; set; }
             public String Rank { get; set; }
+        }
+
+        public class CenterResult
+        {
+            [JsonProperty("MinPoint8")]
+            public int MinPoint8 { get; set; }
+            [JsonProperty("MinPoint5")]
+            public int MinPoint5 { get; set; }
+            [JsonProperty("MinPoint2")]
+            public int MinPoint2 { get; set; }
+            [JsonProperty("MinPoint0")]
+            public int MinPoint0 { get; set; }
+            [JsonProperty("TotalStudent")]
+            public int TotalStudent { get; set; }
+            [JsonProperty("TotalClass")]
+            public int TotalClass { get; set; }
+            [JsonProperty("NameBlock")]
+            public String NameBlock { get; set; }
+            [JsonProperty("TeacherID")]
+            public String TeacherID { get; set; }
         }
 
         //test

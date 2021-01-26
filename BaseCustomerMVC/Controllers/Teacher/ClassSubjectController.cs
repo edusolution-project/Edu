@@ -38,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
         private readonly MappingEntity<LessonEntity, LessonResultViewModel> _resultMapping;
+        private readonly MappingEntity<LessonEntity, LessonVM> _lessonVMMapping = new MappingEntity<LessonEntity, LessonVM>();
 
         private readonly ExamService _examService;
 
@@ -202,19 +203,48 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Error", "Không tìm thấy học liệu" }
                     });
 
-            var courseDetail = new Dictionary<string, object>
-            {
-                { "Chapters", _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
-                { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
-                {"TypeClass",currentCs.TypeClass }
-            };
+            //if (currentCs.TypeClass != CLASSSUBJECT_TYPE.EXAM)
+            //{
+                var courseDetail = new Dictionary<string, object>
+                {
+                    { "Chapters", _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
+                    { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
+                    {"TypeClass",currentCs.TypeClass }
+                };
 
-            var response = new Dictionary<string, object>
+                var response = new Dictionary<string, object>
                 {
                     { "Data", courseDetail }
                 };
 
-            return new JsonResult(response);
+                return new JsonResult(response);
+            //}
+            //else
+            //{
+            //    var chapters = _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+            //    var lessons = _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+            //    var typeclass = currentCs.TypeClass;
+
+            //    var lessonVM = (from l in lessons.ToList()
+            //                    let haspoint = _examService.CreateQuery().Find(x => x.LessonID == l.ID).CountDocuments()
+            //                    select _lessonVMMapping.Auto(l, new LessonVM()
+            //                    {
+            //                        HasPoint = haspoint == 0 ? false : true
+            //                    })).ToList();
+
+            //    var courseDetail = new Dictionary<string, object>
+            //    {
+            //        { "Chapters", chapters } ,
+            //        { "Lessons", lessonVM },
+            //        {"TypeClass",typeclass }
+            //    };
+
+            //    var response = new Dictionary<string, object>
+            //    {
+            //        { "Data", courseDetail }
+            //    };
+            //    return new JsonResult(response);
+            //}
         }
 
         [HttpPost]
@@ -349,6 +379,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public Double MinPoint5 { get; set; }
             public Double MinPoint8 { get; set; }
 
+        }
+
+        public class LessonVM : LessonEntity
+        {
+            [JsonProperty("HasPoint")]
+            public Boolean HasPoint { get; set; }
         }
     }
 }

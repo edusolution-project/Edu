@@ -4265,8 +4265,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questionList;
         }
 
-       
-
         private string validateFill(string org)
         {
             if (string.IsNullOrEmpty(org)) return org;
@@ -4292,6 +4290,88 @@ namespace BaseCustomerMVC.Controllers.Teacher
             $"\nLưu ý: xxx là số thứ tự câu hỏi/câu trả lời;" +
             $"\nLiên kết hình ảnh/media có dạng http://... hoặc https://...";
 
+        #endregion
+
+        #region
+        public JsonResult GetListCourse(String basis,String SubjectID,String GradeID)
+        {
+            try
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if(center == null)
+                {
+                    return Json(new Dictionary<String, Object> 
+                    {
+                        {"Data","" },
+                        {"Error","Cơ sở không tồn tại." }
+                    });
+                }
+
+                var courses = _service.GetItemBySubjectID_GradeID(SubjectID, GradeID,center.ID);
+                var courseIDs = courses.Select(x => x.ID).ToList();
+                var courseChapters = _chapterService.GetCourseChapters(courseIDs);
+                return Json(new Dictionary<String, Object> 
+                {
+                    {"Courses",courses },
+                    {"Chapters",courseChapters },
+                    {"Error","" }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
+        public JsonResult GetListCourseLesson(String basis,String ParentID)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(ParentID))
+                {
+                    var courseLesson = _courseLessonService.GetChapterLesson(ParentID);
+                    if(courseLesson == null)
+                    {
+                        return Json(new Dictionary<String, Object>
+                        {
+                            {"CourseLesson",new CourseLessonEntity() },
+                            {"LessonPart",new LessonPartEntity() },
+                            {"Error","Không tìm thấy bài." },
+                            {"Status",false }
+                        });
+                    }
+
+                    var courseLessonIDs = courseLesson.Select(x => x.ID).ToList();
+                    var lessonPart = _lessonPartService.GetItemByTypeQuiz_LessonIDs(courseLessonIDs).ToList();
+                    return Json(new Dictionary<String, Object> 
+                    {
+                        {"CourseLesson",courseLesson },
+                        {"LessonPart",lessonPart },
+                        {"Error","" },
+                        {"Status",true }
+                    });
+                }
+                else
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                         {"CourseLesson",new CourseLessonEntity() },
+                            {"LessonPart",new LessonPartEntity() },
+                        {"Error","Không tìm thấy bài." },
+                        {"Status",false }
+                    });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                    {
+                        {"CourseLesson","" },
+                        {"Error",ex.Message },
+                        {"Status",false }
+                    });
+            }
+        }
         #endregion
     }
 

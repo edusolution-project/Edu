@@ -2455,6 +2455,9 @@
                     if (s > 0) {
                         ret += s + "s ";
                     }
+                    else {
+                        ret += s + "s "
+                    }
                     return ret;
                 },
                 domDecoder(str) {
@@ -2838,7 +2841,7 @@
                             if (item.ID == ChapterID) {
                                 if (item.ParentID != "0") {
                                     parentItem = listChapters.find(x => x.ID == item.ParentID)
-                                    return item.Name + " - " + parentItem?.Title 
+                                    return item.Name + " - " + (parentItem == null ? "" : parentItem.Title) 
                                 }
                                 else {
                                     return item.Name
@@ -3183,7 +3186,7 @@
                             <tr style="font-weight:bold">
                                 <td colspan="2">Điểm trung bình</td>
                                 <td>{{roundPoint(studentSummary.avgPointPractice,1)}}</td>
-                                <td colspan="3">{{roundPoint(studentSummary.avgPointExam,1)}}</td>
+                                <td :colspan="studentSummary.dataExam.length > 0 ? studentSummary.dataExam.length : 1">{{roundPoint(studentSummary.avgPointExam,1)}}</td>
                             </tr>
 
                         </template>
