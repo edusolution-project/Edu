@@ -3449,10 +3449,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var dic = new Dictionary<String, Object>();
-                dic.Add("10", centerResult10);
-                dic.Add("11", centerResult11);
-                dic.Add("12", centerResult12);
-                dic.Add("99", centerResult99);
+                if (centerResult10.TotalClass > 0 || centerResult10.TotalStudent > 0) dic.Add("10", centerResult10);
+                if (centerResult11.TotalClass > 0 || centerResult11.TotalStudent > 0) dic.Add("11", centerResult11);
+                if (centerResult12.TotalClass > 0 || centerResult12.TotalStudent > 0) dic.Add("12", centerResult12);
+                if (centerResult99.TotalClass > 0 || centerResult99.TotalStudent > 0) dic.Add("99", centerResult99);
                 //return Json(dic);
                 return Json(new Dictionary<String, Object>
                 {
