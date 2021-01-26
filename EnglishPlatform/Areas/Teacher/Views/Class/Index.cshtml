@@ -653,6 +653,7 @@
 
                     var valid = true
                     var notify = false
+
                     if (_that.class_info.subject != null) {
                         _that.class_info.subject.forEach(function (item, k) {
                             if (item.SubjectID == '' || item.GradeID == '' || item.CourseID == '' || item.TeacherID == '') {
@@ -668,6 +669,18 @@
                             _form.append('ClassSubjects[' + k + '].CourseID', item.CourseID)
                             _form.append('ClassSubjects[' + k + '].TeacherID', item.TeacherID)
                             _form.append('ClassSubjects[' + k + '].TypeClass', item.TypeClass)
+                        })
+                    }
+
+                    if (_that.class_info.Teachers != null) {
+                        var addTeacher = []
+                        idx = 0;
+                        _that.class_info.Teachers.forEach(function (item, k) {
+                            if(item != null && item.TeacherID != '')
+                            if (addTeacher.findIndex(t => t == item.ID) < 0) {
+                                addTeacher.push(item.ID);
+                                _form.append('Teachers[' + idx + ']', item.ID)
+                            }
                         })
                     }
 
@@ -851,7 +864,7 @@
                                         GradeID: item.GradeID,
                                         TeacherID: item.TeacherID,
                                         CourseID: item.CourseID,
-                                        IsLock: lock,
+                                        IsLock: false,
                                         IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND',
                                         TypeClass: item.TypeClass
                                     })
@@ -1023,6 +1036,7 @@
                    obj.CourseID = ''
                 },
                 addSubject() {
+                    console.log('@userid');
                     let length = this.class_info.subject.length;
                     this.curr = length
                     let _subject = {
@@ -1031,15 +1045,23 @@
                         //SkillID: '',
                         SubjectID: '',
                         GradeID: '',
-                        TeacherID: '',
+                        TeacherID: '@userid',
                         CourseID: '',
                         TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
                     }
                     this.class_info.subject.push(_subject)
                     this.$forceUpdate();
                 },
+                addTeacher() {
+                    this.class_info.Teachers.push({Name: "", TeacherID: "", Type: 1});
+                    //console.log(this.class_info.Teachers);
+                    this.$forceUpdate();
+                },
                 removeSubject(k) {
                     this.class_info.subject.splice(k, 1);
+                },
+                removeTeacher(k) {
+                    this.class_info.Teachers.splice(k, 1);
                 },
                 refreshSubject(k, obj) {
                     if (this.class_info.subject[k].ID != "") {
@@ -1445,7 +1467,7 @@
                     <div class="tab bg-none">
                         <ul class="flex flex-row">
                             <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu" v-on:click="tabChange()">Học liệu</a></li>
-                            <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Giáo viên" v-on:click="tabChange(1)">Giáo viên</a></li>
+                            <li v-bind:class="{active : tab[1]}" v-if="(isHeadTeacher || class_info.IsOwner)"><a href="javascript:;" title="Giáo viên" v-on:click="tabChange(1)">Giáo viên</a></li>
                         </ul>
                     </div>
                     <div class="c-right">
@@ -1477,14 +1499,14 @@
                         <li class="flex pb-0" :id="sub.UID">
                             <div class="width-100 mr-2">
                                 @*<label for="">Chương trình</label>*@
-                                <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                    <option value="">Chọn chương trình</option>
-                                    <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
-                                </select>
+                                    <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" >
+                                        <option value="">Chọn chương trình</option>
+                                        <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
+                                    </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Cấp độ</label>*@
-                                <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)">
                                     <option value="">Chọn cấp độ</option>
                                     <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
                                 </select>
@@ -1498,21 +1520,21 @@
                                 </div>*@
                             <div class="width-100 mr-2">
                                 @*<label for="">Bài giảng</label>*@
-                                <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                <select v-model="sub.CourseID" class="form-control" >
                                     <option value="">Chọn bài giảng</option>
                                     <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
                                 </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Loại học liệu</label>*@
-                                <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                <select v-model="sub.TypeClass" class="form-control" >
                                     <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
                                     <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
                                 </select>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Giáo viên</label>*@
-                                <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                <select v-model="sub.TeacherID" class="form-control" >
                                     <option value="">Chọn giáo viên</option>
                                     <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                                 </select>
@@ -1568,29 +1590,29 @@
                                     <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
                                 </select>
                             </div>
-
                             <div class="btn-group">
                                 <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
                                 <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                             </div>
                         </li>
                     </ul>
-                    <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>
+                    @*<a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>*@
+                    <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub"><i class="ic ic-plus-c"></i> Thêm môn học</a>
                 </div>
                 <div class="courseTab" v-if="tab[1]">
                     <ul class="list list-subject pt-1 mb-1" v-for="(sub,k) in class_info.Teachers">
                         <li class="flex pb-0" :id="sub.UID">
                             <div class="width-100 mr-2 mb-0">
-                                <select v-model="sub.TeacherID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                                <select v-model="sub.TeacherID" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
                                     <option v-for="(item,k) in teacherSource" :value="item.ID">{{item.FullName}}</option>
                                 </select>
                             </div>
                             <div class="btn-group">
-                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa giáo viên"><i class="ti-trash"></i></button>
+                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="!(isHeadTeacher || class_info.IsOwner)" title="Xóa giáo viên"><i class="ti-trash"></i></button>
                             </div>
                         </li>
                     </ul>
-                    <a href="javascript:;" title="Thêm viên" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i>Thêm giáo viên</a>
+                    <a href="javascript:;" title="Thêm giáo viên" v-on:click="addTeacher()" class="btn-add-sub mt-2" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i>Thêm giáo viên</a>
                 </div>
             </div>
         </div>

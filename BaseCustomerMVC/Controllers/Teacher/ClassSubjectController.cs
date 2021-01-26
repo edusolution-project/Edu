@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly GradeService _gradeService;
         private readonly SubjectService _subjectService;
         private readonly TeacherService _teacherService;
+        private readonly TeacherHelper _teacherHelper;
         private readonly SkillService _skillService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
@@ -47,6 +48,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SubjectService subjectService,
             ClassSubjectService classSubjectService,
             TeacherService teacherService,
+            TeacherHelper teacherHelper,
 
             SkillService skillService,
             CourseService courseService,
@@ -61,6 +63,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _gradeService = gradeservice;
             _subjectService = subjectService;
             _teacherService = teacherService;
+            _teacherHelper = teacherHelper;
+
             _courseService = courseService;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
@@ -82,24 +86,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //if (string.IsNullOrEmpty(ClassID))
             //    return null;
             var teacherID = "";
-            if (User.IsInRole("teacher"))
-                teacherID = User.Claims.GetClaimByType("UserID").Value;
+            //if (User.IsInRole("teacher"))
+            //    teacherID = User.Claims.GetClaimByType("UserID").Value;
 
             var @class = _classService.GetItemByID(ClassID);
-            if(@class == null)
+            if (@class == null)
             {
                 return Json("Lop khong ton tai");
+            }
+            teacherID = User.Claims.GetClaimByType("UserID").Value;
+            var isHeadTeacher = _teacherHelper.HasRole(teacherID, @class.Center, "head-teacher");
+
+            if (!isHeadTeacher)
+            {
+                if (!User.IsInRole("teacher"))
+                    return Json("Khong co quyen truy cap");
             }
 
             var watch1 = new System.Diagnostics.Stopwatch();
             var watch2 = new System.Diagnostics.Stopwatch();
             watch1.Start();
-            var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x=>new {x.ID,x.ClassSubjectID }).ToList();
+            var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x => new { x.ID, x.ClassSubjectID }).ToList();
             watch1.Stop();
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          where string.IsNullOrEmpty(teacherID) || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
+                          where isHeadTeacher || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
                           let subject = r.SubjectID != null?  _subjectService.GetItemByID(r.SubjectID): new SubjectEntity()
                           let grade = r.GradeID != null? _gradeService.GetItemByID(r.GradeID): new GradeEntity()
                           let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}

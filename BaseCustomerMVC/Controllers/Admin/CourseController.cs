@@ -449,7 +449,6 @@ namespace BaseCustomerMVC.Controllers.Admin
                 _courseHelper.CloneForClassSubject(newClassSbj);
             }
 
-
             var subjects = _classSubjectService.CreateQuery().Find(t => t.ClassID == newClass.ID && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
             if (subjects.Count() == 0)
             {
