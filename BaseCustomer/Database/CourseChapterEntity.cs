@@ -103,5 +103,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(x => x.CourseID == CourseID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
         }
+
+        public List<CourseChapterEntity> GetCourseChapters(List<String> CourseIDs)
+        {
+            return Collection.Find(x => CourseIDs.Contains(x.CourseID)).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList();
+        }
     }
 }

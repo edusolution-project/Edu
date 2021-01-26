@@ -82,8 +82,11 @@
 
                 @await Html.PartialAsync("_sideBarTeacher")
 
-                <div class="right-content" style="margin-left:240px">
+                <div class="right-content" id="right-content" style="margin-left:240px">
                     @RenderBody()
+                    <div v-cloak>
+                        @RenderSection("Modals", false)
+                    </div>
                 </div>
 
                 <!-- Footer -->
@@ -102,7 +105,6 @@
     </div>
     <!-- Logout Modal-->
     @await Html.PartialAsync("_modalLogout")
-    @RenderSection("Modals", false)
     @RenderSection("Scripts", false)
     @*@await Html.PartialAsync("_EasyChat")*@
 </body>

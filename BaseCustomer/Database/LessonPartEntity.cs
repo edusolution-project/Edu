@@ -70,7 +70,10 @@ namespace BaseCustomerEntity.Database
                                 .SortBy(q => q.Order)
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
-    
-    
+
+        public IEnumerable<LessonPartEntity> GetItemByTypeQuiz_LessonIDs(List<string> LessonIDs)
+        {
+            return CreateQuery().Find(x => LessonIDs.Contains(x.ParentID) && x.Type.ToUpper().Contains("QUIZ")).ToEnumerable();
+        }
     }
 }

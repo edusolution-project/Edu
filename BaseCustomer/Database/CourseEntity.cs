@@ -116,5 +116,10 @@ namespace BaseCustomerEntity.Database
             CreateQuery().UpdateOneAsync(t => t.ID == ID, new UpdateDefinitionBuilder<CourseEntity>()
                 .AddToSet(t => t.TargetCenters, TargetID));
         }
+
+        public IEnumerable<CourseEntity> GetItemBySubjectID_GradeID(String SubjectID, String GradeID,String CenterID)
+        {
+            return CreateQuery().Find(x => x.GradeID.Equals(GradeID) && x.SubjectID.Equals(SubjectID) && x.Center.Equals(CenterID)).ToEnumerable();
+        }
     }
 }

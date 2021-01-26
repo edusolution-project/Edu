@@ -135,9 +135,14 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => ClassIDs.Contains(t.ID) && t.Center == CenterID).ToEnumerable();
         }
 
-        public IEnumerable<string> GetTeacherClassList(string userID)
+        public IEnumerable<string> GetTeacherClassListID(string userID)
         {
             return Collection.Find(t => t.Members.Any(o => o.TeacherID == userID)).Project(t => t.ID).ToEnumerable();
+        }
+
+        public List<ClassEntity> GetTeacherClassList(String UserID)
+        {
+            return Collection.Find(t => t.Members.Any(o => o.TeacherID == UserID)).ToList();
         }
 
         public IEnumerable<ClassEntity> GetActiveClass(DateTime time, string Center = null)

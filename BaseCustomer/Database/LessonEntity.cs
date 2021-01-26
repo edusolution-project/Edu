@@ -126,6 +126,5 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.IsPractice).ToEnumerable();
         }
-
     }
 }

@@ -64,5 +64,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.ParentID == ID).ToEnumerable();
         }
+
+        public IEnumerable<LessonPartAnswerEntity> GetByQuestionIDs(List<string> IDs)
+        {
+            return CreateQuery().Find(o => IDs.Contains(o.ParentID)).ToEnumerable();
+        }
     }
 }
