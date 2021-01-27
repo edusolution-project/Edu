@@ -475,7 +475,7 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(new { Data = std });
         }
 
-        public JsonResult GetThisWeekLesson(DateTime today, string basis)
+        public JsonResult GetThisWeekLesson(DateTime today, string basis, bool seekStart = true)
         {
             //try
             //{
@@ -485,7 +485,9 @@ namespace BaseCustomerMVC.Controllers.Student
             if (today < new DateTime(1900, 1, 1))
                 return Json(new { });
             today = today.ToUniversalTime();
-            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+            var startWeek = today;
+            if (seekStart)
+                startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
             var userId = User.Claims.GetClaimByType("UserID").Value;
