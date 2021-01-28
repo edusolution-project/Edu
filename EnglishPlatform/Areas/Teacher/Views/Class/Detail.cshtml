@@ -280,7 +280,6 @@
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
                                         <th rowspan="2" class="sticky-col third-col">Trung bình</th>
                                         <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
-
                                     </tr>
                                     <tr style="font-size:80%">
                                         <th v-for="(item,k) in fieldsTime" class="td_hover" v-on:click="loadResultwTime(item)">{{formatDatenoYear(item.startTime)}} - {{formatDatenoYear(item.endTime)}}</th>
@@ -885,7 +884,7 @@
                                         <datepickerV2 :date="data.EndDate" :idx="1" :obj="data" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
                                     </div>
                                     <div class="act_ic">
-                                        <i class="ic-ac fas fa-eye-slash ml-2" style="font-size:16px;" title="Bật / tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleChapterHideAnswer(data)"></i>
+                                        <i class="ic-ac fas fa-eye-slash ml-2" v-bind:class="{active: data.IsHideAnswer == true}" style="font-size:16px;" title="Bật / tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleChapterHideAnswer(data)"></i>
                                     </div>
                                     <div class="act_ic">
                                         <i class="ic-ac far fa-dot-circle ml-2" style="font-size:18px;" title="Đặt mục tiêu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
@@ -1622,6 +1621,7 @@
                                     StartDate: chapter.StartDate,
                                     EndDate: chapter.EndDate,
                                     BasePoint: chapter.BasePoint,
+                                    IsHideAnswer: chapter.IsHideAnswer,
                                     ConditionChapter: chapter.ConditionChapter == null ? '' : chapter.ConditionChapter
                                 })
                             })
@@ -2157,6 +2157,7 @@
                                         icon: 'info',
                                     });
                                 }
+                                //this.$forceUpdate();
                             }
                             else {
                                 Swal.fire({
@@ -2186,6 +2187,7 @@
                                         text: "Đã bật chế độ ẩn đáp án",
                                         icon: 'info',
                                     });
+                                    $('[id^=prc-' + obj.ID + '] .fa-eye-slash').addClass('active');
                                 }
                                 else {
                                     Swal.fire({
@@ -2193,6 +2195,7 @@
                                         text: "Đã tắt chế độ ẩn đáp án",
                                         icon: 'info',
                                     });
+                                    $('[id^=prc-' + obj.ID + '] .fa-eye-slash').removeClass('active');
                                 }
                             }
                             else {
@@ -2202,6 +2205,8 @@
                                     icon: 'warning',
                                 });
                             }
+
+
 
                             //item.IsActive = !item.IsActive;
                             //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;

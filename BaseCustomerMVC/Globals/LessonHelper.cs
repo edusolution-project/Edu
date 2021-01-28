@@ -290,10 +290,10 @@ namespace BaseCustomerMVC.Globals
 
             if (orgItem.Start == 0 && orgItem.Period == 0)//route not set
             {
-                lesson = InitLesson(lesson, invalidTime, invalidTime);
+                lesson = InitLesson(lesson, new LessonScheduleEntity { StartDate = invalidTime, EndDate = invalidTime });
             }
             else
-                lesson = InitLesson(lesson, begin.AddDays(orgItem.Start), begin.AddDays(orgItem.Start + orgItem.Period));
+                lesson = InitLesson(lesson, new LessonScheduleEntity { StartDate = begin.AddDays(orgItem.Start), EndDate = begin.AddDays(orgItem.Start + orgItem.Period) });
 
             var lessonParts = _lessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
@@ -399,7 +399,7 @@ namespace BaseCustomerMVC.Globals
             lesson.ID = null;
 
             var schedule = _lessonScheduleService.GetItemByLessonID(orgLesson.ID);
-            lesson = InitLesson(lesson, schedule.StartDate, schedule.EndDate);
+            lesson = InitLesson(lesson, schedule);
 
             var lessonParts = _cloneLessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
@@ -661,7 +661,7 @@ namespace BaseCustomerMVC.Globals
         }
         #endregion
 
-        public LessonEntity InitLesson(LessonEntity lesson, DateTime? start = null, DateTime? end = null)
+        public LessonEntity InitLesson(LessonEntity lesson, LessonScheduleEntity _schedule = null)
         {
             _lessonService.Save(lesson);
             var schedule = new LessonScheduleEntity
@@ -673,13 +673,13 @@ namespace BaseCustomerMVC.Globals
                 IsActive = true
             };
 
-            if (start > invalidTime)
+            if (_schedule != null && _schedule.StartDate > invalidTime)
             {
-                schedule.StartDate = (DateTime)start;
+                schedule.StartDate = _schedule.StartDate;
             }
-            if (end > invalidTime)
+            if (_schedule != null && _schedule.EndDate > invalidTime)
             {
-                schedule.EndDate = (DateTime)end;
+                schedule.EndDate = _schedule.EndDate;
             }
             _lessonScheduleService.Save(schedule);
             _calendarHelper.ConvertCalendarFromSchedule(schedule, "");

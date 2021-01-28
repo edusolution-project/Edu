@@ -552,7 +552,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             else
             {
-                var lessonids = GetChapterLessonID(ChapterID);
+                var chap = _chapterService.GetItemByID(ChapterID);
+                if (chap == null)
+                {
+                    return Json(new { error = "Thông tin không đúng" });
+                }
+
+                var chapids = new List<string> { ChapterID };
+                var subchap = new List<string>();
+                var lessonids = GetChapterLessonID(ChapterID, out subchap);
+
+                isHide = !chap.IsHideAnswer;
+
+                chapids.AddRange(subchap);
+
+                _chapterService.CreateQuery().UpdateMany(
+                    Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
+                    Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                    new UpdateOptions() { });
 
                 _lessonScheduleService.CreateQuery().UpdateMany(
                     Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
@@ -564,8 +581,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        private List<string> GetChapterLessonID(string chapterID)
+        private List<string> GetChapterLessonID(string chapterID, out List<string> lstChap)
         {
+            lstChap = new List<string>();
             var ret = new List<string>();
             ret = _lessonService.GetChapterLesson("", chapterID).Select(t => t.ID).ToList(); ;
 
@@ -574,8 +592,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 foreach (var sc in subchaps)
                 {
-                    ret.AddRange(GetChapterLessonID(sc.ID));
+                    lstChap.Add(sc.ID);
+                    var subchap = new List<string>();
+                    ret.AddRange(GetChapterLessonID(sc.ID, out subchap));
+                    lstChap.AddRange(subchap);
                 }
+
             }
             return ret;
         }
