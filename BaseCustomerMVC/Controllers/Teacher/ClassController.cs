@@ -2598,6 +2598,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     //update total lesson to parent chapter
                     await _classHelper.IncreaseLessonCounter(item, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0);
+
+                    return new JsonResult(new Dictionary<string, object>
+                                {
+                                    { "Data", item },
+                                    {"Error",null }
+                                });
                 }
                 else
                 {
@@ -2653,13 +2659,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         ChangeLessonPosition(data, newOrder);
                     }
-                }
 
-                return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Data", data },
-                    {"Error",null }
-                });
+                    return new JsonResult(new Dictionary<string, object>
+                        {
+                            { "Data", data },
+                            {"Error",null }
+                        });
+                }
             }
             catch (Exception ex)
             {
