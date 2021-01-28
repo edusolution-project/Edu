@@ -9,6 +9,8 @@ using System.Text;
 using System.Linq;
 using Core_v2.Globals;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -534,18 +536,51 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult ToggleHideAnswer(string ID)
+        public JsonResult ToggleHideAnswer(string ID, string ChapterID = "", bool isHide = true)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var schedule = _lessonScheduleService.GetItemByID(ID);
-            if (schedule == null)
+            if (string.IsNullOrEmpty(ChapterID))
             {
-                return Json(new { error = "Thông tin không đúng" });
+                var schedule = _lessonScheduleService.GetItemByID(ID);
+                if (schedule == null)
+                {
+                    return Json(new { error = "Thông tin không đúng" });
+                }
+                schedule.IsHideAnswer = !schedule.IsHideAnswer;
+                _lessonScheduleService.Save(schedule);
+                return Json(new { schedule.IsHideAnswer });
             }
-            schedule.IsHideAnswer = !schedule.IsHideAnswer;
-            _lessonScheduleService.Save(schedule);
-            return Json(new { schedule.IsHideAnswer });
+            else
+            {
+                var lessonids = GetChapterLessonID(ChapterID);
+
+                _lessonScheduleService.CreateQuery().UpdateMany(
+                    Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
+                    Builders<LessonScheduleEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                    new UpdateOptions() { });
+
+                return Json(new { IsHideAnswer = isHide });
+            }
         }
+
+
+        private List<string> GetChapterLessonID(string chapterID)
+        {
+            var ret = new List<string>();
+            ret = _lessonService.GetChapterLesson("", chapterID).Select(t => t.ID).ToList(); ;
+
+            var subchaps = _chapterService.GetSubChapters("", chapterID).ToList();
+            if (subchaps != null && subchaps.Count > 0)
+            {
+                foreach (var sc in subchaps)
+                {
+                    ret.AddRange(GetChapterLessonID(sc.ID));
+                }
+            }
+            return ret;
+        }
+
+
 
         [HttpPost]
         [Obsolete]
@@ -570,14 +605,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Error", "Không tìm thấy lịch học" }
                     });
                 var oldLesson = _lessonService.GetItemByID(oldItem.LessonID);
-                if(oldLesson == null)
+                if (oldLesson == null)
                 {
                     return new JsonResult(new Dictionary<string, object> {
                         {"Data",null },
                         {"Error", "Không tìm thấy bài kiểm tra" }
                     });
                 }
-                if(oldLesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                if (oldLesson.TemplateType == LESSON_TEMPLATE.EXAM)
                 {
                     oldItem.IsHideAnswer = true;
                 }

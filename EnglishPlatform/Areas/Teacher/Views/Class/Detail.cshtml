@@ -885,6 +885,9 @@
                                         <datepickerV2 :date="data.EndDate" :idx="1" :obj="data" v-on:input="updateChapSchedule(data, pos)"></datepickerV2>
                                     </div>
                                     <div class="act_ic">
+                                        <i class="ic-ac fas fa-eye-slash ml-2" style="font-size:16px;" title="Bật / tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleChapterHideAnswer(data)"></i>
+                                    </div>
+                                    <div class="act_ic">
                                         <i class="ic-ac far fa-dot-circle ml-2" style="font-size:18px;" title="Đặt mục tiêu" onclick='$(".row-action").removeClass("active");$(this).closest(".row-action").addClass("active");$(this).siblings().focus().click()'></i>
                                         <input type="text" class="form-control bg-light text-right basepoint" style="margin: 0 3px;padding: 2px; width: 52px; height:24px; display:none;" onblur="$(this).hide()" onfocus="$(this).show()" v-model="data.BasePoint" placeholder="0-100" v-on:blur="updateChapPoint(data)">
                                     </div>
@@ -1262,6 +1265,7 @@
                 window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
                 window.toggleHideAnswer = this.toggleHideAnswer
+                window.toggleChapterHideAnswer = this.toggleChapterHideAnswer
                 window.filterChap = this.filterChap
                 window.filterLesson = this.filterLesson
                 window.filterResult = this.filterResult
@@ -2134,6 +2138,43 @@
                     let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID);
+                    axios.post(_url, _form)
+                        .then(response => {
+                            if (response.data.error == null) {
+                                console.log(response.data);
+                                obj.IsHideAnswer = response.data.isHideAnswer;
+                                if (response.data.isHideAnswer == true) {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã bật chế độ ẩn đáp án",
+                                        icon: 'info',
+                                    });
+                                }
+                                else {
+                                    Swal.fire({
+                                        title: "Thông báo",
+                                        text: "Đã tắt chế độ ẩn đáp án",
+                                        icon: 'info',
+                                    });
+                                }
+                            }
+                            else {
+                                Swal.fire({
+                                    title: "Có lỗi",
+                                    text: response.error,
+                                    icon: 'warning',
+                                });
+                            }
+
+                            //item.IsActive = !item.IsActive;
+                            //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
+                        }).catch(e => { })
+                },
+                toggleChapterHideAnswer(obj) {
+                    let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
+                    let _form = new FormData()
+                    _form.append('ChapterID', obj.ID);
+                    _form.append('', obj.ScheduleID);
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.data.error == null) {

@@ -104,7 +104,10 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<LessonEntity> GetChapterLesson(string ClassSubjectID, string ChapterID)
         {
-            return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
+            if (!string.IsNullOrEmpty(ClassSubjectID))
+                return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
+            else
+                return Collection.Find(t => t.ChapterID == ChapterID).SortBy(t => t.Order).ToEnumerable();
         }
 
         public long CountChapterLesson(string ChapterID)

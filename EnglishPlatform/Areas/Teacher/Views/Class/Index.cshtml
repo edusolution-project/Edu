@@ -283,6 +283,7 @@
             }
         )
     </script>
+
     <style>
         .private_box {
             padding: 5px 0;
@@ -334,6 +335,7 @@
             height: auto;
         }
     </style>
+
     <script>
         var isSearchDate = false;
         new Vue({
@@ -887,7 +889,8 @@
                                                 Name: item.CourseName,
                                                 SubjectID: item.SubjectID,
                                                 GradeID: item.GradeID,
-                                                IsActive: false
+                                                IsActive: false,
+                                                TeacherID: item.TeacherID
                                             })
                                             this.courseSource = _that.courseSource
                                         }
@@ -991,6 +994,7 @@
                         _form.append('SubjectID', obj.SubjectID)
                         _form.append('GradeID', obj.GradeID)
                         _form.append('Center', '@center')
+                        _form.append('share', true)
                         let _url = '@processUrl("GetActiveList", "Curriculum")'
                         axios.post(_url, _form)
                             .then(response => {
@@ -1006,7 +1010,8 @@
                                             SubjectID: obj.SubjectID,
                                             GradeID: obj.GradeID,
                                             //SkillID: item.SkillID,
-                                            IsActive: true
+                                            IsActive: true,
+                                            TeacherID: item.TeacherID
                                         })
                                     }
                                     else {
@@ -1425,11 +1430,13 @@
                         window.open(uri + base64(format(template, ctx)));
                     }
                 },
-                a(obj, userid) {
-                    //debugger
-                    //if (obj.TeacherID == userid) return true
-                    //else return false
+                displayTitle(obj) {
+                    console.log(obj);
+                    if(obj.TeacherID == '@userid')
+                        return obj.Name;
+                    return obj.Name + " [Học liệu chia sẻ]";
                 }
+
             }
         });
 
@@ -1498,7 +1505,6 @@
                         <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
                     </div>
                 </div>
-
                 <div class="courseTab" v-if="tab[0]">
                     <ul class="list list-subject mb-1">
                         <li class="flex pb-0">
@@ -1546,7 +1552,7 @@
                                 @*<label for="">Bài giảng</label>*@
                                 <select v-model="sub.CourseID" class="form-control">
                                     <option value="">Chọn bài giảng</option>
-                                    <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
+                                    <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{displayTitle(item)}}</option>
                                 </select>
                             </div>
                             <div class="width-100 mr-2">
@@ -1565,58 +1571,10 @@
                             </div>
 
                             <div class="btn-group">
-                                <button class="btn-act" v-on:click="removeSubject(k)" v-if="(sub.IsActable || ((isHeadTeacher || class_info.IsOwner) && !sub.IsLock))" title="Xóa môn học"><i class="ti-trash"></i></button>
+                                <button class="btn-act" v-on:click="removeSubject(k)" v-if="!sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
                                 <button class="btn-act" v-else title="Xóa môn học"><i class="ti-trash disabled"></i></button>
-                                <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="((isHeadTeacher || class_info.IsOwner) && !sub.IsLock)" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
+                                <button class="btn-act" v-on:click="refreshSubject(k, $event)" v-if="!sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                                 <button class="btn-act" v-else title="Cập nhật phiên bản mới nhất"><i class="ti-reload disabled"></i></button>
-                            </div>
-                        </li>
-                        <li class="flex pb-0" :id="sub.UID" v-else>
-                            <div class="width-100 mr-2">
-                                @*<label for="">Chương trình</label>*@
-                                <select v-model="sub.SubjectID" class="form-control" v-on:change="changeAddSubject(sub)" :disabled="sub.IsLock">
-                                    <option value="">Chọn chương trình</option>
-                                    <option v-for="(item,k) in list_subject" :value="item.ID" v-if="matchSubject(sub, item)">{{item.Name}}</option>
-                                </select>
-                            </div>
-                            <div class="width-100 mr-2">
-                                @*<label for="">Cấp độ</label>*@
-                                <select v-model="sub.GradeID" class="form-control" v-on:change="changeAddGrade(sub, true)" :disabled="sub.IsLock">
-                                    <option value="">Chọn cấp độ</option>
-                                    <option v-for="(item,k) in list_grades_full" v-if="matchGrade(sub, item)" :value="item.ID">{{item.Name}}</option>
-                                </select>
-                            </div>
-                            @*<div class="width-100 mr-2">
-                                    <label for="">Môn học</label>
-                                    <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock">
-                                        <option value="">Chọn môn học</option>
-                                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                                    </select>
-                                </div>*@
-                            <div class="width-100 mr-2">
-                                @*<label for="">Bài giảng</label>*@
-                                <select v-model="sub.CourseID" class="form-control" :disabled="sub.IsLock">
-                                    <option value="">Chọn bài giảng</option>
-                                    <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{item.Name}}</option>
-                                </select>
-                            </div>
-                            <div class="width-100 mr-2">
-                                @*<label for="">Loại học liệu</label>*@
-                                <select v-model="sub.TypeClass" class="form-control" :disabled="sub.IsLock">
-                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Chính quy</option>
-                                    <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND">Chuyên đề</option>
-                                </select>
-                            </div>
-                            <div class="width-100 mr-2">
-                                @*<label for="">Giáo viên</label>*@
-                                <select v-model="sub.TeacherID" class="form-control" :disabled="sub.IsLock">
-                                    <option value="">Chọn giáo viên</option>
-                                    <option v-for="(item,k) in teacherSource" v-if="matchTeacher(sub, item)" :value="item.ID">{{item.FullName}}</option>
-                                </select>
-                            </div>
-                            <div class="btn-group">
-                                <button class="btn-act" v-on:click="removeSubject(k)" :disabled="sub.IsLock" title="Xóa môn học"><i class="ti-trash"></i></button>
-                                <button class="btn-act" v-on:click="refreshSubject(k, $event)" :disabled="sub.IsLock" title="Cập nhật phiên bản mới nhất"><i class="ti-reload"></i></button>
                             </div>
                         </li>
                     </ul>

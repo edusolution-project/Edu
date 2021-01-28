@@ -96,7 +96,10 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<ChapterEntity> GetSubChapters(string ClassSubjectID, string ParentID)
         {
-            return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
+            if (!string.IsNullOrEmpty(ClassSubjectID))
+                return CreateQuery().Find(c => c.ClassSubjectID == ClassSubjectID && c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
+            else
+                return CreateQuery().Find(c => c.ParentID == ParentID).SortBy(t => t.Order).ToEnumerable();
         }
 
         public async Task RemoveClassSubjectChapter(string ClassSubjectID)
