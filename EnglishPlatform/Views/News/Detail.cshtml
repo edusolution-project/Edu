@@ -4,122 +4,121 @@
     ViewData["Title"] = news.Title;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<section style="font-family:Open Sans" id="section">
-    <div class="container">
-        <div class="form-group">
-            @*<div class="inner-content">*@
-            <div class="inner-content">
-                <div class="content-box pt-3">
-                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
-                        @news.Title
-                        <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!--<div class="row form-group">
-            <div class="inner-content">
-                <div class="content-box">-->
-        @*<div class="col-md-2"></div>*@
-        <!--<div class="col-md-12 col-sm-12" id="summary" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:17px">
-            @news.Summary
-        </div>-->
-        @*<div class="col-md-2"></div>
-            <div class="col-md-2"></div>*@
-        @*<div class="col-md-12 col-sm-12" style="padding-top:5px">
-                <ul id="nextNews">
-                    <li v-for="(item,k) in items" v-if="k <= 1"><a :href="item.Url" style="margin: 0px 0px 6px -9px;text-decoration:none" :title="item.Title">{{item.Title}}</a></li>
-                </ul>
-            </div>*@
-        <!--</div>
-            </div>
-        </div>-->
-        @*<div class="media-container-row row">*@
-        <div class="form-group">
-            <div class="inner-content">
-                <div class="content-box">
-                    <div class="" id="content" style="text-align:justify;font-size:14px;font-family:'Be Vietnam',sans-serif">
-                        @Html.Raw(news.Content)
-                        <div class="col-md-12 col-sm-12 ">
-                            <div class="float-right" style="font-style:italic;font-size:12px">@news.PublishDate.ToString("dd/MM/yyyy")</div>
-                        </div>
-                    </div>
+<div class="category-box p-5" id="section">
+    <div class="inner-content">
+        <div class="content-box">
+            <div>
+                <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
+                    @news.Title
+                    <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="form-group" id="related_news" style="padding-top:20px">
-            @*<div class="inner-content">*@
-            <div class="content-box">
-                @*<div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 18px;font-weight: bold;">
-                        Tin cùng chuyên mục
-                    </div>*@
-                <div class="inner-content">
-                    <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px;text-align:justify">
-                        Tin cùng chuyên mục
-                        <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12">
-                <div class="carousel-wrap" id="partner" style="text-align:center">
-                    <div class="owl-carousel">
-                        <div class="item" v-for="item in items">
-                            <a :href="item.Url">
-                                <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
-                                <div class="col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:black;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
-                                    {{item.Title}}
-                                </div>
-                            </a>
-                        </div>
 
-                    </div>
-                </div>
-            </div>
-            @*</div>*@
-        </div>
-    </div>
-    <template v-if="itemsHot.length > 0">
-        <div class="container">
-            <div class="form-group" style="padding-top:20px">
-                <div class="content-box">
+
+
+                <!--<div class="row form-group">
                     <div class="inner-content">
-                        <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
-                            Tin nổi bật
-                            <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
-                        </div>
+                        <div class="content-box">-->
+                @*<div class="col-md-2"></div>*@
+                <!--<div class="col-md-12 col-sm-12" id="summary" style="color: #5f5f5f;font-family: auto;font-weight: bold;text-align:justify;font-size:17px">
+                    @news.Summary
+                </div>-->
+                @*<div class="col-md-2"></div>
+                    <div class="col-md-2"></div>*@
+                @*<div class="col-md-12 col-sm-12" style="padding-top:5px">
+                        <ul id="nextNews">
+                            <li v-for="(item,k) in items" v-if="k <= 1"><a :href="item.Url" style="margin: 0px 0px 6px -9px;text-decoration:none" :title="item.Title">{{item.Title}}</a></li>
+                        </ul>
+                    </div>*@
+                <!--</div>
                     </div>
-                </div>
-                <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
-                    <div class="news-top media-body pl-md-4 pr-md-4">
-                        <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in itemsHot" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code">
-                            <div class="thumb">
-                                <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
-                                    <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
-                                </a>
-                            </div> <div class=" media-body pr-4 pt-2">
-                                <div class="news-title">
-                                    <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code" style="text-decoration:none">
-                                        {{item.Title}}
-                                    </a>
-                                </div>
-                                <div class="news-desc" style="overflow: hidden;">
-                                    {{item.Summary}}
-                                </div>
-                                <div class="news-time">
-                                    {{formatShortDate(item.PublishDate)}}
+                </div>-->
+                @*<div class="media-container-row row">*@
+                <div class="form-group">
+                    <div class="inner-content">
+                        <div class="content-box">
+                            <div class="" id="content" style="text-align:justify;font-size:14px;font-family:'Be Vietnam',sans-serif">
+                                @Html.Raw(news.Content)
+                                <div class="col-md-12 col-sm-12 ">
+                                    <div class="float-right" style="font-style:italic;font-size:12px">@news.PublishDate.ToString("dd/MM/yyyy")</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="container">
+                <div class="form-group" id="related_news" style="padding-top:20px">
+                    @*<div class="inner-content">*@
+                    <div class="content-box">
+                        @*<div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 18px;font-weight: bold;">
+                                Tin cùng chuyên mục
+                            </div>*@
+                        <div class="inner-content">
+                            <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px;text-align:justify">
+                                Tin cùng chuyên mục
+                                <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="carousel-wrap" id="partner" style="text-align:center">
+                            <div class="owl-carousel">
+                                <div class="item" v-for="item in items">
+                                    <a :href="item.Url">
+                                        <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
+                                        <div class="col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:#08486b;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
+                                            {{item.Title}}
+                                        </div>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    @*</div>*@
+                </div>
+            </div>
+            <template v-if="itemsHot.length > 0">
+                <div class="container">
+                    <div class="form-group" style="padding-top:20px">
+                        <div class="content-box">
+                            <div class="inner-content">
+                                <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
+                                    Tin nổi bật
+                                    <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                            <div class="news-top media-body pl-md-4 pr-md-4">
+                                <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in itemsHot" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code">
+                                    <div class="thumb">
+                                        <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                            <img :src="cacheStatic(item.Thumbnail,240,135)" class="w-100">
+                                        </a>
+                                    </div> <div class="media-body pr-4 pt-2 pl-sm-3">
+                                        <div class="news-title">
+                                            <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code">
+                                                {{item.Title}}
+                                            </a>
+                                        </div>
+                                        <div class="news-desc" style="overflow: hidden;">
+                                            {{item.Summary}}
+                                        </div>
+                                        <div class="news-time">
+                                            {{formatShortDate(item.PublishDate)}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
         </div>
-    </template>
-    @*</div>*@
-</section>
+    </div>
+</div>
 <script>
     @if(news.Code == "ve-eduso")
     {
@@ -344,10 +343,10 @@
 
     /* fix blank or flashing items on carousel */
     /*.owl-carousel .item {
-        position: relative;
-        z-index: 100;
-        -webkit-backface-visibility: hidden;
-    }*/
+                position: relative;
+                z-index: 100;
+                -webkit-backface-visibility: hidden;
+            }*/
 
     /* end fix */
     .owl-nav {
@@ -388,8 +387,8 @@
         }
 
     /*.owl-carousel:hover .owl-nav i{
-        opacity:1
-    }*/
+                opacity:1
+            }*/
 
     .owl-prev:hover {
         opacity: 1
@@ -422,7 +421,7 @@
     }
 
         .item:hover {
-            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);
+            /*box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);*/
             opacity: 1
         }
 
@@ -479,55 +478,59 @@
         margin-top: 30px
     }
 
-    .container {
-        width: 1200px
-    }
+    /*.container {
+                        width: 1200px
+                    }*/
 
     .news-item {
         /*width:1140px;*/
-        height: 150px !important;
-        opacity:0.9;
-        border-radius:5px
+        /*height: 150px !important;*/
+        opacity: 0.9;
+        border-radius: 5px
     }
 
         .news-item:hover {
             opacity: 1;
-            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);
+            /*box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.25),-5px -5px 12px rgba(0, 0, 0, 0.25);*/
         }
 
-        .news-top .news-item .thumb {
-            width: 21%;
-            height: 100%;
-            margin-right: -5px
-        }
-
-    .thumb img{
-        max-height:100%;
-        max-width:220px
+    .news-top .news-item .thumb {
+        /*width: 21%;*/
+        width: 240px;
+        height: 100%;
+        margin-right: -5px
     }
 
-    .news-title a {
-        text-decoration:none
+    .thumb img {
+        /*max-height: 100%;*/
+        /*max-width: 220px*/
+        max-height: 135px;
+        max-width: 240px
     }
 
-    p{
-        width:100%;
+    .news-item .news-title a {
+        text-decoration: none;
+        color: #08486b
     }
-	
-	.form-group{
-		padding:0px 12px
-	}
+
+    p {
+        width: 100%;
+    }
+
+    .form-group {
+        padding: 0px 12px
+    }
 
     @@media screen and (max-width: 600px) {
         .container {
             width: 100%; /* The width is 100%, when the viewport is 800px or smaller */
-/*padding-left:7px;
-            padding-right:7px;*/
+            /*padding-left:7px;
+                    padding-right:7px;*/
         }
 
-        #content{
-            margin:0px;
-            padding:0px
+        #content {
+            margin: 0px;
+            padding: 0px
         }
     }
 </style>
