@@ -173,10 +173,10 @@
                     <td v-else>{{item.NameBlock}}</td>
                     <td class="text-center">{{item.TotalClass}}</td>
                     <td class="text-center">{{item.TotalStudent}}</td>
-                    <td class="text-center">{{getPersent(item.MinPoint8,item.TotalStudent)}}%</td>
-                    <td class="text-center">{{getPersent(item.MinPoint5,item.TotalStudent)}}%</td>
-                    <td class="text-center">{{getPersent(item.MinPoint2,item.TotalStudent)}}%</td>
-                    <td class="text-center">{{getPersent(item.MinPoint0,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPercent(item.MinPoint8,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPercent(item.MinPoint5,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPercent(item.MinPoint2,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPercent(item.MinPoint0,item.TotalStudent)}}%</td>
                 </tr>
             </thead>
         </table>
@@ -493,6 +493,7 @@
                     }
                 ],
                 tab: [true, false],
+                detailtab: [true, false],
                 subject: '',
                 list_subject: [],
                 list_grades_full: [],
@@ -1409,16 +1410,16 @@
                 downloadTemplate() {
                     window.open("@processUrl("ExportTemplate", "StudentManage")");
                 },
-                tabChange(a = 0) {
+                detailTabChange(a = 0) {
                     // có thể load data theo từng tab để tối ưu hiệu năng
                     // this.getData()
                     let _that = this
-                    this.tab.forEach(function (item, k) {
-                        _that.tab[k] = false;
+                    this.detailtab.forEach(function (item, k) {
+                        _that.detailtab[k] = false;
                     })
                     //console.log(_that.tab);
-                    this.tab = _that.tab
-                    this.tab[a] = true
+                    this.detailtab = _that.detailtab
+                    this.detailtab[a] = true
                     this.$forceUpdate()
                 },
                 //support
@@ -1541,11 +1542,16 @@
                         })
                         .catch(e => { alert(e) })
                 },
-                getPersent(point, total) {
+                getPercent(point, total) {
                     if (total == 0) return 0
                     else return ((point / total) * 100).toFixed(2)
+                },
+                displayTitle(obj) {
+                    //console.log(obj);
+                    if(obj.TeacherID == '@userid')
+                        return obj.Name;
+                    return obj.Name + " [Học liệu chia sẻ]";
                 }
-
             }
         });
 
@@ -1606,15 +1612,15 @@
                 <div class="flex j-between border-b mb-2">
                     <div class="tab bg-none">
                         <ul class="flex flex-row">
-                            <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Học liệu" v-on:click="tabChange()">Học liệu</a></li>
-                            <li v-bind:class="{active : tab[1]}" v-if="(isHeadTeacher || class_info.IsOwner)"><a href="javascript:;" title="Giáo viên" v-on:click="tabChange(1)">Giáo viên</a></li>
+                            <li v-bind:class="{active : detailtab[0]}"><a href="javascript:;" title="Học liệu" v-on:click="detailTabChange()">Học liệu</a></li>
+                            <li v-bind:class="{active : detailtab[1]}" v-if="(isHeadTeacher || class_info.IsOwner)"><a href="javascript:;" title="Giáo viên" v-on:click="detailTabChange(1)">Giáo viên</a></li>
                         </ul>
                     </div>
                     <div class="c-right">
                         <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
                     </div>
                 </div>
-                <div class="courseTab" v-if="tab[0]">
+                <div class="courseTab" v-if="detailtab[0]">
                     <ul class="list list-subject mb-1">
                         <li class="flex pb-0">
                             <div class="width-100 mr-2">
@@ -1690,7 +1696,7 @@
                     @*<a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub" v-if="(isHeadTeacher || class_info.IsOwner)"><i class="ic ic-plus-c"></i> Thêm môn học</a>*@
                     <a href="javascript:;" title="Thêm môn học" v-on:click="addSubject()" class="btn-add-sub"><i class="ic ic-plus-c"></i> Thêm môn học</a>
                 </div>
-                <div class="courseTab" v-if="tab[1]">
+                <div class="courseTab" v-if="detailtab[1]">
                     <ul class="list list-subject pt-1 mb-1" v-for="(sub,k) in class_info.Teachers">
                         <li class="flex pb-0" :id="sub.UID">
                             <div class="width-100 mr-2 mb-0">
