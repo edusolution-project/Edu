@@ -71,6 +71,7 @@ namespace BaseCustomerEntity.Database
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
 
+        //TODO: CHECK PERFORMANCE
         public IEnumerable<LessonPartEntity> GetItemByTypeQuiz_LessonIDs(List<string> LessonIDs)
         {
             return CreateQuery().Find(x => LessonIDs.Contains(x.ParentID) && x.Type.ToUpper().Contains("QUIZ")).ToEnumerable();

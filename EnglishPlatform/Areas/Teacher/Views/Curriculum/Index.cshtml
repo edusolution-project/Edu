@@ -57,7 +57,7 @@
             <div class="ml-0 ml-md-auto">
                 <b-button class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" v-on:click="exportExcel('ed_table')"><i class="ti-import"></i></b-button>
                 <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>
-                <b-button class="btn-addevent btn-sm m-1" onclick="window.location.href = '@processUrl("Index", "ExamManage")'">Kho đề</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1" onclick="window.location.href = '@processUrl("Index", "ExamManage")'">Kho đề</b-button>*@
                 @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
             </div>
         </div>
@@ -403,7 +403,7 @@
                         //_that.addItem.IsPublic = obj.IsPublic;
                         //_that.addItem.PublicWStudent = obj.PublicWStudent;
                         //debugger
-                        if (obj.TargetCenters != null) {
+                        if (obj.TargetCenters != null && obj.TargetCenters.length > 0) {
                             _that.addItem.TargetCenters = obj.TargetCenters;
                             if (obj.TargetCenters.length == this.list_centers.length) {
                                 _that.addItem.SelectAll = true;
@@ -417,7 +417,7 @@
                             _that.addItem.SelectAll = false;
                         }
 
-                        if (obj.StudentTargetCenters != null) {
+                        if (obj.StudentTargetCenters != null && obj.StudentTargetCenters.length > 0) {
                             _that.addItem.StudentTargetCenters = obj.StudentTargetCenters;
                             if (obj.StudentTargetCenters.length == this.list_centers.length) {
                                 _that.addItem.StudentSelectAll = true;

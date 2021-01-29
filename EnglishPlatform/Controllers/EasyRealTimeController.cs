@@ -454,7 +454,7 @@ namespace EnglishPlatform.Controllers
                 }
                 else
                 {
-                    var classIDs = _classService.GetTeacherClassList(_userID).ToList();
+                    var classIDs = _classService.GetTeacherClassListID(_userID).ToList();
                     if (classIDs == null)
                         return NotFoundData();
                     var message = _messageService.GetNewFeedList(classIDs, startDate, endDate).Take(10).ToList();

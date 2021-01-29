@@ -465,7 +465,6 @@ namespace EnglishPlatform.Controllers
         //        else
         //        {
         //            var defCenter = _centerService.GetItemByCode("eduso");
-
         //            var user = new AccountEntity()
         //            {
         //                PassWord = _sPass,
@@ -519,7 +518,6 @@ namespace EnglishPlatform.Controllers
         //                        IsActive = true,// active student
         //                        CreateDate = DateTime.Now
         //                    };
-
         //                    _studentService.CreateQuery().InsertOne(student);
         //                    user.UserID = student.ID;
         //                    //send email for student

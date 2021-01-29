@@ -30,7 +30,7 @@
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
     <div class="card-header border-b" v-cloak>
-        <div class="flex flex-row flex-wrap pb-2 align-items-center">
+        <div class="flex flex-row flex-wrap align-items-center">
             <div class="box filter-box d-none m-1">
                 <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
                 <span class="ic ic-picker inactive"></span>
@@ -65,7 +65,7 @@
             @if (isHeadTeacher)
             {
                 <div class="flex flex-wrap align-items-center">
-                    <div class="tab bg-none col-md-12 m-1">
+                    <div class="tab bg-none col-md-12 mt-2">
                         <ul class="flex flex-row">
                             <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Danh sách lớp" v-on:click="tabChange(0)">Danh sách lớp</a></li>
                             <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Báo cáo" v-on:click="tabChange(1)">Báo cáo</a></li>
@@ -159,24 +159,24 @@
                 <tr>
                     <th v-if="filterReport == 'allCenters'">Khối</th>
                     <th v-else>Giáo viên</th>
-                    <th>Tổng số lớp</th>
-                    <th>Tổng sĩ số</th>
-                    <th>10 - 8.0</th>
-                    <th>7.9 - 5.0</th>
-                    <th>4.9 - 2.0</th>
-                    <th>1.9 - 0.0</th>
+                    <th class="text-center">Tổng số lớp</th>
+                    <th class="text-center">Tổng sĩ số</th>
+                    <th class="text-center">10 - 8.0</th>
+                    <th class="text-center">7.9 - 5.0</th>
+                    <th class="text-center">4.9 - 2.0</th>
+                    <th class="text-center">1.9 - 0.0</th>
                 </tr>
             </thead>
             <thead>
                 <tr v-for="(item,k) in dataReport">
                     <td v-if="filterReport == 'allCenters'">Khối {{(item.NameBlock == 99 ? "Khác" : item.NameBlock)}}</td>
                     <td v-else>{{item.NameBlock}}</td>
-                    <td>{{item.TotalClass}}</td>
-                    <td>{{item.TotalStudent}}</td>
-                    <td>{{getPersent(item.MinPoint8,item.TotalStudent)}}%</td>
-                    <td>{{getPersent(item.MinPoint5,item.TotalStudent)}}%</td>
-                    <td>{{getPersent(item.MinPoint2,item.TotalStudent)}}%</td>
-                    <td>{{getPersent(item.MinPoint0,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{item.TotalClass}}</td>
+                    <td class="text-center">{{item.TotalStudent}}</td>
+                    <td class="text-center">{{getPersent(item.MinPoint8,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPersent(item.MinPoint5,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPersent(item.MinPoint2,item.TotalStudent)}}%</td>
+                    <td class="text-center">{{getPersent(item.MinPoint0,item.TotalStudent)}}%</td>
                 </tr>
             </thead>
         </table>

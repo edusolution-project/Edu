@@ -2592,12 +2592,10 @@
                     if (m > 0) {
                         ret += m + "m ";
                     }
-                    if (s > 0) {
+                    if (s >= 0) {
                         ret += s + "s ";
                     }
-                    else {
-                        ret += s + "s "
-                    }
+		    
                     return ret;
                 },
                 domDecoder(str) {
