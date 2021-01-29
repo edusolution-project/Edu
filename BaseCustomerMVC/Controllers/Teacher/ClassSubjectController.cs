@@ -100,7 +100,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             if (!isHeadTeacher)
             {
-                if (!User.IsInRole("teacher"))
+                if (!User.IsInRole("teacher") || !@class.Members.Any(t => t.TeacherID == teacherID))
                     return Json("Khong co quyen truy cap");
             }
 
@@ -112,7 +112,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var response = new Dictionary<string, object>
             {
                 { "Data", (from r in _classSubjectService.GetByClassID(ClassID)
-                          where isHeadTeacher || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
+                          //where isHeadTeacher || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
+                          //where isHeadTeacher || r.TeacherID == teacherID || r.TypeClass == CLASSSUBJECT_TYPE.EXAM
                           let subject = r.SubjectID != null?  _subjectService.GetItemByID(r.SubjectID): new SubjectEntity()
                           let grade = r.GradeID != null? _gradeService.GetItemByID(r.GradeID): new GradeEntity()
                           let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity{ID = r.CourseID}

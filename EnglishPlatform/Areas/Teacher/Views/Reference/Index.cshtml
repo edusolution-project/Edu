@@ -216,6 +216,11 @@
         .container-fluid {
             height: 100%;
         }
+
+        .selectedClass {
+            background: #EEE;
+            cursor: pointer;
+        }
     </style>
 
     <script>
@@ -246,7 +251,7 @@
                 }
             },
             components: {
-          	    LocalQuillEditor: VueQuillEditor.quillEditor
+                LocalQuillEditor: VueQuillEditor.quillEditor
             },
             data: {
                 isLoading: false,
@@ -280,7 +285,7 @@
                     isCheckDownload: false
                 },
                 linkFile: '',
-                typeFile:[
+                typeFile: [
                     "application/msword",
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     "application/vnd.ms-excel",
@@ -305,24 +310,25 @@
                     ListClasses: [],
                     Image: '',
                     Creator: '',
-                    ClassID: ''
+                    ClassIDs: [],
+                    ListSelectedClass: ''
                 },
                 isCreateNewClass: false,
                 newClass: {
                     Name: '',
                     StartDate: '',
                     EndDate: '',
-                    Description:''
+                    Description: ''
                 }
             },
-            watch : {
-                searchTerm: function(){
-                    if(this.searchTimeout != null)
+            watch: {
+                searchTerm: function () {
+                    if (this.searchTimeout != null)
                         clearTimeout(this.searchTimeout)
                     var fn = this.getData
                     //if (this.tab[1])
                     //    fn = function () { this.getData; }
-                    this.searchTimeout = setTimeout(function(){
+                    this.searchTimeout = setTimeout(function () {
                         fn()
                     }, 500)
                 },
@@ -332,10 +338,10 @@
                 grade: function () {
                     this.getData()
                 },
-                range: function(){
+                range: function () {
                     this.getData()
                 },
-                target: function(){
+                target: function () {
                     this.getData()
                 },
                 gradeID: function () {
@@ -344,13 +350,20 @@
                 subjectID: function () {
                     this.getData()
                 },
-                "docsInteractive.ClassID": function () {
-                    if (this.docsInteractive.ClassID=="true") {
-                        this.isCreateNewClass = true
-                        //alert(this.docsInteractive.NewClass)
-                    } else {
-                        this.isCreateNewClass = false
+                "docsInteractive.ClassIDs": function () {
+                    var data = this.docsInteractive.ClassIDs
+                    //debugger
+                    if (data != null) {
+                        this.docsInteractive.listSelectedClass = ''
+                        for (i = 0; i < this.docsInteractive.ListClasses.length; i++) {
+                            for (j = 0; j < data.length; j++) {
+                                if (this.docsInteractive.ListClasses[i].ID == data[j]) {
+                                    this.docsInteractive.listSelectedClass += this.docsInteractive.ListClasses[i].Name + '; '
+                                }
+                            }
+                        }
                     }
+
                     //debugger
                 }
             },
@@ -693,6 +706,7 @@
                         _that.docsInteractive.Image = obj.Image;
                         _that.docsInteractive.Creator = obj.TeacherName;
                         _that.docsInteractive.ID = obj.ID;
+                        _that.docsInteractive.ClassIDs = [];
                         //debugger
                         _form.append('ID', obj.ID)
                         axios.post(_url, _form)
@@ -729,8 +743,9 @@
                         _form.append('Description', _that.newClass.Description);
                         _form.append('isCreateNewClass', _that.isCreateNewClass);
                     }
+
                     //debugger
-                    if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "") {
+                    if (_that.docsInteractive.ClassIDs == null || _that.docsInteractive.ClassIDs == "" || _that.docsInteractive.ClassIDs.length == 0) {
                         var result = window.confirm("Bạn chưa chọn lớp để thêm học liệu, học liệu sẽ được thêm vào mục TẠO BÀI GIẢNG trong tài khoản của bạn");
                         if (result == true) {
                             this.isLoading = true
@@ -749,23 +764,27 @@
                     }
                     else {
                         if (!_that.isCreateNewClass) {
-                            _form.append('ClassID', _that.docsInteractive.ClassID);
+
+                            _that.docsInteractive.ClassIDs.forEach(function (item, index){
+                                _form.append('ClassIDs[' + index + ']', item);
+                            })
                         }
                         this.isLoading = true
                         axios.post(_url, _form)
                             .then(response => {
                                 this.isLoading = false;
                                 this.hideModal();
-                                if (_that.docsInteractive.ClassID == null || _that.docsInteractive.ClassID == "")
-                                    alert("Tài liệu đã được thêm vào danh mục bài giảng của bạn!");
-                                else if (_that.isCreateNewClass) {
-                                    alert("Lớp " + _that.newClass.Name + " đã được tạo, tài liệu đã được thêm vào lớp " + _that.newClass.Name + ".");
-                                }
-                                else
+                                if (_that.docsInteractive.ClassIDs != null && _that.docsInteractive.ClassIDs.length > 0)
                                     alert("Tài liệu đã được thêm vào lớp của bạn!");
+                                else
+                                    alert("Tài liệu đã được thêm vào danh mục bài giảng của bạn!");
+                                //else if(_that.isCreateNewClass) {
+                                //alert("Lớp " + _that.newClass.Name + " đã được tạo, tài liệu đã được thêm vào lớp " + _that.newClass.Name + ".");
+                                //}
+                                //else
                             }).catch(e => {
                                 this.isLoading = false;
-                                alert(e)
+                                alert("Có lỗi :" + e)
                             })
                     }
                 },
@@ -781,6 +800,17 @@
             }
         });
 
+        var check = false;
+        function showSelect() {
+            if (check == false) {
+                $('#selectClass').attr('style', 'display:block');
+                check = true;
+            }
+            else {
+                $('#selectClass').attr('style', 'display:none');
+                check = false;
+            }
+        }
         //lazy load
         //Vue.use(VueLazyload, {
         //    preLoad: 1.3,
@@ -919,12 +949,35 @@
                         <input type="text" name="" value="" class="form-control" v-model="docsInteractive.Name" placeholder="Tên tài liệu">
                     </b-col>
                     <b-col class="form-group col-sm-12">
-                        <select class="form-control" v-model="docsInteractive.ClassID">
-                            <option value="">Chọn lớp muốn tải về (nếu cần)</option>
-
-                            <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
-                            <option value="true">--- Tạo lớp mới</option>
-                        </select>
+                        <label class="col-sm-12 col-form-label" onclick="showSelect()">Chọn lớp muốn tải về (nếu cần)</label>
+                        <div style="position:relative">
+                            @*<div class="col-sm-2">
+                                    <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" >
+                                        <span class="caret"></span>
+                                    </button>
+                                </div>*@
+                            <div>
+                                <div class="form-control selectedClass" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden" onclick="showSelect()">
+                                    {{this.docsInteractive.listSelectedClass}}
+                                </div>
+                            </div>
+                            <div style="position: absolute;right: 0px;top: 40px;z-index: 999;background: #FFF;padding-left: 12px;">
+                                <div id="selectClass" style="display:none;">
+                                    <ul class="classSelect" role="menu" style="overflow-y:auto;height:auto;list-style:none; max-height: 200px;">
+                                        <li v-for="(item,k) in docsInteractive.ListClasses">
+                                            <a>
+                                                <input type="checkbox" :value="item.ID" v-model="docsInteractive.ClassIDs" /><span class="lbl"> {{item.Name}} </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        @*<select class="form-control" multiple v-model="docsInteractive.ClassID">
+                                <option value="">Chọn lớp muốn tải về (nếu cần)</option>
+                                <option v-for="item in docsInteractive.ListClasses" :value="item.ID">{{item.Name}}</option>
+                                <option value="true">--- Tạo lớp mới</option>
+                            </select>*@
                     </b-col>
 
                     <!--Create New Class-->

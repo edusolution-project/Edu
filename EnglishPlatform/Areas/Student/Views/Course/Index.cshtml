@@ -51,6 +51,16 @@
             </div>
         </div>*@
 
+        <div id="main-route" class="main-route mb-3 mt-2">
+            <ul class="route_holder" id="cid_0" cid="0">
+                <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
+                <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
+                    v-on:click="showWeekLesson(moment(startDate).add(index * 7, 'days'))"
+                    :class="moment(startDate).add(index * 7 + 1, 'days') < moment() ? 'passed' : (moment(startDate).add(index * 7 - 6, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7, 'days'))}} - {{formatDatenoYear(moment(startDate).add(index * 7 + 6 > period ? period : (index * 7 + 6), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+                <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
+            </ul>
+        </div>
+
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
@@ -202,6 +212,156 @@
 
 @section Scripts{
     <style>
+        #main-route {
+            overflow: auto;
+        }
+
+        .route_holder {
+            text-align: left;
+            white-space: nowrap;
+            height: 2px;
+            margin: 50px 0 60px;
+            font-size: 0;
+        }
+
+        .route_item {
+            display: inline-block;
+            width: 100px;
+            height: 4px;
+            overflow: visible;
+            margin: 0;
+            background: #969696;
+            position: relative;
+            font-weight: bold;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .route_item:hover {
+                opacity: 1;
+                background: #13a6fb;
+            }
+
+                .route_item:hover::after {
+                    border-color: #13a6fb;
+                }
+
+            .route_item.start {
+                width: 50px;
+                margin-left: 20px;
+            }
+
+            .route_item.passed,
+            .route_item.start {
+                background: #13a6fb;
+            }
+
+                .route_item.start::after,
+                .route_item.passed::after {
+                    border-color: #13a6fb;
+                    background-color: #13a6fb;
+                }
+
+            .route_item.now {
+                background-color: #D03239;
+            }
+
+                .route_item.now::after {
+                    background-color: #D03239;
+                    border-color: #D03239;
+                }
+
+            .route_item.start .route_period {
+                left: 10px;
+            }
+
+            .route_item.end {
+                width: 50px;
+                text-align: right;
+                /*margin-right: 20px;*/
+            }
+
+                .route_item.end .route_title {
+                    text-align: right;
+                    left: auto;
+                    right: 0px;
+                }
+
+                .route_item.end .route_period {
+                    right: 10px;
+                }
+
+                .route_item.end::after {
+                    right: -10px;
+                    left: auto;
+                }
+
+            .route_item::after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                right: auto;
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                -o-transform: translateX(-50%);
+                transform: translateX(-50%);
+                bottom: -12px;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                border: 2px solid #969696;
+                background: #969696 url(/images/calendar.png) no-repeat center center;
+                -webkit-background-size: 14px auto;
+                background-size: 14px auto;
+                -webkit-transition: background-color .3s,border-color .3s;
+                -moz-transition: background-color .3s,border-color .3s;
+                -o-transition: background-color .3s,border-color .3s;
+                transition: background-color .3s,border-color .3s;
+                top: -8px;
+                cursor: pointer;
+            }
+
+            .route_item.start::after {
+                left: 10px;
+            }
+
+            .route_item .route_title {
+                bottom: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -35px;
+                width: 70px;
+                text-align: center;
+                overflow: hidden;
+                max-height: 28px;
+                white-space: break-spaces;
+                line-height: 14px;
+                font-size: 70%;
+                font-weight: bold;
+            }
+
+            .route_item.start .route_title {
+                margin-left: 0;
+                left: -6px;
+                text-align: left;
+            }
+
+            .route_item .route_period {
+                top: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -25px;
+                width: 50px;
+                text-align: center;
+            }
+
+        .wkIdx {
+            user-select: none;
+            font-size: 110%;
+            color: #007bff;
+        }
 
         .ic-picker {
             cursor: pointer;
@@ -336,23 +496,23 @@
                 </a>
                 @*<div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser'">*@
                 @*<div class="picker-schedule d-flex align-items-center">
-                    <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
-                    <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
-                    <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
-                    <template v-if="type != 'exam'">
-                        <i class="far fa-eye-slash ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsHideAnswer == true}" title="Bật/ tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleHideAnswer(data)"></i>
-                        <i class="fas fa-desktop ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" data-toggle="tooltip" v-on:click="toggleOnlineClass(data)"></i>
-                    </template>
-                </div>
-                <div class="d-flex picker-schedule" v-else>
-                    <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
-                    <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
-                    <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
-                    <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
-                </div>
-                <div class="status">
-                    <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
-                </div>*@
+                        <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
+                        <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
+                        <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
+                        <template v-if="type != 'exam'">
+                            <i class="far fa-eye-slash ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsHideAnswer == true}" title="Bật/ tắt ẩn đáp án" data-toggle="tooltip" v-on:click="toggleHideAnswer(data)"></i>
+                            <i class="fas fa-desktop ic-ac d-flex align-items-center mr-2" v-bind:class="{active: data.IsOnline == true}" title="Bật/ tắt học trực tuyến" data-toggle="tooltip" v-on:click="toggleOnlineClass(data)"></i>
+                        </template>
+                    </div>
+                    <div class="d-flex picker-schedule" v-else>
+                        <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.StartDate)"></div>
+                        <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light" disabled="disabled" :value="formatTime(data.EndDate)"></div>
+                        <i class="far fa-eye-slash ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsHideAnswer == true}"></i>
+                        <i class="fas fa-desktop ic-ac d-flex align-items-center ml-2" v-bind:class="{active: data.IsOnline == true}"></i>
+                    </div>
+                    <div class="status">
+                        <b-form-checkbox switch v-model="data.IsActive" v-on:change="toggleLessonState(data)"></b-form-checkbox>
+                    </div>*@
             </div>
         </li>
     </script>
@@ -386,42 +546,16 @@
         new Vue({
             el: "#main_content",
             mounted() {
-                //var start = moment();
-                //var end = moment().add(29, 'days');
-                //$('input[name="dates"]').daterangepicker({
-                //    startDate: start,
-                //    endDate: end,
-                //    locale: {
-                //        format: "DD/MM/YYYY",
-                //    }
-                //}, function (s, e, label) {
-                //    RepDate(s,e);
-                //    GetCourse();
-                //});
+
                 this.list_subject = @Html.Raw(Json.Serialize(subjects));
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
-                //this.loadClassSubjects();
-                //console.log(this.list_grades_full);
-                this.changeSubject();
-                //window.filterLesson = this.filterLesson
-                //window.ChooseCalendar = this.chooseCalendar
-                //window.GetCourse = this.getCourse
-                //window.InitDate = this.initDate
-                //window.DestroyDate = this.destroyDate
-                //window.RepDate = this.repDate
-                //$('input[name=dates]').siblings('.ic-picker').click(function () {
-                //    if (isSearchDate) {
-                //        DestroyDate(this)
-                //    }
-                //    else {
-                //        InitDate();
-                //    }
-                //});
+
+                this.loadClassSubjects();
+
                 this.isMobileDevice();
             },
             data: {
-                list_course: [
-                ],
+                list_course: [],
                 list_subject: [],
                 list_grades_full: [],
                 list_grades: [],
@@ -429,8 +563,12 @@
                 grade: '',
                 view: 10,
                 page: 1,
-                startdate: moment(new Date(1800,1,1)),
-                enddate: moment(new Date(1800, 1, 1)),
+
+                lesson_week: [],
+                weekTitle: '',
+                startDate: moment(),
+                endDate: moment(),
+                period: 0,
                 classSubjects: [],
                 classes: [],
                 checkClass(c1, c2) {
@@ -477,8 +615,25 @@
                                             this.loadContent(itemcsbj.ID);
                                         }
                                     }
-                                    //var classSbjExam = this.classSubjects.find(x => x.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM)
-                                    //debugger
+
+                                    for (var i = 0; i < this.classes.length; i++) {
+                                        if (this.classes[i].ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL) {
+                                        //console.log(this.classes[i].StartDate)
+                                        if (this.startDate > moment(this.classes[i].StartDate))
+                                            this.startDate = moment(this.classes[i].StartDate);
+                                        if (this.endDate < moment(this.classes[i].EndDate))
+                                            this.endDate = moment(this.classes[i].EndDate);
+                                            this.period = this.endDate.diff(this.startDate, 'days')
+
+                                        }
+                                    }
+
+                                    Vue.nextTick(function () {
+                                        $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
+                                        console.log($(".route_item").index($('.route_item.now')) * 100);
+                                    })
+
+
                                 }
                                 //_data.forEach(function (item, k) {
                                 //    _that.classSubjects.push({
@@ -529,93 +684,23 @@
             watch: {
             },
             methods: {
-                @*getCourse() {
-                    let _that = this
-                    let _form = new FormData()
-                    _form.append('GradeID', _that.grade)
-                    _form.append('SubjectID', _that.subject)
-                    //_form.append('PageSize', _that.view)
-                    //_form.append('PageIndex', _that.page)
-                    //_form.append('StartDate', _that.sDate)
-                    //_form.append('EndDate', _that.eDate)
-                    let _url = '@processUrl("GetList", "Course")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            console.log(response.data)
-                            _that.list_course = response.data.Data;
-                            //console.log(_that.active_course);
-                        }).catch(e => { })
-                },*@
-                changeSubject() {
-                    let _that = this
-                    //console.log(this.subject)
-                    //console.log(this.list_grades_full)
-                    _that.list_grades = [];
-
-                    for (i = 0; i < _that.list_grades_full.length; i++)
-                    {
-                        //console.log(_that.list_grades_full[i].SubjectID)
-                        if (_that.list_grades_full[i].SubjectID == _that.subject) {
-                            _that.list_grades.push(_that.list_grades_full[i])
-                        }
-                    }
-                    _that.grade = ""
-                    _that.changeGrade()
-                },
-                changeGrade() {
-                    let _that = this
-                    _that.loadClassSubjects()
+                formatTime(time) {
+                    var _time = moment(time);
+                    if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
+                    return _time.format("DD/MM/YYYY HH:mm")
                 },
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
-                //chooseCalendar() {
-                //    $('input[name=dates]').focus().click()
-                //},
-                //initDate() {
-                //    if (isSearchDate) return;
-                //    let _that = this
-                //    var start = moment();
-                //    var end = moment().add(29, 'days');
-                //    $('input[name="dates"]').daterangepicker({
-                //        startDate: start,
-                //        endDate: end,
-                //        locale: {
-                //            format: "DD/MM/YYYY",
-                //        }
-                //    }, function (s, e, label) {
-                //        RepDate(s, e);
-                //        GetCourse();
-                //    });
-                //    $('input[name="dates"]').siblings().removeClass('inactive');
-                //    isSearchDate = true;
-                //    $('input[name="dates"]').focus().click();
-                //    _that.startdate = start;
-                //    _that.enddate = end;
-                //    GetCourse()
-                //},
-                //destroyDate() {
-                //    let _that = this
-                //    console.log(isSearchDate);
-                //    if (!isSearchDate) return false;
-                //    //$('input[name="dates"]').daterangepicker().destroy()
-                //    $('input[name="dates"]').data('daterangepicker').remove();
-                //    $('input[name="dates"]').val('-- Chọn thời gian --');
-                //    $('input[name="dates"]').siblings().addClass('inactive');
-                //    isSearchDate = false;
-                //    console.log(isSearchDate);
-                //    _that.startdate = moment(new Date(1800,1,1)),
-                //    _that.enddate = moment(new Date(1800,1,1)),
-                //    GetCourse();
-                //},
+                formatDatenoYear(date) {
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("DD/MM")
+                },
                 cacheImg(src, width, height) {
                     return cacheStatic(src, width, height, 'picture/book.jpg');
                 },
-                //repDate(svalue, evalue) {
-                //    this.eDate = evalue;
-                //    this.sDate = svalue;
-                //},
                 removeCourse(csbj) {
                     let _form = new FormData()
                     _form.append('ClassSubjectID', csbj.ID);
@@ -681,15 +766,11 @@
                     }
                 },
                 filterLesson(obj) {
-                    //var filter = this.list_lessons.filter((p) => {
-                    //    debugger
-                    //    return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject
-                    //})
                     var filter = []
                     for (var i = 0; i < this.list_lessons.length; i++) {
                         var item = this.list_lessons[i]
                         if (item.ClassSubject == obj.ClassSubject) {
-                            debugger
+                            //debugger
                             filter.push(item)
                         }
                     }
@@ -754,6 +835,26 @@
                             })
                         }).catch(e => { })
                 },
+                showWeekLesson(start) {
+                    let _that = this
+                    let _form = new FormData()
+                    var _date = moment(start);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
+                        _date = moment();
+                    date = _date.format("MM/DD/YYYY")
+                    _form.append('today', date)
+                    _form.append('seekStart', false)
+                    let _url = '@processUrl("GetThisWeekLesson", "Course")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //console.log("Week")
+                        _that.lesson_week = response.data.data;
+                        }).catch(e => { })
+
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+                    this.$bvModal.show("model_week_lesson")
+                }
             }
         });
 
@@ -792,4 +893,43 @@
         }
 
     </script>
+}
+
+@section Modals{ 
+
+    <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
+        <div class="modal-body">
+            <template v-if="lesson_week.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th>Học liệu</th>
+                            <th>Lớp</th>
+                            <th>Thời gian mở</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in lesson_week">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classSubjectID" target="_blank">{{item.title}}</a></td>
+                            <td>{{item.bookName}}</td>
+                            <td>{{item.className}}</td>
+                            <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
+                            <td :class="item.isLearnt ? 'text-success':'text-danger'">{{item.isLearnt ? 'Đã học' : 'Chưa học'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có bài
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
 }

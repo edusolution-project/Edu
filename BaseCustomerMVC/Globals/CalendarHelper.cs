@@ -172,7 +172,9 @@ namespace BaseCustomerMVC.Globals
             bool isTeacher = _teacherService.GetItemByID(userid) != null;
             if (classList == null) classList = new List<string>();
             var filter = new List<FilterDefinition<CalendarEntity>>();
-            filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID) && (o.TeacherID == userid)));
+            filter.Add(Builders<CalendarEntity>.Filter.Where(o => classList.Contains(o.GroupID)
+            //&& (o.TeacherID == userid)
+            ));
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
                 var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);

@@ -487,12 +487,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
-        public JsonResult GetActiveList(DefaultModel model, string Center = "", string SubjectID = "", string GradeID = "", bool cp = false)
+        public JsonResult GetActiveList(DefaultModel model, string Center = "", string SubjectID = "", string GradeID = "", bool share = false)
         {
             var filter = new List<FilterDefinition<CourseEntity>>();
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
-
+            var isTeacher = User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher";
             if (!string.IsNullOrEmpty(Center))
             {
                 var @center = _centerService.GetItemByCode(Center);
@@ -500,8 +500,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         { "Error", "Cơ sở không đúng"}
                     });
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID));
+                if (share)
+                {
+                    var listCenter = new List<string> { @center.ID };
+
+                    if (Center != "eduso")
+                    {
+                        var edusoCenter = _centerService.GetItemByCode("eduso");
+                        listCenter.Add(edusoCenter.ID);
+                    }
+
+                    if (isTeacher)
+                        filter.Add(Builders<CourseEntity>.Filter.Or(
+                            Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID && o.TeacherID == UserID),
+                            Builders<CourseEntity>.Filter.Where(o => listCenter.Contains(o.Center) && o.TargetCenters.Contains(@center.ID))
+                            ));
+                    else
+                        filter.Add(Builders<CourseEntity>.Filter.Or(
+                            Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID),
+                            Builders<CourseEntity>.Filter.Where(o => listCenter.Contains(o.Center) && o.TargetCenters.Contains(@center.ID))
+                            ));
+                }
+                else
+                    filter.Add(Builders<CourseEntity>.Filter.Where(o => o.Center == @center.ID));
+
             }
+
             if (!string.IsNullOrEmpty(SubjectID))
             {
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.SubjectID == SubjectID));
@@ -511,23 +535,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<CourseEntity>.Filter.Where(o => o.GradeID == GradeID));
             }
 
-            if (User.Claims.GetClaimByType(ClaimTypes.Role).Value == "teacher")
-                filter.Add(Builders<CourseEntity>.Filter.Where(o => o.TeacherID == UserID));
 
             filter.Add(Builders<CourseEntity>.Filter.Where(o => o.IsActive));
 
-            var data = filter.Count > 0 ? _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter)) : _service.GetAll();
+            var data = filter.Count > 0 ?
+                 _service.Collection.Find(Builders<CourseEntity>.Filter.And(filter))
+                : _service.GetAll().Limit(50);
+            var DataResponse = data.ToList();
 
             //model.TotalRecord = data.CountDocuments();
 
             //var DataResponse = data == null || model.TotalRecord <= 0 || model.TotalRecord < model.PageSize
             //    ? data
             //    : data.Skip((model.PageIndex - 1) * model.PageSize).Limit(model.PageSize);
-            var DataResponse = data;
+
 
             var response = new Dictionary<string, object>
             {
-                { "Data", DataResponse.ToList().Select(o =>
+                { "Data", DataResponse.Select(o =>
 
                     _courseViewMapping.AutoOrtherType(o, new CourseViewModel(){
                         GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
