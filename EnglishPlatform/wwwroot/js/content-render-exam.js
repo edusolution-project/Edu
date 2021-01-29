@@ -2355,7 +2355,7 @@ var Lesson = (function () {
             })
         }
         else {//file word
-            debugger
+            //debugger
             Swal.fire({
                 title: '<strong>Chọn thao tác</strong>',
                 icon: 'question',
@@ -2401,7 +2401,7 @@ var Lesson = (function () {
             xhr.open('POST', config.url.import_quiz);
         }
         else {//file word
-            var a = config.url.import_quiz_with_word;
+            //var a = config.url.import_quiz_with_word;
             //debugger
             xhr.open('POST', config.url.import_quiz_with_word);
         }
@@ -3839,6 +3839,20 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
+            }
+        }
+
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
             while (__answer_sending) {
@@ -4284,6 +4298,10 @@ var Lesson = (function () {
                         });
                         //alert(err);
                     });
+            }
+            else {
+                //console.log('#quiznav' + questionId);
+                $('#quizNav' + questionId).addClass('completed');
             }
         }
     }
