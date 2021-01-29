@@ -2,7 +2,7 @@
     ViewData["Title"] = "Tin tức";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="category-box pt-5 pb-5">
+<div class="category-box pt-5 pb-5 p-4">
     <div class="container pr-xs">
         <div class="inner-content">
             <div class="content-box">
@@ -84,13 +84,13 @@
                         <template v-for="(item,k) in otherNews.listNews">
                             <div class="news-item pb-3 pt-3 d-flex" v-if="item.CategoryID == category.ID" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" :title="item.Title">
                                 <div class="thumb">
-                                    <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                    <a :href="'/tin-tuc/'+'category.Code' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
                                         <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
                                     </a>
                                 </div>
                                 <div class="media-body pr-4 pt-2">
                                     <div class="news-title">
-                                        <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code" style="text-decoration:none">
+                                        <a :href="'/tin-tuc/'+category.Code + '/' + item.Code" style="text-decoration:none">
                                             {{item.Title}}
                                         </a>
                                     </div>
