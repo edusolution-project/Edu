@@ -51,7 +51,7 @@
             </div>
         </div>*@
 
-        <div id="main-route" class="main-route mb-3 mt-2">
+    @*<div id="main-route" class="main-route mb-3 mt-2">
             <ul class="route_holder" id="cid_0" cid="0">
                 <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
                 <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
@@ -59,7 +59,16 @@
                     :class="moment(startDate).add(index * 7 + 1, 'days') < moment() ? 'passed' : (moment(startDate).add(index * 7 - 6, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7, 'days'))}} - {{formatDatenoYear(moment(startDate).add(index * 7 + 6 > period ? period : (index * 7 + 6), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
                 <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
             </ul>
-        </div>
+        </div>*@
+    <div id="main-route" class="main-route mb-3 mt-2">
+        <ul class="route_holder" id="cid_0" cid="0">
+            <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
+            <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
+                v-on:click="showWeekLesson(moment(startDate).add(startDate, index * 7 - padRoute, 'days'))"
+                :class="moment(startDate).add((index + 1) * 7 + 1 - padRoute, 'days') < moment() ? 'passed' : (moment(startDate).add((index + 1) * 7 - 6 - padRoute, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+            <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
+        </ul>
+    </div>
 
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -567,6 +576,7 @@
                 lesson_week: [],
                 weekTitle: '',
                 startDate: moment(),
+                padRoute: 0,
                 endDate: moment(),
                 period: 0,
                 classSubjects: [],
@@ -616,21 +626,26 @@
                                         }
                                     }
 
+
                                     for (var i = 0; i < this.classes.length; i++) {
                                         if (this.classes[i].ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL) {
                                         //console.log(this.classes[i].StartDate)
-                                        if (this.startDate > moment(this.classes[i].StartDate))
-                                            this.startDate = moment(this.classes[i].StartDate);
-                                        if (this.endDate < moment(this.classes[i].EndDate))
-                                            this.endDate = moment(this.classes[i].EndDate);
+                                            var start = moment(this.classes[i].StartDate).toLocaleString();
+                                            if (this.startDate > moment(start))
+                                                this.startDate = moment(start);
+                                            var end = moment(this.classes[i].EndDate).toLocaleString();
+                                            if (this.endDate < moment(end))
+                                                this.endDate = moment(end);
                                             this.period = this.endDate.diff(this.startDate, 'days')
-
                                         }
                                     }
 
+                                    this.padRoute = moment(this.startDate).day() - 1;
+                                    console.log(this.period);
+
                                     Vue.nextTick(function () {
                                         $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
-                                        console.log($(".route_item").index($('.route_item.now')) * 100);
+                                        //console.log($(".route_item").index($('.route_item.now')) * 100);
                                     })
 
 
@@ -895,7 +910,7 @@
     </script>
 }
 
-@section Modals{ 
+@section Modals{
 
     <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
         <div class="modal-body">
