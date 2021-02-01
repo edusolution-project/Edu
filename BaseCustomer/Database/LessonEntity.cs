@@ -14,6 +14,8 @@ namespace BaseCustomerEntity.Database
 
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
+        [JsonProperty("LessonExtension")]
+        public List<LessonExtensionEntity> LessonExtension { get; set; }
 
         public LessonEntity()
         {

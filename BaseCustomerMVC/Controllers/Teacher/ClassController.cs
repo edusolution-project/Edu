@@ -3554,7 +3554,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         centerResult.TeacherID = _teacher.ID;
                         centerResult.NameBlock = _teacher.FullName;
                         resultTeacher.Add(centerResult);
-                        resultTeacher.Add(centerResult);
                     }
 
                     var abc = resultTeacher.Where(x => x.TeacherID == _teacher.ID).FirstOrDefault();
