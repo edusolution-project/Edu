@@ -70,7 +70,7 @@
             <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="searchCsbj">
                     <option value="">Tổng hợp</option>
-                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
+                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName,TypeClass:item.TypeClass}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
                     @*<option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                             {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
                         </option>*@
@@ -1471,7 +1471,8 @@
                     courseName: '',
                     title: '',
                     list_chapters:[]
-                }
+                },
+                isExam: false
             },
             watch: {
                 "ref.subjectID": function () {
@@ -1481,10 +1482,13 @@
                     this.loadPreference()
                 },
                 searchCsbj: function () {
-                    //debugger
                     this.loadClassScore()
                     this.filterChap.TargetChaps = []
                     this.filterChap.SelectAll = false;
+                    if (this.searchCsbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                        this.isExam = true
+                    }
+                    else this.isExam = false
                 },
                 "searchPoint": function () {
                     if (this.searchPoint == 0) {
@@ -2987,7 +2991,7 @@
                             if (item.ID == ChapterID) {
                                 if (item.ParentID != "0") {
                                     parentItem = listChapters.find(x => x.ID == item.ParentID)
-                                    return item.Name + " - " + (parentItem == null ? "" : parentItem.Title) 
+                                    return item.Name + " - " + (parentItem == null ? "" : parentItem.Title)
                                 }
                                 else {
                                     return item.Name
@@ -3016,8 +3020,27 @@
 
                     this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
                     this.$bvModal.show("model_week_lesson")
+                },
+                ResetExam(obj) {
+                    if (window.confirm("Cảnh báo: Thao tác này sẽ xoá tất cả lịch sử kiểm tra của học sinh trong bài kiểm tra này.")) {
+                        let _that = this
+                        let _form = new FormData()
+                        let _url = '@processUrl("ResetExam","Exam")'
+                        _form.append("LessonID", obj.LessonID)
+                        if (obj.ListExam.length > 0)
+                            _form.append("ExamID", obj.ListExam[0].ExamID)
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if (response.data.code == 405) {
+                                    alert("Bạn không có quyền thao tác chức năng này.")
+                                }
+                                else {
+                                    alert(response.data.Msg)
+                                }
+                            })
+                            .catch(e => { alert(e) })
+                    }
                 }
-
             }
         });
 
@@ -3414,6 +3437,7 @@
                             <th style="width:150px">Trạng thái</th>
                             <th style="width:50px">Điểm</th>
                             <th style="width:100px"></th>
+                            <th style="width:50px" v-if="isExam && '@currentuser' == '5d8389c2d5d1bf27e4410c04'"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -3428,6 +3452,7 @@
                             <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
                             <td>{{roundPoint(item.LastPoint,1)}}</td>
                             <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                            <td v-if="isExam && '@currentuser' == '5d8389c2d5d1bf27e4410c04'"><i class="fas fa-redo" v-on:click="ResetExam(item)"></i></td>
                         </tr>
                     </tbody>
                 </table>

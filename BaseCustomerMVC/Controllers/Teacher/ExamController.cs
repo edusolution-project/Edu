@@ -42,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonHelper _lessonHelper;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ProgressHelper _progressHelper;
+        private readonly ExamService _examService;
 
         //private readonly ScoreService _scoreService;
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -63,7 +64,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonHelper lessonHelper,
             ClassSubjectService classSubjectService,
             ProgressHelper progressHelper,
-            IRoxyFilemanHandler roxyFilemanHandler
+            IRoxyFilemanHandler roxyFilemanHandler,
+            ExamService examService
             )
         {
             _learningHistoryService = learningHistoryService;
@@ -85,6 +87,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _roxyFilemanHandler = roxyFilemanHandler;
             _classSubjectService = classSubjectService;
             _progressHelper = progressHelper;
+            _examService = examService;
         }
 
         [Obsolete]
@@ -562,6 +565,63 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Message",ex.Message }
                         }
                     );
+            }
+        }
+
+        public JsonResult ResetExam(String basis, String LessonID,String ExamID)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                if(!UserID.Equals("5d8389c2d5d1bf27e4410c04")) return Json(new Dictionary<String, Object> //chỉ tài khoản huonghl@utc.edu.vn mới sd chức năng này được
+                {
+                    {"Msg","Bạn không có quyền thực hiện chức năng này" }
+                });
+                var lessonSchedule = _lessonScheduleService.GetItemByLessonID(LessonID);
+                if(DateTime.UtcNow > lessonSchedule.EndDate) return Json(new Dictionary<String, Object>
+                {
+                    {"Msg","Đã hết thời gian làm bài, không thể reset." }
+                });
+                var exam = _examService.GetItemByID(ExamID);
+                if (exam == null) return Json(new Dictionary<String, Object> 
+                {
+                    {"Msg","Chưa có thông tin bài kiểm tra" }
+                });
+                var student = _studentService.GetItemByID(exam.StudentID);
+                if(student == null) return Json(new Dictionary<String, Object>
+                {
+                    {"Msg","Thông tin học sinh không chính xác." }
+                });
+                var lessonprogess = _lessonProgressService.GetByStudentID_LessonID(student.ID, LessonID);
+                if(lessonprogess == null) return Json(new Dictionary<String, Object>
+                {
+                    {"Msg","Chưa có thông tin bài kiểm tra" }
+                });
+                _examService.CreateQuery().DeleteOne(x=>x.ID == exam.ID);
+                if (lessonprogess.Tried == 1)
+                    _lessonProgressService.CreateQuery().DeleteOne(x => x.ID == lessonprogess.ID);
+                else
+                {
+                    lessonprogess.Tried = lessonprogess.Tried - 1;
+                    var exams = _examService.CreateQuery().Find(x => x.LessonID == LessonID && student.ID == x.StudentID).SortByDescending(x => x.Created);
+                    lessonprogess.LastDate = exams.FirstOrDefault().Created;
+                    lessonprogess.LastPoint = exams.FirstOrDefault().LastPoint;
+                    lessonprogess.AvgPoint = exams.ToList().Average(x => x.LastPoint);
+                    lessonprogess.MinPoint = exams.ToList().Min(x => x.LastPoint);
+                    lessonprogess.MaxPoint = exams.ToList().Max(x => x.LastPoint);
+                    Int32 index = (Int32)exams.CountDocuments() - 1;
+                    lessonprogess.PointChange = exams.FirstOrDefault().LastPoint - exams.ToList().ElementAtOrDefault(index).LastPoint;
+                    _lessonProgressService.CreateQuery().ReplaceOne(x => x.ID == lessonprogess.ID, lessonprogess, new UpdateOptions() { IsUpsert = false });
+                }
+
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Msg","Reset thành công, báo học sinh làm bài tiếp tục." }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
             }
         }
 

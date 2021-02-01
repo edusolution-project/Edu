@@ -3840,7 +3840,7 @@ var Lesson = (function () {
 
     var completeExam = async function (isOvertime) {
 
-        if (!isOvertime) {
+        //if (!isOvertime) {
             var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
             if (undoneQuiz > 0) {
                 if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
@@ -3851,7 +3851,7 @@ var Lesson = (function () {
                     return false;
                 }
             }
-        }
+        //}
 
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
