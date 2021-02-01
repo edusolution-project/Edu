@@ -1788,29 +1788,29 @@ namespace BaseCustomerMVC.Controllers.Admin
             //}
         }
 
-        //public IActionResult SendMail(String email)
-        //{
-        //    try
-        //    {
-        //        var acc = _accountService.GetAccountByEmail(email);
-        //        var student = _studentService.GetStudentByEmail(acc.UserName);
-        //        var center = _centerService.CreateQuery().Find(x => student.Centers.Contains(x.ID)).FirstOrDefault();
-        //        var pass = "edu123456";
-        //        if (acc != null)
-        //        {
-        //            _mailHelper.SendStudentJoinCenterNotify(student.FullName, acc.UserName, pass, center.Name);
-        //            return Content($"Send mail to {acc.UserName} is OK");
-        //        }
-        //        else
-        //        {
-        //            return Content("acc null");
-        //        }
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        return Content(ex.Message);
-        //    }
-        //}
+        public IActionResult SendMail(String email)
+        {
+            try
+            {
+                var acc = _accountService.GetAccountByEmail(email);
+                var student = _studentService.GetStudentByEmail(acc.UserName);
+                var center = _centerService.CreateQuery().Find(x => student.Centers.Contains(x.ID)).FirstOrDefault();
+                var pass = "edu123456";
+                if (acc != null)
+                {
+                    _mailHelper.SendStudentJoinCenterNotify(student.FullName, acc.UserName, pass, center.Name);
+                    return Content($"Send mail to {acc.UserName} is OK");
+                }
+                else
+                {
+                    return Content("acc null");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
 
         //public IActionResult FixData()
         //{

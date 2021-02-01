@@ -89,7 +89,6 @@ namespace EnglishPlatform.Controllers
         public IActionResult Detail(string catcode, string newscode)
         {
             var cat = _newsCategoryService.GetItemByCode(catcode);
-            ViewBag.Category = cat;
             var filter = new List<FilterDefinition<NewsEntity>>();
 
             if (!string.IsNullOrEmpty(newscode))
@@ -122,6 +121,7 @@ namespace EnglishPlatform.Controllers
                 else
                     return RedirectToRoute("news-category", new { catcode = cat.Code });
             }
+            ViewBag.Category = cat;
             return View();
         }
 
@@ -302,12 +302,52 @@ namespace EnglishPlatform.Controllers
         {
             try
             {
-                var NewsTop = _newsService.Collection.Find(tbl => tbl.IsTop == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x => x.PublishDate).Take(3);
-                var NewsHot = _newsService.Collection.Find(tbl => tbl.IsHot == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x=>x.PublishDate).Take(1);
+                var categories = _newsCategoryService.GetAll().ToList();
+                var NewsTop = (from t in _newsService.Collection.Find(tbl => tbl.IsTop == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x => x.PublishDate).Take(3)
+                               let category = categories.Where(x => x.ID == t.CategoryID).FirstOrDefault()
+                               where category != null
+                               select new NewsViewModel
+                               {
+                                   ID = t.ID,
+                                   CategoryID = t.CategoryID,
+                                   CategoryCode = category.Code,
+                                   Title = t.Title,
+                                   Code = t.Code,
+                                   Thumbnail = t.Thumbnail,
+                                   Summary = t.Summary,
+                                   Content = t.Content,
+                                   IsActive = t.IsActive,
+                                   IsHot = t.IsHot,
+                                   IsTop = t.IsTop,
+                                   Type = t.Type,
+                                   PublishDate = t.PublishDate
+                               }).ToList();
+                var NewsHot = (from h in _newsService.Collection.Find(tbl => tbl.IsHot == true && (tbl.PublishDate <= DateTime.Now || tbl.IsActive == true)).ToList().OrderByDescending(x => x.PublishDate).Take(1)
+                               let category = categories.Where(x => x.ID == h.CategoryID).FirstOrDefault()
+                               where category != null
+                               select new NewsViewModel
+                               {
+                                   ID = h.ID,
+                                   CategoryID = h.CategoryID,
+                                   CategoryCode = category.Code,
+                                   Title = h.Title,
+                                   Code = h.Code,
+                                   Thumbnail = h.Thumbnail,
+                                   Summary = h.Summary,
+                                   Content = h.Content,
+                                   IsActive = h.IsActive,
+                                   IsHot = h.IsHot,
+                                   IsTop = h.IsTop,
+                                   Type = h.Type,
+                                   PublishDate = h.PublishDate
+                               }).ToList();
+                var centers = _centerService.GetActiveCenter(DateTime.Now);
+                var listCenters = centers.Count() == 0 ? null : centers.Where(x=>x.Image !=null).Select(x => new { Logo = x.Image, Name = x.Name }).ToList();
                 var response = new Dictionary<string, object>
                     {
                         {"NewsTop",NewsTop.ToList() },
-                        {"NewsHot",NewsHot.ToList() }
+                        {"NewsHot",NewsHot.ToList() },
+                        {"ListCenters",listCenters }
                     };
 
                 return Json(response);
