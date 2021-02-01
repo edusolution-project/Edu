@@ -2579,7 +2579,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-
         #region Import with Word
         /// <summary>
         /// Using Spire.Doc v8.9.6
@@ -4667,44 +4666,45 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region
-        public JsonResult GetListCourse(String basis,String SubjectID,String GradeID)
+        public JsonResult GetListCourse(String basis, String SubjectID, String GradeID)
         {
             try
             {
                 var center = _centerService.GetItemByCode(basis);
-                if(center == null)
+                if (center == null)
                 {
-                    return Json(new Dictionary<String, Object> 
+                    return Json(new Dictionary<String, Object>
                     {
                         {"Data","" },
                         {"Error","Cơ sở không tồn tại." }
                     });
                 }
 
-                var courses = _service.GetItemBySubjectID_GradeID(SubjectID, GradeID,center.ID);
+                var courses = _service.GetItemBySubjectID_GradeID(SubjectID, GradeID, center.ID);
                 var courseIDs = courses.Select(x => x.ID).ToList();
+                //TODO: Recheck
                 var courseChapters = _chapterService.GetCourseChapters(courseIDs);
-                return Json(new Dictionary<String, Object> 
+                return Json(new Dictionary<String, Object>
                 {
                     {"Courses",courses },
                     {"Chapters",courseChapters },
                     {"Error","" }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }
         }
 
-        public JsonResult GetListCourseLesson(String basis,String ParentID)
+        public JsonResult GetListCourseLesson(String basis, String ParentID)
         {
             try
             {
                 if (!String.IsNullOrEmpty(ParentID))
                 {
                     var courseLesson = _courseLessonService.GetChapterLesson(ParentID);
-                    if(courseLesson == null)
+                    if (courseLesson == null)
                     {
                         return Json(new Dictionary<String, Object>
                         {
@@ -4717,7 +4717,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     var courseLessonIDs = courseLesson.Select(x => x.ID).ToList();
                     var lessonPart = _lessonPartService.GetItemByTypeQuiz_LessonIDs(courseLessonIDs).ToList();
-                    return Json(new Dictionary<String, Object> 
+                    return Json(new Dictionary<String, Object>
                     {
                         {"CourseLesson",courseLesson },
                         {"LessonPart",lessonPart },
@@ -4736,7 +4736,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                     {
@@ -4747,6 +4747,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
         #endregion
+
         private string GetContentType(string fileName)
         {
             var provider = new FileExtensionContentTypeProvider();

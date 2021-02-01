@@ -536,7 +536,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult ToggleHideAnswer(string ID, string ChapterID = "", bool isHide = true)
+        public JsonResult ToggleHideAnswer(string ID, string ChapterID = "")
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(ChapterID))
@@ -558,26 +558,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new { error = "Thông tin không đúng" });
                 }
 
-                var chapids = new List<string> { ChapterID };
-                var subchap = new List<string>();
-                var lessonids = GetChapterLessonID(ChapterID, out subchap);
+                var isHide = ToggleChapHideAnswer(chap);
 
-                isHide = !chap.IsHideAnswer;
-
-                chapids.AddRange(subchap);
-
-                _chapterService.CreateQuery().UpdateMany(
-                    Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
-                    Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
-                    new UpdateOptions() { });
-
-                _lessonScheduleService.CreateQuery().UpdateMany(
-                    Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
-                    Builders<LessonScheduleEntity>.Update.Set(t => t.IsHideAnswer, isHide),
-                    new UpdateOptions() { });
 
                 return Json(new { IsHideAnswer = isHide });
             }
+        }
+
+        private bool ToggleChapHideAnswer(ChapterEntity chap, int resetState = 0)
+        {
+            var isHide = !chap.IsHideAnswer;
+            if (resetState > 0)
+                isHide = true;
+            else if (resetState < 0)
+                isHide = false;
+
+            var chapids = new List<string> { chap.ID };
+            var subchap = new List<string>();
+            var lessonids = GetChapterLessonID(chap.ID, out subchap);
+
+            chapids.AddRange(subchap);
+
+            _chapterService.CreateQuery().UpdateMany(
+                Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
+                Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                new UpdateOptions() { });
+
+            _lessonScheduleService.CreateQuery().UpdateMany(
+                Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
+                Builders<LessonScheduleEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                new UpdateOptions() { });
+
+            return isHide;
         }
 
 
@@ -657,7 +669,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [HttpPost]
         [Obsolete]
-        public JsonResult UpdateChapter(ChapterEntity entity)
+        public JsonResult UpdateChapter(ChapterEntity entity, bool reset = false)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             entity.StartDate = entity.StartDate.ToUniversalTime();
@@ -679,10 +691,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
 
                 var defDate = new DateTime(1900, 1, 1);
-                oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
-                oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
+                if (reset)
+                {
+                    oldItem.ConditionChapter = "";
+                    oldItem.BasePoint = 0;
+                    oldItem.StartDate = defDate;
+                    oldItem.EndDate = defDate;
+                    oldItem.IsHideAnswer = false;
+                }
+                else
+                {
+                    oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
+                    oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
+                }
 
                 _chapterService.Save(oldItem);//Save chapter
+
+                ToggleChapHideAnswer(oldItem, -1); //set hide answer to false
 
                 UpdateChapterCalendar(oldItem, UserID);
 

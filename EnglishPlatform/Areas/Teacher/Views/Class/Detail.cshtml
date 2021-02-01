@@ -59,8 +59,8 @@
             <ul class="route_holder" id="cid_0" cid="0">
                 <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
                 <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
-                    v-on:click="showWeekLesson(addDays(startDate, index * 7))"
-                    :class="addDays(startDate, index * 7 + 1) < moment() ? 'passed' : (addDays(startDate, index * 7 - 6) > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(addDays(startDate, index * 7))}} - {{formatDatenoYear(addDays(startDate, (index * 7 + 6) > period ? period : (index * 7 + 6)))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+                    v-on:click="showWeekLesson(addDays(startDate, index * 7 - padRoute))"
+                    :class="addDays(startDate, (index + 1) * 7 + 1 - padRoute) < moment() ? 'passed' : (addDays(startDate, (index + 1) * 7 - 6 - padRoute) > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(addDays(startDate, index * 7 - padRoute))}} - {{formatDatenoYear(addDays(startDate, (index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute)))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
                 <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
             </ul>
         </div>
@@ -892,7 +892,7 @@
                                     </div>
                                 </template>
                                 <div class="act_ic">
-                                    <i class="ic-ac fas fa-redo ml-2" style="font-size:16px;" title="Xóa lịch" v-on:click="clearChapSchedule(data, pos)"></i>
+                                    <i class="ic-ac fas fa-redo ml-2" style="font-size:16px;" title="Xóa lịch" v-on:click="resetChap(data, pos)"></i>
                                 </div>
                             </div>
                         </div>
@@ -1261,6 +1261,7 @@
                 window.updateChapCondition = this.updateChapCondition
                 window.clearSchedule = this.clearSchedule
                 window.clearChapSchedule = this.clearChapSchedule
+                window.resetChap = this.resetChap
                 window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
                 window.toggleHideAnswer = this.toggleHideAnswer
@@ -1316,6 +1317,7 @@
                 classID: '@currentClass.ID',
                 className: "@Html.Raw(currentClass.Name.Replace("'","\'"))",
                 startDate: '@currentClass.StartDate.ToLocalTime()',
+                padRoute: @(currentClass.StartDate.ToLocalTime().DayOfWeek -  DayOfWeek.Monday),
                 endDate: '@currentClass.EndDate.ToLocalTime()',
                 period: @((currentClass.EndDate - currentClass.StartDate).TotalDays),
                 classDescription: '@currentClass.Description',
@@ -1991,12 +1993,12 @@
                                 return false;
                             }
                             else {
-                                var _container = '#prc-' + chapter.ID + '-' + pos;
-                                var startdate = formatTime(chapter.StartDate);
-                                var enddate = formatTime(chapter.EndDate);
+                                //var _container = '#prc-' + chapter.ID + '-' + pos;
+                                //var startdate = formatTime(chapter.StartDate);
+                                //var enddate = formatTime(chapter.EndDate);
 
-                                $(_container).find('.input-group.date.st > input').val(startdate);
-                                $(_container).find('.input-group.date.ed > input').val(enddate);
+                                //$(_container).find('.input-group.date.st > input').val(startdate);
+                                //$(_container).find('.input-group.date.ed > input').val(enddate);
                                 this.updateSubchapSchedule(obj);
                             }
                         }).catch(e => { })
@@ -2012,6 +2014,13 @@
                                 this.updateSubchapSchedule(item);
                                 item.PreventEvent = false
                             })
+                        });
+                    }
+                    var sublessons = this.list_lessons.filter(t => t.Parent == obj.ID);
+                    if (sublessons.length > 0) {
+                        sublessons.forEach(function (item, pos) {
+                            item.StartDate = obj.StartDate
+                            item.EndDate = obj.EndDate
                         });
                     }
                 },
@@ -2054,6 +2063,74 @@
                                 $(_container).find('.input-group.date.ed > input').val(enddate);
                             }
                         }).catch(e => { })
+                },
+                resetChap(obj, pos) {
+                    obj.IsUpdating = true
+                    obj.StartDate = ''
+                    obj.EndDate = ''
+                    obj.BasePoint = 0
+                    obj.ConditionChapter = ''
+                    obj.IsHideAnswer = false
+
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    _form.append('reset', true)
+
+                    let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //console.log(obj);
+                            obj.IsUpdating = false;
+                            mainInstance.$forceUpdate();
+                            var chapter = response.data.Data;
+                            if (chapter == null) {
+                                alert("có lỗi, vui lòng tải lại trang & thực hiện lại thao tác");
+                                return false;
+                            }
+                            else {
+                                var _container = '#prc-' + chapter.ID + '-' + pos;
+                                var startdate = formatTime(chapter.StartDate);
+                                var enddate = formatTime(chapter.EndDate);
+                                $(_container).find('.input-group.date.st > input').val(startdate);
+                                $(_container).find('.input-group.date.ed > input').val(enddate);
+                                $('[id^=prc-' + obj.ID + '] .fa-eye-slash').removeClass('active');
+
+                                this.resetSubContent(chapter);
+                            }
+                        }).catch(e => { })
+                },
+                resetSubContent(parent) {
+                    if (parent != null) {
+                        var subchaps = this.list_chapters.filter(t => t.Parent == parent.ID);
+
+                        if (subchaps.length > 0) {
+                            subchaps.forEach(function (obj, pos) {
+                                //console.log(item);
+                                obj.PreventEvent = true;
+                                obj.StartDate = ''
+                                obj.EndDate = ''
+                                obj.BasePoint = 0
+                                obj.ConditionChapter = ''
+                                obj.IsHideAnswer = false
+
+                                Vue.nextTick(function () {
+                                    this.updateSubchapCondition(obj);
+                                    obj.PreventEvent = false
+                                })
+                            });
+                        }
+                        var sublessons = this.list_lessons.filter(t => t.Parent == parent.ID);
+                        if (sublessons.length > 0) {
+                            sublessons.forEach(function (obj, pos) {
+                                //console.log(item);
+                                //obj.PreventEvent = true;
+                                obj.StartDate = ''
+                                obj.EndDate = ''
+                                obj.IsHideAnswer = false
+
+                            });
+                        }
+                    }
                 },
                 matchedChap(obj, key) {
                     return (obj.ClassSubject + '-' + obj.Parent) == key
@@ -2191,7 +2268,7 @@
                                         text: "Đã bật chế độ ẩn đáp án",
                                         icon: 'info',
                                     });
-                                    $('[id^=prc-' + obj.ID + '] .fa-eye-slash').addClass('active');
+                                    //$('[id^=prc-' + obj.ID + '] .fa-eye-slash').addClass('active');
                                 }
                                 else {
                                     Swal.fire({
@@ -2199,8 +2276,10 @@
                                         text: "Đã tắt chế độ ẩn đáp án",
                                         icon: 'info',
                                     });
-                                    $('[id^=prc-' + obj.ID + '] .fa-eye-slash').removeClass('active');
+                                    //$('[id^=prc-' + obj.ID + '] .fa-eye-slash').removeClass('active');
                                 }
+                                this.toggleSubHideAnswer(obj);
+
                             }
                             else {
                                 Swal.fire({
@@ -2215,6 +2294,28 @@
                             //item.IsActive = !item.IsActive;
                             //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
                         }).catch(e => { })
+                },
+                toggleSubHideAnswer(parent) {
+                    if (parent != null) {
+                        var subchaps = this.list_chapters.filter(t => t.Parent == parent.ID);
+
+                        if (subchaps.length > 0) {
+                            subchaps.forEach(function (obj, pos) {
+                                obj.IsHideAnswer = parent.IsHideAnswer
+
+                                Vue.nextTick(function () {
+                                    this.toggleSubHideAnswer(obj);
+                                    obj.PreventEvent = false
+                                })
+                            });
+                        }
+                        var sublessons = this.list_lessons.filter(t => t.Parent == parent.ID);
+                        if (sublessons.length > 0) {
+                            sublessons.forEach(function (obj, pos) {
+                                obj.IsHideAnswer = parent.IsHideAnswer
+                            });
+                        }
+                    }
                 },
                 //REF
                 showRefModal(obj) {
@@ -2596,12 +2697,10 @@
                     if (m > 0) {
                         ret += m + "m ";
                     }
-                    if (s > 0) {
+                    if (s >= 0) {
                         ret += s + "s ";
                     }
-                    else {
-                        ret += s + "s "
-                    }
+
                     return ret;
                 },
                 domDecoder(str) {
@@ -3018,7 +3117,7 @@
                         _that.lesson_week = response.data.data;
                         }).catch(e => { })
 
-                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(6, 'days'));
                     this.$bvModal.show("model_week_lesson")
                 },
                 ResetExam(obj) {

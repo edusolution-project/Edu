@@ -35,11 +35,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonProgressService _lessonProgressService;
         private readonly ClassService _classService;
 
-        private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
-        private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
+        //private readonly MappingEntity<StudentEntity, ClassStudentViewModel> _mapping;
+        //private readonly MappingEntity<ClassEntity, ClassActiveViewModel> _activeMapping;
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _lessonMapping;
         private readonly MappingEntity<LessonEntity, LessonResultViewModel> _resultMapping;
-        private readonly MappingEntity<LessonEntity, LessonVM> _lessonVMMapping = new MappingEntity<LessonEntity, LessonVM>();
+        //private readonly MappingEntity<LessonEntity, LessonVM> _lessonVMMapping = new MappingEntity<LessonEntity, LessonVM>();
 
         private readonly ExamService _examService;
 
@@ -76,8 +76,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _examService = examService;
             _classService = classService;
 
-            _mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
-            _activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
+            //_mapping = new MappingEntity<StudentEntity, ClassStudentViewModel>();
+            //_activeMapping = new MappingEntity<ClassEntity, ClassActiveViewModel>();
             _lessonMapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
             _resultMapping = new MappingEntity<LessonEntity, LessonResultViewModel>();
         }
@@ -394,10 +394,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         }
 
-        public class LessonVM : LessonEntity
-        {
-            [JsonProperty("HasPoint")]
-            public Boolean HasPoint { get; set; }
-        }
+        //public class LessonVM : LessonEntity
+        //{
+        //    [JsonProperty("HasPoint")]
+        //    public Boolean HasPoint { get; set; }
+        //}
     }
 }

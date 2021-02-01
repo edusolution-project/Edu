@@ -25,41 +25,15 @@
 <script src="~/js/vue-lazyload.js"></script>
 
 <section class="module" id="dashboard_content">
-    @*<div class="card-header">
-
-            <div class="flex flex-row border-b flex-wrap pb-2 align-items-center">
-                <div class="box filter-box d-none">
-                    <input type="text" value="-- Chọn thời gian --" name="dates" v-on:click="initDate()">
-                    <span class="ic ic-picker inactive"></span>
-                </div>
-                <div class="box filter-box col-12 col-md-3 ml-0 mb-1">
-                    <select v-model="subject" v-on:change="changeSubject()">
-                        <option value="">Chọn chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box col-12 col-md-3 ml-0 mb-1 ml-md-2">
-                    <select name="" v-model="grade" v-on:change="changeGrade()">
-                        <option value="">Chọn cấp độ</option>
-                        <option v-for="(item,k) in list_grades" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="search-box col-12 col-md-3 mb-1 ml-0 ml-md-2">
-                    <button><i class="ic ic-find"></i></button>
-                    <input type="text" name="" placeholder="Tên lớp cần tìm">
-                </div>
-            </div>
-        </div>*@
-
-        <div id="main-route" class="main-route mb-3 mt-2">
-            <ul class="route_holder" id="cid_0" cid="0">
-                <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
-                <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
-                    v-on:click="showWeekLesson(moment(startDate).add(index * 7, 'days'))"
-                    :class="moment(startDate).add(index * 7 + 1, 'days') < moment() ? 'passed' : (moment(startDate).add(index * 7 - 6, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7, 'days'))}} - {{formatDatenoYear(moment(startDate).add(index * 7 + 6 > period ? period : (index * 7 + 6), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
-                <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
-            </ul>
-        </div>
+    <div id="main-route" class="main-route mb-3 mt-2">
+        <ul class="route_holder" id="cid_0" cid="0">
+            <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
+            <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
+                v-on:click="showWeekLesson(moment(startDate).add(index * 7 - padRoute, 'days'))"
+                :class="moment(startDate).add((index + 1) * 7 + 1 - padRoute, 'days') < moment() ? 'passed' : (moment(startDate).add((index + 1) * 7 - 6 - padRoute, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+            <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
+        </ul>
+    </div>
 
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
@@ -567,6 +541,7 @@
                 lesson_week: [],
                 weekTitle: '',
                 startDate: moment(),
+                padRoute: 0,
                 endDate: moment(),
                 period: 0,
                 classSubjects: [],
@@ -616,21 +591,26 @@
                                         }
                                     }
 
+
                                     for (var i = 0; i < this.classes.length; i++) {
                                         if (this.classes[i].ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL) {
                                         //console.log(this.classes[i].StartDate)
-                                        if (this.startDate > moment(this.classes[i].StartDate))
-                                            this.startDate = moment(this.classes[i].StartDate);
-                                        if (this.endDate < moment(this.classes[i].EndDate))
-                                            this.endDate = moment(this.classes[i].EndDate);
+                                            var start = moment(this.classes[i].StartDate).toLocaleString();
+                                            if (this.startDate > moment(start))
+                                                this.startDate = moment(start);
+                                            var end = moment(this.classes[i].EndDate).toLocaleString();
+                                            if (this.endDate < moment(end))
+                                                this.endDate = moment(end);
                                             this.period = this.endDate.diff(this.startDate, 'days')
-
                                         }
                                     }
 
+                                    this.padRoute = moment(this.startDate).day() - 1;
+                                    console.log(this.period);
+
                                     Vue.nextTick(function () {
                                         $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
-                                        console.log($(".route_item").index($('.route_item.now')) * 100);
+                                        //console.log($(".route_item").index($('.route_item.now')) * 100);
                                     })
 
 
@@ -836,12 +816,14 @@
                         }).catch(e => { })
                 },
                 showWeekLesson(start) {
+
                     let _that = this
                     let _form = new FormData()
                     var _date = moment(start);
                     if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
                         _date = moment();
                     date = _date.format("MM/DD/YYYY")
+                    console.log(date);
                     _form.append('today', date)
                     _form.append('seekStart', false)
                     let _url = '@processUrl("GetThisWeekLesson", "Course")'
@@ -895,7 +877,7 @@
     </script>
 }
 
-@section Modals{ 
+@section Modals{
 
     <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
         <div class="modal-body">

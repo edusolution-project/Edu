@@ -35,7 +35,7 @@
         <div class="box">
             <div class="flex">
                 <div id="avatar_box" v-if="isInfo">
-                    <img v-on:error="errorImgUrl()" :src="cacheStatic(avatar.src,150,150,'')" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px" />
+                    <img v-on:error="errorImgUrl()" :src="avatar.src" alt="" v-if="avatar" style="width:150px;height:150px;border-radius:80px" />
                     <img v-else src="/images/no-avatar.png" />
                     <label for="in_avatar">Đổi hình đại diện</label>
                     <input type="file" :ref="`avatar`" v-on:change="previewThumb()" id="in_avatar">
@@ -232,6 +232,7 @@
                     this.$forceUpdate();
                 },
                 previewThumb() {
+                    debugger;
                     let _that = this
                     if (event.target.files[0]['type'] === 'image/jpeg' ||
                         event.target.files[0]['type'] === 'image/png' ||

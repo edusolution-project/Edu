@@ -1841,6 +1841,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             newData.Skills = new List<string>();
             newData.Subjects = new List<string>();
             newData.TeacherID = teacher.ID;
+            newData.Members = new List<ClassMemberEntity>();
 
             _service.CreateQuery().InsertOne(newData);
 
