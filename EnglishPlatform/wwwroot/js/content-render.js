@@ -5465,7 +5465,7 @@ var submitQuizFill = function (event, modalId, callback) {
 
 var toggleExpand = function (obj) {
     $('.collapsable').addClass('collapse');
-    $('.media-holder video').trigger('pause');
+    $('.media-holder video,.media-holder audio').trigger('pause');
 
     if (!$(obj).hasClass("fa-caret-up"))//expand
     {
