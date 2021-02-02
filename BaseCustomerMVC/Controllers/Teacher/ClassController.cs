@@ -1364,10 +1364,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
-            else
-            {
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
-            }
+            //else
+            //{
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
+            //}
             if (!string.IsNullOrEmpty(GradeID))
             {
                 skip_owned = true;
@@ -1410,14 +1410,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //+ "\""
                     ));
 
-            if (classfilter.Count == 0)
-                return null;
+            //if (classfilter.Count == 0)
+            //    return null;
 
-            var classResult = _service.Collection.Find(
+            var classResult =
+
+                classfilter.Count > 0 ?
+                _service.Collection.Find(
                 Builders<ClassEntity>.Filter.And(
                     Builders<ClassEntity>.Filter.Where(o => o.Center == Center && o.ClassMechanism != CLASS_MECHANISM.PERSONAL),
                     Builders<ClassEntity>.Filter.And(classfilter)
-                ));
+                )) :
+                _service.Collection.Find(
+                    Builders<ClassEntity>.Filter.Where(o => o.Center == Center && o.ClassMechanism != CLASS_MECHANISM.PERSONAL)
+                );
+
+
+
 
             model.TotalRecord = classResult.CountDocuments();
 
@@ -3356,14 +3365,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #region Report
-        public JsonResult GetManageReport(String basis,DateTime startTime,DateTime endTime)
+        public JsonResult GetManageReport(String basis, DateTime startTime, DateTime endTime)
         {
             try
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center == null)
                 {
-                    return Json(new Dictionary<String, Object> 
+                    return Json(new Dictionary<String, Object>
                     {
                         {"Data", null },
                         {"Msg","Cơ sở không tồn tại." },
@@ -3371,13 +3380,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                if(startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
+                if (startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
                 {
                     startTime = center.Created;
                     endTime = center.ExpireDate;
                 }
 
-                var listclass = _classService.GetActiveClass4Report(startTime,endTime, center.ID);
+                var listclass = _classService.GetActiveClass4Report(startTime, endTime, center.ID);
                 if (!listclass.Any())
                 {
                     return Json(new Dictionary<String, Object>
@@ -3402,9 +3411,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (!activeLesson.Any()) continue;
                     var activeLessonIDs = activeLesson.Select(x => x.LessonID);
                     var lessonprogess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == @class.ID && activeLessonIDs.Contains(x.LessonID)).ToList();
-                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x=>x.StudentID);
+                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x => x.StudentID);
                     //var b = lessonprogess.Where(x => x.Tried > 0);
-                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x=>x.StudentID);
+                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x => x.StudentID);
                     Int32 minpoint8 = 0, minpoint5 = 0, minpoint2 = 0, minpoint0 = 0;
                     foreach (var st in students)
                     {
@@ -3420,7 +3429,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
-                    if(@class.Name.Contains("10"))
+                    if (@class.Name.Contains("10"))
                     {
                         centerResult10.MinPoint0 += minpoint0;
                         centerResult10.MinPoint2 += minpoint2;
@@ -3474,7 +3483,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Data",dic }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                     {
