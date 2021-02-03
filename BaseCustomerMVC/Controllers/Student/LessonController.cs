@@ -21,6 +21,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ClassSubjectService _classSubjectService;
         private readonly ChapterService _chapterService;
         private readonly ChapterProgressService _chapterProgressService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly LessonService _lessonService;
@@ -58,6 +59,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ChapterService chapterService,
             ProgressHelper progressHelper,
             ChapterProgressService chapterProgressService,
+            ClassSubjectProgressService classSubjectProgressService,
             LessonScheduleService lessonScheduleService,
             LearningHistoryService learningHistoryService,
             LessonService lessonService,
@@ -83,6 +85,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _chapterProgressService = chapterProgressService;
+            _classSubjectProgressService = classSubjectProgressService;
             _lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
 
@@ -324,6 +327,8 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             ViewBag.Center = _centerService.GetItemByCode(basis);
             ViewBag.CurrentUser = student;
+
+            ViewBag.Target = _classSubjectProgressService.GetItemByClassSubjectID(currentCs.ID, UserID)?.Target;
             //if (newui == 1)
             return View("Detail_new");
             //return View();
@@ -474,6 +479,10 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Subject not found" } });
 
+
+
+            var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
+
             //if (string.IsNullOrEmpty(ClassID))
             //    ClassID = currentcs.ClassID;
 
@@ -494,13 +503,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 StudentID = userId
             });
 
+            var cspr = _classSubjectProgressService.GetItemByClassSubjectID(currentcs.ID, userId);
+
             var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
             var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-
-
 
             var result = new List<PartViewModel>();
             foreach (var part in listParts)
@@ -550,7 +559,11 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (lastexam == null)
             {
-                var response = new Dictionary<string, object> { { "Data", dataResponse } };
+                var response = new Dictionary<string, object> {
+                    { "Data", dataResponse },
+                    { "Schedule", schedule == null ? null: Json(new { Start = schedule.StartDate, End = schedule.EndDate }) },
+                    { "CSTarget", cspr == null ? 0: cspr.Target }
+                };
                 return new JsonResult(response);
             }
             else //TODO: Double check here
@@ -578,6 +591,8 @@ namespace BaseCustomerMVC.Controllers.Student
                     new Dictionary<string, object> {
                         { "Data", dataResponse },
                         { "Exam", lastexam },
+                        { "Schedule", schedule == null ? null: Json(new { Start = schedule.StartDate, End = schedule.EndDate }) },
+                        { "CSTarget", cspr == null ? 0: cspr.Target },
                         { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds }
                     });
             }

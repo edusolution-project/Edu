@@ -148,7 +148,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (student == null)
             {
                 return Json("Không tìm thấy học viên");
-            } 
+            }
 
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
@@ -181,6 +181,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                     let course = _courseService.GetItemByID(r.CourseID) ?? new CourseEntity()
                                     let skill = r.SkillID == null ? null : _skillService.GetItemByID(r.SkillID)
                                     let teacher = _teacherService.GetItemByID(r.TeacherID)
+                                    let target = _classSubjectProgressService.GetItemByClassSubjectID(r.ID, _studentid)
                                     select new ClassSubjectViewModel
                                     {
                                         ID = r.ID,
@@ -197,6 +198,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                         TeacherID = r.TeacherID,
                                         TeacherName = teacher == null ? "" : teacher.FullName,
                                         TypeClass = r.TypeClass == null ? CLASSSUBJECT_TYPE.STANDARD : r.TypeClass,
+                                        Target = target?.Target ?? 0,
                                         ClassName = _class.Name,
                                         ClassID = r.ClassID,
                                         StartDate = _class.StartDate,
@@ -428,7 +430,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var data = new List<StudentSummaryViewModel>();
             var a = practiceResult.GroupBy(x => x.ClassID);
-            foreach(var item in a)
+            foreach (var item in a)
             {
                 for (int i = 0; i < item.Count(); i++)
                 {
@@ -782,6 +784,34 @@ namespace BaseCustomerMVC.Controllers.Student
             catch (Exception ex)
             {
                 return Json(ex.Message);
+            }
+        }
+
+        public JsonResult SetTarget(String basis, String ID, double Target)
+        {
+            try
+            {
+                string _studentid = User.Claims.GetClaimByType("UserID").Value;
+                var student = _studentService.GetItemByID(_studentid);
+                if (student == null)
+                    return Json(new { error = "Vui lòng đăng nhập lại" });
+                var csbj = _classSubjectService.GetItemByID(ID);
+                if (csbj == null)
+                    return Json(new { error = "Thông tin không đúng" });
+                var csbjprg = _classSubjectProgressService.GetItemByClassSubjectID(ID, _studentid);
+                if (csbjprg == null)
+                {
+                    csbjprg = new ClassSubjectProgressEntity { ClassSubjectID = ID, StudentID = _studentid, ClassID = csbj.ClassID };
+                }
+
+                csbjprg.Target = Target;
+
+                _classSubjectProgressService.Save(csbjprg);
+                return Json(new { target = Target });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = ex.Message });
             }
         }
 

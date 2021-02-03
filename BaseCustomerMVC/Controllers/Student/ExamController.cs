@@ -89,7 +89,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examDetailService = examDetailService;
             _studentService = studentService;
             _teacherService = teacherService;
-            _lessonProgressService = lessonProgressService; 
+            _lessonProgressService = lessonProgressService;
 
             _progressHelper = progressHelper;
 
@@ -381,7 +381,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetCurrentExam(string LessonID)
+        public JsonResult GetCurrentExam(string LessonID, string ID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
             var lesson = _lessonService.GetItemByID(LessonID);
@@ -400,7 +400,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    if (_lessonHelper.IsOvertime(exam))
+                    if (_lessonHelper.IsOvertime(exam))//Overtime
+                        _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                    else if (exam.ID != ID)//change Exam
                         _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
                     else
                         exam.CurrentDoTime = DateTime.UtcNow;
@@ -581,7 +583,7 @@ namespace BaseCustomerMVC.Controllers.Student
             else
             {
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
-                if(lastestEx.ID != exam.ID)
+                if (lastestEx.ID != exam.ID)
                     return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!" });
                 return new JsonResult(new { error = "Bài kiểm tra đã kết thúc" });
             }
