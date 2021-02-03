@@ -827,11 +827,11 @@
                         _form.append('ID', _that.class_info.ID)
                     _form.append('Name', $(modal).find('[id=Name]').val())
                     _form.append('CenterCode', '@center')
-                    _that.isLoading = true
+                    _that.student_data.isLoading = true
                     axios.post(_url, _form)
                         .then(response => {
                             console.log(response.data);
-                            _that.isLoading = false;
+                            _that.student_data.isLoading = false;
                             if (response.data.Error != null)
                             {
                                 alert(response.data.Error)
@@ -850,7 +850,7 @@
 
                             }
                         }).catch(e => {
-                            _that.isLoading = false
+                            _that.student_data.isLoading = false
                             console.log("Error: " + e)
                         })
                 },
