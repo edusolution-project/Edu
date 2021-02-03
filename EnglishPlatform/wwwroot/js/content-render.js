@@ -228,6 +228,7 @@ var Lesson = (function () {
     var learningTarget = config.target;
     //Load Data
     var loadLessonData = function (param, callback) {
+        learningTarget = config.target;
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
@@ -235,10 +236,10 @@ var Lesson = (function () {
             if (!isNull(res)) {
                 var response = JSON.parse(res);
                 _data = response.Data;
-                console.log(config.url.load);
+                //console.log(learningTarget);
                 if (response.CSTarget > 0)
                     learningTarget = response.CSTarget;
-                console.log(response);
+
                 switch (config.mod) {
                     case mod.PREVIEW: //curriculum view
                     case mod.TEACHERVIEW:
@@ -2980,29 +2981,28 @@ var Lesson = (function () {
                 var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
                 var resultMessage = "";
 
+                console.log(progress);
 
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.MaxPoint }));//.html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.MaxPoint }));//.html();
 
 
                 //console.log(progress);
                 if (learningTarget > 0) {
                     if (progress.toFixed(0) >= learningTarget) {
-                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + ")";
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
                         lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
                     }
                     else if (progress * 100 / learningTarget >= 90) {
-                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "). Cố lên!";
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
                         lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
                     }
                     else {
-                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + ").<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
                         lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
                     }
-
-
                 }
 
                 wrapper.append(lastExamResult);
@@ -3067,10 +3067,30 @@ var Lesson = (function () {
             else {
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
+
+                if (lastExam.Point == null) lastExam.Point = 0;
+                var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
+
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+
+                if (learningTarget > 0) {
+                    if (progress.toFixed(0) >= learningTarget) {
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                    }
+                    else if (progress * 100 / learningTarget >= 90) {
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
+                    }
+                    else {
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
+                    }
+                }
+
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3112,7 +3132,7 @@ var Lesson = (function () {
     var startExam = function (obj) {
         if (obj != null)
             $(obj).prop("disabled", true);
-        if (learningTarget <= 0) {
+        if (!(learningTarget > 0)) {
             setLearningTarget(obj, startExam)
             return false;
         }
@@ -3196,7 +3216,6 @@ var Lesson = (function () {
             inputValue: learningTarget / 10,
             showLoaderOnConfirm: true,
             preConfirm: (target) => {
-                debugger;
                 if (target != learningTarget) {
                     let _form = new FormData()
                     _form.append('Target', target * 10);
@@ -4049,7 +4068,7 @@ var Lesson = (function () {
             var lastExam = data;
             console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
-
+            console.log(lastExam);
             var limit = lastExam.limit;
             var tried = lastExam.number;
             lastExamResult =
@@ -4060,12 +4079,33 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
-            else
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
+            else {
+
+                if (lastExam.point == null) lastExam.point = 0;
+                var progress = lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0;
+
+                console.log(progress);
+
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                if (learningTarget > 0) {
+                    if (progress.toFixed(0) >= learningTarget) {
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                    }
+                    else if (progress * 100 / learningTarget >= 90) {
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
+                    }
+                    else {
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
+                    }
+                }
+            }
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4135,8 +4175,7 @@ var Lesson = (function () {
     }
 
     var redoExam = function (obj) {
-
-        if (learningTarget <= 0) {
+        if (!(learningTarget > 0)) {
             setLearningTarget(obj, redoExam)
             return false;
         }

@@ -209,7 +209,7 @@ else
                 class_subject_id: '@currentClassSubject.ID',
                 chap_id: '@currentLesson.ChapterID',
                 class_name: '@currentClass.Name',
-                class_subject_name: '@currentClassSubject.CourseName',
+                class_subject_name: @Json.Serialize(currentClassSubject.CourseName),
                 target: 0,
                 teacher_target: @currentChapter.BasePoint,
                 center_name: '@currentCenter.Name',
