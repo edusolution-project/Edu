@@ -235,7 +235,9 @@ var Lesson = (function () {
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
                 _data = JSON.parse(res).Data;
-
+                code = JSON.parse(res).CodeExam
+                config.codeExam = code
+                //debugger
                 renderExamInfo();
 
                 switch (config.mod) {
@@ -333,10 +335,9 @@ var Lesson = (function () {
         var dateInfo = $("<div>", { class: "col-6 text-right font-italic", style: "font-size:90%", text: "Ngày " + date.getDate() + " tháng " + (date.getMonth() + 1) + " năm " + date.getFullYear() });
         var lessonTitle = $("<div>", { class: "col-6 font-weight-bold text-right", text: _data.Title + " - Thời gian: " + _data.Timer + "p" });
         var studentInfo = $("<div>", { class: "col-6 text-center", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span>" });
-
+        var codeexam = $("<div>", { class: "col-6 text-center", html: "Mã đề: <span style='font-weight:700'>" + config.codeExam + "</span>" });
         infoHolder.append($("<div>", { class: "col-12 row" }).append(centerInfo).append(dateInfo));
-        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle));
-
+        infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle).append(codeexam));
     }
 
     var renderLessonData = function () {
@@ -2880,6 +2881,7 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
+            //debugger
             this.exam_id = lastExam.ID;
             var tried = lastExam.Number;
             var doable = true;
@@ -2889,7 +2891,8 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
+                    //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
+                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2967,7 +2970,8 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
+                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3515,10 +3519,40 @@ var Lesson = (function () {
 
         var point = 0;
         var firstQuiz = "";
-        if (data.Questions != null && data.Questions.length > 0);
-        {
+        //if (data.Questions != null && data.Questions.length > 0)
+        //{
+        //    firstQuiz = data.Questions[0].ID;
+        //    point = data.Questions.length;
+        //    if (data.Type == "ESSAY")
+        //        point = data.Questions[0].Point;
+
+        //    var totalPoint = parseInt($('#part-total-point').attr('data-point')) + point;
+        //    $('#part-total-point').attr('data-point', totalPoint);
+        //    $('#part-total-point').html("<b style='font-weight: 700'>Tổng: " + totalPoint + "đ<b>");
+        //}
+        //if else (data.QuestionsExtension != null && data.QuestionsExtension.length > 0) {
+        //    firstQuiz = data.Questions[0].ID;
+        //    point = data.Questions.length;
+        //    if (data.Type == "ESSAY")
+        //        point = data.Questions[0].Point;
+
+        //    var totalPoint = parseInt($('#part-total-point').attr('data-point')) + point;
+        //    $('#part-total-point').attr('data-point', totalPoint);
+        //    $('#part-total-point').html("<b style='font-weight: 700'>Tổng: " + totalPoint + "đ<b>");
+        //}
+        if (data.Questions != null && data.Questions.length > 0) {
             firstQuiz = data.Questions[0].ID;
             point = data.Questions.length;
+            if (data.Type == "ESSAY")
+                point = data.Questions[0].Point;
+
+            var totalPoint = parseInt($('#part-total-point').attr('data-point')) + point;
+            $('#part-total-point').attr('data-point', totalPoint);
+            $('#part-total-point').html("<b style='font-weight: 700'>Tổng: " + totalPoint + "đ<b>");
+        }
+        else if (data.QuestionsExtension != null && data.QuestionsExtension.length > 0) {
+            firstQuiz = data.QuestionsExtension[0].ID;
+            point = data.QuestionsExtension.length;
             if (data.Type == "ESSAY")
                 point = data.Questions[0].Point;
 
@@ -3718,7 +3752,7 @@ var Lesson = (function () {
                     }));
 
                     container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
-
+                    debugger
                     if (data.Content != null)
                         answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
@@ -3990,7 +4024,8 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPointmaxPoint }));
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.QuestionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);

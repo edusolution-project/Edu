@@ -2883,6 +2883,7 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
+            debugger
             this.exam_id = lastExam.ID;
             var tried = lastExam.Number;
             var doable = true;

@@ -205,7 +205,8 @@ else
                 chap_id: '@currentLesson.ChapterID',
                 class_name: '@currentClass.Name',
                 center_name: '@currentCenter.Name',
-                student_name: '@currentUser' == null ? '...................................' : '@currentUser.FullName'
+                student_name: '@currentUser' == null ? '...................................' : '@currentUser.FullName',
+                codeExam: ''
             }
             var widget = new Lesson.onReady(config);
         </script>
