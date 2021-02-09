@@ -235,9 +235,10 @@ var Lesson = (function () {
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
                 _data = JSON.parse(res).Data;
-                code = JSON.parse(res).CodeExam
-                config.codeExam = code
+                exam = JSON.parse(res)
                 //debugger
+                if (exam.Exam != undefined)
+                    config.codeExam = exam.Exam.CodeExam
                 renderExamInfo();
 
                 switch (config.mod) {
@@ -1457,7 +1458,7 @@ var Lesson = (function () {
                 //debugger
 
                 console.log(data);
-
+                debugger
                 if (data.Content != null)
                     answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
@@ -3752,15 +3753,19 @@ var Lesson = (function () {
                     }));
 
                     container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
-                    debugger
+                    
                     if (data.Content != null)
                         answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
+                    //if (isNull(data.Media.Path)) {
+                    //    answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                    //}
                     if (data.Media != null) {
                         renderMediaContent(data, answer);
                     }
-                    else
+                    else {
                         answer.append($("<label>", { "class": "answer-text", "html": breakLine(data.Content) }));
+                    }
 
                     var x = Math.floor((Math.random() * 2));
 
@@ -4006,6 +4011,7 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
+            //debugger
             console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
 
@@ -4025,7 +4031,7 @@ var Lesson = (function () {
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
                         //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPointmaxPoint }));
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.QuestionsTotal }));
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);

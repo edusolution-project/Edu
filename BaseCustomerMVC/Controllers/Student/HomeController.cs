@@ -307,6 +307,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             user.PassWord = Core_v2.Globals.Security.Encrypt(newpass);
+            user.PassTemp = Core_v2.Globals.Security.Encrypt(newpass);
             _accountService.CreateOrUpdate(user);
             return new JsonResult(
             new Dictionary<string, object>

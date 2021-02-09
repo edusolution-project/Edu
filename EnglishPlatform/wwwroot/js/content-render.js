@@ -3969,12 +3969,13 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.QuestionsTotal }));
+            //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
             else
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.QuestionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
