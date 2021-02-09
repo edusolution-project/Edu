@@ -1662,6 +1662,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         #endregion
 
+        #region Mở rộng
+
         public IActionResult FixDataPractice()
         {
             var lesson = _courseLessonService.CreateQuery().Find(x => x.IsPractice == false && x.TemplateType == 1);
@@ -1850,5 +1852,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         //        return Content(ex.Message);
         //    }
         //}
+        #endregion
     }
 }
