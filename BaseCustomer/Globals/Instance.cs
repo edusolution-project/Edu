@@ -85,6 +85,15 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<GroupLastLifeService>();
 
             services.AddSingleton<ReportService>();
+            services.AddSingleton<ExamQuestionArchiveService>();
+            services.AddSingleton<LessonPartQuestionExtensionServie>();
+            services.AddSingleton<LessonPartAnswerExtensionService>();
+            services.AddSingleton<ExamProcessService>();
+            services.AddSingleton<LessonExtensionService>();
+            services.AddSingleton<LessonPartExtensionService>();
+            services.AddSingleton<CloneLessonPartExtensionService>();
+            services.AddSingleton<CloneLessonPartQuestionExtensionService>();
+            services.AddSingleton<CloneLessonPartAnswerExtensionService>();
             return services;
         }
     }

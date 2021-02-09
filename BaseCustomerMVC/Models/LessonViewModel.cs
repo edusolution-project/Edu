@@ -10,6 +10,5 @@ namespace BaseCustomerMVC.Models
     {
         [JsonProperty("Part")]
         public List<PartViewModel> Part { get; set; } = new List<PartViewModel>() { };
-
     }
 }

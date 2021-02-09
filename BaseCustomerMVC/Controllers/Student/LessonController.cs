@@ -41,6 +41,10 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
 
+        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
+        private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
+        private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
+
         private readonly MappingEntity<LessonEntity, LessonScheduleViewModel> _schedulemapping;
         private readonly VocabularyService _vocabularyService;
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
@@ -72,7 +76,10 @@ namespace BaseCustomerMVC.Controllers.Student
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
             VocabularyService vocabularyService,
-            CenterService centerService
+            CenterService centerService,
+            CloneLessonPartExtensionService cloneLessonPartExtensionService,
+            CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService,
+            CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService
             )
         {
             _subjectService = subjectService;
@@ -100,6 +107,9 @@ namespace BaseCustomerMVC.Controllers.Student
             _vocabularyService = vocabularyService;
             _progressHelper = progressHelper;
             _centerService = centerService;
+            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
+            _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
+            _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
         }
 
         //public IActionResult Index()
@@ -482,6 +492,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Class not found" } });
 
+            //Get Exam ?/?
 
             //Create learning history
             _ = _progressHelper.CreateHist(new LearningHistoryEntity()
@@ -494,15 +505,134 @@ namespace BaseCustomerMVC.Controllers.Student
                 StudentID = userId
             });
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
-
-            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
-            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
-            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
-
-
-
+            List<CloneLessonPartEntity> listParts = new List<CloneLessonPartEntity>();
             var result = new List<PartViewModel>();
+            var _result = new List<PartExtensionViewModel>();
+            var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
+            var _mapping = new MappingEntity<LessonEntity, StudentLessonExtensionViewModel>();
+            var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
+            var mapPartExtension = new MappingEntity<CloneLessonPartExtensionEntity, PartViewModel>();
+            var _mapPartExtension = new MappingEntity<CloneLessonPartExtensionEntity, PartExtensionViewModel>();
+            var mapQuestion = new MappingEntity<CloneLessonPartQuestionEntity, QuestionViewModel>();
+            var exam = _examService.GetLastestByLessonAndStudent(LessonID, userId);
+            //if (lesson.LessonExtension.Count() > 0)
+            if(exam !=null && (!String.IsNullOrEmpty(exam.LessonExtensionID) || !String.IsNullOrEmpty(exam.CodeExam)))
+            {
+                var lessonID = exam.LessonExtensionID;
+                //var lessonID = lesson.LessonExtension.LastOrDefault().ID;
+                //listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lessonID && o.ClassSubjectID == currentcs.ID).ToList();
+                var lparts = _cloneLessonPartExtensionService.CreateQuery().Find(o => o.ParentID == lessonID && o.ClassSubjectID == currentcs.ID).ToList();
+
+                GetDataPartExtension(lparts, _mapPartExtension, _result);
+
+                var quiz3 = _result.Where(x => x.Type.Equals("QUIZ3")).ToList();
+                if (quiz3.Count()>0)
+                {
+                    var a = "";
+                }
+
+                //listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
+
+                //GetDataPart(listParts, mapPart, result);
+
+                var dataResponse = _mapping.AutoOrtherType(lesson, new StudentLessonExtensionViewModel()
+                {
+                    Part = _result
+                });
+
+                var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+                    //&& o.ClassID == ClassID 
+                    && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+
+                if (lastexam == null)
+                {
+                    var response = new Dictionary<string, object> { { "Data", dataResponse } };
+                    return new JsonResult(response);
+                }
+                else //TODO: Double check here
+                {
+                    var currentTimespan = new TimeSpan(0, 0, lesson.Timer, 0);
+
+                    if (!lastexam.Status && lesson.Timer > 0) //bài kt cũ chưa xong => check thời gian làm bài
+                    {
+                        var endtime = (lastexam.Created.AddMinutes(lastexam.Timer));
+                        if (endtime < DateTime.UtcNow) // hết thời gian 
+                        {
+                            // => kết thúc bài kt
+                            lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _, false);
+                            //throw new NotImplementedException();
+                            //lastexam.Status = true;
+                            ////TODO: Chấm điểm last exam
+                            //_examService.CreateOrUpdate(lastexam);
+                        }
+                    }
+
+                    var timeSpan = lastexam.Status ? new TimeSpan(0, 0, lesson.Timer, 0) : (lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow);
+
+                    //Client check lastexam status để render bài kiểm tra
+                    return new JsonResult(
+                        new Dictionary<string, object> {
+                        { "Data", dataResponse },
+                        { "Exam", lastexam },
+                        { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds },
+                        //{"CodeExam", lesson.LessonExtension.LastOrDefault()?.Code}
+                        });
+                }
+            }
+            else
+            {
+                listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
+
+                GetDataPart(listParts, mapPart, result);
+
+                var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+                {
+                    Part = result
+                });
+
+                var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+                    //&& o.ClassID == ClassID 
+                    && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+
+                if (lastexam == null)
+                {
+                    var response = new Dictionary<string, object> { { "Data", dataResponse } };
+                    return new JsonResult(response);
+                }
+                else //TODO: Double check here
+                {
+                    var currentTimespan = new TimeSpan(0, 0, lesson.Timer, 0);
+
+                    if (!lastexam.Status && lesson.Timer > 0) //bài kt cũ chưa xong => check thời gian làm bài
+                    {
+                        var endtime = (lastexam.Created.AddMinutes(lastexam.Timer));
+                        if (endtime < DateTime.UtcNow) // hết thời gian 
+                        {
+                            // => kết thúc bài kt
+                            lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _, false);
+                            //throw new NotImplementedException();
+                            //lastexam.Status = true;
+                            ////TODO: Chấm điểm last exam
+                            //_examService.CreateOrUpdate(lastexam);
+                        }
+                    }
+
+                    var timeSpan = lastexam.Status ? new TimeSpan(0, 0, lesson.Timer, 0) : (lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow);
+
+                    //Client check lastexam status để render bài kiểm tra
+                    return new JsonResult(
+                        new Dictionary<string, object> {
+                        { "Data", dataResponse },
+                        { "Exam", lastexam },
+                        { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds },
+                        //{"CodeExam", lesson.LessonExtension.LastOrDefault()?.Code}
+                        });
+                }
+            }
+        }
+
+        private void GetDataPart(List<CloneLessonPartEntity> listParts, MappingEntity<CloneLessonPartEntity, PartViewModel> mapPart, List<PartViewModel> result)
+        {
             foreach (var part in listParts)
             {
                 var convertedPart = mapPart.AutoOrtherType(part, new PartViewModel());
@@ -538,48 +668,45 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 result.Add(convertedPart);
             }
+        }
 
-            var dataResponse = mapping.AutoOrtherType(lesson, new StudentLessonViewModel()
+        private void GetDataPartExtension(List<CloneLessonPartExtensionEntity> listParts, MappingEntity<CloneLessonPartExtensionEntity, PartExtensionViewModel> mapPart, List<PartExtensionViewModel> result)
+        {
+            foreach (var part in listParts)
             {
-                Part = result
-            });
-
-            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
-                //&& o.ClassID == ClassID 
-                && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
-
-            if (lastexam == null)
-            {
-                var response = new Dictionary<string, object> { { "Data", dataResponse } };
-                return new JsonResult(response);
-            }
-            else //TODO: Double check here
-            {
-                var currentTimespan = new TimeSpan(0, 0, lesson.Timer, 0);
-
-                if (!lastexam.Status && lesson.Timer > 0) //bài kt cũ chưa xong => check thời gian làm bài
+                var convertedPart = mapPart.AutoOrtherType(part, new PartExtensionViewModel());
+                switch (part.Type)
                 {
-                    var endtime = (lastexam.Created.AddMinutes(lastexam.Timer));
-                    if (endtime < DateTime.UtcNow) // hết thời gian 
-                    {
-                        // => kết thúc bài kt
-                        lastexam = _lessonHelper.CompleteNoEssay(lastexam, lesson, out _, false);
-                        //throw new NotImplementedException();
-                        //lastexam.Status = true;
-                        ////TODO: Chấm điểm last exam
-                        //_examService.CreateOrUpdate(lastexam);
-                    }
+                    case "QUIZ1":
+                    case "QUIZ3":
+                    case "QUIZ4":
+                    case "ESSAY":
+                        convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery()
+                            .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                            .Select(q => new QuestionExtensionViewModel(q)
+                            {
+                                CloneAnswers = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                                Answers = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                                Description = q.Description
+                            }).ToList();
+                        break;
+                    case "QUIZ2":
+                        convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery().Find(q => q.ParentID == part.ID)
+                            //.SortBy(q => q.Order).ThenBy(q => q.ID)
+                            .ToList()
+                            .Select(q => new QuestionExtensionViewModel(q)
+                            {
+                                CloneAnswers = null,
+                                Description = null
+                            }).ToList();
+                        break;
+                    case "VOCAB":
+                        convertedPart.Description = RenderVocab(part.Description);
+                        break;
+                    default:
+                        break;
                 }
-
-                var timeSpan = lastexam.Status ? new TimeSpan(0, 0, lesson.Timer, 0) : (lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow);
-
-                //Client check lastexam status để render bài kiểm tra
-                return new JsonResult(
-                    new Dictionary<string, object> {
-                        { "Data", dataResponse },
-                        { "Exam", lastexam },
-                        { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds }
-                    });
+                result.Add(convertedPart);
             }
         }
 

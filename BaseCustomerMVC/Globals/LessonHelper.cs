@@ -45,6 +45,11 @@ namespace BaseCustomerMVC.Globals
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
         private readonly DateTime invalidTime = new DateTime(1900, 1, 1);
 
+        //extension
+        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
+        private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
+        private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
+
         public LessonHelper(
             LessonService lessonService,
             CourseLessonService courseLessonService,
@@ -65,7 +70,10 @@ namespace BaseCustomerMVC.Globals
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
 
-            ProgressHelper progressHelper
+            ProgressHelper progressHelper,
+            CloneLessonPartExtensionService cloneLessonPartExtensionService,
+            CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService,
+            CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
 
         )
         {
@@ -89,6 +97,9 @@ namespace BaseCustomerMVC.Globals
             _cloneQuestionService = cloneLessonPartQuestionService;
 
             _progressHelper = progressHelper;
+            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
+            _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
+            _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
         }
 
         public async Task RemoveClassSubjectLesson(string ClassSubjectID)
@@ -519,30 +530,78 @@ namespace BaseCustomerMVC.Globals
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
 
-                var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
+                var part = new CloneLessonPartEntity();
+                if(String.IsNullOrEmpty(exam.LessonExtensionID))
+                {
+                    part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
+                }
+                else if(!String.IsNullOrEmpty(exam.LessonExtensionID)){
+                    part = _cloneLessonPartExtensionService.GetItemByID(examDetail.LessonPartID);
+                }
                 if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var question = _cloneQuestionService.GetItemByID(examDetail.QuestionID);
+                var question =new CloneLessonPartQuestionEntity();
+                if (String.IsNullOrEmpty(exam.LessonExtensionID))
+                {
+                    question = _cloneQuestionService.GetItemByID(examDetail.QuestionID);
+                }
+                else if (!String.IsNullOrEmpty(exam.LessonExtensionID))
+                {
+                    question = _cloneLessonPartQuestionExtensionService.GetItemByID(examDetail.QuestionID);
+                }
                 if (question == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
 
-                var realAnswers = _cloneAnswerService.GetByQuestionID(examDetail.QuestionID).Where(o => o.IsCorrect).ToList();
+                var realAnswers = new List<CloneLessonPartAnswerExtensionEntity>();
+                if (String.IsNullOrEmpty(exam.LessonExtensionID))
+                {
+                    //realAnswers = _cloneAnswerService.GetByQuestionID(examDetail.QuestionID).Where(o => o.IsCorrect).ToList();
+                    var test = _cloneAnswerService.CreateQuery().Find(o => o.ParentID == examDetail.QuestionID).ToList(); //need check
+                    foreach(var a in test)
+                    {
+                        var b = new CloneLessonPartAnswerExtensionEntity();
+                        b = a as CloneLessonPartAnswerExtensionEntity;
+                        realAnswers.Add(b);
+                    }
+                }
+                else if (!String.IsNullOrEmpty(exam.LessonExtensionID))
+                {
+                    realAnswers = _cloneLessonPartAnswerExtensionService.GetByQuestionID(examDetail.QuestionID).Where(o => o.IsCorrect).ToList();
+                }
 
                 CloneLessonPartAnswerEntity _correctanswer = null;
 
                 //bài chọn hoặc nối đáp án
                 if (!string.IsNullOrEmpty(examDetail.AnswerID) && realAnswers.Count > 0)
                 {
+                    var ans = new CloneLessonPartAnswerExtensionEntity();
                     switch (part.Type)
                     {
                         case "QUIZ1":
-                            if (_cloneAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            if(String.IsNullOrEmpty(exam.LessonExtensionID))
+                            {
+                                ans = _cloneAnswerService.GetItemByID(examDetail.AnswerID) as CloneLessonPartAnswerExtensionEntity;
+                            }
+                            else if (!String.IsNullOrEmpty(exam.LessonExtensionID))
+                            {
+                                ans = _cloneLessonPartAnswerExtensionService.GetItemByID(examDetail.AnswerID);
+                            }
+                            if (ans == null) continue;
                             _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
                             if (_correctanswer == null) continue;
                             examDetail.RealAnswerID = _correctanswer.ID;
                             examDetail.RealAnswerValue = _correctanswer.Content;
                             break;
                         case "QUIZ3":
-                            if (_cloneAnswerService.GetItemByID(examDetail.AnswerID) == null) continue;
+                            //var ans = new CloneLessonPartAnswerExtensionEntity();
+                            if (String.IsNullOrEmpty(exam.LessonExtensionID))
+                            {
+                                ans = _cloneAnswerService.GetItemByID(examDetail.AnswerID) as CloneLessonPartAnswerExtensionEntity;
+                            }
+                            else if (!String.IsNullOrEmpty(exam.LessonExtensionID))
+                            {
+                                ans = _cloneLessonPartAnswerExtensionService.GetItemByID(examDetail.AnswerID);
+                            }
+                            if (ans == null) continue;
                             _correctanswer = realAnswers.FirstOrDefault(t => t.ID == examDetail.AnswerID);
                             //ID not match => check value
                             if (_correctanswer == null && !string.IsNullOrEmpty(examDetail.AnswerValue))
@@ -623,7 +682,14 @@ namespace BaseCustomerMVC.Globals
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
-            exam.QuestionsTotal = _cloneQuestionService.CountByLessonID(exam.LessonID);
+            if (String.IsNullOrEmpty(exam.LessonExtensionID))
+            {
+                exam.QuestionsTotal = _cloneQuestionService.CountByLessonID(exam.LessonID);
+            }
+            else if(!String.IsNullOrEmpty(exam.LessonExtensionID))
+            {
+                exam.QuestionsTotal = _cloneLessonPartQuestionExtensionService.CountByLessonID(exam.LessonExtensionID);
+            }
 
             var lessonProgress = _progressHelper.UpdateLessonPoint(exam).Result;
 

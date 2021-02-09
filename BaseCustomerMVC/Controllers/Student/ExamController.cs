@@ -41,7 +41,15 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
 
+        private readonly LessonExtensionService _lessonExtensionService;
+        private readonly ClassSubjectService _classSubjectService;
+
         private readonly ProgressHelper _progressHelper;
+
+        //extension
+        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
+        private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
+        private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
 
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
@@ -66,9 +74,17 @@ namespace BaseCustomerMVC.Controllers.Student
             LessonPartQuestionService lessonPartQuestionService,
             LessonProgressService lessonProgressService,
 
+            LessonExtensionService lessonExtensionService,
+            ClassSubjectService classSubjectService,
+
             ProgressHelper progressHelper,
 
-            IRoxyFilemanHandler roxyFilemanHandler
+            IRoxyFilemanHandler roxyFilemanHandler,
+
+            //extension
+            CloneLessonPartExtensionService cloneLessonPartExtensionService,
+            CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService,
+            CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
             )
         {
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -89,12 +105,19 @@ namespace BaseCustomerMVC.Controllers.Student
             _examDetailService = examDetailService;
             _studentService = studentService;
             _teacherService = teacherService;
-            _lessonProgressService = lessonProgressService; 
+            _lessonProgressService = lessonProgressService;
 
             _progressHelper = progressHelper;
 
             _roxyFilemanHandler = roxyFilemanHandler;
-        }
+
+            _lessonExtensionService = lessonExtensionService;
+            _classSubjectService = classSubjectService;
+
+            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
+            _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
+            _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
+    }
 
         [Obsolete]
         [HttpPost]
@@ -279,10 +302,49 @@ namespace BaseCustomerMVC.Controllers.Student
         public async Task<JsonResult> Create(ExamEntity item)
         {
             var userid = User.Claims.GetClaimByType("UserID").Value;
-
+            LessonEntity _lesson = new LessonEntity();
+            LessonExtensionEntity lessonextension = new LessonExtensionEntity();
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                var _lesson = _lessonService.GetItemByID(item.LessonID);
+                LessonScheduleEntity _schedule = new LessonScheduleEntity();
+                var lessonExtension = _lessonExtensionService.GetItemByLessonID(item.LessonID);
+                var rd = new Random();
+                if (lessonExtension.Count() > 1)
+                {
+                    var index = rd.Next(1, lessonExtension.Count());
+                    if (index.ToString() == lessonExtension.LastOrDefault()?.Code)
+                        index = rd.Next(1, lessonExtension.Count());
+                    lessonextension = lessonExtension[index];
+                    _lesson = lessonextension;
+
+                    var l = _lessonService.GetItemByID(item.LessonID);
+                    //if (l.LessonExtension == null || l.LessonExtension.Count() == 0)
+                    //    l.LessonExtension = new List<LessonExtensionEntity>();
+                    l.Updated = DateTime.Now;
+                    //l.LessonExtension.Add(lessonExtension[index]);
+                    l.Limit -=1;
+                    _lessonService.Save(l);
+                    _schedule = _lessonScheduleService.GetItemByLessonID(l.ID);
+                }
+                else if (lessonExtension.Count() == 1)
+                {
+                    lessonextension = lessonExtension.FirstOrDefault();
+                    _lesson = lessonextension;
+                    var l = _lessonService.GetItemByID(item.LessonID);
+                    //if (l.LessonExtension == null || l.LessonExtension.Count() == 0)
+                    //    l.LessonExtension = new List<LessonExtensionEntity>();
+                    //l.LessonExtension.Add(lessonExtension.FirstOrDefault());
+                    l.Updated = DateTime.Now;
+                    l.Limit -=1;
+                    _lessonService.Save(l);
+                    _schedule = _lessonScheduleService.GetItemByLessonID(l.ID);
+                    //_lessonService.Save(l);
+                }
+                else
+                {
+                    _lesson = _lessonService.GetItemByID(item.LessonID);
+                    _schedule = _lessonScheduleService.GetItemByLessonID(_lesson.ID);
+                }
                 var _class = _classService.GetItemByID(item.ClassID);
 
                 if (_class == null)
@@ -293,7 +355,6 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
-                var _schedule = _lessonScheduleService.GetItemByLessonID(_lesson.ID);
                 if (_schedule == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -323,8 +384,10 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 item.StudentID = userid;
                 item.Number = //(int)_indexService.GetNewIndex(_schedule.ID + "_" + item.StudentID);
-
                 (int)_examService.CountByStudentAndLesson(_lesson.ID, item.StudentID) + 1;
+                item.CodeExam = lessonextension.CodeExam;
+                item.LessonExtensionID = lessonextension.ID;
+                item.CodeExam = lessonextension.Code;
                 if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -362,7 +425,14 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.CurrentDoTime = DateTime.UtcNow;
                 item.Status = false;
 
-                item.QuestionsTotal = _cloneLessonPartQuestionService.CountByLessonID(item.LessonID);
+                if (lessonExtension.Count() > 0)
+                {
+                    item.QuestionsTotal = _cloneLessonPartQuestionExtensionService.CountByLessonID(_lesson.ID);
+                }
+                else
+                {
+                    item.QuestionsTotal = _cloneLessonPartQuestionService.CountByLessonID(item.LessonID);
+                }
                 //TODO: Save Question Total in Lesson info
                 item.QuestionsDone = 0;
                 item.Marked = false;
@@ -478,6 +548,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(new { error = "Không tìm thấy bài kiểm tra" });
             }
             var exam = _examService.GetItemByID(item.ExamID);
+            var lesson = _lessonService.GetItemByID(exam.LessonID);
             if (!_lessonHelper.IsOvertime(exam))
             {
                 //TODO: recheck history for doing exam
@@ -530,7 +601,17 @@ namespace BaseCustomerMVC.Controllers.Student
                         item.Updated = DateTime.UtcNow;
                         if (!String.IsNullOrEmpty(item.QuestionID))
                         {
-                            var question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
+                            CloneLessonPartQuestionEntity question = new CloneLessonPartQuestionEntity();
+                            //if (lesson.LessonExtension == null || lesson.LessonExtension.Count() == 0) question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
+                            //else question = _cloneLessonPartQuestionExtensionService.GetItemByID(item.QuestionID);
+                            if (!String.IsNullOrEmpty(exam.LessonExtensionID))
+                            {
+                                question = _cloneLessonPartQuestionExtensionService.GetItemByID(item.QuestionID);
+                            }
+                            else
+                            {
+                                question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
+                            }
                             if (question == null)
                                 return new JsonResult(new { error = "Không tìm thấy câu hỏi" });
                             item.ClassID = exam.ClassID;
@@ -581,7 +662,7 @@ namespace BaseCustomerMVC.Controllers.Student
             else
             {
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
-                if(lastestEx.ID != exam.ID)
+                if (lastestEx.ID != exam.ID)
                     return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!" });
                 return new JsonResult(new { error = "Bài kiểm tra đã kết thúc" });
             }
@@ -735,6 +816,34 @@ namespace BaseCustomerMVC.Controllers.Student
                     { "Data", result }
                 };
             return new JsonResult(response);
+        }
+
+        public async Task<JsonResult> GetLessonProgressListInWeek(String basis, String ClassSubjectID, DateTime StartWeek, DateTime EndWeek)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(userId);
+            if (student == null)
+            {
+                return Json("Học sinh không tồn tại");
+            }
+
+            var classSbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (classSbj == null)
+            {
+                return Json("Môn học không có");
+            }
+
+            var result = new List<StudentLessonResultViewModel>();
+            if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj, true);
+            }
+            else
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+            }
+
+            return Json(result);
         }
 
     }
