@@ -116,6 +116,9 @@ namespace AutoEmailEduso
                     //case "BenTre":
                     //    await BenTre();
                     //    break;
+                    //case "HPNY":
+                    //    await HPNY();
+                    //    break;
                     default:
                         break;
                 }
@@ -480,6 +483,7 @@ namespace AutoEmailEduso
                                              CompletedLesson = ge.ToList().Select(x => x.LessonID).Distinct().Count()
                                          }).ToList();
 
+                            var test = activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0).GroupBy(x => x.StudentID).ToList();
                             //ket qua lam bai cua hoc sinh trong lop
                             var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                                group r by r.StudentID
@@ -894,7 +898,7 @@ namespace AutoEmailEduso
                         var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
-                        _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                       _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                     }
                 }
                 else if (listTeacher.Count == 1)
@@ -979,7 +983,9 @@ namespace AutoEmailEduso
                 {
                     foreach (var @class in activeClasses)
                     {
-                        var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                        //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
+                        //var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                        var activeSchedules = _scheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime ).ToEnumerable()
                             .OrderBy(t => t.ClassID)
                             .ThenBy(t => t.ClassSubjectID)
                             .ThenBy(t => t.StartDate).ToList();
@@ -1031,8 +1037,8 @@ namespace AutoEmailEduso
                                 var skill = _skillService.GetItemByID(currentSubject.SkillID);
                                 count++;
                                 //Send Mail for lastest class subject
-                                //_ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                //_ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
                             }
                         }
                     }
@@ -1171,7 +1177,7 @@ namespace AutoEmailEduso
             }
             body += @"</tbody>
                 </table>";
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com" } : studentList.Select(t => t.Email).ToList();
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
         #endregion
@@ -2627,7 +2633,7 @@ namespace AutoEmailEduso
             return data;
         }
 
-        #region ds hoc sinh chua lam cs ben tre
+        #region mở rộng
         public static async Task BenTre()
         {
             var center = _centerService.CreateQuery().Find(x=>x.Abbr == "c3btvp").FirstOrDefault();
@@ -2642,6 +2648,60 @@ namespace AutoEmailEduso
                         ClassName = item.Name
                     });
                 var a = "";
+            }
+        }
+
+        public static async Task HPNY()
+        {
+            try
+            {
+                var centers = _centerService.GetActiveCenter(DateTime.UtcNow);
+                if (centers.Count() == 0)
+                    Console.WriteLine("Không có cơ sở hoạt động");
+                //Int32 index = 0;
+                foreach (var center in centers)
+                {
+                    //if (index == 0)
+                    //{
+                        var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
+                        String subject = "Thư cảm ơn và thông báo nghỉ tết";
+                        String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
+                            "<div>" +
+                            "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
+                            "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
+                            "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
+                            "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
+                            "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
+                            "<ul>" +
+                            "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
+                            "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
+                            "<li>Hotline: 0989 085 398</li>" +
+                            "</ul>" +
+                            "</p>" +
+                            "<p>Trân trọng</p>" +
+                            "</div>" +
+                            "";
+
+                    foreach (var teacher in teachers)
+                    {
+                        if (teacher.Email != null)
+                        {
+                            var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { teacher.Email };
+                            //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                            //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                            Console.WriteLine($"Send to {teacher.FullName} OK");
+                            _ = _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+                        }
+                    }
+                    //_ = _mailHelper.SendBaseEmail(null, subject, body, MailPhase.WEEKLY_SCHEDULE,null,new List<string> { "huonghl@utc.edu.vn" });
+                    //}
+                    //index++;
+                }
+                Console.WriteLine("Chúc mừng năm mới ^^");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
         #endregion
