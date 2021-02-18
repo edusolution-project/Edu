@@ -225,14 +225,21 @@ var Lesson = (function () {
         document.location = document.location.href.replace('#', '');
     }
 
+    var learningTarget = config.target;
     //Load Data
     var loadLessonData = function (param, callback) {
+        learningTarget = config.target;
         var formData = new FormData();
         if (param != null)
             Object.keys(param).forEach(e => formData.append(e, param[e]));
         Ajax(config.url.load, formData, "POST", true).then(function (res) {
             if (!isNull(res)) {
-                _data = JSON.parse(res).Data;
+                var response = JSON.parse(res);
+                _data = response.Data;
+                //console.log(learningTarget);
+                if (response.CSTarget > 0)
+                    learningTarget = response.CSTarget;
+
                 switch (config.mod) {
                     case mod.PREVIEW: //curriculum view
                     case mod.TEACHERVIEW:
@@ -380,9 +387,6 @@ var Lesson = (function () {
                 lessonButton.append(btnExplain);
                 //lessonButton.append(btnAddFileFromWord);
                 lessonButton.append(btnExportFileToWord);
-
-
-
 
                 var create = $("<button>", { "class": "btn btn-primary btn-add mt-2 mb-2 mr-2", "title": "Add", "data-toggle": "modal", "onclick": "ShowAddPartToLesson('" + data.ID + "','" + data.TemplateType + "')" });
                 var iconCreate = $("<i>", { "class": "fas fa-plus-square mr-2" });
@@ -619,6 +623,9 @@ var Lesson = (function () {
                         dataform.append("ClassID", config.class_id);
                         dataform.append("ClassSubjectID", config.class_subject_id);
                         dataform.append("LessonID", config.lesson_id);
+                        var currentEx = getLocalData("CurrentExam");
+                        if (currentEx != null)
+                            dataform.append("ID", currentEx);
                         if ($('#' + config.container).find("#ExamID").length == 0) {
                             $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", id: "ExamID" }));
                         }
@@ -661,7 +668,7 @@ var Lesson = (function () {
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         $('li[for=lesson-info]').hide().removeClass('d-flex');
                                         renderLectureExam(exam, false);
-                                        
+
                                         //renderOldAnswer();
                                     }
                                     else {
@@ -840,6 +847,7 @@ var Lesson = (function () {
             case mod.TEACHERPREVIEW:
             case mod.STUDENT_LECTURE:
                 if (_UImode == UIMode.EXAM_ONLY) {
+
                     var nav_bottom = lesson_action_holder
                     nav_bottom.empty();
 
@@ -847,8 +855,8 @@ var Lesson = (function () {
                     var iconprev = $("<i>", { "class": "fas fa-arrow-circle-left mr-2" });
                     var nexttab = $("<button>", { "class": "nexttab btn btn-primary m-2", "title": "Câu tiếp", "onclick": "NextPart()" });
                     var iconnext = $("<i>", { "class": "fas fa-arrow-circle-right mr-2" });
-                    prevtab.append(iconprev).append("Câu trước");;
-                    nexttab.append(iconnext).append("Câu sau");;
+                    prevtab.append(iconprev).append("Câu trước");
+                    nexttab.append(iconnext).append("Câu sau");
 
 
                     prevtab.prop("disabled", true);
@@ -2883,7 +2891,6 @@ var Lesson = (function () {
         }
         else {
             var lastExam = data;
-            debugger
             this.exam_id = lastExam.ID;
             var tried = lastExam.Number;
             var doable = true;
@@ -2938,7 +2945,7 @@ var Lesson = (function () {
     }
 
     var renderLectureExam = function (data, isContinue) {
-        console.log(data);
+        //console.log(data);
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2970,10 +2977,34 @@ var Lesson = (function () {
                 //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
+                if (lastExam.Point == null) lastExam.Point = 0;
+                var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
+                var resultMessage = "";
+
+                console.log(progress);
+
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.MaxPoint }));//.html();
+
+
+                //console.log(progress);
+                if (learningTarget > 0) {
+                    if (progress.toFixed(0) >= learningTarget) {
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                    }
+                    else if (progress * 100 / learningTarget >= 90) {
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
+                    }
+                    else {
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
+                    }
+                }
+
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3036,10 +3067,30 @@ var Lesson = (function () {
             else {
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
+
+                if (lastExam.Point == null) lastExam.Point = 0;
+                var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
+
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+
+                if (learningTarget > 0) {
+                    if (progress.toFixed(0) >= learningTarget) {
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                    }
+                    else if (progress * 100 / learningTarget >= 90) {
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
+                    }
+                    else {
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
+                    }
+                }
+
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3081,6 +3132,10 @@ var Lesson = (function () {
     var startExam = function (obj) {
         if (obj != null)
             $(obj).prop("disabled", true);
+        if (!(learningTarget > 0)) {
+            setLearningTarget(obj, startExam)
+            return false;
+        }
         console.log("Create Exam");
         var dataform = new FormData();
         dataform.append("LessonID", config.lesson_id);
@@ -3100,7 +3155,7 @@ var Lesson = (function () {
                     setLocalData("CurrentExam", data.Data.ID);
 
                     renderExamDetail();
-                    
+
                     $('.top-menu[for=lesson-info]').show();
 
                     //console.log(data);
@@ -3140,6 +3195,61 @@ var Lesson = (function () {
                 //notification("error", err, 3000);
                 //alert(err);
             });
+    }
+
+    var setLearningTarget = function (obj, callback) {
+        console.log(obj);
+        Swal.fire({
+            title: 'Vui lòng đặt điểm mục tiêu trước khi làm bài',
+            text: config.class_subject_name,
+            icon: 'warning',
+            input: 'range',
+            showCancelButton: true,
+            cancelButtonText: 'Hủy',
+            confirmButtonText: 'Đặt',
+            inputLabel: 'Điểm mục tiêu',
+            inputAttributes: {
+                min: 1,
+                max: 10,
+                step: 0.1
+            },
+            inputValue: learningTarget / 10,
+            showLoaderOnConfirm: true,
+            preConfirm: (target) => {
+                if (target != learningTarget) {
+                    let _form = new FormData()
+                    _form.append('Target', target * 10);
+                    _form.append('ID', config.class_subject_id);
+                    console.log(1);
+                    return Ajax(config.url.setTarget, _form, "POST", false)
+                        .then(function (res) {
+                            var data = JSON.parse(res);
+                            var target = data.target;
+                            var error = data.error;
+                            if (error != null) {
+                                throw new Error(error);
+                            }
+                            else {
+                                learningTarget = target;
+                                if (learningTarget > 0)
+                                    callback(obj);
+                            }
+                        })
+                        .catch(e => {
+                            //console.log(e)
+                            Swal.showValidationMessage(
+                                `Có lỗi: ${e}`
+                            )
+                        })
+                }
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (learningTarget > 0)
+                    callback(obj);
+            }
+        })
     }
 
     var renderExamDetail = function () {
@@ -3958,7 +4068,7 @@ var Lesson = (function () {
             var lastExam = data;
             console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
-
+            console.log(lastExam);
             var limit = lastExam.limit;
             var tried = lastExam.number;
             lastExamResult =
@@ -3969,13 +4079,33 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.QuestionsTotal }));
-            //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
-            else
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Tổng số câu hỏi: " + lastExam.questionsTotal }));
+            else {
+
+                if (lastExam.point == null) lastExam.point = 0;
+                var progress = lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0;
+
+                console.log(progress);
+
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.QuestionsTotal }));
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
+                if (learningTarget > 0) {
+                    if (progress.toFixed(0) >= learningTarget) {
+                        resultMessage = "Chúc mừng bạn đã hoàn thành mục tiêu (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ)";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                    }
+                    else if (progress * 100 / learningTarget >= 90) {
+                        resultMessage = "Bạn đã gần đạt mục tiêu rồi (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ). Cố lên!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-warning", text: resultMessage }));//.html();
+                    }
+                    else {
+                        resultMessage = "Bạn chưa đạt điểm mục tiêu đề ra: (" + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + "đ).<br/> Bạn cần cố gắng nhiều hơn nhé!";
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-danger", html: resultMessage }));//.html();
+                    }
+                }
+            }
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4045,6 +4175,11 @@ var Lesson = (function () {
     }
 
     var redoExam = function (obj) {
+        if (!(learningTarget > 0)) {
+            setLearningTarget(obj, redoExam)
+            return false;
+        }
+
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
         lesson_action_holder.empty()
         console.log("Redo Exam");
@@ -4892,7 +5027,7 @@ var Lesson = (function () {
 
                         for (var i = 0; i < data.length; i++) {
                             var lessonPart = data[i];
-                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 14px">' + lessonPart.Title + '<input type="checkbox" style="float:right" id="ip_' + lessonPart.ID +'" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
+                            $(ulselectLessonPartTemplate).append('<li style="padding: 10px" class="sub-practice pt-2 pb-1 pl-2 rounded" id="' + lessonPart.ID + '"><div style="font-size: 14px">' + lessonPart.Title + '<input type="checkbox" style="float:right" id="ip_' + lessonPart.ID + '" onclick="selectAllQuestion(\'' + lessonPart.ID + '\',this)"/></div></li>')
                         }
                         var parentLesson = $("#" + lessonid);
                         if (data.length > 1) {
@@ -5082,7 +5217,7 @@ var Lesson = (function () {
                 html:
                     '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st onclick="AddPart(' + id + ',' + type + ')"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
                     '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>',
-                    //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModalAddToLesson()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
+                //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="showModalAddToLesson()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
                 //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
                 confirmButtonText: 'Đóng',
             })
@@ -5467,7 +5602,7 @@ var submitQuizFill = function (event, modalId, callback) {
 
 var toggleExpand = function (obj) {
     $('.collapsable').addClass('collapse');
-    $('.media-holder video').trigger('pause');
+    $('.media-holder video,.media-holder audio').trigger('pause');
 
     if (!$(obj).hasClass("fa-caret-up"))//expand
     {
