@@ -164,26 +164,35 @@
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>
+                            <th>Học Liệu</th>
+                            <th>Chương</th>
                             <th>Bài</th>
-                            <th style="width:100px">Số lượt làm</th>
+                            @*<th style="width:100px">Số lượt làm</th>
                             <th style="width:150px">Thời gian</th>
-                            <th style="width:150px">Trạng thái</th>
-                            <th style="width:50px">Điểm</th>
+                            <th style="width:150px">Trạng thái</th>*@
+                            <th style="width:50px">Điểm/Mục tiêu</th>
                             <th style="width:100px"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(item,k) in result_data">
                             <td>{{k+1}}</td>
+                            <td class="td_hover" v-on:click="openHistory(item)" style="cursor:pointer">{{item.CourseName}}</td>
+                            <td class="td_hover" v-on:click="openHistory(item)" style="cursor:pointer">{{item.ChapterName}}</td>
                             <td class="td_hover" v-on:click="openHistory(item)" style="cursor:pointer">{{item.LessonName}}</td>
-                            <td>{{item.TriedCount}}</td>
-                            @*<td>{{convertPoint(item.MinPoint)}}</td>
-                                <td>{{convertPoint(item.MaxPoint)}}</td>
-                                <td>{{convertPoint(item.AvgPoint)}}</td>*@
+                            @*<td>{{item.TriedCount}}</td>
+                            <td>{{convertPoint(item.MinPoint)}}</td>
+                            <td>{{convertPoint(item.MaxPoint)}}</td>
+                            <td>{{convertPoint(item.AvgPoint)}}</td>
                             <td>{{formatTime(item.LastTried)}}</td>
-                            <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
-                            <td>{{roundPoint(item.LastPoint,1)}}</td>
-                            <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                            <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>*@
+                        <td :style="[item.LastPoint > item.Target ? {'background-color': '#7dcbca'} : {'background-color': '#f3b8b1'}]">{{roundPoint(item.LastPoint,1)}}/{{roundPoint(item.Target,1)}}</td>
+                            <td v-if="item.LastPoint <= item.Target">
+                                <a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a>
+                            </td>
+                            <td v-else>
+                                Hoàn thành mục tiêu
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -723,9 +732,7 @@
                             .then(response => {
                                 this.isLoading = false
                                 var data = response.data
-                                //debugger
                                 this.result_data = data
-                                //debugger
                             }).catch(e => { this.isLoading = false })
                         this.isLoading = false
                         this.$bvModal.show("detailLessonInWeek-modal")

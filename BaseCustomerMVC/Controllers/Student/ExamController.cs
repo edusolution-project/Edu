@@ -40,6 +40,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
+        private readonly ClassSubjectService _classSubjectService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
 
         private readonly ProgressHelper _progressHelper;
 
@@ -65,6 +67,8 @@ namespace BaseCustomerMVC.Controllers.Student
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonProgressService lessonProgressService,
+            ClassSubjectService classSubjectService,
+            ClassSubjectProgressService classSubjectProgressService,
 
             ProgressHelper progressHelper,
 
@@ -90,6 +94,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentService = studentService;
             _teacherService = teacherService;
             _lessonProgressService = lessonProgressService;
+            _classSubjectService = classSubjectService;
+            _classSubjectProgressService = classSubjectProgressService;
 
             _progressHelper = progressHelper;
 
@@ -737,6 +743,40 @@ namespace BaseCustomerMVC.Controllers.Student
                     { "Data", result }
                 };
             return new JsonResult(response);
+        }
+
+        public async Task<JsonResult> GetLessonProgressListInWeek(String basis, String ClassSubjectID, DateTime StartWeek, DateTime EndWeek)
+        {
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            var student = _studentService.GetItemByID(userId);
+            if (student == null)
+            {
+                return Json("Học sinh không tồn tại");
+            }
+
+            var classSbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (classSbj == null)
+            {
+                return Json("Môn học không có");
+            }
+
+            var result = new List<StudentLessonResultViewModel>();
+            if (classSbj.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            {
+                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj, true);
+            }
+            else
+            {
+                var data = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+                foreach(var d in data.ToList())
+                {
+                    var target = _classSubjectProgressService.CreateQuery().Find(x => x.ClassID == classSbj.ClassID && x.ClassSubjectID == classSbj.ID && x.StudentID == userId).FirstOrDefault();
+                    d.Target = target == null? 0 : target.Target;
+                    result.Add(d);
+                }
+            }
+
+            return Json(result);
         }
 
     }
