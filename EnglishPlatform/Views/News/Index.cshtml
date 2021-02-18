@@ -2,16 +2,17 @@
     ViewData["Title"] = "Tin tức";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="category-box pt-5 pb-5">
-    <div class="container pr-xs">
+@*<div class="category-box pt-5 pb-5 p-4">*@
+<div class="category-box">
+    <div class="container pr-xs p-3">
         <div class="inner-content">
             <div class="content-box">
-                <div class="box-title d-flex justify-content-center mb-5">
+                <div class="box-title d-flex justify-content-center mb-5 mt-3">
                     {{mainTitle}}
                     <div class="underline"></div>
                 </div>
-                <div class="news-list d-flex flex-column flex-md-row pt-3 pb-3" style="border-top:solid 0.5px #CCC">
-                    <div class="news-hot media-body pr-md-4" style="border-right:solid 0.5px #CCC" id="newshot">
+                <div class="news-list d-flex flex-column flex-md-row pt-3" style="border-top:solid 0.5px #CCC">
+                    <div class="news-hot media-body pr-md-3" style="border-right:solid 0.5px #CCC" id="newshot">
                         <div class="news-item w-100 pb-3" v-for="(item,k) in newshot">
                             <div class="thumb w-100 pb-2">
                                 <a :href="'/tin-tuc/tin-tuc/' + item.Code" style="font-size:20px;font-weight:bold">
@@ -23,7 +24,7 @@
                                     {{item.Title}}
                                 </a>
                             </div>
-                            <div class="news-desc" style="max-height:40px;overflow:hidden">
+                            <div class="news-desc mb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
                                 {{item.Summary}}
                             </div>
                             <div class="news-time" style="padding-bottom:10px">
@@ -31,20 +32,20 @@
                             </div>
                         </div>
                     </div>
-                    <div class="news-top  media-body pl-md-4">
+                    <div class="news-top  media-body pl-md-3">
                         <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in newstop">
-                            <div class="thumb">
+                            <div class="thumb mr-3">
                                 <a :href="'/tin-tuc/tin-tuc/'+item.Code" style="font-size:20px;font-weight:bold">
                                     <img :src="cacheStatic(item.Thumbnail,220,120)" class="w-100" style="max-width:100%;max-height:100%" />
                                 </a>
                             </div>
                             <div class=" media-body">
-                                <div class="news-title">
+                                <div class="news-title pb-2">
                                     <a :href="'/tin-tuc/tin-tuc/'+item.Code">
                                         {{item.Title}}
                                     </a>
                                 </div>
-                                <div class="news-desc" style="max-height:40px;overflow:hidden">
+                                <div class="news-desc mb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
                                     {{item.Summary}}
                                 </div>
                                 <div class="news-time">
@@ -65,9 +66,9 @@
 <template v-for="(category,k) in otherNews.listCategory" v-if="otherNews.listCategory.length > 0">
     <div class="container" v-if="filterNews(category.ID,otherNews.listNews).length > 0">
         @* :style="[k%2==0?{'background-color':'#f2f2f2'}:{'':''}]" *@
-        <div class="inner-content">
-            <div class="form-group">
-                <div class="content-box" style="padding-top:20px">
+        <div class="inner-content p-3 pt-4">
+            <div class="form-group mb-0 mt-0">
+                <div class="content-box">
                     <div class="inner-content">
                         <div class="box-title d-flex justify-content-start mb-3 w-100 row" style="font-size:20px;margin:0px !important">
                             <div class="col-md-6 col-sm-12" style="padding:0px">{{category.Name}}</div>
@@ -79,22 +80,22 @@
                         </div>*@
                     </div>
                 </div>
-                <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
+                <div class="col-sm-12 p-0 pt-3">
                     <div class="news-top media-body">
                         <template v-for="(item,k) in otherNews.listNews">
                             <div class="news-item pb-3 pt-3 d-flex" v-if="item.CategoryID == category.ID" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" :title="item.Title">
-                                <div class="thumb">
-                                    <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
+                                <div class="thumb mr-3">
+                                    <a :href="'/tin-tuc/'+category.Code + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
                                         <img :src="cacheStatic(item.Thumbnail,220,140)" class="w-100">
                                     </a>
                                 </div>
-                                <div class="media-body pr-4 pt-2">
-                                    <div class="news-title">
-                                        <a :href="'/tin-tuc/'+item.CategoryCode + '/' + item.Code" style="text-decoration:none">
+                                <div class="media-body">
+                                    <div class="news-title pb-2">
+                                        <a :href="'/tin-tuc/'+category.Code + '/' + item.Code" style="text-decoration:none">
                                             {{item.Title}}
                                         </a>
                                     </div>
-                                    <div class="news-desc" style="overflow: hidden;">
+                                    <div class="news-desc mb-2 ellipsis" onclick="$(this).toggleClass('ellipsis')">
                                         {{item.Summary}}
                                     </div>
                                     <div class="news-time">
@@ -192,7 +193,8 @@
     }
 
     .news-top .news-item .thumb{
-        width:auto
+        width:auto;
+        margin-right:0px
     }
 
     .news-item.pb-3.pt-3.d-flex{
@@ -206,7 +208,7 @@
     .news-title a {
         color: #08486b !important;
         opacity: 0.9;
-        text-transform: capitalize !important
+        /*text-transform: capitalize !important*/
     }
 
         .news-title a:hover{
@@ -225,11 +227,17 @@
             font-size:12px;
             font-style:italic;
             text-decoration:none;
-            color:gray
+            color:gray;
+            opacity:0.5
         }
 
             #seemore a:hover {
-                color: lawngreen
+                color: #08486b;
+                opacity:1
             }
+
+    .news-item .news-time::before{
+        top:1px !important;
+    }
 </style>
 }

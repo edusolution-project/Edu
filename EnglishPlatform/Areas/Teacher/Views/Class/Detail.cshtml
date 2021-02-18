@@ -70,7 +70,7 @@
             <div class="box filter-box m-1 col-12 col-md-2">
                 <select v-model="searchCsbj">
                     <option value="">Tổng hợp</option>
-                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
+                    <option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName,TypeClass:item.TypeClass}" v-if="item.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra & Đánh giá</option>
                     @*<option v-for="(item,k) in classSubjects" :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                             {{item.CourseName}} <i class="far fa-check-circle" v-if="item.HasLessonActive"></i>
                         </option>*@
@@ -1473,7 +1473,8 @@
                     courseName: '',
                     title: '',
                     list_chapters:[]
-                }
+                },
+                isExam: false
             },
             watch: {
                 "ref.subjectID": function () {
@@ -1483,10 +1484,13 @@
                     this.loadPreference()
                 },
                 searchCsbj: function () {
-                    //debugger
                     this.loadClassScore()
                     this.filterChap.TargetChaps = []
                     this.filterChap.SelectAll = false;
+                    if (this.searchCsbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                        this.isExam = true
+                    }
+                    else this.isExam = false
                 },
                 "searchPoint": function () {
                     if (this.searchPoint == 0) {
@@ -3115,8 +3119,27 @@
 
                     this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(6, 'days'));
                     this.$bvModal.show("model_week_lesson")
+                },
+                ResetExam(obj) {
+                    if (window.confirm("Cảnh báo: Thao tác này sẽ xoá tất cả lịch sử kiểm tra của học sinh trong bài kiểm tra này.")) {
+                        let _that = this
+                        let _form = new FormData()
+                        let _url = '@processUrl("ResetExam","Exam")'
+                        _form.append("LessonID", obj.LessonID)
+                        if (obj.ListExam.length > 0)
+                            _form.append("ExamID", obj.ListExam[0].ExamID)
+                        axios.post(_url, _form)
+                            .then(response => {
+                                if (response.data.code == 405) {
+                                    alert("Bạn không có quyền thao tác chức năng này.")
+                                }
+                                else {
+                                    alert(response.data.Msg)
+                                }
+                            })
+                            .catch(e => { alert(e) })
+                    }
                 }
-
             }
         });
 
@@ -3477,6 +3500,7 @@
                         <tr>
                             <th style="width:50px">STT</th>
                             <th>Bài</th>
+                            <th>Chương</th>
                             <th>Học liệu</th>
                             <th>Thời gian mở</th>
                         </tr>
@@ -3485,6 +3509,7 @@
                         <tr v-for="(item,k) in lesson_week">
                             <td>{{k+1}}</td>
                             <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classsubjectID" target="_blank">{{item.title}}</a></td>
+                            <td>{{item.chapterName}}</td>
                             <td>{{item.bookName}}</td>
                             <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
                         </tr>
@@ -3513,6 +3538,7 @@
                             <th style="width:150px">Trạng thái</th>
                             <th style="width:50px">Điểm</th>
                             <th style="width:100px"></th>
+                            <th style="width:50px" v-if="isExam && '@currentuser' == '5d8389c2d5d1bf27e4410c04'"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -3527,6 +3553,7 @@
                             <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
                             <td>{{roundPoint(item.LastPoint,1)}}</td>
                             <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                            <td v-if="isExam && '@currentuser' == '5d8389c2d5d1bf27e4410c04'"><i class="fas fa-redo" v-on:click="ResetExam(item)"></i></td>
                         </tr>
                     </tbody>
                 </table>
@@ -3675,4 +3702,57 @@
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
         </template>
     </b-modal>
+}
+
+@section TopStar{
+    <div id="top_star" class="box p-3">
+        <div class="heading flex pb-2">
+            @{
+                var current = DateTime.Now.Date;
+                var startWeek = current.AddDays(DayOfWeek.Monday - current.DayOfWeek - 7);
+                var endWeek = startWeek.AddDays(6);
+            }
+            <h4 class="box-head text-center" style="font-size:110%;">Top tuần @startWeek.ToString("dd/MM") - @endWeek.ToString("dd/MM")</h4>
+        </div>
+        <ul style="border: solid 1px #CCC; border-radius:10px;" class="p-2" v-if="list_star.length > 0">
+            <template v-for="(item,k) in list_star">
+                <li v-if="k < 10" class="p-2 list-unstyled">
+                    <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
+                    <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
+                    <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
+                    <i class="fas fa-star red-color" v-else></i>
+                    <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}<span> ({{ (item.AvgPoint / 10).toFixed(1)}})</span></a>
+            </template>
+        </ul>
+    </div>
+    <style>
+        #top_star li:hover {
+            background-color: #EEE;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        new Vue({
+        el: "#top_star",
+            mounted() {
+                this.getBestClassesLastWeek();
+            },
+            data: {
+                list_star: []
+            },
+            methods: {
+                getBestClassesLastWeek() {
+                    let _form = new FormData()
+                    _form.append('ClassID', '@currentClass.ID')
+                    _form.append('limit', 5)
+                    let _url = '@processUrl("GetBestStudents", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.list_star = response.data.Data;
+                        }).catch(e => { })
+                },
+            }
+        });
+    </script>
+
 }

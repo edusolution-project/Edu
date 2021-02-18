@@ -1029,7 +1029,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var data = _chapterService.GetItemByID(item.ID);
 
-                CourseChapterEntity parent = null;                
+                CourseChapterEntity parent = new CourseChapterEntity();
 
                 var needUpdate = true;
                 if (data == null)
@@ -1050,7 +1050,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _chapterService.Save(item);
 
                     item.Order = ChangeChapterPosition(item, int.MaxValue);//move chapter to bottom of new parent chap
-
+                    UpdateRoute(item, parent);
                     //needUpdate = true;
                 }
                 else
@@ -1107,12 +1107,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                     else if (data.Order != newOrder)
                         item.Order = ChangeChapterPosition(data, newOrder);
-                }
-                //update route
-                if (needUpdate)
-                {
                     UpdateRoute(data, parent);
                 }
+                //update route
+                //if (needUpdate)
+                //{
+                //    UpdateRoute(data, parent);
+                //}
 
                 return new JsonResult(new Dictionary<string, object>
                 {
@@ -1163,14 +1164,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //            obj.Start = prev.Start + prev.Period;
             //    }
             //}
+            if (obj != null)
+            {
+                _chapterService.Save(obj);
 
-            _chapterService.Save(obj);
+                //var linked_period = obj.Period;
+                //linked_period = Math.Max((double)obj.Period + UpdateConnectedRoute(obj), linked_period);
 
-            //var linked_period = obj.Period;
-            //linked_period = Math.Max((double)obj.Period + UpdateConnectedRoute(obj), linked_period);
-
-            UpdateParentRoute(parent, obj.Start + obj.Period);
-            UpdateSubRoute(obj);
+                UpdateParentRoute(parent, obj.Start + obj.Period);
+                UpdateSubRoute(obj);
+            }
         }
 
         private void UpdateRoute(CourseLessonEntity obj, CourseChapterEntity parent)
@@ -1680,11 +1683,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var data = _lessonService.GetItemByID(item.ID);
 
-                CourseChapterEntity parent = null;
-                if (data.ChapterID != "0")
-                {
-                    parent = _chapterService.GetItemByID(data.ChapterID);
-                }
+                CourseChapterEntity parent = new CourseChapterEntity();
+                //if (data.ChapterID != "0")
+                //{
+                //    parent = _chapterService.GetItemByID(data.ChapterID);
+                //}
 
                 if (data == null)
                 {
@@ -1718,6 +1721,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
+                    if (data.ChapterID != "0")
+                    {
+                        parent = _chapterService.GetItemByID(data.ChapterID);
+                    }
+
                     var oldTemplate = data.TemplateType;
                     data.TemplateType = item.TemplateType;
                     data.Title = item.Title;

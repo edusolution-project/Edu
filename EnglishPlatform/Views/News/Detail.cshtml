@@ -1,14 +1,27 @@
 ﻿
 @{
     var news = ViewBag.News as BaseCustomerEntity.Database.NewsEntity;
-    ViewData["Title"] = news.Title;
+    var category = ViewBag.Category as BaseCustomerEntity.Database.NewsCategoryEntity;
+    if (category == null)
+    {
+        category = new BaseCustomerEntity.Database.NewsCategoryEntity { Code = "tin-tuc",Name = "Tin tức"};
+    }
+    ViewData["Title"] = Html.Raw(news.Title);
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="category-box p-5" id="section">
+<div class="category-box pt-0" id="section">
     <div class="inner-content">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/tin-tuc">Tin tức</a></li>
+                <li class="breadcrumb-item" data-before="&rsaquo;"><a href="/tin-tuc/@category.Code">@Html.Raw(category.Name)</a></li>
+            </ol>
+        </nav>
+    </div>
+    <div class="inner-content ">
         <div class="content-box">
-            <div>
+            <div class="pl-3 pr-3">
                 <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
                     @news.Title
                     <div class="underline" style="bottom:0px !important;min-width:70px !important"></div>
@@ -34,26 +47,24 @@
                     </div>
                 </div>-->
                 @*<div class="media-container-row row">*@
-                <div class="form-group">
+                <div class="">
                     <div class="inner-content">
                         <div class="content-box">
                             <div class="" id="content" style="text-align:justify;font-size:14px;font-family:'Be Vietnam',sans-serif">
                                 @Html.Raw(news.Content)
-                                <div class="col-md-12 col-sm-12 ">
+                                @*<div class="col-md-12 col-sm-12 ">
                                     <div class="float-right" style="font-style:italic;font-size:12px">@news.PublishDate.ToString("dd/MM/yyyy")</div>
-                                </div>
+                                </div>*@
+                                <p style="text-align:right">@news.PublishDate.ToString("dd/MM/yyyy")</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="container">
-                <div class="form-group" id="related_news" style="padding-top:20px">
+                <div class="p-3" id="related_news">
                     @*<div class="inner-content">*@
                     <div class="content-box">
-                        @*<div class="col-sm-12" style="text-align:center;font-family: Open Sans;font-size: 18px;font-weight: bold;">
-                                Tin cùng chuyên mục
-                            </div>*@
                         <div class="inner-content">
                             <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px;text-align:justify">
                                 Tin cùng chuyên mục
@@ -61,10 +72,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-12">
+                    <div class="col-sm-12" style="padding:0px">
                         <div class="carousel-wrap" id="partner" style="text-align:center">
                             <div class="owl-carousel">
-                                <div class="item" v-for="item in items">
+                                <div class="item p-2" v-for="item in items">
                                     <a :href="item.Url">
                                         <img :src="cacheStatic(item.Thumbnail,200,120)" :title="item.Title">
                                         <div class="col-sm-12" style="text-align:left;padding:10px 0px 0px 0px;color:#08486b;height: 100px;white-space: revert;overflow: hidden;text-align:justify;font-weight:700;font-size:14px">
@@ -81,8 +92,8 @@
             </div>
             <template v-if="itemsHot.length > 0">
                 <div class="container">
-                    <div class="form-group" style="padding-top:20px">
-                        <div class="content-box">
+                    <div class="pl-3 pr-3">
+                        <div class="content-box pt-3">
                             <div class="inner-content">
                                 <div class="box-title d-flex justify-content-start mb-3" style="font-size:20px">
                                     Tin nổi bật
@@ -91,7 +102,7 @@
                             </div>
                         </div>
                         <div class="col-sm-12" style="margin:0px;padding:10px 0px 0px 0px">
-                            <div class="news-top media-body pl-md-4 pr-md-4">
+                            <div class="news-top media-body">
                                 <div class="news-item pb-3 pt-3 d-flex" v-for="(item,k) in itemsHot" v-on:click="window.location.href = '/tin-tuc/'+'item.CategoryCode' + '/' + item.Code">
                                     <div class="thumb">
                                         <a :href="'/tin-tuc/'+'item.CategoryCode' + '/' + item.Code" style="font-size: 20px; font-weight: bold;">
@@ -165,6 +176,10 @@
             console.log(e)
         }
     }
+    @*$("#meta-og-title").attr("content", '@Html.Raw(news.Title)');
+    $("#meta-og-description").attr("content", '@Html.Raw(news.Summary)');
+    $("#meta-og-url").attr("content", "https://eduso.vn/tin-tuc/@category.Code/@news.Code");
+    $("#meta-og-image").attr("content", "https://static.eduso.vn/@news.Thumbnail");*@
 
     @*new Vue({
         el: '#section',
@@ -475,7 +490,7 @@
 
     #related_news {
         background-color: #f2f2f2;
-        margin-top: 30px
+        /*margin-top: 30px*/
     }
 
     /*.container {
@@ -532,5 +547,24 @@
             margin: 0px;
             padding: 0px
         }
+    }
+
+    .breadcrumb{
+        background-color:#fff;
+        padding-bottom:0px
+    }
+
+        .breadcrumb li a {
+            color: #05517B;
+            text-decoration:none;
+            opacity:0.8;
+            font-size:14px
+        }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: attr(data-before);
+        padding-left: 5px;
+        padding-right: 5px;
+        vertical-align: middle
     }
 </style>

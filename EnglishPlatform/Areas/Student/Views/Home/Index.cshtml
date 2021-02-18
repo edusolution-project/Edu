@@ -18,11 +18,7 @@
 <script>
     setActiveMenu("home");
 </script>
-<style>
-    .height-245 {
-        height: 268px;
-    }
-</style>
+
 <section class="module" id="dashboard_content">
     <div class="card-header border-b" v-cloak>
         <div class="flex justify-content-between align-items-start">
@@ -43,6 +39,16 @@
                 @:<script>$(document).ready(function () { $('#owncenter').show().val('@center') });  var changeCenter = function () { document.location = "/" + $('#owncenter').val() + "/student" }</script>
             }
         </div>
+    </div>
+
+    <div id="main-route" class="main-route m-3" v-cloak>
+        <ul class="route_holder" id="cid_0" cid="0">
+            <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
+            <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
+                v-on:click="showWeekLesson(moment(startDate).add(index * 7 - padRoute, 'days'))"
+                :class="moment(startDate).add((index + 1) * 7 + 1 - padRoute, 'days') < moment() ? 'passed' : (moment(startDate).add((index + 1) * 7 - 6 - padRoute, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+            <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
+        </ul>
     </div>
 
     <div class="h4 m-3" v-cloak cloak-holder>
@@ -86,7 +92,7 @@
                 </ul>
             </div>
         </div>
-        <div class="row margin-b20">
+        <div class="row margin-b20 d-none">
             <div class="col-md-6">
                 <div class="box mb-3">
                     <div class="heading flex mb-2">
@@ -231,7 +237,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row d-none">
             <div class="col-md-12 margin-b20">
                 <div class="heading flex">
                     <h4 class="box-head">Lớp học đã kết thúc</h4>
@@ -299,18 +305,184 @@
 </section>
 
 @section Scripts{
+    <style>
+        .height-245 {
+            height: 268px;
+        }
+
+        #main-route {
+            overflow: auto;
+        }
+
+        .route_holder {
+            text-align: left;
+            white-space: nowrap;
+            height: 2px;
+            margin: 50px 0 60px;
+            font-size: 0;
+        }
+
+        .route_item {
+            display: inline-block;
+            width: 100px;
+            height: 4px;
+            overflow: visible;
+            margin: 0;
+            background: #969696;
+            position: relative;
+            font-weight: bold;
+            opacity: 0.7;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .route_item:hover {
+                opacity: 1;
+                background: #13a6fb;
+            }
+
+                .route_item:hover::after {
+                    border-color: #13a6fb;
+                }
+
+            .route_item.start {
+                width: 50px;
+                margin-left: 20px;
+            }
+
+            .route_item.passed,
+            .route_item.start {
+                background: #13a6fb;
+            }
+
+                .route_item.start::after,
+                .route_item.passed::after {
+                    border-color: #13a6fb;
+                    background-color: #13a6fb;
+                }
+
+            .route_item.now {
+                background-color: #D03239;
+            }
+
+                .route_item.now::after {
+                    background-color: #D03239;
+                    border-color: #D03239;
+                }
+
+            .route_item.start .route_period {
+                left: 10px;
+            }
+
+            .route_item.end {
+                width: 50px;
+                text-align: right;
+                /*margin-right: 20px;*/
+            }
+
+                .route_item.end .route_title {
+                    text-align: right;
+                    left: auto;
+                    right: 0px;
+                }
+
+                .route_item.end .route_period {
+                    right: 10px;
+                }
+
+                .route_item.end::after {
+                    right: -10px;
+                    left: auto;
+                }
+
+            .route_item::after {
+                content: "";
+                position: absolute;
+                left: 50%;
+                right: auto;
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                -o-transform: translateX(-50%);
+                transform: translateX(-50%);
+                bottom: -12px;
+                height: 20px;
+                width: 20px;
+                border-radius: 50%;
+                border: 2px solid #969696;
+                background: #969696 url(/images/calendar.png) no-repeat center center;
+                -webkit-background-size: 14px auto;
+                background-size: 14px auto;
+                -webkit-transition: background-color .3s,border-color .3s;
+                -moz-transition: background-color .3s,border-color .3s;
+                -o-transition: background-color .3s,border-color .3s;
+                transition: background-color .3s,border-color .3s;
+                top: -8px;
+                cursor: pointer;
+            }
+
+            .route_item.start::after {
+                left: 10px;
+            }
+
+            .route_item .route_title {
+                bottom: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -35px;
+                width: 70px;
+                text-align: center;
+                overflow: hidden;
+                max-height: 28px;
+                white-space: break-spaces;
+                line-height: 14px;
+                font-size: 70%;
+                font-weight: bold;
+            }
+
+            .route_item.start .route_title {
+                margin-left: 0;
+                left: -6px;
+                text-align: left;
+            }
+
+            .route_item .route_period {
+                top: 20px;
+                position: absolute;
+                left: 50%;
+                margin-left: -25px;
+                width: 50px;
+                text-align: center;
+            }
+
+        .wkIdx {
+            user-select: none;
+            font-size: 110%;
+            color: #007bff;
+        }
+    </style>
+
     <script>
     new Vue({
-        el: ".module",
+        el: "#main_content",
         mounted() {
             this.getWeekLesson();
             this.getActiveCourse();
-            this.getFinishCourse();
+            //this.getFinishCourse();
             this.getNewFeed();
             this.list_courses = @Html.Raw(Json.Serialize(list_courses));
-            this.getMyCourse();
+            //this.getMyCourse();
         },
         data: {
+            lesson_wk: [],
+            weekTitle: '',
+            startDate: moment(),
+            padRoute: 0,
+            endDate: moment(),
+            period: 0,
+            classSubjects: [],
+            classes: [],
+
             lesson_week: [
             ],
             active_course: [
@@ -340,6 +512,25 @@
                         //console.log("Active")
                         //console.log(response.data)
                         _that.active_course = response.data.data;
+
+                         for (var i = 0; i < this.active_course.length; i++) {
+                            var start = moment(this.active_course[i].startDate).toLocaleString();
+                            if (this.startDate > moment(start))
+                                this.startDate = moment(start);
+                            var end = moment(this.active_course[i].endDate).toLocaleString();
+                            if (this.endDate < moment(end))
+                                this.endDate = moment(end);
+                            this.period = this.endDate.diff(this.startDate, 'days')
+                        }
+
+                        this.padRoute = moment(this.startDate).day() - 1;
+                        console.log(this.period);
+
+                        Vue.nextTick(function () {
+                            $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
+                            //console.log($(".route_item").index($('.route_item.now')) * 100);
+                        })
+
                         //debugger
                         //console.log(_that.active_course);
                     }).catch(e => { })
@@ -401,6 +592,11 @@
             formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
+            },
+            formatDatenoYear(date) {
+                var _date = moment(date);
+                if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                return _date.format("DD/MM")
             },
             validDate(item) {
                 var now = moment().toDate();
@@ -464,8 +660,67 @@
                         _that.list_mycourses = response.data.data;
                         //console.log(_that.active_course);
                     }).catch(e => { })
-            }
+            },
+            showWeekLesson(start) {
+                    let _that = this
+                    let _form = new FormData()
+                    var _date = moment(start);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
+                        _date = moment();
+                    date = _date.format("MM/DD/YYYY")
+                    console.log(date);
+                    _form.append('today', date)
+                    _form.append('seekStart', false)
+                    let _url = '@processUrl("GetThisWeekLesson", "Course")'
+
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //console.log("Week")
+                        _that.lesson_wk = response.data.data;
+                        }).catch(e => { })
+
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+                    this.$bvModal.show("model_week_lesson")
+                }
         }
     });
     </script>
+}
+@section Modals{
+    <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
+        <div class="modal-body">
+            <template v-if="lesson_wk.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th>Chương</th>
+                            <th>Học liệu</th>
+                            <th>Lớp</th>
+                            <th>Thời gian mở</th>
+                            <th>Điểm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in lesson_wk">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classSubjectID" target="_blank">{{item.title}}</a></td>
+                            <td>{{item.chapterName}}</td>
+                            <td>{{item.bookName}}</td>
+                            <td>{{item.className}}</td>
+                            <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
+                            <td :class="item.lastPoint > 0 ? 'text-success':'text-danger'">{{item.lastPoint > 0 ? (item.lastPoint/10).toFixed(1) : '---'}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có bài
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
 }

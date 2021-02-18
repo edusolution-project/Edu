@@ -141,5 +141,10 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.Centers.Contains(CenterID)).CountDocuments();
         }
+
+        public IEnumerable<StudentEntity>GetItemByCenterID(string CenterID)
+        {
+            return CreateQuery().Find(x => x.Centers.Contains(CenterID)).ToEnumerable();
+        }
     }
 }

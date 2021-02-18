@@ -9,7 +9,6 @@
     string processUrl(string act, string ctrl)
     {
         string url = Url.Action(act, ctrl);
-
         return $"/{center}{url}";
     }
 }
@@ -25,16 +24,6 @@
 <script src="~/js/vue-lazyload.js"></script>
 
 <section class="module" id="dashboard_content">
-    <div id="main-route" class="main-route mb-3 mt-2">
-        <ul class="route_holder" id="cid_0" cid="0">
-            <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
-            <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
-                v-on:click="showWeekLesson(moment(startDate).add(index * 7 - padRoute, 'days'))"
-                :class="moment(startDate).add((index + 1) * 7 + 1 - padRoute, 'days') < moment() ? 'passed' : (moment(startDate).add((index + 1) * 7 - 6 - padRoute, 'days') > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
-            <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
-        </ul>
-    </div>
-
     <div class="h4 m-3" v-cloak cloak-holder>
         <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
     </div>
@@ -137,15 +126,6 @@
                                 </ul>
                             </li>
                         </ul>
-                        @*<ul class="list ls-practice row">
-                                <liclass ="form-row col-md-6 col-sm-12 mb-3" >
-                                    <div class="inner d-flex w-100">
-                                        <div class="flex-fill ml-2">
-
-                                        </div>
-                                    </div>
-                                    </li>
-                            </ul>*@
                     </div>
                 </template>
                 <template v-else-if="item.ClassMechanism == @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL">
@@ -195,157 +175,6 @@
 
 @section Scripts{
     <style>
-        #main-route {
-            overflow: auto;
-        }
-
-        .route_holder {
-            text-align: left;
-            white-space: nowrap;
-            height: 2px;
-            margin: 50px 0 60px;
-            font-size: 0;
-        }
-
-        .route_item {
-            display: inline-block;
-            width: 100px;
-            height: 4px;
-            overflow: visible;
-            margin: 0;
-            background: #969696;
-            position: relative;
-            font-weight: bold;
-            opacity: 0.7;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-            .route_item:hover {
-                opacity: 1;
-                background: #13a6fb;
-            }
-
-                .route_item:hover::after {
-                    border-color: #13a6fb;
-                }
-
-            .route_item.start {
-                width: 50px;
-                margin-left: 20px;
-            }
-
-            .route_item.passed,
-            .route_item.start {
-                background: #13a6fb;
-            }
-
-                .route_item.start::after,
-                .route_item.passed::after {
-                    border-color: #13a6fb;
-                    background-color: #13a6fb;
-                }
-
-            .route_item.now {
-                background-color: #D03239;
-            }
-
-                .route_item.now::after {
-                    background-color: #D03239;
-                    border-color: #D03239;
-                }
-
-            .route_item.start .route_period {
-                left: 10px;
-            }
-
-            .route_item.end {
-                width: 50px;
-                text-align: right;
-                /*margin-right: 20px;*/
-            }
-
-                .route_item.end .route_title {
-                    text-align: right;
-                    left: auto;
-                    right: 0px;
-                }
-
-                .route_item.end .route_period {
-                    right: 10px;
-                }
-
-                .route_item.end::after {
-                    right: -10px;
-                    left: auto;
-                }
-
-            .route_item::after {
-                content: "";
-                position: absolute;
-                left: 50%;
-                right: auto;
-                -webkit-transform: translateX(-50%);
-                -moz-transform: translateX(-50%);
-                -ms-transform: translateX(-50%);
-                -o-transform: translateX(-50%);
-                transform: translateX(-50%);
-                bottom: -12px;
-                height: 20px;
-                width: 20px;
-                border-radius: 50%;
-                border: 2px solid #969696;
-                background: #969696 url(/images/calendar.png) no-repeat center center;
-                -webkit-background-size: 14px auto;
-                background-size: 14px auto;
-                -webkit-transition: background-color .3s,border-color .3s;
-                -moz-transition: background-color .3s,border-color .3s;
-                -o-transition: background-color .3s,border-color .3s;
-                transition: background-color .3s,border-color .3s;
-                top: -8px;
-                cursor: pointer;
-            }
-
-            .route_item.start::after {
-                left: 10px;
-            }
-
-            .route_item .route_title {
-                bottom: 20px;
-                position: absolute;
-                left: 50%;
-                margin-left: -35px;
-                width: 70px;
-                text-align: center;
-                overflow: hidden;
-                max-height: 28px;
-                white-space: break-spaces;
-                line-height: 14px;
-                font-size: 70%;
-                font-weight: bold;
-            }
-
-            .route_item.start .route_title {
-                margin-left: 0;
-                left: -6px;
-                text-align: left;
-            }
-
-            .route_item .route_period {
-                top: 20px;
-                position: absolute;
-                left: 50%;
-                margin-left: -25px;
-                width: 50px;
-                text-align: center;
-            }
-
-        .wkIdx {
-            user-select: none;
-            font-size: 110%;
-            color: #007bff;
-        }
-
         .ic-picker {
             cursor: pointer;
         }
@@ -385,6 +214,14 @@
 
         .csbj_target {
             cursor: pointer;
+        }
+
+            .csbj_target:hover {
+                font-weight: bold;
+            }
+
+        .swal2-title {
+            font-size: 18px;
         }
     </style>
 
@@ -554,53 +391,7 @@
                                             this.loadContent(itemcsbj.ID);
                                         }
                                     }
-
-
-                                    for (var i = 0; i < this.classes.length; i++) {
-                                        if (this.classes[i].ClassMechanism != @BaseCustomerEntity.Database.CLASS_MECHANISM.PERSONAL) {
-                                        //console.log(this.classes[i].StartDate)
-                                            var start = moment(this.classes[i].StartDate).toLocaleString();
-                                            if (this.startDate > moment(start))
-                                                this.startDate = moment(start);
-                                            var end = moment(this.classes[i].EndDate).toLocaleString();
-                                            if (this.endDate < moment(end))
-                                                this.endDate = moment(end);
-                                            this.period = this.endDate.diff(this.startDate, 'days')
-                                        }
-                                    }
-
-                                    this.padRoute = moment(this.startDate).day() - 1;
-                                    console.log(this.period);
-
-                                    Vue.nextTick(function () {
-                                        $('.main-route').scrollLeft($(".route_item").index($('.route_item.now')) * 100 - 400);
-                                        //console.log($(".route_item").index($('.route_item.now')) * 100);
-                                    })
-
-
                                 }
-                                //_data.forEach(function (item, k) {
-                                //    _that.classSubjects.push({
-                                //        ID: item.ID,
-                                //        Title: item.SkillName,
-                                //        Image: item.SkillImage,
-                                //        Color: item.Color,
-                                //        Teacher: item.TeacherName,
-                                //        Grade: item.GradeName,
-                                //        Chapters: [],
-                                //        Lessons: [],
-                                //        TypeClass: item.TypeClass,
-                                //        ClassName: item.ClassName,
-                                //        ClassID: item.ClassID,
-                                //        CourseName: item.CourseName,
-                                //        SubjectName: item.SubjectName,
-                                //        StartDate: item.StartDate,
-                                //        EndDate: item.EndDate
-                                //    })
-                                //    //_that.changeAddSubject(item)
-                                //    //_that.changeAddGrade(item)
-                                //})
-                                //_that.$forceUpdate()
                             }).catch(e => { })
                 },
                 list_chapters: [],
@@ -781,10 +572,10 @@
                 },
                 chooseTarget(csbj) {
                     Swal.fire({
-                        title: 'Đặt điểm mục tiêu',
-                        text: csbj.CourseName,
+                        title: 'Điểm mục tiêu cho môn học này của bạn là mấy điểm?',
+                        html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + csbj.CourseName + '</span>',
                         icon: 'info',
-                        input: 'range',
+                        input: 'number',
                         showCancelButton: true,
                         cancelButtonText: 'Hủy',
                         confirmButtonText: 'Đặt',
@@ -792,7 +583,10 @@
                         inputAttributes: {
                             min: 1,
                             max: 10,
-                            step: 0.1
+                            step: 1
+                        },
+                        inputValidator: (value) => {
+                            return value > 10 && 'Điểm mục tiêu trong khoảng 1 đến 10'
                         },
                         inputValue: csbj.Target / 10,
                         showLoaderOnConfirm: true,
@@ -863,10 +657,6 @@
             //listenEvents: ['scroll']
         })
 
-        @*$(document).ready(function () {
-            alert(@TempData["message"])
-        });*@
-
         var toggleTooltips = function (obj) {
             $(obj).find('i').tooltip({
                 position: {
@@ -890,41 +680,3 @@
     </script>
 }
 
-@section Modals{
-
-    <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
-        <div class="modal-body">
-            <template v-if="lesson_week.length > 0">
-                <table id="id_table" class="table">
-                    <thead>
-                        <tr>
-                            <th style="width:50px">STT</th>
-                            <th>Bài</th>
-                            <th>Học liệu</th>
-                            <th>Lớp</th>
-                            <th>Thời gian mở</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item,k) in lesson_week">
-                            <td>{{k+1}}</td>
-                            <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classSubjectID" target="_blank">{{item.title}}</a></td>
-                            <td>{{item.bookName}}</td>
-                            <td>{{item.className}}</td>
-                            <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
-                            <td :class="item.isLearnt ? 'text-success':'text-danger'">{{item.isLearnt ? 'Đã học' : 'Chưa học'}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </template>
-            <template v-else>
-                Không có bài
-            </template>
-        </div>
-        <template v-slot:modal-footer="{ ok, cancel}">
-            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
-        </template>
-    </b-modal>
-
-}

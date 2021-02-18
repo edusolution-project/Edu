@@ -144,7 +144,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item,i) in detail.data">
-                            <td>Tuần {{item.week}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</td>
+                            <td v-on:click="loadDetailinWeek(item)">Tuần {{item.week}} ({{formatShortDate(item.startTime)}} - {{formatShortDate(item.endTime)}})</td>
                             @*<td>{{item.practiceDone}}/{{item.totalPractice}}</td>*@
                             <td>{{roundPoint(item.point,1)}}</td>
                         </tr>
@@ -154,6 +154,86 @@
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal id="detailLessonInWeek-modal" size="xl" :title=" result_data.length > 0 ? result_data[0].StudentName : ''">
+        <div class="modal-body">
+            <template v-if="result_data.length > 0">
+                <table id="id_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">STT</th>
+                            <th>Bài</th>
+                            <th style="width:100px">Số lượt làm</th>
+                            <th style="width:150px">Thời gian</th>
+                            <th style="width:150px">Trạng thái</th>
+                            <th style="width:50px">Điểm</th>
+                            <th style="width:100px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in result_data">
+                            <td>{{k+1}}</td>
+                            <td class="td_hover" v-on:click="openHistory(item)" style="cursor:pointer">{{item.LessonName}}</td>
+                            <td>{{item.TriedCount}}</td>
+                            @*<td>{{convertPoint(item.MinPoint)}}</td>
+                                <td>{{convertPoint(item.MaxPoint)}}</td>
+                                <td>{{convertPoint(item.AvgPoint)}}</td>*@
+                            <td>{{formatTime(item.LastTried)}}</td>
+                            <td>{{item.IsCompleted ? "Hoàn thành": (item.TriedCount > 0 ? "Chưa hoàn thành": "Chưa làm")}}</td>
+                            <td>{{roundPoint(item.LastPoint,1)}}</td>
+                            <td><a :href="'@processUrl("Detail","Lesson")'+'/'+item.LessonID +'/'+ item.ClassSubjectID" target="_blank">Mở bài học</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+            <template v-else>
+                Không có dữ liệu
+            </template>
+        </div>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <b-button variant="danger" v-on:click="hideModal('detailLessonInWeek-modal')">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_history" size="xl" centered title="Lịch sử làm bài">
+        <div class="row">
+            <div class="col-md-12">
+                <template v-if="student_result.History.length > 0">
+                    <table id="st_table" class="table">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col" class="text-center">#</th>
+                                <th scope="col" class="text-center">Giờ bắt đầu</th>
+                                <th scope="col" class="text-center">Giờ kết thúc</th>
+                                <th scope="col" class="text-center">Thời gian làm</th>
+                                <th scope="col" class="text-center">Trạng thái</th>
+                                <th scope="col" class="text-center">Điểm</th>
+                                <th scope="col" class="text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in student_result.History">
+                                <td class="text-center">{{k+1}}</td>
+                                <td class="text-center">{{formatTime(item.Created)}}</td>
+                                <td class="text-center">{{item.Status ? formatTime(item.EndTime): "---"}}</td>
+                                <td class="text-center">{{getPeriod(item)}}</td>
+                                <td class="text-center">{{item.Status ? "Hoàn thành": "Chưa hoàn thành"}}</td>
+                                <td class="text-center">{{item.MaxPoint > 0 ? roundPoint((item.Point * 100 / item.MaxPoint),1) : 0}}</td>
+                                <td class="text-center"><a v-if="item.Status" :href="'@processUrl("CheckPoint","Class")?ID=' + item.ExamID" target="_blank">Xem chi tiết</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>
+                    Chưa có lịch sử học tập
+                </template>
+            </div>
+        </div>
+
+        <template v-slot:modal-footer>
+            <b-button variant="danger" v-on:click="hideModal('modal_history')">Đóng</b-button>
         </template>
     </b-modal>
 </section>
@@ -298,7 +378,13 @@
                     time: 3, //theo thời gian
                     typeFilter: 1
                 },
-                isLoading: false
+                isLoading: false,
+                result_data: [],
+                student_result: {
+                    ID: '',
+                    Name: '',
+                    History: []
+                },
             },
             watch: {
                 classID: function () {
@@ -607,9 +693,11 @@
                         return array
                     }
                 },
-                hideModal() {
-                    this.isLoading = false
-                    $('.close').click();
+                hideModal(id) {
+                    if (id == null)
+                        $('.close').click();
+                    else
+                        $('#' + id + ' .close').click();
                 },
                 roundPoint(value, precision) {
                     if (value > 0) {
@@ -618,6 +706,39 @@
                         return Math.round(value * multiplier) / multiplier;
                     }
                     else return value
+                },
+                loadDetailinWeek(obj) {
+                    if (obj.point >= 0) {
+                        let _that = this
+                        let _form = new FormData()
+                        //debugger
+                        _form.append("StartWeek", obj.startTime)
+                        _form.append("EndWeek", obj.endTime)
+                        _form.append("ClassSubjectID", this.classSubjectID)
+                        let _url = '@processUrl("GetLessonProgressListInWeek", "Exam")'
+                        this.isLoading = true
+                        this.result_data = []
+                        axios.post(_url, _form)
+                            .then(response => {
+                                this.isLoading = false
+                                var data = response.data
+                                //debugger
+                                this.result_data = data
+                                //debugger
+                            }).catch(e => { this.isLoading = false })
+                        this.isLoading = false
+                        this.$bvModal.show("detailLessonInWeek-modal")
+                    }
+                    else return
+                },
+                openHistory(obj) {
+                    let _that = this;
+                    if (obj != null) {
+                        _that.student_result.ID = obj.StudentID
+                        _that.student_result.Name = obj.StudentName
+                        _that.student_result.History = obj.ListExam
+                    }
+                    _that.$bvModal.show('modal_history');
                 }
             },
         })

@@ -4,8 +4,23 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    @{ 
+        var news = ViewBag.News as BaseCustomerEntity.Database.NewsEntity;
+        var category = ViewBag.Category as BaseCustomerEntity.Database.NewsCategoryEntity;
+        if (category == null)
+        {
+            category = new BaseCustomerEntity.Database.NewsCategoryEntity { Code = "tin-tuc", Name = "Tin tức" };
+        }
+        if(news == null)
+        {
+            news = new BaseCustomerEntity.Database.NewsEntity();
+        }
+    }
+    <meta property="og:title" id="meta-og-title" content='@Html.Raw(news.Title)'/>
+    <meta property="og:description" id="meta-og-description" content='@Html.Raw(news.Summary)'/>
+    <meta property="og:image" id="meta-og-image" content="https://static.eduso.vn/@news.Thumbnail"/>
+    <meta property="og:url" id="meta-og-url" content="https://eduso.vn/tin-tuc/@category.Code/@Html.Raw(news.Code)"/>
+    <meta property="og:site_name" content="https://eduso.vn" />
     <!-- Custom fonts for this template-->
     <link href="~/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -276,7 +291,7 @@
         .news-top .news-item .thumb {
             border-bottom: none;
             /*height: 120px;*/
-            width: 40%;
+            /*width: 40%;*/
             margin-right: 12px;
         }
 
@@ -294,7 +309,7 @@
         }
 
             .news-item .news-title a {
-                color: #333;
+                color: #08486b;
                 text-decoration: none;
             }
 
@@ -309,7 +324,7 @@
         }
 
         .news-item .news-time {
-            font-size: 14px;
+            font-size: 80%;
             color: #99A1A6;
             padding-left: 21px;
             position: relative;
@@ -319,7 +334,7 @@
                 content: url(/images/icon/clock.png);
                 position: absolute;
                 left: 1px;
-                top: 4px;
+                top: 1px;
             }
 
         @@media (max-width: 800px) {
@@ -424,11 +439,46 @@
         .footer a {
             color: #000;
         }
+
+        .ellipsis {
+            overflow: hidden;
+            max-height: 40px;
+            line-height: 20px;
+        }
+
+            .ellipsis:before {
+                content: "";
+                float: left;
+                width: 5px;
+                height: 40px;
+            }
+
+            .ellipsis:after {
+                content: "\02026";
+                box-sizing: content-box;
+                -webkit-box-sizing: content-box;
+                -moz-box-sizing: content-box;
+                float: right;
+                position: relative;
+                top: -20px;
+                left: 100%;
+                width: 3em;
+                margin-left: -3em;
+                padding-right: 5px;
+                text-align: right;
+                background-size: 100% 100%;
+                background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAABCAMAAACfZeZEAAAABGdBTUEAALGPC/xhBQAAAwBQTFRF////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////AAAA////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wDWRdwAAAP90Uk5TgsRjMZXhS30YrvDUP3Emow1YibnM9+ggOZxrBtpRRo94gxItwLOoX/vsHdA2yGgL8+TdKUK8VFufmHSGgAQWJNc9tk+rb5KMCA8aM0iwpWV6dwP9+fXuFerm3yMs0jDOysY8wr5FTldeoWKabgEJ8RATG+IeIdsn2NUqLjQ3OgBDumC3SbRMsVKsValZplydZpZpbJOQco2KdYeEe36BDAL8/vgHBfr2CvTyDu8R7esU6RcZ5ecc4+Af3iLcJSjZ1ivT0S/PMs3LNck4x8U7wz7Bv0G9RLtHuEq1TbJQr1OtVqqnWqRdoqBhnmSbZ5mXapRtcJGOc4t2eYiFfH9AS7qYlgAAARlJREFUKM9jqK9fEGS7VNrDI2+F/nyB1Z4Fa5UKN4TbbeLY7FW0Tatkp3jp7mj7vXzl+4yrDsYoVx+JYz7mXXNSp/a0RN25JMcLPP8umzRcTZW77tNyk63tdprzXdmO+2ZdD9MFe56Y9z3LUG96mcX02n/CW71JH6Qmf8px/cw77ZvVzB+BCj8D5vxhn/vXZh6D4uzf1rN+Cc347j79q/zUL25TPrJMfG/5LvuNZP8rixeZz/mf+vU+Vut+5NL5gPOeb/sd1dZbTs03hBuvmV5JuaRyMfk849nEM7qnEk6IHI8/qn049hB35QGHiv0yZXuMdkXtYC3ebrglcqvYxoj1muvC1nDlrzJYGbpcdHHIMo2FwYv+j3QAAOBSfkZYITwUAAAAAElFTkSuQmCC);
+                background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0)), to(white), color-stop(50%, white));
+                background: -moz-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: -o-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: -ms-linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+                background: linear-gradient(to right, rgba(255, 255, 255, 0), white 50%, white);
+            }
     </style>
     <div>
         @await Html.PartialAsync("_CookieConsentPartial")
         @await Html.PartialAsync("_Topmenu")
-        <main class="container">
+        <main class="container" id="maincontent-news">
             @RenderBody()
         </main>
         @await Html.PartialAsync("_footerinfo")

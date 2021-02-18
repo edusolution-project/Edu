@@ -21,6 +21,10 @@
 <script src="~/js/daterangepicker.min.js"></script>
 <link href="~/css/daterangepicker.css" rel="stylesheet" />
 <script src="/libs/vuejs-datepicker.min.js"></script>
+
+<link href="~/js/Chart.js/Chart.min.css" rel="stylesheet" />
+<script src="~/js/Chart.js/Chart.min.js"></script>
+<link href="~/js/Chart.js/css/site.css" rel="stylesheet" />
 <script>
     setActiveMenu("course");
 </script>
@@ -180,6 +184,8 @@
                 </tr>
             </thead>
         </table>
+
+        <canvas id="myChart" width="400" height="400"></canvas>
     </div>
 </section>
 
@@ -1139,7 +1145,9 @@
                     this.$forceUpdate();
                 },
                 removeSubject(k) {
-                    this.class_info.subject.splice(k, 1);
+                    if (window.confirm("Xoá môn học sẽ xoá hết lịch sử học tập, điểm luyện tập và kiểm tra của học sinh. Bạn có muốn xoá????")) {
+                        this.class_info.subject.splice(k, 1);
+                    }
                 },
                 removeTeacher(k) {
                     this.class_info.Teachers.splice(k, 1);
@@ -1535,6 +1543,7 @@
                             //debugger
                             var data = response.data.Data;
                             this.dataReport = data
+                            this.chartsjs(data);
                             //var data10 = response.data[10] //khoi 10
                             //var data11 = response.data[11] //khoi 11
                             //var data12 = response.data[12] //khoi 12
@@ -1551,6 +1560,155 @@
                     if(obj.TeacherID == '@userid')
                         return obj.Name;
                     return obj.Name + " [Học liệu chia sẻ]";
+                },
+                chartsjs(obj) {
+                    var level = []
+                    var minpoint8=[]
+                    var minpoint5=[]
+                    var minpoint2=[]
+                    var minpoint0 = []
+                    var siso = '100'
+                    var result = Object.keys(obj).map((key) => [Number(key), obj[key]]);
+                    for (var i = 0; i < result.length; i++) {
+                        var _level = result[i][0]
+                        var item = result[i][1]
+                        if (_level == 99) level.push("Khối khác")
+                        else level.push("Khối " + _level)
+                        minpoint8.push(item.MinPoint8)
+                        minpoint5.push(item.MinPoint5)
+                        minpoint2.push(item.MinPoint2)
+                        minpoint0.push(item.MinPoint0)
+                    }
+                    var data = {
+                        labels: level,
+                        datasets: [
+                            {
+                                label: 'Điểm 8.0 -> 10',
+                                backgroundColor: 'rgb(133,237,133)',
+                                borderColor: 'rgb(133,237,133)',
+                                minBarLength: 1,
+                                data: minpoint8,
+                                fill: true,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 5.0 -> 7.9',
+                                backgroundColor: 'rgb(134,197,218)',
+                                borderColor: 'rgb(134,197,218)',
+                                minBarLength: 1,
+                                data: minpoint5,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 2.0 -> 4.9',
+                                backgroundColor: 'rgb(224,207,153)',
+                                borderColor: 'rgb(224,207,153)',
+                                minBarLength: 1,
+                                data: minpoint2,
+                                fill: false,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Điểm 0.0 -> 1.9',
+                                backgroundColor: 'rgb(224,153,172)',
+                                borderColor: 'rgb(224,153,172)',
+                                minBarLength: 1,
+                                data: minpoint0,
+                                fill: false,
+                                borderWidth: 1
+                            }
+                        ]
+                    }
+                    var options = {
+                        legend: {
+                            "display": true,
+                            labels: {
+                                fontColor: 'black',
+                                fontSize: 14,
+                            },
+                            position: 'right',//top,left,bottom,right,
+                            align: 'center'//center,start,end
+                        },
+                        tooltips: {
+                            "enabled": true
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    suggestedMin: 0,
+                                    suggestedMax: Math.max(...siso),
+                                    precision: 0
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Tổng sĩ số',
+                                    fontSize: 15,
+                                    fontColor: 'black'
+                                }
+                            }],
+                            xAxes: [{
+                                ticks: {
+                                    fontSize: 14,
+                                    fontColor: 'black',
+                                },
+                            }]
+                        },
+                        //title: {
+                        //    display: true,
+                        //    text: "Báo cáo cơ sở",
+                        //    position: 'bottom',//top,left,bottom,right,
+                        //    fontSize: 14
+                        //},
+                        //plugins: {
+                        //    datalabels: {
+                        //        anchor: 'end',
+                        //        align: 'end',
+                        //        color: 'black',
+                        //        labels: {
+                        //            title: {
+                        //                font: {
+                        //                    //weight: '600',
+                        //                    size: 13,
+                        //                    //family: '"Times New Roman", Times, serif'
+                        //                }
+                        //            }
+                        //        }
+                        //    },
+                        //    labels: {
+                        //        render: 'image',
+                        //        textMargin: -60,
+                        //    },
+                        //},
+                        //"hover": {
+                        //    "animationDuration": 0
+                        //},
+                        //"animation": {
+                        //    "duration": 1,
+                        //    "onComplete": function () {
+                        //        var chartInstance = this.chart,
+                        //            ctx = chartInstance.ctx;
+
+                        //        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        //        ctx.textAlign = 'center';
+                        //        ctx.textBaseline = 'bottom';
+
+                        //        this.data.datasets.forEach(function (dataset, i) {
+                        //            var meta = chartInstance.controller.getDatasetMeta(i);
+                        //            meta.data.forEach(function (bar, index) {
+                        //                var data = dataset.data[index];
+                        //                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                        //            });
+                        //        });
+                        //    }
+                        //},
+                    }
+                    var ctx = document.getElementById('myChart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: data,
+                        options: options
+                    });
                 }
             }
         });

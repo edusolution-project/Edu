@@ -688,55 +688,42 @@ namespace BaseCustomerMVC.Controllers.Student
                 var sbj = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
                 var startDate = sbj.StartDate;
                 List<LessonScheduleEntity> activeLessons = new List<LessonScheduleEntity>();
-                //if(TypeFilter == Type_Filter.LESSONSCHEDULE)
-                //{
-                //    activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.ClassSubjectID == sbj.ID && (o.StartDate != new DateTime() || o.EndDate != new DateTime()) && o.StartDate <= DateTime.Now).ToList();
-                //}
-                //if(TypeFilter == Type_Filter.SHOWALL)
-                //{
-                //    activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.ClassSubjectID == sbj.ID ).ToList();
-                //}
                 var listTime = GetListWeek(startDate);
                 List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
                 List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
+                List<StudentLessonResultViewModel> resultExam = new List<StudentLessonResultViewModel>();
+
+                result = _progressHelper.GetLessonProgressList(listTime.FirstOrDefault().Value.StartTime, listTime.LastOrDefault().Value.EndTime, student, sbj).Result;
+                var listActiveLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == sbj.ID && o.StartDate <= listTime.LastOrDefault().Value.EndTime && o.EndDate > listTime.FirstOrDefault().Value.StartTime).ToList();
+                var activeLessonID = new Dictionary<Int32, Object>();
+                foreach(var item in listTime)
+                {
+                    var index = item.Key;
+                    var startTime = item.Value.StartTime;
+                    var endTime = item.Value.EndTime;
+                    var activeLessonIDs = listActiveLessons.Where(o => o.ClassSubjectID == sbj.ID && o.StartDate <= endTime && o.EndDate > startTime).Select(x=>x.LessonID).ToList();
+                    activeLessonID.Add(index, activeLessonIDs);
+                }
                 foreach (var item in listTime)
                 {
-
-                    result = _progressHelper.GetLessonProgressList(item.Value.StartTime, item.Value.EndTime, student, sbj).Result;
-                    if (result.Count == 0)
+                    var activeLesson = activeLessonID[item.Key] as List<String>;
+                    if (activeLesson.Count == 0)
                     {
                         continue;
                     }
+
+                    var resultPractice = result.Where(x => activeLesson.Contains(x.LessonID)).ToList(); 
+
                     var data = new StudentDetailVM();
                     var index = item.Key;
                     var startTime = item.Value.StartTime;
                     var endTime = item.Value.EndTime;
-                    //activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime && o.ClassSubjectID == ClassSubjectID).ToList();
-
-                    //var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-
-                    //var activeProgress = _lessonProgressService.CreateQuery().Find(x => x.StudentID == student.ID && activeLessonIds.Contains(x.LessonID) && x.LastDate <= endTime).ToList();
-                    //// danh sach bai
-                    //if (activeProgress.Count == 0)
-                    //{
-                    //    continue;
-                    //}
-                    //else
-                    //{
-                    //    var practiceIds = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
                     data.Week = index;
-                    //var exam = _examService.CreateQuery().Find(x => x.StudentID == student.ID && practiceIds.Contains(x.LessonID)).ToList().GroupBy(x=>x.LessonID);
-                    //var point = exam.Count == 0 ? 0 : exam.Average(x => x.LastPoint);
-                    //var _data = activeProgress.Where(x => x.Tried > 0 && practiceIds.Contains(x.LessonID)).ToList();
-                    //var lessonResult = activeProgress.Where(x => practiceIds.Contains(x.LessonID) && x.Tried > 0).ToList();
-                    var point = result.Count() > 0 ? result.Average(x => x.LastPoint).ToString() : "";
+                    var point = resultPractice.Count() > 0 ? resultPractice.Average(x => x.LastPoint).ToString() : "";
                     data.Point = point.ToString();
 
                     data.StartTime = startTime;
                     data.EndTime = endTime;
-                    //data.TotalPractice = activeLessonIds.Count();
-                    //data.PracticeDone = (Int32)_examService.CreateQuery().Find(x => x.StudentID == student.ID && practiceIds.Contains(x.LessonID)).ToList().Select(x => x.LessonID).Distinct().Count();
-                    //}
                     dataresponse.Add(data);
                 }
 
@@ -757,7 +744,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
 
                         var lastEx = examresult.FirstOrDefault();
-                        result.Add(new StudentLessonResultViewModel(student)
+                        resultExam.Add(new StudentLessonResultViewModel(student)
                         {
                             LastTried = lastEx?.Created ?? new DateTime(1900, 1, 1),
                             MaxPoint = maxpoint,
@@ -778,7 +765,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 return Json(new Dictionary<String, Object>
                 {
                     {"Practice",dataresponse },
-                    {"Exam",result }
+                    {"Exam",resultExam }
                 });
             }
             catch (Exception ex)

@@ -359,9 +359,26 @@ namespace BaseCustomerMVC.Controllers.Student
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             var student = _studentService.GetItemByID(userId);
+            if(student == null)
+            {
+                return Json(new Dictionary<String, Object> 
+                {
+                    {"Msg","Không tìm thấy thông tin tài khoản." },
+                    {"Status",false }
+                });
+            }
+            
             var course = _courseService.GetItemByID(CourseID);
             var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
-
+            var classIDs = student.JoinedClasses.Where(x => x != MyClass.ID).ToList();
+            if(classIDs.Count() == 0)
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Msg","Bạn cần có trong lớp mới có thể sử dụng chức năng này." },
+                    {"Status",false }
+                });
+            }
             if (course == null)
             {
                 return new JsonResult(new Dictionary<string, object>()

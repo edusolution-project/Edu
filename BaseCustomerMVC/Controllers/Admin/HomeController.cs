@@ -71,6 +71,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly AccountService _accountService;
         private readonly LessonService _lessonService;
+        private readonly MailHelper _mailHelper;
 
         private string host;
         private string staticPath;
@@ -116,7 +117,8 @@ namespace BaseCustomerMVC.Controllers.Admin
                 LessonScheduleService lessonScheduleService,
                 LearningHistoryService learningHistoryService,
                 AccountService accountService,
-                LessonService lessonService
+                LessonService lessonService,
+                MailHelper mailHelper
             )
         {
             _courseLessonService = _courseLessonService;
@@ -158,6 +160,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
             _accountService = accountService;
             _lessonService = lessonService;
+            _mailHelper = mailHelper;
 
             _env = env;
 
@@ -1659,6 +1662,8 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         #endregion
 
+        #region Mở rộng
+
         public IActionResult FixDataPractice()
         {
             var lesson = _courseLessonService.CreateQuery().Find(x => x.IsPractice == false && x.TemplateType == 1);
@@ -1785,6 +1790,30 @@ namespace BaseCustomerMVC.Controllers.Admin
             //}
         }
 
+        public IActionResult SendMail(String email)
+        {
+            try
+            {
+                var acc = _accountService.GetAccountByEmail(email);
+                var student = _studentService.GetStudentByEmail(acc.UserName);
+                var center = _centerService.CreateQuery().Find(x => student.Centers.Contains(x.ID)).FirstOrDefault();
+                var pass = "edu123456";
+                if (acc != null)
+                {
+                    _mailHelper.SendStudentJoinCenterNotify(student.FullName, acc.UserName, pass, center.Name);
+                    return Content($"Send mail to {acc.UserName} is OK");
+                }
+                else
+                {
+                    return Content("acc null");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
         //public IActionResult FixData()
         //{
         //    try
@@ -1823,5 +1852,6 @@ namespace BaseCustomerMVC.Controllers.Admin
         //        return Content(ex.Message);
         //    }
         //}
+        #endregion
     }
 }
