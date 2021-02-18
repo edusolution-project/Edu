@@ -42,6 +42,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ExamService _examService;
         private readonly LessonScheduleService _lessonScheduleService;
+        private readonly LessonService _lessonService;
+        private readonly LessonProgressService _lessonProgressService;
         private readonly CenterService _centerService;
         private readonly IndexService _indexService;
 
@@ -69,7 +71,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ScoreStudentService scoreStudentService,
+            LessonService lessonService,
             LessonScheduleService lessonScheduleService,
+            LessonProgressService lessonProgressService,
+
             StudentService studentService,
             CenterService centerService,
             ProgressHelper progressHelper,
@@ -98,6 +103,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
             _lessonScheduleService = lessonScheduleService;
+            _lessonService = lessonService;
+            _lessonProgressService = lessonProgressService;
             _studentService = studentService;
             _centerService = centerService;
             _cacheHelper = cacheHelper;
@@ -295,7 +302,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         };
                         return new JsonResult(response);
                     }
-                    
+
                 }
             }
             else
@@ -571,7 +578,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     };
                 return new JsonResult(response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }
@@ -1062,35 +1069,75 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetBestStudents(string basis)
+        public JsonResult GetBestStudents(string basis, string ClassID, int limit = 0)
         {
-            var center = _centerService.GetItemByCode(basis);
-            if (center == null)
-                return Json(new { Err = "Không có dữ liệu" });
-            var cacheKey = "GetBestStudents_" + basis;
+
+            if (limit == 0) limit = 20;
+            var current = DateTime.Now.Date;
+            var startWeek = current.AddDays(DayOfWeek.Monday - current.DayOfWeek - 7);
+            var endWeek = startWeek.AddDays(7);
+
+            var cacheKey = "GetBestStudents_" + basis + "_" + ClassID + "_" + startWeek.ToString("yyyyMMdd") + endWeek.ToString("yyyyMMdd") + "_limit_" + limit;
+
             var rtn = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
             if (rtn == null)
             {
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                    return Json(new { Err = "Không có dữ liệu" });
+
+                var @class = _classService.GetItemByID(ClassID);
+                if (@class == null)
+                    return Json(new { Err = "Không có dữ liệu" });
+
                 rtn = new List<StudentRankingViewModel>();
-                var classIDs = _classService.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
-                var results = _classProgressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+
+                //Tổng số hs trong lớp
+                var totalStudents = _studentService.GetStudentsByClassId(ClassID).Count();
+                if (totalStudents > 0)
                 {
-                    StudentID = g.Key,
-                    TotalPoint = g.Sum(t => t.TotalPoint),
-                    PracticePoint = g.Sum(t => t.PracticePoint),
-                }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
-                foreach (var result in results)
-                {
-                    var st = _studentService.GetItemByID(result.StudentID);
-                    if (st != null)
+                    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == ClassID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+
+                    if (activeLessons.Count() > 0)
                     {
-                        var firstClassID = classIDs.FirstOrDefault(t => st.JoinedClasses.Contains(t));
-                        result.ClassName = firstClassID != null ? _classService.GetItemByID(firstClassID)?.Name : null;
-                        result.StudentName = st.FullName;
-                        rtn.Add(result);
+                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+
+                        var exCount = examIds.Count();
+
+                        if (exCount > 0)
+                        {
+
+                            var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) &&
+                            //x.LastDate <= endWeek && x.LastDate >= startWeek && 
+                            x.Tried > 0);
+
+                            if (activeProgress.Count() > 0)
+                            {
+                                var studentResults = (from r in activeProgress.ToList()
+                                                      group r by r.StudentID
+                                                          into g
+                                                      select new StudentRankingViewModel
+                                                      {
+                                                          StudentID = g.Key,
+                                                          Count = g.Count(),
+                                                          AvgPoint = g.Sum(t => t.LastPoint) / exCount,
+                                                      }).OrderByDescending(t => t.AvgPoint).Take(limit).ToList();
+
+                                rtn.AddRange(studentResults);
+                                if (rtn.Count() > 0)
+                                {
+                                    foreach (var st in rtn)
+                                    {
+                                        st.StudentName = _studentService.GetItemByID(st.StudentID)?.FullName;
+                                        st.ClassName = @class.Name;
+                                    }
+                                }
+                                _cacheHelper.SetCache(cacheKey, rtn, endWeek.AddDays(7) - DateTime.Now);
+                            }
+                        }
                     }
                 }
-                _cacheHelper.SetCache(cacheKey, rtn);
             }
             var response = new Dictionary<string, object>
             {

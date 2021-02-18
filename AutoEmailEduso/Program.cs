@@ -269,7 +269,7 @@ namespace AutoEmailEduso
 
                             var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                                 x => studentIds.Contains(x.StudentID)).ToEnumerable();
-                            //totalActiveStudents += activeStudents.Count();
+                            totalActiveStudents += activeStudents.Count();
 
                             var stChuaVaoLop = classStudent - activeStudents.Count();
                             totalstChuaVaoLop += stChuaVaoLop;

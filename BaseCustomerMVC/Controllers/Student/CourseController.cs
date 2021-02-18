@@ -141,41 +141,114 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetBestStudents(string basis)
+        public JsonResult GetBestStudents(string basis, int limit = 0)
         {
             var center = _centerService.GetItemByCode(basis);
             if (center == null)
                 return Json(new { Err = "Không có dữ liệu" });
-            var cacheKey = "GetBestStudents_" + basis;
-            var rtn = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
-            if (rtn == null)
+
+            var userId = User.Claims.GetClaimByType("UserID").Value;
+            var currentStudent = _studentService.GetItemByID(userId);
+            if (center == null)
+                return Json(new { Err = "Không có quyền truy cập" });
+
+            var rtn = new List<StudentRankingViewModel>();
+
+            if (currentStudent.JoinedClasses == null)
+                return Json(rtn);
+
+            if (limit == 0) limit = 20;
+            var current = DateTime.Now.Date;
+            var startWeek = current.AddDays(DayOfWeek.Monday - current.DayOfWeek - 7);
+            var endWeek = startWeek.AddDays(7);
+
+
+            var classIDs = _service.CreateQuery().Find(t => currentStudent.JoinedClasses.Contains(t.ID) && (t.Center == center.ID) && (t.EndDate <= DateTime.Now || t.IsActive) && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).Project(t => t.ID).ToList();
+
+            if (classIDs != null && classIDs.Count() > 0)
             {
-                rtn = new List<StudentRankingViewModel>();
-                var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
-                var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+                foreach (var classid in classIDs)
                 {
-                    StudentID = g.Key,
-                    TotalPoint = g.Sum(t => t.TotalPoint),
-                    PracticePoint = g.Sum(t => t.PracticePoint),
-                }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
-                foreach (var result in results)
-                {
-                    var st = _studentService.GetItemByID(result.StudentID);
-                    if (st != null)
+                    var cacheKey = "GetBestStudents_" + basis + "_" + classid + "_" + startWeek.ToString("yyyyMMdd") + endWeek.ToString("yyyyMMdd") + "_limit_" + limit;
+                    List<StudentRankingViewModel> classresult = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
+                    if (classresult == null)
                     {
-                        var firstClassID = classIDs.FirstOrDefault(t => st.JoinedClasses.Contains(t));
-                        result.ClassName = firstClassID != null ? _service.GetItemByID(firstClassID)?.Name : null;
-                        result.StudentName = st.FullName;
-                        rtn.Add(result);
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == classid && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+
+                        if (activeLessons.Count() > 0)
+                        {
+                            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+
+                            if (examIds.Count() > 0)
+                            {
+
+                                var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) && x.LastDate <= endWeek && x.LastDate >= startWeek && x.Tried > 0).ToList();
+
+                                if (activeProgress.Count() > 0)
+                                {
+                                    var studentResults = (from r in activeProgress
+                                                          group r by r.StudentID
+                                                              into g
+                                                          select new StudentRankingViewModel
+                                                          {
+                                                              StudentID = g.Key,
+                                                              AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count(),
+                                                          }).OrderByDescending(t => t.AvgPoint).Take(limit).ToList();
+
+                                    rtn.AddRange(studentResults);
+                                    if (rtn.Count() > 0)
+                                    {
+                                        foreach (var st in rtn)
+                                        {
+                                            st.StudentName = _studentService.GetItemByID(st.StudentID)?.FullName;
+                                        }
+                                    }
+                                    _cacheHelper.SetCache(cacheKey, rtn, endWeek.AddDays(7) - DateTime.Now);
+                                }
+                            }
+                        }
                     }
+                    if (classresult != null && classresult.Count() > 0)
+                        rtn.AddRange(classresult);
                 }
-                _cacheHelper.SetCache(cacheKey, rtn);
             }
-            var response = new Dictionary<string, object>
-            {
-                { "Data", rtn }
-            };
-            return new JsonResult(response);
+
+            if (rtn.Count() > 0)
+                rtn = rtn.OrderByDescending(t => t.AvgPoint).Take(limit).ToList();
+
+            return Json(rtn);
+
+            //var cacheKey = "GetBestStudents_" + basis;
+            //var rtn = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
+            //if (rtn == null)
+            //{
+            //    rtn = new List<StudentRankingViewModel>();
+            //    var classIDs = _service.CreateQuery().Find(t => t.Center == center.ID && (t.EndDate <= DateTime.Now || t.IsActive)).Project(t => t.ID).ToEnumerable();
+            //    var results = _progressService.CreateQuery().Aggregate().Match(t => classIDs.Contains(t.ClassID)).Group(t => t.StudentID, g => new StudentRankingViewModel
+            //    {
+            //        StudentID = g.Key,
+            //        TotalPoint = g.Sum(t => t.TotalPoint),
+            //        PracticePoint = g.Sum(t => t.PracticePoint),
+            //    }).SortByDescending(s => s.TotalPoint).ThenByDescending(s => s.PracticePoint).Limit(20).ToEnumerable();
+            //    foreach (var result in results)
+            //    {
+            //        var st = _studentService.GetItemByID(result.StudentID);
+            //        if (st != null)
+            //        {
+            //            var firstClassID = classIDs.FirstOrDefault(t => st.JoinedClasses.Contains(t));
+            //            result.ClassName = firstClassID != null ? _service.GetItemByID(firstClassID)?.Name : null;
+            //            result.StudentName = st.FullName;
+            //            rtn.Add(result);
+            //        }
+            //    }
+            //    _cacheHelper.SetCache(cacheKey, rtn);
+            //}
+            //var response = new Dictionary<string, object>
+            //{
+            //    { "Data", rtn }
+            //};
+            //return new JsonResult(response);
         }
 
         [Obsolete]
@@ -363,6 +436,7 @@ namespace BaseCustomerMVC.Controllers.Student
                            id = o.ID,
                            //courseID = o.CourseID,
                            courseName = course?.Name,
+                           startDate = _class.StartDate,
                            endDate = _class.EndDate,
                            percent = (progress == null || o.TotalLessons == 0) ? 0 : progress.Completed * 100 / o.TotalLessons,
                            max = o.TotalLessons,
@@ -519,7 +593,13 @@ namespace BaseCustomerMVC.Controllers.Student
             if (listSchedule != null && listSchedule.Count > 0)
                 foreach (var schedule in listSchedule)
                 {
-                    schedule.isLearnt = _learningHistoryService.GetLastLearnt(userId, schedule.lessonID, schedule.classSubjectID) != null;
+                    var progress = _lessonProgressService.GetByStudentID_LessonID(userId, schedule.lessonID);
+
+                    schedule.isLearnt = progress == null;
+                    schedule.lastPoint = (progress != null && progress.Tried > 0) ? progress.LastPoint : -1;
+                    var lesson = _lessonService.GetItemByID(schedule.lessonID);
+                    schedule.chapterName = lesson.ChapterID == "0" ? "" : _chapterService.GetItemByID(lesson.ChapterID).Name;
+                    //_learningHistoryService.GetLastLearnt(userId, schedule.lessonID, schedule.classSubjectID) != null;
                 }
 
             return Json(new { Data = listSchedule });

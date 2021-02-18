@@ -3500,6 +3500,7 @@
                         <tr>
                             <th style="width:50px">STT</th>
                             <th>Bài</th>
+                            <th>Chương</th>
                             <th>Học liệu</th>
                             <th>Thời gian mở</th>
                         </tr>
@@ -3508,6 +3509,7 @@
                         <tr v-for="(item,k) in lesson_week">
                             <td>{{k+1}}</td>
                             <td class="td_hover"><a :href="'@processUrl("Detail","Lesson")'+'/'+ item.lessonID +'/'+ item.classsubjectID" target="_blank">{{item.title}}</a></td>
+                            <td>{{item.chapterName}}</td>
                             <td>{{item.bookName}}</td>
                             <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
                         </tr>
@@ -3700,4 +3702,57 @@
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
         </template>
     </b-modal>
+}
+
+@section TopStar{
+    <div id="top_star" class="box p-3">
+        <div class="heading flex pb-2">
+            @{
+                var current = DateTime.Now.Date;
+                var startWeek = current.AddDays(DayOfWeek.Monday - current.DayOfWeek - 7);
+                var endWeek = startWeek.AddDays(6);
+            }
+            <h4 class="box-head text-center" style="font-size:110%;">Top tuần @startWeek.ToString("dd/MM") - @endWeek.ToString("dd/MM")</h4>
+        </div>
+        <ul style="border: solid 1px #CCC; border-radius:10px;" class="p-2" v-if="list_star.length > 0">
+            <template v-for="(item,k) in list_star">
+                <li v-if="k < 10" class="p-2 list-unstyled">
+                    <i class="fas fa-crown" style="color:gold" v-if="k==0"></i>
+                    <i class="fas fa-crown" style="color:silver" v-else-if="k==1"></i>
+                    <i class="fas fa-crown" style="color:saddlebrown" v-else-if="k==2"></i>
+                    <i class="fas fa-star red-color" v-else></i>
+                    <a :href="'@processUrl("Detail", "StudentManage")/' + item.StudentID"> <span class='pl-2' style="font-weight:500;font-size:13px;color: #222;"> {{item.StudentName}}<span> ({{ (item.AvgPoint / 10).toFixed(1)}})</span></a>
+            </template>
+        </ul>
+    </div>
+    <style>
+        #top_star li:hover {
+            background-color: #EEE;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        new Vue({
+        el: "#top_star",
+            mounted() {
+                this.getBestClassesLastWeek();
+            },
+            data: {
+                list_star: []
+            },
+            methods: {
+                getBestClassesLastWeek() {
+                    let _form = new FormData()
+                    _form.append('ClassID', '@currentClass.ID')
+                    _form.append('limit', 5)
+                    let _url = '@processUrl("GetBestStudents", "StudentManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            this.list_star = response.data.Data;
+                        }).catch(e => { })
+                },
+            }
+        });
+    </script>
+
 }

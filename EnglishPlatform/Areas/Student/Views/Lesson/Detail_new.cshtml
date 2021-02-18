@@ -56,6 +56,10 @@ else
     @section Footer{}
     @section Scripts{
         <style>
+            .swal2-title {
+                font-size: 18px;
+            }
+
             .card-header[style*="display:none"] ~ .card-body {
                 top: 0 !important;
             }
@@ -210,8 +214,8 @@ else
                 chap_id: '@currentLesson.ChapterID',
                 class_name: '@currentClass.Name',
                 class_subject_name: @Json.Serialize(currentClassSubject.CourseName),
-                target: 0,
-                teacher_target: @currentChapter.BasePoint,
+                target: @target,
+                teacher_target: @currentChapter?.BasePoint,
                 center_name: '@currentCenter.Name',
                 student_name: '@currentUser' == null ? '...................................' : '@currentUser.FullName',
                 codeExam: ''
