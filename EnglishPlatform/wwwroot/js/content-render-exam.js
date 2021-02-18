@@ -2720,6 +2720,7 @@ var Lesson = (function () {
         dataform.append("ClassID", config.class_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
         dataform.append("LessonID", config.lesson_id);
+        dataform.append("ID", getLocalData("CurrentExam"));
         if ($('#' + config.container).find("#ExamID").length == 0)
             $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", id: "ExamID" }));
         if (!checkExam()) {
@@ -3692,6 +3693,7 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
+        debugger
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];

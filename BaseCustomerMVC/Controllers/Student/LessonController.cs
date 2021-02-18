@@ -323,7 +323,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
                 ViewBag.Subject = currentCs;
                 ViewBag.NextLesson = nextLesson;
-                ViewBag.Chapter = chapter;
+                ViewBag.Chapter = chapter == null ? new ChapterEntity() : chapter;
             }
             ViewBag.Center = _centerService.GetItemByCode(basis);
             ViewBag.CurrentUser = student;
@@ -382,7 +382,23 @@ namespace BaseCustomerMVC.Controllers.Student
 
             if (!isHideAnswer)
             {
-                var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
+                var data = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
+                List<CloneLessonPartEntity> listParts = new List<CloneLessonPartEntity>();
+                if (currentCs.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+                {
+                    if(exam.ListPartIDs != null)
+                    {
+                        foreach (var id in exam.ListPartIDs)
+                        {
+                            var item = data.Where(x => x.ID == id).FirstOrDefault();
+                            if (item != null) listParts.Add(item);
+                        }
+                    }
+                }
+                else
+                {
+                    listParts = data;
+                }
 
                 var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
                 var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -505,7 +521,57 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var cspr = _classSubjectProgressService.GetItemByClassSubjectID(currentcs.ID, userId);
 
-            var listParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
+            var dataListParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
+            List<CloneLessonPartEntity> listParts = new List<CloneLessonPartEntity>();
+
+            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+                //&& o.ClassID == ClassID 
+                && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+
+            var rd = new Random();
+            List<String> listPartIDs = new List<String>();
+            if (currentcs.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            {
+                if (lastexam != null)
+                {
+                    if (lastexam.ListPartIDs == null)
+                    {
+                        List<Int32> listIndex = new List<int>();
+                        do
+                        {
+                            Int32 index = rd.Next(0, dataListParts.Count());
+                            if (!listIndex.Contains(index))
+                            {
+                                listIndex.Add(index);
+                            }
+                        }
+                        while (listIndex.Count() != dataListParts.Count());
+
+                        foreach (var index in listIndex)
+                        {
+                            var data = dataListParts.ElementAtOrDefault(index);
+                            if (data != null)
+                            {
+                                listParts.Add(data);
+                                listPartIDs.Add(data.ID);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var id in lastexam.ListPartIDs)
+                        {
+                            var data = dataListParts.Where(x => x.ID == id).FirstOrDefault();
+                            if (data != null)
+                                listParts.Add(data);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                listParts = dataListParts;
+            }
 
             var mapping = new MappingEntity<LessonEntity, StudentLessonViewModel>();
             var mapPart = new MappingEntity<CloneLessonPartEntity, PartViewModel>();
@@ -553,9 +619,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 Part = result
             });
 
-            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
-                //&& o.ClassID == ClassID 
-                && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
+            //var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+            //    //&& o.ClassID == ClassID 
+            //    && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
 
             if (lastexam == null)
             {
@@ -585,6 +651,13 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
 
                 var timeSpan = lastexam.Status ? new TimeSpan(0, 0, lesson.Timer, 0) : (lastexam.Created.AddMinutes(lastexam.Timer) - DateTime.UtcNow);
+
+                //tạo mã đề + lưu danh sách part
+                if (String.IsNullOrEmpty(lastexam.CodeExam))
+                    lastexam.CodeExam = rd.Next(100, 999).ToString();
+                if (lastexam.ListPartIDs == null)
+                    lastexam.ListPartIDs = listPartIDs;
+                _examService.Save(lastexam);
 
                 //Client check lastexam status để render bài kiểm tra
                 return new JsonResult(
