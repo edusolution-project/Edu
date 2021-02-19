@@ -269,7 +269,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 _form.append('Center', '@center')
                 let _url = '@processUrl("GetActiveList", "Class")'
 
@@ -285,7 +285,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
                 _form.append('Center', '@center')
@@ -303,7 +303,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 _form.append('Center', '@center')
                 let _url = '@processUrl("GetThisWeekLesson", "Class")'
 

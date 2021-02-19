@@ -414,12 +414,19 @@ namespace BaseCustomerMVC.Controllers.Student
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.ClassMechanism != CLASS_MECHANISM.PERSONAL));
             filter.Add(Builders<ClassEntity>.Filter.Where(o => (o.StartDate <= today) && (o.EndDate >= today)));
 
-            var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID).ToList();
-
+            var clIDs = (filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll()).Project(t => t.ID);
+            if (clIDs.Count() == 0)
+            {
+                return Json(new ReturnJsonModel
+                {
+                    StatusCode = ReturnStatus.ERROR,
+                    StatusDesc = "No class"
+                });
+            }
 
             var lstSbj = new List<ClassSubjectEntity>();
             var lstClass = new List<ClassEntity>();
-            foreach (var clID in clIDs)
+            foreach (var clID in clIDs.ToList())
             {
                 lstSbj.AddRange(_classSubjectService.GetByClassID(clID));
                 lstClass.Add(_service.GetItemByID(clID));
