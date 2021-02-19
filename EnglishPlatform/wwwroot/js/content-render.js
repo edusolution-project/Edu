@@ -2986,7 +2986,8 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.MaxPoint }));//.html();
+                        //.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.MaxPoint }));//.html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success pb-3", text: "Kết quả: " + lastExam.Point + "/" + lastExam.QuestionsTotal }));//.html();
 
 
                 //console.log(progress);
