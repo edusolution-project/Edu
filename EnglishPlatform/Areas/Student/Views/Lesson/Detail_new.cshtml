@@ -10,6 +10,7 @@
 
     var nextLesson = ViewBag.NextLesson as BaseCustomerEntity.Database.LessonEntity;
     var currentChapter = ViewBag.Chapter as BaseCustomerEntity.Database.ChapterEntity;
+    double target = ViewBag.Target ?? 0;
     var failpass = ViewBag.FailPass ?? false;
     ViewData["Title"] = currentLesson.Title;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
@@ -55,6 +56,10 @@ else
     @section Footer{}
     @section Scripts{
         <style>
+            .swal2-title {
+                font-size: 18px;
+            }
+
             .card-header[style*="display:none"] ~ .card-body {
                 top: 0 !important;
             }
@@ -63,6 +68,9 @@ else
                 padding-bottom: 7px !important;
             }
         </style>
+        <script>
+            $('.top-menu[for=home] span').text(@(Json.Serialize(currentUser.FullName)))
+        </script>
         @*<script src="~/js/minify/detail.fn.min.js?20200615"></script>*@
         @*<script src="~/js/lib/jquery.ui.touch-punch.min.js"></script>*@
         <script src="~/js/lib/sweetalert2@9.js"></script>
@@ -196,7 +204,8 @@ else
                     removeans: '@processUrl("RemoveDetail", "Exam")',
                     end: '@processUrl("CompleteExam", "Exam")',
                     review: '@processUrl("Review", "Lesson")',
-                    oldAnswer: '@processUrl("GetDetailExam", "Exam")'
+                    oldAnswer: '@processUrl("GetDetailExam", "Exam")',
+                    setTarget: '@processUrl("SetTarget", "ClassSubject")'
                 },
                 type: @currentLesson.TemplateType,
                 lesson_id: '@currentLesson.ID',
@@ -204,6 +213,9 @@ else
                 class_subject_id: '@currentClassSubject.ID',
                 chap_id: '@currentLesson.ChapterID',
                 class_name: '@currentClass.Name',
+                class_subject_name: @Json.Serialize(currentClassSubject.CourseName),
+                target: @target,
+                teacher_target: @currentChapter?.BasePoint,
                 center_name: '@currentCenter.Name',
                 student_name: '@currentUser' == null ? '...................................' : '@currentUser.FullName',
                 codeExam: ''

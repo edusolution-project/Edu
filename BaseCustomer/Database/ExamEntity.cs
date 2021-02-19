@@ -59,6 +59,9 @@ namespace BaseCustomerEntity.Database
         public string CodeExam { get; set; }
         [JsonProperty("LessonExtensionID")]
         public string LessonExtensionID { get; set; }
+
+        [JsonProperty("ListPartIDs")]
+        public List<String> ListPartIDs { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>

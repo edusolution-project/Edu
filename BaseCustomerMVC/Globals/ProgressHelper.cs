@@ -23,6 +23,7 @@ namespace BaseCustomerMVC.Globals
         private readonly ChapterService _chapterService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly ClassService _classService;
+        private readonly CourseService _courseService;
 
         private readonly ExamService _examService;
         private readonly ExamDetailService _examDetailService;
@@ -41,6 +42,7 @@ namespace BaseCustomerMVC.Globals
             ChapterService chapterService,
             ClassSubjectService classSubjectService,
             ClassService classService,
+            CourseService courseService,
 
             ExamService examService,
             ExamDetailService examDetailService,
@@ -64,6 +66,7 @@ namespace BaseCustomerMVC.Globals
             _examDetailService = examDetailService;
             _lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
+            _courseService = courseService;
         }
 
         #region Learning Progress
@@ -836,10 +839,14 @@ namespace BaseCustomerMVC.Globals
                 var minpoint = tried == 0 ? 0 : examresult.Min(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
                 var avgpoint = tried == 0 ? 0 : examresult.Average(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);
 
-                var coursename = new ChapterEntity();
+                ChapterEntity chaptername = new ChapterEntity();
+                CourseEntity coursename = new CourseEntity();
+                //ClassSubjectProgressEntity target = new ClassSubjectProgressEntity();
                 if (!isExam)
                 {
-                    coursename = _chapterService.CreateQuery().Find(x => x.ID == practice.ChapterID).FirstOrDefault();
+                    chaptername = _chapterService.CreateQuery().Find(x => x.ID == practice.ChapterID).FirstOrDefault();
+                    coursename = _courseService.GetItemByID(practice.CourseID);
+                    //target = _classSubjectProgressService.CreateQuery().Find(x => x.ClassID == practice.ClassID && x.ClassSubjectID == practice.ClassSubjectID).FirstOrDefault();
                 }
 
                 var lastEx = examresult.FirstOrDefault();
@@ -858,7 +865,9 @@ namespace BaseCustomerMVC.Globals
                     LessonName = practice.Title,
                     LessonID = practice.ID,
                     ClassSubjectID = practice.ClassSubjectID,
-                    CourseName = coursename != null ? coursename.Name : ""
+                    CourseName = coursename == null ? "" : coursename.Name,
+                    ChapterName = chaptername == null ? "" : chaptername.Name,
+                    //Target = target == null ? 0 : target.Target
                 });
             }
             return result;

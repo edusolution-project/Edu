@@ -39,6 +39,8 @@ namespace BaseCustomerEntity.Database
         public double PracticeAvgPoint { get; set; }
         [JsonProperty("PracticeResult")]
         public double PracticeResult { get; set; }
+        [JsonProperty("Target")]
+        public double Target { get; set; }
     }
 
     public class ClassSubjectProgressService : ServiceBase<ClassSubjectProgressEntity>

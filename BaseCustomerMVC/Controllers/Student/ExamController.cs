@@ -40,16 +40,10 @@ namespace BaseCustomerMVC.Controllers.Student
 
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
-
-        private readonly LessonExtensionService _lessonExtensionService;
         private readonly ClassSubjectService _classSubjectService;
+        private readonly ClassSubjectProgressService _classSubjectProgressService;
 
         private readonly ProgressHelper _progressHelper;
-
-        //extension
-        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
-        private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
-        private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
 
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
 
@@ -73,18 +67,12 @@ namespace BaseCustomerMVC.Controllers.Student
             LessonPartAnswerService lessonPartAnswerService,
             LessonPartQuestionService lessonPartQuestionService,
             LessonProgressService lessonProgressService,
-
-            LessonExtensionService lessonExtensionService,
             ClassSubjectService classSubjectService,
+            ClassSubjectProgressService classSubjectProgressService,
 
             ProgressHelper progressHelper,
 
-            IRoxyFilemanHandler roxyFilemanHandler,
-
-            //extension
-            CloneLessonPartExtensionService cloneLessonPartExtensionService,
-            CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService,
-            CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
+            IRoxyFilemanHandler roxyFilemanHandler
             )
         {
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -106,18 +94,13 @@ namespace BaseCustomerMVC.Controllers.Student
             _studentService = studentService;
             _teacherService = teacherService;
             _lessonProgressService = lessonProgressService;
+            _classSubjectService = classSubjectService;
+            _classSubjectProgressService = classSubjectProgressService;
 
             _progressHelper = progressHelper;
 
             _roxyFilemanHandler = roxyFilemanHandler;
-
-            _lessonExtensionService = lessonExtensionService;
-            _classSubjectService = classSubjectService;
-
-            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
-            _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
-            _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
-    }
+        }
 
         [Obsolete]
         [HttpPost]
@@ -302,49 +285,10 @@ namespace BaseCustomerMVC.Controllers.Student
         public async Task<JsonResult> Create(ExamEntity item)
         {
             var userid = User.Claims.GetClaimByType("UserID").Value;
-            LessonEntity _lesson = new LessonEntity();
-            LessonExtensionEntity lessonextension = new LessonExtensionEntity();
+
             if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
             {
-                LessonScheduleEntity _schedule = new LessonScheduleEntity();
-                var lessonExtension = _lessonExtensionService.GetItemByLessonID(item.LessonID);
-                var rd = new Random();
-                if (lessonExtension.Count() > 1)
-                {
-                    var index = rd.Next(1, lessonExtension.Count());
-                    if (index.ToString() == lessonExtension.LastOrDefault()?.Code)
-                        index = rd.Next(1, lessonExtension.Count());
-                    lessonextension = lessonExtension[index];
-                    _lesson = lessonextension;
-
-                    var l = _lessonService.GetItemByID(item.LessonID);
-                    //if (l.LessonExtension == null || l.LessonExtension.Count() == 0)
-                    //    l.LessonExtension = new List<LessonExtensionEntity>();
-                    l.Updated = DateTime.Now;
-                    //l.LessonExtension.Add(lessonExtension[index]);
-                    l.Limit -=1;
-                    _lessonService.Save(l);
-                    _schedule = _lessonScheduleService.GetItemByLessonID(l.ID);
-                }
-                else if (lessonExtension.Count() == 1)
-                {
-                    lessonextension = lessonExtension.FirstOrDefault();
-                    _lesson = lessonextension;
-                    var l = _lessonService.GetItemByID(item.LessonID);
-                    //if (l.LessonExtension == null || l.LessonExtension.Count() == 0)
-                    //    l.LessonExtension = new List<LessonExtensionEntity>();
-                    //l.LessonExtension.Add(lessonExtension.FirstOrDefault());
-                    l.Updated = DateTime.Now;
-                    l.Limit -=1;
-                    _lessonService.Save(l);
-                    _schedule = _lessonScheduleService.GetItemByLessonID(l.ID);
-                    //_lessonService.Save(l);
-                }
-                else
-                {
-                    _lesson = _lessonService.GetItemByID(item.LessonID);
-                    _schedule = _lessonScheduleService.GetItemByLessonID(_lesson.ID);
-                }
+                var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
 
                 if (_class == null)
@@ -355,6 +299,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
 
+                var _schedule = _lessonScheduleService.GetItemByLessonID(_lesson.ID);
                 if (_schedule == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -384,10 +329,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 item.StudentID = userid;
                 item.Number = //(int)_indexService.GetNewIndex(_schedule.ID + "_" + item.StudentID);
+
                 (int)_examService.CountByStudentAndLesson(_lesson.ID, item.StudentID) + 1;
-                item.CodeExam = lessonextension.CodeExam;
-                item.LessonExtensionID = lessonextension.ID;
-                item.CodeExam = lessonextension.Code;
                 if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
                 {
                     return new JsonResult(new Dictionary<string, object>
@@ -425,14 +368,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.CurrentDoTime = DateTime.UtcNow;
                 item.Status = false;
 
-                if (lessonExtension.Count() > 0)
-                {
-                    item.QuestionsTotal = _cloneLessonPartQuestionExtensionService.CountByLessonID(_lesson.ID);
-                }
-                else
-                {
-                    item.QuestionsTotal = _cloneLessonPartQuestionService.CountByLessonID(item.LessonID);
-                }
+                item.QuestionsTotal = _cloneLessonPartQuestionService.CountByLessonID(item.LessonID);
                 //TODO: Save Question Total in Lesson info
                 item.QuestionsDone = 0;
                 item.Marked = false;
@@ -451,7 +387,7 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetCurrentExam(string LessonID)
+        public JsonResult GetCurrentExam(string LessonID, string ID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
             var lesson = _lessonService.GetItemByID(LessonID);
@@ -470,7 +406,9 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    if (_lessonHelper.IsOvertime(exam))
+                    if (_lessonHelper.IsOvertime(exam))//Overtime
+                        _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                    else if (exam.ID != ID)//change Exam
                         _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
                     else
                         exam.CurrentDoTime = DateTime.UtcNow;
@@ -548,7 +486,6 @@ namespace BaseCustomerMVC.Controllers.Student
                 return new JsonResult(new { error = "Không tìm thấy bài kiểm tra" });
             }
             var exam = _examService.GetItemByID(item.ExamID);
-            var lesson = _lessonService.GetItemByID(exam.LessonID);
             if (!_lessonHelper.IsOvertime(exam))
             {
                 //TODO: recheck history for doing exam
@@ -601,17 +538,7 @@ namespace BaseCustomerMVC.Controllers.Student
                         item.Updated = DateTime.UtcNow;
                         if (!String.IsNullOrEmpty(item.QuestionID))
                         {
-                            CloneLessonPartQuestionEntity question = new CloneLessonPartQuestionEntity();
-                            //if (lesson.LessonExtension == null || lesson.LessonExtension.Count() == 0) question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
-                            //else question = _cloneLessonPartQuestionExtensionService.GetItemByID(item.QuestionID);
-                            if (!String.IsNullOrEmpty(exam.LessonExtensionID))
-                            {
-                                question = _cloneLessonPartQuestionExtensionService.GetItemByID(item.QuestionID);
-                            }
-                            else
-                            {
-                                question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
-                            }
+                            var question = _cloneLessonPartQuestionService.GetItemByID(item.QuestionID);
                             if (question == null)
                                 return new JsonResult(new { error = "Không tìm thấy câu hỏi" });
                             item.ClassID = exam.ClassID;
@@ -840,7 +767,13 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                result = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+                var data = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
+                foreach(var d in data.ToList())
+                {
+                    var target = _classSubjectProgressService.CreateQuery().Find(x => x.ClassID == classSbj.ClassID && x.ClassSubjectID == classSbj.ID && x.StudentID == userId).FirstOrDefault();
+                    d.Target = target == null? 0 : target.Target;
+                    result.Add(d);
+                }
             }
 
             return Json(result);

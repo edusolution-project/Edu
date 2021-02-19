@@ -84,7 +84,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
         private readonly ClassService _classService;
-
+        private readonly CacheHelper _cacheHelper;
         public ClassController(
             AccountService accountService,
             GradeService gradeservice,
@@ -120,6 +120,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentHelper studentHelper,
             TeacherHelper teacherHelper,
             MailHelper mailHelper,
+            CacheHelper cacheHelper,
 
             ChapterProgressService chapterProgressService,
             CenterService centerService
@@ -172,6 +173,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _teacherHelper = teacherHelper;
             _lessonHelper = lessonHelper;
             _mailHelper = mailHelper;
+            _cacheHelper = cacheHelper;
 
             _moduleViewMapping = new MappingEntity<LessonEntity, StudentModuleViewModel>();
             _assignmentViewMapping = new MappingEntity<LessonEntity, StudentAssignmentViewModel>();
@@ -319,6 +321,86 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Student = student;
 
             return View();
+        }
+
+        public JsonResult GetTopActiveClasses(string basis)
+        {
+            var current = DateTime.Now.Date;
+            var startWeek = current.AddDays(DayOfWeek.Monday - current.DayOfWeek - 7);
+            var endWeek = startWeek.AddDays(7);
+
+            var cacheKey = "GetTopActiveClasses_" + basis + "_" + startWeek.ToString("yyyyMMdd") + endWeek.ToString("yyyyMMdd");
+            var rtn = _cacheHelper.GetCache(cacheKey) as List<ClassResultViewModel>;
+            if (rtn == null)
+            {
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                    return Json(new { error = "Thông tin không đúng: kiểm tra cơ sở" });
+
+                var activeClasses = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat 
+
+                var result = new List<ClassResultViewModel>();
+                if (activeClasses != null && activeClasses.Count() > 0)
+                {
+                    foreach (var @class in activeClasses.ToList())
+                    {
+                        //Tổng số hs trong lớp
+                        var totalStudents = _studentService.GetStudentsByClassId(@class.ID).Count();
+                        if (totalStudents == 0) continue;
+
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+
+                        if (activeLessons.Count() == 0) continue;
+
+                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+
+                        if (examIds.Count() == 0) continue;
+
+                        var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) 
+                        //&& x.LastDate <= endWeek && x.LastDate >= startWeek 
+                        && x.Tried > 0).ToList();
+
+                        if (activeProgress.Count() == 0) continue;
+
+                        var studentResults = (from r in activeProgress
+                                              group r by r.StudentID
+                                                  into g
+                                              select new StudentResult
+                                              {
+                                                  StudentID = g.Key,
+                                                  ExamCount = g.Count(),
+                                                  AvgExamPoint = g.Sum(t => t.LastPoint) / examIds.Count(),
+                                              }).ToList();
+
+                        var activeStudents = studentResults.Count();
+
+                        var min8 = studentResults.Count(t => t.AvgExamPoint >= 80);
+                        var min5 = studentResults.Count(t => t.AvgExamPoint >= 50 && t.AvgExamPoint < 80);
+                        var min2 = studentResults.Count(t => t.AvgExamPoint >= 20 && t.AvgExamPoint < 50);
+                        var min0 = studentResults.Count(t => t.AvgExamPoint >= 0 && t.AvgExamPoint < 20);
+
+                        result.Add(new ClassResultViewModel
+                        {
+                            ClassID = @class.ID,
+                            ClassName = @class.Name,
+                            Above0 = min0 * 100 / totalStudents,
+                            Above2 = min2 * 100 / totalStudents,
+                            Above5 = min5 * 100 / totalStudents,
+                            Above8 = min8 * 100 / totalStudents,
+                            Attend = activeStudents * 100 / totalStudents,
+                            TeacherName = string.Join(", ", @class.Members.Where(t => t.Type != ClassMemberType.OWNER && t.Type != 0).Select(t => t.TeacherID).Distinct().Select(m => _teacherService.GetItemByID(m)?.FullName))
+                        });
+                    }
+                }
+
+                result = result.OrderByDescending(t => t.Above8 * t.Attend).Take(5).ToList();
+
+                _cacheHelper.SetCache(cacheKey, result, endWeek.AddDays(7) - DateTime.Now);
+                return Json(result);
+            }
+            else
+                return Json(rtn);
         }
 
         #region ClassDetail
@@ -1055,7 +1137,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var month = dt.Month;
             var year = dt.Year;
             var today = new DateTime(year, month, day, 0, 0, 0);
-            var startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek + 1);
+            var startWeek = today.AddDays(DayOfWeek.Monday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7).AddMinutes(-1);
             var Week1 = new DateTimeVM { StartTime = startWeek, EndTime = endWeek };
             listDateTime.Add(1, Week1);
@@ -1212,7 +1294,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new { });
             var startWeek = today;
             if (seekStart)
-                startWeek = today.AddDays(DayOfWeek.Sunday - today.DayOfWeek);
+                startWeek = today.AddDays(DayOfWeek.Monday - today.DayOfWeek);
             var endWeek = startWeek.AddDays(7);
 
             var userId = User.Claims.GetClaimByType("UserID").Value;
@@ -1290,7 +1372,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                            endDate = o.EndDate,
                            //students = studentCount,
                            //skill = skill,
-                           bookName = _sbj.CourseName
+                           bookName = _sbj.CourseName,
+                           chapterName = _lesson.ChapterID == "0" ? "" : _chapterService.GetItemByID(_lesson.ChapterID).Name
                            //isLearnt = isLearnt
                        }).OrderBy(t => t.startDate).ToList();
 
@@ -1364,10 +1447,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 skip_owned = true;
                 filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => o.SubjectID == SubjectID));
             }
-            else
-            {
-                filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
-            }
+            //else
+            //{
+            //    filter.Add(Builders<ClassSubjectEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
+            //}
             if (!string.IsNullOrEmpty(GradeID))
             {
                 skip_owned = true;
@@ -1410,14 +1493,23 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //+ "\""
                     ));
 
-            if (classfilter.Count == 0)
-                return null;
+            //if (classfilter.Count == 0)
+            //    return null;
 
-            var classResult = _service.Collection.Find(
+            var classResult =
+
+                classfilter.Count > 0 ?
+                _service.Collection.Find(
                 Builders<ClassEntity>.Filter.And(
                     Builders<ClassEntity>.Filter.Where(o => o.Center == Center && o.ClassMechanism != CLASS_MECHANISM.PERSONAL),
                     Builders<ClassEntity>.Filter.And(classfilter)
-                ));
+                )) :
+                _service.Collection.Find(
+                    Builders<ClassEntity>.Filter.Where(o => o.Center == Center && o.ClassMechanism != CLASS_MECHANISM.PERSONAL)
+                );
+
+
+
 
             model.TotalRecord = classResult.CountDocuments();
 
@@ -3356,14 +3448,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         #region Report
-        public JsonResult GetManageReport(String basis,DateTime startTime,DateTime endTime)
+        public JsonResult GetManageReport(String basis, DateTime startTime, DateTime endTime)
         {
             try
             {
                 var center = _centerService.GetItemByCode(basis);
                 if (center == null)
                 {
-                    return Json(new Dictionary<String, Object> 
+                    return Json(new Dictionary<String, Object>
                     {
                         {"Data", null },
                         {"Msg","Cơ sở không tồn tại." },
@@ -3371,13 +3463,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                if(startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
+                if (startTime < new DateTime(1900, 1, 1) || endTime < new DateTime(1900, 1, 1))
                 {
                     startTime = center.Created;
                     endTime = center.ExpireDate;
                 }
 
-                var listclass = _classService.GetActiveClass4Report(startTime,endTime, center.ID);
+                var listclass = _classService.GetActiveClass4Report(startTime, endTime, center.ID);
                 if (!listclass.Any())
                 {
                     return Json(new Dictionary<String, Object>
@@ -3402,9 +3494,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (!activeLesson.Any()) continue;
                     var activeLessonIDs = activeLesson.Select(x => x.LessonID);
                     var lessonprogess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == @class.ID && activeLessonIDs.Contains(x.LessonID)).ToList();
-                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x=>x.StudentID);
+                    var a = lessonprogess.Where(x => x.TotalLearnt == 0).GroupBy(x => x.StudentID);
                     //var b = lessonprogess.Where(x => x.Tried > 0);
-                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x=>x.StudentID);
+                    var result = lessonprogess.Where(x => x.Tried > 0).GroupBy(x => x.StudentID);
                     Int32 minpoint8 = 0, minpoint5 = 0, minpoint2 = 0, minpoint0 = 0;
                     foreach (var st in students)
                     {
@@ -3420,7 +3512,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         }
                     }
 
-                    if(@class.Name.Contains("10"))
+                    if (@class.Name.Contains("10"))
                     {
                         centerResult10.MinPoint0 += minpoint0;
                         centerResult10.MinPoint2 += minpoint2;
@@ -3474,7 +3566,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Data",dic }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                     {

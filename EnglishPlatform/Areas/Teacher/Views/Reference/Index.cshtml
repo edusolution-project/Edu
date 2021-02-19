@@ -957,20 +957,25 @@
                                     </button>
                                 </div>*@
                             <div>
-                                <div class="form-control selectedClass" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden" onclick="showSelect()">
-                                    {{this.docsInteractive.listSelectedClass}}
-                                </div>
-                            </div>
-                            <div style="position: absolute;right: 0px;top: 40px;z-index: 999;background: #FFF;padding-left: 12px; left: 0;">
-                                <div id="selectClass" style="display:none;">
-                                    <ul class="classSelect" role="menu" style="overflow-y:auto;height:auto;list-style:none; max-height: 200px;">
-                                        <li v-for="(item,k) in docsInteractive.ListClasses">
-                                            <a>
-                                                <input type="checkbox" :value="item.ID" v-model="docsInteractive.ClassIDs" /><span class="lbl"> {{item.Name}} </span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <template v-if="docsInteractive.ListClasses.length > 0">
+                                    <div class="form-control selectedClass" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden" onclick="showSelect()">
+                                        {{this.docsInteractive.listSelectedClass}}
+                                    </div>
+                                    <div id="selectClass" class="mt-2" style="display:none;">
+                                        <ul class="classSelect" role="menu" style="overflow-y:auto;height:auto;list-style:none; max-height: 200px;">
+                                            <li v-for="(item,k) in docsInteractive.ListClasses">
+                                                <a>
+                                                    <input type="checkbox" :value="item.ID" v-model="docsInteractive.ClassIDs" /><span class="lbl"> {{item.Name}} </span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    <div class="form-control selectedClass" style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden">
+                                        Chưa có lớp
+                                    </div>
+                                </template>
                             </div>
                         </div>
                         @*<select class="form-control" multiple v-model="docsInteractive.ClassID">
