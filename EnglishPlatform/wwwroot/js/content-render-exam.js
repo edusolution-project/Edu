@@ -337,6 +337,13 @@ var Lesson = (function () {
         var lessonTitle = $("<div>", { class: "col-6 font-weight-bold text-right", text: _data.Title + " - Thời gian: " + _data.Timer + "p" });
         var studentInfo = $("<div>", { class: "col-6 text-center", html: "Học viên: <span style='font-weight:700'>" + config.student_name + "</span>" });
         var codeexam = $("<div>", { class: "col-6 text-center", html: "Mã đề: <span style='font-weight:700'>" + config.codeExam + "</span>" });
+        switch (config.mod) {
+            case mod.PREVIEW: //curriculum view
+            case mod.TEACHERVIEW:
+            case mod.TEACHEREDIT:
+                codeexam = $("<div>", { class: "col-6 text-center", html: "Mã đề: <span style='font-weight:700'>---</span>" });
+                break;
+        }
         infoHolder.append($("<div>", { class: "col-12 row" }).append(centerInfo).append(dateInfo));
         infoHolder.append($("<div>", { class: "col-12 row mt-3" }).append(studentInfo).append(lessonTitle).append(codeexam));
     }
@@ -2894,7 +2901,7 @@ var Lesson = (function () {
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
                     .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+                    //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2973,7 +2980,7 @@ var Lesson = (function () {
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
                         .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                    //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3038,7 +3045,8 @@ var Lesson = (function () {
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
-                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.QuestionsTotal })).html();
+                        .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.QuestionsPass == null ? 0 : lastExam.QuestionsPass) + "/" + lastExam.MaxPoint })).html();
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3755,7 +3763,7 @@ var Lesson = (function () {
                     }));
 
                     container = $("#" + data.ParentID).parent().siblings(".answer-wrapper");
-                    
+
                     if (data.Content != null)
                         answer.append($("<input>", { "type": "hidden", "value": data.Content }));
 
@@ -3882,16 +3890,16 @@ var Lesson = (function () {
     var completeExam = async function (isOvertime) {
 
         //if (!isOvertime) {
-            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
-            if (undoneQuiz > 0) {
-                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+        var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+        if (undoneQuiz > 0) {
+            if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
 
-                }
-                else {
-                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
-                    return false;
-                }
             }
+            else {
+                if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                return false;
+            }
+        }
         //}
 
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
@@ -4022,7 +4030,7 @@ var Lesson = (function () {
             lastExamResult =
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }));
-
+            //debugger
             if (config.mod == mod.TEACHERPREVIEW || config.mod == mod.TEACHERPREVIEWEXAM)
                 lastExamResult =
                     $("<div>", { id: "last-result", class: "text-center" })
@@ -4033,7 +4041,7 @@ var Lesson = (function () {
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
                         .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
-                    //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
+                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4909,7 +4917,7 @@ var Lesson = (function () {
         var obj = $(objHolder).find("i").last();
         var chapterParent = $("#" + id);
         var ul = chapterParent.children('ul');
-        
+
         var classi = $(obj).attr("class");
         if (classi.includes("fa-arrow-alt-circle-down")) {
             $(obj).removeClass();
@@ -4920,29 +4928,29 @@ var Lesson = (function () {
             $(obj).addClass("far fa-arrow-alt-circle-down ml-1");
         }
         ul.toggleClass("hide");
-        
+
         //var classUl = $(ul).attr("class");
         //if (classUl.includes("hide")) {
         //    $(ul).removeClass("hide");
-            //var id = $("#selectChapter").val();
-            //var lessons = $("#selectLesson");
-            //for (var i = 0; i < lessons.length; i++) {
-            //    var lesson = lessons[i];
-            //    for (var j = 0; j < lesson.length; j++) {
-            //        var a = lesson[j];
-            //        if ($(a).attr('data-chapter-id') === id) {
-            //            $(a).removeClass('hide');
-            //            //$(a).attr('onclick','choosePart()');
-            //        }
-            //        else {
-            //            if ($(a).attr('class') != 'hide') {
-            //                $(a).addClass('hide');
-            //                //$(a).removeAttr('onclick');
-            //            }
-            //        }
-            //    }
-            //}
-            //$(lessons).attr('onchange', 'choosePart()');
+        //var id = $("#selectChapter").val();
+        //var lessons = $("#selectLesson");
+        //for (var i = 0; i < lessons.length; i++) {
+        //    var lesson = lessons[i];
+        //    for (var j = 0; j < lesson.length; j++) {
+        //        var a = lesson[j];
+        //        if ($(a).attr('data-chapter-id') === id) {
+        //            $(a).removeClass('hide');
+        //            //$(a).attr('onclick','choosePart()');
+        //        }
+        //        else {
+        //            if ($(a).attr('class') != 'hide') {
+        //                $(a).addClass('hide');
+        //                //$(a).removeAttr('onclick');
+        //            }
+        //        }
+        //    }
+        //}
+        //$(lessons).attr('onchange', 'choosePart()');
         //}
         //else {
         //    $(ul).addClass("hide");

@@ -415,5 +415,21 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(x=>x.LessonScheduleID == LessonScheduleID).ToEnumerable();
         }
+
+        public List<Int32> RandomIndex(Int32 TotalIndex)
+        {
+            var rd = new Random();
+            List<Int32> listIndex = new List<int>();
+            do
+            {
+                Int32 index = rd.Next(0, TotalIndex);
+                if (!listIndex.Contains(index))
+                {
+                    listIndex.Add(index);
+                }
+            }
+            while (listIndex.Count() != TotalIndex);
+            return listIndex;
+        }
     }
 }

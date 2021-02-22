@@ -42,6 +42,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
         private readonly CloneLessonPartQuestionService _cloneQuestionService;
+        private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
@@ -81,7 +82,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //ChapterService chapterService,
             LessonService lessonService,
             LessonHelper lessonHelper,
-            //LessonScheduleService lessonScheduleService,
+            LessonScheduleService lessonScheduleService,
             //LessonPartService lessonPartService,
             //LessonPartQuestionService lessonPartQuestionService,
             //LessonPartAnswerService lessonPartAnswerService,
@@ -114,6 +115,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartService = service;
             _cloneAnswerService = cloneLessonPartAnswerService;
             _cloneQuestionService = cloneLessonPartQuestionService;
+            _lessonScheduleService = lessonScheduleService;
 
             _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
@@ -1324,7 +1326,244 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             });
         }
 
+        #region Auto Create Exam
+        public JsonResult AutoCreateExam(String basis, LessonEntity item, DateTime startTime, DateTime endTime, List<String> classSubjectIDs, Int32 TotalPart)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                if (!classSubjectIDs.Any())
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Status",false },
+                        {"Message","Chưa chọn môn nào" },
+                        {"Data",null }
+                    });
+                }
 
+                var lessonIDs = _lessonScheduleService.CreateQuery().Find(x => classSubjectIDs.Contains(x.ClassSubjectID) && x.StartDate <= endTime && x.EndDate >= startTime).Project(x => x.LessonID);
+                if (lessonIDs.CountDocuments() == 0)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Status",false },
+                        {"Message","Chưa chọn môn nào" },
+                        {"Data",null }
+                    });
+                }
+
+                var cloneLessonParts = _cloneLessonPartService.GetItemsByLessonIDs(lessonIDs.ToList<String>());
+                if(cloneLessonParts.Count() < TotalPart)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Status",false },
+                        {"Message","Số lượng câu hỏi không đủ" },
+                        {"Data",null }
+                    });
+                }
+
+                var index = 0;
+                var indexs = RandomIndex(TotalPart, cloneLessonParts.Count());
+                List<CloneLessonPartEntity> newCloneLessonParts = new List<CloneLessonPartEntity>();
+                newCloneLessonParts.AddRange(GetLessonParts(indexs, cloneLessonParts.ToList()));
+                while(newCloneLessonParts.Count() < indexs.Count()) 
+                {
+                    var newIndexs = RandomIndex(indexs.Count() - newCloneLessonParts.Count(), cloneLessonParts.Count());
+                    while(indexs.Any(x => newIndexs.Contains(x)))
+                    {
+                        newIndexs = RandomIndex(indexs.Count() - newCloneLessonParts.Count(), cloneLessonParts.Count());
+                    }
+                    newCloneLessonParts.AddRange(GetLessonParts(newIndexs, cloneLessonParts.ToList()));
+                    index++;
+                    if (index == cloneLessonParts.Count())
+                    {
+                        return Json(new Dictionary<String, Object>
+                        {
+                            {"Status",false },
+                            {"Message","Số lượng câu hỏi không đủ" },
+                            {"Data",null }
+                        });
+                    }
+                }
+
+                item.ChapterID = "0";
+                item.TemplateType = LESSON_TEMPLATE.EXAM;
+                item.IsPractice = false;
+                var classsbjExam = _classSubjectService.GetClassSubjectExamByClassID(item.ClassID);
+                item.ClassSubjectID = classsbjExam == null ? "0" : classsbjExam.ID;
+
+                var lesson = CreateLesson(item, UserID);
+                if (lesson == null)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Status",true },
+                        {"Message","Lỗi không tạo bài được" },
+                        {"Data",null }
+                    });
+                }
+
+                foreach (var lessonPart in newCloneLessonParts)
+                {
+                    _ = CopyPartToLesson(basis, lessonPart, lesson, UserID);
+                }
+
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Status",true },
+                    {"Message","Tạo thành công" },
+                    {"Data",lesson }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Status",false },
+                    {"Message",ex.Message },
+                    {"Data",null }
+                });
+            }
+        }
+
+        private List<CloneLessonPartEntity> GetLessonParts(List<int> indexs, List<CloneLessonPartEntity> cloneLessonParts)
+        {
+            List<CloneLessonPartEntity> newCloneLessonParts = new List<CloneLessonPartEntity>();
+            foreach (var index in indexs)
+            {
+                var cloneLessonPart = cloneLessonParts.ElementAtOrDefault(index);
+                if (!quizType.Contains(cloneLessonPart.Type))
+                {
+                    continue;
+                }
+                if (cloneLessonPart != null)
+                {
+                    newCloneLessonParts.Add(cloneLessonPart);
+                }
+            }
+            return newCloneLessonParts;
+        }
+
+        private LessonEntity CreateLesson(LessonEntity item, String UserID)
+        {
+            LessonEntity data = null;
+            if (!string.IsNullOrEmpty(item.ID))
+                data = _lessonService.GetItemByID(item.ID);
+            if (data == null)
+            {
+                item.Created = DateTime.UtcNow;
+                item.CreateUser = UserID;
+                item.IsAdmin = true;
+                item.IsActive = false;
+                item.IsParentCourse = item.ChapterID.Equals("0");
+                item.Updated = DateTime.UtcNow;
+                item.Order = 0;
+
+                _lessonHelper.InitLesson(item);//insert + create schedule (no route)
+
+                ChangeLessonPosition(item, Int32.MaxValue);//move lesson to bottom of parent
+
+                //update total lesson to parent chapter
+                _classHelper.IncreaseLessonCounter(item, 1, item.TemplateType == LESSON_TEMPLATE.EXAM ? 1 : 0, 0).Wait();
+
+                return item;
+            }
+            else
+            {
+                if (!_lessonHelper.isExamined(data))
+                {
+                    return data;
+                }
+
+                data.Updated = DateTime.UtcNow;
+                var newOrder = item.Order - 1;
+                data.Order = item.Order;
+                data.ClassID = item.ClassID;
+                data.ClassSubjectID = item.ClassSubjectID;
+                data.Timer = item.Timer;
+                data.Limit = item.Limit;
+                data.Title = item.Title;
+                data.Multiple = item.Multiple;
+                data.Etype = item.Etype;
+                //item.Point = data.Point;
+
+                //update counter if type change
+                if (item.TemplateType != data.TemplateType)
+                {
+                    data.TemplateType = item.TemplateType;
+                    var examInc = 0;
+                    var pracInc = 0;
+                    if (_lessonHelper.IsQuizLesson(data.ID)) pracInc = 1;
+                    if (data.TemplateType == LESSON_TEMPLATE.LECTURE) // EXAM => LECTURE
+                    {
+                        examInc = -1;
+                        data.IsPractice = pracInc == 1;
+                    }
+                    else
+                    {
+                        examInc = 1;
+                        data.IsPractice = false;
+                        pracInc = pracInc == 1 ? -1 : 0;
+                    }
+                    _classHelper.IncreaseLessonCounter(data, 0, examInc, pracInc).Wait();
+                }
+
+                _lessonService.CreateQuery().ReplaceOne(o => o.ID == data.ID, data);
+
+                if (data.Order != newOrder)//change Position
+                {
+                    ChangeLessonPosition(data, newOrder);
+                }
+                return data;
+            }
+        }
+
+        public List<Int32> RandomIndex(Int32 TotalIndex,Int32 max)
+        {
+            var rd = new Random();
+            List<Int32> listIndex = new List<int>();
+            do
+            {
+                Int32 index = rd.Next(0, max);
+                if (!listIndex.Contains(index))
+                {
+                    listIndex.Add(index);
+                }
+            }
+            while (listIndex.Count() != TotalIndex);
+            return listIndex;
+        }
+
+        private int ChangeLessonPosition(LessonEntity item, int pos)
+        {
+            var parts = _lessonService.GetChapterLesson(item.ClassSubjectID, item.ChapterID);
+            var ids = parts.Select(o => o.ID).ToList();
+
+            var oldPos = ids.IndexOf(item.ID);
+            if (oldPos == pos && oldPos == item.Order)
+            {
+                return oldPos;
+            }
+            if (pos > parts.Count())
+                pos = parts.Count() - 1;
+            item.Order = pos;
+
+            _lessonService.CreateQuery().ReplaceOne(o => o.ID == item.ID, item);
+            int entry = -1;
+            foreach (var part in parts)
+            {
+                if (part.ID == item.ID) continue;
+                if (entry == pos - 1)
+                    entry++;
+                entry++;
+                part.Order = entry;
+                _lessonService.CreateQuery().ReplaceOne(o => o.ID == part.ID, part);
+            }
+            return pos;
+        }
+        #endregion
 
 
         ////////////////////////////////////////////////////////////////////
