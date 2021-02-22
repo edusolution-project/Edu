@@ -76,8 +76,8 @@
                         </option>*@
                     <template v-for="(item, k) in classSubjects" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
                         @*<option :value="item.ID" v-if="item.HasLessonActive">&#10003; {{item.CourseName}}</option>*@
-                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
-                        <option :value="{ID:item.ID,CourseName:item.CourseName}" v-else>{{item.CourseName}}</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName,TypeClass:item.TypeClass}" v-if="item.HasLessonActive">{{item.CourseName}} ___ [ĐÃ GIAO]</option>
+                        <option :value="{ID:item.ID,CourseName:item.CourseName,TypeClass:item.TypeClass}" v-else>{{item.CourseName}}</option>
                     </template>
                 </select>
             </div>
@@ -282,7 +282,8 @@
                                     <tr>
                                         <th class="sticky-col first-col" rowspan="2">STT</th>
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
-                                        <th rowspan="2" class="sticky-col third-col">Trung bình</th>
+                                        <th rowspan="2" class="sticky-col third-col">Điểm trung bình</th>
+                                        <th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>
                                         <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
                                     </tr>
                                     <tr style="font-size:80%">
@@ -292,8 +293,9 @@
                                 <tbody>
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
-                                        <td class="sticky-col second-col">{{ list_students[i-1].fullName}}</td>
-                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].avgPointPratice,1)}}</td>
+                                        <td class="sticky-col second-col">{{ list_students[i-1].FullName}}</td>
+                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
+                                        <td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
                                             <template v-for="item in items">
@@ -775,23 +777,30 @@
 
         .first-col {
             width: 30px;
-            min-width: 30px;
-            max-width: 50px;
+            /*min-width: 30px;
+            max-width: 50px;*/
             left: 0px;
         }
 
         .second-col {
             width: 250px;
-            min-width: 150px;
-            max-width: 300px;
+            /*min-width: 150px;
+            max-width: 300px;*/
             left: 30px;
         }
 
         .third-col{
             width:50px;
-            min-width:50px;
-            max-width:90px;
+            /*min-width:50px;
+            max-width:90px;*/
             left:200px
+        }
+
+        .fourth-col {
+            width: 50px;
+            /*min-width: 50px;
+            max-width: 90px;*/
+            left: 280px
         }
 
         /*-----------*/
@@ -2687,6 +2696,11 @@
                     if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
                     return _date.format("DD/MM/YYYY")
                 },
+                formatYYYYMMDShortDate(date) {
+                    var _date = moment(date);
+                    if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                    return _date.format("YYYY-MM-DD")
+                },
                 formatTime(time) {
                     var _time = moment(time);
                     if (!_time._isValid || _time < moment(new Date(2000, 1, 1))) return "";
@@ -3248,6 +3262,29 @@
                     this.exam.startTime = ''
                     this.exam.endTime = ''
                     this.$bvModal.show("autocreateexam-modal-xl")
+                },
+                selectedTime() {
+                    var value = $("#selectedTime option:selected").val();
+                    if (value.includes('weekAgo')) {
+                        var now = new Date();
+                        var pre_week_start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (8 - now.getDay()));
+                        var pre_week_end = new Date(pre_week_start.getFullYear(), pre_week_start.getMonth(), pre_week_start.getDate() + 6);
+
+                        this.exam.startTime = this.formatYYYYMMDShortDate(pre_week_start)
+                        this.exam.endTime = this.formatYYYYMMDShortDate(pre_week_end)
+                    }
+                    else if (value.includes('monthAgo')) {
+                        var now = new Date();
+                        var pre_month_start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        var pre_month_end = new Date(now.getFullYear(), now.getMonth() - 1 + 1, 0);
+
+                        this.exam.startTime = this.formatYYYYMMDShortDate(pre_month_start)
+                        this.exam.endTime = this.formatYYYYMMDShortDate(pre_month_end)
+                    }
+                    else {
+                        this.exam.startTime = ''
+                        this.exam.endTime = ''
+                    }
                 }
             }
         });
@@ -3859,21 +3896,6 @@
                 <input type="number" min="1" v-model="exam.limit" class="form-control" required />
             </div>
         </div>
-        <div class="row form-group">
-            <div class="form-group col-md-6" for="examOnly">
-                <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                <select name="Etype" class="form-control" onchange="showCoefficient(this)" v-model="exam.etype" required>
-                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
-                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
-                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
-                </select>
-            </div>
-
-            <div class="form-group col-md-6" for="examOnly">
-                <label class="col-form-label">Hệ số:</label>
-                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
-            </div>
-        </div>
 
         <div class="row form-group">
             <div class="col-md-6">
@@ -3887,17 +3909,19 @@
                     <div class="col-sm-10">
                         <input type="text" class="form-control " v-model="exam.listNameClassSubject" disabled required />
                     </div>
-                    <div class="col-sm-10 p-0" style="position:absolute;left:75px;top:40px;z-index:9999">
-                        <div id="selectClassSubject" style="display:none;position:absolute;right:0px" class="col-sm-8">
-                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none;width: max-content;">
+                    <div class="col-sm-10 p-0" style="position:absolute;left:75px;top:40px;z-index:9999;background-color:white">
+                        <div id="selectClassSubject" style="display:none;position:absolute;right:0px" class="col-sm-12">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:150px;list-style:none">
                                 <li>
                                     <a>
                                         <input type="checkbox" id="selectAllClassSubject" v-on:click="selectAllClassSubject(classSubjects)" /><span class="lbl"> Chọn tất cả </span>
                                     </a>
                                 </li>
                                 <li v-for="(item,k) in classSubjects">
-                                    <a>
-                                        <input type="checkbox" :value="item.ID" v-model="exam.listClassSubject" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" /><span class="lbl"> {{item.CourseName}} </span>
+                                    <a v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">
+                                        <input type="checkbox" :value="item.ID" v-model="exam.listClassSubject" />
+                                        <span class="lbl" v-if="item.HasLessonActive"> {{item.CourseName}} <span style="font-size:80%">___ [ĐÃ GIAO]</span></span>
+                                        <span class="lbl" v-else> {{item.CourseName}} </span>
                                     </a>
                                 </li>
                             </ul>
@@ -3905,20 +3929,45 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-6">
+                <label class="label" for="totalpart">Số câu</label>
+                <input type="number" v-model="exam.totalpart" id="totalpart" class="form-control" min="1" required />
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-6">
+                <label class="label">Chọn mốc thời gian</label>
+                <select class="form-control" id="selectedTime" v-on:change="selectedTime()">
+                    <option value="selectTime">Theo khoảng thời gian</option>
+                    <option value="weekAgo">Tuần trước</option>
+                    <option value="monthAgo">Tháng trước</option>
+                </select>
+            </div>
             <div class="col-md-3">
-                <label class="label">Ngày bắt đầu</label>
+                <label class="label">Từ ngày</label>
                 <input class="form-control" v-model="exam.startTime" type="date" required />
             </div>
             <div class="col-md-3">
-                <label class="label">Ngày kết thúc</label>
+                <label class="label">Đến ngày</label>
                 <input class="form-control" v-model="exam.endTime" type="date" required />
             </div>
         </div>
 
         <div class="row form-group">
-            <div class="col-md-12">
-                <label class="label" for="totalpart">Số câu</label>
-                <input type="number" v-model="exam.totalpart" id="totalpart" class="form-control" min="1" required />
+            <div class="form-group col-md-6" for="examOnly">
+                <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                <select name="Etype" class="form-control" onchange="showCoefficient(this)" v-model="exam.etype" required>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6" for="examOnly">
+                <label class="col-form-label">Hệ số:</label>
+                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
             </div>
         </div>
 

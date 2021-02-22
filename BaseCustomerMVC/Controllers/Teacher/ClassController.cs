@@ -904,6 +904,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var allWeekActiveIds = activeLessons.Where(t => t.EndDate > listTime.FirstOrDefault().Value.StartTime && t.StartDate <= listTime.LastOrDefault().Value.EndTime).Select(t => t.LessonID).ToList();
                 var allWeekactivePractice = _lessonService.CreateQuery().Find(t => allWeekActiveIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
                 var _listStudent = new List<InforStudent>();
+                var csbjprogess = _classSubjectProgressService.GetItemsByClassSubjectID_StudentIDs(ClassSubjectID, listStudent.Select(x => x.ID).ToList());
 
                 foreach (var student in listStudent)
                 {
@@ -945,12 +946,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
 
                     //tinh diem trung binh
+                    var target = csbjprogess.Where(x => x.StudentID.Equals(student.ID)).FirstOrDefault() != null ? csbjprogess.Where(x => x.StudentID.Equals(student.ID)).FirstOrDefault().Target : 0;
                     var _presult = progress.Where(t => t.StudentID == student.ID && allWeekactivePractice.Contains(t.LessonID));
                     _listStudent.Add(new InforStudent()
                     {
                         StudentID = student.ID,
                         FullName = student.FullName,
-                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---"
+                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---",
+                        Target = _presult.Count() > 0 ? (target == 0 ? "---": target.ToString()) : "---"
                     });
 
                     dataResponse.Add(index.ToString(), dataresponse);
@@ -1187,9 +1190,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public class InforStudent
         {
+            [JsonProperty("StudentID")]
             public String StudentID { get; set; }
+            [JsonProperty("FullName")]
             public String FullName { get; set; }
+            [JsonProperty("AvgPointPratice")]
             public String AvgPointPratice { get; set; }
+            [JsonProperty("Target")]
+            public String Target { get; set; }
         }
 
         public class Type_Filter
