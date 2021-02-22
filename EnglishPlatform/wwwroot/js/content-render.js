@@ -2980,6 +2980,7 @@ var Lesson = (function () {
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 if (lastExam.Point == null) lastExam.Point = 0;
                 var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
+                debugger
                 var resultMessage = "";
 
                 console.log(progress);
@@ -2993,9 +2994,10 @@ var Lesson = (function () {
 
                 //console.log(progress);
                 if (learningTarget > 0) {
+                    debugger
                     if (progress.toFixed(0) >= learningTarget) {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Chúc mừng bạn đã hoàn thành mục tiêu";
-                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", html: resultMessage }));//.html();
                     }
                     else {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Bạn nên làm lại để đạt mục tiêu đề ra.";
@@ -3077,7 +3079,7 @@ var Lesson = (function () {
                 if (learningTarget > 0) {
                     if (progress.toFixed(0) >= learningTarget) {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Chúc mừng bạn đã hoàn thành mục tiêu";
-                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", html: resultMessage }));//.html();
                     }
                     else {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Bạn nên làm lại để đạt mục tiêu đề ra.";
@@ -3199,7 +3201,7 @@ var Lesson = (function () {
     var setLearningTarget = function (obj, callback) {
         console.log(obj);
         Swal.fire({
-            title: 'Điểm mục tiêu cho môn học này của bạn là mấy điểm?',
+            title: 'Điểm mục tiêu cho môn này của bạn là mấy?',
             html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + config.class_subject_name + '</span>',
             icon: 'info',
             input: 'number',
@@ -4098,7 +4100,7 @@ var Lesson = (function () {
                 if (learningTarget > 0) {
                     if (progress.toFixed(0) >= learningTarget) {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Chúc mừng bạn đã hoàn thành mục tiêu";
-                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", text: resultMessage }));//.html();
+                        lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", html: resultMessage }));//.html();
                     }
                     else {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Bạn nên làm lại để đạt mục tiêu đề ra.";
@@ -4176,6 +4178,7 @@ var Lesson = (function () {
 
     var redoExam = function (obj) {
         if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
+            if (learningTarget == null) learningTarget = config.target
             if (!(learningTarget > 0)) {
                 setLearningTarget(obj, redoExam)
                 return false;

@@ -229,6 +229,10 @@
                                 <i class="far fa-edit ml-3"></i>
                                 Soạn thảo
                             </a>
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")" v-on:click="showAutoCreateExam(obj)">
+                                <i class="far fa-edit ml-3"></i>
+                                Tạo đề tự động
+                            </a>
                         </div>
                         @*<b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">*@
                         <ul class="list">
@@ -1474,7 +1478,18 @@
                     title: '',
                     list_chapters:[]
                 },
-                isExam: false
+                isExam: false,
+                exam: {
+                    name: '',
+                    timer: 0,
+                    limit: 0,
+                    etype: 0,
+                    startTime: '',
+                    endTime: '',
+                    listClassSubject: [],
+                    listNameClassSubject: '',
+                    totalpart:''
+                }
             },
             watch: {
                 "ref.subjectID": function () {
@@ -1507,6 +1522,24 @@
                     }
                     else if (this.searchPoint == 2) {
                         this.displaySelectTime = !this.displaySelectTime;
+                    }
+                },
+                "exam.listClassSubject": function () {
+                    var data = this.exam.listClassSubject
+                    //debugger
+                    if (data != null) {
+                        this.exam.listNameClassSubject = ''
+                        for (i = 0; i < this.exam.listClassSubject.length; i++) {
+                            for (j = 0; j < data.length; j++) {
+                                //if (this.classSubjects[j].ID == this.exam.listClassSubject[i]) {
+                                //    this.exam.listNameClassSubject += this.classSubjects[j].CourseName + '; '
+                                //}
+                                var csbj = this.classSubjects.find(x => x.ID == this.exam.listClassSubject[i])
+                                if (csbj != null) {
+                                    this.exam.listNameClassSubject += csbj.CourseName + '; '
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -3139,6 +3172,82 @@
                             })
                             .catch(e => { alert(e) })
                     }
+                },
+                autoCreateExam() {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("AutoCreateExam","CloneLessonPart")'
+                    var multiple = document.getElementById('Multiple').value
+                    _form.append("Title", _that.exam.name)
+                    _form.append("Timer", _that.exam.timer)
+                    _form.append("Limit", _that.exam.limit)
+                    _form.append("Multiple", multiple)
+                    _form.append("Etype", _that.exam.etype)
+                    _form.append("StartTime", _that.exam.startTime)
+                    _form.append("EndTime", _that.exam.endTime)
+                    _form.append("TotalPart", _that.exam.totalpart)
+                    _form.append("ClassID", '@currentClass.ID')
+                    for (var i = 0; i < this.exam.listClassSubject.length; i++) {
+                        _form.append("classSubjectIDs", this.exam.listClassSubject[i])
+                    }
+                    this.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //debugger
+                            var stt = response.data.Status
+                            if (stt) {
+                                alert(response.data.Message)
+                                var data = response.data.Data
+                                this.hideModal('autocreateexam-modal-xl');
+
+                                var listliexam = $("[classsubject=" + data.ClassSubjectID + "]").parent()
+                                var html = '<li class="sub-practice pt-2 pb-1 pl-2 rounded" classsubject="' + data.ClassSubjectID + '"><div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center"><a ' +
+                                    'href="/eduso/teacher/Lesson/Detail/' + data.ID + '/' + data.ClassSubjectID + '" title="' + data.Title + '" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis;"><span ' +
+                                    'class="text-danger"><i class="ic far fa-edit mr-2"></i>' +
+                                    data.Title +
+                                    ' </span></a> <div class="picker-schedule d-flex align-items-center"><div class="input-group date date st mr-2"><input type="text" readonly="readonly" class="form-control" style="font-size: ' +
+                                    '95%;"></div> <div class="input-group date date ed mr-2 ml-0"><input type="text" readonly="readonly" class="form-control" style="font-size: 95%;"></div> <i title="Xóa lịch học" class="fas fa-redo ic-ac d-flex align-' +
+                                    'items-center mr-2"></i></div></div></li>';
+                                
+                                listliexam.append(html)
+                            }
+                            else {
+                                alert(response.data.Message)
+                            }
+                            this.isLoading = false
+                        })
+                        .catch(e => {
+                            alert(e)
+                            this.isLoading = false
+                        })
+                },
+                selectAllClassSubject(classsubjects) {
+                    var status = $("#selectAllClassSubject").prop('checked')
+                    if (status) {
+                        this.exam.listNameClassSubject = ""
+                        for (var i = 0; i < classsubjects.length; i++) {
+                            if (classsubjects[i].TypeClass != '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM')
+                            {
+                                this.exam.listNameClassSubject += classsubjects[i].Title + "; "
+                                this.exam.listClassSubject.push(classsubjects[i].ID)
+                            }
+                        }
+                    }
+                    else {
+                        this.exam.listNameClassSubject = ""
+                        this.exam.listClassSubject = []
+                    }
+                },
+                showAutoCreateExam(obj) {
+                    this.exam.name = ''
+                    this.exam.timer = 0
+                    this.exam.limit = 0
+                    this.exam.listClassSubject = []
+                    this.exam.listNameClassSubject = ''
+                    this.exam.totalpart = ''
+                    this.exam.startTime = ''
+                    this.exam.endTime = ''
+                    this.$bvModal.show("autocreateexam-modal-xl")
                 }
             }
         });
@@ -3200,6 +3309,36 @@
                     delay: 25
                 }
             });
+        }
+
+        var showCoefficient = function (obj) {
+        //alert(obj.value)
+            var typeExam = obj.value;
+            if (typeExam == '@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE') {
+                document.getElementById('Multiple').value = '1';
+            }
+            else if (typeExam == '@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY') {
+                document.getElementById('Multiple').value = '2';
+            }
+            else if (typeExam == '@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT') {
+                document.getElementById('Multiple').value = '3';
+            }
+            else {
+                return false;
+            }
+        }
+
+        var check = false;
+        function showSelect() {
+
+            if (check == false) {
+                $('#selectClassSubject').attr('style', 'display:block');
+                check = true;
+            }
+            else {
+                $('#selectClassSubject').attr('style', 'display:none');
+                check = false;
+            }
         }
 
     </script>
@@ -3700,6 +3839,97 @@
         </div>
         <template v-slot:modal-footer="{ ok, cancel}">
             <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="autocreateexam-modal-xl" centered title="Tự động tạo bài kiểm tra" :no-close-on-backdrop="true" size="xl">
+        <div class="row form-group">
+            <div class="col-md-12">
+                <label class="label" for="nameexam">Tiêu đề</label>
+                <input type="text" v-model="exam.name" id="nameexam" class="form-control" required />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-6">
+                <label class="label" for="">Thời gian (phút):</label>
+                <input type="number" min="1" v-model="exam.timer" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="label" for="">Giới hạn số lượt làm bài: </label>
+                <input type="number" min="1" v-model="exam.limit" class="form-control" required />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="form-group col-md-6" for="examOnly">
+                <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                <select name="Etype" class="form-control" onchange="showCoefficient(this)" v-model="exam.etype" required>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
+                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6" for="examOnly">
+                <label class="col-form-label">Hệ số:</label>
+                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-6">
+                <label class="label">Học liệu</label>
+                <div class="col-sm-10 row p-0" style="position:relative">
+                    <div class="col-sm-2">
+                        <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle" onclick="showSelect()">
+                            Chọn <span class="caret"></span>
+                        </button>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control " v-model="exam.listNameClassSubject" disabled required />
+                    </div>
+                    <div class="col-sm-10 p-0" style="position:absolute;left:75px;top:40px;z-index:9999">
+                        <div id="selectClassSubject" style="display:none;position:absolute;right:0px" class="col-sm-8">
+                            <ul class="classSelect" role="menu" style="overflow-y:auto;height:80px;list-style:none;width: max-content;">
+                                <li>
+                                    <a>
+                                        <input type="checkbox" id="selectAllClassSubject" v-on:click="selectAllClassSubject(classSubjects)" /><span class="lbl"> Chọn tất cả </span>
+                                    </a>
+                                </li>
+                                <li v-for="(item,k) in classSubjects">
+                                    <a>
+                                        <input type="checkbox" :value="item.ID" v-model="exam.listClassSubject" v-if="item.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" /><span class="lbl"> {{item.CourseName}} </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="label">Ngày bắt đầu</label>
+                <input class="form-control" v-model="exam.startTime" type="date" required />
+            </div>
+            <div class="col-md-3">
+                <label class="label">Ngày kết thúc</label>
+                <input class="form-control" v-model="exam.endTime" type="date" required />
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-12">
+                <label class="label" for="totalpart">Số câu</label>
+                <input type="number" v-model="exam.totalpart" id="totalpart" class="form-control" min="1" required />
+            </div>
+        </div>
+
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="autoCreateExam()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
         </template>
     </b-modal>
 }
