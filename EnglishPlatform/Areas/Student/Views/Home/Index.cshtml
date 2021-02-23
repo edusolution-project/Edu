@@ -505,7 +505,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 let _url = '@processUrl("GetActiveListV2", "Course")'
                 axios.post(_url, _form)
                     .then(response => {
@@ -539,7 +539,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 _form.append('PageSize', 6)
                 _form.append('PageIndex', 1)
                 let _url = '@processUrl("GetFinishList", "Course")'
@@ -556,7 +556,7 @@
                 let _that = this
                 // Truyen param vào đây
                 let _form = new FormData()
-                _form.append('today', '@DateTime.Now.ToString("MM/dd/yyyy")')
+                _form.append('today', '@DateTime.Now.ToString("yyyy-MM-dd")')
                 let _url = '@processUrl("GetThisWeekLesson", "Course")'
 
                 axios.post(_url, _form)
@@ -590,8 +590,8 @@
                 return str.substring(0, length) + "...";
             },
             formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                    return moment(date).format("DD/MM/YYYY")
+                if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                return moment(date).format("DD/MM/YYYY")
             },
             formatDatenoYear(date) {
                 var _date = moment(date);
@@ -667,21 +667,26 @@
                     var _date = moment(start);
                     if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
                         _date = moment();
-                    date = _date.format("MM/DD/YYYY")
-                    console.log(date);
+                    date = _date.format("YYYY-MM-DD")
                     _form.append('today', date)
                     _form.append('seekStart', false)
                     let _url = '@processUrl("GetThisWeekLesson", "Course")'
 
                     axios.post(_url, _form)
                         .then(response => {
-                            //console.log("Week")
                         _that.lesson_wk = response.data.data;
                         }).catch(e => { })
 
-                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(6, 'days'));
                     this.$bvModal.show("model_week_lesson")
-                }
+            },
+            hideModal(id) {
+                if (id == null)
+                    $('.close').click();
+                else
+                    $('#' + id + ' .close').click();
+            },
         }
     });
     </script>

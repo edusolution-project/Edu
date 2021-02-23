@@ -629,7 +629,7 @@
                     var _date = moment(start);
                     if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
                         _date = moment();
-                    date = _date.format("MM/DD/YYYY")
+                    date = _date.format("yyyy-MM-dd")
                     console.log(date);
                     _form.append('today', date)
                     _form.append('seekStart', false)
@@ -641,7 +641,7 @@
                         _that.lesson_week = response.data.data;
                         }).catch(e => { })
 
-                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(7, 'days'));
+                    this.weekTitle = "Danh sách bài - Tuần " + this.formatShortDate(_date) + " - " + this.formatShortDate(_date.add(6, 'days'));
                     this.$bvModal.show("model_week_lesson")
                 }
             }

@@ -713,7 +713,7 @@ namespace BaseCustomerMVC.Globals
         {
             if (item == null || item.Status) return true;//break if exam not found or completed
             if (item.Timer == 0) return false;
-            double count = (item.Created.AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
+            double count = (item.Created.ToUniversalTime().AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             return count <= 0;
         }
 
