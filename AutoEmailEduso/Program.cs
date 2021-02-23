@@ -975,85 +975,6 @@ namespace AutoEmailEduso
             return body;
         }
 
-        public static async Task SendIncomingLesson()
-        {
-            try
-            {
-                var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
-                Console.WriteLine(currentTime);
-                var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
-                var period = 60;
-                if (activeClasses != null && activeClasses.Count() > 0)
-                {
-                    foreach (var @class in activeClasses)
-                    {
-                        //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
-                        //var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
-                        var activeSchedules = _scheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime ).ToEnumerable()
-                            .OrderBy(t => t.ClassID)
-                            .ThenBy(t => t.ClassSubjectID)
-                            .ThenBy(t => t.StartDate).ToList();
-                        if (activeSchedules != null && activeSchedules.Count() > 0)
-                        {
-                            string subjectID = "";
-                            string classID = "";
-                            ClassEntity currentClass = null;
-                            ClassSubjectEntity currentSubject = null;
-                            TeacherEntity currentTeacher = null;
-                            var studentList = new List<StudentEntity>();
-                            var schedules = new List<ScheduleView>();
-                            var center = new CenterEntity();
-                            foreach (var schedule in activeSchedules)
-                            {
-                                if (classID != schedule.ClassID)
-                                {
-                                    studentList = _studentService.GetStudentsByClassId(schedule.ClassID).ToList();
-                                    if (studentList == null || studentList.Count == 0) // no student in class
-                                        continue;
-                                    currentClass = _classService.GetItemByID(schedule.ClassID);
-                                    classID = schedule.ClassID;
-                                    center = _centerService.GetItemByID(currentClass.Center);
-                                }
-                                if (subjectID != schedule.ClassSubjectID)//change subject
-                                {
-                                    if (!string.IsNullOrEmpty(subjectID))
-                                    {
-                                        var skill = _skillService.GetItemByID(currentSubject.ID);
-                                        count++;
-                                        //Send Mail for lastest class subject
-                                        _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                        _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                    }
-                                    subjectID = schedule.ClassSubjectID;
-                                    currentSubject = _classSubjectService.GetItemByID(subjectID);
-                                    currentTeacher = _teacherService.GetItemByID(currentSubject.TeacherID);
-                                    var newsubject = _classSubjectService.GetItemByID(schedule.ClassSubjectID);
-                                    schedules = new List<ScheduleView>();
-                                }
-                                schedules.Add(new ScheduleView(schedule)
-                                {
-                                    LessonName = _lessonService.GetItemByID(schedule.LessonID).Title
-                                });
-                            }
-                            //send last Class subject
-                            if (!string.IsNullOrEmpty(subjectID))
-                            {
-                                var skill = _skillService.GetItemByID(currentSubject.SkillID);
-                                count++;
-                                //Send Mail for lastest class subject
-                                _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                            }
-                        }
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine($"SendIncomingLesson : {ex.Message}");
-            }
-        }
-
         private static async Task SendTeacherScheduleToLesson()
         {
             try
@@ -1149,8 +1070,8 @@ namespace AutoEmailEduso
             }
             body += @"</tbody>
                 </table>";
-            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { currentTeacher.Email };
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { currentTeacher.Email };
+            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
         }
 
@@ -1182,9 +1103,95 @@ namespace AutoEmailEduso
             }
             body += @"</tbody>
                 </table>";
-            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
+            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
+        }
+        #endregion
+
+        #region SendIncomingLesson
+        public static async Task SendIncomingLesson()
+        {
+            try
+            {
+                var currentTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 0, 0).AddHours(1).ToUniversalTime();
+                Console.WriteLine(currentTime);
+                var activeClasses = _classService.GetActiveClass(time: currentTime, Center: null).ToList();
+                var period = 60;
+                if (activeClasses != null && activeClasses.Count() > 0)
+                {
+                    foreach (var @class in activeClasses)
+                    {
+                        //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
+                        var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                            .OrderBy(t => t.ClassID)
+                            .ThenBy(t => t.ClassSubjectID)
+                            .ThenBy(t => t.StartDate).ToList();
+                        if (activeSchedules != null && activeSchedules.Count() > 0)
+                        {
+                            string subjectID = "";
+                            string classID = "";
+                            ClassEntity currentClass = null;
+                            ClassSubjectEntity currentSubject = null;
+                            TeacherEntity currentTeacher = null;
+                            var studentList = new List<StudentEntity>();
+                            var schedules = new List<ScheduleView>();
+                            var center = new CenterEntity();
+                            foreach (var schedule in activeSchedules)
+                            {
+                                if (classID != schedule.ClassID)
+                                {
+                                    studentList = _studentService.GetStudentsByClassId(schedule.ClassID).ToList();
+                                    if (studentList == null || studentList.Count == 0) // no student in class
+                                        continue;
+                                    currentClass = _classService.GetItemByID(schedule.ClassID);
+                                    classID = schedule.ClassID;
+                                    center = _centerService.GetItemByID(currentClass.Center);
+                                }
+                                if (subjectID != schedule.ClassSubjectID)//change subject
+                                {
+                                    subjectID = schedule.ClassSubjectID;
+                                    currentSubject = _classSubjectService.GetItemByID(subjectID);
+                                    if (!string.IsNullOrEmpty(subjectID))
+                                    {
+                                        var skill = _skillService.GetItemByID(currentSubject.ID);
+                                        count++;
+                                        //Send Mail for lastest class subject
+                                        if (currentSubject.TypeClass != CLASSSUBJECT_TYPE.EXAM && schedule.IsOnline)
+                                        {
+                                            _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                        }
+                                        _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                    }
+                                    currentTeacher = _teacherService.GetItemByID(currentSubject.TeacherID);
+                                    var newsubject = _classSubjectService.GetItemByID(schedule.ClassSubjectID);
+                                    schedules = new List<ScheduleView>();
+                                }
+                                schedules.Add(new ScheduleView(schedule)
+                                {
+                                    LessonName = _lessonService.GetItemByID(schedule.LessonID).Title
+                                });
+                            }
+                            //send last Class subject ??? 
+                            if (!string.IsNullOrEmpty(subjectID))
+                            {
+                                var skill = _skillService.GetItemByID(currentSubject.SkillID);
+                                count++;
+                                //Send Mail for lastest class subject
+                                if (currentSubject.TypeClass != CLASSSUBJECT_TYPE.EXAM)
+                                {
+                                    _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                }
+                                _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SendIncomingLesson : {ex.Message}");
+            }
         }
         #endregion
 
@@ -2611,6 +2618,7 @@ namespace AutoEmailEduso
         }
         #endregion
 
+        #region mở rộng
         //function
         private static bool HasRole(string userid, string center, string role)
         {
@@ -2713,7 +2721,6 @@ namespace AutoEmailEduso
             return data;
         }
 
-        #region mở rộng
         public static async Task BenTre()
         {
             var center = _centerService.CreateQuery().Find(x=>x.Abbr == "c3btvp").FirstOrDefault();
