@@ -1359,7 +1359,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new Dictionary<String, Object>
                     {
                         {"Status",false },
-                        {"Message","Số lượng câu hỏi không đủ" },
+                        {"Message",$"Số câu khả dụng: {cloneLessonParts.Count()}. Vui lòng chọn số câu <= {cloneLessonParts.Count()}" },
                         {"Data",null }
                     });
                 }

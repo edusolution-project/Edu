@@ -1784,8 +1784,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 else //Not change
                                 {
                                     //update period
-                                    oSbj.StartDate = item.StartDate.ToUniversalTime();
-                                    oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                    oSbj.StartDate = nSbj.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = nSbj.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
 
 
@@ -2050,8 +2050,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
-                nSbj.StartDate = @class.StartDate;
-                nSbj.EndDate = @class.EndDate;
+                nSbj.StartDate = nSbj.StartDate <= new DateTime(1990,01,01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
+                nSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                 nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
