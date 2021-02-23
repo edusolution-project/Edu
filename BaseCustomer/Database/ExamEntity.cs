@@ -59,6 +59,9 @@ namespace BaseCustomerEntity.Database
         public string CodeExam { get; set; }
         [JsonProperty("LessonExtensionID")]
         public string LessonExtensionID { get; set; }
+
+        [JsonProperty("ListPartIDs")]
+        public List<String> ListPartIDs { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -411,6 +414,22 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<ExamEntity> GetItemByLessonScheduleID(String LessonScheduleID)
         {
             return CreateQuery().Find(x=>x.LessonScheduleID == LessonScheduleID).ToEnumerable();
+        }
+
+        public List<Int32> RandomIndex(Int32 TotalIndex)
+        {
+            var rd = new Random();
+            List<Int32> listIndex = new List<int>();
+            do
+            {
+                Int32 index = rd.Next(0, TotalIndex);
+                if (!listIndex.Contains(index))
+                {
+                    listIndex.Add(index);
+                }
+            }
+            while (listIndex.Count() != TotalIndex);
+            return listIndex;
         }
     }
 }

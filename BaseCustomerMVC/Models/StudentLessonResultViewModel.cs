@@ -46,6 +46,10 @@ namespace BaseCustomerMVC.Models
         public String ClassSubjectID { get; set; }
         [JsonProperty("CourseName")]
         public String CourseName { get; set; }
+        [JsonProperty("ChapterName")]
+        public String ChapterName { get; set; }
+        [JsonProperty("Target")]
+        public Double Target { get; set; }
     }
 
     public class ExamDetailCompactView

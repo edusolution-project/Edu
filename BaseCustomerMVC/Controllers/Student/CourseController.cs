@@ -602,7 +602,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     var progress = _lessonProgressService.GetByStudentID_LessonID(userId, schedule.lessonID);
 
-                    schedule.isLearnt = progress == null;
+                    schedule.isLearnt = progress == null ? false : true;
                     schedule.lastPoint = (progress != null && progress.Tried > 0) ? progress.LastPoint : -1;
                     var lesson = _lessonService.GetItemByID(schedule.lessonID);
                     schedule.chapterName = lesson.ChapterID == "0" ? "" : _chapterService.GetItemByID(lesson.ChapterID).Name;

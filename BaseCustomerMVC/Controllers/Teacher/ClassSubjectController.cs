@@ -136,7 +136,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                               TeacherID = r.TeacherID,
                               TeacherName = teacher.FullName,
                               TypeClass = r.TypeClass,
-                              HasLessonActive = countActiveLesson
+                              HasLessonActive = countActiveLesson,
+                              StartDate = r.StartDate,
+                              EndDate = r.EndDate
                           }).ToList()
                 },
             };

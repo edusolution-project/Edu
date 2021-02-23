@@ -62,7 +62,7 @@
                                             </template>
                                         </p>
                                         <p style="font-size:13px">
-                                            Mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ? csbj.Target / 10 : "Chưa đặt"}}</btn>
+                                            Điểm mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ? csbj.Target / 10 : "Chưa đặt"}}</btn>
                                         </p>
                                     </div>
                                 </div>
@@ -96,7 +96,7 @@
                                             </template>
                                         </p>
                                         <p style="font-size:13px">
-                                            Mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ? csbj.Target / 10: "Chưa đặt"}}</btn>
+                                            Điểm mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ? csbj.Target / 10: "Chưa đặt"}}</btn>
                                         </p>
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@
                                             </template>
                                         </p>
                                         <p style="font-size:13px">
-                                            Mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ?  (csbj.Target / 10) : "Chưa đặt"}}</btn>
+                                            Điểm mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ?  (csbj.Target / 10) : "Chưa đặt"}}</btn>
                                         </p>
                                     </div>
                                     <template>
@@ -239,7 +239,7 @@
                         <div class="d-flex justify-content-between align-items-start align-items-md-center">
                             <div class="chap-info ml-3" style="color:#999; white-space: nowrap">
                                 <i class="ti-link" style="background-color: #bee4ef;" v-for="(chap,j) in listchaps" v-if="(data.ConditionChapter != '') && (chap.ID == data.ConditionChapter)"><span class="pl-1">Điều kiện: {{chap.Title}}</span></i>
-                                <i class="ti-target ml-2" v-if="data.BasePoint > 0" style="background-color: #ffe38d"><span class="pl-1">Mục tiêu: {{data.BasePoint}}</span></i>
+                                <i class="ti-target ml-2" v-if="data.BasePoint > 0" style="background-color: #ffe38d"><span class="pl-1">Điểm mục tiêu: {{data.BasePoint}}</span></i>
                                 <i class="ti-control-play ml-2" style="background-color: #c3e2c3" v-if="moment(data.StartDate) > moment(new Date(1900,1,1))"><span class="pl-1">bắt đầu {{formatTime(data.StartDate)}}</span></i>
                                 <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
                             </div>

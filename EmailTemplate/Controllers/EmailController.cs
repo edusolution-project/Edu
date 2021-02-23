@@ -14,6 +14,7 @@ using GoogleLib.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 
 namespace EmailTemplate.Controllers
 {
@@ -77,6 +78,8 @@ namespace EmailTemplate.Controllers
             _roxyFilemanHandler = roxyFilemanHandler;
             _reportService = reportService;
         }
+
+        #region mail
         public IActionResult Index(DateTime currentTime)
         {
             if (currentTime == null || currentTime <= DateTime.MinValue)
@@ -97,8 +100,8 @@ namespace EmailTemplate.Controllers
             {
                 List<int> Block = new List<int>();
                 var center = centersActive.ElementAt(i);
-                //if (center.Abbr == "c3vyvp")
-                if (center.Abbr != "eduso")
+                if (center.Abbr == "c3vyvp")
+                //if (center.Abbr != "eduso")
                 //if(center.ID== "5f17bf6569926b0f6481b742")
                 {
                     var data = GetDataForReprot(center, currentTime);
@@ -152,6 +155,7 @@ namespace EmailTemplate.Controllers
             ViewBag.ClassName = ClassName;
             ViewBag.CountBlock = BlockCenter.Values.Sum(x=>x.Length);
             ViewBag.ClassCenters = classCenter;
+            ViewBag.CurrentTime = currentTime;
 
             return View();
         }
@@ -200,7 +204,7 @@ namespace EmailTemplate.Controllers
 
                     List<string> toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com" } : listEmail;
                     List<string> bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "manhdv@utc.edu.vn" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                    //_ = await _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
 
                     //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "buihong9885@gmail.com", "manhdv@utc.edu.vn" };
                     //List<string> toAddress = new List<string> { "shin.l0v3.ly@gmail.com" };
@@ -752,5 +756,102 @@ namespace EmailTemplate.Controllers
         //        await SendWeeklyReport(center, currentTime, isTest);
         //    }
         //}
+        #endregion
+
+        #region Report To Hien
+        public IActionResult Report()
+        {
+            try
+            {
+                var center = _centerService.CreateQuery().Find(x => x.Abbr.Equals("c3vyvp")).FirstOrDefault();
+                if (center == null) return Content("center null");
+                var @classes = _classService.CreateQuery().Find(x => x.Center.Equals(center.ID));
+                if (@classes.CountDocuments() == 0) return Content("class null");
+                var listData = new List<Dictionary<String, Object>>();
+                foreach (var @class in classes.ToList().Distinct())
+                {
+                    if (!@class.ID.Equals("5f5f322def17391d0c623b9c")) continue;
+                    List<dateTime> listTime = new List<dateTime>
+                    {
+                        new dateTime(new DateTime(2020,09,01,0,0,0),new DateTime(2020,09,30,23,59,59)),
+                        new dateTime(new DateTime(2020,10,01,0,0,0),new DateTime(2020,10,31,23,59,59)),
+                        new dateTime(new DateTime(2020,11,01,0,0,0),new DateTime(2020,11,30,23,59,59)),
+                        new dateTime(new DateTime(2020,12,01,0,0,0),new DateTime(2020,12,31,23,59,59)),
+                    };
+                    
+                    foreach(var time in listTime)
+                    {
+                        var data = GetData4Report(time.StartWeek, time.EndWeek, @class);
+                        listData.Add(data);
+                    }
+                }
+                ViewBag.ListData = listData;
+                return View();
+            }
+            catch(Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        private Dictionary<String,Object> GetData4Report(DateTime startTime, DateTime endTime, ClassEntity @class)
+        {
+            var studentIds = _studentService.GetStudentIdsByClassId(@class.ID);
+            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
+            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+
+            var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID.Equals(@class.ID) && activeLessonIds.Contains(x.LessonID));
+            if (lessonProgess.CountDocuments() == 0) { }
+            var result = lessonProgess.ToList().Where(x => x.Tried > 0).GroupBy(x => x.StudentID);
+            Int32 minpoint8 = 0, minpoint5 = 0, minpoint2 = 0, minpoint0 = 0, chualam = 0;
+            foreach (var st in studentIds)
+            {
+                var item = result.Where(x => x.Key == st).FirstOrDefault();
+                if (item == null) chualam++;
+                else
+                {
+                    var point = item.Average(x => x.LastPoint);
+                    if (point >= 80) minpoint8++;
+                    else if (point >= 50 && point < 80) minpoint5++;
+                    else if (point >= 20 && point < 50) minpoint2++;
+                    else if (point >= 0 && point < 20) minpoint0++;
+                }
+            }
+
+            var classResult = new ClassResult 
+            {
+                ChuaLam = chualam,
+                MinPoint0 = minpoint0,
+                MinPoint2 = minpoint2,
+                MinPoint5 = minpoint5,
+                MinPoint8 = minpoint8,
+                NameClass = @class.Name,
+                TotalStudent = studentIds.Count()
+            };
+
+            return new Dictionary<string, object>
+            {
+                {startTime.Month.ToString(),classResult }
+            };
+        }
+        #endregion
+    }
+
+    public class ClassResult
+    {
+        [JsonProperty("MinPoint8")]
+        public int MinPoint8 { get; set; }
+        [JsonProperty("MinPoint5")]
+        public int MinPoint5 { get; set; }
+        [JsonProperty("MinPoint2")]
+        public int MinPoint2 { get; set; }
+        [JsonProperty("MinPoint0")]
+        public int MinPoint0 { get; set; }
+        [JsonProperty("ChuaLam")]
+        public int ChuaLam { get; set; }
+        [JsonProperty("TotalStudent")]
+        public int TotalStudent { get; set; }
+        [JsonProperty("NameClass")]
+        public String NameClass { get; set; }
     }
 }

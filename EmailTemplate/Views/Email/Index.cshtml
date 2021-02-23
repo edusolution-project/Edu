@@ -12,6 +12,7 @@
     var ClassName = ViewBag.ClassName as Dictionary<string, string>;
     var TotalBlock = ViewBag.CountBlock;
     var ClassCenters = ViewBag.ClassCenters as Dictionary<string, string>;
+    var currentTime = ViewBag.CurrentTime;
 }
 
 <div id="list-data"></div>
@@ -44,15 +45,17 @@
         var div = document.createElement("canvas");
         var Khoi = khoi == 99 ? "" : " khối " + khoi;
 
-        var currentTime = new Date();
+        //var currentTime = new Date();
+        var currentTime = new Date('@currentTime');
         var Thang = "";
         var Nam = "";
         if (currentTime.getMonth() == 0) {
             Thang = "tháng 12";
-            Nam = currentTime.getFullYear() - 1;
+            Nam = currentTime.getFullYear();
         }
         else {
-            Thang = "tháng " + currentTime.getMonth();
+            Thang = "tháng " + (parseInt(currentTime.getMonth()));
+            //debugger
             Nam = currentTime.getFullYear();
         }
 

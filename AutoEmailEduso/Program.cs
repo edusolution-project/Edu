@@ -25,7 +25,7 @@ namespace AutoEmailEduso
         private static TeacherService _teacherService;
         private static SkillService _skillService;
         private static MailHelper _mailHelper;
-        private static bool isTest = false;
+        private static bool isTest = true;
         private static int count = 0;
 
         private static LessonScheduleService _lessonScheduleService;
@@ -98,6 +98,10 @@ namespace AutoEmailEduso
                     case "SendTeacherScheduleToLesson":
                         Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
                         await SendTeacherScheduleToLesson();
+                        break;
+                    case "AutoDeactiveClass":
+                        Console.WriteLine("Processing Auto Deactive Class ...");
+                        await AutoDeactiveClass();
                         break;
                     //case "sendmail":
                     //    Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
@@ -888,7 +892,7 @@ namespace AutoEmailEduso
                                 $"<div style='font-style: italic;font-size: 12px'>Kết quả được cập nhật lần cuối lúc {endWeek.ToString("HH:mm - dd/MM/yyyy")}</div>" +
                                 $"{body}" +
                                 $"{note}" +
-                                $"{newContent}" +
+                                //$"{newContent}" +
                                 $"{extendTeacher}";
 
                 if (listTeacher.Count > 1)
@@ -1017,8 +1021,8 @@ namespace AutoEmailEduso
                                         var skill = _skillService.GetItemByID(currentSubject.ID);
                                         count++;
                                         //Send Mail for lastest class subject
-                                        _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                        _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                        _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                        _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
                                     }
                                     subjectID = schedule.ClassSubjectID;
                                     currentSubject = _classSubjectService.GetItemByID(subjectID);
@@ -1037,8 +1041,8 @@ namespace AutoEmailEduso
                                 var skill = _skillService.GetItemByID(currentSubject.SkillID);
                                 count++;
                                 //Send Mail for lastest class subject
-                                _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
-                                _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                _ = SendStudentSchedule(schedules, currentTeacher, studentList, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
+                                _ = SendTeacherSchedule(schedules, currentTeacher, currentClass, skill?.Name, subjectID, currentTime, currentTime.AddMinutes(period), center);
                             }
                         }
                     }
@@ -1145,7 +1149,8 @@ namespace AutoEmailEduso
             }
             body += @"</tbody>
                 </table>";
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com" } : new List<string> { currentTeacher.Email };
+            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { currentTeacher.Email };
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
         }
 
@@ -1177,7 +1182,8 @@ namespace AutoEmailEduso
             }
             body += @"</tbody>
                 </table>";
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
+            //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
         #endregion
@@ -2532,6 +2538,79 @@ namespace AutoEmailEduso
         }
         #endregion
 
+        #region
+        private static async Task AutoDeactiveClass()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                int offset = currentTime.DayOfWeek - DayOfWeek.Monday;
+                var monday = currentTime.AddDays(-offset);
+                var monday2weekago = monday.AddDays(-14);
+                var sundayweekago = monday.AddDays(-1);
+                var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
+                var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
+                var activeCenters = _centerService.GetActiveCenter(currentTime);
+                if(activeCenters.Count() == 0)
+                {
+                    Console.WriteLine("Không có cơ sở hoạt động");
+                }
+
+                Int32 totalClass = 0;
+
+                foreach(var center in activeCenters)
+                {
+                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);
+                    if (classesActive.Count() == 0) continue;
+                    foreach (var @class in classesActive)
+                    {
+                        if (@class.StartDate > firstDay) continue;
+                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
+                        if(activeLessons == 0)
+                        {
+                            if (!@class.IsActive) continue;
+                            @class.IsActive = false;
+                            totalClass++;
+                            Console.WriteLine("Lop khong co hoat dong " + @class.Name + " - " + center.Name);
+                            //_classService.Save(@class);
+                            var students = _studentService.GetStudentIdsByClassId(@class.ID).Count();
+                            if (students == 0) continue;
+                            var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                            var listTeacher = new List<TeacherEntity>();
+                            var subject = "Thông báo đóng lớp không hoạt động";
+                            foreach (var mem in members.ToList())
+                            {
+                                var _teacher = _teacherService.GetItemByID(mem.TeacherID);
+                                if (!listTeacher.Any(x => x.Email == _teacher.Email))
+                                {
+                                    listTeacher.Add(_teacher);
+                                    var content = "<div>" +
+                                        $"<p>Kính gửi thầy/cô: {_teacher.FullName}</p>" +
+                                        $"<p>EDUSO nhận thấy trong thời gian từ ngày {firstDay.ToString("dd-MM-yyyy")} đến ngày {lastDay.ToString("dd-MM-yyyy")} " +
+                                        $"lớp {@class.Name} - cơ sở {center.Name}" +
+                                        $"của giáo viên {_teacher.FullName} không có hoạt động (lên lịch dạy, giao bài tập cho học sinh).</p>" +
+                                        $"<p>Vì vậy EDUSO đóng lớp {@class.Name} kể từ ngày {currentTime.ToString("dd-MM-yyyy")}</p>" +
+                                        $"<p>Mọi thông tin thắc mắc vui lòng liên hệ CSKH: 0989 085 398 </p>" +
+                                        "</div>";
+                                    var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { _teacher.Email };
+                                    //var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                                    var toBCC = isTest ? null : new List<String> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" };
+                                    _ = _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT, null, toBCC);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Tổng lớp: {totalClass}");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+        #endregion
+
         //function
         private static bool HasRole(string userid, string center, string role)
         {
@@ -2589,6 +2668,7 @@ namespace AutoEmailEduso
                                                                 <div>- Nếu trên 70% học sinh trả lời đúng nội dung thì giáo viên giải thích và tóm tắt ngắn gọn đáp án và chuyển sang phần tiếp theo;</div><br>
                                                                 <div>- Nếu từ 30% đến 70% học sinh trả lời đúng thì tổ chức cho những học sinh này giải thích để học sinh trả lời sai làm lại bài;</div><br>
                                                                 <div>- Nếu dưới 30% học sinh trả lời đúng thì giáo viên giảng lại nội dung đó và cho làm lại chính câu hỏi đó.</div><br>
+                                                                <div>- Tỉ lệ được tổng hợp từ các bài học sinh đã làm.</div><br>
                                                             </p>
                                                         </div>
                                                     </div>";
