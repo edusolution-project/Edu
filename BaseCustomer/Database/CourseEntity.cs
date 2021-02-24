@@ -44,7 +44,7 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Order")]
         public int Order { get; set; }
         [JsonProperty("Outline")]
-        public string Outline { get; set; }             // Đề cương môn học
+        public string Outline { get; set; }
         [JsonProperty("LearningOutcomes")]
         public string LearningOutcomes { get; set; }  // Mục tiêu môn học
         [JsonProperty("TotalLessons")]
@@ -59,6 +59,10 @@ namespace BaseCustomerEntity.Database
         public List<string> TargetCenters { get; set; }
         [JsonProperty("StudentTargetCenters")]
         public List<string> StudentTargetCenters { get; set; }
+        [JsonProperty("PublishedVer")]
+        public DateTime PublishedVer { get; set; } // root to current
+        [JsonProperty("LastSync")]
+        public DateTime LastSync { get; set; } // current to clone
         [JsonProperty("IsPublic")]
         public Boolean IsPublic { get; set; }
         [JsonProperty("PublicWStudent")]
@@ -117,7 +121,7 @@ namespace BaseCustomerEntity.Database
                 .AddToSet(t => t.TargetCenters, TargetID));
         }
 
-        public IEnumerable<CourseEntity> GetItemBySubjectID_GradeID(String SubjectID, String GradeID,String CenterID)
+        public IEnumerable<CourseEntity> GetItemBySubjectID_GradeID(String SubjectID, String GradeID, String CenterID)
         {
             return CreateQuery().Find(x => x.GradeID.Equals(GradeID) && x.SubjectID.Equals(SubjectID) && x.Center.Equals(CenterID)).ToEnumerable();
         }
