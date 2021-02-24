@@ -1073,19 +1073,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return answers;
         }
         
-        private async Task CreateSameExam(LessonExtensionEntity lesson,ExamProcessEntity examProcess)
-        {
-            var lessonparts = _cloneLessonPartExtensionService.GetItemsByLessonID(lesson.ID);
-            var lessonpartIDs = lessonparts.Select(x => x.ID).ToList();
-            //var lessonpartIDs = _cloneLessonPartExtensionService.GetIDsByLessonID(lesson.ID);
-            var questions = _cloneLessonPartQuestionExtensionService.GetItemsByParentIDs(lessonpartIDs);
-            //var questionIDs = questions.Select(x => x.ID).ToList();
+        //private async Task CreateSameExam(LessonExtensionEntity lesson,ExamProcessEntity examProcess)
+        //{
+        //    var lessonparts = _cloneLessonPartExtensionService.GetItemsByLessonID(lesson.ID);
+        //    var lessonpartIDs = lessonparts.Select(x => x.ID).ToList();
+        //    //var lessonpartIDs = _cloneLessonPartExtensionService.GetIDsByLessonID(lesson.ID);
+        //    var questions = _cloneLessonPartQuestionExtensionService.GetItemsByParentIDs(lessonpartIDs);
+        //    //var questionIDs = questions.Select(x => x.ID).ToList();
 
-            foreach (var part in lessonparts)
-            {
-                var question = questions.Where(x => x.ParentID == part.ID);
-            }
-        }
+        //    foreach (var part in lessonparts)
+        //    {
+        //        var question = questions.Where(x => x.ParentID == part.ID);
+        //    }
+        //}
         #endregion
     }
 

@@ -46,6 +46,11 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly VocabularyService _vocabularyService;
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
+        private readonly LessonExtensionService _lessonExtensionService;
+        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
+        private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
+        private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
+
         //private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonPartMapping;
         //private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonPartQuestionMapping;
         //private readonly MappingEntity<LessonPartAnswerEntity, CloneLessonPartAnswerEntity> _lessonPartAnswerMapping;
@@ -74,7 +79,12 @@ namespace BaseCustomerMVC.Controllers.Student
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
             VocabularyService vocabularyService,
-            CenterService centerService
+            CenterService centerService,
+
+            LessonExtensionService lessonExtensionService,
+            CloneLessonPartExtensionService cloneLessonPartExtensionService,
+            CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService,
+            CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
             )
         {
             _subjectService = subjectService;
@@ -103,6 +113,11 @@ namespace BaseCustomerMVC.Controllers.Student
             _vocabularyService = vocabularyService;
             _progressHelper = progressHelper;
             _centerService = centerService;
+
+            _lessonExtensionService = lessonExtensionService;
+            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
+            _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
+            _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
         }
 
         //public IActionResult Index()
@@ -530,45 +545,68 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var rd = new Random();
             List<String> listPartIDs = new List<String>();
-            if (currentcs.TypeClass == CLASSSUBJECT_TYPE.EXAM)
+            var lessonExtension = _lessonExtensionService.GetItemByLessonID(LessonID);
+            if (currentcs.TypeClass == CLASSSUBJECT_TYPE.EXAM) //đảo vị trí câu hỏi trong bài kiểm tra
             {
-                if (lastexam != null)
+                if (lastexam != null)//????
                 {
-                    if (lastexam.ListPartIDs == null)
+                    if (lessonExtension.Count() == 0)
                     {
-                        List<Int32> listIndex = new List<int>();
-                        do
+                        if (lastexam.ListPartIDs == null)
                         {
-                            Int32 index = rd.Next(0, dataListParts.Count());
-                            if (!listIndex.Contains(index))
+                            List<Int32> listIndex = new List<int>();
+                            do
                             {
-                                listIndex.Add(index);
+                                Int32 index = rd.Next(0, dataListParts.Count());
+                                if (!listIndex.Contains(index))
+                                {
+                                    listIndex.Add(index);
+                                }
+                            }
+                            while (listIndex.Count() != dataListParts.Count());
+
+                            foreach (var index in listIndex)
+                            {
+                                var data = dataListParts.ElementAtOrDefault(index);
+                                if (data != null)
+                                {
+                                    listParts.Add(data);
+                                    listPartIDs.Add(data.ID);
+                                }
                             }
                         }
-                        while (listIndex.Count() != dataListParts.Count());
-
-                        foreach (var index in listIndex)
+                        else
                         {
-                            var data = dataListParts.ElementAtOrDefault(index);
-                            if (data != null)
+                            foreach (var id in lastexam.ListPartIDs)
                             {
-                                listParts.Add(data);
-                                listPartIDs.Add(data.ID);
+                                var data = dataListParts.Where(x => x.ID == id).FirstOrDefault();
+                                if (data != null)
+                                    listParts.Add(data);
                             }
                         }
                     }
                     else
                     {
-                        foreach (var id in lastexam.ListPartIDs)
+                        if (lessonExtension.Count() == 1) // 1 đề tạo từ ngân hàng câu hỏi
                         {
-                            var data = dataListParts.Where(x => x.ID == id).FirstOrDefault();
-                            if (data != null)
-                                listParts.Add(data);
+                            listParts = _cloneLessonPartExtensionService.GetItemsByLessonID(lessonExtension.FirstOrDefault().ID, currentcs.ID).ToList<CloneLessonPartEntity>();
+                        }
+                        else if (lessonExtension.Count() > 1) // nhiều đề tạo từ ngân hàng câu hỏi
+                        {
+                            var index = new Random().Next(0, lessonExtension.Count());
+                            var currentLesson = lessonExtension.ElementAtOrDefault(index);
+                            //while (lastexam != null && lastexam.CodeExam != currentLesson.CodeExam)
+                            //{
+                            //    index = new Random().Next(0, lessonExtension.Count());
+                            //    currentLesson = lessonExtension.ElementAtOrDefault(index);
+                            //}
+
+                            listParts = _cloneLessonPartExtensionService.GetItemsByLessonID(currentLesson.ID, currentcs.ID).ToList<CloneLessonPartEntity>();
                         }
                     }
                 }
             }
-            else
+            else //không đảo vị trí trong bài luyện tập
             {
                 listParts = dataListParts;
             }
@@ -587,16 +625,51 @@ namespace BaseCustomerMVC.Controllers.Student
                     case "QUIZ3":
                     case "QUIZ4":
                     case "ESSAY":
-                        convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery()
-                            .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
-                            .Select(q => new QuestionViewModel(q)
+                        if (lessonExtension.Count() == 0)
+                        {
+                            convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery()
+                                .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                                .Select(q => new QuestionViewModel(q)
+                                {
+                                    CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                                    Description = q.Description
+                                }).ToList();
+                        }
+                        else if (lessonExtension.Count() > 0)
+                        {
+                            //convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery()
+                            //    .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                            //    .Select(q => new QuestionViewModel(q)
+                            //    {
+                            //        CloneAnswers = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
+                            //        Description = q.Description
+                            //    }).ToList();
+                            var quiz = _cloneLessonPartQuestionExtensionService.CreateQuery().Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                            var questions = new List<QuestionViewModel>();
+                            foreach(var q in quiz)
                             {
-                                CloneAnswers = _cloneLessonPartAnswerService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
-                                Description = q.Description
-                            }).ToList();
+                                var question = new QuestionViewModel(q);
+                                //var ca = (from a in _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList()
+                                //         let an = a as CloneLessonPartAnswerEntity
+                                //         select an).ToList();
+                                var listans = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList();
+                                var nlistans = new List<CloneLessonPartAnswerEntity>();
+                                foreach(var a in listans)
+                                {
+                                    var cloneans = a as CloneLessonPartAnswerEntity;
+                                    nlistans.Add(cloneans);
+                                }
+                                var des = q.Description;
+                                question.CloneAnswers = nlistans;
+                                question.Description = des;
+                                questions.Add(question);
+                            }
+                        }
                         break;
                     case "QUIZ2":
-                        convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID)
+                        if (lessonExtension.Count() == 0)
+                        {
+                            convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID)
                             //.SortBy(q => q.Order).ThenBy(q => q.ID)
                             .ToList()
                             .Select(q => new QuestionViewModel(q)
@@ -604,6 +677,18 @@ namespace BaseCustomerMVC.Controllers.Student
                                 CloneAnswers = null,
                                 Description = null
                             }).ToList();
+                        }
+                        else if (lessonExtension.Count() > 0)
+                        {
+                            convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery().Find(q => q.ParentID == part.ID)
+                            //.SortBy(q => q.Order).ThenBy(q => q.ID)
+                            .ToList()
+                            .Select(q => new QuestionViewModel(q)
+                            {
+                                CloneAnswers = null,
+                                Description = null
+                            }).ToList();
+                        }
                         break;
                     case "VOCAB":
                         convertedPart.Description = RenderVocab(part.Description);

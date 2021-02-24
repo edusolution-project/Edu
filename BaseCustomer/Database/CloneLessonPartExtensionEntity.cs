@@ -29,9 +29,9 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
-        public IEnumerable<CloneLessonPartExtensionEntity> GetItemsByLessonID(string ParentID)
+        public IEnumerable<CloneLessonPartExtensionEntity> GetItemsByLessonID(string ParentID,String classSubjectID)
         {
-            return CreateQuery().Find(x => x.ParentID == ParentID).ToEnumerable();
+            return CreateQuery().Find(x => x.ParentID == ParentID && x.ClassSubjectID == classSubjectID).ToEnumerable();
         }
 
         public List<String> GetIDsByLessonID(string ParentID)
