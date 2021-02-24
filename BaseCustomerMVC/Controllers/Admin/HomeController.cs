@@ -121,7 +121,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 MailHelper mailHelper
             )
         {
-            _courseLessonService = _courseLessonService;
+            _courseLessonService = courseLessonService;
             _lessonPartService = lessonPartService;
             _questionService = questionService;
             _answerService = answerService;
@@ -413,6 +413,112 @@ namespace BaseCustomerMVC.Controllers.Admin
         //    str += " End. ";
         //    return Json(str);
         //}
+
+
+        public async Task<JsonResult> FixLessonPoint0()
+        {
+            var start = DateTime.UtcNow;
+            var str = "";
+            str += "Phase 0: ";
+            var change = 0;
+
+            var clids = _courseLessonService.CreateQuery().Find(t => t.IsPractice && t.Point == 0).Project(t => t.ID).ToList();
+            foreach (var clid in clids)
+            {
+                var cl = _courseLessonService.GetItemByID(clid);
+                var oldpoint = cl.Point;
+                var isPrac = cl.IsPractice;
+                var newPrac = isPrac;
+                var point = calculateLessonPoint(cl, newPrac);
+                if ((isPrac != newPrac) || (point != oldpoint))
+                {
+                    _courseLessonService.Save(cl);
+                    change++;
+                }
+            }
+            str += " Course Lesson Point change " + change;
+
+            str += " - Phase 2: ";
+            var lids = _lessonService.CreateQuery().Find(t => (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM) && t.Point == 0).Project(t => t.ID).ToList();
+
+            var lchg = 0;
+            foreach (var clid in lids)
+            {
+                var cl = _lessonService.GetItemByID(clid);
+                var oldpoint = cl.Point;
+                var isPrac = cl.IsPractice;
+                var newPrac = isPrac;
+                var point = calculateCloneLessonPoint(cl, newPrac);
+                if ((isPrac != newPrac) || (point != oldpoint))
+                {
+                    _lessonService.Save(cl);
+                    lchg++;
+                    var exams = _examService.CreateQuery().Find(t => t.LessonID == clid).ToList();
+                    if (exams != null && exams.Count() > 0)
+                    {
+                        foreach (var ex in exams)
+                        {
+                            var lesson = _lessonService.GetItemByID(ex.LessonID);
+                            _lessonHelper.CompleteNoEssay(ex, lesson, out point, false);
+
+                            //ex.MaxPoint = point;
+
+                            //_examService.Save(ex);
+                        }
+                    }
+                }
+            }
+
+            str += " Lesson Point change " + lchg;
+
+            str += " - Phase 3: ";
+            var eids = _lessonProgressService.CreateQuery().Find(t => t.LastPoint > 100).Project(t => t.LessonID).ToList().Distinct();
+            var echange = 0;
+            foreach (var eid in eids)
+            {
+                var exs = _examService.CreateQuery().Find(t => eids.Contains(t.LessonID)).ToList();
+                foreach (var ex in exs)
+                {
+
+                    if (ex.QuestionsTotal < ex.QuestionsPass || ex.MaxPoint < ex.QuestionsTotal)
+                    {
+                        var lesson = _lessonService.GetItemByID(ex.LessonID);
+                        double point = 0;
+                        _lessonHelper.CompleteNoEssay(ex, lesson, out point, false);
+                        echange++;
+                    }
+                }
+            }
+
+            str += " Exam point change " + echange;
+
+            //foreach (var clid in eids)
+            //{
+            //    var cl = _lessonService.GetItemByID(clid);
+            //    var oldpoint = cl.Point;
+            //    var isPrac = cl.IsPractice;
+            //    var newPrac = isPrac;
+            //    var point = calculateCloneLessonPoint(cl, newPrac);
+            //    if ((isPrac != newPrac) || (point != oldpoint))
+            //    {
+            //        _lessonService.Save(cl);
+            //        lchg++;
+            //        var exams = _examService.CreateQuery().Find(t => t.LessonID == clid).ToList();
+            //        if (exams != null && exams.Count() > 0)
+            //        {
+            //            foreach (var ex in exams)
+            //            {
+            //                ex.MaxPoint = point;
+
+            //                _examService.Save(ex);
+            //            }
+            //        }
+            //    }
+            //}
+
+            return Json(str);
+        }
+
 
         public async Task<JsonResult> FixScoreDataV2()
         {

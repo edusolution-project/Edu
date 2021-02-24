@@ -581,8 +581,9 @@
                         //console.log(_that.discussion);
                     }).catch(e => { })},
             formatTime(time) {
-                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY HH:mm")
+                var _time = moment(time);
+                if (time == null || !_time._isValid || _time < moment(new Date(2000, 1, 1))) return "-"
+                return _time.format("DD/MM/YYYY HH:mm")
             },
             shortenString(str, length) {
                 if (str.length <= length)
@@ -590,12 +591,13 @@
                 return str.substring(0, length) + "...";
             },
             formatShortDate(date) {
-                if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
-                return moment(date).format("DD/MM/YYYY")
+                var _date = moment(date);
+                if (date == null || !_date._isValid || _date < moment(new Date(2000, 1, 1))) return "-"
+                return _date.format("DD/MM/YYYY")
             },
             formatDatenoYear(date) {
                 var _date = moment(date);
-                if (!_date._isValid || _date < moment(new Date(2000, 1, 1))) return "";
+                if (date == null || !_date._isValid || _date < moment(new Date(2000, 1, 1))) return "-"
                 return _date.format("DD/MM")
             },
             validDate(item) {

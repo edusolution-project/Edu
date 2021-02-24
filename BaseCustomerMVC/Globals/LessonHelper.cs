@@ -506,6 +506,8 @@ namespace BaseCustomerMVC.Globals
                 _examService.CreateQuery().UpdateMany(t => t.StudentID == exam.StudentID && t.LessonID == exam.StudentID && t.ID != exam.ID, Builders<ExamEntity>.Update.Set(t => t.Number, 0));
             }
 
+            var completedQ = new List<string>();
+
             for (int i = 0; listDetails != null && i < listDetails.Count; i++)
             {
                 //var regex = new System.Text.RegularExpressions.Regex(@"[^0-9a-zA-Z:,]+");
@@ -518,6 +520,10 @@ namespace BaseCustomerMVC.Globals
 
                 //bài tự luận
                 if (string.IsNullOrEmpty(examDetail.QuestionID) || examDetail.QuestionID == "0") continue;
+
+                if (completedQ.Contains(examDetail.QuestionID)) continue;
+                completedQ.Add(examDetail.QuestionID);
+
 
                 var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
                 if (part == null) continue; //Lưu lỗi => bỏ qua ko tính điểm
@@ -625,6 +631,13 @@ namespace BaseCustomerMVC.Globals
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
             exam.QuestionsTotal = _cloneQuestionService.CountByLessonID(exam.LessonID);
 
+            //temp fix
+            if (exam.QuestionsTotal < exam.QuestionsDone || exam.MaxPoint < exam.QuestionsDone)
+            {
+                exam.QuestionsTotal = exam.QuestionsDone;
+                exam.MaxPoint = exam.QuestionsDone;
+            }
+
             var lessonProgress = _progressHelper.UpdateLessonPoint(exam).Result;
 
             _examService.Save(exam);
@@ -711,7 +724,12 @@ namespace BaseCustomerMVC.Globals
 
         public bool IsOvertime(ExamEntity item)
         {
+
             if (item == null || item.Status) return true;//break if exam not found or completed
+            var schedule = _lessonScheduleService.GetItemByLessonID(item.LessonID);
+            if (schedule == null) return true;//break if no schedule
+            if (schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate < DateTime.UtcNow)
+                return true;
             if (item.Timer == 0) return false;
             double count = (item.Created.ToUniversalTime().AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             return count <= 0;
