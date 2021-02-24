@@ -1,8 +1,7 @@
 {
   "profiles": {
     "AutoEmailEduso": {
-      "commandName": "Project",
-      "commandLineArgs": "HPNY"
+      "commandName": "Project"
     }
   }
 }

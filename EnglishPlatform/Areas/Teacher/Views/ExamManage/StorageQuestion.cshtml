@@ -1,0 +1,629 @@
+﻿
+@{
+    ViewData["Title"] = "Ngân hàng câu hỏi";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
+    var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
+    var currentData = ViewBag.CurrentExamArchive as BaseCustomerEntity.Database.ExamQuestionArchiveEntity;
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+<script src="~/js/vue@2.6.0.js"></script>
+<script src="~/js/bootstrap-vue.min.js"></script>
+<script src="~/js/axios.min.js"></script>
+
+<section class="container-fluid">
+    <div class="card-header border-b">
+        <div class="flex flex-row flex-wrap align-items-center">
+            <div class="box filter-box w-152 m-1 ">
+                <select v-model="subject">
+                    <option value="">Chương trình</option>
+                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box w-152 m-1">
+                <select name="" v-model="grade">
+                    <option value="">Cấp độ</option>
+                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                </select>
+            </div>
+            <div class="box filter-box w-152 m-1 ">
+                <select v-model="filterLevelPart">
+                    <option value="">Mức độ</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.EASAY">Dễ</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.NORMAL">Trung bình</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.HARD">Khó</option>
+                </select>
+            </div>
+            <div class="search-box m-1">
+                <button><i class="ic ic-find"></i></button>
+                <input type="text" name="" v-model="searchTerm" placeholder="Nội dung tìm kiếm">
+            </div>
+            <div class="ml-0 ml-md-auto">
+                <b-button class="btn-addevent btn-sm m-1" v-on:click="showAddEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td style="width:30px;max-width:30px">#</td>
+                    <td>Câu hỏi</td>
+                    @*<td style="width:70px;min-width:30px">Thời gian</td>*@
+                    <td style="width:100px;max-width:130px;min-width:30px">Mức độ</td>
+                    <td style="width:100px;max-width:100px;min-width:30px">Tác vụ</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item,k) in listLessonPart">
+                    <td>{{(page - 1) * view + (k+1)}}</td>
+                    <td>{{item.Title}}</td>
+                    @*<td><input type="number" v-model="item.Timer" v-on:change="changeTimer(item.ID,item.Timer)" /></td>*@
+                    <td>
+                        <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)">
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.EASAY">Dễ</option>
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.NORMAL">Trung bình</option>
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.HARD">Khó</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="btn-group" style="display:block">
+                            <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
+                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="view" v-on:change="getListPart()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="page"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
+                                  v-on:input="getListPart()"></b-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <script>
+        new Vue({
+            el: "#right-content",
+            mounted() {
+                this.list_subject = @Html.Raw(Json.Serialize(subjects));
+                this.list_grades_full = @Html.Raw(Json.Serialize(grades));
+                this.getListPart();
+            },
+            components: {},
+            data: {
+                list_grades_full: [],
+                list_subject: [],
+                grade: '',
+                subject: '',
+                searchTerm: '',
+                addEditItem: {
+                    SubjectID: '',
+                    GradeID:''
+                },
+                isLoading: false,
+                listCourses: [],
+                listChapters: [],
+                listCourseLesson: [],
+                view: 30,
+                page: 1,
+                totalRec: 0,
+                searchTerm: '',
+                filterLevelPart:'',
+                listLessonPart:[]
+            },
+            computed: {},
+            watch: {
+                "addEditItem.GradeID": function () {
+                    if (this.addEditItem.GradeID != "") {
+                        this.getData();
+                    }
+                },
+                "addEditItem.SubjectID": function () {
+                    this.addEditItem.GradeID = ""
+                },
+                filterLevelPart: function () {
+                    if (this.filterLevelPart >= 1 || this.filterLevelPart <= 3) {
+                        this.getListPart(this.filterLevelPart)
+                    }
+                },
+                grade: function () {
+                    this.getListPart()
+                }
+            },
+            methods: {
+                showAddEditItem() {
+                    let _that = this
+                    _that.addEditItem.GradeID = ""
+                    _that.addEditItem.SubjectID = ""
+                    _that.listCourses = []
+                    _that.$bvModal.show('addEditItem-modal-xl')
+                },
+                hideModal() {
+                    $('.close').click();
+                },
+                getData() {
+                    let _that = this
+                    let _form = new FormData();
+                    _form.append("GradeID", this.addEditItem.GradeID)
+                    _form.append("SubjectID", this.addEditItem.SubjectID)
+                    let _url = '@processUrl("GetListCourse","Curriculum")'
+                    _that.isLoading = true
+                    axios.post(_url, _form)
+                        .then(response => {
+                            _that.isLoading = false
+                            var data = response.data.Courses
+                            var chapters = response.data.Chapters
+                            var error = response.data.Error
+                            this.listCourses = []
+                            this.listChapters = []
+                            //debugger
+                            if (data.length > 0) {
+                                _that.listCourses = data
+                                this.listCourses = _that.listCourses
+                                this.listChapters = chapters
+                                //this.totalRec = response.data.Model.totalRecord
+                            }
+                            //else if (error == "") {
+                            //    alert(error)
+                            //}
+                        }).catch(e => {
+                            _that.isLoading = false;
+                            alert("Error: " + e)
+                        })
+                },
+                filterChapters(courseID, obj) {
+                    //debugger
+                    var array = []
+                    if (obj.length > 0) {
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            if (item.CourseID == courseID)
+                                array.push(item)
+                        }
+                        return array
+                    }
+                    else {
+                        return array
+                    }
+                },
+                filterChildChapters(ParentID, obj) {
+                    var array = []
+                    if (obj.length > 0) {
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            if (item.ParentID == ParentID)
+                                array.push(item)
+                        }
+                        return array
+                    }
+                    else {
+                        return array
+                    }
+                },
+                showChapter(obj) {
+                    var id = obj.ID
+                    var ulChapter = $("#"+id).attr("class")
+                    var classi = $("#i_" + id).attr("class")
+                    //ebugger
+                    if (ulChapter != null) {
+                        if (ulChapter.includes("hide")) {
+                            $("#" + id).removeClass("hide")
+                        }
+                        else {
+                            $("#" + id).addClass("hide")
+                        }
+                        if (classi.includes("fa-arrow-alt-circle-down")) {
+                            $("#i_" + id).removeClass("fa-arrow-alt-circle-down")
+                            $("#i_" + id).addClass("fa-arrow-alt-circle-left")
+                        }
+                        else {
+                            $("#i_" + id).addClass("fa-arrow-alt-circle-down")
+                            $("#i_" + id).removeClass("fa-arrow-alt-circle-left")
+                        }
+                    }
+                },
+                showCourseLesson(obj) {
+                    var ul = $("#li_" + obj.ID)
+                    if (ul[0].childElementCount == 0) {
+                        if ($(ul).attr("class").includes("hide")) {
+                            $(ul).removeClass("hide")
+                            $("#i_" + obj.ID).removeClass("fa-arrow-alt-circle-down")
+                            $("#i_" + obj.ID).addClass("fa-arrow-alt-circle-left")
+                        }
+                        else {
+                            $(ul).addClass("hide")
+                            $("#i_" + obj.ID).addClass("fa-arrow-alt-circle-down")
+                            $("#i_" + obj.ID).removeClass("fa-arrow-alt-circle-left")
+                        }
+                        let _that = this
+                        let _form = new FormData()
+                        _form.append("ParentID", obj.ID)
+                        let _url = '@processUrl("GetListCourseLesson", "Curriculum")'
+                        _that.isLoading = true
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.isLoading = false
+                                var data = response.data.CourseLesson
+                                var lessonPart = response.data.LessonPart
+                                var status = response.data.Status
+                                var error = response.data.Error
+                                var code = response.data.code
+                                if (code == 405) {
+                                    alert("Bạn không có quyền với thao tác này.Vui lòng liên hệ quản trị viên.")
+                                }
+                                else {
+                                    if (status) {
+                                        //this.listCourseLesson = data
+                                        this.renderCourseLesson(obj.ID, data)
+                                        this.renderLessonPart(lessonPart)
+                                    }
+                                    else {
+                                        alert(error)
+                                    }
+                                }
+                            }).catch(e => {
+                                _that.isLoading = false;
+                                alert("Error: " + e)
+                            })
+                    }
+                    else {
+                        if ($(ul).attr("class").includes("hide")) {
+                            $(ul).removeClass("hide")
+                            $("#i_" + obj.ID).removeClass("fa-arrow-alt-circle-down")
+                            $("#i_" + obj.ID).addClass("fa-arrow-alt-circle-left")
+                        }
+                        else {
+                            $(ul).addClass("hide")
+                            $("#i_" + obj.ID).addClass("fa-arrow-alt-circle-down")
+                            $("#i_" + obj.ID).removeClass("fa-arrow-alt-circle-left")
+                        }
+                    }
+                },
+                renderCourseLesson(id, obj) {
+                    var ul = $("#li_" + id)
+                    if (ul != null) {
+                        ul.empty();
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            //ul.append($('<li>', { "class": "card-footer", "style": "display:none","text": obj.Name}))
+                            ul.append("<li><div style='cursor:pointer' onclick='showLessonPart(\"" + item.ID + "\")'>" + item.Title + "</div><ul class='hide' id='" + item.ID + "'></ul></li>")
+                        }
+                    }
+                },
+                renderLessonPart(obj) {
+                    if (obj.length > 0) {
+                        for (var i = 0; i < obj.length; i++) {
+                            var item = obj[i]
+                            var id = item.ParentID
+                            var ul = $("#" + id)
+                            var selectOption = "<select id='sl_" + item.ID + "' class='form-control' required>" +
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.EASAY'>Dễ</option>"+
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.NORMAL'>Trung bình</option>"+
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.HARD'>Khó</option>"+
+                                "</select>"
+                            var input = "<input type='checkbox' class='form-check-input' style='width: 50px;vertical-align: middle;' onclick='chooseLessonPart(\"" + item.ID + "\",this)'/>"
+                            //var timer = "<input type='number' class='form-control' min='1' placeholder='Thời gian' id='tm_'" + item.ID + "/>"
+                            //ul.append("<div class='row'><div class='col-sm-10'><li style='cursor:pointer'>" + item.Title + "</li></div><div class='col-sm-2' style='margin:auto'>" + timer + selectOption + input + "</div></div>")
+                            //var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'>" + timer + "</div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
+                            var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'></div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
+                            ul.append("<div class='row'>" + table + "</div>")
+                        }
+                    }
+                },
+                savePart() {
+                    if (array.length == 0) {
+                        alert("Bạn chưa chọn câu hỏi nào. Vui lòng chọn ít nhất 1 câu hỏi")
+                    }
+                    else {
+                        //debugger
+                        let _that = this
+                        let _form = new FormData()
+                        let _url = '@processUrl("CreateOrUpdateLessonPart", "ExamManage")'
+                        for (var i = 0; i < array.length; i++) {
+                            item = array[i]
+                            _form.append("IDs", item.ID)
+                            _form.append("Types", item.Type)
+                        }
+                        _form.append("GradeID", this.addEditItem.GradeID)
+                        //debugger
+                        _form.append("ID", '@currentData.ID')
+                        _that.isLoading = true
+                        axios.post(_url, _form)
+                            .then(response => {
+                                _that.isLoading = false
+                                this.hideModal()
+                                var data = response.data.Data
+                                var array = []
+                                debugger
+                                if (data.length > 0) {
+                                    for (var i = 0; i < data.length; i++) {
+                                        var item = data[i]
+                                        array.push(item)
+                                    }
+                                    this.listLessonPart = array.concat(this.listLessonPart)
+                                }
+                                else {
+                                    alert(response.data.Msg)
+                                }
+                            }).catch(e => {
+                                _that.isLoading = false;
+                                this.hideModal()
+                                alert("Error: " + e)
+                            })
+                    }
+                },
+                getListPart() {
+                    let _that = this
+                    let _form = new FormData()
+                    _form.append("ID", '@currentData.ID')
+                    _form.append('PageSize', _that.view)
+                    _form.append('PageIndex', _that.page)
+                    _form.append('SearchText', _that.searchTerm)
+                    _form.append('LevelPart', _that.filterLevelPart)
+                    if (_that.grade) {
+                        _form.append('SubjectID', _that.subject)
+                        _form.append('GradeID', _that.grade)
+                    }
+                    let _url = '@processUrl("GetListPart", "ExamManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //_that.isLoading = false
+                            var data = response.data.Data
+                            this.listLessonPart = data
+                            this.totalRec = response.data.Model.totalRecord
+                        }).catch(e => {
+                            _that.isLoading = false;
+                            alert("Error: " + e)
+                        })
+                },
+                changeStatus(ID, newType) {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("ChangeStatus", "ExamManage")'
+                    _form.append("ID", ID)
+                    _form.append("NewType", newType)
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var id = response.data.ID
+                            var type = response.data.NewType
+                            $("#" + ID).val(type);
+                        }).catch(e => {
+                            _that.isLoading = false;
+                            alert("Error: " + e)
+                        })
+                },
+                changeTimer(ID, timer) {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("ChangeTimer", "ExamManage")'
+                    _form.append("ID", ID)
+                    _form.append("Timer", timer)
+                    axios.post(_url, _form)
+                        .then(response => {
+                            var id = response.data.ID
+                            var timer = response.data.Timer
+                            $("#tm_" + ID).val(timer);
+                        }).catch(e => {
+                            _that.isLoading = false;
+                            alert("Error: " + e)
+                        })
+                },
+                removeItem(obj) {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("DeleteLessonPart", "ExamManage")'
+                    _form.append("ID", obj.ID)
+                    if (window.confirm("Bạn muốn xoá câu hỏi " + obj.Title + " ?")) {
+                        axios.post(_url, _form)
+                            .then(response =>
+                            {
+                                var stt = response.data.Status
+                                var data = response.data.Data
+                                if (stt) {
+                                    var index = this.listLessonPart.findIndex(x => x.ID == data);
+                                    if (index > -1) {
+                                        this.listLessonPart.splice(index, 1);
+                                    }
+                                }
+                                else {
+                                    alert(data)
+                                }
+                            })
+                            .catch(e =>
+                            {
+                                alert(e)
+                            })
+                    }
+                }
+            }
+        });
+
+        var showLessonPart = function (id) {
+            //debugger
+            var ul = $("#" + id)
+            if ($(ul).attr("class").includes("hide")) {
+                $(ul).removeClass("hide")
+            }
+            else {
+                $(ul).addClass("hide")
+            }
+        }
+
+        var array = []
+
+        var chooseLessonPart = function (id, obj) {
+            //debugger
+            var stt = $(obj).prop("checked")
+            var typePart = document.getElementById("sl_" + id).value
+            //var timer = document.getElementById("tm_" + id).value
+            if (stt) {
+                //array.push({ ID: id, Type: typePart, Timer: timer })
+                array.push({ ID: id, Type: typePart })
+            }
+            else {
+                var index = array.findIndex(x => x.ID == id);
+                if (index > -1) {
+                    array.splice(index, 1);
+                }
+            }
+        }
+
+        @*var saveQuestion = function () {
+            if (array.length == 0) {
+                alert("Bạn chưa chọn câu hỏi nào. Vui lòng chọn ít nhất 1 câu hỏi")
+            }
+            else {
+                let _that = this
+                let _form = new FormData()
+                let _url = '@processUrl("CreateOrUpdateQuestion", "ExamManage")'
+                //for (var i = 0; i < array.length; i++) {
+                //    item = array[i]
+                //    _form.append("Data", item)
+                //}
+                _form.append(array)
+                axios.post(_url, _form)
+                    .then(response => {
+                        //_that.isLoading = false
+                    }).catch(e => {
+                        _that.isLoading = false;
+                        alert("Error: " + e)
+                    })
+            }
+        }*@
+    </script>
+<style>
+    ul {
+        list-style: none
+    }
+
+        ul li {
+            padding: 10px
+        }
+
+    /*.course {
+        padding: 10px
+    }*/
+
+    .course .course-content {
+        font-size: 16px;
+        color: #00bbd4;
+        font-weight: 700;
+        cursor: pointer
+    }
+
+        .course .course-content:hover {
+            text-shadow: 2px 2px 8px #FF0000
+        }
+
+    .right-content{
+        position:relative
+    }
+
+    /*footer {
+        background-color: white ;
+        height: 60px
+    }*/
+
+    /*ul li:hover {
+        text-shadow: 2px 2px 8px #FF0000
+    }*/
+</style>
+}
+
+@section Modals{
+    <!--modal thêm câu hỏi-->
+    <b-modal id="addEditItem-modal-xl" size="xl" title="Thêm câu hỏi" :no-close-on-backdrop="true">
+        <b-col class="form-group">
+            <b-col class="flex flex-row flex-wrap align-items-center">
+                <b-col class="box filter-box w-152 m-1">
+                    <select v-model="addEditItem.SubjectID">
+                        <option value="">Chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+                <b-col class="box filter-box w-152 m-1">
+                    <select name="" v-model="addEditItem.GradeID">
+                        <option value="">Cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addEditItem.SubjectID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+            </b-col>
+        </b-col>
+        <b-col class="form-group">
+            <template v-if="listCourses.length > 0">
+                <ul class="ul-course">
+                    <template v-for="(item,k) in listCourses">
+                        <li class="course">
+                            <div class="course-content" v-on:click="showChapter(item)">
+                                {{item.Name}}
+                                <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+ item.ID"></i>
+                            </div>
+                            <ul class="ul-chapter hide" :id="item.ID" v-if="filterChapters(item.ID,listChapters).length > 0">
+                                <li v-for="(chapter,i) in filterChapters(item.ID,listChapters)" v-if="chapter.ParentID == 0">
+                                    <template v-if="filterChildChapters(chapter.ID,listChapters).length > 0">
+                                        <div class="course-content" v-on:click="showChapter(chapter)">
+                                            {{chapter.Name}}
+                                            <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chapter.ID"></i>
+                                        </div>
+                                        <ul class="hide" :id="chapter.ID">
+                                            <li v-for="(chid,c) in filterChildChapters(chapter.ID,listChapters)">
+                                                <div class="course-content" v-on:click="showCourseLesson(chid)">
+                                                    {{chid.Name}}
+                                                    <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chid.ID"></i>
+                                                </div>
+                                                <ul class="hide" :id="'li_' + chid.ID"></ul>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <template v-else>
+                                        <div class="course-content" v-on:click="showCourseLesson(chapter)">
+                                            {{chapter.Name}}
+                                            <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chapter.ID"></i>
+                                        </div>
+                                        <ul class="hide" :id="'li_' + chapter.ID"></ul>
+                                    </template>
+                                </li>
+                            </ul>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            @*<template v-else>
+                Không có nội dung
+            </template>*@
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="savePart()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+}
+

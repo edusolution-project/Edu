@@ -175,7 +175,7 @@ namespace AutoEmailEduso
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Lớp</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
+                                            
                                             <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
                                             <!--<td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>-->
                                         </tr>
@@ -307,14 +307,14 @@ namespace AutoEmailEduso
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}{listNameTeachers}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
-                            if (stChuaVaoLop == 0)
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>--</td>";
-                            }
-                            else
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{stChuaVaoLop}</td>";
-                            }
+                            //if (stChuaVaoLop == 0)
+                            //{
+                            //    tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>--</td>";
+                            //}
+                            //else
+                            //{
+                            //    tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{stChuaVaoLop}</td>";
+                            //}
 
 
                             List<double> points = new List<double>();

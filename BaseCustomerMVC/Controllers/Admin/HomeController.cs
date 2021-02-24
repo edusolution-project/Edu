@@ -1794,18 +1794,55 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             try
             {
-                var acc = _accountService.GetAccountByEmail(email);
-                var student = _studentService.GetStudentByEmail(acc.UserName);
-                var center = _centerService.CreateQuery().Find(x => student.Centers.Contains(x.ID)).FirstOrDefault();
+                //var acc = _accountService.GetAccountByEmail(email);
+                //var student = _studentService.GetStudentByEmail(acc.UserName);
+                //var center = _centerService.CreateQuery().Find(x => student.Centers.Contains(x.ID)).FirstOrDefault();
+                //var pass = "edu123456";
+                //if (acc != null)
+                //{
+                //    _mailHelper.SendStudentJoinCenterNotify(student.FullName, acc.UserName, pass, center.Name);
+                //    return Content($"Send mail to {acc.UserName} is OK");
+                //}
+                //else
+                //{
+                //    return Content("acc null");
+                //}
+                List<String> listClassIDs = new List<string> { "600c2bca4aeb19046851feec", "600c46b24aeb190468589969", "600f8b5792b5e7309473b277" };
                 var pass = "edu123456";
-                if (acc != null)
+                var center = _centerService.CreateQuery().Find(x => x.Abbr.Equals("c3cva_qt")).FirstOrDefault();
+                //var students = _studentService.CreateQuery().Find(x => x.JoinedClasses.Any(y => listClassIDs.Contains(y))).ToList().Select(x => new { FullName = x.FullName,Email = x.Email });
+                List<StudentEntity> students = new List<StudentEntity>();
+                foreach (var classid in listClassIDs)
                 {
-                    _mailHelper.SendStudentJoinCenterNotify(student.FullName, acc.UserName, pass, center.Name);
-                    return Content($"Send mail to {acc.UserName} is OK");
+                    var std = _studentService.GetStudentsByClassId(classid);
+                    if (std != null)
+                    {
+                        students.AddRange(std);
+                    }
+                }
+                if (students.Count() > 0)
+                {
+                    String content = "";
+                    foreach (var student in students.Distinct())
+                    {
+                        if (!student.Email.Contains("@gmail.com"))
+                        {
+                            student.Email = student.Email.Trim().Substring(0, student.Email.Trim().IndexOf("@") - 1) + "@gmail.com";
+                            var account = _accountService.CreateQuery().Find(x => x.UserID.Equals(student.ID)).FirstOrDefault();
+                            if(account != null)
+                            {
+                                account.UserName = student.Email;
+                                _accountService.Save(account);
+                            }
+                        }
+                        _mailHelper.SendStudentJoinCenterNotify(student.FullName, student.Email, pass, center.Name);
+                        content += $"{student.Email}</br>";
+                    }
+                    return Content(content + center.Name + students.Distinct().Count());
                 }
                 else
                 {
-                    return Content("acc null");
+                    return Content("students null");
                 }
             }
             catch (Exception ex)
@@ -1814,6 +1851,474 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
+        public IActionResult FixPointBigger100(bool incCounter = false)
+        {
+            try
+            {
+                //var lessonprogess = _lessonProgressService.CreateQuery().Find(x => (x.MaxPoint > 100 || x.AvgPoint > 100 || x.LastPoint > 100) && x.Tried > 0).ToList();
+                ////var lessonprogess = _lessonProgressService.CreateQuery().Find(x => (x.AvgPoint > 100 ) && x.Tried > 0).ToList();
+                //var lessonid = lessonprogess.Select(x => x.LessonID).ToList().Distinct();
+                ////var lessonIDs = _lessonScheduleService.CreateQuery().Find(x => lessonid.Contains(x.LessonID) && x.StartDate <= new DateTime(2021, 02, 22, 9, 0, 0) && x.EndDate >= new DateTime(2021, 02, 15, 9, 0, 0)).Project(x => x.LessonID).ToList();
+                //var studentid = lessonprogess.Select(x => x.StudentID).Distinct().ToList();
+                //var exams = (from e in _examService.CreateQuery().Find(x => lessonid.Contains(x.LessonID) && studentid.Contains(x.StudentID)).ToList()
+                //             group e by e.StudentID
+                //           into g
+                //             let exam = g.OrderByDescending(x => x.Number).FirstOrDefault()
+                //             where exam != null
+                //             select exam).ToList();
+                //var lessons = _lessonService.CreateQuery().Find(x => lessonid.Contains(x.ID)).ToList();
+                //foreach(var lesson in lessons)
+                //{
+                //    if(lesson.ID == "600c3d614aeb19046856791a")
+                //    {
+                //        var test = "";
+                //    }
+                //    var point = calculateLessonPoint(lesson.ID);
+                //    lesson.Point = point;
+                //    _lessonService.Save(lesson);
+                //    var listLastExam = new List<ExamEntity>();
+                //    foreach(var exam in exams.Where(x=>x.LessonID == lesson.ID))
+                //    {
+                //        if(exam.ID == "602a89beca3d6d25d44971be")
+                //        {
+                //            var test = "";
+                //        }
+
+                //        var incompleted_exs = _examService.GetPreviousIncompletedExams(exam.LessonID, exam.StudentID, exam.Number);
+                //        if (incompleted_exs != null && incompleted_exs.Count() > 0)
+                //        {
+                //            foreach (var ex in incompleted_exs)
+                //            {
+                //                _lessonHelper.CompleteNoEssay(ex, lesson, out _, false);
+                //            }
+                //        }
+
+                        //_lessonHelper.CompleteNoEssay(exam, lesson, out point);
+                //        if (exam.QuestionsPass > exam.QuestionsTotal)
+                //        {
+                //            exam.QuestionsPass = (long)lesson.Point;
+                //            exam.QuestionsDone = (long)lesson.Point;
+                //            exam.QuestionsTotal = (long)lesson.Point;
+                //            exam.Point = lesson.Point;
+                //        }
+                //        _examService.Save(exam);
+                //        listLastExam.Add(exam);
+                //    }
+
+                //    var lessonpro = lessonprogess.Where(x => x.LessonID == lesson.ID);
+                //    foreach (var item in lessonpro)
+                //    {
+                //        var exam = listLastExam.Where(x => x.StudentID == item.StudentID && x.LessonID == item.LessonID).FirstOrDefault();
+                //        if (exam != null)
+                //        {
+                //            item.LastPoint = exam.Point;
+                //            item.PointChange = exam.Point;
+                //        }
+                //        item.MaxPoint = lesson.Point;
+                //        _lessonProgressService.Save(item);
+                //    }
+                //}
+
+                ////////////////////////////
+                //var lesson = _lessonService.GetClassSubjectLesson("5ff5c48d947ba007b4476f5c").Select(x=>x.ID);
+                //var lessonpogess = _lessonProgressService.CreateQuery().Find(x => (x.LastPoint > 100 || x.AvgPoint > 100) && x.Tried > 0 || x.MaxPoint > 100);
+                ////var lessonpogess = _lessonProgressService.CreateQuery().Find(x => lesson.Contains(x.LessonID) && (x.LastPoint > 100 || x.AvgPoint > 100) && x.Tried > 0);
+                //var lessonIDs = lessonpogess.ToList().Select(x => x.LessonID).Distinct();
+                //var studentIDs = lessonpogess.Project(x => x.StudentID).ToList().Distinct();
+                //var listExam = _examService.CreateQuery().Find(x => lessonIDs.Contains(x.LessonID) && studentIDs.Contains(x.StudentID));
+                //var listExamErrorPoint = (from e in listExam.ToList()
+                //                          group e by e.StudentID
+                //                         into g
+                //                          let exam = g.OrderByDescending(x => x.Number).FirstOrDefault()
+                //                          where exam != null
+                //                          select exam).ToList();
+                //var listExamPoint = new List<ExamEntity>();
+                //foreach (var lessonId in lessonIDs)
+                //{
+                //    var point = calculateLessonPoint(lessonId);
+                //    var lesson = _lessonService.GetItemByID(lessonId);
+                //    //lesson.Point = point;
+                //    //_lessonService.Save(lesson);
+                //    var exams = listExamErrorPoint.Where(x => x.LessonID.Equals(lessonId)).ToList();
+                //    foreach (var exam in exams)
+                //    {
+                //        if (exam.LessonID == "5ff5c48f947ba007b4477617" && exam.ID == "5ffc6016df037a23c0216479")
+                //        {
+                //            var error = "";
+                //        }
+                //        if (exam.QuestionsPass > exam.QuestionsTotal)
+                //        {
+                //            exam.QuestionsPass = exam.QuestionsTotal;
+                //            exam.QuestionsDone = exam.QuestionsTotal;
+                //        }
+
+                //        //    var point1 = exam.MaxPoint > 0 ? (exam.QuestionsPass * 100.0 / exam.QuestionsTotal) : 0;
+                //        //    var point = calculateLessonPoint(lessonId);
+                //        //    if (point1 > 100)
+                //        //    {
+                //        //        var error = "";
+                //        //    }
+                //        exam.MaxPoint = point;
+                //        //    listExamPoint.Add(exam);
+                //        //_examService.Save(exam);
+
+                //        //var prg = _lessonProgressService.UpdatePoint(exam).Result;
+
+                //        //if (prg.ChapterID != "0")
+                //        //    _ = UpdateChapterPoint(prg, incCounter: incCounter);
+                //        //else
+                //        //    _ = UpdateClassSubjectPoint(prg, incCounter: incCounter);
+                //    }
+                //}
+                ////foreach (var exam in listExamPoint.ToList())
+                ////{
+                ////    var prg = _lessonProgressService.UpdatePoint(exam).Result;
+
+                ////    if (prg.ChapterID != "0")
+                ////        _ = UpdateChapterPoint(prg, incCounter: incCounter);
+                ////    else
+                ////        _ = UpdateClassSubjectPoint(prg, incCounter: incCounter);
+                ////}
+                return Content("");
+            }
+            catch(Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        private double calculateLessonPoint(string lessonId)
+        {
+            var point = 0.0;
+            var parts = _clonelessonPartService.GetByLessonID(lessonId).Where(t => quizType.Contains(t.Type));
+            foreach (var part in parts)
+            {
+                if (part.Type == "ESSAY")
+                {
+                    point += part.Point;
+                    _clonequestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, part.Point));
+                }
+                else
+                {
+                    point += _clonequestionService.GetByPartID(part.ID).Count();//trắc nghiệm => điểm = số câu hỏi (mỗi câu 1đ)
+                    _clonequestionService.Collection.UpdateMany(t => t.ParentID == part.ID, Builders<CloneLessonPartQuestionEntity>.Update.Set(t => t.Point, 1));
+                }
+            }
+            _lessonService.UpdateLessonPoint(lessonId, point);
+            return point;
+        }
+
+        public async Task UpdateChapterPoint(LessonProgressEntity item, double pointchange = 0, bool incCounter = false)
+        {
+            var lesson = _lessonService.GetItemByID(item.LessonID);
+            if (lesson == null)
+            {
+                return;
+            }
+            var chapter = _chapterService.GetItemByID(lesson.ChapterID);
+            if (chapter == null)
+            {
+                return;
+            }
+            var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, item.StudentID);
+            if (progress == null)//progress not found => create progress
+            {
+                progress = _chapterProgressService.NewProgressEntity(chapter, item.StudentID);
+                _chapterProgressService.Save(progress);
+                //return;
+            }
+            //else
+            //{
+            var point = (pointchange != 0 ? pointchange : item.PointChange) * item.Multiple;
+
+            var incPoint = 0.0;
+            long incCount = 0;
+            var incPracPoint = 0.0;
+            long incPracCount = 0;
+
+            if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+            {
+                incPoint = point;
+
+                if (incCounter)//new
+                    incCount = (long)item.Multiple;
+
+                progress.ExamDone += incCount;
+                progress.TotalPoint += incPoint;
+                progress.AvgPoint = progress.TotalPoint / progress.ExamDone;
+
+                await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    Builders<ChapterProgressEntity>.Update
+                    .Inc(t => t.ExamDone, incCount)
+                    .Inc(t => t.TotalPoint, incPoint)
+                    .Set(t => t.AvgPoint, progress.AvgPoint)
+                    );
+            }
+            else
+            {
+                incPracPoint = point;
+
+                if (incCounter)//new
+                    incPracCount = (long)item.Multiple;
+
+                progress.PracticeDone += incPracCount;
+                progress.PracticePoint += incPracPoint;
+                progress.PracticeAvgPoint = progress.PracticePoint / progress.PracticeDone;
+
+                await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    Builders<ChapterProgressEntity>.Update
+                    .Inc(t => t.PracticeDone, incPracCount)
+                    .Inc(t => t.PracticePoint, incPracPoint)
+                    .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                    );
+            }
+
+            if (chapter.ParentID != "0")
+                await UpdateParentChapPoint(chapter.ParentID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            else
+                await UpdateClassSubjectPoint(chapter.ClassSubjectID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            //}
+        }
+
+        public async Task UpdateParentChapPoint(string ChapterID, string StudentID, double incPoint, long incCount, double incPracPoint, long incPracCount)
+        {
+            var chapter = _chapterService.GetItemByID(ChapterID);
+            if (chapter == null)
+            {
+                return;
+            }
+            var progress = _chapterProgressService.GetItemByChapterID(chapter.ID, StudentID);
+            if (progress == null)//progress not found => create progress
+            {
+                progress = new ChapterProgressEntity
+                {
+                    ChapterID = chapter.ID,
+                    StudentID = StudentID,
+                    ClassID = chapter.ClassID,
+                    ClassSubjectID = chapter.ClassSubjectID,
+                };
+                _chapterProgressService.Save(progress);
+                //return;
+            }
+            //else
+            //{
+
+            var update = Builders<ChapterProgressEntity>.Update;
+            var updates = new List<UpdateDefinition<ChapterProgressEntity>>();
+
+            if (incCount != 0 || incPoint != 0)
+            {
+                progress.ExamDone += incCount;
+                progress.TotalPoint += incPoint;
+                progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
+
+                updates.Add(update.Inc(t => t.ExamDone, incCount)
+                      .Inc(t => t.TotalPoint, incPoint)
+                      .Set(t => t.AvgPoint, progress.AvgPoint));
+            }
+
+            if (incPracCount != 0 || incPracPoint != 0)
+            {
+                progress.PracticeDone += incPracCount;
+                progress.PracticePoint += incPracPoint;
+
+                progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
+
+                updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
+                    .Inc(t => t.PracticePoint, incPracPoint)
+                    .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                    );
+            }
+
+            if (updates.Count > 0)
+            {
+                await _chapterProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
+
+                if (chapter.ParentID != "0")
+                    await UpdateParentChapPoint(chapter.ParentID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+                else
+                    await UpdateClassSubjectPoint(chapter.ClassSubjectID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            }
+            //}
+        }
+        public async Task UpdateClassSubjectPoint(LessonProgressEntity item, double pointchange = 0, bool incCounter = false)
+        {
+            var lesson = _lessonService.GetItemByID(item.LessonID);
+            if (lesson == null)
+            {
+                return;
+            }
+            var classSbj = _classSubjectService.GetItemByID(item.ClassSubjectID);
+            if (classSbj == null)
+            {
+                return;
+            }
+            var progress = _classSubjectProgressService.GetItemByClassSubjectID(classSbj.ID, item.StudentID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                var point = (pointchange != 0 ? pointchange : item.PointChange) * item.Multiple;
+
+                var incPoint = 0.0;
+                long incCount = 0;
+                var incPracPoint = 0.0;
+                long incPracCount = 0;
+
+                if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    incPoint = point;
+
+                    //if (item.Tried == 1 || progress.ExamDone == 0)//new
+                    if (incCounter)
+                        incCount = (long)item.Multiple;
+
+                    progress.ExamDone += incCount;
+                    progress.TotalPoint += incPoint;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
+
+                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                        Builders<ClassSubjectProgressEntity>.Update
+                        .Inc(t => t.ExamDone, incCount)
+                        .Inc(t => t.TotalPoint, incPoint)
+                        .Set(t => t.AvgPoint, progress.AvgPoint)
+                        );
+                }
+                else
+                {
+                    incPracPoint = point;
+                    //if (item.Tried == 1 || progress.PracticeDone == 0)//new
+                    if (incCounter)
+                        incPracCount = (long)item.Multiple;
+
+                    progress.PracticeDone += incPracCount;
+                    progress.PracticePoint += incPracPoint;
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
+
+                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                        Builders<ClassSubjectProgressEntity>.Update
+                        .Inc(t => t.PracticeDone, incPracCount)
+                        .Inc(t => t.PracticePoint, incPracPoint)
+                        .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                        );
+                }
+
+                await UpdateClassPoint(classSbj.ClassID, progress.StudentID, incPoint, incCount, incPracPoint, incPracCount);
+            }
+        }
+
+        public async Task UpdateClassSubjectPoint(string ClassSubjectID, string StudentID, double incPoint, long incCount, double incPracPoint, long incPracCount)
+        {
+            var classSbj = _classSubjectService.GetItemByID(ClassSubjectID);
+            if (classSbj == null)
+            {
+                return;
+            }
+            var progress = _classSubjectProgressService.GetItemByClassSubjectID(ClassSubjectID, StudentID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                var update = Builders<ClassSubjectProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassSubjectProgressEntity>>();
+
+
+                if (incCount != 0 || incPoint != 0)
+                {
+                    progress.ExamDone += incCount;
+                    progress.TotalPoint += incPoint;
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
+
+                    updates.Add(update.Inc(t => t.ExamDone, incCount)
+                        .Inc(t => t.TotalPoint, incPoint)
+                        .Set(t => t.AvgPoint, progress.AvgPoint));
+
+                    //await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    //    Builders<ClassSubjectProgressEntity>.Update
+                    //    .Inc(t => t.ExamDone, incCount)
+                    //    .Inc(t => t.TotalPoint, incPoint)
+                    //    .Set(t => t.AvgPoint, progress.AvgPoint)
+                    //    );
+                }
+
+                if (incPracCount != 0 || incPracPoint != 0)
+                {
+                    progress.PracticeDone += incPracCount;
+                    progress.PracticePoint += incPracPoint;
+
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
+
+                    updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
+                        .Inc(t => t.PracticePoint, incPracPoint)
+                        .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                        );
+
+                    //await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID,
+                    //    Builders<ClassSubjectProgressEntity>.Update
+                    //    .Inc(t => t.PracticeDone, incPracCount)
+                    //    .Inc(t => t.PracticePoint, incPracPoint)
+                    //    .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                    //    );
+                }
+                if (updates.Count > 0)
+                {
+                    await _classSubjectProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
+                    await UpdateClassPoint(classSbj.ClassID, StudentID, incPoint, incCount, incPracPoint, incPracCount);
+                }
+            }
+        }
+
+        public async Task UpdateClassPoint(string ClassID, string StudentID, double incPoint, long incCount, double incPracPoint, long incPracCount)
+        {
+            var @class = _classService.GetItemByID(ClassID);
+            if (@class == null)
+            {
+                return;
+            }
+            var progress = _classProgressService.GetItemByClassID(ClassID, StudentID);
+            if (progress == null)
+            {
+                return;
+            }
+            else
+            {
+                progress.PracticeDone += incPracCount;
+                progress.PracticePoint += incPracPoint;
+
+                var update = Builders<ClassProgressEntity>.Update;
+                var updates = new List<UpdateDefinition<ClassProgressEntity>>();
+
+                if (incCount != 0 || incPoint != 0)
+                {
+                    progress.ExamDone += incCount;
+                    progress.TotalPoint += incPoint;
+
+                    progress.AvgPoint = progress.ExamDone != 0 ? progress.TotalPoint / progress.ExamDone : 0;
+
+                    updates.Add(update.Inc(t => t.ExamDone, incCount)
+                        .Inc(t => t.TotalPoint, incPoint)
+                        .Set(t => t.AvgPoint, progress.AvgPoint));
+                }
+                if (incPracCount != 0 || incPracPoint != 0)
+                {
+                    progress.PracticeDone += incPracCount;
+                    progress.PracticePoint += incPracPoint;
+
+                    progress.PracticeAvgPoint = progress.PracticeDone != 0 ? progress.PracticePoint / progress.PracticeDone : 0;
+
+                    updates.Add(update.Inc(t => t.PracticeDone, incPracCount)
+                        .Inc(t => t.PracticePoint, incPracPoint)
+                        .Set(t => t.PracticeAvgPoint, progress.PracticeAvgPoint)
+                        );
+                }
+                if (updates.Count > 0)
+                    await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
+            }
+        }
         //public IActionResult FixData()
         //{
         //    try

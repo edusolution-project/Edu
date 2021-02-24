@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
-    public class ExamManage : TeacherController
+    public class ExamManageController : TeacherController
     {
         private readonly CenterService _centerService;
         private readonly TeacherService _teacherService;
@@ -46,7 +46,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel> _examQuestionArchiveViewMapping = new MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel>();
         private readonly MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity> _lessonPartQuestionExtensionMapping = new MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity>();
         private readonly MappingEntity<LessonExtensionEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonExtensionEntity, LessonEntity>();
-        public ExamManage(
+        public ExamManageController(
             CenterService centerService
             , TeacherService teacherService
             , SubjectService subjectService
@@ -736,8 +736,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     _lessonScheduleService.Save(lessonShechude);
 
                     //render exam
-                    //for (Int32 i = 0; i < item.TotalExam; i++)
-                    //{
+                    for (Int32 i = 0; i < item.TotalExam; i++)
+                    {
                         var lesson = new LessonExtensionEntity
                         {
                             TemplateType = 2,
@@ -761,7 +761,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         item.LessonID = lesson.ID;
                         _examProcessService.Save(item);
                         var msg = ProcessCreateExam(item, UserID, lesson).Result;
-                    //}
+                    }
 
                     //tạo đề khác tương tự
 
