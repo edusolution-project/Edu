@@ -322,11 +322,13 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
+
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
         }
         var data = _data;
+        console.log(_data);
         //if (data.TemplateType == 2) {
         //    renderLessonData.prototype.IsTest = true;
         //}
@@ -637,9 +639,12 @@ var Lesson = (function () {
                         $(".time-counter").text("");
                         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
                             var exam;
+                            var schedule;
                             try {
                                 var data = JSON.parse(res);
                                 exam = data.exam
+                                schedule = data.schedule
+                                //console.log(data);
                             } catch (e) {
                                 console.log(e)
                             }
@@ -649,7 +654,7 @@ var Lesson = (function () {
                             if (exam == null) {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
-                                renderLectureExam(exam, false);
+                                renderLectureExam(exam, false, schedule);
                                 $('li[for=lesson-info]').hide().removeClass('d-flex');
 
                             }
@@ -667,49 +672,56 @@ var Lesson = (function () {
                                     //console.log(getLocalData("CurrentExam"))    
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         $('li[for=lesson-info]').hide().removeClass('d-flex');
-                                        renderLectureExam(exam, false);
+                                        renderLectureExam(exam, false, schedule);
 
                                         //renderOldAnswer();
                                     }
                                     else {
-                                        renderLectureExam(exam, true);
+                                        renderLectureExam(exam, true, schedule);
                                         goPartInx(0);
                                     }
                                 }
                                 else {
-                                    console.log("Exam Continue");
-                                    $('li[for=lesson-info]').show().addClass('d-flex');
-                                    setLocalData("CurrentExam", exam.ID);
-                                    $('#ExamID').val(exam.ID);
-
-                                    var current = exam.CurrentDoTime;
-                                    var start = exam.Created;
-                                    var timer = moment(current) - moment(start);
-
-                                    //console.log(exam);
-                                    if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
-                                    {
-                                        console.log("Exam Timeout")
+                                    if (exam.Status == true) {
+                                        console.log("Exam End");
                                         setLocalData("Timer", "00:00");
                                         CompleteLectureExam(true);
                                     }
                                     else {
+                                        console.log("Exam Continue");
+                                        $('li[for=lesson-info]').show().addClass('d-flex');
                                         setLocalData("CurrentExam", exam.ID);
                                         $('#ExamID').val(exam.ID);
-                                        //render Exam
-                                        if (exam.Timer > 0) {
-                                            var _sec = 59 - moment(timer).second();
-                                            var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                                            var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                                            setLocalData("Timer", _timer);
-                                            $(".time-counter").text(_timer);
-                                            console.log(_timer);
-                                            countdown(false);
+
+                                        var current = exam.CurrentDoTime;
+                                        var start = exam.Created;
+                                        var timer = moment(current) - moment(start);
+
+                                        //console.log(exam);
+                                        if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
+                                        {
+                                            console.log("Exam Timeout")
+                                            setLocalData("Timer", "00:00");
+                                            CompleteLectureExam(true);
                                         }
-                                        renderLectureExam(exam, true);
-                                        goPartInx(0);
-                                        if (config.mod == mod.STUDENT_LECTURE) {
-                                            renderOldAnswer();
+                                        else {
+                                            setLocalData("CurrentExam", exam.ID);
+                                            $('#ExamID').val(exam.ID);
+                                            //render Exam
+                                            if (exam.Timer > 0) {
+                                                var _sec = 59 - moment(timer).second();
+                                                var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                                var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                                setLocalData("Timer", _timer);
+                                                $(".time-counter").text(_timer);
+                                                console.log(_timer);
+                                                countdown(false);
+                                            }
+                                            renderLectureExam(exam, true, schedule);
+                                            goPartInx(0);
+                                            if (config.mod == mod.STUDENT_LECTURE) {
+                                                renderOldAnswer();
+                                            }
                                         }
                                     }
                                 }
@@ -2901,7 +2913,7 @@ var Lesson = (function () {
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
                     //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2945,8 +2957,7 @@ var Lesson = (function () {
         }
     }
 
-    var renderLectureExam = function (data, isContinue) {
-        //console.log(data);
+    var renderLectureExam = function (data, isContinue, schedule) {
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2961,26 +2972,34 @@ var Lesson = (function () {
                         "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                         "style": "cursor: pointer"
                     }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "ml-2" }).append("Nộp bài"));
+
+                    var schend = moment(schedule.EndDate);
+
                     if (isMobileDevice()) {
                         $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
                         $('.top-menu[for=lesson-info]').append(completeButton);
+                        if (schend > moment(new Date(2000, 1, 1)))
+                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
                         $('.right-content').removeClass("no-info-bar");
                     }
-                    else
+                    else {
+                        if (schend > moment(new Date(2000, 1, 1)))
+                            $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold mr-2 text-danger' }));
                         wrapper.append(completeButton);
+                    }
+
                     $('#rightCol').find('.tab-pane').show();
                 }
                 //renderQuizCounter();
                 //renderOldAnswer();
             }
             else {
-                //alert(1);
                 //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 if (lastExam.Point == null) lastExam.Point = 0;
                 var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
-                debugger
+                //debugger
                 var resultMessage = "";
 
                 console.log(progress);
@@ -2994,7 +3013,7 @@ var Lesson = (function () {
 
                 //console.log(progress);
                 if (learningTarget > 0) {
-                    debugger
+                    //debugger
                     if (progress.toFixed(0) >= learningTarget) {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Chúc mừng bạn đã hoàn thành mục tiêu";
                         lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", html: resultMessage }));//.html();
@@ -3021,6 +3040,16 @@ var Lesson = (function () {
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
+
+                var schend = moment(schedule.EndDate);
+                if (schend > moment(new Date(2000, 1, 1))) {
+                    if (isMobileDevice()) {
+                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                    }
+                    else
+                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                }
+
 
                 //$('#leftCol').addClass('hide');//fix tạm thời
             }
@@ -3259,6 +3288,7 @@ var Lesson = (function () {
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
         loadLessonData({
+            "ID": $('#ExamID').val(),
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
@@ -3271,7 +3301,7 @@ var Lesson = (function () {
         //debugger
         //if (OldExamID) {
         console.log("Load easy part....");
-        var currentEx = $("input[name=ExamID]").val();
+        var currentEx = $("#ExamID").val();
         if (currentEx == "") return;
 
         var dataform = new FormData();
@@ -3779,7 +3809,7 @@ var Lesson = (function () {
     }
 
     var renderExamAnswer = function (data, partid, template) {
-        
+
         var container = $("#" + data.ParentID + " .answer-wrapper");
         var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
         switch (template) {
@@ -4356,8 +4386,8 @@ var Lesson = (function () {
                     break;
             }
             var dataform = new FormData();
-            dataform.append("ExamID", $("input[name=ExamID]").val());
-            //console.log($("input[name=ExamID]"));
+            dataform.append("ExamID", $("#ExamID").val());
+            //console.log($("#ExamID"));
             //if (type != "ESSAY") {
 
             dataform.append("LessonPartID", partID);
@@ -4389,6 +4419,11 @@ var Lesson = (function () {
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
+                            //alert(rsp.reset)
+                            if (rsp.reset) {
+                                setLocalData("Timer", "00:00");
+                                CompleteLectureExam(true);
+                            }
                         });
 
                         //alert(rsp.error);
@@ -4475,7 +4510,7 @@ var Lesson = (function () {
         }
         var dataform = new FormData();
 
-        dataform.append("ExamID", $("input[name=ExamID]").val());
+        dataform.append("ExamID", $("#ExamID").val());
         dataform.append("LessonPartID", partID);
         dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
@@ -4510,8 +4545,8 @@ var Lesson = (function () {
                 .catch(function (err) {
                     //alert();
                     Swal.fire({
-                        title: 'Có lỗi',
-                        text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
+                        title: 'Có lỗi, vui lòng kiểm tra lại kết nối',
+                        html: "<span>Chi tiết: " + err + "</span>",
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {

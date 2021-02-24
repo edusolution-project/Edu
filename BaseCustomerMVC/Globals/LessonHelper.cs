@@ -724,7 +724,12 @@ namespace BaseCustomerMVC.Globals
 
         public bool IsOvertime(ExamEntity item)
         {
+
             if (item == null || item.Status) return true;//break if exam not found or completed
+            var schedule = _lessonScheduleService.GetItemByLessonID(item.LessonID);
+            if (schedule == null) return true;//break if no schedule
+            if (schedule.EndDate > new DateTime(1900, 1, 1) && schedule.EndDate < DateTime.UtcNow)
+                return true;
             if (item.Timer == 0) return false;
             double count = (item.Created.ToUniversalTime().AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
             return count <= 0;

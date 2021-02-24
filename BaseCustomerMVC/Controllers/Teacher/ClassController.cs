@@ -2318,9 +2318,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //new_course.SkillID = target_course.SkillID;
                 new_course.Created = DateTime.UtcNow;
                 new_course.Updated = DateTime.UtcNow;
+                new_course.PublishedVer = DateTime.UtcNow;
                 new_course.IsActive = true;
                 new_course.IsUsed = false;
-                new_course.IsPublic = false;
+                //new_course.IsPublic = false;
                 new_course.TargetCenters = new List<string>();
                 new_course.StudentTargetCenters = new List<string>();
 
