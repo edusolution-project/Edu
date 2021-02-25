@@ -317,9 +317,9 @@ namespace BaseCustomerMVC.Controllers.Admin
                         }
                     }
                     var currentRole = _service.GetItemByCode(role);
-                    if(currentRole != null)
+                    if (currentRole != null)
                     {
-                        CacheExtends.SetObjectFromCache(currentRole.ID, 3600 * 24 * 360, permission.Select(o=>o.Key)?.ToList());
+                        CacheExtends.SetObjectFromCache(currentRole.Code, 3600 * 24 * 360, permission.Select(o => o.Key)?.ToList());
                     }
 
                     return new JsonResult(new { code = 200, msg = "success", data = success });
