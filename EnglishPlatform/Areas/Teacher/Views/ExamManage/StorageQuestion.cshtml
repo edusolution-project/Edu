@@ -35,9 +35,10 @@
             <div class="box filter-box w-152 m-1 ">
                 <select v-model="filterLevelPart">
                     <option value="">Mức độ</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.EASAY">Dễ</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.NORMAL">Trung bình</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.HARD">Khó</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
+                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
                 </select>
             </div>
             <div class="search-box m-1">
@@ -56,8 +57,8 @@
                 <tr>
                     <td style="width:30px;max-width:30px">#</td>
                     <td>Câu hỏi</td>
-                    @*<td style="width:70px;min-width:30px">Thời gian</td>*@
-                    <td style="width:100px;max-width:130px;min-width:30px">Mức độ</td>
+                    <td style="width:250px;min-width:30px">Tags</td>
+                    <td style="width:150px;max-width:130px;min-width:30px">Mức độ</td>
                     <td style="width:100px;max-width:100px;min-width:30px">Tác vụ</td>
                 </tr>
             </thead>
@@ -65,12 +66,15 @@
                 <tr v-for="(item,k) in listLessonPart">
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>{{item.Title}}</td>
-                    @*<td><input type="number" v-model="item.Timer" v-on:change="changeTimer(item.ID,item.Timer)" /></td>*@
                     <td>
-                        <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)">
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.EASAY">Dễ</option>
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.NORMAL">Trung bình</option>
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.HARD">Khó</option>
+                        <input type="text" class="form-control" v-model="item.TagsName" disabled readonly/>
+                    </td>
+                    <td>
+                        <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)" class="form-control">
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
+                            <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
                         </select>
                     </td>
                     <td>
@@ -319,16 +323,21 @@
                             var item = obj[i]
                             var id = item.ParentID
                             var ul = $("#" + id)
-                            var selectOption = "<select id='sl_" + item.ID + "' class='form-control' required>" +
-                                "<option value='@BaseCustomerEntity.Database.LEVELPART.EASAY'>Dễ</option>"+
-                                "<option value='@BaseCustomerEntity.Database.LEVELPART.NORMAL'>Trung bình</option>"+
-                                "<option value='@BaseCustomerEntity.Database.LEVELPART.HARD'>Khó</option>"+
+                            
+                            var selectOption = "<select id='lp_" + item.ID + "' class='form-control' required>" +
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.KNOW'>Nhận biết</option>"+
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING'>Thông hiểu</option>"+
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.MANIPULATE'>Vận dụng</option>"+
+                                "<option value='@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY'>Vận dụng cao</option>"+
                                 "</select>"
+
                             var input = "<input type='checkbox' class='form-check-input' style='width: 50px;vertical-align: middle;' onclick='chooseLessonPart(\"" + item.ID + "\",this)'/>"
+
+                            var tags = "<input type='text' id='tags_" + item.ID + "' class='form-control' required />"
                             //var timer = "<input type='number' class='form-control' min='1' placeholder='Thời gian' id='tm_'" + item.ID + "/>"
                             //ul.append("<div class='row'><div class='col-sm-10'><li style='cursor:pointer'>" + item.Title + "</li></div><div class='col-sm-2' style='margin:auto'>" + timer + selectOption + input + "</div></div>")
                             //var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'>" + timer + "</div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
-                            var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'></div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
+                            var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'>" + tags + "</div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
                             ul.append("<div class='row'>" + table + "</div>")
                         }
                     }
@@ -344,20 +353,20 @@
                         let _url = '@processUrl("CreateOrUpdateLessonPart", "ExamManage")'
                         for (var i = 0; i < array.length; i++) {
                             item = array[i]
-                            _form.append("IDs", item.ID)
-                            _form.append("Types", item.Type)
+                            _form.append("lessonPartExtentsions[" + i +"].OriginID", item.LessonPartID)
+                            _form.append("lessonPartExtentsions[" + i +"].LevelPart", item.LevelPart)
+                            _form.append("lessonPartExtentsions[" + i +"].Tags", item.Tags)
                         }
                         _form.append("GradeID", this.addEditItem.GradeID)
-                        //debugger
+                        debugger
                         _form.append("ID", '@currentData.ID')
                         _that.isLoading = true
                         axios.post(_url, _form)
                             .then(response => {
                                 _that.isLoading = false
-                                this.hideModal()
+                                //this.hideModal()
                                 var data = response.data.Data
                                 var array = []
-                                debugger
                                 if (data.length > 0) {
                                     for (var i = 0; i < data.length; i++) {
                                         var item = data[i]
@@ -475,16 +484,16 @@
         var array = []
 
         var chooseLessonPart = function (id, obj) {
-            //debugger
             var stt = $(obj).prop("checked")
-            var typePart = document.getElementById("sl_" + id).value
+            var levelPart = document.getElementById("lp_" + id).value
+            var tags = document.getElementById("tags_" + id).value
             //var timer = document.getElementById("tm_" + id).value
             if (stt) {
                 //array.push({ ID: id, Type: typePart, Timer: timer })
-                array.push({ ID: id, Type: typePart })
+                array.push({ LessonPartID: id, LevelPart: levelPart, Tags: tags })
             }
             else {
-                var index = array.findIndex(x => x.ID == id);
+                var index = array.findIndex(x => x.LessonPartID == id);
                 if (index > -1) {
                     array.splice(index, 1);
                 }

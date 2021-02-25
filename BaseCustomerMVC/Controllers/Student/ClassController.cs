@@ -370,14 +370,19 @@ namespace BaseCustomerMVC.Controllers.Student
             
             var course = _courseService.GetItemByID(CourseID);
             var MyClass = _classService.GetClassByMechanism(CLASS_MECHANISM.PERSONAL, student.ID);
-            var classIDs = student.JoinedClasses.Where(x => x != MyClass.ID).ToList();
-            if(classIDs.Count() == 0)
+
+            if (student.JoinedClasses.Count() > 0)
             {
-                return Json(new Dictionary<String, Object>
+                var myclass = MyClass == null ? new ClassEntity() : MyClass;
+                var classIDs = student.JoinedClasses.Where(x => x != myclass.ID).ToList();
+                if (classIDs.Count() == 0)
                 {
-                    {"Msg","Bạn cần có trong lớp mới có thể sử dụng chức năng này." },
-                    {"Status",false }
-                });
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Msg","Bạn cần có trong lớp mới có thể sử dụng chức năng này." },
+                        {"Status",false }
+                    });
+                }
             }
             if (course == null)
             {

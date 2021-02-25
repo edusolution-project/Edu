@@ -1,14 +1,11 @@
-﻿using Core_v2.Repositories;
-using Microsoft.Extensions.Configuration;
-using MongoDB.Driver;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace BaseCustomerEntity.Database
+namespace BaseCustomerMVC.Models
 {
-    public class ExamProcessEntity : EntityBase
+    public class ExamProcessViewModel
     {
         [JsonProperty("ExamQuestionArchiveID")] //ma kho de
         public String ExamQuestionArchiveID { get; set; }
@@ -44,26 +41,5 @@ namespace BaseCustomerEntity.Database
         public String LessonID { get; set; }
         [JsonProperty("Title")]
         public string Title { get; set; }
-    }
-
-    public class ExamProcessService : ServiceBase<ExamProcessEntity>
-    {
-        public ExamProcessService(IConfiguration config) : base(config)
-        {
-            var indexs = new List<CreateIndexModel<ExamProcessEntity>>
-            {
-                //TeacherID_1_SubjectID_1_GradeID_1_IsActive_1
-                new CreateIndexModel<ExamProcessEntity>(
-                    new IndexKeysDefinitionBuilder<ExamProcessEntity>()
-                    .Ascending(t => t.ID)
-                    ),
-                //new CreateIndexModel<ExamProcessEntity>(
-                //    new IndexKeysDefinitionBuilder<ExamProcessEntity>()
-                //    .Ascending(t => t.ID)
-                //    ),
-            };
-
-            Collection.Indexes.CreateManyAsync(indexs);
-        }
     }
 }

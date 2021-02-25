@@ -10,6 +10,7 @@ using Core_v2.Globals;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using BaseCustomerEntity.Globals;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -27,7 +28,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartQuestionExtensionServie _lessonPartQuestionExtensionServie;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
         private readonly LessonPartAnswerExtensionService _lessonPartAnswerExtensionService;
-        private readonly ExamProcessService _examProcessService;
+        //private readonly ExamProcessService _examProcessService;
         private readonly LessonService _lessonService;
         private readonly LessonHelper _lessonHelper;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
@@ -42,6 +43,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
         private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
         private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
+        private readonly TagsService _tagsService;
 
         private readonly MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel> _examQuestionArchiveViewMapping = new MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel>();
         private readonly MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity> _lessonPartQuestionExtensionMapping = new MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity>();
@@ -59,7 +61,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , LessonPartQuestionExtensionServie lessonPartQuestionExtensionServie
             , LessonPartAnswerService lessonPartAnswerService
             , LessonPartAnswerExtensionService lessonPartAnswerExtensionService
-            , ExamProcessService examProcessService
+            //, ExamProcessService examProcessService
             , LessonService lessonService
             , LessonHelper lessonHelper
             , CloneLessonPartQuestionService cloneLessonPartQuestionService
@@ -74,6 +76,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService
             , CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
             , LessonScheduleService lessonScheduleService
+            , TagsService tagsService
             )
         {
             _centerService = centerService;
@@ -88,7 +91,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartQuestionExtensionServie = lessonPartQuestionExtensionServie;
             _lessonPartAnswerService = lessonPartAnswerService;
             _lessonPartAnswerExtensionService = lessonPartAnswerExtensionService;
-            _examProcessService = examProcessService;
+            //_examProcessService = examProcessService;
             _lessonService = lessonService;
             _lessonHelper = lessonHelper;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
@@ -103,6 +106,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
             _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
             _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
+            _tagsService = tagsService;
         }
         public IActionResult Index(String basis)
         {
@@ -375,12 +379,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region Quiz
-        public JsonResult CreateOrUpdateLessonPart(String basis, List<String> IDs, List<String> Types, List<Int32> Timer, String ID, String GradeID)
+        //public JsonResult CreateOrUpdateLessonPart(String basis, List<String> IDs, List<String> Types, String ID, String GradeID)
+        public JsonResult CreateOrUpdateLessonPart(String basis, List<LessonPartExtensionEntity> lessonPartExtentsions, String ID, String GradeID)
         {
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
                 var examQuestionArchive = _examQuestionArchiveService.GetItemByID(ID);
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null) return Json("Cơ sở không tồn tại.");
                 if (examQuestionArchive == null) return Json("Kho đề không tồn tại");
                 if (String.IsNullOrEmpty(UserID) || _teacherService.GetItemByID(UserID) == null)
                 {
@@ -392,7 +399,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 //if (item == null)
                 //{
-                if (IDs.Count() == 0)
+                if (lessonPartExtentsions.Count() == 0)
                 {
                     return Json(new Dictionary<String, Object>
                 {
@@ -401,13 +408,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
                 }
                 var listPart = new List<LessonPartExtensionEntity>();
-                for (Int32 i = 0; i < IDs.Count(); i++)
+                for (Int32 i = 0; i < lessonPartExtentsions.Count(); i++)
                 {
-                    var itemID = IDs.ElementAtOrDefault(i);
-                    Int32.TryParse(Types.ElementAtOrDefault(i), out Int32 itemType);
-                    var itemTimer = Timer.ElementAtOrDefault(i);
-                    var lessonPart = _lessonPartService.GetItemByID(itemID);
-                    var lessonPartQuestion = _lessonPartQuestionService.GetByPartID(itemID);
+                    var lessonPartExtension = lessonPartExtentsions.ElementAtOrDefault(i);
+                    
+                    var lessonPart = _lessonPartService.GetItemByID(lessonPartExtension.OriginID);
+                    var lessonPartQuestion = _lessonPartQuestionService.GetByPartID(lessonPartExtension.OriginID);
                     var lessonpart = new LessonPartExtensionEntity
                     {
                         OriginID = lessonPart.ID,
@@ -420,11 +426,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         Updated = DateTime.Now,
                         //Order = lessonPart.Order,
                         Media = lessonPart.Media,
-                        LevelPart = itemType,
+                        LevelPart = lessonPartExtension.LevelPart,
                         ExamQuestionArchiveID = ID,
                         GradeID = GradeID,
-                        SubjectID = examQuestionArchive.SubjectID
+                        SubjectID = examQuestionArchive.SubjectID,
                     };
+
+                    if(!String.IsNullOrEmpty(lessonPartExtension.Tags))
+                    {
+                        var listTags = lessonPartExtension.Tags.Split(';');
+                        var tag = "";
+                        foreach(var t in listTags)
+                        {
+                            var codeT= t.ConvertUnicodeToCode("-", true);
+                            Int32 pos = 0;
+                            while (_tagsService.GetItemByCode(codeT) != null)
+                            {
+                                pos++;
+                                codeT += ("-" + pos);
+                            }
+                            var newTag = new TagsEntity
+                            {
+                                Name = t,
+                                Code = codeT,
+                                ExamQuestionArchiveID = ID,
+                                CenterCode = center.Code,
+                                CreateUser = UserID
+                            };
+                            _tagsService.Save(newTag);
+                            tag += $"{codeT}; ";
+                        }
+                        lessonpart.Tags = tag;
+                    }    
 
                     _lessonPartExtensionService.Save(lessonpart);
                     listPart.Add(lessonpart);
@@ -444,10 +477,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _lessonPartQuestionExtensionServie.CreateQuery().InsertOne(ni);
                         newItem.Add(ni);
                     }
-                    //_lessonPartQuestionExtensionServie.CreateQuery().InsertMany(newItem);
-                    //var test = newItem.FirstOrDefault();
-                    //_lessonPartQuestionExtensionServie.CreateQuery().InsertOne(test);
-
+                    
                     var lessonPartAns = _lessonPartAnswerService.GetByQuestionIDs(lessonPartQuestion.Select(x => x.ID).ToList());
                     var newAns = (from a in lessonPartAns.ToList()
                                   let q = newItem.Where(x => x.OriginID == a.ParentID).FirstOrDefault()
@@ -462,10 +492,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                   }).ToList();
                     _lessonPartAnswerExtensionService.CreateQuery().InsertMany(newAns);
                 }
+
+                var newListPart = (from lp in listPart
+                                   let tagName = _tagsService.GetNamesByCodes(lp.Tags)
+                                   select new LessonPartExtensionViewModel(lp)
+                                   {
+                                       TagsName = tagName
+                                   }).ToList();
+
                 return Json(new Dictionary<String, Object>
                 {
                     {"Msg","Thêm thành công" },
-                    {"Data",listPart }
+                    {"Data",newListPart }
                 });
                 //}
                 //else
@@ -537,9 +575,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         : data.Skip((model.PageIndex) * model.PageSize).Limit(model.PageSize);
                     //var DataResponse = data;
 
+                    var listPart = (from lp in DataResponse.ToList()
+                                    let tagname = _tagsService.GetNamesByCodes(lp.Tags)
+                                    select new LessonPartExtensionViewModel(lp)
+                                    {
+                                        TagsName = tagname
+                                    }).ToList();
                     response = new Dictionary<string, object>
                     {
-                        { "Data", DataResponse.ToList()},
+                        { "Data", listPart},
                         { "Model", model }
                     };
                 }
@@ -686,7 +730,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessEntity item, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item, Boolean isNew)
         {
             try
             {
@@ -759,7 +803,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _lessonExtensionService.Save(lesson);
 
                         item.LessonID = lesson.ID;
-                        _examProcessService.Save(item);
+                        //_examProcessService.Save(item);
                         var msg = ProcessCreateExam(item, UserID, lesson).Result;
                     }
 
@@ -781,7 +825,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         /// <param name="UserID"></param>
         /// <param name="lesson"></param>
         /// <returns></returns>
-        public async Task<String> ProcessCreateExam(ExamProcessEntity item, String UserID, LessonExtensionEntity lesson)
+        public async Task<String> ProcessCreateExam(ExamProcessViewModel item, String UserID, LessonExtensionEntity lesson)
         {
             // danh sach lessonpart trong kho de
             var lessonPart = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(item.ExamQuestionArchiveID);
@@ -795,9 +839,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var listQuestionIDs = listQuestions.Project(x => x.ID).ToList();
             var listAns = _lessonPartAnswerExtensionService.CreateQuery().Find(x => listQuestionIDs.Contains(x.ParentID));
 
-            var listPartEasy = lessonPart.Where(x => x.LevelPart == LEVELPART.EASAY);
-            var listPartNormal = lessonPart.Where(x => x.LevelPart == LEVELPART.NORMAL);
-            var listPartHard = lessonPart.Where(x => x.LevelPart == LEVELPART.HARD);
+            var listPartKnow = lessonPart.Where(x => x.LevelPart == LEVELPART.KNOW); // 
+            var listPartUnderstanding = lessonPart.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING);
+            var listPartManipulate = lessonPart.Where(x => x.LevelPart == LEVELPART.MANIPULATE);
+            var listPartManipulateHighly = lessonPart.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY);
 
             //for (var j = 0; j < item.TotalExam; j++)
             //{
@@ -806,136 +851,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var newListAns = new List<LessonPartAnswerExtensionEntity>();
             var rd = new Random();
 
-            var listpartEasy = GetLessonPart(item.EasyQuestion, listPartEasy.ToList()).Result;
-            var listpartNormal = GetLessonPart(item.NormalQuestion, listPartNormal.ToList()).Result;
-            var listpartHard = GetLessonPart(item.NormalQuestion, listPartHard.ToList()).Result;
+            var listpartKnow = GetLessonPart(item.EasyQuestion, listPartKnow.ToList()).Result;
+            var listpartUnderstanding = GetLessonPart(item.NormalQuestion, listPartUnderstanding.ToList()).Result;
+            var listpartManipulate = GetLessonPart(item.NormalQuestion, listPartManipulate.ToList()).Result;
+            var listpartManipulatehighly = GetLessonPart(item.NormalQuestion, listPartManipulate.ToList()).Result;
 
-            newListPart.AddRange(listpartEasy);
-            newListPart.AddRange(listpartNormal);
-            newListPart.AddRange(listpartHard);
+            newListPart.AddRange(listpartKnow);
+            newListPart.AddRange(listpartUnderstanding);
+            newListPart.AddRange(listpartManipulate);
+            newListPart.AddRange(listpartManipulatehighly);
 
             if (newListPart.Count() > 0)
                 newListQuestion.AddRange(GetQuestion(newListPart, listQuestions.ToList()).Result);
             if (newListQuestion.Count() > 0)
                 newListAns.AddRange(GetAnswer(newListQuestion, listAns.ToList()).Result);
-            {
-                //for (var i = 0; i < item.EasyQuestion; i++)
-                //{
-                //    Int32 index = rd.Next(0, listPartEasay.Count());
-                //    var _item = listPartEasay.ElementAtOrDefault(index);
-                //    if (_item == null) continue;
-                //    //do
-                //    //{
-                //    //    index = rd.Next(0, listPartEasay.Count());
-                //    //    _item = listPartEasay.ElementAtOrDefault(index);
-                //    //    while (!newListPart.Any(x => x.ID == _item.ID))
-                //    //    {
-                //    //        index = rd.Next(0, listPartEasay.Count());
-                //    //        _item = listPartEasay.ElementAtOrDefault(index);
-                //    newListPart.Add(_item);
-                //    //    }
-                //    //}
-                //    //while (!newListPart.Any(x => x.ID == _item.ID));
-                //    //if (!newListQuestion.Any(x => x.ID == _item.ID)) newListQuestion.Add(_item);
-                //    var itemQuestion = listQuestions.ToList().Where(x => x.ParentID == _item.ID);
-                //    newListQuestion.AddRange(itemQuestion);
-                //    var itemQuestionIDs = itemQuestion.Select(x => x.ID).ToList();
-                //    var itemAns = listAns.ToList().Where(x => itemQuestionIDs.Contains(x.ParentID));
-                //    newListAns.AddRange(itemAns);
-                //    if (_item.Type.Equals("QUIZ3"))
-                //    {
-                //        String a = "";
-                //    }
-                //    var hasmedia = itemQuestion.Any(x => x.Media != null);
-                //    if (hasmedia)
-                //    {
-                //        String b = "";
-                //    }
-                //    var hasm = itemAns.Any(x => x.Media != null);
-                //    if (hasm)
-                //    {
-                //        String c = "";
-                //    }
-                //}
-
-                //for (var i = 0; i < item.NormalQuestion; i++)
-                //{
-                //    Int32 index = rd.Next(0, listPartNormal.Count());
-                //    var _item = listPartNormal.ElementAtOrDefault(index);
-                //    if (_item == null) continue;
-                //    //do
-                //    //{
-                //    //    index = rd.Next(0, listPartNormal.Count());
-                //    //    _item = listPartNormal.ElementAtOrDefault(index);
-                //    //    while (!newListPart.Any(x => x.ID == _item.ID))
-                //    //    {
-                //    //        index = rd.Next(0, listPartNormal.Count());
-                //    //        _item = listPartNormal.ElementAtOrDefault(index);
-                //    newListPart.Add(_item);
-                //    //    }
-                //    //}
-                //    //while (!newListPart.Any(x => x.ID == _item.ID));
-                //    //if (!newListQuestion.Any(x => x.ID == _item.ID)) newListQuestion.Add(_item);
-                //    var itemQuestion = listQuestions.ToList().Where(x => x.ParentID == _item.ID);
-                //    newListQuestion.AddRange(itemQuestion);
-                //    var itemQuestionIDs = itemQuestion.Select(x => x.ID).ToList();
-                //    var itemAns = listAns.ToList().Where(x => itemQuestionIDs.Contains(x.ParentID));
-                //    newListAns.AddRange(itemAns);
-                //    if (_item.Type.Equals("QUIZ3"))
-                //    {
-                //        String a = "";
-                //    }
-                //    var hasmedia = itemQuestion.Any(x => x.Media != null);
-                //    if (hasmedia)
-                //    {
-                //        String b = "";
-                //    }
-                //    var hasm = itemAns.Any(x => x.Media != null);
-                //    if (hasm)
-                //    {
-                //        String c = "";
-                //    }
-                //}
-
-                //for (var i = 0; i < item.HardQuestion; i++)
-                //{
-                //    Int32 index = rd.Next(0, listPartHard.Count());
-                //    var _item = listPartHard.ElementAtOrDefault(index);
-                //    if (_item == null) continue;
-                //    //do
-                //    //{
-                //    //    index = rd.Next(0, listPartHard.Count());
-                //    //    _item = listPartHard.ElementAtOrDefault(index);
-                //    //    while (!newListPart.Any(x => x.ID == _item.ID))
-                //    //    {
-                //    //        index = rd.Next(0, listPartHard.Count());
-                //    //        _item = listPartHard.ElementAtOrDefault(index);
-                //    newListPart.Add(_item);
-                //    //    }
-                //    //}
-                //    //while (!newListPart.Any(x => x.ID == _item.ID));
-                //    //if (!newListQuestion.Any(x => x.ID == _item.ID)) newListQuestion.Add(_item);
-                //    var itemQuestion = listQuestions.ToList().Where(x => x.ParentID == _item.ID);
-                //    newListQuestion.AddRange(itemQuestion);
-                //    var itemQuestionIDs = itemQuestion.Select(x => x.ID).ToList();
-                //    var itemAns = listAns.ToList().Where(x => itemQuestionIDs.Contains(x.ParentID));
-                //    newListAns.AddRange(itemAns);
-                //    if (_item.Type.Equals("QUIZ3"))
-                //    {
-                //        String a = "";
-                //    }
-                //    var hasmedia = itemQuestion.Any(x => x.Media != null);
-                //    if (hasmedia)
-                //    {
-                //        String b = "";
-                //    }
-                //    var hasm = itemAns.Any(x => x.Media != null);
-                //    if (hasm)
-                //    {
-                //        String c = "";
-                //    }
-                //}
-            }
+            
             foreach (var part in newListPart)
             {
                 var clonelessonpart = new CloneLessonPartExtensionEntity
@@ -1072,7 +1002,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return answers;
         }
-        
+
         //private async Task CreateSameExam(LessonExtensionEntity lesson,ExamProcessEntity examProcess)
         //{
         //    var lessonparts = _cloneLessonPartExtensionService.GetItemsByLessonID(lesson.ID);
@@ -1087,8 +1017,45 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    }
         //}
         #endregion
+
+        #region Option
+        public JsonResult GetOptionFormatExam(String basis, String ID)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var exam = _examQuestionArchiveService.GetItemByID(ID);
+                if (exam == null)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"Status",false },
+                        {"Msg","" },
+                        {"Data",null }
+                    });
+                }
+                var tags = _tagsService.GetItemByUserAndCenter(basis,UserID);
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data",tags }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data",null }
+                });
+            }    
+        }
+        #endregion
     }
 
+    #region class other
     public class DataQuestion
     {
         [JsonProperty("ID")]
@@ -1096,4 +1063,5 @@ namespace BaseCustomerMVC.Controllers.Teacher
         [JsonProperty("Type")]
         public Int32 Type { get; set; }
     }
+    #endregion
 }

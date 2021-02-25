@@ -88,12 +88,14 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<ExamQuestionArchiveService>();
             services.AddSingleton<LessonPartQuestionExtensionServie>();
             services.AddSingleton<LessonPartAnswerExtensionService>();
-            services.AddSingleton<ExamProcessService>();
+            //services.AddSingleton<ExamProcessService>();
             services.AddSingleton<LessonExtensionService>();
             services.AddSingleton<LessonPartExtensionService>();
             services.AddSingleton<CloneLessonPartExtensionService>();
             services.AddSingleton<CloneLessonPartQuestionExtensionService>();
             services.AddSingleton<CloneLessonPartAnswerExtensionService>();
+            services.AddSingleton<TagsService>();
+            services.AddSingleton<FormatExamService>();
             return services;
         }
     }

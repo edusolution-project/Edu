@@ -8,6 +8,8 @@ namespace BaseCustomerMVC.Models
 {
     public class LessonPartExtensionViewModel : LessonPartExtensionEntity
     {
+        [JsonProperty("TagsName")]
+        public String TagsName { get; set; }
         public LessonPartExtensionViewModel()
         {
 
@@ -27,6 +29,8 @@ namespace BaseCustomerMVC.Models
             this.Updated = o.Updated;
             this.Media = o.Media;
             this.Questions = new List<QuestionViewModel>();
+            this.Tags = o.Tags;
+            this.LevelPart = o.LevelPart;
         }
 
         [JsonProperty("Questions")]

@@ -22,13 +22,17 @@ namespace BaseCustomerEntity.Database
         public String GradeID { get; set; }
         [JsonProperty("SubjectID")]
         public String SubjectID { get; set; }
+        [JsonProperty("Tags")]
+        //public List<String> Tags = new List<String>();
+        public String Tags { get; set; }
     }
 
-    public class LEVELPART
+    public class LEVELPART //mức độ
     {
-        public const int EASAY = 1, //DỄ
-            NORMAL = 2, //TRUNG BÌNH
-            HARD = 3; //KHÓ
+        public const int KNOW = 1, //Nhận biết
+            UNDERSTANDING = 2, //Thông hiểu
+            MANIPULATE = 3, //Vận dụng
+            MANIPULATEHIGHLY = 4; // vận dụng cao
     }
 
     public class LessonPartExtensionService : ServiceBase<LessonPartExtensionEntity>
