@@ -726,11 +726,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        #region Ans
-        #endregion
-
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<FormatExamEntity> formatExams, Boolean isNew)
         {
             try
             {
@@ -740,76 +737,78 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json("Tai khoan khong ton tai.");
                 }
 
-                var @class = _classService.GetItemByID(item.TargetClasses.FirstOrDefault());
-                var classsbj = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
+                var curre
 
-                if (isNew)
-                {
-                    item.Created = DateTime.Now;
-                    item.Updated = DateTime.Now;
-                    item.CreateUser = UserID;
+                //var @class = _classService.GetItemByID(item.TargetClasses.FirstOrDefault());
+                //var classsbj = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
 
-                    var _lesson = new LessonEntity
-                    {
-                        TemplateType = 2,
-                        Timer = item.Timer,
-                        CreateUser = UserID,
-                        Title = item.Title,
-                        Created = DateTime.Now,
-                        Updated = DateTime.Now,
-                        Limit = item.Limit,
-                        Multiple = item.Multiple,
-                        Etype = item.Etype,
-                        ClassID = @class.ID,
-                        ClassSubjectID = classsbj.ID,
-                        ChapterID = "0",
-                        IsParentCourse = true
-                    };
-                    _lessonService.Save(_lesson);
+                //if (isNew)
+                //{
+                //    item.Created = DateTime.Now;
+                //    item.Updated = DateTime.Now;
+                //    item.CreateUser = UserID;
 
-                    var lessonShechude = new LessonScheduleEntity
-                    {
-                        ClassID = _lesson.ClassID,
-                        ClassSubjectID = _lesson.ClassSubjectID,
-                        IsHideAnswer = true,
-                        IsActive = _lesson.IsActive,
-                        LessonID = _lesson.ID,
-                        TeacherID = UserID,
-                        Type = CLASSSUBJECT_TYPE.EXAM
-                    };
-                    _lessonScheduleService.Save(lessonShechude);
+                //    var _lesson = new LessonEntity
+                //    {
+                //        TemplateType = 2,
+                //        Timer = item.Timer,
+                //        CreateUser = UserID,
+                //        Title = item.Title,
+                //        Created = DateTime.Now,
+                //        Updated = DateTime.Now,
+                //        Limit = item.Limit,
+                //        Multiple = item.Multiple,
+                //        Etype = item.Etype,
+                //        ClassID = @class.ID,
+                //        ClassSubjectID = classsbj.ID,
+                //        ChapterID = "0",
+                //        IsParentCourse = true
+                //    };
+                //    _lessonService.Save(_lesson);
 
-                    //render exam
-                    for (Int32 i = 0; i < item.TotalExam; i++)
-                    {
-                        var lesson = new LessonExtensionEntity
-                        {
-                            TemplateType = 2,
-                            Timer = item.Timer,
-                            CreateUser = UserID,
-                            Title = item.Title,
-                            Created = DateTime.Now,
-                            Updated = DateTime.Now,
-                            Limit = item.Limit,
-                            Multiple = item.Multiple,
-                            Etype = item.Etype,
-                            ClassID = _lesson.ClassID,
-                            ClassSubjectID = _lesson.ClassSubjectID,
-                            ChapterID = "0",
-                            IsParentCourse = true,
-                            LessonID = _lesson.ID,
-                            Code = new Random().Next(1, 100).ToString()
-                        };
-                        _lessonExtensionService.Save(lesson);
+                //    var lessonShechude = new LessonScheduleEntity
+                //    {
+                //        ClassID = _lesson.ClassID,
+                //        ClassSubjectID = _lesson.ClassSubjectID,
+                //        IsHideAnswer = true,
+                //        IsActive = _lesson.IsActive,
+                //        LessonID = _lesson.ID,
+                //        TeacherID = UserID,
+                //        Type = CLASSSUBJECT_TYPE.EXAM
+                //    };
+                //    _lessonScheduleService.Save(lessonShechude);
 
-                        item.LessonID = lesson.ID;
-                        //_examProcessService.Save(item);
-                        var msg = ProcessCreateExam(item, UserID, lesson).Result;
-                    }
+                //    //render exam
+                //    for (Int32 i = 0; i < item.TotalExam; i++)
+                //    {
+                //        var lesson = new LessonExtensionEntity
+                //        {
+                //            TemplateType = 2,
+                //            Timer = item.Timer,
+                //            CreateUser = UserID,
+                //            Title = item.Title,
+                //            Created = DateTime.Now,
+                //            Updated = DateTime.Now,
+                //            Limit = item.Limit,
+                //            Multiple = item.Multiple,
+                //            Etype = item.Etype,
+                //            ClassID = _lesson.ClassID,
+                //            ClassSubjectID = _lesson.ClassSubjectID,
+                //            ChapterID = "0",
+                //            IsParentCourse = true,
+                //            LessonID = _lesson.ID,
+                //            Code = new Random().Next(1, 100).ToString()
+                //        };
+                //        _lessonExtensionService.Save(lesson);
 
-                    //tạo đề khác tương tự
+                //        item.LessonID = lesson.ID;
+                //        //_examProcessService.Save(item);
+                //        var msg = ProcessCreateExam(item, UserID, lesson).Result;
+                //    }
 
-                }
+                //    //tạo đề khác tương tự
+
+                //}
                 return Json("");
             }
             catch (Exception ex)
@@ -1003,19 +1002,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return answers;
         }
 
-        //private async Task CreateSameExam(LessonExtensionEntity lesson,ExamProcessEntity examProcess)
-        //{
-        //    var lessonparts = _cloneLessonPartExtensionService.GetItemsByLessonID(lesson.ID);
-        //    var lessonpartIDs = lessonparts.Select(x => x.ID).ToList();
-        //    //var lessonpartIDs = _cloneLessonPartExtensionService.GetIDsByLessonID(lesson.ID);
-        //    var questions = _cloneLessonPartQuestionExtensionService.GetItemsByParentIDs(lessonpartIDs);
-        //    //var questionIDs = questions.Select(x => x.ID).ToList();
-
-        //    foreach (var part in lessonparts)
-        //    {
-        //        var question = questions.Where(x => x.ParentID == part.ID);
-        //    }
-        //}
         #endregion
 
         #region Option

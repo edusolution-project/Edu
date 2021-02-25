@@ -12,11 +12,12 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("Name")]
         public String Name { get; set; }
-        //[JsonProperty("")]
-
-
-
-
+        [JsonProperty("Created")]
+        public DateTime Created { get; set; }
+        [JsonProperty("CreateUser")]
+        public String CreateUser { get; set; }
+        [JsonProperty("Center")]
+        public String Center { get; set; }
         [JsonProperty("Order")]
         public Int32 Order { get; set; }
         [JsonProperty("Level")]

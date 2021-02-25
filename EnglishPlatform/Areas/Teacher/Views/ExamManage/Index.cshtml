@@ -171,7 +171,7 @@
                     titleExam: '',
                     timer: 1,
                     limit: 1,
-                    typeExam: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
+                    template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                     totalExam: 1,
                     format: {
                         level: '',
@@ -236,7 +236,7 @@
                             titleExam: '',
                             timer: 1,
                             limit: 1,
-                            typeExam: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
+                            template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                             totalExam: 1,
                             format:[
                             {
@@ -365,13 +365,23 @@
                     let _form = new FormData()
                     let _url = '@processUrl("CreateOrUpdateExam", "ExamManage")'
                     _form.append("ExamQuestionArchiveID", _that.createExam.examQuestionArchiveID)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.titleFormat)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.titleExam)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.timer)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.limit)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.typeExam)
-                    _form.append("ExamQuestionArchiveID", _that.formatExam.totalExam)
-                    
+                    //_form.append("ExamQuestionArchiveID", _that.formatExam.titleFormat)
+                    _form.append("Title", _that.formatExam.titleExam)
+                    _form.append("Timer", _that.formatExam.timer)
+                    _form.append("Limit", _that.formatExam.limit)
+                    _form.append("Template", _that.formatExam.template)
+                    _form.append("TotalExam", _that.formatExam.totalExam)
+                    for (var i = 0; i < _that.formatExam.format.length; i++) {
+                        var itemFormat = _that.formatExam.format[i]
+                        _form.append("formatExams[" + i + "].Level", itemFormat.level)
+                        _form.append("formatExams[" + i + "].Tags", itemFormat.tag)
+                        _form.append("formatExams[" + i + "].Know", itemFormat.levelKnow)
+                        _form.append("formatExams[" + i + "].Understanding", itemFormat.levelUnderstanding)
+                        _form.append("formatExams[" + i + "].Manipulate", itemFormat.levelManipulate)
+                        _form.append("formatExams[" + i + "].ManipulateHighly", itemFormat.levelManipulateHighly)
+                        _form.append("formatExams[" + i + "].Name", _that.formatExam.titleFormat)
+                    }
+                    debugger
                     axios.post(_url, _form)
                         .then(response =>
                         {
@@ -516,14 +526,14 @@
             <div class="row">
                 <div class="col-md-6">
                     <label class="label">Loại đề</label>
-                    <select class="form-control" v-model="formatExam.typeExam">
+                    <select class="form-control" v-model="formatExam.template">
                         <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra</option>
                         <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Luyện tập</option>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label class="label">Số đề</label>
-                    <template v-if="formatExam.typeExam == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM'">
+                    <template v-if="formatExam.template == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM'">
                         <input type="number" min="1" class="form-control" v-model="formatExam.totalExam"/>
                     </template>
                     <template v-else>
