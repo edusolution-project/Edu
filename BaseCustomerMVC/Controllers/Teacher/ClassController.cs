@@ -1784,8 +1784,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 else //Not change
                                 {
                                     //update period
-                                    oSbj.StartDate = nSbj.StartDate.ToUniversalTime();
-                                    oSbj.EndDate = nSbj.EndDate.ToUniversalTime();
+                                    var @class = _classService.GetItemByID(oSbj.ClassID);
+                                    oSbj.StartDate = nSbj.StartDate <= new DateTime(1990, 01, 01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
 
 

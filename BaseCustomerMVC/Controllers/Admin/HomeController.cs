@@ -77,6 +77,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private string staticPath;
         private string RootPath { get; }
         private readonly IHostingEnvironment _env;
+        private readonly IConfiguration _config;
 
         public HomeController(
                 CourseLessonService courseLessonService,
@@ -167,6 +168,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             host = iConfig.GetValue<string>("SysConfig:Domain");
             staticPath = iConfig.GetValue<string>("SysConfig:StaticPath");
             RootPath = staticPath ?? _env.WebRootPath;
+            _config = iConfig;
         }
 
         // GET: Home
@@ -1915,6 +1917,85 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
             }
             catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        public IActionResult RestoreDB(String email)
+        {
+            try
+            {
+                var msg = "";
+                var @class = _classService.GetItemByID("5f5af8ae171ba81edc70b72b");//12a8 VY
+                var st = _studentService.GetStudentByEmail(email);
+                if(st == null)
+                {
+                    return Content("email null");
+                }
+
+                //lich su hoc tap
+                var learningHistory = _learningHistoryService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"Lịch sử học tập: {learningHistory.CountDocuments()} ";
+                //class progess
+                var classProgess = _classProgressService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"classprogess: {classProgess.CountDocuments()} ";
+                //chapterprogess
+                var chapterProgess = _chapterProgressService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"chapterprogess: {chapterProgess.CountDocuments()} ";
+                //classubject progess
+                var classSubjectProgess = _classSubjectProgressService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"classsjbprogess: {classSubjectProgess.CountDocuments()}";
+                //lessonprogess
+                var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"lessonprogess: {lessonProgess.CountDocuments()}";
+                var exams = _examService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"exams: {exams.CountDocuments()}";
+                var examdetails = _examDetailService.CreateQuery().Find(x => x.StudentID == st.ID && x.ClassID == @class.ID);
+                msg += $"examdetails: {examdetails.CountDocuments()}";
+
+                ClassService classService = new ClassService(_config, "Restore");
+                StudentService studentService = new StudentService(_config, "Restore");
+                LearningHistoryService learningHistoryService =new LearningHistoryService(_config, "Restore");
+                ClassProgressService classProgressService =new ClassProgressService(_config, "Restore");
+                ChapterProgressService chapterProgressService =new ChapterProgressService(_config, "Restore");
+                ClassSubjectProgressService classSubjectProgressService = new ClassSubjectProgressService(_config, "Restore");
+                LessonProgressService lessonProgressService = new LessonProgressService(_config, "Restore");
+                ExamService examService = new ExamService(_config, "Restore");
+                ExamDetailService examDetailService = new ExamDetailService(_config, "Restore");
+
+                if(learningHistory.CountDocuments() > 0)
+                {
+                    learningHistoryService.CreateQuery().InsertManyAsync(learningHistory.ToList()).Wait();
+                }
+                if (classProgess.CountDocuments() > 0)
+                {
+                    classProgressService.CreateQuery().InsertManyAsync(classProgess.ToList()).Wait();
+                }
+                if(chapterProgess.CountDocuments() > 0)
+                {
+                    chapterProgressService.CreateQuery().InsertManyAsync(chapterProgess.ToList()).Wait();
+                }
+                if (classSubjectProgess.CountDocuments() > 0)
+                {
+                    classSubjectProgressService.CreateQuery().InsertManyAsync(classSubjectProgess.ToList()).Wait();
+                }
+                if (lessonProgess.CountDocuments() > 0)
+                {
+                    lessonProgressService.CreateQuery().InsertManyAsync(lessonProgess.ToList()).Wait();
+                }
+                if (exams.CountDocuments() > 0)
+                {
+                    examService.CreateQuery().InsertManyAsync(exams.ToList()).Wait();
+                }
+                if (examdetails.CountDocuments() > 0)
+                {
+                    examDetailService.CreateQuery().InsertManyAsync(examdetails.ToList()).Wait();
+                }
+
+                return Content(msg);
+            }
+            catch(Exception ex)
             {
                 return Content(ex.Message);
             }

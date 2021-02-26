@@ -51,6 +51,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public ClassProgressService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+
+        }
+
         //public async Task UpdateLastLearn(LessonProgressEntity item)
         //{
         //    var progress = GetStudentResult(item.ClassID, item.StudentID);

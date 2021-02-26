@@ -92,6 +92,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public ClassService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+
+        }
+
         public long RemoveStudent(string ID, string studentID)
         {
             return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
