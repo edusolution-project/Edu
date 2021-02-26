@@ -322,13 +322,11 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
-
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
         }
         var data = _data;
-        console.log(_data);
         //if (data.TemplateType == 2) {
         //    renderLessonData.prototype.IsTest = true;
         //}
@@ -534,8 +532,17 @@ var Lesson = (function () {
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
+
                 partMenu.append(lessontabs);
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
+
+                //thêm nút xoá nhiều
+                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá","onclick":"delManyPart()" })
+                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)","class":"ml-4","style":"margin-top:10px","id":"del2all" })
+                var div = $("<div>", { "class": "row ml-3 mt-2" })
+                div.append(inputCheckAll).append(btnDelMany)
+                tabs.append(div);
+
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
@@ -639,12 +646,9 @@ var Lesson = (function () {
                         $(".time-counter").text("");
                         Ajax(config.url.current, dataform, "POST", true).then(function (res) {
                             var exam;
-                            var schedule;
                             try {
                                 var data = JSON.parse(res);
                                 exam = data.exam
-                                schedule = data.schedule
-                                //console.log(data);
                             } catch (e) {
                                 console.log(e)
                             }
@@ -654,7 +658,7 @@ var Lesson = (function () {
                             if (exam == null) {
                                 localStorage.clear();
                                 console.log("New Fresh Exam");
-                                renderLectureExam(exam, false, schedule);
+                                renderLectureExam(exam, false);
                                 $('li[for=lesson-info]').hide().removeClass('d-flex');
 
                             }
@@ -672,56 +676,49 @@ var Lesson = (function () {
                                     //console.log(getLocalData("CurrentExam"))    
                                     if (config.mod == mod.STUDENT_LECTURE) {
                                         $('li[for=lesson-info]').hide().removeClass('d-flex');
-                                        renderLectureExam(exam, false, schedule);
+                                        renderLectureExam(exam, false);
 
                                         //renderOldAnswer();
                                     }
                                     else {
-                                        renderLectureExam(exam, true, schedule);
+                                        renderLectureExam(exam, true);
                                         goPartInx(0);
                                     }
                                 }
                                 else {
-                                    if (exam.Status == true) {
-                                        console.log("Exam End");
+                                    console.log("Exam Continue");
+                                    $('li[for=lesson-info]').show().addClass('d-flex');
+                                    setLocalData("CurrentExam", exam.ID);
+                                    $('#ExamID').val(exam.ID);
+
+                                    var current = exam.CurrentDoTime;
+                                    var start = exam.Created;
+                                    var timer = moment(current) - moment(start);
+
+                                    //console.log(exam);
+                                    if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
+                                    {
+                                        console.log("Exam Timeout")
                                         setLocalData("Timer", "00:00");
                                         CompleteLectureExam(true);
                                     }
                                     else {
-                                        console.log("Exam Continue");
-                                        $('li[for=lesson-info]').show().addClass('d-flex');
                                         setLocalData("CurrentExam", exam.ID);
                                         $('#ExamID').val(exam.ID);
-
-                                        var current = exam.CurrentDoTime;
-                                        var start = exam.Created;
-                                        var timer = moment(current) - moment(start);
-
-                                        //console.log(exam);
-                                        if ((exam.Timer > 0) && moment(timer).minutes() >= exam.Timer)//Timeout
-                                        {
-                                            console.log("Exam Timeout")
-                                            setLocalData("Timer", "00:00");
-                                            CompleteLectureExam(true);
+                                        //render Exam
+                                        if (exam.Timer > 0) {
+                                            var _sec = 59 - moment(timer).second();
+                                            var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
+                                            var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
+                                            setLocalData("Timer", _timer);
+                                            $(".time-counter").text(_timer);
+                                            console.log(_timer);
+                                            countdown(false);
                                         }
-                                        else {
-                                            setLocalData("CurrentExam", exam.ID);
-                                            $('#ExamID').val(exam.ID);
-                                            //render Exam
-                                            if (exam.Timer > 0) {
-                                                var _sec = 59 - moment(timer).second();
-                                                var _minutes = exam.Timer - moment(timer).minutes() - (_sec > 0 ? 1 : 0);
-                                                var _timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":" + (_sec >= 10 ? _sec : "0" + _sec)
-                                                setLocalData("Timer", _timer);
-                                                $(".time-counter").text(_timer);
-                                                console.log(_timer);
-                                                countdown(false);
-                                            }
-                                            renderLectureExam(exam, true, schedule);
-                                            goPartInx(0);
-                                            if (config.mod == mod.STUDENT_LECTURE) {
-                                                renderOldAnswer();
-                                            }
+                                        renderLectureExam(exam, true);
+                                        goPartInx(0);
+                                        if (config.mod == mod.STUDENT_LECTURE) {
+                                            renderOldAnswer();
                                         }
                                     }
                                 }
@@ -1030,12 +1027,14 @@ var Lesson = (function () {
             lessonitem = $('li #pills-' + data.ID).parent().empty()
         }
         else {
-            lessonitem = $("<li>", { "class": "nav-item" });
+            //lessonitem = $("<li>", { "class": "nav-item" });
+            lessonitem = $("<li>", { "class": "nav-item row ml-3" });
             listPartContainer.append(lessonitem);
         }
-
+        var inputDel = $("<input>", { "id": "del-" + data.ID, "type": "checkbox", "class": "ml-4", "style": "margin-top:12px", "onclick": "check2Del('" + data.ID + "')", "data-id": data.ID })
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
-        lessonitem.append(itemtitle);
+        lessonitem.append(inputDel).append(itemtitle);
+        //lessonitem.append(itemtitle);
 
         var tabsitem = null;
 
@@ -2913,7 +2912,7 @@ var Lesson = (function () {
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
                     //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                    .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+                .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2957,7 +2956,8 @@ var Lesson = (function () {
         }
     }
 
-    var renderLectureExam = function (data, isContinue, schedule) {
+    var renderLectureExam = function (data, isContinue) {
+        //console.log(data);
         var wrapper = $("<div>", { "class": "w-100 text-center partWrapper" });
         $('#rightCol').find(".partWrapper").remove();
         if (data != null) {
@@ -2972,34 +2972,26 @@ var Lesson = (function () {
                         "onclick": 'CompleteLectureExam(\'' + lastExam.ID + '\')',
                         "style": "cursor: pointer"
                     }).append('<i class="fas fa-save"></i>').append($("<span>", { class: "ml-2" }).append("Nộp bài"));
-
-                    var schend = moment(schedule.EndDate);
-
                     if (isMobileDevice()) {
                         $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
                         $('.top-menu[for=lesson-info]').append(completeButton);
-                        if (schend > moment(new Date(2000, 1, 1)))
-                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
                         $('.right-content').removeClass("no-info-bar");
                     }
-                    else {
-                        if (schend > moment(new Date(2000, 1, 1)))
-                            $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold mr-2 text-danger' }));
+                    else
                         wrapper.append(completeButton);
-                    }
-
                     $('#rightCol').find('.tab-pane').show();
                 }
                 //renderQuizCounter();
                 //renderOldAnswer();
             }
             else {
+                //alert(1);
                 //console.log(lastExam);
                 $('#rightCol').prepend($(wrapper));
                 var lastdate = moment(lastExam.Updated).format("DD/MM/YYYY hh:mm A");
                 if (lastExam.Point == null) lastExam.Point = 0;
                 var progress = lastExam.MaxPoint > 0 ? (lastExam.Point * 100 / lastExam.MaxPoint) : 0;
-                //debugger
+                debugger
                 var resultMessage = "";
 
                 console.log(progress);
@@ -3013,7 +3005,7 @@ var Lesson = (function () {
 
                 //console.log(progress);
                 if (learningTarget > 0) {
-                    //debugger
+                    debugger
                     if (progress.toFixed(0) >= learningTarget) {
                         resultMessage = "Bạn đạt " + (progress / 10).toFixed(1) + "/" + (learningTarget / 10) + " điểm.<br/>Chúc mừng bạn đã hoàn thành mục tiêu";
                         lastExamResult.append($('<div>', { class: "col-md-12 text-center h4 pb-3 text-success", html: resultMessage }));//.html();
@@ -3040,16 +3032,6 @@ var Lesson = (function () {
                 wrapper.append(doButton)
                     .append(reviewButton);
                 $('#rightCol').find('.tab-pane').hide().removeClass("show");
-
-                var schend = moment(schedule.EndDate);
-                if (schend > moment(new Date(2000, 1, 1))) {
-                    if (isMobileDevice()) {
-                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
-                    }
-                    else
-                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
-                }
-
 
                 //$('#leftCol').addClass('hide');//fix tạm thời
             }
@@ -3288,7 +3270,6 @@ var Lesson = (function () {
         renderStandardLayout(true);
         $('#' + config.container).prepend($("<input>", { type: "hidden", name: "ExamID", value: getLocalData("CurrentExam"), id: "ExamID" }));
         loadLessonData({
-            "ID": $('#ExamID').val(),
             "LessonID": config.lesson_id,
             "ClassSubjectID": config.class_subject_id,
             "ClassID": config.class_id
@@ -3301,7 +3282,7 @@ var Lesson = (function () {
         //debugger
         //if (OldExamID) {
         console.log("Load easy part....");
-        var currentEx = $("#ExamID").val();
+        var currentEx = $("input[name=ExamID]").val();
         if (currentEx == "") return;
 
         var dataform = new FormData();
@@ -3809,7 +3790,7 @@ var Lesson = (function () {
     }
 
     var renderExamAnswer = function (data, partid, template) {
-
+        
         var container = $("#" + data.ParentID + " .answer-wrapper");
         var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
         switch (template) {
@@ -4386,8 +4367,8 @@ var Lesson = (function () {
                     break;
             }
             var dataform = new FormData();
-            dataform.append("ExamID", $("#ExamID").val());
-            //console.log($("#ExamID"));
+            dataform.append("ExamID", $("input[name=ExamID]").val());
+            //console.log($("input[name=ExamID]"));
             //if (type != "ESSAY") {
 
             dataform.append("LessonPartID", partID);
@@ -4419,11 +4400,6 @@ var Lesson = (function () {
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
-                            //alert(rsp.reset)
-                            if (rsp.reset) {
-                                setLocalData("Timer", "00:00");
-                                CompleteLectureExam(true);
-                            }
                         });
 
                         //alert(rsp.error);
@@ -4510,7 +4486,7 @@ var Lesson = (function () {
         }
         var dataform = new FormData();
 
-        dataform.append("ExamID", $("#ExamID").val());
+        dataform.append("ExamID", $("input[name=ExamID]").val());
         dataform.append("LessonPartID", partID);
         dataform.append("QuestionID", questionId);
         dataform.append("AnswerValue", value);
@@ -4545,8 +4521,8 @@ var Lesson = (function () {
                 .catch(function (err) {
                     //alert();
                     Swal.fire({
-                        title: 'Có lỗi, vui lòng kiểm tra lại kết nối',
-                        html: "<span>Chi tiết: " + err + "</span>",
+                        title: 'Có lỗi',
+                        text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
@@ -5264,6 +5240,71 @@ var Lesson = (function () {
         }
     }
 
+    var idPart2ManyDel = []
+
+    var checkAll2Del = function (id, obj) {
+        idPart2ManyDel = []
+        var stt = $(obj).prop("checked")
+        var ul = $("#" + id)
+        var childUl = ul.children()
+        for (var i = 1; i < childUl.length; i++) {
+            var li = childUl[i]
+            var input = $(li).find("input")
+            if (stt) {
+                $(input).prop("checked", true)
+                var idInput = $(input).attr("data-id")
+                idPart2ManyDel.push(idInput)
+            }
+            else {
+                $(input).prop("checked", false)
+                idPart2ManyDel = []
+            }
+        }
+    }
+
+    var check2Del = function (id) {
+        var stt = $("#del-" + id).prop('checked')
+        var idInput = $("#del-" + id).attr("data-id")
+        if (stt) {
+            if (idPart2ManyDel.indexOf(idInput) < 0) {
+                idPart2ManyDel.push(idInput)
+            }
+        }
+        else {
+            if (idPart2ManyDel.indexOf(idInput) >= 0) {
+                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput),1)
+            }
+
+            $("#del2all").prop("checked", false)
+        }
+    }
+
+    var delManyPart = function () {
+        if (idPart2ManyDel.length > 0) {
+            var lessonID = $("#LessonID")[0].value;
+            var dataform = new FormData();
+            for (var i = 0; i < idPart2ManyDel.length; i++)
+                dataform.append("PartIDs", idPart2ManyDel[i]);
+            //dataform.append("ClassSubjectID", classSubjectID);
+            dataform.append("LessonID", lessonID);
+            Ajax(config.url.del_many_part, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    if (data.Status) {
+                        alert(data.Msg)
+                        location.reload();
+                    }
+                    else {
+                        alert(data.Msg)
+                    }
+                })
+        }
+        else {
+            idPart2ManyDel = []
+            return false
+        }
+    }
+
     window.choosePart = choosePart;
     window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
     window.renderAns = renderAns;
@@ -5333,6 +5374,9 @@ var Lesson = (function () {
     window.downloadFileWordWitdData = downloadFileWordWitdData;
 
     window.showModalAddToLesson = showModalAddToLesson;
+    window.checkAll2Del = checkAll2Del;
+    window.check2Del = check2Del;
+    window.delManyPart = delManyPart;
     return LessonInstance;
 }());
 
