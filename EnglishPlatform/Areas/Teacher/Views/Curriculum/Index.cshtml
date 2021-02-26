@@ -66,7 +66,16 @@
         <table id="ed_table" class="table">
             <thead>
                 <tr>
-                    <th v-for="(field,k) in fields">{{field.label}}</th>
+                    <th>#</th>
+                    <th>Tên bài giảng</th>
+                    <th>Ảnh bìa</th>
+                    <th>Chương trình</th>
+                    <th style="width:100px;">Cấp độ</th>
+                    <th>GV soạn thảo</th>
+                    <th style="width:100px;">Ngày tạo</th>
+                    <th>Đồng bộ gần nhất</th>
+                    <th style="width:100px;">Trạng thái</th>
+                    <th>Tác vụ</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,10 +92,10 @@
                         </template>
                     </td>
                     <td>{{item.SubjectName}}</td>
-                    @*<td>{{item.SkillName}}</td>*@
                     <td>{{item.GradeName}}</td>
                     <td>{{item.TeacherName}}</td>
                     <td>{{formatShortDate(item.Created)}}</td>
+                    <td>{{formatShortDate(item.PublishedVer)}}</td>
                     <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleState(item)"></b-form-checkbox></td>
                     <td>
                         <div class="btn-group" style="display:block">
@@ -94,6 +103,7 @@
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
                             <a class="btn-act btn-edit" title="Ghép bài giảng" href="javascript:;" v-on:click="showMergeItem(item)"><i class="fa fa-first-aid"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
+                            <button class="btn-act btn-update" title="Cập nhật" v-on:click="updateItem(item)"><i class="ic-ac fas fa-redo" style="color: #13a6fb;"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -156,48 +166,6 @@
                 editorOption: {
                     theme: 'snow'
                 },
-                fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'lesson_name',
-                        label: 'Tên bài giảng'
-                    },
-                    {
-                        key: 'lesson_image',
-                        label: 'Ảnh bìa'
-                    },
-                    {
-                        key: 'subject_name',
-                        label: 'Chương trình'
-                    },
-                    //{
-                    //    key: 'skill',
-                    //    label: 'Môn học'
-                    //},
-                    {
-                        key: 'level',
-                        label: 'Cấp độ'
-                    },
-                    {
-                        key: 'creator',
-                        label: 'GV soạn thảo'
-                    },
-                    {
-                        key: 'created_at',
-                        label: 'Ngày tạo'
-                    },
-                    {
-                        key: 'state',
-                        label: 'Trạng thái'
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
-                ],
                 searchTerm: '',
                 list_skills: [],
                 list_data: [],
@@ -688,7 +656,8 @@
                         })
                 },
                 formatShortDate(date) {
-                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    var _date = moment(date);
+                    if (date == null || !_date._isValid || _date < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
                 },
                 goPage(pgIdx) {
@@ -725,6 +694,46 @@
                             alert("Error: " + e)
                         })
                     }
+                },
+                refreshItem(obj) {
+                    Swal.fire({
+                        title: 'Đồng bộ nội dung học liệu này cho các tài liệu liên quan?',
+                        html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + csbj.CourseName + '</span>',
+                        icon: 'info',
+                        input: 'number',
+                        showCancelButton: true,
+                        cancelButtonText: 'Hủy',
+                        confirmButtonText: 'Đồng bộ',                        
+                        showLoaderOnConfirm: true,
+                        preConfirm: (target) => {
+                                let _form = new FormData()                                
+                                _form.append('ID', obj.ID);
+                                let _url = '@processUrl("Sync", "Curriculum")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = response.data.target;
+                                        var error = response.data.error;
+                                        if (error != null) {
+                                            throw new Error(error);
+                                        }
+                                        else {
+                                            csbj.Target = data;
+                                        }
+                                    }).catch(e => {
+                                        //console.log(e)
+                                        Swal.showValidationMessage(
+                                            `Có lỗi: ${e}`
+                                        )
+                                    })
+                            
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        console.log(result);
+                        if (result.isConfirmed) {
+                           //csbj.Target = result.value
+                        }
+                    })
                 },
                 errorImgUrl() {
 

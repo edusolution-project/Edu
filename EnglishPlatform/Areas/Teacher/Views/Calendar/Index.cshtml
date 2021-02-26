@@ -198,7 +198,7 @@
                         (jsonData.TeacherID == "@User.FindFirst("UserID")?.Value" && jsonData.ScheduleID != null)) {*@
 
                     if (jsonData.Status != 5) {
-                       
+
                             document.body.classList.add("open-add-event");
                             var startDate = new Date(jsonData.StartDate);
                             var timeEvent = changeTime(startDate);
@@ -207,7 +207,7 @@
                             var dateEvent = `${startDate.getFullYear()}-${monthEvent}-${dayEvent}`;
                             var formEvent = document.getElementById("form-event");
                             var bodyEvent = formEvent.querySelector(".body-form-event");
-                       
+
                             bodyEvent.querySelector('input[name="ID"]').value = jsonData.ID;
                             if (bodyEvent != null) {
                                 var Title = bodyEvent.querySelector("input[name='Title']");
@@ -216,10 +216,22 @@
                                 }
                                 var Content = bodyEvent.querySelector("textarea[name='Content']");
                                 if (Content != null) {
+                                    var endStr = "";
+                                    var endDate = new Date(jsonData.EndDate);
+                                    if (endDate > new Date(1900, 1, 1)) {
 
-                                    Content.value = jsonData.Content != void 0
-                                        ? jsonData.Content
-                                        : "";
+                                        var monthEnd = endDate.getMonth() + 1 >= 10 ? endDate.getMonth() + 1 : `0${endDate.getMonth() + 1}`;
+                                        var dayEnd = endDate.getDate() >= 10 ? endDate.getDate() : `0${endDate.getDate()}`;
+                                        var endTime = changeTime(startDate);
+                                        endStr += `Kết thúc: ${dayEnd}/${monthEnd}/${endDate.getFullYear()} ${endTime}`
+                                    }
+
+                                    if (jsonData.Content != void 0) {
+                                        Content.value = jsonData.Content + " - " + endStr
+                                    }
+                                    else {
+                                        Content.value = endStr;
+                                    }
                                 }
                                 var time = bodyEvent.querySelector("input[name='Time']");
                                 if (time != null) {
@@ -231,7 +243,7 @@
                                 }
                                 //formEvent.classList.remove("view-form");
                                 //formEvent.classList.add("edit-form");
-                                
+
                                 //console.log(jsonData);
                                 var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
                                 console.log(btnMo)
@@ -246,13 +258,13 @@
                                 }
 
                             }
-                      
+
                             if (checkTime(new Date(jsonData.Created), 0)) {
                                 // cho phép xóa
                             }
                         } else {
                             //teacher show
-                       
+
                             document.body.classList.add("open-add-event-class");
                             var startDate = new Date(jsonData.StartDate);
                             var timeEvent = changeTime(startDate);

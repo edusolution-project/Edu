@@ -41,7 +41,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ScoreStudentService _scoreStudentService;
         private readonly LearningHistoryService _learningHistoryService;
         private readonly ExamService _examService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonService _lessonService;
         private readonly LessonProgressService _lessonProgressService;
         private readonly CenterService _centerService;
@@ -72,7 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ClassSubjectProgressService classSubjectProgressService,
             ScoreStudentService scoreStudentService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
+            ////LessonScheduleService lessonScheduleService,
             LessonProgressService lessonProgressService,
 
             StudentService studentService,
@@ -102,7 +102,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _scoreStudentService = scoreStudentService;
             //_classStudentService = classStudentService;
             _classSubjectService = classSubjectService;
-            _lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
             _lessonService = lessonService;
             _lessonProgressService = lessonProgressService;
             _studentService = studentService;
@@ -1096,18 +1096,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var totalStudents = _studentService.GetStudentsByClassId(ClassID).Count();
                 if (totalStudents > 0)
                 {
-                    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == ClassID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                    var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == ClassID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonEntity
+                    {
+                        ID = t.ID,
+                        TemplateType = t.TemplateType,
+                        IsPractice = t.IsPractice
+                    }).ToList();
 
                     if (activeLessons.Count() > 0)
                     {
-                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                        //var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
+                        var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
 
                         var exCount = examIds.Count();
 
                         if (exCount > 0)
                         {
-
                             var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) &&
                             //x.LastDate <= endWeek && x.LastDate >= startWeek && 
                             x.Tried > 0);

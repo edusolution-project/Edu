@@ -25,7 +25,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
-        private readonly LessonScheduleService _scheduleService;
+        private readonly ClassSubjectService _classSubjectService;
+        private readonly ChapterService _chapterService;
+        private readonly LessonService _lessonService;
         private readonly TeacherService _teacherService;
         private readonly CenterService _centerService;
         private readonly TeacherHelper _teacherHelper;
@@ -35,7 +37,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CalendarReportService calendarReportService,
             CalendarHelper calendarHelper,
             ClassService classService,
-            LessonScheduleService scheduleService,
+            ChapterService chapterService,
+            ClassSubjectService classSubjectService,
+            LessonService lessonService,
             TeacherService teacherService,
             CenterService centerService,
             TeacherHelper teacherHelper
@@ -46,7 +50,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             this._calendarReportService = calendarReportService;
             _calendarHelper = calendarHelper;
             _classService = classService;
-            _scheduleService = scheduleService;
+            _classSubjectService = classSubjectService;
+            _chapterService = chapterService;
+            //_scheduleService = scheduleService;
+            _lessonService = lessonService;
             _teacherService = teacherService;
             _centerService = centerService;
             _teacherHelper = teacherHelper;
@@ -85,7 +92,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var userId = User?.FindFirst("UserID").Value;
                     if (center != null && userId != null)
                     {
-                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type != ClassMemberType.OWNER) && o.Center == center.ID)?.ToList();
+                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER) && o.Center == center.ID)?.ToList();
                         if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
                         var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
                         if (data == null) return Task.FromResult(new JsonResult(new { }));
@@ -105,14 +112,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public Task<JsonResult> GetDetail(string id)
         {
             var map = new MappingEntity<CalendarEntity, CalendarViewModel>();
-            var DataResponse = _calendarService.GetItemByID(id);
+            var calendar = _calendarService.GetItemByID(id);
             var data = new CalendarViewModel();
-            data = map.AutoOrtherType(DataResponse, data);
+            data = map.AutoOrtherType(calendar, data);
+            if (!string.IsNullOrEmpty(data.ScheduleID))
+            {
+                if (string.IsNullOrEmpty(data.Path))
+                {
+                    var lesson = string.IsNullOrEmpty(data.ScheduleID) ? null : _lessonService.GetItemByID(data.ScheduleID);
+                    //schedule -> LessonID + class -> classubject -> skill
+                    if (lesson != null && string.IsNullOrEmpty(calendar.Content))
+                    {
+                        string url = $"{Url.Action("Detail", "Lesson")}/{lesson.ID}/{lesson.ClassSubjectID}";
+                        var content = "";
+                        var course = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
+                        if (course != null)
+                            content += course.CourseName;
+                        if (lesson.ChapterID != "0")
+                        {
+                            var chap = _chapterService.GetItemByID(lesson.ChapterID);
+                            if (chap != null)
+                                content += " - " + chap.Name;
+                        }
+                        calendar.Content = content;
+                        calendar.Path = url;
+                        _calendarService.Save(calendar);
+                        data.Content = calendar.Content;
+                        data.LinkLesson = url;
+                    }
+                }
+                else
+                    data.LinkLesson = data.Path;
+            }
+            if (data.UserBook == null || data.UserBook.Count == 0)
+            {
+
+            }
             // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
-            var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _scheduleService.GetItemByID(DataResponse.ScheduleID);
-            //schedule -> LessonID + class -> classubject -> skill
-            string url = schedule != null ? $"{Url.Action("Detail", "Lesson")}/{schedule.LessonID}/{schedule.ClassSubjectID}" : null;
-            data.LinkLesson = url;
+
             return Task.FromResult(new JsonResult(data));
         }
         [HttpPost]

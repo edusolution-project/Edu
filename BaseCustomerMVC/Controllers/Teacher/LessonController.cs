@@ -26,6 +26,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseChapterService _courseChapterService;
         private readonly LessonHelper _lessonHelper;
         private readonly ClassHelper _classHelper;
+        private readonly CalendarHelper _calendarHelper;
 
 
         private readonly ChapterService _chapterService;
@@ -33,7 +34,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonPartService _lessonPartService;
         private readonly LessonPartQuestionService _questionService;
         private readonly LessonPartAnswerService _answerService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
         private readonly CenterService _centerService;
 
         private readonly CloneLessonPartService _clonepartService;
@@ -53,10 +54,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ChapterService chapterService,
             LessonService lessonService,
             LessonHelper lessonHelper,
+            CalendarHelper calendarHelper,
+
             LessonPartService lessonPartService,
             LessonPartQuestionService questionService,
             LessonPartAnswerService answerService,
-            LessonScheduleService lessonScheduleService,
+            ////LessonScheduleService lessonScheduleService,
             CenterService centerService,
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
@@ -75,10 +78,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonPartService = lessonPartService;
             _questionService = questionService;
             _answerService = answerService;
-            _lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
             _centerService = centerService;
             _classHelper = classHelper;
             _lessonHelper = lessonHelper;
+            _calendarHelper = calendarHelper;
 
             _clonepartService = cloneLessonPartService;
             _clonequestionService = cloneLessonPartQuestionService;
@@ -353,6 +357,201 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    };
         //    return new JsonResult(response);
         //}
+
+        [HttpPost]
+        public JsonResult UpdateSchedule(LessonEntity entity)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (entity == null || string.IsNullOrEmpty(entity.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy lịch học" }
+                    });
+            }
+            else
+            {
+                var oldItem = _lessonService.GetItemByID(entity.ID);
+                //if (oldItem == null)
+                //    return new JsonResult(new Dictionary<string, object> {
+                //        {"Data",null },
+                //        {"Error", "Không tìm thấy lịch học" }
+                //    });
+                //var oldLesson = _lessonService.GetItemByID(oldItem.LessonID);
+                if (oldItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy bài" }
+                    });
+                }
+                if (oldItem.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+                    oldItem.IsHideAnswer = true;
+                }
+                oldItem.StartDate = entity.StartDate.ToUniversalTime();
+                oldItem.EndDate = entity.EndDate.ToUniversalTime();
+
+                if (oldItem.StartDate < DateTime.UtcNow)
+                    oldItem.IsOnline = false;
+
+                _lessonService.Save(oldItem);
+
+                _calendarHelper.UpdateCalendar(oldItem, UserID);
+                
+
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data", oldItem },
+                        {"Error", null }
+                    });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UpdateChapterSchedule(ChapterEntity entity, bool reset = false)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            entity.StartDate = entity.StartDate.ToUniversalTime();
+            entity.EndDate = entity.EndDate.ToUniversalTime();
+            if (entity == null || string.IsNullOrEmpty(entity.ID))
+            {
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy chương" }
+                    });
+            }
+            else
+            {
+                var oldItem = _chapterService.GetItemByID(entity.ID);
+                if (oldItem == null)
+                    return new JsonResult(new Dictionary<string, object> {
+                        {"Data",null },
+                        {"Error", "Không tìm thấy chương" }
+                    });
+
+                var defDate = new DateTime(1900, 1, 1);
+                if (reset)
+                {
+                    oldItem.ConditionChapter = "";
+                    oldItem.BasePoint = 0;
+                    oldItem.StartDate = defDate;
+                    oldItem.EndDate = defDate;
+                    oldItem.IsHideAnswer = false;
+                    //set hide answer to false
+                    ToggleChapHideAnswer(oldItem, -1);
+                }
+                else
+                {
+                    oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
+                    oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
+                }
+
+                _chapterService.Save(oldItem);//Save chapter
+
+                _calendarHelper.UpdateChapterCalendar(oldItem, UserID);
+
+                return new JsonResult(new Dictionary<string, object> {
+                        {"Data", oldItem },
+                    });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ToggleOnline(string ID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            var lesson = _lessonService.GetItemByID(ID);
+            if (lesson == null)
+            {
+                return Json(new { error = "Thông tin không đúng" });
+            }
+            lesson.IsOnline = !lesson.IsOnline;
+            _lessonService.Save(lesson);
+
+            //_calendarHelper.RemoveLessonSchedule(lesson.ID);
+            //if (lesson.IsActive)
+                _calendarHelper.ConvertCalendarFromLesson(lesson, UserID);
+
+            return Json(new { isOnline = lesson.IsOnline });
+        }
+
+        [HttpPost]
+        public JsonResult ToggleHideAnswer(string ID, string ChapterID = "")
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(ChapterID))
+            {
+                var lesson = _lessonService.GetItemByID(ID);
+                if (lesson == null)
+                {
+                    return Json(new { error = "Thông tin không đúng" });
+                }
+                lesson.IsHideAnswer = !lesson.IsHideAnswer;
+                _lessonService.Save(lesson);
+                return Json(new { lesson.IsHideAnswer });
+            }
+            else
+            {
+                var chap = _chapterService.GetItemByID(ChapterID);
+                if (chap == null)
+                {
+                    return Json(new { error = "Thông tin không đúng" });
+                }
+
+                var isHide = ToggleChapHideAnswer(chap);
+
+
+                return Json(new { IsHideAnswer = isHide });
+            }
+        }
+
+        private bool ToggleChapHideAnswer(ChapterEntity chap, int resetState = 0)
+        {
+            var isHide = !chap.IsHideAnswer;
+            if (resetState > 0)
+                isHide = true;
+            else if (resetState < 0)
+                isHide = false;
+
+            var chapids = new List<string> { chap.ID };
+            var subchap = new List<string>();
+
+            var lessonids = GetChapterLessonID(chap.ID, out subchap);
+
+            chapids.AddRange(subchap);
+
+            _chapterService.CreateQuery().UpdateMany(
+                Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
+                Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                new UpdateOptions() { });
+
+            _lessonService.CreateQuery().UpdateMany(
+                Builders<LessonEntity>.Filter.In(t => t.ID, lessonids),
+                Builders<LessonEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+                new UpdateOptions() { });
+
+            return isHide;
+        }
+
+        private List<string> GetChapterLessonID(string chapterID, out List<string> lstChap)
+        {
+            lstChap = new List<string>();
+            var ret = new List<string>();
+            ret = _lessonService.GetChapterLesson("", chapterID).Select(t => t.ID).ToList(); ;
+
+            var subchaps = _chapterService.GetSubChapters("", chapterID).ToList();
+            if (subchaps != null && subchaps.Count > 0)
+            {
+                foreach (var sc in subchaps)
+                {
+                    lstChap.Add(sc.ID);
+                    var subchap = new List<string>();
+                    ret.AddRange(GetChapterLessonID(sc.ID, out subchap));
+                    lstChap.AddRange(subchap);
+                }
+            }
+            return ret;
+        }
 
         [Obsolete]
         [HttpPost]
@@ -740,13 +939,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ID = "",
                 Created = DateTime.UtcNow,
                 CurrentDoTime = DateTime.UtcNow,
-                LessonScheduleID = "",
+                //LessonScheduleID = "",
                 Point = lesson.Point,
                 Timer = lesson.Timer
             };
             //hết hạn => đóng luôn
-            var schedule = new LessonScheduleEntity();
-            return new JsonResult(new { exam = x, schedule, limit = lesson.Limit });
+            return new JsonResult(new { exam = x, schedule = new LessonEntity { }, limit = lesson.Limit });
         }
 
         [HttpPost]
@@ -759,7 +957,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var _lesson = _lessonService.GetItemByID(item.LessonID);
                 var _class = _classService.GetItemByID(item.ClassID);
 
-                if (_class == null)
+                if (_class == null || _lesson == null)
                 {
                     return new JsonResult(new Dictionary<string, object>
                     {
@@ -767,19 +965,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
-                if (_schedule == null)
-                {
-                    return new JsonResult(new Dictionary<string, object>
-                    {
-                       { "Error", "Thông tin không đúng" }
-                    });
-                }
+                //var _schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == _lesson.ID && o.ClassID == _class.ID).FirstOrDefault();
+                //if (_schedule == null)
+                //{
+                //    return new JsonResult(new Dictionary<string, object>
+                //    {
+                //       { "Error", "Thông tin không đúng" }
+                //    });
+                //}
 
                 item.StudentID = userid;
                 item.Number = 1;
 
-                item.LessonScheduleID = _schedule.ID;
+                //item.LessonScheduleID = _lesson.ID;
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
                 item.MaxPoint = _lesson.Point;

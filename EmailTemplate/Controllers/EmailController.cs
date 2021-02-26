@@ -26,12 +26,12 @@ namespace EmailTemplate.Controllers
         private readonly CenterService _centerService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _scheduleService;
+        //private readonly LessonScheduleService _scheduleService;
         private readonly AccountService _accountService;
         private readonly StudentService _studentService;
         private readonly TeacherService _teacherService;
         private readonly SkillService _skillService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly RoleService _roleService;
         private readonly CourseService _courseService;
         private readonly LearningHistoryService _learningHistory;
@@ -45,12 +45,12 @@ namespace EmailTemplate.Controllers
             CenterService centerService,
             ClassSubjectService classSubjectService,
             LessonService lessonService,
-            LessonScheduleService scheduleService,
+            //LessonScheduleService scheduleService,
             AccountService accountService,
             StudentService studentService,
             TeacherService teacherService,
             SkillService skillService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             RoleService roleService,
             CourseService courseService,
             LearningHistoryService learningHistory,
@@ -65,12 +65,12 @@ namespace EmailTemplate.Controllers
             _classService = classService;
             _classSubjectService = classSubjectService;
             _lessonService = lessonService;
-            _scheduleService = scheduleService;
+            //_scheduleService = scheduleService;
             _accountService = accountService;
             _studentService = studentService;
             _teacherService = teacherService;
             _skillService = skillService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _roleService = roleService;
             _courseService = courseService;
             _learningHistory = learningHistory;
@@ -381,15 +381,16 @@ namespace EmailTemplate.Controllers
                     var classStudent = studentIds.Count();
                     totalStudents += classStudent;
 
-                    var activeSchedules = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => new LessonScheduleEntity
-                    {
-                        LessonID = t.LessonID,
-                        ClassSubjectID = t.ClassSubjectID,
-                        StartDate = t.StartDate,
-                        EndDate = t.EndDate
-                    })?.ToList();
+                    var activeLessonIds = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek)?.Project(t => t.ID).ToList();
+                    //    .Project(t => new LessonEntity
+                    //{
+                    //    ID = t.ID,
+                    //    ClassSubjectID = t.ClassSubjectID,
+                    //    StartDate = t.StartDate,
+                    //    EndDate = t.EndDate
+                    //})?.ToList();
 
-                    var activeLessonIds = activeSchedules?.Select(t => t.LessonID)?.ToList();
+                    //var activeLessonIds = activeSchedules?.Select(t => t.ID )?.ToList();
 
                     //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                     var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -533,17 +534,17 @@ namespace EmailTemplate.Controllers
             public int Type { get; set; }
         }
 
-        public class ScheduleView : LessonScheduleEntity
-        {
-            public string LessonName { get; set; }
+        //public class ScheduleView : LessonScheduleEntity
+        //{
+        //    public string LessonName { get; set; }
 
-            public ScheduleView(LessonScheduleEntity schedule)
-            {
-                LessonID = schedule.LessonID;
-                StartDate = schedule.StartDate;
-                EndDate = schedule.EndDate;
-            }
-        }
+        //    public ScheduleView(LessonScheduleEntity schedule)
+        //    {
+        //        LessonID = schedule.LessonID;
+        //        StartDate = schedule.StartDate;
+        //        EndDate = schedule.EndDate;
+        //    }
+        //}
 
         public class dateTime
         {
@@ -797,8 +798,8 @@ namespace EmailTemplate.Controllers
         private Dictionary<String,Object> GetData4Report(DateTime startTime, DateTime endTime, ClassEntity @class)
         {
             var studentIds = _studentService.GetStudentIdsByClassId(@class.ID);
-            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).ToList();
-            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+            var activeLessonIds = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endTime && o.EndDate >= startTime).Project(t=> t.ID).ToList();
+            //var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
             var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID.Equals(@class.ID) && activeLessonIds.Contains(x.LessonID));
             if (lessonProgess.CountDocuments() == 0) { }

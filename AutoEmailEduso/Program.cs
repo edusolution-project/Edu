@@ -9,6 +9,7 @@ using BaseCustomerEntity.Database;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using OfficeOpenXml.Style;
 
 namespace AutoEmailEduso
@@ -19,7 +20,7 @@ namespace AutoEmailEduso
         private static CenterService _centerService;
         private static ClassSubjectService _classSubjectService;
         private static LessonService _lessonService;
-        private static LessonScheduleService _scheduleService;
+        //private static LessonScheduleService _scheduleService;
         private static AccountService _accountService;
         private static StudentService _studentService;
         private static TeacherService _teacherService;
@@ -28,7 +29,7 @@ namespace AutoEmailEduso
         private static bool isTest = true;
         private static int count = 0;
 
-        private static LessonScheduleService _lessonScheduleService;
+        //private static LessonScheduleService _lessonScheduleService;
         private static RoleService _roleService;
         private static CourseService _courseService;
         private static LearningHistoryService _learningHistory;
@@ -51,13 +52,13 @@ namespace AutoEmailEduso
             _classService = new ClassService(configuration);
             _classSubjectService = new ClassSubjectService(configuration);
             _lessonService = new LessonService(configuration);
-            _scheduleService = new LessonScheduleService(configuration);
+            //_scheduleService = new LessonScheduleService(configuration);
             _accountService = new AccountService(configuration);
             _studentService = new StudentService(configuration);
             _teacherService = new TeacherService(configuration);
             _mailHelper = new MailHelper(configuration);
             _skillService = new SkillService(configuration);
-            _lessonScheduleService = new LessonScheduleService(configuration);
+            //_lessonScheduleService = new LessonScheduleService(configuration);
             _roleService = new RoleService(configuration);
             _courseService = new CourseService(configuration);
             _learningHistory = new LearningHistoryService(configuration);
@@ -249,9 +250,14 @@ namespace AutoEmailEduso
                             totalStudent += classStudent;
 
                             //Lay danh sach ID bai hoc duoc mo trong tuan
-                            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                            var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonEntity
+                            {
+                                ID = t.ID,
+                                TemplateType = t.TemplateType,
+                                IsPractice = t.IsPractice
+                            }).ToList();
 
-                            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                            var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
 
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -264,8 +270,8 @@ namespace AutoEmailEduso
                             //var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                             //    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
                             //    && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-                            var activeStudents = _lessonProgressService.CreateQuery().Find(x => 
-                            studentIds.Contains(x.StudentID) 
+                            var activeStudents = _lessonProgressService.CreateQuery().Find(x =>
+                            studentIds.Contains(x.StudentID)
                                 && x.TotalLearnt > 0)
                                 .ToList()
                                 .Select(x => x.StudentID)
@@ -279,7 +285,7 @@ namespace AutoEmailEduso
                             totalstChuaVaoLop += stChuaVaoLop;
 
                             // danh sach bai kiem tra
-                            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                            var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
                             //ket qua lam bai cua hoc sinh trong lop
                             var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                                group r by r.StudentID
@@ -455,8 +461,16 @@ namespace AutoEmailEduso
                             }
 
                             //Lay danh sach ID bai hoc duoc mo trong tuan
-                            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-                            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                            var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonEntity
+                            {
+                                ID = t.ID,
+                                IsPractice = t.IsPractice,
+                                TemplateType = t.TemplateType,
+                                ChapterID = t.ChapterID,
+                                CourseID = t.CourseID,
+                                Title = t.Title
+                            }).ToList();
+                            var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
 
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -468,8 +482,8 @@ namespace AutoEmailEduso
                                 && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
 
                             // danh sach bai kiem tra
-                            var listlessons = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).ToList();
-                            var examIds = listlessons.Select(x => x.ID).ToList();
+                            var listExams = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).ToList();
+                            var examIds = listExams.Select(x => x.ID).ToList();
                             //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
                             //var exams = _examService.CreateQuery().Find(x => examIds.Contains(x.ID)).ToList();
 
@@ -502,7 +516,7 @@ namespace AutoEmailEduso
                                                    StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
                                                    AvgTimeDoExam = _AvgTimeDoExam,
                                                    CompletedLesson = _CompletedLesson,
-                                                   TotalLesson = activeLessonIds.Count
+                                                   TotalLesson = activeLessonIds.Count()
                                                }).ToList();
 
                             foreach (var item in students)
@@ -526,7 +540,7 @@ namespace AutoEmailEduso
                             var listExamIds = _examService.CreateQuery().Find(x => examIds.Contains(x.LessonID)).Project(x => x.ID).ToList();
                             var detailExams = _examDetailService.GetByExamIDs(listExamIds).ToList().GroupBy(x => x.LessonPartID);
                             var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
-                            var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x => new { ID = x.ID, Title = x.Title, Type = x.Type ,LessonID = x.ParentID}).ToList();
+                            var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x => new { ID = x.ID, Title = x.Title, Type = x.Type, LessonID = x.ParentID }).ToList();
                             List<ExamDetailEntity> listDetailExams = new List<ExamDetailEntity>();
                             foreach (var item in _examDetailService.GetByExamIDs(listExamIds).ToList())
                             {
@@ -549,28 +563,28 @@ namespace AutoEmailEduso
 
                             //var result = from d in _examDetailService.GetByExamIDs(examIDs).ToList()
                             var result = (from d in listDetailExams
-                                         group d by d.LessonPartID
+                                          group d by d.LessonPartID
                                           into g
-                                         let detailExams1 = g
-                                         let lessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault()
-                                         //let lesson = _lessonService.GetItemByID(lessonPart.LessonID)
-                                         let lesson = listlessons.Where(x=>x.ID == lessonPart.LessonID).FirstOrDefault()
-                                         let course = _courseService.GetItemByID(lesson.CourseID)
-                                         let chapter = _chapterService.GetItemByID(lesson.ChapterID)
+                                          let detailExams1 = g
+                                          let lessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault()
+                                          //let lesson = _lessonService.GetItemByID(lessonPart.LessonID)
+                                          let lesson = listExams.Find(x => x.ID == lessonPart.LessonID)
+                                          let course = _courseService.GetItemByID(lesson.CourseID)
+                                          let chapter = _chapterService.GetItemByID(lesson.ChapterID)
                                           select new PersentTrueFalse
-                                         {
-                                             ExamID = g.FirstOrDefault().ExamID,
-                                             TitleLessonPart = lessonPart.Title,
-                                             CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID).Count(),
-                                             CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID).Count(),
-                                             TotalAns = g.Count(),
-                                             TitleLesson = lesson?.Title,
-                                             LessonID = lesson?.ID,
-                                             CourseName = course?.Name,
-                                             ChapterName = chapter?.Name
-                                         }).ToList();
+                                          {
+                                              ExamID = g.FirstOrDefault().ExamID,
+                                              TitleLessonPart = lessonPart.Title,
+                                              CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID).Count(),
+                                              CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID).Count(),
+                                              TotalAns = g.Count(),
+                                              TitleLesson = lesson?.Title,
+                                              LessonID = lesson?.ID,
+                                              CourseName = course?.Name,
+                                              ChapterName = chapter?.Name
+                                          }).ToList();
 
-                            await SendContentToTeacher(_class, _classResult, startWeek, endWeek, center.Name,result);
+                            await SendContentToTeacher(_class, _classResult, startWeek, endWeek, center.Name, result);
                             Console.WriteLine($"Send to class {_class.Name} - { center.Name} is done");
                         }
                     }
@@ -616,8 +630,13 @@ namespace AutoEmailEduso
                         var studentIds = students.Select(t => t.ID).ToList();
                         totalstd += studentIds.Count();
                         //Lay danh sach ID bai hoc duoc mo trong tuan
-                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-                        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+                        var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonEntity
+                        {
+                            ID = t.ID,
+                            TemplateType = t.TemplateType,
+                            IsPractice = t.IsPractice
+                        }).ToList();
+                        var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
                         if (activeLessonIds.Count() == 0) continue;
                         //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                         var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -626,7 +645,7 @@ namespace AutoEmailEduso
                         var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                                 x => studentIds.Contains(x.StudentID)).ToEnumerable();
                         // danh sach bai kiem tra
-                        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+                        var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
                         //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
 
                         //ket qua lam bai cua hoc sinh trong lop
@@ -842,7 +861,7 @@ namespace AutoEmailEduso
                                 "<th style='width:max-width:10px;width:10px;text-align:center;border:solid 1px #333;border-collapse:collapse;'>#</th>" +
                                 "<th style='text-align:center;border:solid 1px #333;border-collapse:collapse;'></th>" +
                                 "<th style='width:100px;text-align:center;border:solid 1px #333;border-collapse:collapse;'>Tỉ lệ làm đúng</th>" +
-                                //"<th style='width:100px;text-align:center;border:solid 1px #333;border-collapse:collapse;'>Tỉ lệ làm sai</th>" +
+                            //"<th style='width:100px;text-align:center;border:solid 1px #333;border-collapse:collapse;'>Tỉ lệ làm sai</th>" +
                             "</tr>" +
                         "</thead>";
                     var ntbody = "<tbody>";
@@ -850,7 +869,7 @@ namespace AutoEmailEduso
                     {
                         var item = _data.ElementAtOrDefault(i);
                         var persentTrue = item.TotalAns > 0 ? Math.Round(((Double)item.CountTrue / item.TotalAns) * 100, 2) : 0;
-                        var persentFalse = Math.Round(100 - persentTrue,2);
+                        var persentFalse = Math.Round(100 - persentTrue, 2);
                         //var styleTrue = persentTrue >= 50 ? "background-color: lightgreen;" : "";
                         var styleTrue = "";
                         if (persentTrue >= 70) styleTrue = "background-color: lightgreen;";
@@ -871,7 +890,7 @@ namespace AutoEmailEduso
 
                 //if(newData.Count > 5)
                 //{
-                    newContent += @"<br><div>
+                newContent += @"<br><div>
                                         <div>
                                             <span style='text-decoration: underline;'>Chú ý</span>
                                         </div>
@@ -902,7 +921,7 @@ namespace AutoEmailEduso
                         var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
-                       _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                     }
                 }
                 else if (listTeacher.Count == 1)
@@ -989,7 +1008,7 @@ namespace AutoEmailEduso
                     {
                         //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
                         //var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
-                        var activeSchedules = _scheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime ).ToEnumerable()
+                        var activeSchedules = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime).ToEnumerable()
                             .OrderBy(t => t.ClassID)
                             .ThenBy(t => t.ClassSubjectID)
                             .ThenBy(t => t.StartDate).ToList();
@@ -1001,7 +1020,7 @@ namespace AutoEmailEduso
                             ClassSubjectEntity currentSubject = null;
                             TeacherEntity currentTeacher = null;
                             var studentList = new List<StudentEntity>();
-                            var schedules = new List<ScheduleView>();
+                            var schedules = new List<LessonEntity>();
                             var center = new CenterEntity();
                             foreach (var schedule in activeSchedules)
                             {
@@ -1028,12 +1047,9 @@ namespace AutoEmailEduso
                                     currentSubject = _classSubjectService.GetItemByID(subjectID);
                                     currentTeacher = _teacherService.GetItemByID(currentSubject.TeacherID);
                                     var newsubject = _classSubjectService.GetItemByID(schedule.ClassSubjectID);
-                                    schedules = new List<ScheduleView>();
+                                    schedules = new List<LessonEntity>();
                                 }
-                                schedules.Add(new ScheduleView(schedule)
-                                {
-                                    LessonName = _lessonService.GetItemByID(schedule.LessonID).Title
-                                });
+                                schedules.Add(schedule);
                             }
                             //send last Class subject
                             if (!string.IsNullOrEmpty(subjectID))
@@ -1048,7 +1064,7 @@ namespace AutoEmailEduso
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"SendIncomingLesson : {ex.Message}");
             }
@@ -1083,7 +1099,7 @@ namespace AutoEmailEduso
                         for (int j = 0; j < classesActive.Count(); j++)
                         {
                             var @class = classesActive.ElementAtOrDefault(j);
-                            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+                            var activeLessonIds = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => t.ID).ToList();
                             String className = @class.Name.ToLower().Contains("lớp") ? @class.Name : $"Lớp {@class.Name}";
 
                             //if (activeLessons.Count > 0)
@@ -1092,7 +1108,7 @@ namespace AutoEmailEduso
                             //}
                             if (@class.Members == null) continue;
                             var listTeachers = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
-                            if (activeLessons.Count == 0)
+                            if (activeLessonIds.Count == 0)
                             {
                                 String subject = $"Nhắc đặt lịch học Tuần lớp {className} ({startWeek.ToString("dd/MM/yyyy")} - {endWeek.ToString("dd/MM/yyyy")})";
                                 foreach (var teacher in listTeachers)
@@ -1124,7 +1140,7 @@ namespace AutoEmailEduso
             }
         }
 
-        private static async Task SendTeacherSchedule(List<ScheduleView> schedules, TeacherEntity currentTeacher, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
+        private static async Task SendTeacherSchedule(List<LessonEntity> Lessons, TeacherEntity currentTeacher, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
         {
             string subject =
                 "Nhắc lịch dạy " +
@@ -1140,10 +1156,10 @@ namespace AutoEmailEduso
                         </tr>
                     </thead>
                     <tbody>";
-            foreach (var schedule in schedules)
+            foreach (var schedule in Lessons)
             {
                 body += @"<tr>
-                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'><a href='https://eduso.vn/" + center.Code + "/teacher/Lesson/Detail/" + schedule.LessonID + "/" + subjectID + "' target='_blank'>" + schedule.LessonName + @"</td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'><a href='https://eduso.vn/" + center.Code + "/teacher/Lesson/Detail/" + schedule.ID + "/" + subjectID + "' target='_blank'>" + schedule.Title + @"</td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>" + schedule.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm:tt") + @"</td>
                           </tr>";
             }
@@ -1154,7 +1170,7 @@ namespace AutoEmailEduso
             _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
         }
 
-        private static async Task SendStudentSchedule(List<ScheduleView> schedules, TeacherEntity teacher, List<StudentEntity> studentList, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
+        private static async Task SendStudentSchedule(List<LessonEntity> lessons, TeacherEntity teacher, List<StudentEntity> studentList, ClassEntity currentClass, string currentSkill, string subjectID, DateTime startTime, DateTime endTime, CenterEntity center)
         {
 
             string subject =
@@ -1172,10 +1188,10 @@ namespace AutoEmailEduso
                         </tr>
                     </thead>
                     <tbody>";
-            foreach (var schedule in schedules)
+            foreach (var schedule in lessons)
             {
                 body += @"<tr>
-                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'><a href='https://eduso.vn/" + center.Code + "/student/Lesson/Detail/" + schedule.LessonID + "/" + subjectID + "' target='_blank'>" + schedule.LessonName + @"</a></td>
+                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'><a href='https://eduso.vn/" + center.Code + "/student/Lesson/Detail/" + schedule.ID + "/" + subjectID + "' target='_blank'>" + schedule.Title + @"</a></td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>" + schedule.StartDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm:tt") + @"</td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>" + schedule.EndDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm:tt") + @"</td>
                           </tr>";
@@ -1183,164 +1199,165 @@ namespace AutoEmailEduso
             body += @"</tbody>
                 </table>";
             //var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : studentList.Select(t => t.Email).ToList();
-            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com","shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
+            var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
         #endregion
 
         #region ReportToExcel
-        public static async Task ReportToExcel()
-        {
-            try
-            {
-                //var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
-                var activeCenters = _centerService.GetActiveCenter(new DateTime(2020,12,31));
-                if (activeCenters.Count() == 0)
-                {
-                    Console.WriteLine($"active Centers = 0");
-                }
+        //public static async Task ReportToExcel()
+        //{
+        //    try
+        //    {
+        //        //var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
+        //        var activeCenters = _centerService.GetActiveCenter(new DateTime(2020, 12, 31));
+        //        if (activeCenters.Count() == 0)
+        //        {
+        //            Console.WriteLine($"active Centers = 0");
+        //        }
 
-                foreach (var center in activeCenters)
-                {
-                    //if (center.Abbr.Contains("utc"))
-                    //if (center.Abbr.Contains("c3vyvp"))
-                    if (center.Abbr.Contains("c3cvpvp"))
-                    {
-                        var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
-                        var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
-                        var Teachers = _teacherService.CreateQuery().Find(x => x.Centers.Any(y => y.CenterID == center.ID) && x.Email != "huonghl@utc.edu.vn").ToList();
-                        var TotalTeachersinCenter = Teachers.Count(); //Tong so giao vien
-                        var ExpireDate = center.ExpireDate; //Han muc
-                        var ClassesinCenter = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
-                        var TotalClassesinCenter = ClassesinCenter.Count(); //Tong so lop hoc co trong co so
-                        var ListStudentIDs = Students.Select(x => x.ID).ToList();
-                        var ActiveStudents = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt > 0 && ListStudentIDs.Contains(x.StudentID)).ToList().GroupBy(x => x.StudentID);
-                        var InactiveStudentsnoGroup = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt == 0 && ListStudentIDs.Contains(x.StudentID)).ToList();
-                        var TotalActiveStudents = ActiveStudents.Count();
+        //        foreach (var center in activeCenters)
+        //        {
+        //            //if (center.Abbr.Contains("utc"))
+        //            //if (center.Abbr.Contains("c3vyvp"))
+        //            if (center.Abbr.Contains("c3cvpvp"))
+        //            {
+        //                var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
+        //                var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
+        //                var Teachers = _teacherService.CreateQuery().Find(x => x.Centers.Any(y => y.CenterID == center.ID) && x.Email != "huonghl@utc.edu.vn").ToList();
+        //                var TotalTeachersinCenter = Teachers.Count(); //Tong so giao vien
+        //                var ExpireDate = center.ExpireDate; //Han muc
+        //                var ClassesinCenter = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
+        //                var TotalClassesinCenter = ClassesinCenter.Count(); //Tong so lop hoc co trong co so
+        //                var ListStudentIDs = Students.Select(x => x.ID).ToList();
+        //                var ActiveStudents = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt > 0 && ListStudentIDs.Contains(x.StudentID)).ToList().GroupBy(x => x.StudentID);
+        //                var InactiveStudentsnoGroup = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt == 0 && ListStudentIDs.Contains(x.StudentID)).ToList();
+        //                var TotalActiveStudents = ActiveStudents.Count();
 
-                        Center4Report2Excel dataCenter = new Center4Report2Excel()
-                        {
-                            CenterID = center.ID,
-                            CenterName = center.Name,
-                            StartDate = center.StartDate,
-                            //EndDate = center.ExpireDate,
-                            EndDate = new DateTime(2020, 12, 31),
-                            Limit = (Int32)center.Limit,
-                            TotalTeachersinCenter = TotalTeachersinCenter,
-                            TotalStudentsinCenter = TotalStudentsinCenter,
-                            TotalClass = TotalClassesinCenter,
-                            TotalClassActive = ClassesinCenter.Where(x => x.IsActive == true).Count(),
-                            DaHoc = TotalActiveStudents
-                        };
+        //                Center4Report2Excel dataCenter = new Center4Report2Excel()
+        //                {
+        //                    CenterID = center.ID,
+        //                    CenterName = center.Name,
+        //                    StartDate = center.StartDate,
+        //                    //EndDate = center.ExpireDate,
+        //                    EndDate = new DateTime(2020, 12, 31),
+        //                    Limit = (Int32)center.Limit,
+        //                    TotalTeachersinCenter = TotalTeachersinCenter,
+        //                    TotalStudentsinCenter = TotalStudentsinCenter,
+        //                    TotalClass = TotalClassesinCenter,
+        //                    TotalClassActive = ClassesinCenter.Where(x => x.IsActive == true).Count(),
+        //                    DaHoc = TotalActiveStudents
+        //                };
 
-                        List<Class4Report2Excel> dataResponse = new List<Class4Report2Excel>();
+        //                List<Class4Report2Excel> dataResponse = new List<Class4Report2Excel>();
 
-                        foreach (var @class in ClassesinCenter.OrderBy(x => x.Name))
-                        {
-                            //lay danh sach giao vien trong lop
-                            var listNameTeachers = "";
-                            if (@class.Members != null)
-                            {
-                                var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
-                                if (members.Count() > 0)
-                                {
-                                    foreach (var mem in members)
-                                    {
-                                        var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
-                                        //var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
-                                        var str = teacherFName.Split(" ");
-                                        //var teacherName = str[str.Length - 1];
-                                        var teacherName = teacherFName;
-                                        listNameTeachers += $"{teacherName}, ";
-                                    }
-                                    listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
-                                }
-                                else
-                                {
-                                    listNameTeachers = "";
-                                }
-                            }
-                            else
-                            {
-                                listNameTeachers = "";
-                            }
+        //                foreach (var @class in ClassesinCenter.OrderBy(x => x.Name))
+        //                {
+        //                    //lay danh sach giao vien trong lop
+        //                    var listNameTeachers = "";
+        //                    if (@class.Members != null)
+        //                    {
+        //                        var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+        //                        if (members.Count() > 0)
+        //                        {
+        //                            foreach (var mem in members)
+        //                            {
+        //                                var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
+        //                                //var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
+        //                                var str = teacherFName.Split(" ");
+        //                                //var teacherName = str[str.Length - 1];
+        //                                var teacherName = teacherFName;
+        //                                listNameTeachers += $"{teacherName}, ";
+        //                            }
+        //                            listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
+        //                        }
+        //                        else
+        //                        {
+        //                            listNameTeachers = "";
+        //                        }
+        //                    }
+        //                    else
+        //                    {
+        //                        listNameTeachers = "";
+        //                    }
 
-                            var studentsinClass = Students.Where(x => x.JoinedClasses.Contains(@class.ID));
-                            var studentIDsinClass = studentsinClass.Select(x => x.ID).ToList();
+        //                    var studentsinClass = Students.Where(x => x.JoinedClasses.Contains(@class.ID));
+        //                    var studentIDsinClass = studentsinClass.Select(x => x.ID).ToList();
 
-                            //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
-                            var listTime = new Dictionary<Int32, DataTime>(){
-                                //{8,new DataTime{ StartTime = new DateTime(2020,8,1,0,0,0),EndTime = new DateTime(2020,8,31,23,59,0)} },
-                                //{9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
-                                //{10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
-                                //{11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
-                                //{12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
-                            };
-                            foreach (var time in listTime)
-                            {
-                                var dataClass = new Class4Report2Excel();
-                                dataClass = NewMethod(center, @class, studentIDsinClass, time.Value.StartTime, time.Value.EndTime, listNameTeachers, studentsinClass.ToList(), InactiveStudentsnoGroup.ToList());
-                                dataResponse.Add(dataClass);
-                            }
-                        }
-                        //var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
-                        var test1 = Export2Excel(dataResponse, dataCenter,"8").Result;
-                        //Console.WriteLine(error);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
+        //                    //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
+        //                    var listTime = new Dictionary<Int32, DataTime>()
+        //                    {
+        //                        //{8,new DataTime{ StartTime = new DateTime(2020,8,1,0,0,0),EndTime = new DateTime(2020,8,31,23,59,0)} },
+        //                        //{9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
+        //                        //{10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
+        //                        //{11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
+        //                        //{12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
+        //                    };
+        //                    foreach (var time in listTime)
+        //                    {
+        //                        var dataClass = new Class4Report2Excel();
+        //                        dataClass = NewMethod(center, @class, studentIDsinClass, time.Value.StartTime, time.Value.EndTime, listNameTeachers, studentsinClass.ToList(), InactiveStudentsnoGroup.ToList());
+        //                        dataResponse.Add(dataClass);
+        //                    }
+        //                }
+        //                //var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
+        //                var test1 = Export2Excel(dataResponse, dataCenter, "8").Result;
+        //                //Console.WriteLine(error);
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
+        //}
 
-        private static Class4Report2Excel NewMethod(CenterEntity center, ClassEntity @class, List<string> studentIDsinClass, DateTime StartTime, DateTime EndTime, String listNameTeachers, List<StudentEntity> studentsinClass, List<LessonProgressEntity> InactiveStudentsnoGroup)
-        {
-            Class4Report2Excel dataClass = new Class4Report2Excel();
+        //private static Class4Report2Excel NewMethod(CenterEntity center, ClassEntity @class, List<string> studentIDsinClass, DateTime StartTime, DateTime EndTime, String listNameTeachers, List<StudentEntity> studentsinClass, List<LessonProgressEntity> InactiveStudentsnoGroup)
+        //{
+        //    Class4Report2Excel dataClass = new Class4Report2Excel();
 
-            dataClass.CenterID = center.ID;
-            dataClass.ClassID = @class.ID;
-            dataClass.ClassName = @class.Name;
-            dataClass.TeacherName = listNameTeachers;
-            dataClass.StartDate = @class.StartDate;
-            dataClass.EndDate = @class.EndDate;
-            dataClass.StudentinClass = studentsinClass.Count();
-            dataClass.DontActiveStudent = InactiveStudentsnoGroup.Where(x => x.ClassID == @class.ID).Count();
-            dataClass.Status = @class.IsActive ? "Hoạt động" : "Không hoạt động";
+        //    dataClass.CenterID = center.ID;
+        //    dataClass.ClassID = @class.ID;
+        //    dataClass.ClassName = @class.Name;
+        //    dataClass.TeacherName = listNameTeachers;
+        //    dataClass.StartDate = @class.StartDate;
+        //    dataClass.EndDate = @class.EndDate;
+        //    dataClass.StudentinClass = studentsinClass.Count();
+        //    dataClass.DontActiveStudent = InactiveStudentsnoGroup.Where(x => x.ClassID == @class.ID).Count();
+        //    dataClass.Status = @class.IsActive ? "Hoạt động" : "Không hoạt động";
 
-            //danh sach mon hoc trong lop
-            var classSbjs = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID).ToList();
-            //danh sach bai hoc trong lop
-            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToList();
-            var activeLessonIds = activeLessons.Select(x => x.LessonID).ToList();
-            //danh sach bai luyen tap + kiem tra
-            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-            var activeProgress = _lessonProgressService.CreateQuery().Find(x => studentIDsinClass.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                && x.LastDate <= new DateTime(2020, 12, 31, 23, 59, 00) && x.LastDate >= center.StartDate).ToList();
-            //ket qua lam bai cua hoc sinh trong lop
-            var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                               group r by r.StudentID
-                               into g
-                               select new StudentResult
-                               {
-                                   StudentID = g.Key,
-                                   AvgPoint = g.Average(t => t.LastPoint),
-                               }).ToList();
+        //    //danh sach mon hoc trong lop
+        //    var classSbjs = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID).ToList();
+        //    //danh sach bai hoc trong lop
+        //    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToList();
+        //    var activeLessonIds = activeLessons.Select(x => x.LessonID).ToList();
+        //    //danh sach bai luyen tap + kiem tra
+        //    var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+        //    //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+        //    var activeProgress = _lessonProgressService.CreateQuery().Find(x => studentIDsinClass.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+        //        && x.LastDate <= new DateTime(2020, 12, 31, 23, 59, 00) && x.LastDate >= center.StartDate).ToList();
+        //    //ket qua lam bai cua hoc sinh trong lop
+        //    var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+        //                       group r by r.StudentID
+        //                       into g
+        //                       select new StudentResult
+        //                       {
+        //                           StudentID = g.Key,
+        //                           AvgPoint = g.Average(t => t.LastPoint),
+        //                       }).ToList();
 
-            //render ket qua hoc tap
-            var minPoint8 = classResult.Count(t => t.AvgPoint >= 80);
-            var minPoint5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-            var minPoint2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
-            var minPoint0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+        //    //render ket qua hoc tap
+        //    var minPoint8 = classResult.Count(t => t.AvgPoint >= 80);
+        //    var minPoint5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+        //    var minPoint2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+        //    var minPoint0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
 
-            dataClass.MinPoint0 = minPoint0;
-            dataClass.MinPoint2 = minPoint2;
-            dataClass.MinPoint5 = minPoint5;
-            dataClass.MinPoint8 = minPoint8;
-            return dataClass;
-        }
+        //    dataClass.MinPoint0 = minPoint0;
+        //    dataClass.MinPoint2 = minPoint2;
+        //    dataClass.MinPoint5 = minPoint5;
+        //    dataClass.MinPoint8 = minPoint8;
+        //    return dataClass;
+        //}
 
         private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String month = "")
         {
@@ -2047,7 +2064,7 @@ namespace AutoEmailEduso
                         }
                         else
                         {
-                            var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x=>x.CreateDate);
+                            var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x => x.CreateDate);
                             var studentinM10 = students.Where(x => x.CreateDate.Month.Equals(10)).OrderBy(x => x.CreateDate);
                             var studentinM11 = students.Where(x => x.CreateDate.Month.Equals(11)).OrderBy(x => x.CreateDate);
                             var studentinM12 = students.Where(x => x.CreateDate.Month.Equals(12)).OrderBy(x => x.CreateDate);
@@ -2055,7 +2072,7 @@ namespace AutoEmailEduso
                             lines.Add($"Tháng 10 tạo: {studentinM10.Count()} tài khoản - Tạo ngày: {studentinM10.FirstOrDefault()?.CreateDate}");
                             lines.Add($"Tháng 11 tạo: {studentinM11.Count()} tài khoản - Tạo ngày: {studentinM11.FirstOrDefault()?.CreateDate}");
                             lines.Add($"Tháng 12 tạo: {studentinM12.Count()} tài khoản - Tạo ngày: {studentinM12.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Hoạt động: {students.Where(x=>x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
+                            lines.Add($"Hoạt động: {students.Where(x => x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
                             System.IO.File.WriteAllLines(fileLPath, lines);
                         }
                     }
@@ -2088,7 +2105,7 @@ namespace AutoEmailEduso
             {
                 var currentTime = DateTime.UtcNow;
                 //lay danh sach co so dang hoat dong
-                var centers = _centerService.CreateQuery().Find(x=>x.Status == true).ToList();
+                var centers = _centerService.CreateQuery().Find(x => x.Status == true).ToList();
                 //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
                 foreach (var item in centers)
                 {
@@ -2112,7 +2129,7 @@ namespace AutoEmailEduso
 
                         String listNameTeachers = "";
                         List<String> listEmailTeachers = new List<string>();
-                        foreach(var teacher in listTeacherHeader)
+                        foreach (var teacher in listTeacherHeader)
                         {
                             listNameTeachers += $"{teacher.FullName}, ";
                             listEmailTeachers.Add(teacher.Email);
@@ -2162,7 +2179,7 @@ namespace AutoEmailEduso
 
                         var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
 
-                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com","k.chee.dinh@gmail.com", "vietphung.it@gmail.com" } : listEmailTeachers;
+                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com", "vietphung.it@gmail.com" } : listEmailTeachers;
                         //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
                         var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
                         _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
@@ -2171,7 +2188,7 @@ namespace AutoEmailEduso
                 }
                 return "Thong bao thanh cong";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return ex.Message;
             }
@@ -2333,167 +2350,168 @@ namespace AutoEmailEduso
         //    return body;
         //}
 
-        private static async Task sendmail()
-        {
-            List<DateTime> dateTimes = new List<DateTime>
-            {
-                new DateTime(2020,10,1,8,0,0),
-                new DateTime(2020,10,8,8,0,0),
-                new DateTime(2020,10,15,8,0,0),
-                new DateTime(2020,10,22,8,0,0),
-                new DateTime(2020,10,29,8,0,0),
-                new DateTime(2020,11,5,8,0,0),
-                new DateTime(2020,11,12,8,0,0),
-                new DateTime(2020,11,19,8,0,0),
-                new DateTime(2020,11,26,8,0,0),
-                new DateTime(2020,12,3,8,0,0),
-                new DateTime(2020,12,10,8,0,0),
-            };
+        //private static async Task sendmail()
+        //{
+        //    List<DateTime> dateTimes = new List<DateTime>
+        //    {
+        //        new DateTime(2020,10,1,8,0,0),
+        //        new DateTime(2020,10,8,8,0,0),
+        //        new DateTime(2020,10,15,8,0,0),
+        //        new DateTime(2020,10,22,8,0,0),
+        //        new DateTime(2020,10,29,8,0,0),
+        //        new DateTime(2020,11,5,8,0,0),
+        //        new DateTime(2020,11,12,8,0,0),
+        //        new DateTime(2020,11,19,8,0,0),
+        //        new DateTime(2020,11,26,8,0,0),
+        //        new DateTime(2020,12,3,8,0,0),
+        //        new DateTime(2020,12,10,8,0,0),
+        //    };
 
-            List<Data> data = new List<Data>();
+        //    List<Data> data = new List<Data>();
 
-            List<CenterEntity> listCenterActive = new List<CenterEntity>();
-            List<TeacherEntity> listTeacher = new List<TeacherEntity>();
-            //foreach (DateTime currentTime in dateTimes)
-            //{
-            //    var centersActive = _centerService.GetActiveCenter(currentTime) as CenterEntity;//lay co so dang hoat dong
-            //    listCenterActive.Add(centersActive);
-            //}
+        //    List<CenterEntity> listCenterActive = new List<CenterEntity>();
+        //    List<TeacherEntity> listTeacher = new List<TeacherEntity>();
+        //    //foreach (DateTime currentTime in dateTimes)
+        //    //{
+        //    //    var centersActive = _centerService.GetActiveCenter(currentTime) as CenterEntity;//lay co so dang hoat dong
+        //    //    listCenterActive.Add(centersActive);
+        //    //}
 
-            var a = dateTimes.LastOrDefault();
-            var centersActive = _centerService.GetActiveCenter(dateTimes.LastOrDefault()).ToList();//lay co so dang hoat dong
-            var b = _centerService.GetActiveCenter(DateTime.Now).ToList();
+        //    var a = dateTimes.LastOrDefault();
+        //    var centersActive = _centerService.GetActiveCenter(dateTimes.LastOrDefault()).ToList();//lay co so dang hoat dong
+        //    var b = _centerService.GetActiveCenter(DateTime.Now).ToList();
 
-            foreach (var center in centersActive)
-            {
-                if (center.Abbr == "c3vyvp")
-                {
-                    var indexWeek = 0;
-                    var index = 1;
-                    data = new List<Data>();
-                    foreach (DateTime currentTime in dateTimes)
-                    {
-                        var _data = await GetDataForExcel(currentTime, center);
-                        if (currentTime.Month == dateTimes.ElementAtOrDefault(index).Month)
-                        {
-                            indexWeek++;
-                            _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-                        }
-                        else
-                        {
-                            indexWeek++;
-                            _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-                            indexWeek = 0;
-                        }
-                        data.Add(_data);
-                        index++;
-                    }
+        //    foreach (var center in centersActive)
+        //    {
+        //        if (center.Abbr == "c3vyvp")
+        //        {
+        //            var indexWeek = 0;
+        //            var index = 1;
+        //            data = new List<Data>();
+        //            foreach (DateTime currentTime in dateTimes)
+        //            {
+        //                var _data = await GetDataForExcel(currentTime, center);
+        //                if (currentTime.Month == dateTimes.ElementAtOrDefault(index).Month)
+        //                {
+        //                    indexWeek++;
+        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
+        //                }
+        //                else
+        //                {
+        //                    indexWeek++;
+        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
+        //                    indexWeek = 0;
+        //                }
+        //                data.Add(_data);
+        //                index++;
+        //            }
 
-                    var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
-                    if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
-                    {
-                        listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
-                    }
+        //            var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
+        //            if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
+        //            {
+        //                listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
+        //            }
 
-                    String body = GetContent(data);
-                    String subject = $"B/c tháng {center.Name}";
-                    var toAddress = isTest == true ? new List<String> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : listTeacherHeader.Select(x => x.Email).ToList();
-                    var toBcc = isTest == true ? null : new List<String> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "kchidinh@gmail.com" };
-                    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toBcc);
-                    Console.WriteLine($"{center.Name} Is Done!");
-                }
-            }
-        }
-        private static async Task<Data> GetDataForExcel(DateTime currentTime, CenterEntity center)
-        {
-            var day = currentTime.Day;
-            var month = currentTime.Month;
-            var year = currentTime.Year;
-            var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
-            var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
+        //            String body = GetContent(data);
+        //            String subject = $"B/c tháng {center.Name}";
+        //            var toAddress = isTest == true ? new List<String> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : listTeacherHeader.Select(x => x.Email).ToList();
+        //            var toBcc = isTest == true ? null : new List<String> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "kchidinh@gmail.com" };
+        //            _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toBcc);
+        //            Console.WriteLine($"{center.Name} Is Done!");
+        //        }
+        //    }
+        //}
+        
+        //private static async Task<Data> GetDataForExcel(DateTime currentTime, CenterEntity center)
+        //{
+        //    var day = currentTime.Day;
+        //    var month = currentTime.Month;
+        //    var year = currentTime.Year;
+        //    var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
+        //    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
 
-            //var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
+        //    //var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
 
-            var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-            Int32 totalStudent = 0, totalActiveStudents = 0; ;
-            long tren8 = 0, tren5 = 0, tren0 = 0;
-            string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-            if (classesActive.Count() == 0)
-            {
-                //continue;
-            }
+        //    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
+        //    Int32 totalStudent = 0, totalActiveStudents = 0; ;
+        //    long tren8 = 0, tren5 = 0, tren0 = 0;
+        //    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
+        //    if (classesActive.Count() == 0)
+        //    {
+        //        //continue;
+        //    }
 
-            foreach (var _class in classesActive.OrderBy(x => x.Name))
-            {
-                //Lay danh sach ID hoc sinh trong lop
-                var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
-                var studentIds = students.Select(t => t.ID).ToList();
+        //    foreach (var _class in classesActive.OrderBy(x => x.Name))
+        //    {
+        //        //Lay danh sach ID hoc sinh trong lop
+        //        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
+        //        var studentIds = students.Select(t => t.ID).ToList();
 
-                var classStudent = studentIds.Count();
-                totalStudent += classStudent;
+        //        var classStudent = studentIds.Count();
+        //        totalStudent += classStudent;
 
-                //Lay danh sach ID bai hoc duoc mo trong tuan
-                var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-                var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
+        //        //Lay danh sach ID bai hoc duoc mo trong tuan
+        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
+        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
-                //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-                var activeProgress = _lessonProgressService.CreateQuery().Find(
-                    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                    && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
+        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
+        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
+        //            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
 
 
-                //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-                var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                    x => studentIds.Contains(x.StudentID)).ToEnumerable();
-                totalActiveStudents += activeStudents.Count();
+        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+        //        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+        //            x => studentIds.Contains(x.StudentID)).ToEnumerable();
+        //        totalActiveStudents += activeStudents.Count();
 
-                //var stChuaVaoLop = classStudent - activeStudents.Count();
-                //totalstChuaVaoLop += stChuaVaoLop;
+        //        //var stChuaVaoLop = classStudent - activeStudents.Count();
+        //        //totalstChuaVaoLop += stChuaVaoLop;
 
-                // danh sach bai kiem tra
-                var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-                //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+        //        // danh sach bai kiem tra
+        //        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+        //        //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
 
-                //ket qua lam bai cua hoc sinh trong lop
-                var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-                                   group r by r.StudentID
-                                   into g
-                                   select new StudentResult
-                                   {
-                                       StudentID = g.Key,
-                                       ExamCount = g.Count(),
-                                       AvgPoint = g.Average(t => t.LastPoint),
-                                       StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-                                   }).ToList();
+        //        //ket qua lam bai cua hoc sinh trong lop
+        //        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+        //                           group r by r.StudentID
+        //                           into g
+        //                           select new StudentResult
+        //                           {
+        //                               StudentID = g.Key,
+        //                               ExamCount = g.Count(),
+        //                               AvgPoint = g.Average(t => t.LastPoint),
+        //                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
+        //                           }).ToList();
 
-                //render ket qua hoc tap
-                var min8 = classResult.Count(t => t.AvgPoint >= 80);
-                var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-                var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 50);
+        //        //render ket qua hoc tap
+        //        var min8 = classResult.Count(t => t.AvgPoint >= 80);
+        //        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+        //        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 50);
 
-                tren8 += min8;
-                tren5 += min5;
-                tren0 += min0;
-            }
+        //        tren8 += min8;
+        //        tren5 += min5;
+        //        tren0 += min0;
+        //    }
 
-            double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100, 2);
-            double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100, 2);
-            //double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
-            //double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
-            double tiletren0 = Math.Round(((double)tren0 / totalActiveStudents) * 100, 2);
-            double tilechualam = 100 - tiletren0 - tiletren5 - tiletren8;
-            var datarespone = new Data
-            {
-                TotalStudent = totalStudent,
-                TotalStudentActive = totalActiveStudents,
-                PersentMinPoint0 = tiletren0,
-                PersentMinPoint5 = tiletren5,
-                PersentMinPoint8 = tiletren8,
-                currentTime = currentTime,
-                DontWork = tilechualam
-            };
-            return datarespone;
-        }
+        //    double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100, 2);
+        //    double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100, 2);
+        //    //double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
+        //    //double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
+        //    double tiletren0 = Math.Round(((double)tren0 / totalActiveStudents) * 100, 2);
+        //    double tilechualam = 100 - tiletren0 - tiletren5 - tiletren8;
+        //    var datarespone = new Data
+        //    {
+        //        TotalStudent = totalStudent,
+        //        TotalStudentActive = totalActiveStudents,
+        //        PersentMinPoint0 = tiletren0,
+        //        PersentMinPoint5 = tiletren5,
+        //        PersentMinPoint8 = tiletren8,
+        //        currentTime = currentTime,
+        //        DontWork = tilechualam
+        //    };
+        //    return datarespone;
+        //}
 
         private static String GetContent(List<Data> datas)
         {
@@ -2551,22 +2569,22 @@ namespace AutoEmailEduso
                 var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
                 var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
                 var activeCenters = _centerService.GetActiveCenter(currentTime);
-                if(activeCenters.Count() == 0)
+                if (activeCenters.Count() == 0)
                 {
                     Console.WriteLine("Không có cơ sở hoạt động");
                 }
 
                 Int32 totalClass = 0;
 
-                foreach(var center in activeCenters)
+                foreach (var center in activeCenters)
                 {
                     var classesActive = _classService.GetActiveClass(currentTime, center.ID);
                     if (classesActive.Count() == 0) continue;
                     foreach (var @class in classesActive)
                     {
                         if (@class.StartDate > firstDay) continue;
-                        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
-                        if(activeLessons == 0)
+                        var activeLessons = _lessonService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
+                        if (activeLessons == 0)
                         {
                             if (!@class.IsActive) continue;
                             @class.IsActive = false;
@@ -2604,7 +2622,7 @@ namespace AutoEmailEduso
 
                 Console.WriteLine($"Tổng lớp: {totalClass}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
@@ -2687,7 +2705,7 @@ namespace AutoEmailEduso
             }
         }
 
-        private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime,DateTime endTime)
+        private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime, DateTime endTime)
         {
             var month = startTime.Month;
             var year = startTime.Year;
@@ -2699,16 +2717,16 @@ namespace AutoEmailEduso
                 StartTime = firstTime,
                 EndTime = firstTime.AddMonths(1).AddMinutes(-1)
             };
-            data.Add(month,timeMonth);
+            data.Add(month, timeMonth);
 
-            while(timeMonth.EndTime.Month <= 12 && year == 2020)
+            while (timeMonth.EndTime.Month <= 12 && year == 2020)
             {
                 firstTime = timeMonth.StartTime.AddMonths(1);
                 var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
                 month = firstTime.Month;
                 timeMonth.StartTime = firstTime;
                 timeMonth.EndTime = lastTime;
-                data.Add(month,timeMonth);
+                data.Add(month, timeMonth);
             }
             return data;
         }
@@ -2716,13 +2734,13 @@ namespace AutoEmailEduso
         #region mở rộng
         public static async Task BenTre()
         {
-            var center = _centerService.CreateQuery().Find(x=>x.Abbr == "c3btvp").FirstOrDefault();
+            var center = _centerService.CreateQuery().Find(x => x.Abbr == "c3btvp").FirstOrDefault();
             var listClass = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
-            foreach(var item in listClass)
+            foreach (var item in listClass)
             {
                 var students = _studentService.GetStudentsByClassId(item.ID);
                 var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == item.ID && x.TotalLearnt == 0).ToList().GroupBy(x => x.StudentID)
-                    .Select(x => new 
+                    .Select(x => new
                     {
                         StudentName = _studentService.GetItemByID(x.Key).FullName,
                         ClassName = item.Name
@@ -2743,24 +2761,24 @@ namespace AutoEmailEduso
                 {
                     //if (index == 0)
                     //{
-                        var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
-                        String subject = "Thư cảm ơn và thông báo nghỉ tết";
-                        String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
-                            "<div>" +
-                            "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
-                            "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
-                            "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
-                            "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
-                            "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
-                            "<ul>" +
-                            "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
-                            "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
-                            "<li>Hotline: 0989 085 398</li>" +
-                            "</ul>" +
-                            "</p>" +
-                            "<p>Trân trọng</p>" +
-                            "</div>" +
-                            "";
+                    var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
+                    String subject = "Thư cảm ơn và thông báo nghỉ tết";
+                    String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
+                        "<div>" +
+                        "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
+                        "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
+                        "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
+                        "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
+                        "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
+                        "<ul>" +
+                        "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
+                        "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
+                        "<li>Hotline: 0989 085 398</li>" +
+                        "</ul>" +
+                        "</p>" +
+                        "<p>Trân trọng</p>" +
+                        "</div>" +
+                        "";
 
                     foreach (var teacher in teachers)
                     {
@@ -2788,17 +2806,17 @@ namespace AutoEmailEduso
     }
 
     #region class
-    public class ScheduleView : LessonScheduleEntity
-    {
-        public string LessonName { get; set; }
+    //public class ScheduleView : LessonEntity
+    //{
+    //    public string LessonName { get; set; }
 
-        public ScheduleView(LessonScheduleEntity schedule)
-        {
-            LessonID = schedule.LessonID;
-            StartDate = schedule.StartDate;
-            EndDate = schedule.EndDate;
-        }
-    }
+    //    public ScheduleView(LessonEntity lesson)
+    //    {
+    //        LessonID = lesson.ID;
+    //        StartDate = lesson.StartDate;
+    //        EndDate = lesson.EndDate;
+    //    }
+    //}
 
     public class ReportViewModal : ReportEntity
     {

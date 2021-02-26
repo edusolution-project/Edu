@@ -15,7 +15,7 @@ namespace BaseCustomerMVC.Globals
         private readonly CourseService _courseService;
         private readonly ChapterService _chapterService;
         private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         public CustomerHelper(
             GradeService gradeservice
             , SubjectService subjectService
@@ -24,7 +24,7 @@ namespace BaseCustomerMVC.Globals
             , CourseService courseService
             , ChapterService chapterService
             , LessonService lessonService
-            , LessonScheduleService lessonScheduleService
+            ////, LessonScheduleService lessonScheduleService
             , StudentService studentService
         )
         {
@@ -35,7 +35,7 @@ namespace BaseCustomerMVC.Globals
             _service = service;
             _chapterService = chapterService;
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
         }
         /// <summary>

@@ -327,16 +327,16 @@
                     }).catch(e => { })
             },
             formatTime(time) {
-                //console.log(time);
-                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
+                var _time = moment(time);
+                if (time == null || !_time._isValid || _time < moment(new Date(2000, 1, 1))) return "-"
                 var options = { weekday: "long", day: "numeric" };
                 var date = new Date(time);
-                return moment(time).format("HH:mm") +  ' ' + date.toLocaleDateString("vi-VN", options).replace("ngày ","")
+                return _time.format("HH:mm") +  ' ' + date.toLocaleDateString("vi-VN", options).replace("ngày ","")
             },
             formatDate(time) {
-                //console.log(time);
-                if (moment(time) < moment(new Date(2000, 1, 1))) return "-";
-                return moment(time).format("DD/MM/YYYY")
+                var _time = moment(time);
+                if (time == null || !_time._isValid || _time < moment(new Date(2000, 1, 1))) return "-"
+                return _time.format("DD/MM/YYYY")
             },
             shortenString(str, length) {
                 if (str.length <= length)

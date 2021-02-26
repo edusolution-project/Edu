@@ -155,9 +155,9 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<ClassSubjectProgressEntity> GetListOfCurrentSubject(string ClassSubjectID)
         {
-            var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
-            if (currentObj == null) return null;
-            return CreateQuery().Find(t => t.ClassSubjectID == currentObj.ID).ToEnumerable();
+            //var currentObj = _classSubjectService.GetItemByID(ClassSubjectID);
+            //if (currentObj == null) return null;
+            return CreateQuery().Find(t => t.ClassSubjectID == ClassSubjectID).ToEnumerable();
         }
 
         public IEnumerable<ClassSubjectProgressEntity> GetItemsByClassSubjectID_StudentIDs(string classSubjectID, List<string> studentIDs)
