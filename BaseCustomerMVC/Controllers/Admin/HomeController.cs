@@ -1966,32 +1966,90 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 if(learningHistory.CountDocuments() > 0)
                 {
-                    learningHistoryService.CreateQuery().InsertManyAsync(learningHistory.ToList()).Wait();
+                    foreach(var item in learningHistory.ToList())
+                    {
+                        var current = learningHistoryService.GetItemByID(item.ID);
+                        if(current == null){
+                            learningHistoryService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if (classProgess.CountDocuments() > 0)
                 {
-                    classProgressService.CreateQuery().InsertManyAsync(classProgess.ToList()).Wait();
+                    //classProgressService.CreateQuery().InsertManyAsync(classProgess.ToList()).Wait();
+                    foreach (var item in classProgess.ToList())
+                    {
+                        var current = classProgressService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            classProgressService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if(chapterProgess.CountDocuments() > 0)
                 {
-                    chapterProgressService.CreateQuery().InsertManyAsync(chapterProgess.ToList()).Wait();
+                    //chapterProgressService.CreateQuery().InsertManyAsync(chapterProgess.ToList()).Wait();
+                    foreach (var item in chapterProgess.ToList())
+                    {
+                        var current = chapterProgressService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            chapterProgressService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if (classSubjectProgess.CountDocuments() > 0)
                 {
-                    classSubjectProgressService.CreateQuery().InsertManyAsync(classSubjectProgess.ToList()).Wait();
+                    //classSubjectProgressService.CreateQuery().InsertManyAsync(classSubjectProgess.ToList()).Wait();
+                    foreach (var item in classSubjectProgess.ToList())
+                    {
+                        var current = classSubjectProgressService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            classSubjectProgressService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if (lessonProgess.CountDocuments() > 0)
                 {
-                    lessonProgressService.CreateQuery().InsertManyAsync(lessonProgess.ToList()).Wait();
+                    //lessonProgressService.CreateQuery().InsertManyAsync(lessonProgess.ToList()).Wait();
+                    foreach (var item in lessonProgess.ToList())
+                    {
+                        var current = lessonProgressService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            lessonProgressService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if (exams.CountDocuments() > 0)
                 {
-                    examService.CreateQuery().InsertManyAsync(exams.ToList()).Wait();
+                    //examService.CreateQuery().InsertManyAsync(exams.ToList()).Wait();
+                    foreach (var item in exams.ToList())
+                    {
+                        var current = examService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            examService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
                 if (examdetails.CountDocuments() > 0)
                 {
-                    examDetailService.CreateQuery().InsertManyAsync(examdetails.ToList()).Wait();
+                    //examDetailService.CreateQuery().InsertManyAsync(examdetails.ToList()).Wait();
+                    foreach (var item in examdetails.ToList())
+                    {
+                        var current = examDetailService.GetItemByID(item.ID);
+                        if (current == null)
+                        {
+                            examDetailService.CreateQuery().InsertOne(item);
+                        }
+                    }
                 }
+
+                var student = studentService.GetStudentByEmail(email);
+                student.JoinedClasses.Add(@class.ID);
+                studentService.Save(student);
 
                 return Content(msg);
             }
