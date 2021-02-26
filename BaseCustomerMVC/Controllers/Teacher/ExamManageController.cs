@@ -44,6 +44,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
         private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
         private readonly TagsService _tagsService;
+        private readonly FormatExamService _formatExamService;
 
         private readonly MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel> _examQuestionArchiveViewMapping = new MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel>();
         private readonly MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity> _lessonPartQuestionExtensionMapping = new MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity>();
@@ -77,6 +78,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
             , LessonScheduleService lessonScheduleService
             , TagsService tagsService
+            , FormatExamService formatExamService
             )
         {
             _centerService = centerService;
@@ -107,6 +109,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
             _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
             _tagsService = tagsService;
+            _formatExamService = formatExamService;
         }
         public IActionResult Index(String basis)
         {
@@ -727,7 +730,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<FormatExamEntity> formatExams, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<FormatExamViewModel> formatExams, Boolean isNew)
         {
             try
             {
@@ -737,7 +740,67 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json("Tai khoan khong ton tai.");
                 }
 
-                var curre
+                var centerID = _centerService.GetItemByCode(basis).ID;
+
+                //Lưu format đề
+                var formatExam = new FormatExamEntity
+                {
+                    Name = formatExams.FirstOrDefault().Name,
+                    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
+                    Created = DateTime.UtcNow,
+                    CreateUser = UserID,
+                    Center = centerID,
+                };
+
+                for(var i =0;i<formatExams.Count;i++)
+                {
+                    var f = formatExams.ElementAtOrDefault(i);
+                        var detal = new DetailFormat
+                        {
+                            Level = f.Level,
+                            Order = i,
+                            Tags = f.Tags,
+                            Know = f.Know,
+                            Understanding = f.Understanding,
+                            Manipulate = f.Manipulate,
+                            ManipulateHighly = f.ManipulateHighly,
+                            Total = f.Know + f.Understanding +  f.Manipulate + f.ManipulateHighly
+                        };
+                        formatExam.DetailFormat.Add(detal);
+                }
+
+                _formatExamService.Save(formatExam);
+
+                if(item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
+                {
+                    return Json("");
+                }
+                else //kiem tra thi tao de truoc
+                {
+                    if (isNew)
+                    {
+                        //var _lesson = new LessonEntity
+                        //{
+                        //    TemplateType = 2,
+                        //    Timer = item.Timer,
+                        //    CreateUser = UserID,
+                        //    Title = item.Title,
+                        //    Created = DateTime.Now,
+                        //    Updated = DateTime.Now,
+                        //    Limit = item.Limit,
+                        //    Multiple = item.Multiple,
+                        //    Etype = item.Etype,
+                        //    ClassID = @class.ID,
+                        //    ClassSubjectID = classsbj.ID,
+                        //    ChapterID = "0",
+                        //    IsParentCourse = true
+                        //};
+                        //_lessonService.Save(_lesson);
+                    }
+                    return Json("");
+                }
+
+                //
 
                 //var @class = _classService.GetItemByID(item.TargetClasses.FirstOrDefault());
                 //var classsbj = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
@@ -809,7 +872,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //    //tạo đề khác tương tự
 
                 //}
-                return Json("");
+                //return Json("");
             }
             catch (Exception ex)
             {

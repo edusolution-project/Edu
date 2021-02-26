@@ -432,4 +432,10 @@ namespace BaseCustomerEntity.Database
             return listIndex;
         }
     }
+
+    public class EXAM_TYPE
+    {
+        public const int ISEXAM = 0, //Kieerm tra
+            ISLECTURE = 1; //luyen tap
+    }
 }

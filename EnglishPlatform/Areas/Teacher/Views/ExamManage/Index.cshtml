@@ -232,11 +232,12 @@
                     this.getOptionFormatExam(itemID)
                     if (item == undefined) {
                         _that.formatExam = {
+                            examQuestionArchiveID: itemID,
                             titleFormat: '',
                             titleExam: '',
                             timer: 1,
                             limit: 1,
-                            template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
+                            template: '@BaseCustomerEntity.Database.EXAM_TYPE.ISEXAM',
                             totalExam: 1,
                             format:[
                             {
@@ -364,7 +365,7 @@
                     let _that = this
                     let _form = new FormData()
                     let _url = '@processUrl("CreateOrUpdateExam", "ExamManage")'
-                    _form.append("ExamQuestionArchiveID", _that.createExam.examQuestionArchiveID)
+                    _form.append("ExamQuestionArchiveID", _that.formatExam.examQuestionArchiveID)
                     //_form.append("ExamQuestionArchiveID", _that.formatExam.titleFormat)
                     _form.append("Title", _that.formatExam.titleExam)
                     _form.append("Timer", _that.formatExam.timer)
@@ -381,10 +382,10 @@
                         _form.append("formatExams[" + i + "].ManipulateHighly", itemFormat.levelManipulateHighly)
                         _form.append("formatExams[" + i + "].Name", _that.formatExam.titleFormat)
                     }
-                    debugger
                     axios.post(_url, _form)
                         .then(response =>
                         {
+                            debugger
                         })
                         .catch(e => { alert(e) })
                 },
