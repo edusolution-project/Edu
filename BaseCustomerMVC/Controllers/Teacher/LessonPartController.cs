@@ -668,6 +668,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public async Task<JsonResult> RemoveMany(String basis,List<String> PartIDs,String LessonID)
+        {
+            try
+            {
+                _lessonPartService.CreateQuery().DeleteMany(x=>PartIDs.Contains(x.ID) && x.ParentID.Equals(LessonID));
+                return Json(new Dictionary<String, Object> 
+                {
+                    {"Status",true },
+                    {"Msg",$"Đã xoá {PartIDs.Count()} bài." }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                {
+                    {"Status",false },
+                    {"Msg",ex.Message }
+                });
+            }
+        }
+
         private async Task RemoveLessonPart(string ID)
         {
             try

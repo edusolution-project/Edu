@@ -403,13 +403,13 @@
                     _form.append("TotalExam", _that.formatExam.totalExam)
                     for (var i = 0; i < _that.formatExam.format.length; i++) {
                         var itemFormat = _that.formatExam.format[i]
-                        _form.append("formatExams[" + i + "].Level", itemFormat.level)
-                        _form.append("formatExams[" + i + "].Tags", itemFormat.tag)
-                        _form.append("formatExams[" + i + "].Know", itemFormat.levelKnow)
-                        _form.append("formatExams[" + i + "].Understanding", itemFormat.levelUnderstanding)
-                        _form.append("formatExams[" + i + "].Manipulate", itemFormat.levelManipulate)
-                        _form.append("formatExams[" + i + "].ManipulateHighly", itemFormat.levelManipulateHighly)
-                        _form.append("formatExams[" + i + "].Name", _that.formatExam.titleFormat)
+                        _form.append("matrixExams[" + i + "].Level", itemFormat.level)
+                        _form.append("matrixExams[" + i + "].Tags", itemFormat.tag)
+                        _form.append("matrixExams[" + i + "].Know", itemFormat.levelKnow)
+                        _form.append("matrixExams[" + i + "].Understanding", itemFormat.levelUnderstanding)
+                        _form.append("matrixExams[" + i + "].Manipulate", itemFormat.levelManipulate)
+                        _form.append("matrixExams[" + i + "].ManipulateHighly", itemFormat.levelManipulateHighly)
+                        _form.append("matrixExams[" + i + "].Name", _that.formatExam.titleFormat)
                     }
                     axios.post(_url, _form)
                         .then(response =>

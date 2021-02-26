@@ -14,6 +14,8 @@ namespace BaseCustomerEntity.Database
         public String CodeExam { get; set; }
         [JsonProperty("LessonID")]
         public String LessonID { get; set; }
+        [JsonProperty("MatrixExamID")]
+        public String MatrixExamID { get; set; }
     }
 
     public class LessonExamService : ServiceBase<LessonExamEntity>

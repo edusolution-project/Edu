@@ -84,9 +84,6 @@
 
                 <div class="right-content" id="right-content" style="margin-left:240px">
                     @RenderBody()
-                    <div v-cloak>
-                        @RenderSection("Modals", false)
-                    </div>
                 </div>
 
                 <!-- Footer -->
@@ -104,6 +101,9 @@
             </a>*@
     </div>
     <!-- Logout Modal-->
+    <div v-cloak>
+        @RenderSection("Modals", false)
+    </div>
     @await Html.PartialAsync("_modalLogout")
     @RenderSection("Scripts", false)
     @*@await Html.PartialAsync("_EasyChat")*@

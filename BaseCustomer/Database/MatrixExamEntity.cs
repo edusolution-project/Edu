@@ -38,9 +38,9 @@ namespace BaseCustomerEntity.Database
         public List<DetailMatrixExam> DetailFormat = new List<DetailMatrixExam>();
     }
 
-    public class FormatExamService : ServiceBase<MatrixExamEntity>
+    public class MatrixExamService : ServiceBase<MatrixExamEntity>
     {
-        public FormatExamService(IConfiguration config) : base(config)
+        public MatrixExamService(IConfiguration config) : base(config)
         {
             var indexs = new List<CreateIndexModel<MatrixExamEntity>>
             {

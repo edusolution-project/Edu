@@ -44,7 +44,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
         private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
         private readonly TagsService _tagsService;
-        private readonly FormatExamService _formatExamService;
+        private readonly MatrixExamService _matrixExamService;
 
         private readonly MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel> _examQuestionArchiveViewMapping = new MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel>();
         private readonly MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity> _lessonPartQuestionExtensionMapping = new MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity>();
@@ -78,7 +78,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
             , LessonScheduleService lessonScheduleService
             , TagsService tagsService
-            , FormatExamService formatExamService
+            , MatrixExamService matrixExamService
             )
         {
             _centerService = centerService;
@@ -109,7 +109,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
             _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
             _tagsService = tagsService;
-            _formatExamService = formatExamService;
+            _matrixExamService = matrixExamService;
         }
         public IActionResult Index(String basis)
         {
@@ -730,7 +730,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<MatrixExamViewModel> formatExams, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<MatrixExamViewModel> matrixExams, Boolean isNew)
         {
             try
             {
@@ -743,33 +743,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var centerID = _centerService.GetItemByCode(basis).ID;
 
                 //Lưu format đề
-                var formatExam = new MatrixExamEntity
+                var matrixExam = new MatrixExamEntity
                 {
-                    Name = formatExams.FirstOrDefault().Name,
+                    Name = matrixExams.FirstOrDefault().Name,
                     ExamQuestionArchiveID = item.ExamQuestionArchiveID,
                     Created = DateTime.UtcNow,
                     CreateUser = UserID,
                     Center = centerID,
                 };
 
-                for(var i =0;i<formatExams.Count;i++)
+                for (var i = 0; i < matrixExams.Count; i++)
                 {
-                    var f = formatExams.ElementAtOrDefault(i);
-                        var detal = new DetailMatrixExam
-                        {
-                            Level = f.Level,
-                            Order = i,
-                            Tags = f.Tags,
-                            Know = f.Know,
-                            Understanding = f.Understanding,
-                            Manipulate = f.Manipulate,
-                            ManipulateHighly = f.ManipulateHighly,
-                            Total = f.Know + f.Understanding +  f.Manipulate + f.ManipulateHighly
-                        };
-                        formatExam.DetailFormat.Add(detal);
+                    var f = matrixExams.ElementAtOrDefault(i);
+                    var detal = new DetailMatrixExam
+                    {
+                        Level = f.Level,
+                        Order = i,
+                        Tags = f.Tags,
+                        Know = f.Know,
+                        Understanding = f.Understanding,
+                        Manipulate = f.Manipulate,
+                        ManipulateHighly = f.ManipulateHighly,
+                        Total = f.Know + f.Understanding + f.Manipulate + f.ManipulateHighly
+                    };
+                    matrixExam.DetailFormat.Add(detal);
                 }
 
-                _formatExamService.Save(formatExam);
+                _matrixExamService.Save(matrixExam);
 
                 if(item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
                 {
@@ -779,23 +779,38 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     if (isNew)
                     {
-                        //var _lesson = new LessonEntity
-                        //{
-                        //    TemplateType = 2,
-                        //    Timer = item.Timer,
-                        //    CreateUser = UserID,
-                        //    Title = item.Title,
-                        //    Created = DateTime.Now,
-                        //    Updated = DateTime.Now,
-                        //    Limit = item.Limit,
-                        //    Multiple = item.Multiple,
-                        //    Etype = item.Etype,
-                        //    ClassID = @class.ID,
-                        //    ClassSubjectID = classsbj.ID,
-                        //    ChapterID = "0",
-                        //    IsParentCourse = true
-                        //};
-                        //_lessonService.Save(_lesson);
+                        List<String> listLessonExamIDs = new List<string>();
+                        List<Int32> listIndex = new List<Int32>();
+                        var rd = new Random();
+                        var index = rd.Next(100, 999);
+                        for (Int32 i = 0; i < item.TotalExam; i++)
+                        {
+                            if (listIndex.Contains(index))
+                            {
+                                index = rd.Next(100, 999);
+                            }
+                            var codeExam = index;
+                            listIndex.Add(index);
+
+                            var lessonExam = new LessonExamEntity
+                            {
+                                TemplateType = 2,
+                                Timer = item.Timer,
+                                CreateUser = UserID,
+                                Title = item.Title,
+                                Created = DateTime.UtcNow,
+                                Updated = DateTime.UtcNow,
+                                Limit = item.Limit,
+                                Multiple = item.Multiple,//he so
+                                Etype = item.Etype,
+                                ChapterID = "0",
+                                IsParentCourse = true,
+                                MatrixExamID = matrixExam.ID,
+                                CodeExam = index.ToString()
+                            };
+                            _lessonExamService.Save(lessonExam);
+                            listLessonExamIDs.Add(lessonExam.ID);
+                        }
                     }
                     return Json("");
                 }
