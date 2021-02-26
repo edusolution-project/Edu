@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class FormatExamViewModel
+    public class MatrixExamViewModel
     {
         [JsonProperty("Name")]
         public String Name { get; set; }

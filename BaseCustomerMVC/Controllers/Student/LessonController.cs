@@ -46,7 +46,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly VocabularyService _vocabularyService;
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
 
-        private readonly LessonExtensionService _lessonExtensionService;
+        private readonly LessonExamService _lessonExamService;
         private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
         private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
         private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
@@ -81,7 +81,7 @@ namespace BaseCustomerMVC.Controllers.Student
             VocabularyService vocabularyService,
             CenterService centerService,
 
-            LessonExtensionService lessonExtensionService,
+            LessonExamService lessonExamService,
             CloneLessonPartExtensionService cloneLessonPartExtensionService,
             CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService,
             CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
@@ -114,7 +114,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _progressHelper = progressHelper;
             _centerService = centerService;
 
-            _lessonExtensionService = lessonExtensionService;
+            _lessonExamService = lessonExamService;
             _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
             _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
             _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
@@ -545,7 +545,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var rd = new Random();
             List<String> listPartIDs = new List<String>();
-            var lessonExtension = _lessonExtensionService.GetItemByLessonID(LessonID);
+            var lessonExtension = _lessonExamService.GetItemByLessonID(LessonID);
             if (currentcs.TypeClass == CLASSSUBJECT_TYPE.EXAM) //đảo vị trí câu hỏi trong bài kiểm tra
             {
                 if (lastexam != null)//????

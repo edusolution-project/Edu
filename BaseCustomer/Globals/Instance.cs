@@ -89,7 +89,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<LessonPartQuestionExtensionServie>();
             services.AddSingleton<LessonPartAnswerExtensionService>();
             //services.AddSingleton<ExamProcessService>();
-            services.AddSingleton<LessonExtensionService>();
+            services.AddSingleton<LessonExamService>();
             services.AddSingleton<LessonPartExtensionService>();
             services.AddSingleton<CloneLessonPartExtensionService>();
             services.AddSingleton<CloneLessonPartQuestionExtensionService>();

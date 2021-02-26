@@ -39,7 +39,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonScheduleService _lessonScheduleService;
 
         //extenstion
-        private readonly LessonExtensionService _lessonExtensionService;
+        private readonly LessonExamService _lessonExamService;
         private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
         private readonly CloneLessonPartQuestionExtensionService _cloneLessonPartQuestionExtensionService;
         private readonly CloneLessonPartAnswerExtensionService _cloneLessonPartAnswerExtensionService;
@@ -48,7 +48,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel> _examQuestionArchiveViewMapping = new MappingEntity<ExamQuestionArchiveEntity, ExamQuestionArchiveViewModel>();
         private readonly MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity> _lessonPartQuestionExtensionMapping = new MappingEntity<LessonPartQuestionExtensionEntity, LessonPartQuestionEntity>();
-        private readonly MappingEntity<LessonExtensionEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonExtensionEntity, LessonEntity>();
+        private readonly MappingEntity<LessonExamEntity, LessonEntity> _lessonMapping = new MappingEntity<LessonExamEntity, LessonEntity>();
         public ExamManageController(
             CenterService centerService
             , TeacherService teacherService
@@ -72,7 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
 
             //extentsion
-            , LessonExtensionService lessonExtensionService
+            , LessonExamService lessonExamService
             , CloneLessonPartExtensionService cloneLessonPartExtensionService
             , CloneLessonPartQuestionExtensionService cloneLessonPartQuestionExtensionService
             , CloneLessonPartAnswerExtensionService cloneLessonPartAnswerExtensionService
@@ -104,7 +104,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonScheduleService = lessonScheduleService;
 
             //extenstion
-            _lessonExtensionService = lessonExtensionService;
+            _lessonExamService = lessonExamService;
             _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
             _cloneLessonPartQuestionExtensionService = cloneLessonPartQuestionExtensionService;
             _cloneLessonPartAnswerExtensionService = cloneLessonPartAnswerExtensionService;
@@ -730,7 +730,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<FormatExamViewModel> formatExams, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<MatrixExamViewModel> formatExams, Boolean isNew)
         {
             try
             {
@@ -743,7 +743,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var centerID = _centerService.GetItemByCode(basis).ID;
 
                 //Lưu format đề
-                var formatExam = new FormatExamEntity
+                var formatExam = new MatrixExamEntity
                 {
                     Name = formatExams.FirstOrDefault().Name,
                     ExamQuestionArchiveID = item.ExamQuestionArchiveID,
@@ -755,7 +755,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 for(var i =0;i<formatExams.Count;i++)
                 {
                     var f = formatExams.ElementAtOrDefault(i);
-                        var detal = new DetailFormat
+                        var detal = new DetailMatrixExam
                         {
                             Level = f.Level,
                             Order = i,
@@ -862,7 +862,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //            LessonID = _lesson.ID,
                 //            Code = new Random().Next(1, 100).ToString()
                 //        };
-                //        _lessonExtensionService.Save(lesson);
+                //        _lessonExamService.Save(lesson);
 
                 //        item.LessonID = lesson.ID;
                 //        //_examProcessService.Save(item);
@@ -887,7 +887,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         /// <param name="UserID"></param>
         /// <param name="lesson"></param>
         /// <returns></returns>
-        public async Task<String> ProcessCreateExam(ExamProcessViewModel item, String UserID, LessonExtensionEntity lesson)
+        public async Task<String> ProcessCreateExam(ExamProcessViewModel item, String UserID, LessonExamEntity lesson)
         {
             // danh sach lessonpart trong kho de
             var lessonPart = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(item.ExamQuestionArchiveID);
@@ -986,7 +986,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return listPart;
         }
 
-        private void SetQuestion(string UserID, LessonExtensionEntity lesson, List<LessonPartQuestionExtensionEntity> newListQuestion, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartExtensionEntity part, CloneLessonPartExtensionEntity clonelessonpart)
+        private void SetQuestion(string UserID, LessonExamEntity lesson, List<LessonPartQuestionExtensionEntity> newListQuestion, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartExtensionEntity part, CloneLessonPartExtensionEntity clonelessonpart)
         {
             foreach (var quiz in newListQuestion.Where(x => x.ParentID == part.ID))
             {
@@ -1028,7 +1028,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questions;
         }
 
-        private void SetAnswer(string UserID, LessonExtensionEntity lesson, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartQuestionExtensionEntity quiz, CloneLessonPartQuestionExtensionEntity clonelessonpartquestion)
+        private void SetAnswer(string UserID, LessonExamEntity lesson, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartQuestionExtensionEntity quiz, CloneLessonPartQuestionExtensionEntity clonelessonpartquestion)
         {
             foreach (var ans in newListAns.Where(x => x.ParentID == quiz.ID))
             {

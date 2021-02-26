@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerEntity.Database
 {
-    public class LessonExtensionEntity : LessonEntity
+    public class LessonExamEntity : LessonEntity
     {
         [JsonProperty("CodeExam")]
         public String CodeExam { get; set; }
@@ -16,21 +16,21 @@ namespace BaseCustomerEntity.Database
         public String LessonID { get; set; }
     }
 
-    public class LessonExtensionService : ServiceBase<LessonExtensionEntity>
+    public class LessonExamService : ServiceBase<LessonExamEntity>
     {
-        public LessonExtensionService(IConfiguration config) : base(config)
+        public LessonExamService(IConfiguration config) : base(config)
         {
-            var indexs = new List<CreateIndexModel<LessonExtensionEntity>>
+            var indexs = new List<CreateIndexModel<LessonExamEntity>>
             {
-                new CreateIndexModel<LessonExtensionEntity>(
-                    new IndexKeysDefinitionBuilder<LessonExtensionEntity>()
+                new CreateIndexModel<LessonExamEntity>(
+                    new IndexKeysDefinitionBuilder<LessonExamEntity>()
                     .Ascending(t => t.LessonID)
                     .Ascending(t=> t.CodeExam)
                     ),
             };
         }
 
-        public List<LessonExtensionEntity> GetItemByLessonID(string LessonID)
+        public List<LessonExamEntity> GetItemByLessonID(string LessonID)
         {
             return CreateQuery().Find(x => x.LessonID == LessonID).ToList();
         }

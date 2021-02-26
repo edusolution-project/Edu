@@ -18,39 +18,49 @@
             <li for="home">
                 <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
-            <li for="profile" id="showbtnProfile" style="display:none">
-                <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
-            </li>
-            <li for="curriculum">
-                <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
-            </li>
-            <li for="reference">
-                <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="ic ic-file"></i>Học liệu</a>
-            </li>
+
             <li for="course">
                 <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
             </li>
+
             @if (isHeadTeacher)
             {
                 <li for="teacher">
                     <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
                 </li>
             }
+
             <li for="student">
                 <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
             </li>
+
+            <li for="profile" id="showbtnProfile" style="display:none">
+                <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
+            </li>
+
+            <li for="curriculum">
+                <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
+            </li>
+
+            <li for="reference">
+                <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="ic ic-file"></i>Học liệu</a>
+            </li>
+
             <li for="calendar">
                 <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Quản lý lịch dạy</a>
             </li>
+
             @if (isHeadTeacher)
             {
                 <li for="product">
                     <a href="@processUrl("Index", "Product")" title="Quản lý gói học"><i class="ic ic-celendar"></i>Quản lý gói học</a>
                 </li>
             }
+
             <li for="discussion">
                 <a href="javascript:;;" onclick="$('.easy-chat__content').toggleClass('open')" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
             </li>
+
             <li for="news">
                 @*<a href="@processUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>*@
                 <a href="/tin-tuc" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>

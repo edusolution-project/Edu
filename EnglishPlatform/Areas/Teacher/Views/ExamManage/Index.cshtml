@@ -32,6 +32,16 @@
             <i class="fas fa-sync fa-spin"></i> Đang nạp dữ liệu ...
         </div>*@
     <div class="card-header border-b">
+
+        <div class="flex flex-wrap align-items-center">
+            <div class="tab bg-none col-md-12 mt-2">
+                <ul class="flex flex-row">
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Ngân hàng câu hỏi" v-on:click="tabChange(0)">Ngân hàng câu hỏi</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Ma trận đề" v-on:click="tabChange(1)">Ma trận đề</a></li>
+                </ul>
+            </div>
+        </div>
+
         <div class="flex flex-row flex-wrap align-items-center">
             <div class="box filter-box w-152 m-1 ">
                 <select v-model="subject">
@@ -55,54 +65,56 @@
             </div>
         </div>
     </div>
-    <div class="card-body">
-        <table id="ed_table" class="table">
-            <thead>
-                <tr class="text-sm-center">
-                    @*<td style="width:35px"><input type="checkbox" /></td>*@
-                    <td>#</td>
-                    <td>Tên</td>
-                    <td>Cấp độ</td>
-                    <td>Chương trình</td>
-                    <td>Số câu</td>
-                    <td style="width:150px;max-width:150px">Tác vụ</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item,k) in dataResult" :id="item.ID">
-                    <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td><a :href="'@processUrl("StorageQuestion","ExamManage")/' + item.ID">{{item.Name}}</a></td>
-                    <td>{{item.GradeName}}</td>
-                    <td>{{item.SubjectName}}</td>
-                    <td>{{item.TotalQuestion}}</td>
-                    <td>
-                        <div class="btn-group" style="display:block">
-                            <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="fas fa-edit"></i></a>
-                            <a class="btn-act btn-edit" title="Tạo bài kiểm tra" href="javascript:;" v-on:click="showCreateExam(item.ID)"><i class="fas fa-pen-fancy"></i></a>
-                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="fas fa-trash-alt"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="box margin-t20 flex">
-            <div class="paging-view">
-                Hiển thị:
-                <select v-model="view" v-on:change="getData()">
-                    <option value="10">10 kết quả</option>
-                    <option value="20">20 kết quả</option>
-                    <option value="30">30 kết quả</option>
-                </select>
-            </div>
-            <div class="page-control">
-                <div class="right">
-                    <b-pagination v-model="page"
-                                  :total-rows="totalRec"
-                                  :per-page="view"
-                                  v-on:input="getData()"></b-pagination>
+    <div class="card-body" v-if="tab[0]">
+        <template>
+            <table id="ed_table" class="table">
+                <thead>
+                    <tr class="text-sm-center">
+                        @*<td style="width:35px"><input type="checkbox" /></td>*@
+                        <td>#</td>
+                        <td>Tên</td>
+                        <td>Cấp độ</td>
+                        <td>Chương trình</td>
+                        <td>Số câu</td>
+                        <td style="width:150px;max-width:150px">Tác vụ</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item,k) in dataResult" :id="item.ID">
+                        <td>{{(page - 1) * view + (k+1)}}</td>
+                        <td><a :href="'@processUrl("StorageQuestion","ExamManage")/' + item.ID">{{item.Name}}</a></td>
+                        <td>{{item.GradeName}}</td>
+                        <td>{{item.SubjectName}}</td>
+                        <td>{{item.TotalQuestion}}</td>
+                        <td>
+                            <div class="btn-group" style="display:block">
+                                <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="fas fa-edit"></i></a>
+                                <a class="btn-act btn-edit" title="Tạo bài kiểm tra" href="javascript:;" v-on:click="showCreateExam(item.ID)"><i class="fas fa-pen-fancy"></i></a>
+                                <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="box margin-t20 flex">
+                <div class="paging-view">
+                    Hiển thị:
+                    <select v-model="view" v-on:change="getData()">
+                        <option value="10">10 kết quả</option>
+                        <option value="20">20 kết quả</option>
+                        <option value="30">30 kết quả</option>
+                    </select>
+                </div>
+                <div class="page-control">
+                    <div class="right">
+                        <b-pagination v-model="page"
+                                      :total-rows="totalRec"
+                                      :per-page="view"
+                                      v-on:input="getData()"></b-pagination>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
 </section>
 
@@ -183,7 +195,8 @@
                         total: 0
                     }
                 },
-                list_Tags:[]
+                list_Tags: [],
+                tab: [true, false]
             },
             computed: {},
             watch: {
@@ -359,7 +372,23 @@
                         return false;
                     }
                 },
-
+                tabChange(a = 0) {
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Ngân hàng câu hỏi", "#bank-question");
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Ma trận đề", "#matrix-exam");
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
                 //
                 createNewExam(isNew) {
                     let _that = this

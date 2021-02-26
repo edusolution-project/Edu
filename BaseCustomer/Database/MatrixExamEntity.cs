@@ -8,7 +8,7 @@ using System.Text;
 
 namespace BaseCustomerEntity.Database
 {
-    public class FormatExamEntity : EntityBase
+    public class MatrixExamEntity : EntityBase
     {
         [JsonProperty("Name")]
         public String Name { get; set; }
@@ -35,17 +35,17 @@ namespace BaseCustomerEntity.Database
         //[JsonProperty("ManipulateHighly")]
         //public List<DetailFormat> ManipulateHighly = new List<DetailFormat>();
         [JsonProperty("DetailFormat")]
-        public List<DetailFormat> DetailFormat = new List<DetailFormat>();
+        public List<DetailMatrixExam> DetailFormat = new List<DetailMatrixExam>();
     }
 
-    public class FormatExamService : ServiceBase<FormatExamEntity>
+    public class FormatExamService : ServiceBase<MatrixExamEntity>
     {
         public FormatExamService(IConfiguration config) : base(config)
         {
-            var indexs = new List<CreateIndexModel<FormatExamEntity>>
+            var indexs = new List<CreateIndexModel<MatrixExamEntity>>
             {
-                new CreateIndexModel<FormatExamEntity>(
-                    new IndexKeysDefinitionBuilder<FormatExamEntity>()
+                new CreateIndexModel<MatrixExamEntity>(
+                    new IndexKeysDefinitionBuilder<MatrixExamEntity>()
                     .Ascending(t=> t.ID)
                     .Ascending(x=>x.ExamQuestionArchiveID)
                     )
@@ -55,7 +55,7 @@ namespace BaseCustomerEntity.Database
         }
     }
 
-    public class DetailFormat
+    public class DetailMatrixExam
     {
         [JsonProperty("Order")]
         public Int32 Order { get; set; }
