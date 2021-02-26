@@ -236,14 +236,14 @@
                                 var btnMo = formEvent.querySelector("button#btn-mo-bai-hoc");
                                 console.log(btnMo)
                                 btnMo.setAttribute("data-url", '');
-                                @*$(btnMo).hide();
+                                $(btnMo).hide();
                                 if (jsonData.LinkLesson != null && jsonData.LinkLesson != void 0 && jsonData.LinkLesson != "" && jsonData.LinkLesson != "null")
                                 {
                                     if (btnMo != null) {
                                         btnMo.setAttribute("data-url", `/@center${jsonData.LinkLesson}`);
                                         $(btnMo).show();
                                     }
-                                }*@
+                                }
 
                             }
                       
