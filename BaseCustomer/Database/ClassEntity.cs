@@ -164,7 +164,7 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime, DateTime lastTime, String centerID)
         {
-            return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToEnumerable();
+            return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime && t.ClassMechanism != CLASS_MECHANISM.PERSONAL && t.IsActive).ToEnumerable();
         }
 
         /// <summary>

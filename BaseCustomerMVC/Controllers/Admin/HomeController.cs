@@ -1922,12 +1922,12 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-        public IActionResult RestoreDB(String email)
+        public IActionResult RestoreDB(String email,String classID)
         {
             try
             {
                 var msg = "";
-                var @class = _classService.GetItemByID("5f5af8ae171ba81edc70b72b");//12a8 VY
+                var @class = _classService.GetItemByID(classID);//12a8 VY
                 var st = _studentService.GetStudentByEmail(email);
                 if(st == null)
                 {
@@ -1986,7 +1986,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         }
                     }
                 }
-                if(chapterProgess.CountDocuments() > 0)
+                if (chapterProgess.CountDocuments() > 0)
                 {
                     //chapterProgressService.CreateQuery().InsertManyAsync(chapterProgess.ToList()).Wait();
                     foreach (var item in chapterProgess.ToList())
@@ -1994,7 +1994,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                         var current = chapterProgressService.GetItemByID(item.ID);
                         if (current == null)
                         {
-                            chapterProgressService.CreateQuery().InsertOne(item);
+                            //chapterProgressService.CreateQuery().InsertOne(item);
                         }
                     }
                 }
