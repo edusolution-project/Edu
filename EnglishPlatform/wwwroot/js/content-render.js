@@ -328,7 +328,7 @@ var Lesson = (function () {
             throw "No data";
         }
         var data = _data;
-        console.log(_data);
+        //console.log(_data);
         //if (data.TemplateType == 2) {
         //    renderLessonData.prototype.IsTest = true;
         //}
@@ -2979,7 +2979,7 @@ var Lesson = (function () {
                         $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
                         $('.top-menu[for=lesson-info]').append(completeButton);
                         if (schend > moment(new Date(2000, 1, 1)))
-                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                         $('.right-content').removeClass("no-info-bar");
                     }
                     else {
@@ -3044,10 +3044,10 @@ var Lesson = (function () {
                 var schend = moment(schedule.EndDate);
                 if (schend > moment(new Date(2000, 1, 1))) {
                     if (isMobileDevice()) {
-                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                     }
                     else
-                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                 }
 
 
@@ -3174,6 +3174,7 @@ var Lesson = (function () {
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
+                console.log(res);
                 if (data.Error == null) {
                     if (!$(obj).parent().hasClass('top-menu'))
                         $(obj).parent().remove();
@@ -3183,10 +3184,9 @@ var Lesson = (function () {
                     //console.log("NewID: " + data.Data.ID);
                     $("#ExamID").val(data.Data.ID);
                     setLocalData("CurrentExam", data.Data.ID);
+                    $('.top-menu[for=lesson-info]').empty().show();
 
                     renderExamDetail();
-
-                    $('.top-menu[for=lesson-info]').show();
 
                     //console.log(data);
                     if (data.Data.Timer > 0) {
@@ -4216,7 +4216,8 @@ var Lesson = (function () {
         }
 
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
-        lesson_action_holder.empty()
+        var sch = lesson_action_holder.find('.lesson_schedule').clone();
+        lesson_action_holder.empty().append(sch);
         console.log("Redo Exam");
         localStorage.clear();
         startExam(obj);
