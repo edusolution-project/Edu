@@ -103,10 +103,10 @@ namespace AutoEmailEduso
                     //    Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
                     //    await sendmail();
                     //    break;
-                    //case "ReportToExcel":
-                    //    Console.WriteLine("Dang xuat bao cao");
-                    //    await ReportToExcel();
-                    //    break;
+                    case "ReportToExcel":
+                        Console.WriteLine("Dang xuat bao cao");
+                        await ReportToExcel();
+                        break;
                     case "ServiceRenewalNotice":
                         Console.WriteLine(ServiceRenewalNotice().Result);
                         break;
@@ -1198,7 +1198,7 @@ namespace AutoEmailEduso
                 {
                     //if (center.Abbr.Contains("utc"))
                     //if (center.Abbr.Contains("c3vyvp"))
-                    if (center.Abbr.Contains("c3cvpvp"))
+                    if (center.Abbr.Contains("c3yl1vp"))
                     {
                         var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
                         var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
@@ -1264,8 +1264,12 @@ namespace AutoEmailEduso
 
                             //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
                             var listTime = new Dictionary<Int32, DataTime>(){
-                                //{8,new DataTime{ StartTime = new DateTime(2020,8,1,0,0,0),EndTime = new DateTime(2020,8,31,23,59,0)} },
-                                //{9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
+                                {1,new DataTime{ StartTime = new DateTime(2021,1,25,0,0,0),EndTime = new DateTime(2021,1,31,23,59,0)} },
+                                {2,new DataTime{ StartTime = new DateTime(2021,2,1,0,0,0),EndTime = new DateTime(2021,2,7,23,59,0)} },
+                                {3,new DataTime{ StartTime = new DateTime(2021,2,8,0,0,0),EndTime = new DateTime(2021,2,15,23,59,0)} },
+                                {4,new DataTime{ StartTime = new DateTime(2021,2,8,0,0,0),EndTime = new DateTime(2021,2,14,23,59,0)} },
+                                {5,new DataTime{ StartTime = new DateTime(2021,2,15,0,0,0),EndTime = new DateTime(2021,2,21,23,59,0)} },
+                                {6,new DataTime{ StartTime = new DateTime(2021,2,22,0,0,0),EndTime = new DateTime(2021,2,28,23,59,0)} },
                                 //{10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
                                 //{11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
                                 //{12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
@@ -1277,8 +1281,8 @@ namespace AutoEmailEduso
                                 dataResponse.Add(dataClass);
                             }
                         }
-                        //var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
-                        var test1 = Export2Excel(dataResponse, dataCenter,"8").Result;
+                        var error = Export2Excelv2(dataResponse, dataCenter,"1").Result;
+                        //var test1 = Export2Excel(dataResponse, dataCenter,"8").Result;
                         //Console.WriteLine(error);
                     }
                 }
@@ -1312,7 +1316,7 @@ namespace AutoEmailEduso
             var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
             var activeProgress = _lessonProgressService.CreateQuery().Find(x => studentIDsinClass.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-                && x.LastDate <= new DateTime(2020, 12, 31, 23, 59, 00) && x.LastDate >= center.StartDate).ToList();
+                && x.LastDate <= EndTime).ToList();
             //ket qua lam bai cua hoc sinh trong lop
             var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
                                group r by r.StudentID
@@ -1508,7 +1512,8 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\ChuyenVP\\Month{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    //File.WriteAllBytes($"H:\\Eduso\\Thao\\YenLac\\Month{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Eduso\\Thao\\YenLac\\Week{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
                 }
                 return "";
             }
@@ -1545,7 +1550,8 @@ namespace AutoEmailEduso
 
                     // Tạo danh sách các column header
                     //string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Chưa sử dụng hệ thống", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0","Chưa làm" };
-                    string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
+                    //string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
+                    string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tuần", "Kết quả", "", "", "", "" };
 
                     // lấy ra số lượng cột cần dùng dựa vào số lượng header
                     var countColHeader = arrColumnHeader.Count();
@@ -1815,15 +1821,11 @@ namespace AutoEmailEduso
                                 border.Right.Style = ExcelBorderStyle.Thin;
                         }
 
+                        DateTime ft = new DateTime(item.ElementAtOrDefault(0).StartDate.Year, item.ElementAtOrDefault(0).StartDate.Month, item.ElementAtOrDefault(0).StartDate.Day);
                         for (Int32 j = 0; j < item.Count(); j++)
                         {
                             var _colIndex = colIndex;
                             var _item = item.ElementAtOrDefault(j);
-
-                            if (item.Key == "5f5af539171ba81edc6ec410")
-                            {
-                                var a = "";
-                            }
 
                             var persentMinPoint8 = Math.Round((((double)_item.MinPoint8 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
                             var persentMinPoint5 = Math.Round((((double)_item.MinPoint5 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
@@ -1839,7 +1841,10 @@ namespace AutoEmailEduso
 
                             {
                                 var cell = ws.Cells[rowIndex + j, _colIndex++];
-                                cell.Value = $"Tháng { 9 + j}";
+                                //cell.Value = $"Tháng { 9 + j}";
+                                var lt = ft.AddDays(-(ft.DayOfWeek - DayOfWeek.Sunday)).AddDays(7);
+                                cell.Value = $"Tuần { 1 + j} ({ft.ToString("dd/MM/yyyy")} - {lt.ToString("dd/MM/yyyy")})";
+                                ft = lt.AddDays(1);
                                 var border = cell.Style.Border;
                                 border.Bottom.Style =
                                     border.Top.Style =
@@ -1990,7 +1995,8 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
+                    //File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Eduso\\Thao\\YenLac\\Week{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
                 }
                 return "";
             }
