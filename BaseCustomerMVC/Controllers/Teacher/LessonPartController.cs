@@ -511,7 +511,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     parentLesson.Point = _lessonHelper.calculateLessonPoint(item.ParentID);
                     parentLesson.Updated = DateTime.UtcNow;
                     _lessonService.Save(parentLesson);
-                    
+
                     //IDictionary<string, object> valuePairs = new Dictionary<string, object>
                     //    {
                     //        { "Data", item },
@@ -645,7 +645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //}
 
                     await RemoveLessonPart(ID);
-                    
+
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -672,18 +672,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public async Task<JsonResult> RemoveMany(String basis,List<String> PartIDs,String LessonID)
+        public async Task<JsonResult> RemoveMany(String basis, List<String> PartIDs, String LessonID)
         {
             try
             {
-                _lessonPartService.CreateQuery().DeleteMany(x=>PartIDs.Contains(x.ID) && x.ParentID.Equals(LessonID));
-                return Json(new Dictionary<String, Object> 
+                var cltask = _lessonPartService.Collection.DeleteManyAsync(o => o.ParentID == LessonID && PartIDs.Contains(o.ID));
+                var quizs = _questionService.Collection.Find(o => PartIDs.Contains(o.ParentID)).Project(t => t.ID).ToList();
+                var cqtask = _questionService.Collection.DeleteManyAsync(o => PartIDs.Contains(o.ParentID));
+                Task<DeleteResult> catask = null;
+                if (quizs != null && quizs.Count > 0)
+                {
+                    catask = _answerService.Collection.DeleteManyAsync(o => quizs.Contains(o.ParentID));
+                    await Task.WhenAll(cltask, cqtask, catask);
+                }
+                else
+                    await Task.WhenAll(cltask, cqtask);
+
+                /*_lessonPartService.CreateQuery().DeleteMany(x=>PartIDs.Contains(x.ID) && x.ParentID.Equals(LessonID));*/
+                return Json(new Dictionary<String, Object>
                 {
                     {"Status",true },
                     {"Msg",$"Đã xoá {PartIDs.Count()} bài." }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                 {

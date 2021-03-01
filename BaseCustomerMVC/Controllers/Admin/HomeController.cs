@@ -1983,14 +1983,14 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-        public IActionResult RestoreDB(String email,String classID)
+        public IActionResult RestoreDB(String email, String classID)
         {
             try
             {
                 var msg = "";
                 var @class = _classService.GetItemByID(classID);//12a8 VY
                 var st = _studentService.GetStudentByEmail(email);
-                if(st == null)
+                if (st == null)
                 {
                     return Content("email null");
                 }
@@ -2017,20 +2017,21 @@ namespace BaseCustomerMVC.Controllers.Admin
 
                 ClassService classService = new ClassService(_config, "Restore");
                 StudentService studentService = new StudentService(_config, "Restore");
-                LearningHistoryService learningHistoryService =new LearningHistoryService(_config, "Restore");
-                ClassProgressService classProgressService =new ClassProgressService(_config, "Restore");
-                ChapterProgressService chapterProgressService =new ChapterProgressService(_config, "Restore");
+                LearningHistoryService learningHistoryService = new LearningHistoryService(_config, "Restore");
+                ClassProgressService classProgressService = new ClassProgressService(_config, "Restore");
+                ChapterProgressService chapterProgressService = new ChapterProgressService(_config, "Restore");
                 ClassSubjectProgressService classSubjectProgressService = new ClassSubjectProgressService(_config, "Restore");
                 LessonProgressService lessonProgressService = new LessonProgressService(_config, "Restore");
                 ExamService examService = new ExamService(_config, "Restore");
                 ExamDetailService examDetailService = new ExamDetailService(_config, "Restore");
 
-                if(learningHistory.CountDocuments() > 0)
+                if (learningHistory.CountDocuments() > 0)
                 {
-                    foreach(var item in learningHistory.ToList())
+                    foreach (var item in learningHistory.ToList())
                     {
                         var current = learningHistoryService.GetItemByID(item.ID);
-                        if(current == null){
+                        if (current == null)
+                        {
                             learningHistoryService.CreateQuery().InsertOne(item);
                         }
                     }
@@ -2109,12 +2110,14 @@ namespace BaseCustomerMVC.Controllers.Admin
                 }
 
                 var student = studentService.GetStudentByEmail(email);
-                student.JoinedClasses.Add(@class.ID);
-                studentService.Save(student);
-
+                if (!student.JoinedClasses.Contains(@class.ID))
+                {
+                    student.JoinedClasses.Add(@class.ID);
+                    studentService.Save(student);
+                }
                 return Content(msg);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Content(ex.Message);
             }

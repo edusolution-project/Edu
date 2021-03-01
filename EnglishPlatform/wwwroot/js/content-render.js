@@ -322,13 +322,11 @@ var Lesson = (function () {
     }
 
     var renderLessonData = function () {
-
         var lesson_action_holder = $('.top-menu[for=lesson-info]');
         if (isNull(_data)) {
             throw "No data";
         }
         var data = _data;
-        //console.log(_data);
         //if (data.TemplateType == 2) {
         //    renderLessonData.prototype.IsTest = true;
         //}
@@ -534,8 +532,17 @@ var Lesson = (function () {
                 var partMenu = $("<div>", { "id": "part-menu", "class": "w-100", "style": "display:none;" });
                 lessonBody.append(partMenu);
                 var lessontabs = $("<div>", { "class": "lesson-tabs" });
+
                 partMenu.append(lessontabs);
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
+
+                //thêm nút xoá nhiều
+                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá","onclick":"delManyPart()" })
+                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)","class":"ml-4","style":"margin-top:10px","id":"del2all" })
+                var div = $("<div>", { "class": "row ml-3 mt-2" })
+                div.append(inputCheckAll).append(btnDelMany)
+                tabs.append(div);
+
                 lessontabs.append(tabs);
                 for (var i = 0; data.Part != null && i < data.Part.length; i++) {
                     var item = data.Part[i];
@@ -1030,12 +1037,14 @@ var Lesson = (function () {
             lessonitem = $('li #pills-' + data.ID).parent().empty()
         }
         else {
-            lessonitem = $("<li>", { "class": "nav-item" });
+            //lessonitem = $("<li>", { "class": "nav-item" });
+            lessonitem = $("<li>", { "class": "nav-item row ml-3" });
             listPartContainer.append(lessonitem);
         }
-
+        var inputDel = $("<input>", { "id": "del-" + data.ID, "type": "checkbox", "class": "ml-4", "style": "margin-top:12px", "onclick": "check2Del('" + data.ID + "')", "data-id": data.ID })
         var itemtitle = $("<a>", { "id": "pills-" + data.ID, "class": "nav-link", "data-toggle": "pill", "href": "#pills-part-" + data.ID, "role": "tab", "aria-controls": "pills-" + data.ID, "aria-selected": "false", "text": data.Title });
-        lessonitem.append(itemtitle);
+        lessonitem.append(inputDel).append(itemtitle);
+        //lessonitem.append(itemtitle);
 
         var tabsitem = null;
 
@@ -3174,7 +3183,6 @@ var Lesson = (function () {
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
-                console.log(res);
                 if (data.Error == null) {
                     if (!$(obj).parent().hasClass('top-menu'))
                         $(obj).parent().remove();
@@ -3809,12 +3817,10 @@ var Lesson = (function () {
     }
 
     var renderExamAnswer = function (data, partid, template) {
-
         var container = $("#" + data.ParentID + " .answer-wrapper");
         var answer = $("<fieldset>", { "class": "answer-item", id: data.ID });
         switch (template) {
             case "QUIZ2":
-                console.log(data);
                 if ($(container).find(".answer-item").length == 0) {
                     answer.append($("<input>", {
                         "type": "text",
@@ -4103,7 +4109,7 @@ var Lesson = (function () {
             var lastExam = data;
             console.log(data);
             var lastpoint = (lastExam.maxPoint > 0 ? (lastExam.point * 100 / lastExam.maxPoint) : 0);
-            console.log(lastExam);
+
             var limit = lastExam.limit;
             var tried = lastExam.number;
             lastExamResult =
@@ -5265,6 +5271,71 @@ var Lesson = (function () {
         }
     }
 
+    var idPart2ManyDel = []
+
+    var checkAll2Del = function (id, obj) {
+        idPart2ManyDel = []
+        var stt = $(obj).prop("checked")
+        var ul = $("#" + id)
+        var childUl = ul.children()
+        for (var i = 1; i < childUl.length; i++) {
+            var li = childUl[i]
+            var input = $(li).find("input")
+            if (stt) {
+                $(input).prop("checked", true)
+                var idInput = $(input).attr("data-id")
+                idPart2ManyDel.push(idInput)
+            }
+            else {
+                $(input).prop("checked", false)
+                idPart2ManyDel = []
+            }
+        }
+    }
+
+    var check2Del = function (id) {
+        var stt = $("#del-" + id).prop('checked')
+        var idInput = $("#del-" + id).attr("data-id")
+        if (stt) {
+            if (idPart2ManyDel.indexOf(idInput) < 0) {
+                idPart2ManyDel.push(idInput)
+            }
+        }
+        else {
+            if (idPart2ManyDel.indexOf(idInput) >= 0) {
+                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput),1)
+            }
+
+            $("#del2all").prop("checked", false)
+        }
+    }
+
+    var delManyPart = function () {
+        if (idPart2ManyDel.length > 0) {
+            var lessonID = $("#LessonID")[0].value;
+            var dataform = new FormData();
+            for (var i = 0; i < idPart2ManyDel.length; i++)
+                dataform.append("PartIDs", idPart2ManyDel[i]);
+            //dataform.append("ClassSubjectID", classSubjectID);
+            dataform.append("LessonID", lessonID);
+            Ajax(config.url.del_many_part, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    if (data.Status) {
+                        alert(data.Msg)
+                        location.reload();
+                    }
+                    else {
+                        alert(data.Msg)
+                    }
+                })
+        }
+        else {
+            idPart2ManyDel = []
+            return false
+        }
+    }
+
     window.choosePart = choosePart;
     window.renderQuestiontoSelectQ = renderQuestiontoSelectQ;
     window.renderAns = renderAns;
@@ -5334,6 +5405,9 @@ var Lesson = (function () {
     window.downloadFileWordWitdData = downloadFileWordWitdData;
 
     window.showModalAddToLesson = showModalAddToLesson;
+    window.checkAll2Del = checkAll2Del;
+    window.check2Del = check2Del;
+    window.delManyPart = delManyPart;
     return LessonInstance;
 }());
 

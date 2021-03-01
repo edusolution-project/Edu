@@ -1811,12 +1811,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 {
                                     //update period
                                     var @class = _classService.GetItemByID(oSbj.ClassID);
-                                    oSbj.StartDate = nSbj.StartDate <= new DateTime(1990, 01, 01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
-                                    oSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
+                                    oSbj.StartDate = nSbj.StartDate <= validDate ? item.StartDate : nSbj.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = nSbj.EndDate <= validDate ? item.EndDate : nSbj.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
-
-
-
 
                                     //date fix
                                     if (oSbj.StartDate < item.StartDate)//class subject cann't start before class
