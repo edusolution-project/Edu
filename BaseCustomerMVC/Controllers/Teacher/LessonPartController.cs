@@ -504,16 +504,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
                     {
                         parentLesson.IsPractice = isPractice;
-                        _lessonService.Save(parentLesson);
+
                         //increase practice counter
                         await _courseHelper.ChangeLessonPracticeState(parentLesson);
                     }
-                    _lessonHelper.calculateLessonPoint(item.ParentID);
-                    IDictionary<string, object> valuePairs = new Dictionary<string, object>
-                        {
-                            { "Data", item },
-                            //{ "LessonPartExtends", files }
-                        };
+                    parentLesson.Point = _lessonHelper.calculateLessonPoint(item.ParentID);
+                    parentLesson.Updated = DateTime.UtcNow;
+                    _lessonService.Save(parentLesson);
+                    
+                    //IDictionary<string, object> valuePairs = new Dictionary<string, object>
+                    //    {
+                    //        { "Data", item },
+                    //        //{ "LessonPartExtends", files }
+                    //    };
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -642,6 +645,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //}
 
                     await RemoveLessonPart(ID);
+                    
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -706,19 +710,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        _lessonHelper.calculateLessonPoint(parentLesson.ID);
+                        parentLesson.Point = _lessonHelper.calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _lessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
                             if (quizPartCount == 0)//no quiz part
                             {
                                 parentLesson.IsPractice = false;
-                                _lessonService.Save(parentLesson);
+
                                 //decrease practice counter
                                 _ = _courseHelper.ChangeLessonPracticeState(parentLesson);
                             }
+
                         }
                     }
+                    parentLesson.Updated = DateTime.UtcNow;
+                    _lessonService.Save(parentLesson);//check point
                 }
             }
             catch (Exception ex)

@@ -133,9 +133,9 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(x => x.ClassID == ClassID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
         }
 
-        public List<ClassSubjectEntity> GetByClassIds(List<string> classIds)
+        public IEnumerable<ClassSubjectEntity> GetByClassIds(List<string> classIds)
         {
-            return Collection.Find(t => classIds.Contains(t.ClassID)).ToList();
+            return Collection.Find(t => classIds.Contains(t.ClassID)).ToEnumerable();
         }
     }
 

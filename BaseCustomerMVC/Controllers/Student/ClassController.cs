@@ -545,7 +545,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var courseDetail = new Dictionary<string, object>
             {
-                { "Chapters", _courseChapterService.GetCourseChapters(CourseID) } ,
+                { "Chapters", _courseChapterService.GetCourseChapters(CourseID).ToList() } ,
                 //{ "Lessons", _courseLessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
                 //{"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
             };

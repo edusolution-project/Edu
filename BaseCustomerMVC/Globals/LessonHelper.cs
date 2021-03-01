@@ -1,12 +1,9 @@
 ﻿using BaseCustomerEntity.Database;
 using Core_v2.Globals;
 using MongoDB.Driver;
-using OfficeOpenXml.FormulaParsing.Excel.Functions;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BaseCustomerMVC.Globals
@@ -91,7 +88,7 @@ namespace BaseCustomerMVC.Globals
                 _calendarHelper.RemoveManySchedules(lids);
 
             var lstask = _lessonService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
-           
+
             var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
             var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
             var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => o.ClassSubjectID == ClassSubjectID);
@@ -105,7 +102,7 @@ namespace BaseCustomerMVC.Globals
                 _calendarHelper.RemoveManySchedules(lids);
 
             var lstask = _lessonService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
-            
+
             var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
             var catask = _cloneAnswerService.Collection.DeleteManyAsync(o => ids.Contains(o.ClassID));
@@ -129,6 +126,22 @@ namespace BaseCustomerMVC.Globals
             else
                 await Task.WhenAll(lstask, cltask, cqtask);
         }
+
+        public async Task RemoveSingleLessonContent(string id)
+        {
+            var cltask = _cloneLessonPartService.Collection.DeleteManyAsync(o => o.ParentID == id);
+            var quizs = _cloneQuestionService.Collection.Find(o => o.LessonID == id).Project(t => t.ID).ToList();
+            var cqtask = _cloneQuestionService.Collection.DeleteManyAsync(o => o.LessonID == id);
+            Task<DeleteResult> catask = null;
+            if (quizs != null && quizs.Count > 0)
+            {
+                catask = _cloneAnswerService.Collection.DeleteManyAsync(o => quizs.Contains(o.ParentID));
+                await Task.WhenAll( cltask, cqtask, catask);
+            }
+            else
+                await Task.WhenAll(cltask, cqtask);
+        }
+
 
 
         public double calculateLessonPoint(string lessonId)
@@ -175,18 +188,28 @@ namespace BaseCustomerMVC.Globals
         }
 
         #region Copy CourseLesson From CourseLesson
-        public async Task CopyCourseLessonFromCourseLesson(CourseLessonEntity orgItem, CourseLessonEntity cloneItem)
+        public async Task CopyCourseLessonFromCourseLesson(CourseLessonEntity orgItem, CourseLessonEntity cloneItem, bool sync = false)
         {
-            var lesson = _courseLessonMapping.Clone(orgItem, new CourseLessonEntity());
-            lesson.CreateUser = cloneItem.CreateUser;
-            lesson.OriginID = orgItem.ID;
-            lesson.Created = DateTime.UtcNow;
-            lesson.Updated = DateTime.UtcNow;
-            lesson.CourseID = cloneItem.CourseID;
-            lesson.ChapterID = cloneItem.ChapterID;
-            lesson.Order = cloneItem.Order;
-
-            _courseLessonService.CreateQuery().InsertOne(lesson);
+            var lesson = cloneItem;
+            if (!sync)
+            {
+                lesson = _courseLessonMapping.Clone(orgItem, new CourseLessonEntity());
+                lesson.CreateUser = cloneItem.CreateUser;
+                lesson.OriginID = orgItem.ID;
+                lesson.Created = DateTime.UtcNow;
+                lesson.Updated = DateTime.UtcNow;
+                lesson.CourseID = cloneItem.CourseID;
+                lesson.ChapterID = cloneItem.ChapterID;
+                lesson.Order = cloneItem.Order;
+                _courseLessonService.CreateQuery().InsertOne(lesson);
+            }
+            else
+            {
+                lesson.Point = orgItem.Point;
+                lesson.IsPractice = orgItem.IsPractice;
+                lesson.Updated = DateTime.UtcNow;
+                _courseLessonService.Save(lesson);
+            }
 
             var parts = _lessonPartService.CreateQuery().Find(o => o.ParentID == lesson.OriginID);
 
@@ -197,6 +220,10 @@ namespace BaseCustomerMVC.Globals
                     ParentID = lesson.ID,
                     CourseID = lesson.CourseID
                 });
+            }
+            if (sync)
+            {
+                calculateLessonPoint(lesson.ID);
             }
         }
 
@@ -266,30 +293,39 @@ namespace BaseCustomerMVC.Globals
         #endregion
 
         #region Copy Lesson From CourseLesson
-        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem, DateTime begin)
+        public async Task CopyLessonFromCourseLesson(CourseLessonEntity orgItem, LessonEntity cloneItem, DateTime begin, bool keepData = false)
         {
             var lesson = _courseLessonMapping.AutoOrtherType(orgItem, new LessonEntity());
-            lesson.ChapterID = cloneItem.ChapterID;
-            lesson.OriginID = orgItem.ID;
-            lesson.ClassID = cloneItem.ClassID;
-            lesson.ClassSubjectID = cloneItem.ClassSubjectID;
-            lesson.Created = DateTime.UtcNow;
-            lesson.Updated = DateTime.UtcNow;
-            lesson.ID = null;
 
-            //lesson.Start = orgItem.Start;
-            //lesson.Period
-
-            if (orgItem.Start == 0 && orgItem.Period == 0)//route not set
+            if (keepData)
             {
-                lesson = InitLesson(lesson);
+                lesson = cloneItem;
+                lesson.IsPractice = orgItem.IsPractice;
+                lesson.Point = orgItem.Point;
+                _lessonService.Save(lesson);
             }
             else
             {
-                lesson.StartDate = begin.AddDays(orgItem.Start);
-                lesson.EndDate = begin.AddDays(orgItem.Start + orgItem.Period);
-
-                lesson = InitLesson(lesson);
+                lesson.ChapterID = cloneItem.ChapterID;
+                lesson.OriginID = orgItem.ID;
+                lesson.ClassID = cloneItem.ClassID;
+                lesson.ClassSubjectID = cloneItem.ClassSubjectID;
+                lesson.Created = DateTime.UtcNow;
+                lesson.Updated = DateTime.UtcNow;
+                lesson.ID = null;
+                if (orgItem.Start == 0 && orgItem.Period == 0)//route not set
+                {
+                    lesson = InitLesson(lesson);
+                }
+                else
+                {
+                    if (begin > new DateTime(1900, 1, 1))
+                    {
+                        lesson.StartDate = begin.AddDays(orgItem.Start);
+                        lesson.EndDate = begin.AddDays(orgItem.Start + orgItem.Period);
+                    }
+                    lesson = InitLesson(lesson);
+                }
             }
 
             var lessonParts = _lessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();

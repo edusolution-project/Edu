@@ -18,6 +18,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -85,6 +86,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly MappingEntity<CourseEntity, CourseEntity> _cloneCourseMapping = new MappingEntity<CourseEntity, CourseEntity>();
         private readonly ClassService _classService;
         private readonly CacheHelper _cacheHelper;
+
+        private static readonly DateTime validDate = new DateTime(2020, 1, 1);
+
         public ClassController(
             AccountService accountService,
             GradeService gradeservice,
@@ -1361,7 +1365,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
                 classes = _service.GetItemsByIDs(classIds).ToList();
-                classSbjs = _classSubjectService.GetByClassIds(classIds);
+                classSbjs = _classSubjectService.GetByClassIds(classIds).ToList();
             }
             else
             {
@@ -1557,6 +1561,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                  { "EndDate", o.EndDate },
                                  { "Order", o.Order },
                                  { "Skills", o.Skills },
+                                 { "Level", o.Level },
                                  { "Members", o.Members.Where(t=> !string.IsNullOrEmpty(t.TeacherID)).ToList() },
                                  { "Description", o.Description },
                                  { "SkillName", sname },
@@ -1581,8 +1586,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             {"Error", "Vui lòng đăng nhập lại" }
                         });
             }
-
-
 
             var cm = _teacherService.GetItemByID(userId);
             if (cm == null)
@@ -1628,7 +1631,15 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 item.TotalExams = 0;
                 item.IsActive = true;
                 item.StartDate = item.StartDate.ToUniversalTime();
+
+                if (item.StartDate < validDate)
+                    item.StartDate = DateTime.Now;
+
                 item.EndDate = item.EndDate.ToUniversalTime();
+                if (item.StartDate < validDate)
+                    item.StartDate = DateTime.Now;
+
+
                 item.Center = center.ID;
 
                 if (fileUpload != null)
@@ -1804,6 +1815,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                     oSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
 
+
+
+
+                                    //date fix
+                                    if (oSbj.StartDate < item.StartDate)//class subject cann't start before class
+                                        oSbj.StartDate = item.StartDate;
+
+                                    if (oSbj.StartDate < validDate)
+                                        oSbj.StartDate = DateTime.UtcNow;
+
+                                    oSbj.EndDate = oSbj.EndDate.ToUniversalTime();
+                                    if (oSbj.EndDate < validDate)
+                                        oSbj.EndDate = DateTime.UtcNow;
 
 
                                     var teacher = _teacherService.GetItemByID(nSbj.TeacherID);
@@ -2064,7 +2088,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
-                nSbj.StartDate = nSbj.StartDate <= new DateTime(1990, 01, 01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
+                nSbj.StartDate = (nSbj.StartDate <= new DateTime(1990, 01, 01) || nSbj.StartDate > @class.StartDate) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
                 nSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                 nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
@@ -3358,6 +3382,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
 
                     ViewBag.Lesson = lessonview;
+                    ViewBag.IsLocked = data.IsLockReview;
                     //ViewBag.Class = currentClass;
                     //ViewBag.Subject = currentCs;
                     //ViewBag.NextLesson = nextLesson;

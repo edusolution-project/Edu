@@ -125,5 +125,12 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(x => x.GradeID.Equals(GradeID) && x.SubjectID.Equals(SubjectID) && x.Center.Equals(CenterID)).ToEnumerable();
         }
+
+        public IEnumerable<CourseEntity> GetCloneCourse(string courseID, List<string> centers = null)
+        {
+            if (centers == null || centers.Count == 0)
+                return CreateQuery().Find(x => x.OriginID.Equals(courseID)).ToEnumerable();
+            return CreateQuery().Find(x => centers.Contains(x.Center) && x.OriginID.Equals(courseID)).ToEnumerable();
+        }
     }
 }
