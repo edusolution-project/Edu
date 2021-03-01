@@ -1359,7 +1359,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new Dictionary<String, Object>
                     {
                         {"Status",false },
-                        {"Message","Số lượng câu hỏi không đủ" },
+                        {"Message",$"Số câu khả dụng: {cloneLessonParts.Count()}. Vui lòng chọn số câu <= {cloneLessonParts.Count()}" },
                         {"Data",null }
                     });
                 }
@@ -1568,11 +1568,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         ////////////////////////////////////////////////////////////////////
         #region Import By Word
-        public async Task<JsonResult> ImportFromWord(string basis = "", string ParentID = "")
+        public async Task<JsonResult> ImportFromWord(string basis, string ParentID)
         {
             Boolean Status = false;
             try
             {
+                if (String.IsNullOrEmpty(ParentID) || _lessonService.GetItemByID(ParentID) == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                        //{ "Data", full_item },
+                        {"Msg", "Không tìm thấy bài học" },
+                        {"Stt",false }
+                    });
+                }
                 var form = HttpContext.Request.Form;
                 if (form == null || form.Files == null || form.Files.Count <= 0)
                     return new JsonResult(new Dictionary<string, object> { { "Error", "Chưa chọn file" } });

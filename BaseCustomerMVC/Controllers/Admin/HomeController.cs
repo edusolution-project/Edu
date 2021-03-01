@@ -2319,6 +2319,23 @@ namespace BaseCustomerMVC.Controllers.Admin
                     await _classProgressService.CreateQuery().UpdateOneAsync(t => t.ID == progress.ID, update.Combine(updates));
             }
         }
+
+        public IActionResult FixTimeClassSubject(String centerAbbr)
+        {
+            try
+            {
+                var center = _centerService.CreateQuery().Find(x => x.Abbr.Equals(centerAbbr)).FirstOrDefault();
+                if(center == null)
+                {
+                    return Content("Center null");
+                }
+                return Content("");
+            }
+            catch(Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
         //public IActionResult FixData()
         //{
         //    try

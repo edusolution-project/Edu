@@ -64,6 +64,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public StudentService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+
+        }
+
         public IEnumerable<StudentEntity> Search(string name, int limit = 0)
         {
 

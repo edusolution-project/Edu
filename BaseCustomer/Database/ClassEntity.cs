@@ -92,6 +92,11 @@ namespace BaseCustomerEntity.Database
             Collection.Indexes.CreateManyAsync(indexs);
         }
 
+        public ClassService(IConfiguration config, string dbName) : base(config, dbName)
+        {
+
+        }
+
         public long RemoveStudent(string ID, string studentID)
         {
             return CreateQuery().UpdateManyAsync(t => t.ID.Equals(ID),
@@ -152,14 +157,14 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<ClassEntity> GetActiveClass(DateTime time, string Center = null)
         {
             if (string.IsNullOrEmpty(Center))
-                return Collection.Find(t => t.StartDate < time && t.EndDate > time).ToEnumerable();
+                return Collection.Find(t => t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToEnumerable();
             else
-                return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time).ToEnumerable();
+                return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToEnumerable();
         }
 
         public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime, DateTime lastTime, String centerID)
         {
-            return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime).ToEnumerable();
+            return Collection.Find(t => t.Center == centerID && t.StartDate <= lastTime && t.EndDate >= firstTime && t.ClassMechanism != CLASS_MECHANISM.PERSONAL && t.IsActive).ToEnumerable();
         }
 
         /// <summary>

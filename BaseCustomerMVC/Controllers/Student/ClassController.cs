@@ -384,6 +384,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     });
                 }
             }
+
             if (course == null)
             {
                 return new JsonResult(new Dictionary<string, object>()

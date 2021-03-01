@@ -36,8 +36,9 @@
         <div class="flex flex-wrap align-items-center">
             <div class="tab bg-none col-md-12 mt-2">
                 <ul class="flex flex-row">
-                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Ngân hàng câu hỏi" v-on:click="tabChange(0)">Ngân hàng câu hỏi</a></li>
-                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Ma trận đề" v-on:click="tabChange(1)">Ma trận đề</a></li>
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Kì thi" v-on:click="tabChange(0)">Kì thi</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Ngân hàng câu hỏi" v-on:click="tabChange(1)">Ngân hàng câu hỏi</a></li>
+                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Ma trận đề" v-on:click="tabChange(2)">Ma trận đề</a></li>
                 </ul>
             </div>
         </div>
@@ -65,7 +66,7 @@
             </div>
         </div>
     </div>
-    <div class="card-body" v-if="tab[0]">
+    <div class="card-body" v-if="tab[1]">
         <template>
             <table id="ed_table" class="table">
                 <thead>
@@ -127,7 +128,8 @@
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.currentUser = @Html.Raw(Json.Serialize(currentUser));
                 this.list_classes = @Html.Raw(Json.Serialize(classlist));
-                this.getData();
+                //this.getData();
+                this.getExamManage
                 @*this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses = @Html.Raw(Json.Serialize(courses));*@
             },
@@ -179,6 +181,7 @@
                     title:''
                 },
                 formatExam: {
+                    name:'',
                     titleFormat: '',
                     titleExam: '',
                     timer: 1,
@@ -196,7 +199,7 @@
                     }
                 },
                 list_Tags: [],
-                tab: [true, false]
+                tab: [true, false, false]
             },
             computed: {},
             watch: {
@@ -243,6 +246,7 @@
                 showCreateExam(itemID,item) {
                     let _that = this
                     this.getOptionFormatExam(itemID)
+                    this.getCurrentClass();
                     if (item == undefined) {
                         _that.formatExam = {
                             examQuestionArchiveID: itemID,
@@ -381,10 +385,16 @@
                     this.tab[a] = true
                     switch (a) {
                         case 0:
-                            history.replaceState({ tab: a }, "Ngân hàng câu hỏi", "#bank-question");
+                            history.replaceState({ tab: a }, "Kì thi", "#exam");
+                            this.getExamManage();
                             break;
                         case 1:
+                            history.replaceState({ tab: a }, "Ngân hàng câu hỏi", "#bank-question");
+                            this.getData()
+                            break;
+                        case 2:
                             history.replaceState({ tab: a }, "Ma trận đề", "#matrix-exam");
+                            this.getMatrixExams()
                             break;
                     }
                     this.$forceUpdate()
@@ -464,6 +474,36 @@
                     option.levelManipulate = 0
                     option.levelManipulateHighly = 0
                     option.tag = ''
+                },
+                getExamManage() {//load anh sach ki thi
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("GetExamManage", "ExamManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            debugger
+                        })
+                        .catch(e => { alert(e) })
+                },
+                getMatrixExams() {
+                     let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("GetMatrixExams", "ExamManage")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            debugger
+                        })
+                        .catch(e => { alert(e) })
+                },
+                getCurrentClass() {
+                    let _that = this
+                    let _form = new FormData()
+                    let _url = '@processUrl("GetClassList", "Class")'
+                    axios.post(_url, _form)
+                        .then(response => {
+                            debugger
+                        })
+                        .catch(e => { alert(e) })
                 }
             }
         });
@@ -532,6 +572,10 @@
     <b-modal id="create-exam-modal-xl" size="xl" title="Tạo kỳ kiểm tra">
         <b-col>
             <div class="row">
+                <label class="label">Tên kì kiểm tra</label>
+                <input type="text" class="form-control" placeholder="Tên kì thi" v-model="name"/>
+            </div>
+            <div class="row">
                 <div class="col-md-6">
                     <label class="label">Tên ma trận đề</label>
                     <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat"/>
@@ -550,6 +594,15 @@
                 <div class="col-md-6">
                     <label class="label">Lượt làm</label>
                     <input type="number" min="1" class="form-control" v-model="formatExam.limit"/>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="label">Môn</label>
+                    <select class="form-control">
+                        <option value="">Tiếng anh</option>
+                    </select>
                 </div>
             </div>
 

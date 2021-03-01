@@ -552,7 +552,9 @@
                             //SkillID: '',
                             TeacherID: '',
                             CourseID: '',
-                            TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
+                            TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD',
+                            StartDateSubject: '',
+                            EndDateSubject:''
                         }
                     ],
                     Level: 0,
@@ -750,6 +752,9 @@
                             _form.append('ClassSubjects[' + k + '].CourseID', item.CourseID)
                             _form.append('ClassSubjects[' + k + '].TeacherID', item.TeacherID)
                             _form.append('ClassSubjects[' + k + '].TypeClass', item.TypeClass)
+                            _form.append('ClassSubjects[' + k + '].StartDate', item.StartDateSubject)
+                            _form.append('ClassSubjects[' + k + '].EndDate', item.EndDateSubject)
+                            //debugger
                         })
                     }
 
@@ -883,7 +888,9 @@
                                     GradeID: '',
                                     TeacherID: '',
                                     CourseID: '',
-                                    TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD'
+                                    TypeClass: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD',
+                                    StartDateSubject: '',
+                                    EndDateSubject:''
                                 }
                             ],
                             IsOwner: true
@@ -950,9 +957,10 @@
                                         CourseID: item.CourseID,
                                         IsLock: false,
                                         IsActable: item.TeacherID == '@userid' && item.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXTEND',
-                                        TypeClass: item.TypeClass
+                                        TypeClass: item.TypeClass,
+                                        StartDateSubject: _that.formatShortDateYYYYMMDD(item.StartDate),
+                                        EndDateSubject: _that.formatShortDateYYYYMMDD(item.EndDate)
                                     })
-
                                     _that.changeAddSubject(item)
                                     _that.changeAddGrade(item)
 
@@ -1158,6 +1166,8 @@
                         $(obj.target).addClass('text-danger');
                         this.class_info.subject[k].OldID = this.class_info.subject[k].ID;
                         this.class_info.subject[k].ID = "";
+                        this.class_info.subject[k].StartDateSubject = ''
+                        this.class_info.subject[k].EndDateSubject = ''
                     }
                     else {
                         var oldId = $(obj.target).attr('oldID');
@@ -1434,6 +1444,10 @@
                 formatShortDate(date) {
                     if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
                     return moment(date).format("DD/MM/YYYY")
+                },
+                formatShortDateYYYYMMDD(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("YYYY-MM-DD")
                 },
                 repDate(svalue, evalue) {
                     this.eDate = evalue;
@@ -1716,9 +1730,9 @@
     </script>
 }
 @section Modals{
-    <b-modal :no-close-on-backdrop="true" id="modal_class" centered v-bind:title="getEditTitle()" style="width:90%">
+    <b-modal :no-close-on-backdrop="true" id="modal_class" size="xl" centered v-bind:title="getEditTitle()">
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-12">
                 <b-col class="form-group row col pr-0">
                     <b-col class="col-sm-6">
                         <label class="label">Tên lớp học*</label>
@@ -1749,12 +1763,12 @@
                     <textarea v-model="class_info.Description" rows="2" class="form-control" ref="addDescription" :disabled="!(isHeadTeacher || class_info.IsOwner)"></textarea>
                 </b-col>
                 @*<b-col class="form-group d-none">
-                        <label class="label">Cho phép học sinh tự động tham gia:</label>
-                        <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
-                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
-                            <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
-                        </select>
-                    </b-col>*@
+                <label class="label">Cho phép học sinh tự động tham gia:</label>
+                <select v-model="class_info.ClassMechanism" class="form-control" :disabled="!(isHeadTeacher || class_info.IsOwner)">
+                    <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.OPEN">Cho phép</option>
+                    <option value="@BaseCustomerEntity.Database.CLASS_MECHANISM.CLOSE">Không cho phép</option>
+                </select>
+            </b-col>*@
                 <b-col class="form-group">
                     <label class="label">Ảnh lớp học</label>
                     <div id="thumb_class" v-if="class_info.thumbnail.src">
@@ -1766,7 +1780,10 @@
                     </label>
                 </b-col>
             </div>
-            <div class="col-md-8">
+        </div>
+        <div class="row">
+            
+            <div class="col-md-12">
                 <div class="flex j-between border-b mb-2">
                     <div class="tab bg-none">
                         <ul class="flex flex-row">
@@ -1789,6 +1806,12 @@
                             </div>
                             <div class="width-100 mr-2">
                                 <label for="">Bài giảng</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Bắt đầu</label>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <label for="">Kết thúc</label>
                             </div>
                             <div class="width-100 mr-2">
                                 <label for="">Loại học liệu</label>
@@ -1815,18 +1838,24 @@
                                 </select>
                             </div>
                             @*<div class="width-100 mr-2 d-none">
-                                    <label for="">Môn học</label>
-                                    <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
-                                        <option value="">Chọn môn học</option>
-                                        <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
-                                    </select>
-                                </div>*@
+            <label for="">Môn học</label>
+            <select v-model="sub.SkillID" class="form-control" v-on:change="changeAddSkill(sub)" :disabled="sub.IsLock || !(isHeadTeacher || class_info.IsOwner)">
+                <option value="">Chọn môn học</option>
+                <option v-for="(item,k) in list_skill" :value="item.ID">{{item.Name}}</option>
+            </select>
+        </div>*@
                             <div class="width-100 mr-2">
                                 @*<label for="">Bài giảng</label>*@
                                 <select v-model="sub.CourseID" class="form-control">
                                     <option value="">Chọn bài giảng</option>
                                     <option v-for="(item,k) in courseSource" v-if="matchCourse(sub,item)" :value="item.ID">{{displayTitle(item)}}</option>
                                 </select>
+                            </div>
+                            <div class="width-100 mr-2">
+                                <input type="date" class="form-control" v-model="sub.StartDateSubject" />
+                            </div>
+                            <div class="width-100 mr-2">
+                                <input type="date" class="form-control" v-model="sub.EndDateSubject"/>
                             </div>
                             <div class="width-100 mr-2">
                                 @*<label for="">Loại học liệu</label>*@

@@ -160,6 +160,11 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(t => t.ClassSubjectID == currentObj.ID).ToEnumerable();
         }
 
+        public IEnumerable<ClassSubjectProgressEntity> GetItemsByClassSubjectID_StudentIDs(string classSubjectID, List<string> studentIDs)
+        {
+            return CreateQuery().Find(x => x.ClassSubjectID.Equals(classSubjectID) && studentIDs.Contains(x.StudentID)).ToEnumerable();
+        }
+
         //public long DecreasePoint(LessonProgressEntity item)
         //{
         //    var filter = Builders<ClassSubjectProgressEntity>.Filter.Where(t => t.ClassSubjectID == item.ClassSubjectID && t.StudentID == item.StudentID);

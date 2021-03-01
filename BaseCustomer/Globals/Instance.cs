@@ -96,6 +96,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<CloneLessonPartAnswerExtensionService>();
             services.AddSingleton<TagsService>();
             services.AddSingleton<MatrixExamService>();
+            services.AddSingleton<ManageExamService>();
             return services;
         }
     }

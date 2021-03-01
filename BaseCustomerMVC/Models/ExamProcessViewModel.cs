@@ -43,5 +43,7 @@ namespace BaseCustomerMVC.Models
         public string Title { get; set; }
         [JsonProperty("Template")]
         public Int32 Template { get; set; }
+        [JsonProperty("Name")]
+        public String Name { get; set; }
     }
 }

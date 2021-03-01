@@ -233,7 +233,9 @@ namespace BaseCustomerMVC.Controllers.Student
                     return new JsonResult(response);
                 }
 
-                var exam = _examService.CreateQuery().Find(x => x.LessonID == LessonID && x.ClassSubjectID == ClassSubjectID && x.ClassID == ClassID && x.StudentID == student.ID).SortByDescending(x => x.Number);
+                var exam = _examService.CreateQuery().Find(x => x.LessonID == LessonID 
+                //&& x.ClassSubjectID == ClassSubjectID && x.ClassID == ClassID 
+                && x.StudentID == student.ID).SortByDescending(x => x.Number);
                 if (exam.CountDocuments() < 2)
                 {
                     var response = new Dictionary<string, object>
@@ -397,6 +399,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
             //hết hạn => đóng luôn
             var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
+            schedule.StartDate = schedule.StartDate.ToUniversalTime();
+            schedule.EndDate = schedule.EndDate.ToUniversalTime();
             if (exam != null && !exam.Status)
             {
                 //if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
@@ -481,9 +485,9 @@ namespace BaseCustomerMVC.Controllers.Student
         [HttpPost]
         public JsonResult CreateDetail(string basis, ExamDetailEntity item)
         {
-            if (item.ExamID == null)
+            if (item.ExamID == null || item.ExamID == "undefined")
             {
-                return new JsonResult(new { error = "Không tìm thấy bài kiểm tra" });
+                return new JsonResult(new { error = "Không tìm thấy bài kiểm tra", reset = true });
             }
             var exam = _examService.GetItemByID(item.ExamID);
             if (!_lessonHelper.IsOvertime(exam))
@@ -590,8 +594,8 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
                 if (lastestEx.ID != exam.ID)
-                    return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!" });
-                return new JsonResult(new { error = "Bài kiểm tra đã kết thúc" });
+                    return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!", reset = true });
+                return new JsonResult(new { error = "Bài kiểm tra đã kết thúc", reset = true });
             }
         }
 
@@ -768,10 +772,10 @@ namespace BaseCustomerMVC.Controllers.Student
             else
             {
                 var data = await _progressHelper.GetLessonProgressList(StartWeek, EndWeek, student, classSbj);
-                foreach(var d in data.ToList())
+                foreach (var d in data.ToList())
                 {
                     var target = _classSubjectProgressService.CreateQuery().Find(x => x.ClassID == classSbj.ClassID && x.ClassSubjectID == classSbj.ID && x.StudentID == userId).FirstOrDefault();
-                    d.Target = target == null? 0 : target.Target;
+                    d.Target = target == null ? 0 : target.Target;
                     result.Add(d);
                 }
             }

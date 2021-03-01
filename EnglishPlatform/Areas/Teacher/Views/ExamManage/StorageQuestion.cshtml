@@ -16,6 +16,8 @@
 <script src="~/js/vue@2.6.0.js"></script>
 <script src="~/js/bootstrap-vue.min.js"></script>
 <script src="~/js/axios.min.js"></script>
+<script src="~/js/plugins/ck4/ckeditor.js"></script>
+<script src="~/js/content-render-lessonexam.js"></script>
 
 <section class="container-fluid">
     <div class="card-header border-b">
@@ -46,7 +48,8 @@
                 <input type="text" name="" v-model="searchTerm" placeholder="Nội dung tìm kiếm">
             </div>
             <div class="ml-0 ml-md-auto">
-                <b-button class="btn-addevent btn-sm m-1" v-on:click="showAddEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
+                @*<b-button class="btn-addevent btn-sm m-1" v-on:click="showAddEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>*@
+                <b-button class="btn-addevent btn-sm m-1" v-on:click="showSelectTypeContent()"><i class="ti-plus"></i>Thêm nội dung</b-button>
                 @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
             </div>
         </div>
@@ -67,7 +70,7 @@
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>{{item.Title}}</td>
                     <td>
-                        <input type="text" class="form-control" v-model="item.TagsName" disabled readonly/>
+                        <input type="text" class="form-control" v-model="item.TagsName" disabled readonly />
                     </td>
                     <td>
                         <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)" class="form-control">
@@ -101,6 +104,115 @@
                                   :total-rows="totalRec"
                                   :per-page="view"
                                   v-on:input="getListPart()"></b-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modals-->
+    <b-modal id="addEditItem-modal-xl" size="xl" title="Thêm câu hỏi" :no-close-on-backdrop="true">
+        <b-col class="form-group">
+            <b-col class="flex flex-row flex-wrap align-items-center">
+                <b-col class="box filter-box w-152 m-1">
+                    <select v-model="addEditItem.SubjectID">
+                        <option value="">Chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+                <b-col class="box filter-box w-152 m-1">
+                    <select name="" v-model="addEditItem.GradeID">
+                        <option value="">Cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addEditItem.SubjectID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+            </b-col>
+        </b-col>
+        <b-col class="form-group">
+            <template v-if="listCourses.length > 0">
+                <ul class="ul-course">
+                    <template v-for="(item,k) in listCourses">
+                        <li class="course">
+                            <div class="course-content" v-on:click="showChapter(item)">
+                                {{item.Name}}
+                                <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+ item.ID"></i>
+                            </div>
+                            <ul class="ul-chapter hide" :id="item.ID" v-if="filterChapters(item.ID,listChapters).length > 0">
+                                <li v-for="(chapter,i) in filterChapters(item.ID,listChapters)" v-if="chapter.ParentID == 0">
+                                    <template v-if="filterChildChapters(chapter.ID,listChapters).length > 0">
+                                        <div class="course-content" v-on:click="showChapter(chapter)">
+                                            {{chapter.Name}}
+                                            <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chapter.ID"></i>
+                                        </div>
+                                        <ul class="hide" :id="chapter.ID">
+                                            <li v-for="(chid,c) in filterChildChapters(chapter.ID,listChapters)">
+                                                <div class="course-content" v-on:click="showCourseLesson(chid)">
+                                                    {{chid.Name}}
+                                                    <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chid.ID"></i>
+                                                </div>
+                                                <ul class="hide" :id="'li_' + chid.ID"></ul>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                    <template v-else>
+                                        <div class="course-content" v-on:click="showCourseLesson(chapter)">
+                                            {{chapter.Name}}
+                                            <i class='far fa-arrow-alt-circle-down ml-1' :id="'i_'+chapter.ID"></i>
+                                        </div>
+                                        <ul class="hide" :id="'li_' + chapter.ID"></ul>
+                                    </template>
+                                </li>
+                            </ul>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            @*<template v-else>
+                    Không có nội dung
+                </template>*@
+        </b-col>
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang thực hiện...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="savePart()">Lưu</b-button>
+                <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
+            </template>
+        </template>
+    </b-modal>
+
+    <b-modal id="selectTypeContent-modal-center" centered title="Chọn thao tác">
+        <div class="text-center">
+            <p>
+                <button type="button" class="btn btn-primary w-50 p-2 m-2" st v-on:click="AddPart()"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>
+            </p>
+            <p>
+                <button type="button" class="btn btn-primary w-50 p-2 m-2" v-on:click="showAddEditItem()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button>
+            </p>
+        </div>
+
+        <template #modal-footer="{cancel}">
+            <b-button size="xl" v-on:click="hideModal('selectTypeContent-modal-center')">
+                Đóng
+            </b-button>
+        </template>
+    </b-modal>
+
+    <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
+        <div class="modal-dialog modal-xl lesson-modal" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm phần mới</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="#" name="partForm" enctype="multipart/form-data"></form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary btnSaveForm" onclick="submitForm(event)">Lưu</button>
                 </div>
             </div>
         </div>
@@ -159,11 +271,26 @@
             },
             methods: {
                 showAddEditItem() {
+                    debugger
                     let _that = this
                     _that.addEditItem.GradeID = ""
                     _that.addEditItem.SubjectID = ""
                     _that.listCourses = []
                     _that.$bvModal.show('addEditItem-modal-xl')
+                },
+                showSelectTypeContent() {
+                    let _that = this
+                    _that.$bvModal.show('selectTypeContent-modal-center')
+                    //Swal.fire({
+                    //    title: '<strong>Chọn thao tác</strong>',
+                    //    icon: 'question',
+                    //    html:
+                    //        '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st v-on:click="AddPart()"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
+                    //        //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>',
+                    //    '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" v-on:click="showAddEditItem()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
+                    //    //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
+                    //    confirmButtonText: 'Đóng',
+                    //})
                 },
                 hideModal() {
                     $('.close').click();
@@ -323,7 +450,7 @@
                             var item = obj[i]
                             var id = item.ParentID
                             var ul = $("#" + id)
-                            
+
                             var selectOption = "<select id='lp_" + item.ID + "' class='form-control' required>" +
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.KNOW'>Nhận biết</option>"+
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING'>Thông hiểu</option>"+
@@ -523,43 +650,43 @@
             }
         }*@
     </script>
-<style>
-    ul {
-        list-style: none
-    }
+    <style>
+        ul {
+            list-style: none
+        }
 
-        ul li {
+            ul li {
+                padding: 10px
+            }
+
+        /*.course {
             padding: 10px
+        }*/
+
+        .course .course-content {
+            font-size: 16px;
+            color: #00bbd4;
+            font-weight: 700;
+            cursor: pointer
         }
 
-    /*.course {
-        padding: 10px
-    }*/
+            .course .course-content:hover {
+                text-shadow: 2px 2px 8px #FF0000
+            }
 
-    .course .course-content {
-        font-size: 16px;
-        color: #00bbd4;
-        font-weight: 700;
-        cursor: pointer
-    }
+        .right-content {
+            position: relative
+        }
 
-        .course .course-content:hover {
+        /*footer {
+            background-color: white ;
+            height: 60px
+        }*/
+
+        /*ul li:hover {
             text-shadow: 2px 2px 8px #FF0000
-        }
-
-    .right-content{
-        position:relative
-    }
-
-    /*footer {
-        background-color: white ;
-        height: 60px
-    }*/
-
-    /*ul li:hover {
-        text-shadow: 2px 2px 8px #FF0000
-    }*/
-</style>
+        }*/
+    </style>
 }
 
 @section Modals{
@@ -621,8 +748,8 @@
                 </ul>
             </template>
             @*<template v-else>
-                Không có nội dung
-            </template>*@
+                    Không có nội dung
+                </template>*@
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">

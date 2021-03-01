@@ -904,6 +904,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var allWeekActiveIds = activeLessons.Where(t => t.EndDate > listTime.FirstOrDefault().Value.StartTime && t.StartDate <= listTime.LastOrDefault().Value.EndTime).Select(t => t.LessonID).ToList();
                 var allWeekactivePractice = _lessonService.CreateQuery().Find(t => allWeekActiveIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
                 var _listStudent = new List<InforStudent>();
+                var csbjprogess = _classSubjectProgressService.GetItemsByClassSubjectID_StudentIDs(ClassSubjectID, listStudent.Select(x => x.ID).ToList());
 
                 foreach (var student in listStudent)
                 {
@@ -926,7 +927,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         data.StudentID = student.ID;
                         data.Week = item.Key;
 
-                        var presult = progress.Where(t => t.StudentID == student.ID && lessonids.Contains(t.LessonID));
+                        var presult = progress.Where(t => t.StudentID == student.ID && lessonids.Contains(t.LessonID) && t.LastDate<=item.Value.EndTime);
                         if (lessonids.Count() == 0) continue;
                         var point = presult.Count() > 0 ? (presult.Sum(x => x.LastPoint) / lessonids.Count()).ToString() : "---";
                         data.Point = point.ToString();
@@ -945,12 +946,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
 
                     //tinh diem trung binh
+                    var target = csbjprogess.Where(x => x.StudentID.Equals(student.ID)).FirstOrDefault() != null ? csbjprogess.Where(x => x.StudentID.Equals(student.ID)).FirstOrDefault().Target : 0;
                     var _presult = progress.Where(t => t.StudentID == student.ID && allWeekactivePractice.Contains(t.LessonID));
                     _listStudent.Add(new InforStudent()
                     {
                         StudentID = student.ID,
                         FullName = student.FullName,
-                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---"
+                        AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---",
+                        Target = _presult.Count() > 0 ? (target == 0 ? "---": target.ToString()) : "---"
                     });
 
                     dataResponse.Add(index.ToString(), dataresponse);
@@ -1187,9 +1190,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         public class InforStudent
         {
+            [JsonProperty("StudentID")]
             public String StudentID { get; set; }
+            [JsonProperty("FullName")]
             public String FullName { get; set; }
+            [JsonProperty("AvgPointPratice")]
             public String AvgPointPratice { get; set; }
+            [JsonProperty("Target")]
+            public String Target { get; set; }
         }
 
         public class Type_Filter
@@ -1776,8 +1784,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 else //Not change
                                 {
                                     //update period
-                                    oSbj.StartDate = item.StartDate.ToUniversalTime();
-                                    oSbj.EndDate = item.EndDate.ToUniversalTime();
+                                    var @class = _classService.GetItemByID(oSbj.ClassID);
+                                    oSbj.StartDate = nSbj.StartDate <= new DateTime(1990, 01, 01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
+                                    oSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                                     oSbj.TypeClass = nSbj.TypeClass;
 
 
@@ -2042,8 +2051,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 nSbj.CourseName = course.Name;
                 nSbj.ClassID = @class.ID;
-                nSbj.StartDate = @class.StartDate;
-                nSbj.EndDate = @class.EndDate;
+                nSbj.StartDate = nSbj.StartDate <= new DateTime(1990,01,01) ? @class.StartDate : nSbj.StartDate.ToUniversalTime();
+                nSbj.EndDate = nSbj.EndDate <= new DateTime(1990, 01, 01) ? @class.EndDate : nSbj.EndDate.ToUniversalTime();
                 nSbj.SkillID = course.SkillID;
                 nSbj.Description = course.Description;
                 nSbj.LearningOutcomes = course.LearningOutcomes;
@@ -2310,9 +2319,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //new_course.SkillID = target_course.SkillID;
                 new_course.Created = DateTime.UtcNow;
                 new_course.Updated = DateTime.UtcNow;
+                //new_course.PublishedVer = DateTime.UtcNow;
                 new_course.IsActive = true;
                 new_course.IsUsed = false;
-                new_course.IsPublic = false;
+                //new_course.IsPublic = false;
                 new_course.TargetCenters = new List<string>();
                 new_course.StudentTargetCenters = new List<string>();
 
