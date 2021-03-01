@@ -117,6 +117,52 @@
             </div>
         </template>
     </div>
+
+    <!--Ma trận-->
+    <div class="card-body" v-if="tab[2]">
+        <table id="ed_table" class="table">
+            <thead>
+                <tr class="text-sm-center">
+                    <td>#</td>
+                    <td>Tên</td>
+                    <td>Người tạo</td>
+                    <td style="width:150px;max-width:150px">Tác vụ</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td v-on:click="showModalExam()">Ma trận đề thi giữa kì khối 12</td>
+                    <td>Nguyễn Văn Hoà</td>
+                    <td>
+                        <div class="btn-group" style="display:block">
+                            <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="fas fa-edit"></i></a>
+                            <a class="btn-act btn-edit" title="Tạo bài kiểm tra" href="javascript:;" v-on:click="showCreateExam(item.ID)"><i class="fas fa-pen-fancy"></i></a>
+                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="box margin-t20 flex">
+            <div class="paging-view">
+                Hiển thị:
+                <select v-model="view" v-on:change="getData()">
+                    <option value="10">10 kết quả</option>
+                    <option value="20">20 kết quả</option>
+                    <option value="30">30 kết quả</option>
+                </select>
+            </div>
+            <div class="page-control">
+                <div class="right">
+                    <b-pagination v-model="page"
+                                  :total-rows="totalRec"
+                                  :per-page="view"
+                                  v-on:input="getData()"></b-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 @section Scripts{
@@ -452,15 +498,15 @@
                         .then(response => {
                             var stt = response.data.Status
                             if (stt) {
-                                var data = response.data.Data
-                                this.list_Tags = data
+                                //var data = response.data.Data
+                                //this.list_Tags = data
                             }
                             else {
-                                alert(response.data.Msg)
+                                //alert(response.data.Msg)
                             }
                         })
                         .catch(e => {
-                            alert(e)
+                            //alert(e)
                         })
                 },
                 removeOption(k) {
@@ -491,7 +537,7 @@
                     let _url = '@processUrl("GetMatrixExams", "ExamManage")'
                     axios.post(_url, _form)
                         .then(response => {
-                            debugger
+                            //debugger
                         })
                         .catch(e => { alert(e) })
                 },
@@ -504,6 +550,10 @@
                             debugger
                         })
                         .catch(e => { alert(e) })
+                },
+                showModalExam() {
+                    let _that = this
+                    _that.$bvModal.show('modal_exam')
                 }
             }
         });
@@ -572,18 +622,18 @@
     <b-modal id="create-exam-modal-xl" size="xl" title="Tạo kỳ kiểm tra">
         <b-col>
             <div class="row">
-                <label class="label">Tên kì kiểm tra</label>
-                <input type="text" class="form-control" placeholder="Tên kì thi" v-model="name"/>
-            </div>
-            <div class="row">
+                <div class="col-md-6">
+                    <label class="label">Kì kiểm tra</label>
+                    <input type="text" class="form-control" placeholder="Kì kiểm tra" v-model="name" />
+                </div>
                 <div class="col-md-6">
                     <label class="label">Tên ma trận đề</label>
-                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat"/>
+                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" />
                 </div>
-                <div class="col-md-6">
-                    <label class="label">Tiêu đề</label>
-                    <input type="text" class="form-control" placeholder="Tên đề" v-model="formatExam.titleExam"/>
-                </div>
+                @*<div class="col-md-6">
+            <label class="label">Tiêu đề</label>
+            <input type="text" class="form-control" placeholder="Tên đề" v-model="formatExam.titleExam"/>
+        </div>*@
             </div>
 
             <div class="row">
@@ -598,7 +648,7 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <label class="label">Môn</label>
                     <select class="form-control">
                         <option value="">Tiếng anh</option>
@@ -631,7 +681,7 @@
                     <thead>
                         <tr>
                             <td rowspan="2" class="text-center align-middle">STT</td>
-                            <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Khối</td>
+                            <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Khối/Lớp</td>
                             <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Chuyên đề | Nội dung</td>
                             <td colspan="4" style="text-align:center">Mức độ</td>
                             <td rowspan="2" class="text-center align-middle" style="width:100px">Số câu</td>
@@ -649,8 +699,10 @@
                         <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
                             <td class="text-center align-middle">{{k+1}}</td>
                             <td>
-                                <select class="form-control" v-model="item.tag">
-                                    <option></option>
+                                <select class="form-control">
+                                    <option>10</option>
+                                    <option>11</option>
+                                    <option>12</option>
                                 </select>
                             </td>
                             <td>
@@ -721,5 +773,496 @@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>
+    </b-modal>
+
+    <b-modal id="modal_exam" centered title="Ma trận đề thi giữa kì khối 12" size="xl">
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <td rowspan="2" class="text-center align-middle">STT</td>
+                    <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Khối/Lớp</td>
+                    <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Chuyên đề | Nội dung</td>
+                    <td colspan="4" style="text-align:center">Mức độ</td>
+                    <td rowspan="2" class="text-center align-middle" style="width:100px">Số câu</td>
+                    <td rowspan="2" class="text-center align-middle" style="width:100px">Tác vụ</td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">Nhận biết</td>
+                    <td class="text-center align-middle">Thông hiểu</td>
+                    <td class="text-center align-middle">Vận dụng</td>
+                    <td class="text-center align-middle">Vận dụng cao</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td class="text-center align-middle">1</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">2</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">3</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">4</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">5</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">6</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">7</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">8</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">9</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center align-middle">10</td>
+                    <td>
+                        <select class="form-control">
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-control">
+                            <option value="">Chọn nội dung</option>
+                            <option>Phát âm</option>
+                            <option>Trọng âm</option>
+                            <option>Từ vựng</option>
+                            <option>Từ đồng nghĩa</option>
+                            <option>Từ trái nghĩa</option>
+                            <option>Chức năng giao tiếp</option>
+                            <option>Điền từ vào bài đọc</option>
+                            <option>Đọc hiểu và trả lời câu hỏi</option>
+                            <option>Viết lại câu</option>
+                            <option>Kết hợp câu đơn thành câu phức</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" min="0" class="form-control" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button title="Xoá điều kiện" class="btn-act"><i class="ti-trash"></i></button>
+                        <button title="Đặt lại" class="btn-act"><i class="ti-reload"></i></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="9" class="text-right">
+                        <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-center align-middle">Tổng</td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" />
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
     </b-modal>
 }
