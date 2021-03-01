@@ -52,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         private readonly FileProcess _fileProcess;
 
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly CalendarHelper _calendarHelper;
         //private readonly ClassStudentService _classStudentService;
         private readonly IHostingEnvironment _env;
@@ -79,7 +79,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             SkillService skillService,
             //ClassStudentService classStudentService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             ExamService examService,
             ExamDetailService examDetailService,
 
@@ -115,7 +115,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _teacherService = teacherService;
             _studentService = studentService;
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _examService = examService;
             _examDetailService = examDetailService;
             _learningHistoryService = learningHistoryService;

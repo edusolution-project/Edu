@@ -94,7 +94,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ExamDetailService _examDetailService;
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartQuestionService _cloneLessonPartQuestionService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
         private readonly CourseLessonService _courseLessonService;
 
@@ -163,7 +163,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                  , LessonProgressService lessonProgressService
                  , ExamService examService
                  , ClassService classService
-                 , LessonScheduleService lessonScheduleService
+                 ////, LessonScheduleService lessonScheduleService
                  , ExamDetailService examDetailService
                  , StudentService studentService
                  , CourseLessonService courseLessonService
@@ -221,7 +221,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _lessonProgressService = lessonProgressService;
             _examService = examService;
             _examDetailService = examDetailService;
-            _lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _courseLessonService = courseLessonService;
             _vocabularyService = vocabularyService;
@@ -656,6 +656,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     item.IsAdmin = true;
                     item.IsActive = false;
                     item.Updated = DateTime.UtcNow;
+                    item.PublishedVer = DateTime.UtcNow;
                     item.TeacherID = UserID;
                     item.TotalPractices = 0;
                     item.TotalLessons = 0;
@@ -874,6 +875,69 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
+
+        [HttpPost]
+        public async Task<JsonResult> Sync(string ID)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var orgItem = _service.GetItemByID(ID);
+
+                if (orgItem == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                {"Error", "Không tìm thấy bài giảng" }
+                            });
+                }
+
+                var activeCenters = _centerService.GetActiveCenter(DateTime.Now).Select(t => t.ID).ToList();
+                if (activeCenters.Count == 0)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Cập nhật thành công" }
+                            });
+
+                
+
+                var cloneQr = _service.CreateQuery().Find(t => t.OriginID == orgItem.ID && activeCenters.Contains(t.Center));
+                var cloneItems = cloneQr.ToList();
+
+
+                var activeClasses = new List<string>();
+                foreach (var ct in activeCenters)
+                    activeClasses.AddRange(_classService.GetActiveClass(DateTime.Now, ct).Select(t => t.ID).ToList());
+
+                if (activeClasses.Count == 0)
+                    return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Cập nhật thành công" }
+                            });
+
+                if (cloneItems != null && cloneItems.Count > 0)
+                {
+                    foreach (var clone in cloneItems)
+                    {
+                        
+                    }
+                }
+                return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Data", "Đã xóa bài giảng" },
+                                {"Error", null }
+                            });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message}
+                });
+            }
+        }
+
 
         [HttpPost]
         public JsonResult Publish(DefaultModel model)
@@ -2202,7 +2266,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             return new JsonResult("OK");
         }
-
 
         [HttpPost]
         public JsonResult GetModList(DefaultModel model, string SubjectID = "", string GradeID = "")

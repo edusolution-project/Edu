@@ -37,7 +37,7 @@ namespace EnglishPlatform.Controllers
         private readonly SubjectService _subjectService;
         private readonly ClassService _classService;
         //private readonly ClassStudentService _classStudentService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly GroupService _groupService;
         private readonly MessageService _messageService;
         private readonly NewFeedService _newFeedService;
@@ -51,7 +51,7 @@ namespace EnglishPlatform.Controllers
             SubjectService subjectService,
             ClassService classService,
             //ClassStudentService classStudentService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             GroupService groupService,
             MessageService messageService,
             NewFeedService newFeedService,
@@ -64,7 +64,7 @@ namespace EnglishPlatform.Controllers
             _subjectService = subjectService;
             _classService = classService;
             //_classStudentService = classStudentService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _groupService = groupService;
             _messageService = messageService;
             _hubContent = hubContent;

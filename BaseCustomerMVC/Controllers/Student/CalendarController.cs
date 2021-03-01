@@ -21,11 +21,12 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly CalendarReportService _calendarReportService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ClassService _classService;
+        private readonly LessonService _lessonService;
         private readonly CenterService _centerService;
         //private readonly ClassStudentService _classStudentService;
         private readonly TeacherService _teacherService;
         private readonly StudentService _studentService;
-        private readonly LessonScheduleService _scheduleService;
+        //private readonly LessonScheduleService _scheduleService;
         public CalendarController(
             CalendarService calendarService,
             CalendarLogService calendarLogService,
@@ -33,9 +34,10 @@ namespace BaseCustomerMVC.Controllers.Student
             CalendarHelper calendarHelper,
             //ClassStudentService classStudentService,
             ClassService classService,
+            LessonService lessonService,
             TeacherService teacherService,
             StudentService studentService,
-            LessonScheduleService scheduleService,
+            //LessonScheduleService scheduleService,
             CenterService centerService
             )
         {
@@ -46,7 +48,8 @@ namespace BaseCustomerMVC.Controllers.Student
             _classService = classService;
             _teacherService = teacherService;
             _studentService = studentService;
-            _scheduleService = scheduleService;
+            _lessonService = lessonService;
+            //_scheduleService = scheduleService;
             _centerService = centerService;
             //_classStudentService = classStudentService;
         }
@@ -84,8 +87,8 @@ namespace BaseCustomerMVC.Controllers.Student
             var data = new CalendarViewModel();
             data = map.AutoOrtherType(DataResponse, data);
             // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
-            var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _scheduleService.GetItemByID(DataResponse.ScheduleID);
-            string url = schedule != null ? Url.Action("Detail", "Lesson", new { id = schedule.LessonID, ClassID = schedule.ClassSubjectID }) : null;
+            var schedule = string.IsNullOrEmpty(DataResponse.ScheduleID) ? null : _lessonService.GetItemByID(DataResponse.ScheduleID);
+            string url = schedule != null ? Url.Action("Detail", "Lesson", new { id = schedule.ID, ClassID = schedule.ClassSubjectID }) : null;
             data.LinkLesson = url;
             return Task.FromResult(new JsonResult(data));
         }

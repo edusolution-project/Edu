@@ -413,7 +413,6 @@
                     let _form = new FormData()
                     _form.append('ClassID', _that.classID)
                     _form.append('StudentID', '@currentStudent.ID')
-                    //let _url = '@processUrl("GetLearningSummary", "Class")'
                     let _url = '@processUrl("GetStudentSummary", "Class")'
                     axios.post(_url, _form)
                         .then(response => {

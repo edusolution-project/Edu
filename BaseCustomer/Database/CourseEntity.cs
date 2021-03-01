@@ -63,10 +63,10 @@ namespace BaseCustomerEntity.Database
         public DateTime PublishedVer { get; set; } // root to current
         [JsonProperty("LastSync")]
         public DateTime LastSync { get; set; } // current to clone
-        [JsonProperty("IsPublic")]
-        public Boolean IsPublic { get; set; }
-        [JsonProperty("PublicWStudent")]
-        public Boolean PublicWStudent { get; set; }
+        //[JsonProperty("IsPublic")]
+        //public Boolean IsPublic { get; set; }
+        //[JsonProperty("PublicWStudent")]
+        //public Boolean PublicWStudent { get; set; }
     }
 
     public class CourseService : ServiceBase<CourseEntity>

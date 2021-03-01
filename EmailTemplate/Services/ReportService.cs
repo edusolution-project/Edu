@@ -13,7 +13,7 @@ namespace EmailTemplate.Services
         private static CenterService _centerService;
         private static ClassSubjectService _classSubjectService;
         private static LessonService _lessonService;
-        private static LessonScheduleService _scheduleService;
+        //private static LessonScheduleService _scheduleService;
         private static AccountService _accountService;
         private static StudentService _studentService;
         private static TeacherService _teacherService;
@@ -24,7 +24,7 @@ namespace EmailTemplate.Services
             CenterService centerService,
             ClassSubjectService classSubjectService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             AccountService accountService,
             StudentService studentService,
             SkillService skillService,
@@ -35,7 +35,7 @@ namespace EmailTemplate.Services
             _centerService = centerService;
             _classSubjectService = classSubjectService;
             _lessonService = lessonService;
-            _scheduleService = lessonScheduleService;
+            //_scheduleService = lessonScheduleService;
             _accountService = accountService;
             _studentService = studentService;
             _skillService = skillService;

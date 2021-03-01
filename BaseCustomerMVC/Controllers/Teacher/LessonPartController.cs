@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //private readonly ClassService _classService;
         //private readonly CourseService _courseService;
         //private readonly ChapterService _chapterService;
-        //private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -72,7 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //ClassService classService,
             //CourseService courseService,
             //ChapterService chapterService,
-            //LessonScheduleService lessonScheduleService,
+            ////LessonScheduleService lessonScheduleService,
 
             CourseLessonService lessonService,
             LessonPartService lessonPartService,
@@ -95,7 +95,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_courseService = courseService;
             //_classService = classService;
             //_chapterService = chapterService;
-            //_lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
 
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;

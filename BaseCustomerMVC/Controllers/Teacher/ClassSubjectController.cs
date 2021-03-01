@@ -31,7 +31,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ChapterService _chapterService;
 
         private readonly LessonService _lessonService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonProgressService _lessonProgressService;
         private readonly ClassService _classService;
 
@@ -54,7 +54,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             SkillService skillService,
             CourseService courseService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             ExamService examService,
             ChapterService chapterService,
             LessonProgressService lessonProgressService,
@@ -71,7 +71,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classSubjectService = classSubjectService;
             _chapterService = chapterService;
             _lessonService = lessonService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _lessonProgressService = lessonProgressService;
             _examService = examService;
             _classService = classService;
@@ -107,7 +107,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var watch1 = new System.Diagnostics.Stopwatch();
             var watch2 = new System.Diagnostics.Stopwatch();
             watch1.Start();
-            var activeLesson = _lessonScheduleService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x => new { x.ID, x.ClassSubjectID }).ToList();
+            var activeLesson = _lessonService.CreateQuery().Find(o => o.StartDate <= DateTime.Now && o.EndDate >= @class.StartDate && o.ClassID == ClassID).Project(x => new { x.ID, x.ClassSubjectID }).ToList();
             watch1.Stop();
             var response = new Dictionary<string, object>
             {
@@ -176,16 +176,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var chapters = _chapterService.GetSubChapters(currentCs.ID, Parent);
 
             var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
-                           where schedule != null
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                           //where schedule != null
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
-                               ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
-                               IsHideAnswer = schedule.IsHideAnswer,
-                               IsActive = schedule.IsActive,
-                               IsOnline = schedule.IsOnline
+                               ScheduleID = r.ID,
                            })).ToList();
 
             var response = new Dictionary<string, object>
@@ -220,19 +215,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //if (currentCs.TypeClass != CLASSSUBJECT_TYPE.EXAM)
             //{
-                var courseDetail = new Dictionary<string, object>
+            var courseDetail = new Dictionary<string, object>
                 {
                     { "Chapters", _chapterService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ParentID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() } ,
                     { "Lessons", _lessonService.CreateQuery().Find(o => o.ClassSubjectID == ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
                     {"TypeClass",currentCs.TypeClass }
                 };
 
-                var response = new Dictionary<string, object>
+            var response = new Dictionary<string, object>
                 {
                     { "Data", courseDetail }
                 };
 
-                return new JsonResult(response);
+            return new JsonResult(response);
             //}
             //else
             //{
@@ -292,14 +287,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var chapters = _chapterService.GetSubChapters(currentCs.ID, Parent);
 
             var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
-                           where schedule != null
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                           //where schedule != null
                            let progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID)
                            let progressCount = progress.CountDocuments()
                            let examCount = _examService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).Project(t => t.StudentID).ToList().Distinct().Count()
                            select _resultMapping.AutoOrtherType(r, new LessonResultViewModel()
                            {
-                               ScheduleID = schedule.ID,
+                               ScheduleID = r.ID,
                                //StartDate = schedule.StartDate,
                                //EndDate = schedule.EndDate,
                                LearntCount = progressCount,
@@ -340,24 +335,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var avtiveLessons = _lessonScheduleService.GetActiveLesson(StartTime, EndTime, currentCs.ID);
-                var activeLessonIDs = avtiveLessons.Select(x => x.LessonID);
+                var activeLessons = _lessonService.GetClassSubjectActiveLesson(StartTime, EndTime, currentCs.ID)
+                    .Select(t => new LessonEntity
+                    {
+                        ID = t.ID,
+                        ChapterID = t.ChapterID,
+                        Title = t.Title
+                    }).ToList();
+
+
+
+                var activeLessonIDs = activeLessons.Select(t => t.ID).ToList();
                 var progress = _lessonProgressService.CreateQuery().Find(o => activeLessonIDs.Contains(o.LessonID) && o.ClassSubjectID == currentCs.ID).ToList();
                 List<LessonResultVM> lessonResult = new List<LessonResultVM>();
 
-                foreach (var item in avtiveLessons)
+                foreach (var lesson in activeLessons)
                 {
                     //var progress = _lessonProgressService.CreateQuery().Find(o => o.LessonID == item.LessonID && o.ClassSubjectID == currentCs.ID);
-                    var lesson = _lessonService.GetItemByID(item.LessonID);
+                    //var lesson = _lessonService.GetItemByID(lessonid);
                     //var exam = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).ToList().GroupBy(x=>x.StudentID);
                     //var _progessResult = progress.Where(x => x.LessonID == item.LessonID).ToList();
                     var examCount = _examService.CreateQuery().Find(o => o.LessonID == lesson.ID && o.ClassSubjectID == currentCs.ID).Project(t => t.StudentID).ToList().Distinct().Count();
-                    var progessResult = progress.Where(x => x.LessonID == item.LessonID && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { x.Key, Point = x.ToList().Average(y => y.LastPoint) });
+                    var progessResult = progress.Where(x => x.LessonID == lesson.ID && x.Tried > 0).GroupBy(x => x.StudentID).Select(x => new { x.Key, Point = x.ToList().Average(y => y.LastPoint) });
                     //var avgPoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.EXAM ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
                     //var avgPracticePoint = progress.Count() > 0 ? (lesson.TemplateType == LESSON_TEMPLATE.LECTURE ? progress.ToList().Average(t => t.AvgPoint) : 0) : 0;
                     var result = new LessonResultVM()
                     {
-                        ScheduleID = item.ID,
+                        ScheduleID = lesson.ID,
                         //StartDate = item.StartDate,
                         //EndDate = item.EndDate,
                         //LearntCount = progress.Count(),

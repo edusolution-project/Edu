@@ -22,7 +22,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ChapterService _chapterService;
         private readonly ChapterProgressService _chapterProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -60,7 +60,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ProgressHelper progressHelper,
             ChapterProgressService chapterProgressService,
             ClassSubjectProgressService classSubjectProgressService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             LearningHistoryService learningHistoryService,
             LessonService lessonService,
             LessonHelper lessonHelper,
@@ -86,7 +86,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _chapterService = chapterService;
             _chapterProgressService = chapterProgressService;
             _classSubjectProgressService = classSubjectProgressService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _learningHistoryService = learningHistoryService;
 
             _lessonService = lessonService;
@@ -132,17 +132,17 @@ namespace BaseCustomerMVC.Controllers.Student
                 //id class
                 var listID = data.Select(o => o.ID).ToList();
                 // lịch học hôm nay
-                var schedule = _lessonScheduleService.Collection.Find(o => listID.Contains(o.ClassID)).ToList();
+                var lessons = _lessonService.Collection.Find(o => listID.Contains(o.ClassID)).ToList();
                 // có list lessonid
-                var listIDSchedule = schedule.Select(x => x.LessonID).ToList();
+                //var listIDSchedule = schedule.Select(x => x.LessonID).ToList();
 
                 var resData = data.Select(o => mapping.AutoOrtherType(o, new TodayClassViewModel()
                 {
-                    Lessons = schedule != null ? _lessonService.Collection.Find(y => listIDSchedule.Contains(y.ID)).ToList()
-                        .Select(y => map2.AutoOrtherType(y, new LessonScheduleTodayViewModel()
-                        {
-                            ClassID = schedule.SingleOrDefault(x => x.LessonID == y.ID)?.ClassID
-                        })).ToList() : null
+                    Lessons = lessons
+                        .Select(y => map2.AutoOrtherType(y, new LessonScheduleTodayViewModel())).ToList()
+                    //{
+                    //    ClassID = lessons.SingleOrDefault(x => x.ID == y.ID)?.ClassID
+                    //})).ToList()
                 }));
 
                 var response = new Dictionary<string, object>()
@@ -225,26 +225,22 @@ namespace BaseCustomerMVC.Controllers.Student
             var enddate = date.AddDays(1);
             foreach (var _class in activeClass)
             {
-                var schedule = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID
+                var lesson = _lessonService.CreateQuery().Find(o => o.ClassID == _class.ID
                 //&& o.IsActive 
                 && o.EndDate >= startdate && o.StartDate <= enddate).FirstOrDefault();
-                if (schedule != null)
+                if (lesson != null)
                 {
-                    var lesson = _lessonService.GetItemByID(schedule.LessonID);
-                    if (lesson != null)
+                    //var subject = subjects.SingleOrDefault(o => o.ID == _class.SubjectID);
+                    data.Add(_schedulemapping.AutoOrtherType(lesson, new LessonScheduleViewModel()
                     {
-                        //var subject = subjects.SingleOrDefault(o => o.ID == _class.SubjectID);
-                        data.Add(_schedulemapping.AutoOrtherType(lesson, new LessonScheduleViewModel()
-                        {
-                            ScheduleID = schedule.ID,
-                            StartDate = schedule.StartDate,
-                            EndDate = schedule.EndDate,
-                            IsActive = schedule.IsActive,
-                            ClassID = _class.ID,
-                            //SubjectName = subject.Name,
-                            ClassName = _class.Name
-                        }));
-                    }
+                        ScheduleID = lesson.ID,
+                        //StartDate = lesson.StartDate,
+                        //EndDate = lesson.EndDate,
+                        //IsActive = lesson.IsActive,
+                        ClassID = _class.ID,
+                        //SubjectName = subject.Name,
+                        ClassName = _class.Name
+                    }));
                 }
             }
             model.TotalRecord = data.Count();
@@ -374,19 +370,21 @@ namespace BaseCustomerMVC.Controllers.Student
             var ExamTypes = quizType;
 
 
-            var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
-            var isHideAnswer = schedule.IsHideAnswer;
-            if (schedule.EndDate < DateTime.UtcNow)
+            //var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
+            var isHideAnswer = lesson.IsHideAnswer;
+            if (lesson.EndDate < DateTime.UtcNow)
                 isHideAnswer = false;
             ViewBag.IsHideAnswer = isHideAnswer;
 
             if (!isHideAnswer)
             {
-                var data = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassID == exam.ClassID && ExamTypes.Contains(o.Type)).ToList();
+                var data = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID
+                //&& o.ClassID == exam.ClassID 
+                && ExamTypes.Contains(o.Type)).ToList();
                 List<CloneLessonPartEntity> listParts = new List<CloneLessonPartEntity>();
                 if (currentCs.TypeClass == CLASSSUBJECT_TYPE.EXAM)
                 {
-                    if(exam.ListPartIDs != null)
+                    if (exam.ListPartIDs != null)
                     {
                         foreach (var id in exam.ListPartIDs)
                         {
@@ -497,7 +495,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
 
 
-            var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
+            //var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
 
             //if (string.IsNullOrEmpty(ClassID))
             //    ClassID = currentcs.ClassID;
@@ -627,7 +625,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 var response = new Dictionary<string, object> {
                     { "Data", dataResponse },
-                    { "Schedule", schedule == null ? null: Json(new { Start = schedule.StartDate, End = schedule.EndDate }) },
+                    { "Schedule", lesson == null ? null: Json(new { Start = lesson.StartDate, End = lesson.EndDate }) },
                     { "CSTarget", cspr == null ? 0: cspr.Target }
                 };
                 return new JsonResult(response);
@@ -664,7 +662,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     new Dictionary<string, object> {
                         { "Data", dataResponse },
                         { "Exam", lastexam },
-                        { "Schedule", schedule == null ? null: Json(new { Start = schedule.StartDate, End = schedule.EndDate }) },
+                        { "Schedule", lesson == null ? null: Json(new { Start = lesson.StartDate, End = lesson.EndDate }) },
                         { "CSTarget", cspr == null ? 0: cspr.Target },
                         { "Timer", (timeSpan.Minutes < 10 ? "0":"") +  timeSpan.Minutes + ":" + (timeSpan.Seconds < 10 ? "0":"") + timeSpan.Seconds }
                     });
@@ -834,7 +832,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 Chapters = _chapterService.GetSubChapters(currentCs.ID, ChapterID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
+                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
                            let lastexam =
                            //r.TemplateType == LESSON_TEMPLATE.EXAM ? 
@@ -844,10 +842,10 @@ namespace BaseCustomerMVC.Controllers.Student
                            //: null //get lastest exam
                            select _schedulemapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
-                               ScheduleID = schedule.ID,
-                               StartDate = schedule.StartDate,
-                               EndDate = schedule.EndDate,
-                               IsActive = schedule.IsActive,
+                               ScheduleID = r.ID,
+                               StartDate = r.StartDate,
+                               EndDate = r.EndDate,
+                               IsActive = r.IsActive,
                                IsView = r.TemplateType == LESSON_TEMPLATE.EXAM ? lastexam != null : lastjoin != null,
                                LastJoin = r.TemplateType == LESSON_TEMPLATE.EXAM ? (lastexam != null ? lastexam.Updated : DateTime.MinValue) :
                                     lastjoin != null ? lastjoin.Time : DateTime.MinValue,

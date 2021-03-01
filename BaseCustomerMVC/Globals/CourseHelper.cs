@@ -64,8 +64,8 @@ namespace BaseCustomerMVC.Globals
             new_course.Updated = DateTime.UtcNow;
             new_course.IsActive = false;
             new_course.IsUsed = false;
-            new_course.IsPublic = false;
-            new_course.PublicWStudent = false;
+            //new_course.IsPublic = false;
+            //new_course.PublicWStudent = false;
             new_course.TargetCenters = new List<string>();
             new_course.StudentTargetCenters = new List<string>();
 

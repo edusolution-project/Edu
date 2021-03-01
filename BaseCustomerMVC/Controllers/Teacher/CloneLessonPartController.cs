@@ -42,7 +42,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartService _cloneLessonPartService;
         private readonly CloneLessonPartAnswerService _cloneAnswerService;
         private readonly CloneLessonPartQuestionService _cloneQuestionService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly MappingEntity<LessonPartEntity, CloneLessonPartEntity> _lessonpartMapping;
         private readonly MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity> _lessonpartQuestionMapping;
@@ -82,7 +82,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //ChapterService chapterService,
             LessonService lessonService,
             LessonHelper lessonHelper,
-            LessonScheduleService lessonScheduleService,
+            ////LessonScheduleService lessonScheduleService,
             //LessonPartService lessonPartService,
             //LessonPartQuestionService lessonPartQuestionService,
             //LessonPartAnswerService lessonPartAnswerService,
@@ -115,7 +115,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _cloneLessonPartService = service;
             _cloneAnswerService = cloneLessonPartAnswerService;
             _cloneQuestionService = cloneLessonPartQuestionService;
-            _lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
 
             _lessonpartMapping = new MappingEntity<LessonPartEntity, CloneLessonPartEntity>();
             _lessonpartQuestionMapping = new MappingEntity<LessonPartQuestionEntity, CloneLessonPartQuestionEntity>();
@@ -1342,13 +1342,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var lessonIDs = _lessonScheduleService.CreateQuery().Find(x => classSubjectIDs.Contains(x.ClassSubjectID) && x.StartDate <= endTime && x.EndDate >= startTime).Project(x => x.LessonID);
+                var lessonIDs = _lessonService.CreateQuery().Find(x => classSubjectIDs.Contains(x.ClassSubjectID) && x.StartDate <= endTime && x.EndDate >= startTime).Project(x => x.ID);
                 if (lessonIDs.CountDocuments() == 0)
                 {
                     return Json(new Dictionary<String, Object>
                     {
                         {"Status",false },
-                        {"Message","Chưa chọn môn nào" },
+                        {"Message","Không tìm thấy bài đã giao trong phạm vi trên" },
                         {"Data",null }
                     });
                 }
@@ -1382,7 +1382,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         return Json(new Dictionary<String, Object>
                         {
                             {"Status",false },
-                            {"Message","Số lượng câu hỏi không đủ" },
+                            {"Message","Số lượng câu hỏi trong kho không đủ" },
                             {"Data",null }
                         });
                     }

@@ -87,7 +87,7 @@
                     meetingNumber:@roomid,
                     userName: name,//document.getElementById('display_name').value,
                     passWord: document.getElementById('password').value,
-                    leaveUrl: "https://zoom.us",
+                    leaveUrl: "https://eduso.vn",
                     role: 0 // 0 member - 1 admin
                 };
                 var signature = ZoomMtg.generateSignature({
@@ -102,7 +102,7 @@
                 });
 
                 ZoomMtg.init({
-                    leaveUrl: 'http://www.zoom.us',
+                    leaveUrl: 'https://eduso.vn',
                     isSupportAV: true,
                     success: function () {
                         ZoomMtg.join(

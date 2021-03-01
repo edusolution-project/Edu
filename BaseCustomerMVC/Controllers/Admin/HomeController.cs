@@ -831,59 +831,59 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         }
 
-        public async Task<JsonResult> FixUTCSchedule(string classList)
-        {
-            var arr = classList.Split(',');
-            var classsubjs = new List<ClassSubjectEntity>();
-            if (arr.Length > 0)
-                foreach (var clid in arr)
-                {
-                    classsubjs.AddRange(_classSubjectService.GetByClassID(clid));
-                }
+        //public async Task<JsonResult> FixUTCSchedule(string classList)
+        //{
+        //    var arr = classList.Split(',');
+        //    var classsubjs = new List<ClassSubjectEntity>();
+        //    if (arr.Length > 0)
+        //        foreach (var clid in arr)
+        //        {
+        //            classsubjs.AddRange(_classSubjectService.GetByClassID(clid));
+        //        }
 
-            foreach (var sbj in classsubjs)
-            {
-                var rootchaps = _chapterService.GetSubChapters(sbj.ID, "0");
-                foreach (var chap in rootchaps)
-                {
-                    if (chap.StartDate > new DateTime(1900, 1, 1))
-                        UpdateChapterCalendar(chap, "5e43fedd4a77b123fc297e90");//Mr Lam
-                }
-            }
+        //    foreach (var sbj in classsubjs)
+        //    {
+        //        var rootchaps = _chapterService.GetSubChapters(sbj.ID, "0");
+        //        foreach (var chap in rootchaps)
+        //        {
+        //            if (chap.StartDate > new DateTime(1900, 1, 1))
+        //                UpdateChapterCalendar(chap, "5e43fedd4a77b123fc297e90");//Mr Lam
+        //        }
+        //    }
 
-            return Json("OK");
+        //    return Json("OK");
 
-        }
+        //}
 
-        private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
-        {
-            var lessonids = _clonelessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
-            foreach (var id in lessonids)
-            {
-                var schedule = _lessonScheduleService.GetItemByLessonID(id);
-                schedule.StartDate = entity.StartDate;
-                schedule.EndDate = entity.EndDate;
-                UpdateCalendar(schedule, UserID);
-                _lessonScheduleService.CreateOrUpdate(schedule);
-            }
-            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
-            foreach (var subchap in subchaps)
-            {
-                subchap.StartDate = entity.StartDate;
-                subchap.EndDate = entity.EndDate;
-                _chapterService.Save(subchap);
-                UpdateChapterCalendar(subchap, UserID);
-            }
-        }
+        //private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        //{
+        //    var lessonids = _clonelessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
+        //    foreach (var id in lessonids)
+        //    {
+        //        var schedule = _lessonScheduleService.GetItemByLessonID(id);
+        //        schedule.StartDate = entity.StartDate;
+        //        schedule.EndDate = entity.EndDate;
+        //        UpdateCalendar(schedule, UserID);
+        //        _lessonScheduleService.CreateOrUpdate(schedule);
+        //    }
+        //    var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+        //    foreach (var subchap in subchaps)
+        //    {
+        //        subchap.StartDate = entity.StartDate;
+        //        subchap.EndDate = entity.EndDate;
+        //        _chapterService.Save(subchap);
+        //        UpdateChapterCalendar(subchap, UserID);
+        //    }
+        //}
 
-        private void UpdateCalendar(LessonScheduleEntity entity, string userid)
-        {
-            //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
-            //if (oldcalendar != null)
-            _calendarHelper.RemoveSchedule(entity.ID);
-            if (entity.IsActive)
-                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
-        }
+        //private void UpdateCalendar(LessonScheduleEntity entity, string userid)
+        //{
+        //    //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+        //    //if (oldcalendar != null)
+        //    _calendarHelper.RemoveSchedule(entity.ID);
+        //    if (entity.IsActive)
+        //        _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+        //}
 
         //public async Task<JsonResult> Remark(string ExamID)//Big fix
         //{
@@ -1198,7 +1198,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                     //remove Lesson, Part, Question, Answer
                     _ = _lessonHelper.RemoveManyClassLessons(ids);
                     //remove Schedule
-                    _ = _lessonScheduleService.RemoveManyClass(ids);
+                    //_ = _lessonScheduleService.RemoveManyClass(ids);
                     //remove History
                     _ = _progressHelper.RemoveClassHistory(ids);
                     //remove Exam
@@ -1227,22 +1227,22 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("OK");
         }
 
-        public JsonResult ShareStudent()
-        {
-            var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
-            var count = 0;
-            foreach (var course in courses)
-            {
-                if (course.StudentTargetCenters == null)
-                {
-                    course.StudentTargetCenters = course.TargetCenters;
-                    course.PublicWStudent = false;
-                    _courseService.Save(course);
-                    count++;
-                }
-            }
-            return Json("OK:" + count);
-        }
+        //public JsonResult ShareStudent()
+        //{
+        //    var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
+        //    var count = 0;
+        //    foreach (var course in courses)
+        //    {
+        //        if (course.StudentTargetCenters == null)
+        //        {
+        //            course.StudentTargetCenters = course.TargetCenters;
+        //            course.PublicWStudent = false;
+        //            _courseService.Save(course);
+        //            count++;
+        //        }
+        //    }
+        //    return Json("OK:" + count);
+        //}
 
         public JsonResult ChangeLinkImage()
         {
@@ -1279,21 +1279,21 @@ namespace BaseCustomerMVC.Controllers.Admin
             }
         }
 
-        public JsonResult FixCalendar()
-        {
-            var calendars = _calendarService.GetAll().ToEnumerable();
-            var count = 0;
-            foreach (var calendar in calendars)
-            {
-                var sch = _lessonScheduleService.GetItemByID(calendar.ScheduleID);
-                if (sch == null)
-                {
-                    _calendarService.Remove(calendar.ID);
-                    count++;
-                }
-            }
-            return Json("DEL " + count);
-        }
+        //public JsonResult FixCalendar()
+        //{
+        //    var calendars = _calendarService.GetAll().ToEnumerable();
+        //    var count = 0;
+        //    foreach (var calendar in calendars)
+        //    {
+        //        var sch = _lessonScheduleService.GetItemByID(calendar.ScheduleID);
+        //        if (sch == null)
+        //        {
+        //            _calendarService.Remove(calendar.ID);
+        //            count++;
+        //        }
+        //    }
+        //    return Json("DEL " + count);
+        //}
 
         public JsonResult FixLastUpdate()
         {
@@ -1766,6 +1766,67 @@ namespace BaseCustomerMVC.Controllers.Admin
 
 
             return Json(msg);
+        }
+
+        public JsonResult FixSchedule()
+        {
+            var schedules = _lessonScheduleService.GetAll().Limit(20000).ToList();
+            var start = DateTime.Now;
+            var begin = DateTime.Now;
+            var counter = 0;
+            var str = "Start: " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss");
+            while (schedules.Count > 0)
+            {
+                start = DateTime.Now;
+                counter += schedules.Count;
+                var bulkLessonOps = new List<WriteModel<LessonEntity>>();
+                var bulkCalendarOps = new List<WriteModel<CalendarEntity>>();
+                var listid = new List<string>();
+
+                foreach (var schedule in schedules)
+                {
+                    listid.Add(schedule.ID);
+                    //add info to lesson
+                    var lesson = _lessonService.GetItemByID(schedule.LessonID);
+                    //lesson.IsActive = schedule.IsActive;
+                    lesson.StartDate = schedule.StartDate;
+                    lesson.EndDate = schedule.EndDate;
+                    lesson.IsHideAnswer = schedule.IsHideAnswer;
+                    lesson.IsOnline = schedule.IsOnline;
+                    var updateLesson = new UpdateOneModel<LessonEntity>(
+                         Builders<LessonEntity>.Filter.Where(t => t.ID == schedule.LessonID),
+                         Builders<LessonEntity>.Update
+                            .Set(t => t.StartDate, schedule.StartDate)
+                            .Set(t => t.EndDate, schedule.EndDate)
+                            .Set(t => t.IsHideAnswer, schedule.IsHideAnswer)
+                            .Set(t => t.IsOnline, schedule.IsOnline));
+                    bulkLessonOps.Add(updateLesson);
+
+                    //change calendar schedule => lesson id
+
+                    var update = new UpdateOneModel<CalendarEntity>(
+                        Builders<CalendarEntity>.Filter.Where(t => t.ScheduleID == schedule.ID),
+                        Builders<CalendarEntity>.Update.Set(t => t.ScheduleID, schedule.LessonID)
+                            .Set(t => t.EndDate, schedule.EndDate)
+                        )
+                    { IsUpsert = false };
+                    //_calendarService.CreateQuery().UpdateOne(t => t.ScheduleID == schedule.ID, Builders<CalendarEntity>.Update.Set(t => t.ScheduleID, lesson.ID));
+                    bulkCalendarOps.Add(update);
+                }
+                if (bulkCalendarOps.Count > 0)
+                    _calendarService.Collection.BulkWrite(bulkCalendarOps);
+                if (bulkLessonOps.Count > 0)
+                    _lessonService.Collection.BulkWrite(bulkLessonOps);
+
+                _lessonScheduleService.Collection.DeleteMany<LessonScheduleEntity>(t => listid.Contains(t.ID));
+
+                schedules = _lessonScheduleService.GetAll().Limit(20000).ToList();
+                str += " - Round " + counter + ": " + (DateTime.Now - start).TotalMilliseconds + "; ";
+                Debug.WriteLine(counter + " - " + (DateTime.Now - begin).TotalMilliseconds);
+                start = DateTime.Now;
+            }
+            str += ("Đã fix " + counter + "; Total: " + (DateTime.Now - begin).TotalMilliseconds + " - End: " + DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"));
+            return Json(str);
         }
 
         #endregion
