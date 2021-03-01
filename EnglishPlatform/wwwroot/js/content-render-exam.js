@@ -2919,6 +2919,7 @@ var Lesson = (function () {
             }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
             if (!isOverdue)
                 if (limit > 0) {
+                    console.log("line 2922")
                     tryleft = limit - tried;
                     if (tryleft > 0) {
                         doButton = $('<div>', {
@@ -3085,71 +3086,76 @@ var Lesson = (function () {
         $('#rightCol').find('.tab-pane').hide();
     }
 
+    var countCreateExam = 0;
     var startExam = function (obj) {
-        if (obj != null)
-            $(obj).prop("disabled", true);
-        console.log("Create Exam");
-        var dataform = new FormData();
-        dataform.append("LessonID", config.lesson_id);
-        dataform.append("ClassSubjectID", config.class_subject_id);
-        dataform.append("ClassID", config.class_id);
-        Ajax(config.url.start, dataform, "POST", false)
-            .then(function (res) {
-                var data = JSON.parse(res);
-                if (data.Error == null) {
-                    if (!$(obj).parent().hasClass('top-menu'))
-                        $(obj).parent().remove();
-                    else
-                        $(obj).parent().empty();
-                    //notification("success", "Bắt đầu làm bài", 1500);
-                    //console.log("NewID: " + data.Data.ID);
-                    $("#ExamID").val(data.Data.ID);
-                    setLocalData("CurrentExam", data.Data.ID);
+        countCreateExam++;
+        if (countCreateExam == 1) {
+            if (obj != null)
+                $(obj).prop("disabled", true);
+            console.log("Create Exam");
+            var dataform = new FormData();
+            dataform.append("LessonID", config.lesson_id);
+            dataform.append("ClassSubjectID", config.class_subject_id);
+            dataform.append("ClassID", config.class_id);
+            Ajax(config.url.start, dataform, "POST", false)
+                .then(function (res) {
+                    var data = JSON.parse(res);
+                    if (data.Error == null) {
+                        if (!$(obj).parent().hasClass('top-menu'))
+                            $(obj).parent().remove();
+                        else
+                            $(obj).parent().empty();
+                        //notification("success", "Bắt đầu làm bài", 1500);
+                        //console.log("NewID: " + data.Data.ID);
+                        $("#ExamID").val(data.Data.ID);
+                        setLocalData("CurrentExam", data.Data.ID);
 
-                    renderExamDetail();
-                    //show QuizNav & PartNav
-                    $('.btn-answer-idx.completed').removeClass('completed');
-                    $('#QuizNav').addClass('show');
-                    $('#PartNav').addClass('show');
+                        renderExamDetail();
+                        //show QuizNav & PartNav
+                        $('.btn-answer-idx.completed').removeClass('completed');
+                        $('#QuizNav').addClass('show');
+                        $('#PartNav').addClass('show');
 
 
-                    //console.log(data);
-                    if (data.Data.Timer > 0) {
-                        var _minutes = data.Data.Timer;
-                        //console.log(_minutes);
-                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
-                        setLocalData("Timer", timer);
-                        //console.log($(".time-counter"));
+                        //console.log(data);
+                        if (data.Data.Timer > 0) {
+                            var _minutes = data.Data.Timer;
+                            //console.log(_minutes);
+                            var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                            setLocalData("Timer", timer);
+                            //console.log($(".time-counter"));
+                        }
+                    } else {
+                        //notification("error", data.Error, 3000);
+
+                        Swal.fire({
+                            title: 'Có lỗi',
+                            text: data.Error,
+                            icon: 'error',
+                            confirmButtonText: "Đóng"
+                        }).then(() => {
+                        });
+
+                        //alert(data.Error);
+                        if (obj != null)
+                            $(obj).prop("disabled", false);
                     }
-                } else {
-                    //notification("error", data.Error, 3000);
+                    countCreateExam = 0;
+                })
+                .catch(function (err) {
 
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: data.Error,
+                        text: err,
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
                     });
-
-                    //alert(data.Error);
-                    if (obj != null)
-                        $(obj).prop("disabled", false);
-                }
-            })
-            .catch(function (err) {
-
-                Swal.fire({
-                    title: 'Có lỗi',
-                    text: err,
-                    icon: 'error',
-                    confirmButtonText: "Đóng"
-                }).then(() => {
+                    countCreateExam = 0;
+                    //notification("error", err, 3000);
+                    //alert(err);
                 });
-
-                //notification("error", err, 3000);
-                //alert(err);
-            });
+        }
     }
 
     var renderExamDetail = function () {
@@ -3701,7 +3707,7 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-        debugger
+        //debugger
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
@@ -4060,6 +4066,7 @@ var Lesson = (function () {
                 "style": "cursor: pointer"
             }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
             if (limit > 0) {
+                console.log("line 4064")
                 tryleft = limit - tried;
                 if (tryleft > 0) {
                     var doButton = $('<div>', {
