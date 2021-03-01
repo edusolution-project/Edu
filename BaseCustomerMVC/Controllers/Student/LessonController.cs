@@ -369,11 +369,12 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var ExamTypes = quizType;
 
-
             //var schedule = _lessonScheduleService.GetItemByLessonID(lesson.ID);
             var isHideAnswer = lesson.IsHideAnswer;
             if (lesson.EndDate < DateTime.UtcNow)
                 isHideAnswer = false;
+            if (exam.IsLockReview) //lock review cause by lesson update)
+                isHideAnswer = true;
             ViewBag.IsHideAnswer = isHideAnswer;
 
             if (!isHideAnswer)
@@ -832,7 +833,7 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 Chapters = _chapterService.GetSubChapters(currentCs.ID, ChapterID).ToList(),
                 Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == ChapterID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                           //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
+                               //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == model.ID).FirstOrDefault()
                            let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == UserID && x.LessonID == r.ID && x.ClassSubjectID == model.ID).SortByDescending(o => o.ID).FirstOrDefault()
                            let lastexam =
                            //r.TemplateType == LESSON_TEMPLATE.EXAM ? 

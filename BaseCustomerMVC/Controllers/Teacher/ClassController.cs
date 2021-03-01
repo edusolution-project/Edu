@@ -1365,7 +1365,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
                 classes = _service.GetItemsByIDs(classIds).ToList();
-                classSbjs = _classSubjectService.GetByClassIds(classIds);
+                classSbjs = _classSubjectService.GetByClassIds(classIds).ToList();
             }
             else
             {
@@ -3381,6 +3381,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
 
                     ViewBag.Lesson = lessonview;
+                    ViewBag.IsLocked = data.IsLockReview;
                     //ViewBag.Class = currentClass;
                     //ViewBag.Subject = currentCs;
                     //ViewBag.NextLesson = nextLesson;

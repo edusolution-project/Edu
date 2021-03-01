@@ -62,6 +62,9 @@ namespace BaseCustomerEntity.Database
 
         [JsonProperty("ListPartIDs")]
         public List<String> ListPartIDs { get; set; }
+
+        [JsonProperty("IsLockReview")]//Khóa xem đáp án
+        public bool IsLockReview { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>

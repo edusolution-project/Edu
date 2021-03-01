@@ -533,7 +533,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        _lessonHelper.calculateCloneLessonPoint(item.ParentID);
+                        parentLesson.Point = _lessonHelper.calculateCloneLessonPoint(item.ParentID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _cloneLessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));

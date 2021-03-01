@@ -116,6 +116,16 @@ namespace BaseCustomerEntity.Database
             else
                 return Collection.Find(x => (x.CourseID == courseID && x.ChapterID == "0") && x.ConnectID == connectID).ToEnumerable();
         }
+
+        public IEnumerable<CourseLessonEntity> GetCourseLesson(string CourseID)
+        {
+            return Collection.Find(x =>x.CourseID == CourseID).ToEnumerable();
+        }
+
+        public IEnumerable<CourseLessonEntity> GetCloneCourseLesson(string ID, List<string> CourseIDs)
+        {
+            return Collection.Find(x => x.OriginID == ID && CourseIDs.Contains(x.CourseID)).ToEnumerable();
+        }
     }
 
     public class CONNECT_TYPE
