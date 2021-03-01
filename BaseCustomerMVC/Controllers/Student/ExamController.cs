@@ -665,7 +665,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             exam = _lessonHelper.CompleteNoEssay(exam, lesson, out point);
 
-            //----TH loi 0s
+            //----TH loi 0s -> reset lượt làm
             var created = exam.Created;
             var end = exam.Updated;
             var subtract = end.Subtract(created).TotalSeconds;
