@@ -133,6 +133,14 @@
     }
 
     function sendPushNotification() {
+
+        if (!applicationServerPublicKey) {
+            PushNotificationsController.retrievePublicKey()
+                .then(function (retrievedPublicKey) {
+                    applicationServerPublicKey = retrievedPublicKey;
+                });
+        }
+
         var payload = { topic: topicInput.value, notification: notificationInput.value, urgency: urgencySelect.value, userId: g_CurrentUser.id };
 
         fetch('/push-notifications-api/notifications', {
