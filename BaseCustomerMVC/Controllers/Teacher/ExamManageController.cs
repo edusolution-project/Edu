@@ -872,7 +872,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         //taoj mowis kif kierm tra
                         var manageexam = new ManageExamEntity
                         {
-                            Name = item.Name,
+                            Name = item.Title,
                             Created = DateTime.UtcNow,
                             Updated = DateTime.UtcNow,
                             CreateUser = UserID,
@@ -1095,10 +1095,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var newListAns = new List<LessonPartAnswerExtensionEntity>();
             //var rd = new Random();
 
-            var listpartKnow = GetLessonPart(item.EasyQuestion, listPartKnow.ToList()).Result;
-            var listpartUnderstanding = GetLessonPart(item.NormalQuestion, listPartUnderstanding.ToList()).Result;
-            var listpartManipulate = GetLessonPart(item.NormalQuestion, listPartManipulate.ToList()).Result;
-            var listpartManipulatehighly = GetLessonPart(item.NormalQuestion, listPartManipulate.ToList()).Result;
+            var listpartKnow = GetLessonPart(item.KnowQuestion, listPartKnow.ToList()).Result;
+            var listpartUnderstanding = GetLessonPart(item.UnderstandQuestion, listPartUnderstanding.ToList()).Result;
+            var listpartManipulate = GetLessonPart(item.ManipulateQuestion, listPartManipulate.ToList()).Result;
+            var listpartManipulatehighly = GetLessonPart(item.ManipulateHighlyQuestion, listPartManipulate.ToList()).Result;
 
             newListPart.AddRange(listpartKnow);
             newListPart.AddRange(listpartUnderstanding);

@@ -19,12 +19,14 @@ namespace BaseCustomerMVC.Models
         public DateTime StartTime { get; set; }
         [JsonProperty("EndTime")]
         public DateTime EndTime { get; set; }
-        [JsonProperty("EasyQuestion")]
-        public Int32 EasyQuestion { get; set; }
-        [JsonProperty("NormalQuestion")]
-        public Int32 NormalQuestion { get; set; }
-        [JsonProperty("HardQuestion")]
-        public Int32 HardQuestion { get; set; }
+        [JsonProperty("KnowQuestion")]
+        public Int32 KnowQuestion { get; set; }
+        [JsonProperty("UnderstandQuestion")]
+        public Int32 UnderstandQuestion { get; set; }
+        [JsonProperty("ManipulateQuestion")]
+        public Int32 ManipulateQuestion { get; set; }
+        [JsonProperty("ManipulateHighlyQuestion")]
+        public Int32 ManipulateHighlyQuestion { get; set; }
         [JsonProperty("Timer")] // thời gian làm bài
         public Int32 Timer { get; set; }
         [JsonProperty("Limit")]
@@ -43,7 +45,7 @@ namespace BaseCustomerMVC.Models
         public string Title { get; set; }
         [JsonProperty("Template")]
         public Int32 Template { get; set; }
-        [JsonProperty("Name")]
-        public String Name { get; set; }
+        [JsonProperty("Subject")]
+        public String Subject { get; set; }
     }
 }

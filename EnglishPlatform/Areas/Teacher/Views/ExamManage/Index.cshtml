@@ -197,6 +197,7 @@
                     theme: 'snow'
                 },
                 list_classes: [],
+                list_subjects:[],
                 subject: '',
                 grade: '',
                 view: 30,
@@ -227,13 +228,13 @@
                     title:''
                 },
                 formatExam: {
-                    name:'',
-                    titleFormat: '',
-                    titleExam: '',
+                    titleFormat: '',//tên ma trận đề
+                    titleExam: '', //tên kì thi, tên bài kiểm tra
                     timer: 1,
                     limit: 1,
                     template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                     totalExam: 1,
+                    subject:'',
                     format: {
                         level: '',
                         tag: '',
@@ -245,7 +246,13 @@
                     }
                 },
                 list_Tags: [],
-                tab: [true, false, false]
+                tab: [true, false, false],
+                list_matrixs: {
+                    name: '',
+                    id: '',
+                    created: '',
+                    detailFormat:[]
+                }
             },
             computed: {},
             watch: {
@@ -537,7 +544,16 @@
                     let _url = '@processUrl("GetMatrixExams", "ExamManage")'
                     axios.post(_url, _form)
                         .then(response => {
-                            //debugger
+                            var stt = response.data.Status
+                            if (stt) {
+                                var data = response.data.Data
+                                debugger
+                                _that.list_matrixs = data
+                                this.list_matrixs = _that.list_matrixs
+                            }
+                            else {
+                                alert(response.data.Msg)
+                            }
                         })
                         .catch(e => { alert(e) })
                 },
@@ -650,8 +666,8 @@
             <div class="row">
                 <div class="col-md-12">
                     <label class="label">Môn</label>
-                    <select class="form-control">
-                        <option value="">Tiếng anh</option>
+                    <select class="form-control" v-model="formatExam.Subject">
+                        <option value="english">Tiếng anh</option>
                     </select>
                 </div>
             </div>
