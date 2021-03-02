@@ -68,5 +68,12 @@ namespace BaseCustomerEntity.Database
                                 .SortBy(q => q.Order)
                                 .ThenBy(q => q.ID).ToEnumerable();
         }
+
+        public IEnumerable<CloneLessonPartEntity> GetItemsByLessonIDs_TypeQuiz(List<string> lessonIDs, List<string> quizType)
+        {
+            return CreateQuery().Find(o => lessonIDs.Contains(o.ParentID) && quizType.Contains(o.Type))
+                                .SortBy(q => q.Order)
+                                .ThenBy(q => q.ID).ToEnumerable();
+        }
     }
 }

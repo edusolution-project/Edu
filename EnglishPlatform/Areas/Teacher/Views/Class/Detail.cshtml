@@ -282,8 +282,9 @@
                                     <tr>
                                         <th class="sticky-col first-col" rowspan="2">STT</th>
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
-                                        <th rowspan="2" class="sticky-col third-col">Điểm trung bình</th>
-                                        <th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm trung bình/Điểm mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col third-col" v-else>Điểm trung bình</th>
+                                        @*<th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>*@
                                         <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
                                     </tr>
                                     <tr style="font-size:80%">
@@ -294,8 +295,9 @@
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
                                         <td class="sticky-col second-col">{{ list_students[i-1].FullName}}</td>
-                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
-                                        <td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>
+                                        <td class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}/{{roundPoint(list_students[i-1].Target,1)}}</td>
+                                        <td class="sticky-col third-col" v-else>{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
+                                        @*<td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>*@
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
                                             <template v-for="item in items">
@@ -3182,19 +3184,20 @@
                             var stt = response.data.Status
                             if (stt) {
                                 alert(response.data.Message)
-                                var data = response.data.Data
-                                this.hideModal('autocreateexam-modal-xl');
+                                //var data = response.data.Data
+                                //this.hideModal('autocreateexam-modal-xl');
 
-                                var listliexam = $("[classsubject=" + data.ClassSubjectID + "]").parent()
-                                var html = '<li class="sub-practice pt-2 pb-1 pl-2 rounded" classsubject="' + data.ClassSubjectID + '"><div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center"><a ' +
-                                    'href="/eduso/teacher/Lesson/Detail/' + data.ID + '/' + data.ClassSubjectID + '" title="' + data.Title + '" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis;"><span ' +
-                                    'class="text-danger"><i class="ic far fa-edit mr-2"></i>' +
-                                    data.Title +
-                                    ' </span></a> <div class="picker-schedule d-flex align-items-center"><div class="input-group date date st mr-2"><input type="text" readonly="readonly" class="form-control" style="font-size: ' +
-                                    '95%;"></div> <div class="input-group date date ed mr-2 ml-0"><input type="text" readonly="readonly" class="form-control" style="font-size: 95%;"></div> <i title="Xóa lịch học" class="fas fa-redo ic-ac d-flex align-' +
-                                    'items-center mr-2"></i></div></div></li>';
+                                //var listliexam = $("[classsubject=" + data.ClassSubjectID + "]").parent()
+                                //var html = '<li class="sub-practice pt-2 pb-1 pl-2 rounded" classsubject="' + data.ClassSubjectID + '"><div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center"><a ' +
+                                //    'href="/eduso/teacher/Lesson/Detail/' + data.ID + '/' + data.ClassSubjectID + '" title="' + data.Title + '" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis;"><span ' +
+                                //    'class="text-danger"><i class="ic far fa-edit mr-2"></i>' +
+                                //    data.Title +
+                                //    ' </span></a> <div class="picker-schedule d-flex align-items-center"><div class="input-group date date st mr-2"><input type="text" readonly="readonly" class="form-control" style="font-size: ' +
+                                //    '95%;"></div> <div class="input-group date date ed mr-2 ml-0"><input type="text" readonly="readonly" class="form-control" style="font-size: 95%;"></div> <i title="Xóa lịch học" class="fas fa-redo ic-ac d-flex align-' +
+                                //    'items-center mr-2"></i></div></div></li>';
 
-                                listliexam.append(html)
+                                //listliexam.append(html)
+                                location.reload()
                             }
                             else {
                                 alert(response.data.Message)
