@@ -423,7 +423,7 @@ namespace BaseCustomerMVC.Globals
         {
             var lesson = _lessonMapping.Clone(orgLesson, new LessonEntity());
             lesson.ChapterID = cloneItem.ChapterID;
-            lesson.OriginID = orgLesson.ID;
+            lesson.OriginID = orgLesson.OriginID; //switch origin to root course - if existed
             lesson.ClassID = string.IsNullOrEmpty(cloneItem.ClassID) ? orgLesson.ClassID : cloneItem.ClassID;
             lesson.ClassSubjectID = string.IsNullOrEmpty(cloneItem.ClassSubjectID) ? orgLesson.ClassSubjectID : cloneItem.ClassSubjectID;
             lesson.Title = string.IsNullOrEmpty(cloneItem.Title) ? orgLesson.Title : cloneItem.Title;
@@ -439,7 +439,7 @@ namespace BaseCustomerMVC.Globals
 
             lesson = InitLesson(lesson);
 
-            var lessonParts = _cloneLessonPartService.GetByLessonID(lesson.OriginID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
+            var lessonParts = _cloneLessonPartService.GetByLessonID(orgLesson.ID).OrderBy(q => q.Order).ThenBy(q => q.ID).ToList();
             if (lessonParts != null && lessonParts.Count() > 0)
             {
                 foreach (var lessonpart in lessonParts)
