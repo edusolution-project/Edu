@@ -410,7 +410,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 }
                 else
                 {
-                    if (_lessonHelper.IsOvertime(exam, lesson))//Overtime
+                    if (_lessonHelper.IsOvertime(exam, lesson, out _))//Overtime
                         _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
                     else if (exam.ID != ID)//change Exam
                         _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
@@ -496,8 +496,8 @@ namespace BaseCustomerMVC.Controllers.Student
             {
                 return new JsonResult(new { error = "Không tìm thấy bài học", reset = true });
             }
-
-            if (!_lessonHelper.IsOvertime(exam, lesson))
+            var endtype = EXAM_END_TYPE.OVERDATE;
+            if (!_lessonHelper.IsOvertime(exam, lesson, out endtype))
             {
                 //TODO: recheck history for doing exam
                 //await _learningHistoryService.CreateHist(new LearningHistoryEntity()
@@ -602,7 +602,11 @@ namespace BaseCustomerMVC.Controllers.Student
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
                 if (lastestEx.ID != exam.ID)
                     return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!", reset = true });
-                return new JsonResult(new { error = $"Bài kiểm tra đã kết thúc lúc {TimeZone.CurrentTimeZone.ToLocalTime(exam.Updated).ToString("HH:mm:ss dd-MM-yyyy")} - Hết thời gian", reset = true });
+
+                if (endtype == EXAM_END_TYPE.OVERDATE)
+                    return new JsonResult(new { error = $"Bài đã quá hạn", date = lesson.EndDate, reset = true });
+                else
+                    return new JsonResult(new { error = $"Thời gian làm bài đã hết", reset = true });
             }
         }
 
@@ -612,14 +616,16 @@ namespace BaseCustomerMVC.Controllers.Student
             var exam = _examService.GetItemByID(item.ExamID);
             if (exam == null)
             {
-                return new JsonResult("Không tìm thấy bài kiểm tra");
+                return new JsonResult(new { error = "Không tìm thấy bài kiểm tra", reset = true });
             }
             var lesson = _lessonService.GetItemByID(exam.LessonID);
             if (lesson == null)
             {
-                return new JsonResult("Không tìm thấy bài học");
+                return new JsonResult(new { error = "Không tìm thấy bài học", reset = true });
             }
-            if (!_lessonHelper.IsOvertime(exam, lesson))
+            var endtype = EXAM_END_TYPE.OVERDATE;
+
+            if (!_lessonHelper.IsOvertime(exam, lesson, out endtype))
             {
                 //TODO: recheck history for doing exam
                 var deleted = _examDetailService.RemoveAnswer(item.ExamID, item.QuestionID);
@@ -629,7 +635,10 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult($"Bài đã kết thúc lúc {TimeZone.CurrentTimeZone.ToLocalTime(exam.Updated).ToString("HH:mm:ss dd-MM-yyyy")} - Hết thời gian");
+                if (endtype == EXAM_END_TYPE.OVERDATE)
+                    return new JsonResult(new { error = $"Bài đã quá hạn", date = lesson.EndDate, reset = true });
+                else
+                    return new JsonResult(new { error = $"Thời gian làm bài đã hết", reset = true });
             }
         }
 

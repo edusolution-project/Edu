@@ -2919,7 +2919,6 @@ var Lesson = (function () {
             }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
             if (!isOverdue)
                 if (limit > 0) {
-                    console.log("line 2922")
                     tryleft = limit - tried;
                     if (tryleft > 0) {
                         doButton = $('<div>', {
@@ -3086,11 +3085,11 @@ var Lesson = (function () {
         $('#rightCol').find('.tab-pane').hide();
     }
 
-    var countCreateExam = 0;
+    //var countCreateExam = 0;
     var startExam = function (obj) {
-        countCreateExam++;
+        //countCreateExam++;
         showLoading("Đang tải dữ liệu ...");
-        if (countCreateExam == 1) {
+        //if (countCreateExam == 1) {
             if (obj != null)
                 $(obj).prop("disabled", true);
             console.log("Create Exam");
@@ -3141,7 +3140,7 @@ var Lesson = (function () {
                         if (obj != null)
                             $(obj).prop("disabled", false);
                     }
-                    countCreateExam = 0;
+                    //countCreateExam = 0;
                     hideLoading();
                 })
                 .catch(function (err) {
@@ -3153,12 +3152,12 @@ var Lesson = (function () {
                         confirmButtonText: "Đóng"
                     }).then(() => {
                     });
-                    countCreateExam = 0;
+                    //countCreateExam = 0;
                     hideLoading();
                     //notification("error", err, 3000);
                     //alert(err);
                 });
-        }
+        //}
     }
 
     var renderExamDetail = function () {
@@ -3710,7 +3709,6 @@ var Lesson = (function () {
     }
 
     var renderFillQuestionStudent = function (data, pos) {
-        //debugger
         var container = $("#" + data.ParentID + " .quiz-wrapper .part-description");
 
         var holder = $(container).find("fillquiz")[pos];
@@ -3897,20 +3895,19 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
-        
-        //if (!isOvertime) {
-        var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
-        if (undoneQuiz > 0) {
-            if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
-                
-            }
-            else {
-                if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
-                return false;
+
+        if (!isOvertime) {
+            var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
+            if (undoneQuiz > 0) {
+                if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
+
+                }
+                else {
+                    if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
+                    return false;
+                }
             }
         }
-        //}
-        debugger
 
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
@@ -4070,7 +4067,6 @@ var Lesson = (function () {
                 "style": "cursor: pointer"
             }).append('<i class="fas fa-poll mr-2"></i>').append("Xem đáp án");
             if (limit > 0) {
-                console.log("line 4064")
                 tryleft = limit - tried;
                 if (tryleft > 0) {
                     var doButton = $('<div>', {
@@ -4131,8 +4127,8 @@ var Lesson = (function () {
     }
 
     var review = function (examid) {
+	showLoading('Đang tải dữ liệu ...')
         document.location = config.url.review + '/' + examid;
-        showLoading('Đang tải dữ liệu ...')
     }
 
     /// tồn tại exam cũ thì return true;
@@ -4333,6 +4329,11 @@ var Lesson = (function () {
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
+                            //alert(rsp.reset)
+                            if (rsp.reset) {
+                                setLocalData("Timer", "00:00");
+                                CompleteLectureExam(true);
+                            }
                         });
 
                         //alert(rsp.error);

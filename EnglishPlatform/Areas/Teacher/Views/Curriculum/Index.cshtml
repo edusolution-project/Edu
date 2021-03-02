@@ -103,7 +103,10 @@
                             <a class="btn-act btn-edit" title="Sao chép" href="javascript:;" v-on:click="showCloneItem(item)"><i class="ti-layers"></i></a>
                             <a class="btn-act btn-edit" title="Ghép bài giảng" href="javascript:;" v-on:click="showMergeItem(item)"><i class="fa fa-first-aid"></i></a>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
-                            <button class="btn-act btn-update" title="Cập nhật" v-on:click="syncItem(item)"><i class="ic-ac fas fa-cloud-upload-alt" style="color: #13a6fb;"></i></button>
+                            @if (defTeacher == "5d8389c2d5d1bf27e4410c04")
+                            {
+                                <button class="btn-act btn-update" title="Đồng bộ" v-on:click="syncItem(item)"><i class="ic-ac fas fa-cloud-upload-alt" style="color: #13a6fb;"></i></button>
+                            }
                         </div>
                     </td>
                 </tr>
@@ -712,7 +715,7 @@
                             _form.append('ID', obj.ID);
                             let _url = '@processUrl("Sync", "Curriculum")'
                             axios.post(_url, _form)
-                                .then(res => {                                    
+                                .then(res => {
                                     var data = res.data;
                                     var error = data.error;
                                     if (error != null) {

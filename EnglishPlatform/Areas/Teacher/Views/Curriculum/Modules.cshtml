@@ -624,9 +624,9 @@
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
-        rightPart.append($("<i>", {
-            "class": "fas fa-cloud-upload-alt", "data-placement": "top", "title": "Đồng bộ", "onclick": "return SyncLesson('" + item.ID + "'); return false;",
-        }));
+        @if(user == "5d8389c2d5d1bf27e4410c04") {
+        @:rightPart.append($("<i>", { "class": "fas fa-cloud-upload-alt", "data-placement": "top", "title": "Đồng bộ", "onclick": "return SyncLesson('" + item.ID + "'); return false;", }));
+        }
         rowData.append(wPart);
         rowData.append(leftPart);
         rowData.append(rightPart);

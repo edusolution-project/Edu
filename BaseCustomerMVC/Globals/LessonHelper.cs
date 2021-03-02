@@ -742,16 +742,17 @@ namespace BaseCustomerMVC.Globals
                 .Replace(" ", " ");
         }
 
-        public bool IsOvertime(ExamEntity item, LessonEntity lesson)
+        public bool IsOvertime(ExamEntity item, LessonEntity lesson, out int endType)
         {
-
+            endType = EXAM_END_TYPE.OVERDATE;
             if (item == null || item.Status) return true;//break if exam not found or completed
             //var schedule = _lessonScheduleService.GetItemByLessonID(item.LessonID);
             //if (schedule == null) return true;//break if no schedule
-            if (lesson.EndDate > new DateTime(1900, 1, 1) && lesson.EndDate < DateTime.UtcNow)
+            if (lesson.EndDate > new DateTime(1900, 1, 1) && lesson.EndDate < DateTime.UtcNow) //hết hạn
                 return true;
+            endType = EXAM_END_TYPE.TIMEOUT;
             if (item.Timer == 0) return false;
-            double count = (item.Created.ToUniversalTime().AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;
+            double count = (item.Created.ToUniversalTime().AddMinutes(item.Timer) - DateTime.UtcNow).TotalMilliseconds;//hết thời gian làm bài
             return count <= 0;
         }
 
@@ -773,5 +774,11 @@ namespace BaseCustomerMVC.Globals
     {
         public string ID { get; set; }
         public string Value { get; set; }
+    }
+
+    public class EXAM_END_TYPE
+    {
+        public static int OVERDATE = 1,//het han theo lich bai
+            TIMEOUT = 2;//het thoi gian lam bai
     }
 }

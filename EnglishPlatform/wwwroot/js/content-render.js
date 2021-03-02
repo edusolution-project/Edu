@@ -3184,7 +3184,7 @@ var Lesson = (function () {
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
-                if (data.Error == null) {
+                if (data.error == null) {
                     if (!$(obj).parent().hasClass('top-menu'))
                         $(obj).parent().remove();
                     else
@@ -3207,10 +3207,10 @@ var Lesson = (function () {
                     }
                 } else {
                     //notification("error", data.Error, 3000);
-
+                    
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: data.Error,
+                        text: data.error,
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
