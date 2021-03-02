@@ -602,7 +602,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var lastestEx = _examService.GetLastestByLessonAndStudent(exam.LessonID, exam.StudentID);
                 if (lastestEx.ID != exam.ID)
                     return new JsonResult(new { error = "Bạn hoặc ai đó đang làm lại bài kiểm tra này. Vui lòng không thực hiện bài trên phiên làm việc đồng thời!", reset = true });
-                return new JsonResult(new { error = "Bài kiểm tra đã kết thúc", reset = true });
+                return new JsonResult(new { error = $"Bài kiểm tra đã kết thúc lúc {TimeZone.CurrentTimeZone.ToLocalTime(exam.Updated).ToString("HH:mm:ss dd-MM-yyyy")} - Hết thời gian", reset = true });
             }
         }
 
@@ -629,7 +629,7 @@ namespace BaseCustomerMVC.Controllers.Student
             }
             else
             {
-                return new JsonResult("Bài đã kết thúc");
+                return new JsonResult($"Bài đã kết thúc lúc {TimeZone.CurrentTimeZone.ToLocalTime(exam.Updated).ToString("HH:mm:ss dd-MM-yyyy")} - Hết thời gian");
             }
         }
 
@@ -647,7 +647,7 @@ namespace BaseCustomerMVC.Controllers.Student
             if (exam.Status)
             {
                 //return new JsonResult(new { Point = exam.Point, MaxPoint = exam.MaxPoint, ID = exam.ID, Number = exam.Number, Limit = 0 });
-                return new JsonResult("Bài đã kết thúc");
+                return new JsonResult($"Bài đã kết thúc lúc {TimeZone.CurrentTimeZone.ToLocalTime(exam.Updated).ToString("HH:mm:ss dd-MM-yyyy")} - Trạng thái bài kiểm tra đã hoàn thành");
             }
             double point = 0;
             var lesson = _lessonService.GetItemByID(exam.LessonID);
@@ -664,6 +664,46 @@ namespace BaseCustomerMVC.Controllers.Student
             }
 
             exam = _lessonHelper.CompleteNoEssay(exam, lesson, out point);
+
+            //----TH loi 0s -> reset lượt làm
+            var created = exam.Created;
+            var end = exam.Updated;
+            var subtract = end.Subtract(created).TotalSeconds;
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (subtract < 1)//Th bai ktra 0s
+            {
+                var detailExams = _examDetailService.GetByExamID(ExamID);
+                if (detailExams.Any())
+                {
+                    _examDetailService.CreateQuery().DeleteMany(x => x.ExamID.Equals(ExamID) && x.StudentID.Equals(UserID));
+                }
+
+                var lessonprogress = _lessonProgressService.GetByStudentID_LessonID(UserID, exam.LessonID);
+                if (lessonprogress == null) return Json(new Dictionary<String, Object>
+                        {
+                            {"Msg","Chưa có thông tin bài làm" }
+                        });
+                _examService.CreateQuery().DeleteOne(x => x.ID == exam.ID);
+                if (lessonprogress.Tried == 1)
+                    _lessonProgressService.CreateQuery().DeleteOne(x => x.ID == lessonprogress.ID);
+                else
+                {
+                    lessonprogress.Tried = lessonprogress.Tried - 1;
+                    var exams = _examService.CreateQuery().Find(x => x.LessonID == exam.LessonID && UserID == x.StudentID).SortByDescending(x => x.Created);
+                    lessonprogress.LastDate = exams.FirstOrDefault().Created;
+                    lessonprogress.LastPoint = exams.FirstOrDefault().LastPoint;
+                    lessonprogress.AvgPoint = exams.ToList().Average(x => x.LastPoint);
+                    lessonprogress.MinPoint = exams.ToList().Min(x => x.LastPoint);
+                    lessonprogress.MaxPoint = exams.ToList().Max(x => x.LastPoint);
+                    Int32 index = (Int32)exams.CountDocuments() - 1;
+                    lessonprogress.PointChange = exams.FirstOrDefault().LastPoint - exams.ToList().ElementAtOrDefault(index).LastPoint;
+                    _lessonProgressService.CreateQuery().ReplaceOne(x => x.ID == lessonprogress.ID, lessonprogress, new UpdateOptions() { IsUpsert = false });
+                    _examService.CreateQuery().DeleteOne(x => x.ID == exam.ID);
+                }
+
+                return new JsonResult("Có lỗi trong quá trình mở bài (0s). Vui lòng thực hiện lại thao tác");
+            }
+
             return new JsonResult(new
             {
                 Point = point,
