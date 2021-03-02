@@ -60,6 +60,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
 
         private readonly List<string> quizType = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
+        private readonly List<string> quizTypenoEssay = new List<string> { "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4" };
         private readonly List<string> partTypes = new List<string> { "TEXT", "DOC", "AUDIO", "VIDEO", "IMG", "VOCAB", "QUIZ1", "QUIZ2", "QUIZ3", "QUIZ4", "ESSAY" };
         private readonly List<string> partDSP = new List<string> { "Văn bản", "File văn bản", "Audio", "Video", "Ảnh", "Từ vựng tiếng anh", "Chọn 1 đáp án đúng", "Điền từ", "Nối đáp án", "Chọn 1/nhiều đáp án đúng", "Essay" };
 
@@ -1337,7 +1338,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new Dictionary<String, Object>
                     {
                         {"Status",false },
-                        {"Message","Chưa chọn môn nào" },
+                        {"Message",$"Từ {startTime.ToString("dd-MM-yyyy")} đến {endTime.ToString("dd-MM-yyyy")} không có bài nào được giao, vui lòng chọn lại." },
                         {"Data",null }
                     });
                 }
@@ -1353,7 +1354,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var cloneLessonParts = _cloneLessonPartService.GetItemsByLessonIDs(lessonIDs.ToList<String>());
+                var cloneLessonParts = _cloneLessonPartService.GetItemsByLessonIDs_TypeQuiz(lessonIDs.ToList<String>(), quizTypenoEssay);
                 if(cloneLessonParts.Count() < TotalPart)
                 {
                     return Json(new Dictionary<String, Object>
@@ -1370,6 +1371,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 newCloneLessonParts.AddRange(GetLessonParts(indexs, cloneLessonParts.ToList()));
                 while(newCloneLessonParts.Count() < indexs.Count()) 
                 {
+                    ///---check lại
                     var newIndexs = RandomIndex(indexs.Count() - newCloneLessonParts.Count(), cloneLessonParts.Count());
                     while(indexs.Any(x => newIndexs.Contains(x)))
                     {
@@ -1434,7 +1436,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             foreach (var index in indexs)
             {
                 var cloneLessonPart = cloneLessonParts.ElementAtOrDefault(index);
-                if (!quizType.Contains(cloneLessonPart.Type))
+                if (!quizTypenoEssay.Contains(cloneLessonPart.Type))
                 {
                     continue;
                 }
