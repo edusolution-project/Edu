@@ -1348,12 +1348,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     return Json(new Dictionary<String, Object>
                     {
                         {"Status",false },
-                        {"Message","Chưa chọn môn nào" },
+                        {"Message",$"Từ {startTime.ToString("dd-MM-yyyy")} đến {endTime.ToString("dd-MM-yyyy")} không có bài nào được giao, vui lòng chọn lại." },
                         {"Data",null }
                     });
                 }
 
-                var cloneLessonParts = _cloneLessonPartService.GetItemsByLessonIDs(lessonIDs.ToList<String>());
+                var cloneLessonParts = _cloneLessonPartService.GetItemsByLessonIDs_TypeQuiz(lessonIDs.ToList<String>(), quizType);
                 if(cloneLessonParts.Count() < TotalPart)
                 {
                     return Json(new Dictionary<String, Object>
@@ -1365,7 +1365,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var index = 0;
-                var indexs = RandomIndex(TotalPart, cloneLessonParts.Count());
+                var indexs = RandomIndex(TotalPart, cloneLessonParts.Count()); //danh sach index
                 List<CloneLessonPartEntity> newCloneLessonParts = new List<CloneLessonPartEntity>();
                 newCloneLessonParts.AddRange(GetLessonParts(indexs, cloneLessonParts.ToList()));
                 while(newCloneLessonParts.Count() < indexs.Count()) 

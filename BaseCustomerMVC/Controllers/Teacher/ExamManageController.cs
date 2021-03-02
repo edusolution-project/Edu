@@ -327,7 +327,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(new Dictionary<String, Object> {
                     {"Status",true },
                     {"Msg","" },
-                    {"Data",null }
+                    {"Data",listMatrixs }
                 });
             }
             catch(Exception ex)
@@ -827,33 +827,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var centerID = _centerService.GetItemByCode(basis).ID;
 
                 //Lưu format đề
-                var matrixExam = new MatrixExamEntity
-                {
-                    Name = matrixExams.FirstOrDefault().Name,
-                    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
-                    Created = DateTime.UtcNow,
-                    CreateUser = UserID,
-                    Center = centerID,
-                };
+                //var matrixExam = new MatrixExamEntity
+                //{
+                //    Name = matrixExams.FirstOrDefault().Name,
+                //    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
+                //    Created = DateTime.UtcNow,
+                //    CreateUser = UserID,
+                //    Center = centerID,
+                //};
 
-                for (var i = 0; i < matrixExams.Count; i++)
-                {
-                    var f = matrixExams.ElementAtOrDefault(i);
-                    var detail = new DetailMatrixExam
-                    {
-                        Level = f.Level,
-                        Order = i,
-                        Tags = f.Tags,
-                        Know = f.Know,
-                        Understanding = f.Understanding,
-                        Manipulate = f.Manipulate,
-                        ManipulateHighly = f.ManipulateHighly,
-                        Total = f.Know + f.Understanding + f.Manipulate + f.ManipulateHighly
-                    };
-                    matrixExam.DetailFormat.Add(detail);
-                }
+                //for (var i = 0; i < matrixExams.Count; i++)
+                //{
+                //    var f = matrixExams.ElementAtOrDefault(i);
+                //    var detail = new DetailMatrixExam
+                //    {
+                //        Level = f.Level,
+                //        Order = i,
+                //        Tags = f.Tags,
+                //        Know = f.Know,
+                //        Understanding = f.Understanding,
+                //        Manipulate = f.Manipulate,
+                //        ManipulateHighly = f.ManipulateHighly,
+                //        Total = f.Know + f.Understanding + f.Manipulate + f.ManipulateHighly
+                //    };
+                //    matrixExam.DetailFormat.Add(detail);
+                //}
 
-                _matrixExamService.Save(matrixExam);
+                //_matrixExamService.Save(matrixExam);
 
                 if(item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
                 {
@@ -903,14 +903,14 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Etype = item.Etype,
                                 ChapterID = "0",
                                 IsParentCourse = true,
-                                MatrixExamID = matrixExam.ID,
+                                //MatrixExamID = matrixExam.ID,
                                 CodeExam = index.ToString(),
                                 ManageExamID = manageexam.ID
                             };
                             _lessonExamService.Save(lessonExam);
                             //lessonExams.Add(lessonExam);
                             listLessonExamIDs.Add(lessonExam.ID);
-                            var str = RenderExam(lessonExam,matrixExam,item.ExamQuestionArchiveID,UserID).Result;
+                            //var str = RenderExam(lessonExam,matrixExam,item.ExamQuestionArchiveID,UserID).Result;
                         }
                     }
                     return Json("");
