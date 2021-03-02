@@ -136,7 +136,7 @@ namespace BaseCustomerMVC.Globals
             if (quizs != null && quizs.Count > 0)
             {
                 catask = _cloneAnswerService.Collection.DeleteManyAsync(o => quizs.Contains(o.ParentID));
-                await Task.WhenAll( cltask, cqtask, catask);
+                await Task.WhenAll(cltask, cqtask, catask);
             }
             else
                 await Task.WhenAll(cltask, cqtask);
@@ -430,10 +430,10 @@ namespace BaseCustomerMVC.Globals
             lesson.Created = DateTime.UtcNow;
             lesson.Updated = DateTime.UtcNow;
             lesson.Order = cloneItem.Order;
-            //schedule
-            lesson.StartDate = DateTime.MinValue;
-            lesson.EndDate = DateTime.MinValue;
-            lesson.IsHideAnswer = false;
+            //copy all schedule except online class
+            //lesson.StartDate = DateTime.MinValue;
+            //lesson.EndDate = DateTime.MinValue;
+            //lesson.IsHideAnswer = false;
             lesson.IsOnline = false;
             lesson.ID = null;
 

@@ -3242,7 +3242,7 @@ var Lesson = (function () {
         Swal.fire({
             title: 'Điểm mục tiêu cho môn này của bạn là mấy?',
             html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + config.class_subject_name + '</span>',
-            icon: 'info',
+            icon: 'question',
             input: 'number',
             showCancelButton: true,
             cancelButtonText: 'Hủy',
@@ -3254,7 +3254,7 @@ var Lesson = (function () {
                 step: 1
             },
             inputValidator: (value) => {
-                return value > 10 && 'Điểm mục tiêu trong khoảng 1 đến 10'
+                return (value > 10 || value < 0) && 'Điểm mục tiêu trong khoảng 1 đến 10'
             },
             inputValue: learningTarget / 10,
             showLoaderOnConfirm: true,
