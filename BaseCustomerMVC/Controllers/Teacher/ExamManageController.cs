@@ -1019,10 +1019,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var newListAns = new List<LessonPartAnswerExtensionEntity>();
             foreach (var item in matrixExam.DetailFormat)
             {
-                var _listPartKnow = lessonParts.Where(x => x.LevelPart == LEVELPART.KNOW && item.Tags.Contains(x.Tags)).Take(item.Know); // 
-                var _listPartUnderstanding = lessonParts.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING && item.Tags.Contains(x.Tags)).Take(item.Know);
-                var _listPartManipulate = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATE && item.Tags.Contains(x.Tags)).Take(item.Know);
-                var _listPartManipulateHighly = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY && item.Tags.Contains(x.Tags)).Take(item.Know);
+                var _listPartKnow = lessonParts.Where(x => x.LevelPart == LEVELPART.KNOW && item.Tags.Contains(x.Tags)).Take(item.Total); // 
+                var _listPartUnderstanding = lessonParts.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING && item.Tags.Contains(x.Tags)).Take(item.Total);
+                var _listPartManipulate = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATE && item.Tags.Contains(x.Tags)).Take(item.Total);
+                var _listPartManipulateHighly = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY && item.Tags.Contains(x.Tags)).Take(item.Total);
 
                 newListParts.AddRange(_listPartKnow);
                 newListParts.AddRange(_listPartUnderstanding);

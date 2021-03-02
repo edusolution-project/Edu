@@ -238,10 +238,22 @@
                     format: {
                         level: '',
                         tag: '',
-                        levelKnow: 0, //nhận biết
-                        levelUnderstanding: 0, //thông hiểu
-                        levelManipulate:0, //vận dụng
-                        levelManipulateHighly: 0, //vận dụng cao
+                        levelKnow: {
+                            theory: 0,//lý thuyết
+                            exercise: 0 //bài tập
+                        }, //nhận biết
+                        levelUnderstanding: {
+                            theory: 0,//lý thuyết
+                            exercise: 0 //bài tập
+                        }, //thông hiểu
+                        levelManipulate: {
+                            theory: 0,//lý thuyết
+                            exercise: 0 //bài tập
+                        }, //vận dụng
+                        levelManipulateHighly: {
+                            theory: 0,//lý thuyết
+                            exercise: 0 //bài tập
+                        }, //vận dụng cao
                         total: 0
                     }
                 },
@@ -313,15 +325,28 @@
                             {
                                 level: '',
                                 tag: '',
-                                levelKnow: 0, //nhận biết
-                                levelUnderstanding: 0, //thông hiểu
-                                levelManipulate: 0, //vận dụng
-                                levelManipulateHighly: 0, //vận dụng cao
+                                    levelKnow: {
+                                        theory: 0,//lý thuyết
+                                        exercise: 0 //bài tập
+                                    }, //nhận biết
+                                    levelUnderstanding: {
+                                        theory: 0,//lý thuyết
+                                        exercise: 0 //bài tập
+                                    }, //thông hiểu
+                                    levelManipulate: {
+                                        theory: 0,//lý thuyết
+                                        exercise: 0 //bài tập
+                                    }, //vận dụng
+                                    levelManipulateHighly: {
+                                        theory: 0,//lý thuyết
+                                        exercise: 0 //bài tập
+                                    }, //vận dụng cao
                                 total: 0
                                 }
                             ]
                         }
                     }
+                    debugger
                     _that.$bvModal.show('create-exam-modal-xl')
                 },
                 saveItem() {
@@ -696,18 +721,24 @@
                 <table class="table table-bordered table-sm">
                     <thead>
                         <tr>
-                            <td rowspan="2" class="text-center align-middle">STT</td>
-                            <td rowspan="2" style="width:80px;text-align:center;vertical-align:middle">Khối/Lớp</td>
-                            <td rowspan="2" style="width:150px;text-align:center;vertical-align:middle">Chuyên đề | Nội dung</td>
-                            <td colspan="4" style="text-align:center">Mức độ</td>
-                            <td rowspan="2" class="text-center align-middle" style="width:100px">Số câu</td>
-                            <td rowspan="2" class="text-center align-middle" style="width:100px">Tác vụ</td>
+                            <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
+                            <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                            <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
+                            <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                            <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                            <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                            <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                            <td rowspan="2" class="text-center align-middle" style="width:85px">Tác vụ</td>
                         </tr>
                         <tr>
-                            <td class="text-center align-middle">Nhận biết</td>
-                            <td class="text-center align-middle">Thông hiểu</td>
-                            <td class="text-center align-middle">Vận dụng</td>
-                            <td class="text-center align-middle">Vận dụng cao</td>
+                            <td class="text-center align-middle" style="width:80px">LT</td>
+                            <td class="text-center align-middle" style="width:80px">BT</td>
+                            <td class="text-center align-middle" style="width:80px">LT</td>
+                            <td class="text-center align-middle" style="width:80px">BT</td>
+                            <td class="text-center align-middle" style="width:80px">LT</td>
+                            <td class="text-center align-middle" style="width:80px">BT</td>
+                            <td class="text-center align-middle" style="width:80px">LT</td>
+                            <td class="text-center align-middle" style="width:80px">BT</td>
                         </tr>
                     </thead>
 
@@ -715,63 +746,67 @@
                         <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
                             <td class="text-center align-middle">{{k+1}}</td>
                             <td>
-                                <select class="form-control">
-                                    <option>10</option>
-                                    <option>11</option>
-                                    <option>12</option>
-                                </select>
+                                <input type="text" class="form-control" />
+                            </td>
+
+                            <td>
+                                @*<input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow + item.levelUnderstanding + item.levelManipulate + item.levelManipulateHighly" disabled readonly />*@
+                            </td>
+
+                            <td v-for="(type,i) in item.levelKnow">
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="type.theory" />
                             </td>
                             <td>
-                                @*<input type="text" class="form-control" v-model="item.tag"/>*@
-                                <select class="form-control" v-model="item.tag">
-                                    <option value="">Chọn nội dung</option>
-                                    <option v-for="(_tag,i) in list_Tags" :value="_tag.Code">{{_tag.Name}}</option>
-                                </select>
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow[0].theory" />
+                            </td>
+
+                            @*<td>
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.theory" />
                             </td>
                             <td>
-                                <input type="number" min="0" class="form-control" v-model="item.levelKnow" />
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.exercise" />
+                            </td>
+
+                            <td> 
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.theory" />
                             </td>
                             <td>
-                                <input type="number" min="0" class="form-control" v-model="item.levelUnderstanding" />
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.exercise" />
+                            </td>
+
+                            <td>
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.theory" />
                             </td>
                             <td>
-                                <input type="number" min="0" class="form-control" v-model="item.levelManipulate" />
-                            </td>
-                            <td>
-                                <input type="number" min="0" class="form-control" v-model="item.levelManipulateHighly" />
-                            </td>
-                            <td>
-                                <input type="number" min="0" class="form-control" v-model="item.levelKnow + item.levelUnderstanding + item.levelManipulate + item.levelManipulateHighly" disabled readonly />
-                            </td>
+                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.exercise" />
+                            </td>*@
+
                             <td class="text-center align-middle">
                                 <button title="Xoá điều kiện" v-on:click="removeOption(k)" class="btn-act"><i class="ti-trash"></i></button>
                                 <button title="Đặt lại" v-on:click="refreshOption(k)" class="btn-act"><i class="ti-reload"></i></button>
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="9" class="text-right">
+                            <td colspan="12" class="text-right p-2">
                                 <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
                             </td>
                         </tr>
                         <tr>
                             <td colspan="2" class="text-center align-middle">Tổng</td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
+                            <td class="text-center align-middle">
+                                <input type="number" class="form-control text-center align-middle" disabled readonly />
                             </td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" disabled readonly />
                             </td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" disabled readonly />
                             </td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" disabled readonly />
                             </td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
-                            </td>
-                            <td>
-                                <input type="number" class="form-control" disabled readonly />
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" disabled readonly />
                             </td>
                             <td></td>
                         </tr>

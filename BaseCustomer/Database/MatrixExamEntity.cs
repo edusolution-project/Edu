@@ -66,12 +66,22 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Total")]
         public Int32 Total { get; set; }
         [JsonProperty("Know")] //so cau muc do nhan biet
-        public Int32 Know { get; set; }
+        public TypeQuiz Know { get; set; }
         [JsonProperty("Understanding")] //so cau muc do thong hieu
-        public Int32 Understanding { get; set; }
+        public TypeQuiz Understanding { get; set; }
         [JsonProperty("Manipulate")] //so cau muc do van dung
-        public Int32 Manipulate { get; set; }
+        public TypeQuiz Manipulate { get; set; }
         [JsonProperty("ManipulateHighly")]
-        public Int32 ManipulateHighly { get; set; }
+        public TypeQuiz ManipulateHighly { get; set; }
+    }
+
+    public class TypeQuiz
+    {
+        [JsonProperty("Theory")]
+        public Int32 Theory { get; set; }
+        [JsonProperty("Exercise")]
+        public Int32 Exercise { get; set; }
+        [JsonProperty("Total")]
+        public Int32 Total { get; set; }
     }
 }
