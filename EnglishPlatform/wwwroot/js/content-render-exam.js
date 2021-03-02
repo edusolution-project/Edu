@@ -2901,7 +2901,7 @@ var Lesson = (function () {
                 $("<div>", { id: "last-result", class: "text-center" })
                     .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm cuối (lần " + tried + ") đã kết thúc lúc " + lastdate }))
                     .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                    //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+            //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả : " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
             wrapper.append(lastExamResult);
 
             tryleft = limit - tried;
@@ -2980,7 +2980,7 @@ var Lesson = (function () {
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Lượt làm bài đã kết thúc lúc " + lastdate }))
                         .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.MaxPoint })).html();
-                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
+                //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.Point == null ? 0 : lastExam.Point) + "/" + lastExam.QuestionsTotal })).html();
                 wrapper.append(lastExamResult);
 
                 var reviewButton = $('<div>', {
@@ -3090,73 +3090,73 @@ var Lesson = (function () {
         //countCreateExam++;
         showLoading("Đang tải dữ liệu ...");
         //if (countCreateExam == 1) {
-            if (obj != null)
-                $(obj).prop("disabled", true);
-            console.log("Create Exam");
-            var dataform = new FormData();
-            dataform.append("LessonID", config.lesson_id);
-            dataform.append("ClassSubjectID", config.class_subject_id);
-            dataform.append("ClassID", config.class_id);
-            Ajax(config.url.start, dataform, "POST", false)
-                .then(function (res) {
-                    var data = JSON.parse(res);
-                    if (data.Error == null) {
-                        if (!$(obj).parent().hasClass('top-menu'))
-                            $(obj).parent().remove();
-                        else
-                            $(obj).parent().empty();
-                        //notification("success", "Bắt đầu làm bài", 1500);
-                        //console.log("NewID: " + data.Data.ID);
-                        $("#ExamID").val(data.Data.ID);
-                        setLocalData("CurrentExam", data.Data.ID);
+        if (obj != null)
+            $(obj).prop("disabled", true);
+        console.log("Create Exam");
+        var dataform = new FormData();
+        dataform.append("LessonID", config.lesson_id);
+        dataform.append("ClassSubjectID", config.class_subject_id);
+        dataform.append("ClassID", config.class_id);
+        Ajax(config.url.start, dataform, "POST", false)
+            .then(function (res) {
+                var data = JSON.parse(res);
+                if (data.Error == null) {
+                    if (!$(obj).parent().hasClass('top-menu'))
+                        $(obj).parent().remove();
+                    else
+                        $(obj).parent().empty();
+                    //notification("success", "Bắt đầu làm bài", 1500);
+                    //console.log("NewID: " + data.Data.ID);
+                    $("#ExamID").val(data.Data.ID);
+                    setLocalData("CurrentExam", data.Data.ID);
 
-                        renderExamDetail();
-                        //show QuizNav & PartNav
-                        $('.btn-answer-idx.completed').removeClass('completed');
-                        $('#QuizNav').addClass('show');
-                        $('#PartNav').addClass('show');
+                    renderExamDetail();
+                    //show QuizNav & PartNav
+                    $('.btn-answer-idx.completed').removeClass('completed');
+                    $('#QuizNav').addClass('show');
+                    $('#PartNav').addClass('show');
 
 
-                        //console.log(data);
-                        if (data.Data.Timer > 0) {
-                            var _minutes = data.Data.Timer;
-                            //console.log(_minutes);
-                            var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
-                            setLocalData("Timer", timer);
-                            //console.log($(".time-counter"));
-                        }
-                    } else {
-                        //notification("error", data.Error, 3000);
-
-                        Swal.fire({
-                            title: 'Có lỗi',
-                            text: data.Error,
-                            icon: 'error',
-                            confirmButtonText: "Đóng"
-                        }).then(() => {
-                        });
-
-                        //alert(data.Error);
-                        if (obj != null)
-                            $(obj).prop("disabled", false);
+                    //console.log(data);
+                    if (data.Data.Timer > 0) {
+                        var _minutes = data.Data.Timer;
+                        //console.log(_minutes);
+                        var timer = (_minutes >= 10 ? _minutes : "0" + _minutes) + ":00";
+                        setLocalData("Timer", timer);
+                        //console.log($(".time-counter"));
                     }
-                    //countCreateExam = 0;
-                    hideLoading();
-                })
-                .catch(function (err) {
+                } else {
+                    //notification("error", data.Error, 3000);
 
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: err,
+                        text: data.Error,
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
                     });
-                    //countCreateExam = 0;
-                    hideLoading();
-                    //notification("error", err, 3000);
-                    //alert(err);
+
+                    //alert(data.Error);
+                    if (obj != null)
+                        $(obj).prop("disabled", false);
+                }
+                //countCreateExam = 0;
+                hideLoading();
+            })
+            .catch(function (err) {
+
+                Swal.fire({
+                    title: 'Có lỗi',
+                    text: err,
+                    icon: 'error',
+                    confirmButtonText: "Đóng"
+                }).then(() => {
                 });
+                //countCreateExam = 0;
+                hideLoading();
+                //notification("error", err, 3000);
+                //alert(err);
+            });
         //}
     }
 
@@ -4048,7 +4048,7 @@ var Lesson = (function () {
                     $("<div>", { id: "last-result", class: "text-center" })
                         .append($('<div>', { class: "col-md-12 text-center p-3 h5 text-info", text: "Chúc mừng! Bạn đã hoàn thành bài kiểm tra (lần " + tried + ")" }))
                         .append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.maxPoint }));
-                        //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
+            //.append($('<div>', { class: "col-md-12 text-center h4 text-success", text: "Kết quả: " + (lastExam.point == null ? 0 : lastExam.point) + "/" + lastExam.questionsTotal }));
 
             wrapper.append(lastExamResult);
             //console.log(data);
@@ -4127,7 +4127,7 @@ var Lesson = (function () {
     }
 
     var review = function (examid) {
-	showLoading('Đang tải dữ liệu ...')
+        showLoading('Đang tải dữ liệu ...')
         document.location = config.url.review + '/' + examid;
     }
 
@@ -4329,7 +4329,6 @@ var Lesson = (function () {
                             icon: 'error',
                             confirmButtonText: "Đóng"
                         }).then(() => {
-                            //alert(rsp.reset)
                             if (rsp.reset) {
                                 setLocalData("Timer", "00:00");
                                 CompleteLectureExam(true);
@@ -4342,7 +4341,7 @@ var Lesson = (function () {
                     }
                     else {
                         //debugger
-                        console.log("line 4060 to fix");
+                        //console.log("line 4060 to fix");
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
                         //} else {
@@ -4360,7 +4359,6 @@ var Lesson = (function () {
                             confirmButtonText: "Đóng"
                         }).then(() => {
                         });
-                        //alert(err);
                     });
             }
             else {
@@ -4442,13 +4440,16 @@ var Lesson = (function () {
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
+                        if (rsp.reset) {
+                            setLocalData("Timer", "00:00");
+                            CompleteLectureExam(true);
+                        }
                     });
 
                     //notification("error", rsp.error, 3000);
                     return false;
                 }
                 else {
-                    console.log("line 4161 to fix");
                     //if (value == "") {
                     //    delAnswerForStudent(questionId);
                     //} else {
@@ -4463,8 +4464,7 @@ var Lesson = (function () {
                         text: "Có lỗi, vui lòng kiểm tra lại kết nối mạng",
                         icon: 'error',
                         confirmButtonText: "Đóng"
-                    }).then(() => {
-                    });
+                    }).then(() => { });
                     console.log(err);
                     __answer_sending = false;
                     //rollback

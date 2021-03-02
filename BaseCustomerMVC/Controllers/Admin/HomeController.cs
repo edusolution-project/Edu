@@ -1770,6 +1770,25 @@ namespace BaseCustomerMVC.Controllers.Admin
 
         public JsonResult FixSchedule()
         {
+            _classService.CreateQuery().UpdateMany(t => t.StartDate < new DateTime(2000, 1, 1),
+                    Builders<ClassEntity>.Update.Set(t => t.StartDate, DateTime.Now.AddDays(-30 * 6))
+                );
+
+            _classSubjectService.CreateQuery().UpdateMany(t => t.StartDate < new DateTime(2000, 1, 1),
+                    Builders<ClassSubjectEntity>.Update.Set(t => t.StartDate, DateTime.Now.AddDays(-30 * 6))
+                );
+
+            var atvClasses = _classService.GetActiveClass(DateTime.Now).ToList();
+            if (atvClasses.Count > 0)
+            {
+                foreach (var atvClass in atvClasses)
+                {
+                    _classSubjectService.CreateQuery().UpdateMany(t => t.ClassID == atvClass.ID,
+                        Builders<ClassSubjectEntity>.Update.Set(t => t.StartDate, atvClass.StartDate)
+                    );
+                }
+            }
+
             var schedules = _lessonScheduleService.GetAll().Limit(20000).ToList();
             var start = DateTime.Now;
             var begin = DateTime.Now;

@@ -537,8 +537,8 @@ var Lesson = (function () {
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
                 //thêm nút xoá nhiều
-                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá","onclick":"delManyPart()" })
-                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)","class":"ml-4","style":"margin-top:10px","id":"del2all" })
+                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá", "onclick": "delManyPart()" })
+                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)", "class": "ml-4", "style": "margin-top:10px", "id": "del2all" })
                 var div = $("<div>", { "class": "row ml-3 mt-2" })
                 div.append(inputCheckAll).append(btnDelMany)
                 tabs.append(div);
@@ -3184,7 +3184,7 @@ var Lesson = (function () {
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
-                if (data.error == null) {
+                if (data.Error == null) {
                     if (!$(obj).parent().hasClass('top-menu'))
                         $(obj).parent().remove();
                     else
@@ -3207,10 +3207,10 @@ var Lesson = (function () {
                     }
                 } else {
                     //notification("error", data.Error, 3000);
-                    
+
                     Swal.fire({
                         title: 'Có lỗi',
-                        text: data.error,
+                        text: data.Error,
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
@@ -4420,8 +4420,9 @@ var Lesson = (function () {
                 Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                     __answer_sending = false;
                     var rsp = JSON.parse(res)
+                    console.log(rsp);
                     if (rsp != null && rsp.error != null) {
-
+                        console.log(rsp);
                         Swal.fire({
                             title: 'Có lỗi',
                             text: rsp.error,
@@ -4440,8 +4441,6 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        //debugger
-                        console.log("line 4060 to fix");
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
                         //} else {
@@ -4537,13 +4536,16 @@ var Lesson = (function () {
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
+                        if (rsp.reset) {
+                            setLocalData("Timer", "00:00");
+                            CompleteLectureExam(true);
+                        }
                     });
 
                     //notification("error", rsp.error, 3000);
                     return false;
                 }
                 else {
-                    console.log("line 4161 to fix");
                     //if (value == "") {
                     //    delAnswerForStudent(questionId);
                     //} else {
@@ -5305,7 +5307,7 @@ var Lesson = (function () {
         }
         else {
             if (idPart2ManyDel.indexOf(idInput) >= 0) {
-                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput),1)
+                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput), 1)
             }
 
             $("#del2all").prop("checked", false)
