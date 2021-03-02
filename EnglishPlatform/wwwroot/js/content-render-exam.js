@@ -3089,6 +3089,7 @@ var Lesson = (function () {
     var countCreateExam = 0;
     var startExam = function (obj) {
         countCreateExam++;
+        showLoading("Đang tải dữ liệu ...");
         if (countCreateExam == 1) {
             if (obj != null)
                 $(obj).prop("disabled", true);
@@ -3141,6 +3142,7 @@ var Lesson = (function () {
                             $(obj).prop("disabled", false);
                     }
                     countCreateExam = 0;
+                    hideLoading();
                 })
                 .catch(function (err) {
 
@@ -3152,6 +3154,7 @@ var Lesson = (function () {
                     }).then(() => {
                     });
                     countCreateExam = 0;
+                    hideLoading();
                     //notification("error", err, 3000);
                     //alert(err);
                 });
@@ -3894,12 +3897,12 @@ var Lesson = (function () {
     }
 
     var completeExam = async function (isOvertime) {
-
+        
         //if (!isOvertime) {
         var undoneQuiz = $('.rounded-quiz:not(.completed)').length;
         if (undoneQuiz > 0) {
             if (confirm("Bạn chưa làm xong hết các câu hỏi. Xác nhận nộp bài?")) {
-
+                
             }
             else {
                 if (!$('#QuizNav').hasClass("show")) toggleNav($('#quiz_number_counter'));
@@ -3907,6 +3910,7 @@ var Lesson = (function () {
             }
         }
         //}
+        debugger
 
         if (config.mod == mod.STUDENT_EXAM || config.mod == mod.STUDENT_LECTURE) {
             showLoading("Đang nộp bài...");
@@ -4128,6 +4132,7 @@ var Lesson = (function () {
 
     var review = function (examid) {
         document.location = config.url.review + '/' + examid;
+        showLoading('Đang tải dữ liệu ...')
     }
 
     /// tồn tại exam cũ thì return true;

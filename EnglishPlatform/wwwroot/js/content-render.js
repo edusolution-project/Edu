@@ -3171,6 +3171,7 @@ var Lesson = (function () {
         dataform.append("LessonID", config.lesson_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
         dataform.append("ClassID", config.class_id);
+        showLoading('Đang tải dữ liệu ...')
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
@@ -3211,9 +3212,10 @@ var Lesson = (function () {
                     if (obj != null)
                         $(obj).prop("disabled", false);
                 }
+                hideLoading()
             })
             .catch(function (err) {
-
+                hideLoading()
                 Swal.fire({
                     title: 'Có lỗi',
                     text: err,
