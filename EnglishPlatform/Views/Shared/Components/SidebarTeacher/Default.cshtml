@@ -15,31 +15,91 @@
     </div>
     <div class="menu-bar" style="position:absolute; top: 100px; bottom: 0; width: 100%; overflow:auto;">
         <ul>
+            <!--<li for="home">
+        <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
+    </li>
+
+    <li for="course">
+        <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
+    </li>
+
+    @if (isHeadTeacher)
+    {
+        <li for="teacher">
+            <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
+        </li>
+    }
+
+    <li for="student">
+        <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+    </li>
+
+    <li for="profile" id="showbtnProfile" style="display:none">
+        <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
+    </li>
+
+    <li for="curriculum">
+        <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
+    </li>
+
+    <li for="reference">
+        <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="ic ic-file"></i>Học liệu</a>
+    </li>
+
+    <li for="calendar">
+        <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Lịch dạy</a>
+    </li>
+
+    <li for="">
+        <a href="@processUrl("Index" , "ExamManage" )" title="Khảo thí"><i class="ic ic-book-pen"></i>Khảo thí</a>
+    </li>-->
+            @*@if (isHeadTeacher)
+        {
+            <li for="product">
+                <a href="@processUrl("Index", "Product")" title="Quản lý gói học"><i class="ic ic-celendar"></i>Quản lý gói học</a>
+            </li>
+        }
+
+        <li for="discussion">
+            <a href="javascript:;;" onclick="$('.easy-chat__content').toggleClass('open')" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
+        </li>*@
+
+            <!--<li for="news">-->
+            @*<a href="@processUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>*@
+            <!--<a href="/tin-tuc" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
+    </li>-->
+
             <li for="home">
                 <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
             </li>
 
             <li for="course">
-                <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
+                <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Lớp học của tôi</a>
             </li>
 
-            @if (isHeadTeacher)
-            {
-                <li for="teacher">
-                    <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
-                </li>
-            }
-
-            <li for="student">
-                <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+            <li for="teacher" id="parentMenu">
+                <a href="#" title="Quản lý giáo viên" onclick="openChilMenu('chilMenu')">
+                    <i class="ic ic-multi-user"></i>Quản lý
+                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" style="font-size:20px;float:right"></i>
+                </a>
+                <ul id="chilMenu" class="ml-3 hide" style="display:none">
+                    <li for="">
+                        <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
+                    </li>
+                    <li for="">
+                        <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
+                    </li>
+                    <li for="">
+                        <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+                    </li>
+                    <li for="">
+                        <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Quản lý bài giảng</a>
+                    </li>
+                </ul>
             </li>
 
             <li for="profile" id="showbtnProfile" style="display:none">
                 <a href="@processUrl("Profile","Home")" title="Cá nhân"><i class="ic ic-user"></i>Cá nhân</a>
-            </li>
-
-            <li for="curriculum">
-                <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Tạo bài giảng</a>
             </li>
 
             <li for="reference">
@@ -47,22 +107,14 @@
             </li>
 
             <li for="calendar">
-                <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Quản lý lịch dạy</a>
+                <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Lịch dạy</a>
             </li>
 
-            @if (isHeadTeacher)
-            {
-                <li for="product">
-                    <a href="@processUrl("Index", "Product")" title="Quản lý gói học"><i class="ic ic-celendar"></i>Quản lý gói học</a>
-                </li>
-            }
-
-            <li for="discussion">
-                <a href="javascript:;;" onclick="$('.easy-chat__content').toggleClass('open')" title="Thảo luận"><i class="ic ic-discussion"></i>Thảo luận</a>
+            <li for="">
+                <a href="@processUrl("Index" , "ExamManage" )" title="Khảo thí"><i class="ic ic-book-pen"></i>Khảo thí</a>
             </li>
 
             <li for="news">
-                @*<a href="@processUrl("Index", "News" )" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>*@
                 <a href="/tin-tuc" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
             </li>
         </ul>
@@ -72,6 +124,8 @@
     </div>
 
 </aside>
+<style>
+</style>
 <script>
     var setActiveMenu = function (menu) {
         $('.menu-bar li[for=' + menu + ']').addClass('active');
@@ -88,6 +142,14 @@
         }
     }
 
+    var openChilMenu = function (id) {
+        if ($("#chilMenu").attr("style") == "display:none")
+            $("#chilMenu").attr("style", "display:block")
+        else {
+            $("#chilMenu").attr("style", "display:none")
+        }
+    }
+
     $(document).ready(function () {
         responeMenu();
     });
@@ -95,4 +157,5 @@
     $(window).resize(function () {
         responeMenu();
     });
+
 </script>

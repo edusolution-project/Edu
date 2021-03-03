@@ -66,18 +66,57 @@
             </div>
         </div>
     </div>
+
+    <!--Danh sách kì thì-->
+    <div class="card-body" v-if="tab[0]">
+        <template v-if="list_exams.length > 0">
+            <table id="ed_table" class="table">
+                <thead>
+                    <tr>
+                        <th class="text-center align-middle" style="width:30px">#</th>
+                        <th class="text-center align-middle">Tên kì thi</th>
+                        <th class="text-center align-middle">Ngày tạo</th>
+                        <th class="text-center align-middle">Thời gian</th>
+                        <th class="text-center align-middle">Lượt làm</th>
+                        <th class="text-center align-middle">Số mã đề</th>
+                        <th class="text-center align-middle">Lớp</th>
+                        <th class="text-center align-middle">Người tạo</th>
+                        <th class="text-center align-middle">Tác vụ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(exam,k) in list_exams">
+                        <td class="text-center align-middle">{{k+1}}</td>
+                        <td class="text-center align-middle">{{exam.Name}}</td>
+                        <td class="text-center align-middle">{{formatShortDate(exam.Created)}}</td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle">{{exam.UserName}}</td>
+                        <td class="text-center align-middle">
+                            <button>Sửa</button>
+                            <button>Xoá</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </template>
+        <template v-else>Không có dữ liệu về các kì thi.</template>
+    </div>
+
     <div class="card-body" v-if="tab[1]">
         <template>
             <table id="ed_table" class="table">
                 <thead>
                     <tr class="text-sm-center">
                         @*<td style="width:35px"><input type="checkbox" /></td>*@
-                        <td>#</td>
-                        <td>Tên</td>
-                        <td>Cấp độ</td>
-                        <td>Chương trình</td>
-                        <td>Số câu</td>
-                        <td style="width:150px;max-width:150px">Tác vụ</td>
+                        <th>#</th>
+                        <th>Tên</th>
+                        <th>Cấp độ</th>
+                        <th>Chương trình</th>
+                        <th>Số câu</th>
+                        <th style="width:150px;max-width:150px">Tác vụ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,10 +162,10 @@
         <table id="ed_table" class="table">
             <thead>
                 <tr class="text-sm-center">
-                    <td>#</td>
-                    <td>Tên</td>
-                    <td>Người tạo</td>
-                    <td style="width:150px;max-width:150px">Tác vụ</td>
+                    <th>#</th>
+                    <th>Tên</th>
+                    <th>Người tạo</th>
+                    <th style="width:150px;max-width:150px">Tác vụ</th>
                 </tr>
             </thead>
             <tbody>
@@ -149,7 +188,7 @@
                     <td>
                         <div class="btn-group" style="display:block">
                             <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showModalExam(matrix.DetailFormat,matrix.Name)"><i class="fas fa-edit"></i></a>
-                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeMatrix(matrix.ID,matrix.Name)"><i class="fas fa-trash-alt"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -186,7 +225,7 @@
                 this.currentUser = @Html.Raw(Json.Serialize(currentUser));
                 this.list_classes = @Html.Raw(Json.Serialize(classlist));
                 //this.getData();
-                this.getExamManage
+                this.getExamManage()
                 @*this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses = @Html.Raw(Json.Serialize(courses));*@
             },
@@ -281,6 +320,7 @@
                     isHideFooter: false,
                     data: []
                 },
+                list_exams:[]
             },
             computed: {},
             watch: {
@@ -505,6 +545,7 @@
                     _form.append("Limit", _that.formatExam.limit)
                     _form.append("Template", _that.formatExam.template)
                     _form.append("TotalExam", _that.formatExam.totalExam)
+                    _form.append("isNew", isNew)
                     for (var i = 0; i < _that.formatExam.format.length; i++) {
                         var itemFormat = _that.formatExam.format[i]
                         //debugger
@@ -606,8 +647,27 @@
                     axios.post(_url, _form)
                         .then(response => {
                             //debugger
+                            var stt = response.data.Status
+                            if (stt) {
+                                _that.list_exams = response.data.Data
+                                this.list_exams = _that.list_exams
+                                debugger
+                            }
+                            else {
+                                Swal.fire(
+                                    'Lỗi',
+                                    response.data.Msg,
+                                    'error'
+                                )
+                            }
                         })
-                        .catch(e => { alert(e) })
+                        .catch(e => {
+                            Swal.fire(
+                                'Lỗi',
+                                e,
+                                'error'
+                            )
+                        })
                 },
                 getMatrixExams() {
                     let _that = this
@@ -644,7 +704,36 @@
                     _that.list_detailMatrix.isHideFooter = isHideFooter
                     _that.list_detailMatrix.data = obj
                     _that.$bvModal.show('modal_exam')
-                }
+                },
+                removeMatrix(id,name) {
+                    if (window.confirm("Bạn muốn xoá " + name + " ?")) {
+                        let _that = this
+                        let _form = new FormData()
+                        _form.append("ID", id)
+                        let _url = '@processUrl("RemoveMatrix","ExamManage")'
+                        _that.isLoading = true
+                        axios.post(_url, _form)
+                            .then(response => {
+
+                                _that.isLoading = false
+
+                            }).catch(e => {
+                                _that.isLoading = false;
+                                alert("Error: " + e)
+                            })
+                        _that.hideModal();
+                    }
+                },
+
+                //support
+                formatShortDate(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("DD/MM/YYYY")
+                },
+                formatShortDateYYYYMMDD(date) {
+                    if (moment(date) < moment(new Date(2000, 1, 1))) return "-"
+                    return moment(date).format("YYYY-MM-DD")
+                },
             }
         });
     </script>
@@ -714,7 +803,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <label class="label">Kì kiểm tra</label>
-                    <input type="text" class="form-control" placeholder="Kì kiểm tra" v-model="name" />
+                    <input type="text" class="form-control" placeholder="Kì kiểm tra" v-model="formatExam.titleExam" />
                 </div>
                 <div class="col-md-6">
                     <label class="label">Tên ma trận đề</label>

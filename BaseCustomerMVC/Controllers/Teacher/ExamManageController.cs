@@ -262,7 +262,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-       public JsonResult GetExamManage(DefaultModel model,String basis)
+        public JsonResult GetExamManage(DefaultModel model,String basis)
         {
             try
             {
@@ -293,7 +293,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if(_teacherHelper.HasRole(UserID,center.ID, "head-teacher"))
                 {
                     var data = _manageExamService.GetItemsByTeacherAndCenter("",center.ID);
-                    listData.AddRange(data.ToList());
+                    var newData = (from d in data.ToList()
+                                  let user = _teacherService.GetItemByID(d.CreateUser)
+                                  select new ManageExamViewModel(d)
+                                  {
+                                      UserName = user == null ? "" : user.FullName,
+                                  }).ToList();
+                    listData.AddRange(newData);
                 }
                 else
                 {
@@ -1249,6 +1255,50 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 answers.AddRange(ans);
             }
             return answers;
+        }
+
+        public JsonResult CreateOrUpdateMatrix(String basis)
+        {
+            try
+            {
+                return Json(new Dictionary<String, Object> {
+
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object>
+                {
+
+                });
+            }
+        }
+
+        public JsonResult RemoveMatrix(String basis,String ID)
+        {
+            try
+            {
+                var matrix = _matrixExamService.GetItemByID(ID);
+                if(matrix == null)
+                    return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg","Không tìm thấy thông tin" }
+                });
+
+                _matrixExamService.Remove(ID);
+
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","Đã xoá" }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message }
+                });
+            }
         }
 
         #endregion

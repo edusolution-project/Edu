@@ -133,7 +133,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         filter.Add(Builders<CourseEntity>.Filter.Text("\"" + defaultModel.SearchText + "\""));
                     }
-                    var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(filter));
+                    var result = _courseService.CreateQuery().Find(Builders<CourseEntity>.Filter.And(filter)).SortByDescending(x=>x.Created);
                     defaultModel.TotalRecord = result.CountDocuments();
 
                     //var result = _referenceService.GetAll();
