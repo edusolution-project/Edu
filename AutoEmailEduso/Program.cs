@@ -28,6 +28,8 @@ namespace AutoEmailEduso
         private static MailHelper _mailHelper;
         private static bool isTest = true;
         private static int count = 0;
+        private static List<String> bcc = new List<String>();
+        private static List<String> cc = new List<String>();
 
         //private static LessonScheduleService _lessonScheduleService;
         private static RoleService _roleService;
@@ -71,6 +73,8 @@ namespace AutoEmailEduso
             _chapterService = new ChapterService(configuration);
 
             isTest = configuration["Test"] == "1";
+            bcc = configuration["BccAddress"].Split(',').ToList();
+            cc = configuration["CcAddress"].Split(',').ToList();
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -104,26 +108,9 @@ namespace AutoEmailEduso
                         Console.WriteLine("Processing Auto Deactive Class ...");
                         await AutoDeactiveClass();
                         break;
-                    //case "sendmail":
-                    //    Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
-                    //    await sendmail();
-                    //    break;
-                    //case "ReportToExcel":
-                    //    Console.WriteLine("Dang xuat bao cao");
-                    //    await ReportToExcel();
-                    //    break;
                     case "ServiceRenewalNotice":
                         Console.WriteLine(ServiceRenewalNotice().Result);
                         break;
-                    case "GetReport4Chi":
-                        //GetReport4Chi();
-                        break;
-                    //case "BenTre":
-                    //    await BenTre();
-                    //    break;
-                    //case "HPNY":
-                    //    await HPNY();
-                    //    break;
                     default:
                         break;
                 }
@@ -180,7 +167,6 @@ namespace AutoEmailEduso
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Lớp</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
                                             <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
                                             <!--<td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>-->
                                         </tr>
@@ -195,7 +181,6 @@ namespace AutoEmailEduso
                                     <tbody>";
                         var tbody = "";
                         tbody += "<tbody>";
-                        //var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
                         var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
                         var index = 1;
                         long totalStudent = 0, totalstChuaVaoLop = 0, totalActiveStudents = 0;
@@ -258,7 +243,7 @@ namespace AutoEmailEduso
                             }).ToList();
 
                             var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
-
+                            if (activeLessonIds.Count() == 0) continue;
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
                                 x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
@@ -270,19 +255,19 @@ namespace AutoEmailEduso
                             //var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                             //    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
                             //    && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-                            var activeStudents = _lessonProgressService.CreateQuery().Find(x =>
-                            studentIds.Contains(x.StudentID)
-                                && x.TotalLearnt > 0)
-                                .ToList()
-                                .Select(x => x.StudentID)
-                                .Distinct();
+                            //var activeStudents = _lessonProgressService.CreateQuery().Find(x =>
+                            //studentIds.Contains(x.StudentID)
+                            //    && x.TotalLearnt > 0)
+                            //    .ToList()
+                            //    .Select(x => x.StudentID)
+                            //    .Distinct();
 
-                            var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                                x => studentIds.Contains(x.StudentID)).ToEnumerable();
-                            totalActiveStudents += activeStudents.Count();
+                            //var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                            //    x => studentIds.Contains(x.StudentID)).ToEnumerable();
+                            //totalActiveStudents += activeStudents.Count();
 
-                            var stChuaVaoLop = classStudent - activeStudents.Count();
-                            totalstChuaVaoLop += stChuaVaoLop;
+                            //var stChuaVaoLop = classStudent - activeStudents.Count();
+                            //totalstChuaVaoLop += stChuaVaoLop;
 
                             // danh sach bai kiem tra
                             var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
@@ -294,7 +279,8 @@ namespace AutoEmailEduso
                                                {
                                                    StudentID = g.Key,
                                                    ExamCount = g.Count(),
-                                                   AvgPoint = g.Average(t => t.LastPoint),
+                                                   AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
+                                                   //AvgPoint = g.Average(t => t.LastPoint),
                                                    StudentName = _studentService.GetItemByID(g.Key)?.FullName,
                                                }).ToList();
 
@@ -317,15 +303,6 @@ namespace AutoEmailEduso
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}{listNameTeachers}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
-                            if (stChuaVaoLop == 0)
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>--</td>";
-                            }
-                            else
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{stChuaVaoLop}</td>";
-                            }
-
 
                             List<double> points = new List<double>();
                             var classSbjes_active = _classSubjectService.CreateQuery().Find(o => o.StartDate <= endWeek && o.EndDate >= startWeek && o.TotalExams > 0 && o.ClassID == _class.ID).ToEnumerable();//danh sach mon hoc trong lop dang hoat dong
@@ -334,11 +311,7 @@ namespace AutoEmailEduso
                             var diemtren5 = min5 == 0 ? "--" : min5.ToString();
                             var diemtren2 = min2 == 0 ? "--" : min2.ToString();
                             var diemtren0 = min0 == 0 ? "--" : min0.ToString();
-                            //tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren8}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren5}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren2}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren0}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
+
                             tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#7dcbca'>{diemtren8}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#cae9e0'>{diemtren5}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#f3d2ac'>{diemtren2}</td>" +
@@ -390,17 +363,17 @@ namespace AutoEmailEduso
                         {
                             foreach (var item in listTeacherHeader)
                             {
-                                var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
+                                var toAddress = isTest == true ? cc : new List<string> { item.Email };
                                 //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                                var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                                var bccAddress = isTest == true ? null : bcc;
                                 _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                             }
                         }
                         else if (listTeacherHeader.Count() == 1)
                         {
-                            var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { listTeacherHeader[0].Email };
+                            var toAddress = isTest == true ? cc : new List<string> { listTeacherHeader[0].Email };
                             //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                            var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                            var bccAddress = isTest == true ? null : bcc;
                             _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{listTeacherHeader[0].FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                         }
                         else
@@ -471,6 +444,7 @@ namespace AutoEmailEduso
                                 Title = t.Title
                             }).ToList();
                             var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
+                            if (activeLessonIds.Count() == 0) continue;// khong giao bai khong gui email
 
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -512,7 +486,7 @@ namespace AutoEmailEduso
                                                {
                                                    StudentID = g.Key,
                                                    ExamCount = g.Count() == 0 ? 0 : g.Count(),
-                                                   AvgPoint = g.Average(t => t.LastPoint),
+                                                   AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
                                                    StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
                                                    AvgTimeDoExam = _AvgTimeDoExam,
                                                    CompletedLesson = _CompletedLesson,
@@ -656,7 +630,7 @@ namespace AutoEmailEduso
                                            {
                                                StudentID = g.Key,
                                                ExamCount = g.Count(),
-                                               AvgPoint = g.Average(t => t.LastPoint),
+                                               AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
                                                StudentName = _studentService.GetItemByID(g.Key)?.FullName,
                                            }).ToList();
 
@@ -918,17 +892,17 @@ namespace AutoEmailEduso
                 {
                     foreach (var item in listTeacher)
                     {
-                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
+                        var toAddress = isTest == true ? cc : new List<string> { item.Email };
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
-                        var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
+                        var bccAddress = isTest == true ? null : bcc;
                         _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                     }
                 }
                 else if (listTeacher.Count == 1)
                 {
-                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { listTeacher[0].Email };
+                    var toAddress = isTest == true ? cc : new List<string> { listTeacher[0].Email };
                     //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                    var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
+                    var bccAddress = isTest == true ? null : bcc;
                     _ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{listTeacher[0].FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                 }
                 else
@@ -1007,8 +981,8 @@ namespace AutoEmailEduso
                     foreach (var @class in activeClasses)
                     {
                         //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
-                        //var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
-                        var activeSchedules = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime).ToEnumerable()
+                        var activeSchedules = _lessonService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                        //var activeSchedules = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime).ToEnumerable()
                             .OrderBy(t => t.ClassID)
                             .ThenBy(t => t.ClassSubjectID)
                             .ThenBy(t => t.StartDate).ToList();
@@ -1202,6 +1176,172 @@ namespace AutoEmailEduso
             var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
+
+        private static async Task AutoDeactiveClass()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                int offset = currentTime.DayOfWeek - DayOfWeek.Monday;
+                var monday = currentTime.AddDays(-offset);
+                var monday2weekago = monday.AddDays(-14);
+                var sundayweekago = monday.AddDays(-1);
+                var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
+                var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
+                var activeCenters = _centerService.GetActiveCenter(currentTime);
+                if (activeCenters.Count() == 0)
+                {
+                    Console.WriteLine("Không có cơ sở hoạt động");
+                }
+
+                Int32 totalClass = 0;
+
+                foreach (var center in activeCenters)
+                {
+                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);
+                    if (classesActive.Count() == 0) continue;
+                    foreach (var @class in classesActive)
+                    {
+                        if (@class.StartDate > firstDay) continue;
+                        var activeLessons = _lessonService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
+                        if (activeLessons == 0)
+                        {
+                            if (!@class.IsActive) continue;
+                            @class.IsActive = false;
+                            totalClass++;
+                            Console.WriteLine("Lop khong co hoat dong " + @class.Name + " - " + center.Name);
+                            _classService.Save(@class);
+                            var students = _studentService.GetStudentIdsByClassId(@class.ID).Count();
+                            if (students == 0) continue;
+                            var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                            var listTeacher = new List<TeacherEntity>();
+                            var subject = "Thông báo đóng lớp không hoạt động";
+                            foreach (var mem in members.ToList())
+                            {
+                                var _teacher = _teacherService.GetItemByID(mem.TeacherID);
+                                if (!listTeacher.Any(x => x.Email == _teacher.Email))
+                                {
+                                    listTeacher.Add(_teacher);
+                                    var content = "<div>" +
+                                        $"<p>Kính gửi thầy/cô: {_teacher.FullName}</p>" +
+                                        $"<p>EDUSO nhận thấy trong thời gian từ ngày {firstDay.ToString("dd-MM-yyyy")} đến ngày {lastDay.ToString("dd-MM-yyyy")} " +
+                                        $"lớp {@class.Name} - cơ sở {center.Name}" +
+                                        $"của giáo viên {_teacher.FullName} không có hoạt động (lên lịch dạy, giao bài tập cho học sinh).</p>" +
+                                        $"<p>Vì vậy EDUSO đóng lớp {@class.Name} kể từ ngày {currentTime.ToString("dd-MM-yyyy")}</p>" +
+                                        $"<p>Mọi thông tin thắc mắc vui lòng liên hệ CSKH: 0989 085 398 </p>" +
+                                        "</div>";
+                                    var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { _teacher.Email };
+                                    //var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                                    var toBCC = isTest ? null : new List<String> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" };
+                                    _ = _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT, null, toBCC);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Tổng lớp: {totalClass}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static async Task<String> ServiceRenewalNotice()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                //lay danh sach co so dang hoat dong
+                var centers = _centerService.CreateQuery().Find(x => x.Status == true).ToList();
+                //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
+                foreach (var item in centers)
+                {
+                    //lay danh sach lop dang hoat dong
+                    var classesActive = _classService.GetActiveClass4Report(item.StartDate, item.ExpireDate, item.ID);
+                    if (classesActive.Count() == 0) continue;
+
+                    var endTime = item.ExpireDate;
+                    var totalTotalMilliseconds = currentTime.Subtract(endTime).TotalMilliseconds;
+                    var totalTotalDays = currentTime.Subtract(endTime).TotalDays;
+                    if (totalTotalDays >= 0 && totalTotalDays <= 7 && item.ExpireDate.Month == currentTime.Month)
+                    {
+                        //gui mail thong bao het han
+                        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == item.ID)).ToList().FindAll(y => HasRole(y.ID, item.ID, "head-teacher")).ToList();
+                        if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
+                        {
+                            listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
+                        }
+
+                        if (listTeacherHeader.Count == 0) continue;
+
+                        String listNameTeachers = "";
+                        List<String> listEmailTeachers = new List<string>();
+                        foreach (var teacher in listTeacherHeader)
+                        {
+                            listNameTeachers += $"{teacher.FullName}, ";
+                            listEmailTeachers.Add(teacher.Email);
+                        }
+                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim() + ".";
+                        String subject = "THÔNG BÁO GIA HẠN DỊCH VỤ";
+
+                        var thead = "<thead>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:18pt;font-family:Arial,sans-serif;font-weight:bold;text-align: center'>THƯ THÔNG BÁO GIA HẠN DỊCH VỤ</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center;font-style: italic'>(Thành thật xin lỗi, nếu trong thời gian thư đang chuyển đi mà quý thầy cô đã thực hiện gia hạn)</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center'>Ngày gửi: {DateTime.Now.ToString("dd-MM-yyyy")}</td>" +
+                            "</tr>" +
+                            "</thead>";
+                        var tbody = "<tbody>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Kính gửi: thầy/cô <span style='font-weight: bold;font-family:\"Segoe UI\",sans-serif; color: black; background-image:initial; background-position:initial; background-size:initial; background-repeat:initial; background-origin:initial; background-clip:initial'>{listNameTeachers}<span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Lời đầu tiên, <span style='font-weight:bold'>EDUSO</span> xin trân trọng cảm ơn sự hợp tác giữa <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> về việc sử dụng Eduso Platform trong giảng dạy và học tập.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Theo như thời gian sử dụng dịch vụ của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> từ <span style='font-weight:bold'>{item.StartDate.ToUniversalTime().ToString("HH:mm dd/MM/yyyy")}</span> đến <span style='font-weight:bold'>{item.ExpireDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")}.</span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'><span style='font-weight:bold'>EDUSO</span> nhận thấy <span style='font-weight:bold'>{item.Name}</span> sắp đến ngày hết hạn sử dụng, sau ngày hết hạn thì các dịch vụ trên hệ thống Eduso sẽ tạm dừng hoạt động.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Để gia hạn dịch vụ, vui lòng liên hệ bộ phận chăm sóc khách hàng theo số điện thoại 0989085398 - 02432444439</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Chân thành cảm ơn sự hợp tác của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span>.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>Trân trọng!</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>----------------o0o-----------</td>" +
+                            "</tr>" +
+                            "</tbody>";
+
+                        var table2 = @"<table cellpadding='0' cellspacing='0' style='margin:auto;border-spacing:0px; border-collapse:collapse; color: rgb(68, 68, 68); width: 480px; font-size:9pt; font-family:Arial,sans-serif; line-height:14px'><tbody><tr><td colspan='2' style='padding: 0px 0px 5px; width: 480px'><font color='#134f5c'><font face='Arial, sans-serif'><span style='font-size:14.6667px'><b>EDU</b></span><span style='font-weight:bold;font-size:14.6667px'>SO</span></font><b style='font-size:9pt'>.,JSC</b></font><font color='#ff9900'><font face='Arial, sans-serif'><b><span style='font-size:14.6667px'><br></span></b></font></font></td></tr><tr><td colspan='2' style='padding:0px 0px 5px;width:480px;color:rgb(23,147,210)'></td></tr><tr><td colspan='2' style='padding:0px 0px 2px;width:480px;border-top:1px dotted rgb(19,19,19)'>&nbsp;</td></tr><tr><td valign='middle' style='padding:0px;width:120px;vertical-align:middle'><img src='https://ci3.googleusercontent.com/proxy/QAgPRZBFrmIBlGmpla2ITc2bGA9bDK-jAclDqfTcfevFuuKJSYrVRL3tBSDbre6GDcdcRw7fRTECfG5ANvDxMvkQiXZbAd56B4pNx3a8cSg2THUFbi0kScAaG8p1jrykO5s4=s0-d-e1-ft#https://drive.google.com/uc?id=1P2PWW0Do8B1PfWW-r1Kjy_tDK2mp92ma&amp;export=download' width='96' height='95' class='CToWUd'></td><td valign='middle' style='font-family:Arial,sans-serif;padding:0px;width:360px;color:rgb(19,19,19);vertical-align:middle'><table cellpadding='0' cellspacing='0' style='border-spacing:0px;border-collapse:collapse;background-color:transparent'><tbody><tr><td style='padding:1px'><br></td></tr><tr><td style='padding:1px'><span style='font-family:Arial,sans-serif;font-size:9pt'>Hotline: (+84)989 085 398</span></td></tr><tr><td style='font-family:Arial,sans-serif;padding:1px;font-size:9pt'><span style='font-size:9pt'>Mail:&nbsp;<a href='http://buithihong98@gmail.com/' target='_blank' data-saferedirecturl='https://www.google.com/url?q=http://buithihong98@gmail.com/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNETDHvUCqOIe01CJEJwgt6gTrPCkw'>eduso.vn@gmail.com</a></span>&nbsp;</td></tr><tr><td style='padding:1px'><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Trường&nbsp;</span></font><span style='font-size:9pt'>Đại học Giao thông vận tải -&nbsp;</span></span><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Số 3 Phố Cầu Giâ</span></font></span><font style='background-color:transparent;font-size:12px' face='Arial, sans-serif'>y <br>-&nbsp;</font><font face='Arial, sans-serif' style='background-color:transparent'><span style='font-size:12px'>Láng Thượng - Đống Đa -&nbsp;</span></font><span style='background-color:transparent;font-size:9pt'>Hà Nội -&nbsp; Việt Nam</span><font face='Arial, sans-serif' style='background-color:transparent;font-size:9pt'><br></font></td></tr><tr><td style='padding:2px 0px 0px 1px'><span style='display:inline-block;height:23px'><a href='https://www.facebook.com/engcooacademy/' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.facebook.com/engcooacademy/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGKOaTRls1lZt_lcFHOqghSGBtnLQ'><img alt='Facebook icon' border='0' width='23' height='23' src='https://ci3.googleusercontent.com/proxy/mjiWTZdOYIWVF9PvTDENxZ6wQOuPAlFcn8ifTjfAuWRilo8dSpvX4l41IZgRY291qHCNVuF42W5YnOsux7SW-_NZ_nzBFoyx9RXY096p16IIPundLZxXuJgdlBEEyn-qrPROAmxOkxQ=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/fb.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;<a href='https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as=subscriber' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as%3Dsubscriber&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGfTeFFzglJMtBFYrt1A1mPlgwklw'><img alt='Youtbue icon' border='0' width='23' height='23' src='https://ci4.googleusercontent.com/proxy/3yJ04s_GTj8Eck5ACth9ub3_mXYz9hUld0f6NMft-hC_i9M91dE06tpBbNOnc--l8okk-gS8GKbpichkfW88R2CG3u_8n0H_bU6tVdcUcTjLX8JkjbKpSJuY2xg2PWulNFSbyAuW60M=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/yt.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;</span></td></tr></tbody></table></td></tr><tr><td colspan='2' style='padding:2px 0px 0px;width:480px;border-bottom:1px dotted rgb(19,19,19)'>&nbsp;</td></tr></tbody></table>";
+
+                        var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
+
+                        var toAddress = isTest == true ? cc : listEmailTeachers;
+                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                        var bccAddress = isTest == true ? null : bcc;
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+                    }
+                }
+                return "Thong bao thanh cong";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
         #endregion
 
         #region ReportToExcel
@@ -1359,1274 +1499,787 @@ namespace AutoEmailEduso
         //    return dataClass;
         //}
 
-        private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String month = "")
-        {
-            try
-            {
-                using (ExcelPackage p = new ExcelPackage())
-                {
-                    // đặt tên người tạo file
-                    p.Workbook.Properties.Author = "Admin";
-
-                    // đặt tiêu đề cho file
-                    p.Workbook.Properties.Title = $"Báo cáo thống kê {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
-
-                    //Tạo một sheet để làm việc trên đó
-                    p.Workbook.Worksheets.Add($"{dataCenter.CenterName}");
-
-                    // lấy sheet vừa add ra để thao tác
-                    ExcelWorksheet ws = p.Workbook.Worksheets[1];
-
-                    // đặt tên cho sheet
-                    ws.Name = $"{dataCenter.CenterName}";
-                    // fontsize mặc định cho cả sheet
-                    ws.Cells.Style.Font.Size = 11;
-                    // font family mặc định cho cả sheet
-                    ws.Cells.Style.Font.Name = "Calibri";
-
-                    // Tạo danh sách các column header
-                    //string[] arrColumnHeader = {"#","Lớp","Ngày bắt đầu","Ngày kết thúc","Sĩ số","Chưa sử dụng hệ thống","10.0 - 8.0","7.9 - 5.0","4.9 - 2.0","1.9 - 0.0"};
-                    string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0", "Chưa làm" };
-
-                    // lấy ra số lượng cột cần dùng dựa vào số lượng header
-                    var countColHeader = arrColumnHeader.Count();
-
-                    // merge các column lại từ column 1 đến số column header
-                    // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
-                    #region row 1
-                    ws.Cells[1, 1].Value = $"Báo cáo thống kê {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
-                    ws.Cells[1, 1, 1, countColHeader].Merge = true;
-                    // in đậm
-                    ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[1, 1, 1, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    #endregion
-
-                    #region row 2
-                    ws.Cells[2, countColHeader - 1].Value = "Hạn mức";
-                    // in đậm
-                    ws.Cells[2, countColHeader - 1].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[2, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[2, countColHeader].Value = dataCenter.Limit;
-                    // in đậm
-                    ws.Cells[2, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[2, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                    #endregion
-
-                    #region row 3
-                    ws.Cells[3, countColHeader - 1].Value = "Tổng số giáo viên";
-                    // in đậm
-                    ws.Cells[3, countColHeader - 1].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[3, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[3, countColHeader].Value = dataCenter.TotalTeachersinCenter;
-                    // in đậm
-                    ws.Cells[3, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[3, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                    #endregion
-
-                    #region row 4
-                    ws.Cells[4, countColHeader - 1].Value = "Tổng số học viên";
-                    // in đậm
-                    ws.Cells[4, countColHeader - 1].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[4, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[4, countColHeader].Value = dataCenter.TotalStudentsinCenter;
-                    // in đậm
-                    ws.Cells[4, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[4, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                    #endregion
-
-                    #region row 5
-                    ws.Cells[5, countColHeader - 1].Value = "Lớp đang hoạt động";
-                    // in đậm
-                    ws.Cells[5, countColHeader - 1].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[5, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[5, countColHeader].Value = $"{dataCenter.TotalClassActive}/{dataCenter.TotalClass}";
-                    // in đậm
-                    ws.Cells[5, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[5, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                    #endregion
-
-                    #region row 6
-                    ws.Cells[6, countColHeader - 1].Value = "Đã học";
-                    // in đậm
-                    ws.Cells[6, countColHeader - 1].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[6, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[6, countColHeader].Value = $"{dataCenter.DaHoc}/{dataCenter.TotalStudentsinCenter}";
-                    // in đậm
-                    ws.Cells[6, countColHeader].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[6, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                    #endregion
-
-                    int colIndex = 1;
-                    int rowIndex = 7;
-
-                    //tạo các header từ column header đã tạo từ bên trên
-                    foreach (var item in arrColumnHeader)
-                    {
-                        var cell = ws.Cells[rowIndex, colIndex];
-
-                        //set màu thành gray
-                        var fill = cell.Style.Fill;
-                        fill.PatternType = ExcelFillStyle.Solid;
-                        fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
-
-                        //căn chỉnh các border
-                        var border = cell.Style.Border;
-                        border.Bottom.Style =
-                            border.Top.Style =
-                            border.Left.Style =
-                            border.Right.Style = ExcelBorderStyle.Thin;
-
-                        //gán giá trị
-                        cell.Value = item;
-
-                        colIndex++;
-                    }
-
-                    // lấy ra danh sách UserInfo từ ItemSource của DataGrid
-                    //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
-
-                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
-                    for (Int32 index = 0; index < data.Count(); index++)
-                    {
-                        var item = data.ElementAtOrDefault(index);
-                        // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
-                        colIndex = 1;
-
-                        // rowIndex tương ứng từng dòng dữ liệu
-                        rowIndex++;
-
-                        //gán giá trị cho từng cell                      
-                        ws.Cells[rowIndex, colIndex++].Value = index + 1;
-                        ws.Cells[rowIndex, colIndex++].Value = item.ClassName;
-                        ws.Cells[rowIndex, colIndex++].Value = item.StartDate.ToShortDateString();
-                        ws.Cells[rowIndex, colIndex++].Value = item.EndDate.ToShortDateString();
-                        ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass;
-                        ws.Cells[rowIndex, colIndex++].Value = item.DontActiveStudent;
-                        ws.Cells[rowIndex, colIndex++].Value = item.MinPoint8;
-                        ws.Cells[rowIndex, colIndex++].Value = item.MinPoint5;
-                        ws.Cells[rowIndex, colIndex++].Value = item.MinPoint2;
-                        ws.Cells[rowIndex, colIndex++].Value = item.MinPoint0;
-                        ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass - item.MinPoint0 - item.MinPoint2 - item.MinPoint5 - item.MinPoint8;
-
-                        // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
-                        //ws.Cells[rowIndex, colIndex++].Value = item.Birthday.ToShortDateString();
-
-                    }
-
-                    //Lưu file lại
-                    Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\ChuyenVP\\Month{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
-                }
-                return "";
-            }
-            catch (Exception EE)
-            {
-                return EE.Message;
-            }
-        }
-
-        private static async Task<String> Export2Excelv2(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String Month)
-        {
-            try
-            {
-                using (ExcelPackage p = new ExcelPackage())
-                {
-                    // đặt tên người tạo file
-                    p.Workbook.Properties.Author = "Admin";
-
-                    // đặt tiêu đề cho file
-                    p.Workbook.Properties.Title = $"Báo cáo kết quả {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
-
-                    //Tạo một sheet để làm việc trên đó
-                    p.Workbook.Worksheets.Add($"{dataCenter.CenterName}");
-
-                    // lấy sheet vừa add ra để thao tác
-                    ExcelWorksheet ws = p.Workbook.Worksheets[1];
-
-                    // đặt tên cho sheet
-                    ws.Name = $"{dataCenter.CenterName}";
-                    // fontsize mặc định cho cả sheet
-                    ws.Cells.Style.Font.Size = 11;
-                    // font family mặc định cho cả sheet
-                    ws.Cells.Style.Font.Name = "Calibri";
-
-                    // Tạo danh sách các column header
-                    //string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Chưa sử dụng hệ thống", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0","Chưa làm" };
-                    string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
-
-                    // lấy ra số lượng cột cần dùng dựa vào số lượng header
-                    var countColHeader = arrColumnHeader.Count();
-
-                    // merge các column lại từ column 1 đến số column header
-                    // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
-                    #region row 1
-                    {
-                        ws.Cells[1, 1].Value = $"Báo cáo kết quả {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
-                        ws.Cells[1, 1, 1, 108].Merge = true;
-                        // in đậm
-                        ws.Cells[1, 1, 1, 108].Style.Font.Bold = true;
-                        ws.Cells[1, 1, 1, 108].Style.Font.Size = 18;
-                        ws.Cells[1, 1, 1, 108].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        ws.Cells[1, 1, 1, 108].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        // căn giữa
-                        ws.Row(1).Height = 50;
-                        var border = ws.Cells[1, 1, 1, 108].Style.Border;
-                        border.Bottom.Style =
-                            border.Top.Style =
-                            border.Left.Style =
-                            border.Right.Style = ExcelBorderStyle.Thin;
-                        ws.Cells[1, 1, 1, 108].Style.WrapText = true;
-                    }
-                    #endregion
-
-                    #region row 2
-                    ws.Cells[2, 1, 2, 2].Value = $"Hạn mức: {dataCenter.Limit}";
-                    ws.Cells[2, 1, 2, 2].Merge = true;
-                    // in đậm
-                    ws.Cells[2, 1, 2, 2].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[2, 1, 2, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[2, 80, 2, 97].Value = "Điểm 8.0 - 10";
-                    ws.Cells[2, 80, 2, 97].Merge = true;
-                    ws.Cells[2, 98, 2, 108].Style.Fill.PatternType = ExcelFillStyle.DarkDown; // cell co \\
-                    ws.Cells[2, 98, 2, 108].Merge = true;
-                    ws.Cells[2, 98, 2, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134, 208, 141));
-                    //ws.Cells[2, 98, 2, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                    #endregion
-
-                    #region row 3
-                    ws.Cells[3, 1, 3, 2].Value = $"Tổng số giáo viên: {dataCenter.TotalTeachersinCenter}";
-                    ws.Cells[3, 1, 3, 2].Merge = true;
-                    // in đậm
-                    ws.Cells[3, 1, 3, 2].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[3, 1, 3, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[3, 80, 3, 97].Value = "Điểm 5.0 - 7.9";
-                    ws.Cells[3, 80, 3, 97].Merge = true;
-                    ws.Cells[3, 98, 3, 108].Style.Fill.PatternType = ExcelFillStyle.Gray0625;
-                    ws.Cells[3, 98, 3, 108].Merge = true;
-                    ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
-                    //ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                    #endregion
-
-                    #region row 4
-                    ws.Cells[4, 1, 4, 2].Value = $"Tổng số học viên: {dataCenter.TotalStudentsinCenter}";
-                    ws.Cells[4, 1, 4, 2].Merge = true;
-                    // in đậm
-                    ws.Cells[4, 1, 4, 2].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[4, 1, 4, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[4, 4].Value = $"Hoạt động: {dataCenter.DaHoc}";
-                    // in đậm
-                    ws.Cells[4, 4].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[4, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[4, 80, 4, 97].Value = "Điểm 2.0 - 4.9";
-                    ws.Cells[4, 80, 4, 97].Merge = true;
-                    ws.Cells[4, 98, 4, 108].Style.Fill.PatternType = ExcelFillStyle.DarkUp;
-                    ws.Cells[4, 98, 4, 108].Merge = true;
-                    ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
-                    //ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                    #endregion
-
-                    #region row 5
-                    ws.Cells[5, 1, 5, 2].Value = $"Tổng số lớp: {dataCenter.TotalClass}";
-                    ws.Cells[5, 1, 5, 2].Merge = true;
-                    // in đậm
-                    ws.Cells[5, 1, 5, 2].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[5, 1, 5, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[5, 4, 5, 4].Value = $"Lớp đang hoạt động: {dataCenter.TotalClassActive}";
-                    // in đậm
-                    ws.Cells[5, 4, 5, 4].Style.Font.Bold = true;
-                    // căn giữa
-                    ws.Cells[5, 4, 5, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-
-                    ws.Cells[5, 80, 5, 97].Value = "Điểm 0.0 - 1.9";
-                    ws.Cells[5, 80, 5, 97].Merge = true;
-                    ws.Cells[5, 98, 5, 108].Style.Fill.PatternType = ExcelFillStyle.LightVertical;
-                    ws.Cells[5, 98, 5, 108].Merge = true;
-                    ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
-                    //ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                    #endregion
-
-                    #region row 6
-                    ws.Cells[6, 80, 6, 97].Value = "Chưa học";
-                    ws.Cells[6, 80, 6, 97].Merge = true;
-                    ws.Cells[6, 98, 6, 108].Style.Fill.PatternType = ExcelFillStyle.DarkTrellis;
-                    ws.Cells[6, 98, 6, 108].Merge = true;
-                    //ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174,157,245));
-                    ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                    #endregion
-
-                    int colIndex = 1;
-                    int rowIndex = 8;
-
-                    //tạo các header từ column header đã tạo từ bên trên
-                    //foreach (var item in arrColumnHeader)
-                    for (var i = 0; i < 108; i++)
-                    {
-                        var item = arrColumnHeader.ElementAtOrDefault(i);
-                        var cell = ws.Cells[rowIndex, colIndex];
-                        //căn chỉnh các border
-                        var border = cell.Style.Border;
-                        border.Bottom.Style =
-                            border.Top.Style =
-                            border.Left.Style =
-                            border.Right.Style = ExcelBorderStyle.Thin;
-                        cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                        cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                        cell.Style.WrapText = true;
-
-                        //gán giá trị
-                        cell.Value = item;
-                        colIndex++;
-                        if (colIndex == 8)
-                        {
-                            ws.Cells[rowIndex, 8, rowIndex, 108].Merge = true;
-                        }
-                        if (colIndex == 1)
-                        {
-                            ws.Column(colIndex).Width = 2.5;
-                        }
-                        if (colIndex == 2 || colIndex == 4 || colIndex == 5)
-                        {
-                            ws.Column(colIndex).Width = 15;
-                        }
-                        if (colIndex == 3)
-                        {
-                            ws.Column(colIndex).Width = 22;
-                        }
-                        if (colIndex == 6)
-                        {
-                            ws.Column(colIndex).Width = 7;
-                        }
-                        if (colIndex == 7)
-                        {
-                            ws.Column(colIndex).Width = 9;
-                        }
-                    }
-
-                    // lấy ra danh sách UserInfo từ ItemSource của DataGrid
-                    //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
-                    var datatest = data.GroupBy(x => x.ClassID);
-
-                    for (int i = 8; i <= 8 + 100; i++)
-                    {
-                        ws.Column(i).Width = 1;
-                    }
-
-                    // với mỗi item trong danh sách sẽ ghi trên 1 dòng
-                    for (Int32 index = 0; index < datatest.Count(); index++)
-                    {
-                        var item = datatest.ElementAtOrDefault(index);
-                        var inforClass = item.FirstOrDefault();
-                        // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
-                        colIndex = 1;
-
-                        // rowIndex tương ứng từng dòng dữ liệu
-                        rowIndex++;
-
-                        //gán giá trị cho từng cell        
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = index + 1;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = $"{inforClass.ClassName}";
-                            cell.Style.WrapText = true;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = $"{inforClass.TeacherName}";
-                            cell.Style.WrapText = true;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = inforClass.StartDate.ToString("dd/MM/yyyy");
-                            cell.Style.WrapText = true;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = inforClass.EndDate.ToString("dd/MM/yyyy");
-                            cell.Style.WrapText = true;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-                        {
-                            var currentrow = rowIndex;
-                            var currentcol = colIndex++;
-                            var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
-                            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                            cell.Merge = true;
-                            cell.Value = inforClass.StudentinClass;
-                            var border = cell.Style.Border;
-                            border.Bottom.Style =
-                                border.Top.Style =
-                                border.Left.Style =
-                                border.Right.Style = ExcelBorderStyle.Thin;
-                        }
-
-                        for (Int32 j = 0; j < item.Count(); j++)
-                        {
-                            var _colIndex = colIndex;
-                            var _item = item.ElementAtOrDefault(j);
-
-                            if (item.Key == "5f5af539171ba81edc6ec410")
-                            {
-                                var a = "";
-                            }
-
-                            var persentMinPoint8 = Math.Round((((double)_item.MinPoint8 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
-                            var persentMinPoint5 = Math.Round((((double)_item.MinPoint5 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
-                            var persentMinPoint2 = Math.Round((((double)_item.MinPoint2 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
-                            var persentMinPoint0 = Math.Round((((double)_item.MinPoint0 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
-                            if (persentMinPoint0 + persentMinPoint2 + persentMinPoint5 + persentMinPoint8 > 100)
-                            {
-                                if (persentMinPoint0 != 0) persentMinPoint0 = 100 - persentMinPoint2 - persentMinPoint5 - persentMinPoint8;
-                                else if (persentMinPoint0 == 0 && persentMinPoint2 != 0) persentMinPoint2 = 100 - persentMinPoint5 - persentMinPoint8;
-                            }
-
-                            var persentChuaLam = 100 - persentMinPoint0 - persentMinPoint2 - persentMinPoint5 - persentMinPoint8;
-
-                            {
-                                var cell = ws.Cells[rowIndex + j, _colIndex++];
-                                cell.Value = $"Tháng { 9 + j}";
-                                var border = cell.Style.Border;
-                                border.Bottom.Style =
-                                    border.Top.Style =
-                                    border.Left.Style =
-                                    border.Right.Style = ExcelBorderStyle.Thin;
-                            }
-
-                            Int32 colPerSent8 = _colIndex + (Int32)persentMinPoint8;
-                            if (persentMinPoint8 > 0)
-                            {
-                                var cellColPersent8 = ws.Cells[rowIndex + j, colPerSent8];
-                                ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Value = $"{persentMinPoint8}%";
-                                //set màu thành lightgreen
-                                var fill8 = ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Fill;
-                                fill8.PatternType = ExcelFillStyle.DarkDown;
-                                fill8.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134, 208, 141));
-                                //fill8.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Merge = true;
-                                // in đậm
-                                ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Font.Bold = true;
-                                // căn giữa
-                                ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                //căn chỉnh các border
-                                var border = ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Border;
-                                border.Bottom.Style =
-                                    border.Top.Style =
-                                    border.Left.Style =
-                                    border.Right.Style = ExcelBorderStyle.Thin;
-                            }
-                            else
-                            {
-                                colPerSent8 -= 1;
-                            }
-
-                            Int32 colPerSent5 = colPerSent8 + (Int32)persentMinPoint5;
-                            if (persentMinPoint5 > 0)
-                            {
-                                var cellColPersent5 = ws.Cells[rowIndex + j, colPerSent5];
-                                //cellColPersent5.Value = $"{persentMinPoint5}%";
-                                ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Value = $"{persentMinPoint5}%";
-                                //set màu thành lightgreen
-                                var fill5 = ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Fill;
-                                fill5.PatternType = ExcelFillStyle.Gray0625;
-                                fill5.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
-                                //fill5.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Merge = true;
-                                // in đậm
-                                ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Font.Bold = true;
-                                // căn giữa
-                                ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                var border = ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Border;
-                                border.Bottom.Style =
-                                    border.Top.Style =
-                                    border.Left.Style =
-                                    border.Right.Style = ExcelBorderStyle.Thin;
-                            }
-
-                            Int32 colPerSent2 = colPerSent5 + (Int32)persentMinPoint2;
-                            if (persentMinPoint2 > 0)
-                            {
-                                var cellColPersent2 = ws.Cells[rowIndex + j, colPerSent2];
-                                ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Value = $"{persentMinPoint2}%";
-                                var fill2 = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Fill;
-                                fill2.PatternType = ExcelFillStyle.DarkUp;
-                                fill2.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
-                                //fill2.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Merge = true;
-                                // in đậm
-                                ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Font.Bold = true;
-                                // căn giữa
-                                ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Border;
-                                border.Bottom.Style =
-                                    border.Top.Style =
-                                    border.Left.Style =
-                                    border.Right.Style = ExcelBorderStyle.Thin;
-                            }
-
-                            Int32 colPerSent0 = colPerSent2 + (Int32)persentMinPoint0;
-                            if (persentMinPoint0 > 0)
-                            {
-                                var cellColPersent0 = ws.Cells[rowIndex + j, colPerSent0];
-                                ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Value = $"{persentMinPoint0}%";
-                                var fill0 = ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.Fill;
-                                fill0.PatternType = ExcelFillStyle.LightVertical;
-                                fill0.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
-                                //fill0.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Merge = true;
-                                // in đậm
-                                ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.Font.Bold = true;
-                                // căn giữa
-                                ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent0].Style.Border;
-                                border.Bottom.Style =
-                                    border.Top.Style =
-                                    border.Left.Style =
-                                    border.Right.Style = ExcelBorderStyle.Thin;
-                            }
-
-                            Int32 colPerSent = colPerSent0 + (Int32)persentChuaLam;
-                            if (persentChuaLam > 0)
-                            {
-                                if (persentMinPoint8 == 0)
-                                {
-                                    var cellCollPersent = ws.Cells[rowIndex + j, colPerSent + 1];
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Value = $"{persentChuaLam}%";
-                                    var fill = ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.Fill;
-                                    fill.PatternType = ExcelFillStyle.DarkTrellis;
-                                    fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174, 157, 245));
-                                    //fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Merge = true;
-                                    // in đậm
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.Font.Bold = true;
-                                    // căn giữa
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                    var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent + 1].Style.Border;
-                                    border.Bottom.Style =
-                                        border.Top.Style =
-                                        border.Left.Style =
-                                        border.Right.Style = ExcelBorderStyle.Thin;
-                                }
-                                else
-                                {
-                                    var cellCollPersent = ws.Cells[rowIndex + j, colPerSent];
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Value = $"{persentChuaLam}%";
-                                    var fill = ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.Fill;
-                                    fill.PatternType = ExcelFillStyle.DarkTrellis;
-                                    fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174, 157, 245));
-                                    //fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Merge = true;
-                                    // in đậm
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.Font.Bold = true;
-                                    // căn giữa
-                                    ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                    var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent].Style.Border;
-                                    border.Bottom.Style =
-                                        border.Top.Style =
-                                        border.Left.Style =
-                                        border.Right.Style = ExcelBorderStyle.Thin;
-                                }
-                            }
-                        }
-                        rowIndex += item.Count();
-                        ws.Cells[rowIndex, 1, rowIndex, 108].Merge = true;
-                        ws.Row(rowIndex).Height = 15;
-
-                    }
-
-                    //Lưu file lại
-                    Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
-                }
-                return "";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
-
-
-        private static Dictionary<Int32, DataTime> GetListTime(DateTime currentTime)
-        {
-            var currentMonth = currentTime.Month;
-            var currentYear = currentTime.Year;
-            var firstDayofMonth = new DateTime(currentYear, currentMonth, 1, 00, 00, 00);
-            var lastDayofMonth = firstDayofMonth.AddMonths(1).AddMilliseconds(-1);
-            Dictionary<Int32, DataTime> data = new Dictionary<int, DataTime>();
-            data.Add(currentMonth, new DataTime { StartTime = firstDayofMonth, EndTime = lastDayofMonth });
-            while (lastDayofMonth.Month <= 12)
-            {
-                firstDayofMonth = firstDayofMonth.AddMonths(1);
-                lastDayofMonth = firstDayofMonth.AddMonths(1).AddMilliseconds(-1);
-                var key = firstDayofMonth.Month;
-                data.Add(key, new DataTime { StartTime = firstDayofMonth, EndTime = lastDayofMonth });
-            }
-            return data;
-        }
+        //private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String month = "")
+        //{
+        //    try
+        //    {
+        //        using (ExcelPackage p = new ExcelPackage())
+        //        {
+        //            // đặt tên người tạo file
+        //            p.Workbook.Properties.Author = "Admin";
+
+        //            // đặt tiêu đề cho file
+        //            p.Workbook.Properties.Title = $"Báo cáo thống kê {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
+
+        //            //Tạo một sheet để làm việc trên đó
+        //            p.Workbook.Worksheets.Add($"{dataCenter.CenterName}");
+
+        //            // lấy sheet vừa add ra để thao tác
+        //            ExcelWorksheet ws = p.Workbook.Worksheets[1];
+
+        //            // đặt tên cho sheet
+        //            ws.Name = $"{dataCenter.CenterName}";
+        //            // fontsize mặc định cho cả sheet
+        //            ws.Cells.Style.Font.Size = 11;
+        //            // font family mặc định cho cả sheet
+        //            ws.Cells.Style.Font.Name = "Calibri";
+
+        //            // Tạo danh sách các column header
+        //            //string[] arrColumnHeader = {"#","Lớp","Ngày bắt đầu","Ngày kết thúc","Sĩ số","Chưa sử dụng hệ thống","10.0 - 8.0","7.9 - 5.0","4.9 - 2.0","1.9 - 0.0"};
+        //            string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0", "Chưa làm" };
+
+        //            // lấy ra số lượng cột cần dùng dựa vào số lượng header
+        //            var countColHeader = arrColumnHeader.Count();
+
+        //            // merge các column lại từ column 1 đến số column header
+        //            // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
+        //            #region row 1
+        //            ws.Cells[1, 1].Value = $"Báo cáo thống kê {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
+        //            ws.Cells[1, 1, 1, countColHeader].Merge = true;
+        //            // in đậm
+        //            ws.Cells[1, 1, 1, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[1, 1, 1, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //            #endregion
+
+        //            #region row 2
+        //            ws.Cells[2, countColHeader - 1].Value = "Hạn mức";
+        //            // in đậm
+        //            ws.Cells[2, countColHeader - 1].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[2, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[2, countColHeader].Value = dataCenter.Limit;
+        //            // in đậm
+        //            ws.Cells[2, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[2, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        //            #endregion
+
+        //            #region row 3
+        //            ws.Cells[3, countColHeader - 1].Value = "Tổng số giáo viên";
+        //            // in đậm
+        //            ws.Cells[3, countColHeader - 1].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[3, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[3, countColHeader].Value = dataCenter.TotalTeachersinCenter;
+        //            // in đậm
+        //            ws.Cells[3, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[3, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        //            #endregion
+
+        //            #region row 4
+        //            ws.Cells[4, countColHeader - 1].Value = "Tổng số học viên";
+        //            // in đậm
+        //            ws.Cells[4, countColHeader - 1].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[4, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[4, countColHeader].Value = dataCenter.TotalStudentsinCenter;
+        //            // in đậm
+        //            ws.Cells[4, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[4, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        //            #endregion
+
+        //            #region row 5
+        //            ws.Cells[5, countColHeader - 1].Value = "Lớp đang hoạt động";
+        //            // in đậm
+        //            ws.Cells[5, countColHeader - 1].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[5, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[5, countColHeader].Value = $"{dataCenter.TotalClassActive}/{dataCenter.TotalClass}";
+        //            // in đậm
+        //            ws.Cells[5, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[5, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        //            #endregion
+
+        //            #region row 6
+        //            ws.Cells[6, countColHeader - 1].Value = "Đã học";
+        //            // in đậm
+        //            ws.Cells[6, countColHeader - 1].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[6, countColHeader - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[6, countColHeader].Value = $"{dataCenter.DaHoc}/{dataCenter.TotalStudentsinCenter}";
+        //            // in đậm
+        //            ws.Cells[6, countColHeader].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[6, countColHeader].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+        //            #endregion
+
+        //            int colIndex = 1;
+        //            int rowIndex = 7;
+
+        //            //tạo các header từ column header đã tạo từ bên trên
+        //            foreach (var item in arrColumnHeader)
+        //            {
+        //                var cell = ws.Cells[rowIndex, colIndex];
+
+        //                //set màu thành gray
+        //                var fill = cell.Style.Fill;
+        //                fill.PatternType = ExcelFillStyle.Solid;
+        //                fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
+
+        //                //căn chỉnh các border
+        //                var border = cell.Style.Border;
+        //                border.Bottom.Style =
+        //                    border.Top.Style =
+        //                    border.Left.Style =
+        //                    border.Right.Style = ExcelBorderStyle.Thin;
+
+        //                //gán giá trị
+        //                cell.Value = item;
+
+        //                colIndex++;
+        //            }
+
+        //            // lấy ra danh sách UserInfo từ ItemSource của DataGrid
+        //            //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
+
+        //            // với mỗi item trong danh sách sẽ ghi trên 1 dòng
+        //            for (Int32 index = 0; index < data.Count(); index++)
+        //            {
+        //                var item = data.ElementAtOrDefault(index);
+        //                // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
+        //                colIndex = 1;
+
+        //                // rowIndex tương ứng từng dòng dữ liệu
+        //                rowIndex++;
+
+        //                //gán giá trị cho từng cell                      
+        //                ws.Cells[rowIndex, colIndex++].Value = index + 1;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.ClassName;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.StartDate.ToShortDateString();
+        //                ws.Cells[rowIndex, colIndex++].Value = item.EndDate.ToShortDateString();
+        //                ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.DontActiveStudent;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.MinPoint8;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.MinPoint5;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.MinPoint2;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.MinPoint0;
+        //                ws.Cells[rowIndex, colIndex++].Value = item.StudentinClass - item.MinPoint0 - item.MinPoint2 - item.MinPoint5 - item.MinPoint8;
+
+        //                // lưu ý phải .ToShortDateString để dữ liệu khi in ra Excel là ngày như ta vẫn thấy.Nếu không sẽ ra tổng số :v
+        //                //ws.Cells[rowIndex, colIndex++].Value = item.Birthday.ToShortDateString();
+
+        //            }
+
+        //            //Lưu file lại
+        //            Byte[] bin = p.GetAsByteArray();
+        //            File.WriteAllBytes($"H:\\Hoa\\ChuyenVP\\Month{month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}.xlsx", bin);
+        //        }
+        //        return "";
+        //    }
+        //    catch (Exception EE)
+        //    {
+        //        return EE.Message;
+        //    }
+        //}
+
+        //private static async Task<String> Export2Excelv2(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String Month)
+        //{
+        //    try
+        //    {
+        //        using (ExcelPackage p = new ExcelPackage())
+        //        {
+        //            // đặt tên người tạo file
+        //            p.Workbook.Properties.Author = "Admin";
+
+        //            // đặt tiêu đề cho file
+        //            p.Workbook.Properties.Title = $"Báo cáo kết quả {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
+
+        //            //Tạo một sheet để làm việc trên đó
+        //            p.Workbook.Worksheets.Add($"{dataCenter.CenterName}");
+
+        //            // lấy sheet vừa add ra để thao tác
+        //            ExcelWorksheet ws = p.Workbook.Worksheets[1];
+
+        //            // đặt tên cho sheet
+        //            ws.Name = $"{dataCenter.CenterName}";
+        //            // fontsize mặc định cho cả sheet
+        //            ws.Cells.Style.Font.Size = 11;
+        //            // font family mặc định cho cả sheet
+        //            ws.Cells.Style.Font.Name = "Calibri";
+
+        //            // Tạo danh sách các column header
+        //            //string[] arrColumnHeader = { "#", "Lớp", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Chưa sử dụng hệ thống", "10.0 - 8.0", "7.9 - 5.0", "4.9 - 2.0", "1.9 - 0.0","Chưa làm" };
+        //            string[] arrColumnHeader = { "#", "Lớp", "Giáo viên", "Ngày bắt đầu", "Ngày kết thúc", "Sĩ số", "Tháng", "Kết quả", "", "", "", "" };
+
+        //            // lấy ra số lượng cột cần dùng dựa vào số lượng header
+        //            var countColHeader = arrColumnHeader.Count();
+
+        //            // merge các column lại từ column 1 đến số column header
+        //            // gán giá trị cho cell vừa merge là Thống kê thông tni User Kteam
+        //            #region row 1
+        //            {
+        //                ws.Cells[1, 1].Value = $"Báo cáo kết quả {dataCenter.CenterName} ({dataCenter.StartDate.ToString("dd/MM/yyyy")} - {dataCenter.EndDate.ToString("dd/MM/yyyy")})";
+        //                ws.Cells[1, 1, 1, 108].Merge = true;
+        //                // in đậm
+        //                ws.Cells[1, 1, 1, 108].Style.Font.Bold = true;
+        //                ws.Cells[1, 1, 1, 108].Style.Font.Size = 18;
+        //                ws.Cells[1, 1, 1, 108].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                ws.Cells[1, 1, 1, 108].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                // căn giữa
+        //                ws.Row(1).Height = 50;
+        //                var border = ws.Cells[1, 1, 1, 108].Style.Border;
+        //                border.Bottom.Style =
+        //                    border.Top.Style =
+        //                    border.Left.Style =
+        //                    border.Right.Style = ExcelBorderStyle.Thin;
+        //                ws.Cells[1, 1, 1, 108].Style.WrapText = true;
+        //            }
+        //            #endregion
+
+        //            #region row 2
+        //            ws.Cells[2, 1, 2, 2].Value = $"Hạn mức: {dataCenter.Limit}";
+        //            ws.Cells[2, 1, 2, 2].Merge = true;
+        //            // in đậm
+        //            ws.Cells[2, 1, 2, 2].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[2, 1, 2, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[2, 80, 2, 97].Value = "Điểm 8.0 - 10";
+        //            ws.Cells[2, 80, 2, 97].Merge = true;
+        //            ws.Cells[2, 98, 2, 108].Style.Fill.PatternType = ExcelFillStyle.DarkDown; // cell co \\
+        //            ws.Cells[2, 98, 2, 108].Merge = true;
+        //            ws.Cells[2, 98, 2, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134, 208, 141));
+        //            //ws.Cells[2, 98, 2, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //            #endregion
+
+        //            #region row 3
+        //            ws.Cells[3, 1, 3, 2].Value = $"Tổng số giáo viên: {dataCenter.TotalTeachersinCenter}";
+        //            ws.Cells[3, 1, 3, 2].Merge = true;
+        //            // in đậm
+        //            ws.Cells[3, 1, 3, 2].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[3, 1, 3, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[3, 80, 3, 97].Value = "Điểm 5.0 - 7.9";
+        //            ws.Cells[3, 80, 3, 97].Merge = true;
+        //            ws.Cells[3, 98, 3, 108].Style.Fill.PatternType = ExcelFillStyle.Gray0625;
+        //            ws.Cells[3, 98, 3, 108].Merge = true;
+        //            ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
+        //            //ws.Cells[3, 98, 3, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //            #endregion
+
+        //            #region row 4
+        //            ws.Cells[4, 1, 4, 2].Value = $"Tổng số học viên: {dataCenter.TotalStudentsinCenter}";
+        //            ws.Cells[4, 1, 4, 2].Merge = true;
+        //            // in đậm
+        //            ws.Cells[4, 1, 4, 2].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[4, 1, 4, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[4, 4].Value = $"Hoạt động: {dataCenter.DaHoc}";
+        //            // in đậm
+        //            ws.Cells[4, 4].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[4, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[4, 80, 4, 97].Value = "Điểm 2.0 - 4.9";
+        //            ws.Cells[4, 80, 4, 97].Merge = true;
+        //            ws.Cells[4, 98, 4, 108].Style.Fill.PatternType = ExcelFillStyle.DarkUp;
+        //            ws.Cells[4, 98, 4, 108].Merge = true;
+        //            ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
+        //            //ws.Cells[4, 98, 4, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //            #endregion
+
+        //            #region row 5
+        //            ws.Cells[5, 1, 5, 2].Value = $"Tổng số lớp: {dataCenter.TotalClass}";
+        //            ws.Cells[5, 1, 5, 2].Merge = true;
+        //            // in đậm
+        //            ws.Cells[5, 1, 5, 2].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[5, 1, 5, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[5, 4, 5, 4].Value = $"Lớp đang hoạt động: {dataCenter.TotalClassActive}";
+        //            // in đậm
+        //            ws.Cells[5, 4, 5, 4].Style.Font.Bold = true;
+        //            // căn giữa
+        //            ws.Cells[5, 4, 5, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+        //            ws.Cells[5, 80, 5, 97].Value = "Điểm 0.0 - 1.9";
+        //            ws.Cells[5, 80, 5, 97].Merge = true;
+        //            ws.Cells[5, 98, 5, 108].Style.Fill.PatternType = ExcelFillStyle.LightVertical;
+        //            ws.Cells[5, 98, 5, 108].Merge = true;
+        //            ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
+        //            //ws.Cells[5, 98, 5, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //            #endregion
+
+        //            #region row 6
+        //            ws.Cells[6, 80, 6, 97].Value = "Chưa học";
+        //            ws.Cells[6, 80, 6, 97].Merge = true;
+        //            ws.Cells[6, 98, 6, 108].Style.Fill.PatternType = ExcelFillStyle.DarkTrellis;
+        //            ws.Cells[6, 98, 6, 108].Merge = true;
+        //            //ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174,157,245));
+        //            ws.Cells[6, 98, 6, 108].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //            #endregion
+
+        //            int colIndex = 1;
+        //            int rowIndex = 8;
+
+        //            //tạo các header từ column header đã tạo từ bên trên
+        //            //foreach (var item in arrColumnHeader)
+        //            for (var i = 0; i < 108; i++)
+        //            {
+        //                var item = arrColumnHeader.ElementAtOrDefault(i);
+        //                var cell = ws.Cells[rowIndex, colIndex];
+        //                //căn chỉnh các border
+        //                var border = cell.Style.Border;
+        //                border.Bottom.Style =
+        //                    border.Top.Style =
+        //                    border.Left.Style =
+        //                    border.Right.Style = ExcelBorderStyle.Thin;
+        //                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                cell.Style.WrapText = true;
+
+        //                //gán giá trị
+        //                cell.Value = item;
+        //                colIndex++;
+        //                if (colIndex == 8)
+        //                {
+        //                    ws.Cells[rowIndex, 8, rowIndex, 108].Merge = true;
+        //                }
+        //                if (colIndex == 1)
+        //                {
+        //                    ws.Column(colIndex).Width = 2.5;
+        //                }
+        //                if (colIndex == 2 || colIndex == 4 || colIndex == 5)
+        //                {
+        //                    ws.Column(colIndex).Width = 15;
+        //                }
+        //                if (colIndex == 3)
+        //                {
+        //                    ws.Column(colIndex).Width = 22;
+        //                }
+        //                if (colIndex == 6)
+        //                {
+        //                    ws.Column(colIndex).Width = 7;
+        //                }
+        //                if (colIndex == 7)
+        //                {
+        //                    ws.Column(colIndex).Width = 9;
+        //                }
+        //            }
+
+        //            // lấy ra danh sách UserInfo từ ItemSource của DataGrid
+        //            //List<UserInfo> userList = dtgExcel.ItemsSource.Cast<UserInfo>().ToList();
+        //            var datatest = data.GroupBy(x => x.ClassID);
+
+        //            for (int i = 8; i <= 8 + 100; i++)
+        //            {
+        //                ws.Column(i).Width = 1;
+        //            }
+
+        //            // với mỗi item trong danh sách sẽ ghi trên 1 dòng
+        //            for (Int32 index = 0; index < datatest.Count(); index++)
+        //            {
+        //                var item = datatest.ElementAtOrDefault(index);
+        //                var inforClass = item.FirstOrDefault();
+        //                // bắt đầu ghi từ cột 1. Excel bắt đầu từ 1 không phải từ 0
+        //                colIndex = 1;
+
+        //                // rowIndex tương ứng từng dòng dữ liệu
+        //                rowIndex++;
+
+        //                //gán giá trị cho từng cell        
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = index + 1;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = $"{inforClass.ClassName}";
+        //                    cell.Style.WrapText = true;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = $"{inforClass.TeacherName}";
+        //                    cell.Style.WrapText = true;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = inforClass.StartDate.ToString("dd/MM/yyyy");
+        //                    cell.Style.WrapText = true;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = inforClass.EndDate.ToString("dd/MM/yyyy");
+        //                    cell.Style.WrapText = true;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+        //                {
+        //                    var currentrow = rowIndex;
+        //                    var currentcol = colIndex++;
+        //                    var cell = ws.Cells[currentrow, currentcol, currentrow + item.Count() - 1, currentcol];
+        //                    cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+        //                    cell.Merge = true;
+        //                    cell.Value = inforClass.StudentinClass;
+        //                    var border = cell.Style.Border;
+        //                    border.Bottom.Style =
+        //                        border.Top.Style =
+        //                        border.Left.Style =
+        //                        border.Right.Style = ExcelBorderStyle.Thin;
+        //                }
+
+        //                for (Int32 j = 0; j < item.Count(); j++)
+        //                {
+        //                    var _colIndex = colIndex;
+        //                    var _item = item.ElementAtOrDefault(j);
+
+        //                    if (item.Key == "5f5af539171ba81edc6ec410")
+        //                    {
+        //                        var a = "";
+        //                    }
+
+        //                    var persentMinPoint8 = Math.Round((((double)_item.MinPoint8 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
+        //                    var persentMinPoint5 = Math.Round((((double)_item.MinPoint5 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
+        //                    var persentMinPoint2 = Math.Round((((double)_item.MinPoint2 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
+        //                    var persentMinPoint0 = Math.Round((((double)_item.MinPoint0 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
+        //                    if (persentMinPoint0 + persentMinPoint2 + persentMinPoint5 + persentMinPoint8 > 100)
+        //                    {
+        //                        if (persentMinPoint0 != 0) persentMinPoint0 = 100 - persentMinPoint2 - persentMinPoint5 - persentMinPoint8;
+        //                        else if (persentMinPoint0 == 0 && persentMinPoint2 != 0) persentMinPoint2 = 100 - persentMinPoint5 - persentMinPoint8;
+        //                    }
+
+        //                    var persentChuaLam = 100 - persentMinPoint0 - persentMinPoint2 - persentMinPoint5 - persentMinPoint8;
+
+        //                    {
+        //                        var cell = ws.Cells[rowIndex + j, _colIndex++];
+        //                        cell.Value = $"Tháng { 9 + j}";
+        //                        var border = cell.Style.Border;
+        //                        border.Bottom.Style =
+        //                            border.Top.Style =
+        //                            border.Left.Style =
+        //                            border.Right.Style = ExcelBorderStyle.Thin;
+        //                    }
+
+        //                    Int32 colPerSent8 = _colIndex + (Int32)persentMinPoint8;
+        //                    if (persentMinPoint8 > 0)
+        //                    {
+        //                        var cellColPersent8 = ws.Cells[rowIndex + j, colPerSent8];
+        //                        ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Value = $"{persentMinPoint8}%";
+        //                        //set màu thành lightgreen
+        //                        var fill8 = ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Fill;
+        //                        fill8.PatternType = ExcelFillStyle.DarkDown;
+        //                        fill8.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(134, 208, 141));
+        //                        //fill8.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                        ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Merge = true;
+        //                        // in đậm
+        //                        ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Font.Bold = true;
+        //                        // căn giữa
+        //                        ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                        //căn chỉnh các border
+        //                        var border = ws.Cells[rowIndex + j, _colIndex, rowIndex + j, colPerSent8].Style.Border;
+        //                        border.Bottom.Style =
+        //                            border.Top.Style =
+        //                            border.Left.Style =
+        //                            border.Right.Style = ExcelBorderStyle.Thin;
+        //                    }
+        //                    else
+        //                    {
+        //                        colPerSent8 -= 1;
+        //                    }
+
+        //                    Int32 colPerSent5 = colPerSent8 + (Int32)persentMinPoint5;
+        //                    if (persentMinPoint5 > 0)
+        //                    {
+        //                        var cellColPersent5 = ws.Cells[rowIndex + j, colPerSent5];
+        //                        //cellColPersent5.Value = $"{persentMinPoint5}%";
+        //                        ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Value = $"{persentMinPoint5}%";
+        //                        //set màu thành lightgreen
+        //                        var fill5 = ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Fill;
+        //                        fill5.PatternType = ExcelFillStyle.Gray0625;
+        //                        fill5.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(157, 195, 230));
+        //                        //fill5.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                        ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Merge = true;
+        //                        // in đậm
+        //                        ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Font.Bold = true;
+        //                        // căn giữa
+        //                        ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                        var border = ws.Cells[rowIndex + j, colPerSent8 + 1, rowIndex + j, colPerSent5].Style.Border;
+        //                        border.Bottom.Style =
+        //                            border.Top.Style =
+        //                            border.Left.Style =
+        //                            border.Right.Style = ExcelBorderStyle.Thin;
+        //                    }
+
+        //                    Int32 colPerSent2 = colPerSent5 + (Int32)persentMinPoint2;
+        //                    if (persentMinPoint2 > 0)
+        //                    {
+        //                        var cellColPersent2 = ws.Cells[rowIndex + j, colPerSent2];
+        //                        ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Value = $"{persentMinPoint2}%";
+        //                        var fill2 = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Fill;
+        //                        fill2.PatternType = ExcelFillStyle.DarkUp;
+        //                        fill2.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 255, 102));
+        //                        //fill2.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                        ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Merge = true;
+        //                        // in đậm
+        //                        ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Font.Bold = true;
+        //                        // căn giữa
+        //                        ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                        var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent2].Style.Border;
+        //                        border.Bottom.Style =
+        //                            border.Top.Style =
+        //                            border.Left.Style =
+        //                            border.Right.Style = ExcelBorderStyle.Thin;
+        //                    }
+
+        //                    Int32 colPerSent0 = colPerSent2 + (Int32)persentMinPoint0;
+        //                    if (persentMinPoint0 > 0)
+        //                    {
+        //                        var cellColPersent0 = ws.Cells[rowIndex + j, colPerSent0];
+        //                        ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Value = $"{persentMinPoint0}%";
+        //                        var fill0 = ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.Fill;
+        //                        fill0.PatternType = ExcelFillStyle.LightVertical;
+        //                        fill0.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(237, 67, 67));
+        //                        //fill0.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                        ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Merge = true;
+        //                        // in đậm
+        //                        ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.Font.Bold = true;
+        //                        // căn giữa
+        //                        ws.Cells[rowIndex + j, colPerSent2 + 1, rowIndex + j, colPerSent0].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                        var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent0].Style.Border;
+        //                        border.Bottom.Style =
+        //                            border.Top.Style =
+        //                            border.Left.Style =
+        //                            border.Right.Style = ExcelBorderStyle.Thin;
+        //                    }
+
+        //                    Int32 colPerSent = colPerSent0 + (Int32)persentChuaLam;
+        //                    if (persentChuaLam > 0)
+        //                    {
+        //                        if (persentMinPoint8 == 0)
+        //                        {
+        //                            var cellCollPersent = ws.Cells[rowIndex + j, colPerSent + 1];
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Value = $"{persentChuaLam}%";
+        //                            var fill = ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.Fill;
+        //                            fill.PatternType = ExcelFillStyle.DarkTrellis;
+        //                            fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174, 157, 245));
+        //                            //fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Merge = true;
+        //                            // in đậm
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.Font.Bold = true;
+        //                            // căn giữa
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent + 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                            var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent + 1].Style.Border;
+        //                            border.Bottom.Style =
+        //                                border.Top.Style =
+        //                                border.Left.Style =
+        //                                border.Right.Style = ExcelBorderStyle.Thin;
+        //                        }
+        //                        else
+        //                        {
+        //                            var cellCollPersent = ws.Cells[rowIndex + j, colPerSent];
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Value = $"{persentChuaLam}%";
+        //                            var fill = ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.Fill;
+        //                            fill.PatternType = ExcelFillStyle.DarkTrellis;
+        //                            fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(174, 157, 245));
+        //                            //fill.BackgroundColor.SetColor(System.Drawing.Color.Blue);
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Merge = true;
+        //                            // in đậm
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.Font.Bold = true;
+        //                            // căn giữa
+        //                            ws.Cells[rowIndex + j, colPerSent0 + 1, rowIndex + j, colPerSent].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        //                            var border = ws.Cells[rowIndex + j, colPerSent5 + 1, rowIndex + j, colPerSent].Style.Border;
+        //                            border.Bottom.Style =
+        //                                border.Top.Style =
+        //                                border.Left.Style =
+        //                                border.Right.Style = ExcelBorderStyle.Thin;
+        //                        }
+        //                    }
+        //                }
+        //                rowIndex += item.Count();
+        //                ws.Cells[rowIndex, 1, rowIndex, 108].Merge = true;
+        //                ws.Row(rowIndex).Height = 15;
+
+        //            }
+
+        //            //Lưu file lại
+        //            Byte[] bin = p.GetAsByteArray();
+        //            File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
+        //        }
+        //        return "";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return ex.Message;
+        //    }
+        //}
+
+
+        //private static Dictionary<Int32, DataTime> GetListTime(DateTime currentTime)
+        //{
+        //    var currentMonth = currentTime.Month;
+        //    var currentYear = currentTime.Year;
+        //    var firstDayofMonth = new DateTime(currentYear, currentMonth, 1, 00, 00, 00);
+        //    var lastDayofMonth = firstDayofMonth.AddMonths(1).AddMilliseconds(-1);
+        //    Dictionary<Int32, DataTime> data = new Dictionary<int, DataTime>();
+        //    data.Add(currentMonth, new DataTime { StartTime = firstDayofMonth, EndTime = lastDayofMonth });
+        //    while (lastDayofMonth.Month <= 12)
+        //    {
+        //        firstDayofMonth = firstDayofMonth.AddMonths(1);
+        //        lastDayofMonth = firstDayofMonth.AddMonths(1).AddMilliseconds(-1);
+        //        var key = firstDayofMonth.Month;
+        //        data.Add(key, new DataTime { StartTime = firstDayofMonth, EndTime = lastDayofMonth });
+        //    }
+        //    return data;
+        //}
         #endregion
 
         #region ReportToChi
-        private static async Task GetReport4Chi()
-        {
-            try
-            {
-                var centers = _centerService.GetAll();
-                foreach (var center in centers.ToList())
-                {
-                    if (center.Abbr == null) continue;
-                    if (center.Abbr.Equals("c3vyvp") || center.Abbr.Equals("c3btvp"))
-                    {
-                        var students = _studentService.GetItemByCenterID(center.ID);
-                        string fileLPath = @"H:\Eduso\Chi\" + center.Abbr + ".txt";
-                        List<string> lines = new List<string>();
-                        if (students.Count() == 0)
-                        {
-                            lines.Add("Khong co hoc sinh nao");
-                            System.IO.File.WriteAllLines(fileLPath, lines);
-                        }
-                        else
-                        {
-                            var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x => x.CreateDate);
-                            var studentinM10 = students.Where(x => x.CreateDate.Month.Equals(10)).OrderBy(x => x.CreateDate);
-                            var studentinM11 = students.Where(x => x.CreateDate.Month.Equals(11)).OrderBy(x => x.CreateDate);
-                            var studentinM12 = students.Where(x => x.CreateDate.Month.Equals(12)).OrderBy(x => x.CreateDate);
-                            lines.Add($"Tháng 9 tạo: {studentinM9.Count()} tài khoản - Tạo ngày: {studentinM9.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 10 tạo: {studentinM10.Count()} tài khoản - Tạo ngày: {studentinM10.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 11 tạo: {studentinM11.Count()} tài khoản - Tạo ngày: {studentinM11.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 12 tạo: {studentinM12.Count()} tài khoản - Tạo ngày: {studentinM12.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Hoạt động: {students.Where(x => x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
-                            System.IO.File.WriteAllLines(fileLPath, lines);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                string fileLPath = @"H:\Eduso\Chi\Error.txt";
-                List<string> lines = new List<string>();
-                lines.Add(ex.Message);
-                System.IO.File.WriteAllLines(fileLPath, lines);
-            }
-        }
-        private static void WriteText()
-        {
-            string fileLPath = @"G:\New folder\listStudenID.txt";
+        //private static async Task GetReport4Chi()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetAll();
+        //        foreach (var center in centers.ToList())
+        //        {
+        //            if (center.Abbr == null) continue;
+        //            if (center.Abbr.Equals("c3vyvp") || center.Abbr.Equals("c3btvp"))
+        //            {
+        //                var students = _studentService.GetItemByCenterID(center.ID);
+        //                string fileLPath = @"H:\Eduso\Chi\" + center.Abbr + ".txt";
+        //                List<string> lines = new List<string>();
+        //                if (students.Count() == 0)
+        //                {
+        //                    lines.Add("Khong co hoc sinh nao");
+        //                    System.IO.File.WriteAllLines(fileLPath, lines);
+        //                }
+        //                else
+        //                {
+        //                    var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x => x.CreateDate);
+        //                    var studentinM10 = students.Where(x => x.CreateDate.Month.Equals(10)).OrderBy(x => x.CreateDate);
+        //                    var studentinM11 = students.Where(x => x.CreateDate.Month.Equals(11)).OrderBy(x => x.CreateDate);
+        //                    var studentinM12 = students.Where(x => x.CreateDate.Month.Equals(12)).OrderBy(x => x.CreateDate);
+        //                    lines.Add($"Tháng 9 tạo: {studentinM9.Count()} tài khoản - Tạo ngày: {studentinM9.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 10 tạo: {studentinM10.Count()} tài khoản - Tạo ngày: {studentinM10.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 11 tạo: {studentinM11.Count()} tài khoản - Tạo ngày: {studentinM11.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 12 tạo: {studentinM12.Count()} tài khoản - Tạo ngày: {studentinM12.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Hoạt động: {students.Where(x => x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
+        //                    System.IO.File.WriteAllLines(fileLPath, lines);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        string fileLPath = @"H:\Eduso\Chi\Error.txt";
+        //        List<string> lines = new List<string>();
+        //        lines.Add(ex.Message);
+        //        System.IO.File.WriteAllLines(fileLPath, lines);
+        //    }
+        //}
+        //private static void WriteText()
+        //{
+        //    string fileLPath = @"G:\New folder\listStudenID.txt";
 
-            List<string> lines = new List<string>();
-            var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
-            lines.AddRange(StudentsID);
+        //    List<string> lines = new List<string>();
+        //    var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
+        //    lines.AddRange(StudentsID);
 
-            System.IO.File.WriteAllLines(fileLPath, lines);
-        }
-        #endregion
-
-        #region Service renewal notice
-        private static async Task<String> ServiceRenewalNotice()
-        {
-            try
-            {
-                var currentTime = DateTime.UtcNow;
-                //lay danh sach co so dang hoat dong
-                var centers = _centerService.CreateQuery().Find(x => x.Status == true).ToList();
-                //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
-                foreach (var item in centers)
-                {
-                    //lay danh sach lop dang hoat dong
-                    var classesActive = _classService.GetActiveClass4Report(item.StartDate, item.ExpireDate, item.ID);
-                    if (classesActive.Count() == 0) continue;
-
-                    var endTime = item.ExpireDate;
-                    var totalTotalMilliseconds = currentTime.Subtract(endTime).TotalMilliseconds;
-                    var totalTotalDays = currentTime.Subtract(endTime).TotalDays;
-                    if (totalTotalDays >= 0 && totalTotalDays <= 7 && item.ExpireDate.Month == currentTime.Month)
-                    {
-                        //gui mail thong bao het han
-                        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == item.ID)).ToList().FindAll(y => HasRole(y.ID, item.ID, "head-teacher")).ToList();
-                        if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
-                        {
-                            listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
-                        }
-
-                        if (listTeacherHeader.Count == 0) continue;
-
-                        String listNameTeachers = "";
-                        List<String> listEmailTeachers = new List<string>();
-                        foreach (var teacher in listTeacherHeader)
-                        {
-                            listNameTeachers += $"{teacher.FullName}, ";
-                            listEmailTeachers.Add(teacher.Email);
-                        }
-                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim() + ".";
-                        String subject = "THÔNG BÁO GIA HẠN DỊCH VỤ";
-
-                        var thead = "<thead>" +
-                            "<tr>" +
-                            "<td style='padding: 0.75pt;font-size:18pt;font-family:Arial,sans-serif;font-weight:bold;text-align: center'>THƯ THÔNG BÁO GIA HẠN DỊCH VỤ</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            "<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center;font-style: italic'>(Thành thật xin lỗi, nếu trong thời gian thư đang chuyển đi mà quý thầy cô đã thực hiện gia hạn)</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center'>Ngày gửi: {DateTime.Now.ToString("dd-MM-yyyy")}</td>" +
-                            "</tr>" +
-                            "</thead>";
-                        var tbody = "<tbody>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Kính gửi: thầy/cô <span style='font-weight: bold;font-family:\"Segoe UI\",sans-serif; color: black; background-image:initial; background-position:initial; background-size:initial; background-repeat:initial; background-origin:initial; background-clip:initial'>{listNameTeachers}<span></td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Lời đầu tiên, <span style='font-weight:bold'>EDUSO</span> xin trân trọng cảm ơn sự hợp tác giữa <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> về việc sử dụng Eduso Platform trong giảng dạy và học tập.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Theo như thời gian sử dụng dịch vụ của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> từ <span style='font-weight:bold'>{item.StartDate.ToUniversalTime().ToString("HH:mm dd/MM/yyyy")}</span> đến <span style='font-weight:bold'>{item.ExpireDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")}.</span></td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'><span style='font-weight:bold'>EDUSO</span> nhận thấy <span style='font-weight:bold'>{item.Name}</span> sắp đến ngày hết hạn sử dụng, sau ngày hết hạn thì các dịch vụ trên hệ thống Eduso sẽ tạm dừng hoạt động.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Để gia hạn dịch vụ, vui lòng liên hệ bộ phận chăm sóc khách hàng theo số điện thoại 0989085398 - 02432444439</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Chân thành cảm ơn sự hợp tác của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span>.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>Trân trọng!</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>----------------o0o-----------</td>" +
-                            "</tr>" +
-                            "</tbody>";
-
-                        var table2 = @"<table cellpadding='0' cellspacing='0' style='margin:auto;border-spacing:0px; border-collapse:collapse; color: rgb(68, 68, 68); width: 480px; font-size:9pt; font-family:Arial,sans-serif; line-height:14px'><tbody><tr><td colspan='2' style='padding: 0px 0px 5px; width: 480px'><font color='#134f5c'><font face='Arial, sans-serif'><span style='font-size:14.6667px'><b>EDU</b></span><span style='font-weight:bold;font-size:14.6667px'>SO</span></font><b style='font-size:9pt'>.,JSC</b></font><font color='#ff9900'><font face='Arial, sans-serif'><b><span style='font-size:14.6667px'><br></span></b></font></font></td></tr><tr><td colspan='2' style='padding:0px 0px 5px;width:480px;color:rgb(23,147,210)'></td></tr><tr><td colspan='2' style='padding:0px 0px 2px;width:480px;border-top:1px dotted rgb(19,19,19)'>&nbsp;</td></tr><tr><td valign='middle' style='padding:0px;width:120px;vertical-align:middle'><img src='https://ci3.googleusercontent.com/proxy/QAgPRZBFrmIBlGmpla2ITc2bGA9bDK-jAclDqfTcfevFuuKJSYrVRL3tBSDbre6GDcdcRw7fRTECfG5ANvDxMvkQiXZbAd56B4pNx3a8cSg2THUFbi0kScAaG8p1jrykO5s4=s0-d-e1-ft#https://drive.google.com/uc?id=1P2PWW0Do8B1PfWW-r1Kjy_tDK2mp92ma&amp;export=download' width='96' height='95' class='CToWUd'></td><td valign='middle' style='font-family:Arial,sans-serif;padding:0px;width:360px;color:rgb(19,19,19);vertical-align:middle'><table cellpadding='0' cellspacing='0' style='border-spacing:0px;border-collapse:collapse;background-color:transparent'><tbody><tr><td style='padding:1px'><br></td></tr><tr><td style='padding:1px'><span style='font-family:Arial,sans-serif;font-size:9pt'>Hotline: (+84)989 085 398</span></td></tr><tr><td style='font-family:Arial,sans-serif;padding:1px;font-size:9pt'><span style='font-size:9pt'>Mail:&nbsp;<a href='http://buithihong98@gmail.com/' target='_blank' data-saferedirecturl='https://www.google.com/url?q=http://buithihong98@gmail.com/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNETDHvUCqOIe01CJEJwgt6gTrPCkw'>eduso.vn@gmail.com</a></span>&nbsp;</td></tr><tr><td style='padding:1px'><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Trường&nbsp;</span></font><span style='font-size:9pt'>Đại học Giao thông vận tải -&nbsp;</span></span><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Số 3 Phố Cầu Giâ</span></font></span><font style='background-color:transparent;font-size:12px' face='Arial, sans-serif'>y <br>-&nbsp;</font><font face='Arial, sans-serif' style='background-color:transparent'><span style='font-size:12px'>Láng Thượng - Đống Đa -&nbsp;</span></font><span style='background-color:transparent;font-size:9pt'>Hà Nội -&nbsp; Việt Nam</span><font face='Arial, sans-serif' style='background-color:transparent;font-size:9pt'><br></font></td></tr><tr><td style='padding:2px 0px 0px 1px'><span style='display:inline-block;height:23px'><a href='https://www.facebook.com/engcooacademy/' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.facebook.com/engcooacademy/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGKOaTRls1lZt_lcFHOqghSGBtnLQ'><img alt='Facebook icon' border='0' width='23' height='23' src='https://ci3.googleusercontent.com/proxy/mjiWTZdOYIWVF9PvTDENxZ6wQOuPAlFcn8ifTjfAuWRilo8dSpvX4l41IZgRY291qHCNVuF42W5YnOsux7SW-_NZ_nzBFoyx9RXY096p16IIPundLZxXuJgdlBEEyn-qrPROAmxOkxQ=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/fb.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;<a href='https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as=subscriber' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as%3Dsubscriber&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGfTeFFzglJMtBFYrt1A1mPlgwklw'><img alt='Youtbue icon' border='0' width='23' height='23' src='https://ci4.googleusercontent.com/proxy/3yJ04s_GTj8Eck5ACth9ub3_mXYz9hUld0f6NMft-hC_i9M91dE06tpBbNOnc--l8okk-gS8GKbpichkfW88R2CG3u_8n0H_bU6tVdcUcTjLX8JkjbKpSJuY2xg2PWulNFSbyAuW60M=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/yt.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;</span></td></tr></tbody></table></td></tr><tr><td colspan='2' style='padding:2px 0px 0px;width:480px;border-bottom:1px dotted rgb(19,19,19)'>&nbsp;</td></tr></tbody></table>";
-
-                        var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
-
-                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com", "vietphung.it@gmail.com" } : listEmailTeachers;
-                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
-                        var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-                    }
-                }
-                return "Thong bao thanh cong";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
+        //    System.IO.File.WriteAllLines(fileLPath, lines);
+        //}
         #endregion
 
         #region
-        //private static async Task sendmail()
-        //{
-        //    List<DateTime> dateTimes = new List<DateTime>
-        //    {
-        //        new DateTime(2020,10,1,8,0,0),
-        //        new DateTime(2020,10,8,8,0,0),
-        //        new DateTime(2020,10,15,8,0,0),
-        //        new DateTime(2020,10,22,8,0,0),
-        //        new DateTime(2020,10,29,8,0,0),
-        //        new DateTime(2020,11,5,8,0,0),
-        //        new DateTime(2020,11,12,8,0,0),
-        //        new DateTime(2020,11,19,8,0,0),
-        //    };
-
-        //    List<Data> data = new List<Data>();
-
-        //    foreach(DateTime currentTime in dateTimes)
-        //    {
-        //        var _data = GetDataForExcel(currentTime).Result;
-        //        data.Add(_data);
-        //    }
-
-        //    String body = GetContent(data);
-        //    String subject = "Lấy data làm excel";
-        //    var toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com" };
-        //    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-        //    Console.WriteLine($"Is Done!");
-        //}
-        //private static async Task<Data> GetDataForExcel(DateTime currentTime)
-        //{
-        //    var day = currentTime.Day;
-        //    var month = currentTime.Month;
-        //    var year = currentTime.Year;
-        //    var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
-        //    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
-
-        //    var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
-
-        //    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-        //    Int32 totalStudent = 0, totalActiveStudents = 0; ;
-        //    long tren8 = 0, tren5 = 0, tren2 = 0, tren0 = 0;
-        //    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-        //    if (classesActive.Count() == 0)
-        //    {
-        //        //continue;
-        //    }
-
-        //    foreach (var _class in classesActive.OrderBy(x => x.Name))
-        //    {
-        //        //Lay danh sach ID hoc sinh trong lop
-        //        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
-        //        var studentIds = students.Select(t => t.ID).ToList();
-
-        //        var classStudent = studentIds.Count();
-        //        totalStudent += classStudent;
-
-        //        //Lay danh sach ID bai hoc duoc mo trong tuan
-        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
-        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-        //            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-        //            x => studentIds.Contains(x.StudentID)).ToEnumerable();
-        //        totalActiveStudents += activeStudents.Count();
-
-        //        //var stChuaVaoLop = classStudent - activeStudents.Count();
-        //        //totalstChuaVaoLop += stChuaVaoLop;
-
-        //        // danh sach bai kiem tra
-        //        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-        //        //ket qua lam bai cua hoc sinh trong lop
-        //        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-        //                           group r by r.StudentID
-        //                           into g
-        //                           select new StudentResult
-        //                           {
-        //                               StudentID = g.Key,
-        //                               ExamCount = g.Count(),
-        //                               AvgPoint = g.Average(t => t.LastPoint),
-        //                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-        //                           }).ToList();
-
-        //        //render ket qua hoc tap
-        //        var min8 = classResult.Count(t => t.AvgPoint >= 80);
-        //        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-        //        var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
-        //        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
-
-        //        tren8 += min8;
-        //        tren5 += min5;
-        //        tren2 += min2;
-        //        tren0 += min0;
-        //    }
-
-        //    double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100,2);
-        //    double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100,2);
-        //    double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
-        //    double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
-        //    //double tiletren0 = ((double)tren0 / totalActiveStudents) * 100;
-        //    var datarespone = new Data
-        //    {
-        //        TotalStudent = totalStudent,
-        //        TotalStudentActive = totalActiveStudents,
-        //        PersentPoint2 = tiletren0,
-        //        PersentPoint5 = tiletren2,
-        //        PersentPoint8 = tiletren5,
-        //        PersentPoint10 = tiletren8,
-        //        currentTime = currentTime
-        //    };
-        //    return datarespone;
-        //}
-
         //private static String GetContent(List<Data> datas)
         //{
         //    String body = "";
         //    body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
         //                    <thead>
         //                                <tr style='font-weight:bold;background-color: bisque'>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>Tháng</td>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Số lượng tài khoản</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Sĩ số</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Chưa vào hệ thống</td>
         //                                    <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
         //                                </tr>
         //                                <tr style='font-weight:bold;background-color: bisque'>                                        
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 1.9</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 2.0 -> 4.9</td>
+        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 4.9</td>
         //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
         //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
+        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
         //                                </tr>
         //                            </thead>
         //                            <tbody>";
         //    String tbody = "";
-        //    foreach(var data in datas)
+        //    var listData = datas.GroupBy(x => x.Week.Substring(x.Week.Length - 2)).OrderByDescending(x => x.Key);
+        //    foreach (var _data in listData)
         //    {
-        //        tbody += $"<tr>" +
-        //            $"<td>Tháng {data.currentTime.Month}</td>" +
-        //            $"<td>{data.TotalStudentActive}/{data.TotalStudent}</td>" +
-        //            $"<td>{data.PersentPoint2} %</td>" +
-        //            $"<td>{data.PersentPoint5} %</td>" +
-        //            $"<td>{data.PersentPoint8} %</td>" +
-        //            $"<td>{data.PersentPoint10} %</td>" +
-        //            $"</tr>";
+        //        var _datas = _data.ToList().OrderByDescending(x => x.Week);
+        //        foreach (var data in _datas)
+        //        {
+        //            tbody += $"<tr>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.Week}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent - data.TotalStudentActive}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color:#ffff33'>{data.PersentMinPoint0} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightblue'>{data.PersentMinPoint5} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightgreen'>{data.PersentMinPoint8} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: rgb(194,194,216)'>{data.DontWork} %</td>" +
+        //                $"</tr>";
+        //        }
         //    }
         //    tbody += "</tbody></table>";
         //    body += tbody;
         //    return body;
         //}
-
-        //private static async Task sendmail()
-        //{
-        //    List<DateTime> dateTimes = new List<DateTime>
-        //    {
-        //        new DateTime(2020,10,1,8,0,0),
-        //        new DateTime(2020,10,8,8,0,0),
-        //        new DateTime(2020,10,15,8,0,0),
-        //        new DateTime(2020,10,22,8,0,0),
-        //        new DateTime(2020,10,29,8,0,0),
-        //        new DateTime(2020,11,5,8,0,0),
-        //        new DateTime(2020,11,12,8,0,0),
-        //        new DateTime(2020,11,19,8,0,0),
-        //        new DateTime(2020,11,26,8,0,0),
-        //        new DateTime(2020,12,3,8,0,0),
-        //        new DateTime(2020,12,10,8,0,0),
-        //    };
-
-        //    List<Data> data = new List<Data>();
-
-        //    List<CenterEntity> listCenterActive = new List<CenterEntity>();
-        //    List<TeacherEntity> listTeacher = new List<TeacherEntity>();
-        //    //foreach (DateTime currentTime in dateTimes)
-        //    //{
-        //    //    var centersActive = _centerService.GetActiveCenter(currentTime) as CenterEntity;//lay co so dang hoat dong
-        //    //    listCenterActive.Add(centersActive);
-        //    //}
-
-        //    var a = dateTimes.LastOrDefault();
-        //    var centersActive = _centerService.GetActiveCenter(dateTimes.LastOrDefault()).ToList();//lay co so dang hoat dong
-        //    var b = _centerService.GetActiveCenter(DateTime.Now).ToList();
-
-        //    foreach (var center in centersActive)
-        //    {
-        //        if (center.Abbr == "c3vyvp")
-        //        {
-        //            var indexWeek = 0;
-        //            var index = 1;
-        //            data = new List<Data>();
-        //            foreach (DateTime currentTime in dateTimes)
-        //            {
-        //                var _data = await GetDataForExcel(currentTime, center);
-        //                if (currentTime.Month == dateTimes.ElementAtOrDefault(index).Month)
-        //                {
-        //                    indexWeek++;
-        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-        //                }
-        //                else
-        //                {
-        //                    indexWeek++;
-        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-        //                    indexWeek = 0;
-        //                }
-        //                data.Add(_data);
-        //                index++;
-        //            }
-
-        //            var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
-        //            if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
-        //            {
-        //                listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
-        //            }
-
-        //            String body = GetContent(data);
-        //            String subject = $"B/c tháng {center.Name}";
-        //            var toAddress = isTest == true ? new List<String> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : listTeacherHeader.Select(x => x.Email).ToList();
-        //            var toBcc = isTest == true ? null : new List<String> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "kchidinh@gmail.com" };
-        //            _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toBcc);
-        //            Console.WriteLine($"{center.Name} Is Done!");
-        //        }
-        //    }
-        //}
-        
-        //private static async Task<Data> GetDataForExcel(DateTime currentTime, CenterEntity center)
-        //{
-        //    var day = currentTime.Day;
-        //    var month = currentTime.Month;
-        //    var year = currentTime.Year;
-        //    var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
-        //    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
-
-        //    //var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
-
-        //    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-        //    Int32 totalStudent = 0, totalActiveStudents = 0; ;
-        //    long tren8 = 0, tren5 = 0, tren0 = 0;
-        //    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-        //    if (classesActive.Count() == 0)
-        //    {
-        //        //continue;
-        //    }
-
-        //    foreach (var _class in classesActive.OrderBy(x => x.Name))
-        //    {
-        //        //Lay danh sach ID hoc sinh trong lop
-        //        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
-        //        var studentIds = students.Select(t => t.ID).ToList();
-
-        //        var classStudent = studentIds.Count();
-        //        totalStudent += classStudent;
-
-        //        //Lay danh sach ID bai hoc duoc mo trong tuan
-        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
-        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-        //            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-        //            x => studentIds.Contains(x.StudentID)).ToEnumerable();
-        //        totalActiveStudents += activeStudents.Count();
-
-        //        //var stChuaVaoLop = classStudent - activeStudents.Count();
-        //        //totalstChuaVaoLop += stChuaVaoLop;
-
-        //        // danh sach bai kiem tra
-        //        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-        //        //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-        //        //ket qua lam bai cua hoc sinh trong lop
-        //        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-        //                           group r by r.StudentID
-        //                           into g
-        //                           select new StudentResult
-        //                           {
-        //                               StudentID = g.Key,
-        //                               ExamCount = g.Count(),
-        //                               AvgPoint = g.Average(t => t.LastPoint),
-        //                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-        //                           }).ToList();
-
-        //        //render ket qua hoc tap
-        //        var min8 = classResult.Count(t => t.AvgPoint >= 80);
-        //        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-        //        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 50);
-
-        //        tren8 += min8;
-        //        tren5 += min5;
-        //        tren0 += min0;
-        //    }
-
-        //    double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100, 2);
-        //    double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100, 2);
-        //    //double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
-        //    //double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
-        //    double tiletren0 = Math.Round(((double)tren0 / totalActiveStudents) * 100, 2);
-        //    double tilechualam = 100 - tiletren0 - tiletren5 - tiletren8;
-        //    var datarespone = new Data
-        //    {
-        //        TotalStudent = totalStudent,
-        //        TotalStudentActive = totalActiveStudents,
-        //        PersentMinPoint0 = tiletren0,
-        //        PersentMinPoint5 = tiletren5,
-        //        PersentMinPoint8 = tiletren8,
-        //        currentTime = currentTime,
-        //        DontWork = tilechualam
-        //    };
-        //    return datarespone;
-        //}
-
-        private static String GetContent(List<Data> datas)
-        {
-            String body = "";
-            body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
-                            <thead>
-                                        <tr style='font-weight:bold;background-color: bisque'>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Sĩ số</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Chưa vào hệ thống</td>
-                                            <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
-                                        </tr>
-                                        <tr style='font-weight:bold;background-color: bisque'>                                        
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 4.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>";
-            String tbody = "";
-            var listData = datas.GroupBy(x => x.Week.Substring(x.Week.Length - 2)).OrderByDescending(x => x.Key);
-            foreach (var _data in listData)
-            {
-                var _datas = _data.ToList().OrderByDescending(x => x.Week);
-                foreach (var data in _datas)
-                {
-                    tbody += $"<tr>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.Week}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent - data.TotalStudentActive}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color:#ffff33'>{data.PersentMinPoint0} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightblue'>{data.PersentMinPoint5} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightgreen'>{data.PersentMinPoint8} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: rgb(194,194,216)'>{data.DontWork} %</td>" +
-                        $"</tr>";
-                }
-            }
-            tbody += "</tbody></table>";
-            body += tbody;
-            return body;
-        }
-        #endregion
-
-        #region
-        private static async Task AutoDeactiveClass()
-        {
-            try
-            {
-                var currentTime = DateTime.UtcNow;
-                int offset = currentTime.DayOfWeek - DayOfWeek.Monday;
-                var monday = currentTime.AddDays(-offset);
-                var monday2weekago = monday.AddDays(-14);
-                var sundayweekago = monday.AddDays(-1);
-                var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
-                var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
-                var activeCenters = _centerService.GetActiveCenter(currentTime);
-                if (activeCenters.Count() == 0)
-                {
-                    Console.WriteLine("Không có cơ sở hoạt động");
-                }
-
-                Int32 totalClass = 0;
-
-                foreach (var center in activeCenters)
-                {
-                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);
-                    if (classesActive.Count() == 0) continue;
-                    foreach (var @class in classesActive)
-                    {
-                        if (@class.StartDate > firstDay) continue;
-                        var activeLessons = _lessonService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
-                        if (activeLessons == 0)
-                        {
-                            if (!@class.IsActive) continue;
-                            @class.IsActive = false;
-                            totalClass++;
-                            Console.WriteLine("Lop khong co hoat dong " + @class.Name + " - " + center.Name);
-                            //_classService.Save(@class);
-                            var students = _studentService.GetStudentIdsByClassId(@class.ID).Count();
-                            if (students == 0) continue;
-                            var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
-                            var listTeacher = new List<TeacherEntity>();
-                            var subject = "Thông báo đóng lớp không hoạt động";
-                            foreach (var mem in members.ToList())
-                            {
-                                var _teacher = _teacherService.GetItemByID(mem.TeacherID);
-                                if (!listTeacher.Any(x => x.Email == _teacher.Email))
-                                {
-                                    listTeacher.Add(_teacher);
-                                    var content = "<div>" +
-                                        $"<p>Kính gửi thầy/cô: {_teacher.FullName}</p>" +
-                                        $"<p>EDUSO nhận thấy trong thời gian từ ngày {firstDay.ToString("dd-MM-yyyy")} đến ngày {lastDay.ToString("dd-MM-yyyy")} " +
-                                        $"lớp {@class.Name} - cơ sở {center.Name}" +
-                                        $"của giáo viên {_teacher.FullName} không có hoạt động (lên lịch dạy, giao bài tập cho học sinh).</p>" +
-                                        $"<p>Vì vậy EDUSO đóng lớp {@class.Name} kể từ ngày {currentTime.ToString("dd-MM-yyyy")}</p>" +
-                                        $"<p>Mọi thông tin thắc mắc vui lòng liên hệ CSKH: 0989 085 398 </p>" +
-                                        "</div>";
-                                    var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { _teacher.Email };
-                                    //var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
-                                    var toBCC = isTest ? null : new List<String> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" };
-                                    _ = _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT, null, toBCC);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Console.WriteLine($"Tổng lớp: {totalClass}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
         #endregion
 
         //function
@@ -2638,25 +2291,6 @@ namespace AutoEmailEduso
             if (centerMember == null) return false;
             if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
             return true;
-        }
-
-        private class ClassSubjectInfo
-        {
-            public string Name { get; set; }
-            public string LessonName { get; set; }
-            public DateTime Start { get; set; }
-            public int Type { get; set; }
-        }
-
-        private class StudentResult
-        {
-            public string StudentID { get; set; }
-            public int ExamCount { get; set; }
-            public double AvgPoint { get; set; }
-            public string StudentName { get; set; }
-            public string AvgTimeDoExam { get; set; }
-            public int CompletedLesson { get; set; }
-            public int TotalLesson { get; set; }
         }
 
         private static readonly string extendTeacher =
@@ -2705,119 +2339,88 @@ namespace AutoEmailEduso
             }
         }
 
-        private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime, DateTime endTime)
-        {
-            var month = startTime.Month;
-            var year = startTime.Year;
-            var firstTime = new DateTime(year, month, 1, 0, 0, 0);
-            //List<DataTime> data = new List<DataTime>();
-            Dictionary<Int32, DataTime> data = new Dictionary<Int32, DataTime>();
-            var timeMonth = new DataTime()
-            {
-                StartTime = firstTime,
-                EndTime = firstTime.AddMonths(1).AddMinutes(-1)
-            };
-            data.Add(month, timeMonth);
+        //private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime, DateTime endTime)
+        //{
+        //    var month = startTime.Month;
+        //    var year = startTime.Year;
+        //    var firstTime = new DateTime(year, month, 1, 0, 0, 0);
+        //    //List<DataTime> data = new List<DataTime>();
+        //    Dictionary<Int32, DataTime> data = new Dictionary<Int32, DataTime>();
+        //    var timeMonth = new DataTime()
+        //    {
+        //        StartTime = firstTime,
+        //        EndTime = firstTime.AddMonths(1).AddMinutes(-1)
+        //    };
+        //    data.Add(month, timeMonth);
 
-            while (timeMonth.EndTime.Month <= 12 && year == 2020)
-            {
-                firstTime = timeMonth.StartTime.AddMonths(1);
-                var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
-                month = firstTime.Month;
-                timeMonth.StartTime = firstTime;
-                timeMonth.EndTime = lastTime;
-                data.Add(month, timeMonth);
-            }
-            return data;
-        }
+        //    while (timeMonth.EndTime.Month <= 12 && year == 2020)
+        //    {
+        //        firstTime = timeMonth.StartTime.AddMonths(1);
+        //        var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
+        //        month = firstTime.Month;
+        //        timeMonth.StartTime = firstTime;
+        //        timeMonth.EndTime = lastTime;
+        //        data.Add(month, timeMonth);
+        //    }
+        //    return data;
+        //}
 
-        #region mở rộng
-        public static async Task BenTre()
-        {
-            var center = _centerService.CreateQuery().Find(x => x.Abbr == "c3btvp").FirstOrDefault();
-            var listClass = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
-            foreach (var item in listClass)
-            {
-                var students = _studentService.GetStudentsByClassId(item.ID);
-                var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == item.ID && x.TotalLearnt == 0).ToList().GroupBy(x => x.StudentID)
-                    .Select(x => new
-                    {
-                        StudentName = _studentService.GetItemByID(x.Key).FullName,
-                        ClassName = item.Name
-                    });
-                var a = "";
-            }
-        }
+        //public static async Task HPNY()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetActiveCenter(DateTime.UtcNow);
+        //        if (centers.Count() == 0)
+        //            Console.WriteLine("Không có cơ sở hoạt động");
+        //        //Int32 index = 0;
+        //        foreach (var center in centers)
+        //        {
+        //            //if (index == 0)
+        //            //{
+        //            var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
+        //            String subject = "Thư cảm ơn và thông báo nghỉ tết";
+        //            String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
+        //                "<div>" +
+        //                "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
+        //                "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
+        //                "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
+        //                "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
+        //                "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
+        //                "<ul>" +
+        //                "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
+        //                "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
+        //                "<li>Hotline: 0989 085 398</li>" +
+        //                "</ul>" +
+        //                "</p>" +
+        //                "<p>Trân trọng</p>" +
+        //                "</div>" +
+        //                "";
 
-        public static async Task HPNY()
-        {
-            try
-            {
-                var centers = _centerService.GetActiveCenter(DateTime.UtcNow);
-                if (centers.Count() == 0)
-                    Console.WriteLine("Không có cơ sở hoạt động");
-                //Int32 index = 0;
-                foreach (var center in centers)
-                {
-                    //if (index == 0)
-                    //{
-                    var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
-                    String subject = "Thư cảm ơn và thông báo nghỉ tết";
-                    String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
-                        "<div>" +
-                        "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
-                        "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
-                        "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
-                        "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
-                        "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
-                        "<ul>" +
-                        "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
-                        "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
-                        "<li>Hotline: 0989 085 398</li>" +
-                        "</ul>" +
-                        "</p>" +
-                        "<p>Trân trọng</p>" +
-                        "</div>" +
-                        "";
-
-                    foreach (var teacher in teachers)
-                    {
-                        if (teacher.Email != null)
-                        {
-                            var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { teacher.Email };
-                            //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                            //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                            Console.WriteLine($"Send to {teacher.FullName} OK");
-                            _ = _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-                        }
-                    }
-                    //_ = _mailHelper.SendBaseEmail(null, subject, body, MailPhase.WEEKLY_SCHEDULE,null,new List<string> { "huonghl@utc.edu.vn" });
-                    //}
-                    //index++;
-                }
-                Console.WriteLine("Chúc mừng năm mới ^^");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-        #endregion
+        //            foreach (var teacher in teachers)
+        //            {
+        //                if (teacher.Email != null)
+        //                {
+        //                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { teacher.Email };
+        //                    //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+        //                    //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+        //                    Console.WriteLine($"Send to {teacher.FullName} OK");
+        //                    _ = _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+        //                }
+        //            }
+        //            //_ = _mailHelper.SendBaseEmail(null, subject, body, MailPhase.WEEKLY_SCHEDULE,null,new List<string> { "huonghl@utc.edu.vn" });
+        //            //}
+        //            //index++;
+        //        }
+        //        Console.WriteLine("Chúc mừng năm mới ^^");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
+        //}
     }
 
     #region class
-    //public class ScheduleView : LessonEntity
-    //{
-    //    public string LessonName { get; set; }
-
-    //    public ScheduleView(LessonEntity lesson)
-    //    {
-    //        LessonID = lesson.ID;
-    //        StartDate = lesson.StartDate;
-    //        EndDate = lesson.EndDate;
-    //    }
-    //}
-
     public class ReportViewModal : ReportEntity
     {
         public String CenterName { get; set; } //ten co so
@@ -2899,6 +2502,25 @@ namespace AutoEmailEduso
         public String LessonID { get; set; }
         public String CourseName { get; set; }
         public String ChapterName { get; set; }
+    }
+
+    public class ClassSubjectInfo
+    {
+        public string Name { get; set; }
+        public string LessonName { get; set; }
+        public DateTime Start { get; set; }
+        public int Type { get; set; }
+    }
+
+    public class StudentResult
+    {
+        public string StudentID { get; set; }
+        public int ExamCount { get; set; }
+        public double AvgPoint { get; set; }
+        public string StudentName { get; set; }
+        public string AvgTimeDoExam { get; set; }
+        public int CompletedLesson { get; set; }
+        public int TotalLesson { get; set; }
     }
     #endregion
 

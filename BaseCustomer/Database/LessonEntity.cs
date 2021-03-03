@@ -169,5 +169,9 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(o => o.ClassSubjectID == ClassSubjectID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToEnumerable();
         }
 
+        public IEnumerable<LessonEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)
+        {
+            return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();
+        }
     }
 }
