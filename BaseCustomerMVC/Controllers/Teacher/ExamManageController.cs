@@ -827,35 +827,39 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var centerID = _centerService.GetItemByCode(basis).ID;
 
                 //Lưu format đề
-                //var matrixExam = new MatrixExamEntity
-                //{
-                //    Name = matrixExams.FirstOrDefault().Name,
-                //    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
-                //    Created = DateTime.UtcNow,
-                //    CreateUser = UserID,
-                //    Center = centerID,
-                //};
+                var matrixExam = new MatrixExamEntity
+                {
+                    Name = matrixExams.FirstOrDefault().Name,
+                    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
+                    Created = DateTime.UtcNow,
+                    CreateUser = UserID,
+                    Center = centerID,
+                };
 
-                //for (var i = 0; i < matrixExams.Count; i++)
-                //{
-                //    var f = matrixExams.ElementAtOrDefault(i);
-                //    var detail = new DetailMatrixExam
-                //    {
-                //        Level = f.Level,
-                //        Order = i,
-                //        Tags = f.Tags,
-                //        Know = f.Know,
-                //        Understanding = f.Understanding,
-                //        Manipulate = f.Manipulate,
-                //        ManipulateHighly = f.ManipulateHighly,
-                //        Total = f.Know + f.Understanding + f.Manipulate + f.ManipulateHighly
-                //    };
-                //    matrixExam.DetailFormat.Add(detail);
-                //}
+                for (var i = 0; i < matrixExams.Count; i++)
+                {
+                    var f = matrixExams.ElementAtOrDefault(i);
+                    f.Know.Total = f.Know.Theory + f.Know.Exercise;
+                    f.Understanding.Total = f.Understanding.Theory + f.Understanding.Exercise;
+                    f.Manipulate.Total = f.Manipulate.Theory + f.Manipulate.Exercise;
+                    f.ManipulateHighly.Total = f.ManipulateHighly.Theory + f.ManipulateHighly.Exercise;
+                    var detail = new DetailMatrixExam
+                    {
+                        Level = f.Level,
+                        Order = i,
+                        Tags = f.Tags,
+                        Know = f.Know,
+                        Understanding = f.Understanding,
+                        Manipulate = f.Manipulate,
+                        ManipulateHighly = f.ManipulateHighly,
+                        
+                    };
+                    matrixExam.DetailFormat.Add(detail);
+                }
 
-                //_matrixExamService.Save(matrixExam);
+                _matrixExamService.Save(matrixExam);
 
-                if(item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
+                if (item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
                 {
                     return Json("");
                 }

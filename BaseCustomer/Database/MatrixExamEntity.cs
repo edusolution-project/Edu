@@ -20,20 +20,20 @@ namespace BaseCustomerEntity.Database
         public String CreateUser { get; set; }
         [JsonProperty("Center")]
         public String Center { get; set; }
-        //[JsonProperty("Order")]
-        //public Int32 Order { get; set; }
-        //[JsonProperty("Level")]
-        //public String Level { get; set; }
-        //[JsonProperty("Tags")]
-        //public String Tags { get; set; }
+        [JsonProperty("Order")]
+        public Int32 Order { get; set; }
+        [JsonProperty("Level")]
+        public String Level { get; set; }
+        [JsonProperty("Tags")]
+        public String Tags { get; set; }
         //[JsonProperty("Know")] //so cau muc do nhan biet
-        //public List<DetailFormat> Know = new List<DetailFormat>();
+        //public List<DetailMatrixExam> Know = new List<DetailMatrixExam>();
         //[JsonProperty("Understanding")] //so cau muc do thong hieu
-        //public List<DetailFormat> Understanding = new List<DetailFormat>();
+        //public List<DetailMatrixExam> Understanding = new List<DetailMatrixExam>();
         //[JsonProperty("Manipulate")] //so cau muc do van dung
-        //public List<DetailFormat> Manipulate = new List<DetailFormat>();
+        //public List<DetailMatrixExam> Manipulate = new List<DetailMatrixExam>();
         //[JsonProperty("ManipulateHighly")]
-        //public List<DetailFormat> ManipulateHighly = new List<DetailFormat>();
+        //public List<DetailMatrixExam> ManipulateHighly = new List<DetailMatrixExam>();
         [JsonProperty("DetailFormat")]
         public List<DetailMatrixExam> DetailFormat = new List<DetailMatrixExam>();
     }
