@@ -151,7 +151,7 @@ namespace BaseCustomerEntity.Database
 
         public List<ClassEntity> GetTeacherClassList(String UserID)
         {
-            return Collection.Find(t => t.Members.Any(o => o.TeacherID == UserID)).ToList();
+            return Collection.Find(t => t.Members.Any(o => o.TeacherID == UserID) && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToList();
         }
 
         public IEnumerable<ClassEntity> GetActiveClass(DateTime time, string Center = null)

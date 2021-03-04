@@ -301,7 +301,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                   {
                                       UserName = user == null ? "" : user.FullName,
                                       TotalExam = totalExam,
-                                      ListExam = listExam
+                                      ListExam = listExam,
+                                      ClassName = d.ListClassID.Count() > 0 ? string.Join("; ", _classService.GetMultipleClassName(d.ListClassID)) : ""
                                   }).ToList();
                     listData.AddRange(newData);
                 }
@@ -310,10 +311,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var data = _manageExamService.GetItemsByTeacherAndCenter(UserID,center.ID);
                     listData.AddRange(data.ToList());
                 }
+                var listClass = GetClasses(center.ID,tc.ID);
                 return Json(new Dictionary<String, Object> 
                 {
                     {"Status",true },
                     {"Data", listData },
+                    {"Classes",listClass },
                     {"Msg","" }
                 });
             }
@@ -819,6 +822,48 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Data",ex.Message },
                     {"Status" ,true}
                 });
+            }
+        }
+
+        private List<ClassEntity> GetClasses(String centerID,String UserID)
+        {
+            try
+            {
+                var isHeadTeacher = _teacherHelper.HasRole(UserID, centerID, "head-teacher");
+                var data = new List<ClassEntity>();
+                if (isHeadTeacher)
+                {
+                    var listClass = _classService.CreateQuery().Find(x => x.Center.Equals(centerID) && x.IsActive && x.EndDate > DateTime.UtcNow && x.ClassMechanism != CLASS_MECHANISM.PERSONAL);
+                    if(listClass.CountDocuments() > 0)
+                    {
+                        data.AddRange(listClass.ToList());
+                    }
+                    else
+                    {
+                        data.Add(new ClassEntity { Name = "Không có lớp nào" });
+                    }
+                }
+                else
+                {
+                    var listClass = _classService.GetTeacherClassList(UserID);
+                    if (listClass.Count() > 0)
+                    {
+                        data.AddRange(listClass.ToList());
+                    }
+                    else
+                    {
+                        data.Add(new ClassEntity { Name = "Không có lớp nào" });
+                    }
+                }
+                return data;
+            }
+            catch(Exception ex)
+            {
+                var newclass = new ClassEntity
+                {
+                    Name = ex.Message
+                };
+                return new List<ClassEntity> { newclass };
             }
         }
         #endregion
