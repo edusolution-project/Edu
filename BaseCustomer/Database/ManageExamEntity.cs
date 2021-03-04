@@ -20,6 +20,12 @@ namespace BaseCustomerEntity.Database
         public String CreateUser { get; set; }
         [JsonProperty("Center")]
         public String Center { get; set; }
+        [JsonProperty("Timer")]
+        public Int32 Timer { get; set; }
+        [JsonProperty("Limit")]
+        public Int32 Limtit { get; set; }
+        [JsonProperty("ListClassID")]
+        public List<String> ListClassID = new List<string>();
     }
 
     public class ManageExamService : ServiceBase<ManageExamEntity>

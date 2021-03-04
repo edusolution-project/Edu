@@ -295,9 +295,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var data = _manageExamService.GetItemsByTeacherAndCenter("",center.ID);
                     var newData = (from d in data.ToList()
                                   let user = _teacherService.GetItemByID(d.CreateUser)
+                                  let listExam = _lessonExamService.GetItemsByManageExamID(d.ID)
+                                  let totalExam = listExam.Count()
                                   select new ManageExamViewModel(d)
                                   {
                                       UserName = user == null ? "" : user.FullName,
+                                      TotalExam = totalExam,
+                                      ListExam = listExam
                                   }).ToList();
                     listData.AddRange(newData);
                 }
@@ -886,7 +890,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             Created = DateTime.UtcNow,
                             Updated = DateTime.UtcNow,
                             CreateUser = UserID,
-                            Center = centerID
+                            Center = centerID,
+                            Limtit = item.Limit,
+                            Timer = item.Timer
                         };
                         _manageExamService.Save(manageexam);
 

@@ -89,14 +89,14 @@
                         <td class="text-center align-middle">{{k+1}}</td>
                         <td class="text-center align-middle">{{exam.Name}}</td>
                         <td class="text-center align-middle">{{formatShortDate(exam.Created)}}</td>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
-                        <td class="text-center align-middle"></td>
+                        <td class="text-center align-middle">{{item.Timer}}</td>
+                        <td class="text-center align-middle">{{item.Limit}}</td>
+                        <td class="text-center align-middle">{{exam.TotalExam}}</td>
+                        <td class="text-center align-middle">{{item.ClassName}}</td>
                         <td class="text-center align-middle">{{exam.UserName}}</td>
                         <td class="text-center align-middle">
-                            <button>Sửa</button>
-                            <button>Xoá</button>
+                            <button type="button" class="btn btn-success" title="Sửa"><i class="ti-pencil-alt"></i></button>
+                            <button type="button" class="btn btn-act btn-trash" title="Xoá"><i class="ti-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>

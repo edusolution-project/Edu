@@ -12,6 +12,10 @@ namespace BaseCustomerMVC.Models
         public String UserName { get; set; }
         [JsonProperty("ClassName")]
         public String ClassName { get; set; }
+        [JsonProperty("TotalExam")]
+        public Int32 TotalExam { get; set; }
+        [JsonProperty("ListExam")]
+        public List<LessonExamEntity> ListExam = new List<LessonExamEntity>();
 
         public ManageExamViewModel(ManageExamEntity o)
         {

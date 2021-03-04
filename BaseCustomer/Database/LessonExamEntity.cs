@@ -38,5 +38,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(x => x.LessonID == LessonID).ToList();
         }
+
+        public List<LessonExamEntity> GetItemsByManageExamID(String ID)
+        {
+            return CreateQuery().Find(x=>x.ManageExamID == ID).ToList();
+        }
     }
 }
