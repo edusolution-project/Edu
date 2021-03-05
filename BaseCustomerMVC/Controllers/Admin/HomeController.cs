@@ -2147,17 +2147,20 @@ namespace BaseCustomerMVC.Controllers.Admin
             try
             {
                 var listClass = new List<String> { "5f7e80abf197721750de5ea7", "5f7e8167f197721750de681b", "5f5f2fa6ef17391d0c61e0ba", "5f5f3072ef17391d0c61f264", "5f7e81adf197721750de710e", "5f5f30d6ef17391d0c6203f0", "5f5f322def17391d0c623b9c", "5f5f331bef17391d0c625343" };
-                var exams = _examService.CreateQuery().Find(x => listClass.Contains(x.ClassID) && x.Created > new DateTime(2021, 03, 04, 00, 00, 00) && x.QuestionsTotal < 50).ToEnumerable();
+                var csbj = _classSubjectService.CreateQuery().Find(x => listClass.Contains(x.ClassID) && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).Project(x => x.ID).ToList().Distinct().ToList();
+                var exams = _examService.CreateQuery().Find(x => csbj.Contains(x.ClassSubjectID) && x.Created > new DateTime(2021, 03, 04, 00, 00, 00) && x.QuestionsTotal < 50).ToEnumerable();
                 var lessonIDs = exams.Select(x => x.LessonID).Distinct().ToList();
                 var lessons = _lessonService.CreateQuery().Find(x => lessonIDs.Contains(x.ID)).ToList();
                 foreach(var exam in exams.ToList())
                 {
-                    exam.QuestionsTotal = _clonequestionService.CountByLessonID(exam.LessonID);
-                    _examService.Save(exam);
                     var lesson = lessons.Where(x => x.ID == exam.LessonID).FirstOrDefault();
+                    var lessonpart = _clonelessonPartService.GetByLessonID(lesson.ID).Select(x => x.ID).ToList();
+                    var point = _clonequestionService.CreateQuery().Find(x => lessonpart.Contains(x.ParentID)).CountDocuments();
+                    exam.QuestionsTotal = point;
+                    _examService.Save(exam);
                     _lessonHelper.CompleteNoEssay(exam, lesson,out _,false);
                 }
-                return Content("");
+                return Content($"ExamCount: {exams.Count()}");
             }
             catch(Exception ex)
             {

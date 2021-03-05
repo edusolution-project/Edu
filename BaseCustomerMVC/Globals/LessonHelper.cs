@@ -667,7 +667,7 @@ namespace BaseCustomerMVC.Globals
             exam.MaxPoint = lesson.Point;
             exam.QuestionsDone = listDetails.Count();
             //Tổng số câu hỏi = tổng số câu hỏi + số phần tự luận
-            exam.QuestionsTotal = _cloneQuestionService.CountByLessonID(exam.LessonID);
+            exam.QuestionsTotal = _cloneQuestionService.CountByLessonID(exam.LessonID); //chạy data fix điểm ktra 4/3/2021 xong thì phải bỏ cmt ra
 
             //temp fix
             if (exam.QuestionsTotal < exam.QuestionsDone || exam.MaxPoint < exam.QuestionsDone)
