@@ -891,6 +891,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Center = centerID,
                 };
 
+                List<String> Tags = new List<string>();
+
                 for (var i = 0; i < matrixExams.Count; i++)
                 {
                     var f = matrixExams.ElementAtOrDefault(i);
@@ -910,6 +912,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         
                     };
                     matrixExam.DetailFormat.Add(detail);
+                    Tags.Add(f.Tags);
                 }
 
                 _matrixExamService.Save(matrixExam);
@@ -924,9 +927,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         List<String> listLessonExamIDs = new List<string>();
                         List<LessonExamEntity> lessonExams = new List<LessonExamEntity>();
-                        List<Int32> listIndex = new List<Int32>();
-                        var rd = new Random();
-                        var index = rd.Next(100, 999);
+                        //List<Int32> listIndex = new List<Int32>();
+                        //var rd = new Random();
+                        //var index = rd.Next(100, 999);
 
                         //taoj mowis kif kierm tra
                         var manageexam = new ManageExamEntity
@@ -941,15 +944,17 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         };
                         _manageExamService.Save(manageexam);
 
+                        var listIndexs = RandomIndex(item.TotalExam,999,100);
+
                         //tạo mã đề, gán cho từng kì thi
-                        for (Int32 i = 0; i < item.TotalExam; i++)
+                        for (Int32 i = 0; i < listIndexs.Count(); i++)
                         {
-                            if (listIndex.Contains(index))
-                            {
-                                index = rd.Next(100, 999);
-                            }
-                            var codeExam = index;
-                            listIndex.Add(index);
+                            //if (listIndex.Contains(index))
+                            //{
+                            //    index = rd.Next(100, 999);
+                            //}
+                            var codeExam = listIndexs.ElementAtOrDefault(i);
+                            //listIndex.Add(index);
 
                             var lessonExam = new LessonExamEntity
                             {
@@ -965,13 +970,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 ChapterID = "0",
                                 IsParentCourse = true,
                                 //MatrixExamID = matrixExam.ID,
-                                CodeExam = index.ToString(),
+                                CodeExam = codeExam.ToString(),
                                 ManageExamID = manageexam.ID
                             };
                             _lessonExamService.Save(lessonExam);
                             //lessonExams.Add(lessonExam);
                             listLessonExamIDs.Add(lessonExam.ID);
-                            //var str = RenderExam(lessonExam,matrixExam,item.ExamQuestionArchiveID,UserID).Result;
+                            var str = RenderExam(lessonExam,matrixExam,item.ExamQuestionArchiveID,UserID,Tags).Result;
                         }
                     }
                     return Json("");
@@ -1057,10 +1062,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task<String> RenderExam(LessonExamEntity lessonExam, MatrixExamEntity matrixExam, String ID,String UserID)
+        private async Task<String> RenderExam(LessonExamEntity lessonExam, MatrixExamEntity matrixExam, String ID,String UserID,List<String> Tags)
         {
             //lay danh sach cac lessonpart trong ngan hang cau hoi
-            var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
+            //var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
+            var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Contains(x.Tags)).ToEnumerable();
             if (lessonParts.Count() == 0)
             {
                 return "";
@@ -1071,10 +1077,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var listQuestionIDs = listQuestions.Project(x => x.ID).ToList();
             var listAns = _lessonPartAnswerExtensionService.CreateQuery().Find(x => listQuestionIDs.Contains(x.ParentID));
 
-            //var listPartKnow = new List<LessonPartExtensionEntity>();
-            //var listPartUnderstanding = new List<LessonPartExtensionEntity>();
-            //var listPartManipulate = new List<LessonPartExtensionEntity>();
-            //var listPartManipulateHighly = new List<LessonPartExtensionEntity>();
             var newListParts = new List<LessonPartExtensionEntity>();
             var newListQuestion = new List<LessonPartQuestionExtensionEntity>();
             var newListAns = new List<LessonPartAnswerExtensionEntity>();
@@ -1121,6 +1123,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             return "";
+        }
+
+        public JsonResult UpdateExam(String ID)
+        {
+            try
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data",null }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg",ex.Message },
+                    {"Data",null }
+                });
+            }
         }
 
         /// <summary>
@@ -1389,15 +1411,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }    
         }
         #endregion
-    }
 
-    #region class other
-    public class DataQuestion
-    {
-        [JsonProperty("ID")]
-        public String ID { get; set; }
-        [JsonProperty("Type")]
-        public Int32 Type { get; set; }
+        public List<Int32> RandomIndex(Int32 TotalIndex, Int32 max,Int32 min = 0)
+        {
+            var rd = new Random();
+            List<Int32> listIndex = new List<int>();
+            do
+            {
+                Int32 index = rd.Next(min, max);
+                if (!listIndex.Contains(index))
+                {
+                    listIndex.Add(index);
+                }
+            }
+            while (listIndex.Count() != TotalIndex);
+            return listIndex;
+        }
     }
-    #endregion
 }
