@@ -223,7 +223,7 @@
 
 @section Scripts{
     <script>
-        
+
         new Vue({
             el: "#main_content",
             mounted() {
@@ -292,7 +292,9 @@
                     limit: 1,
                     template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                     totalExam: 1,
-                    subject:'',
+                    subject: '',
+                    isNewMatrix: true,
+                    matrixID:'',
                     format: {
                         level: '',
                         tag: '',
@@ -344,6 +346,31 @@
             },
             computed: {},
             watch: {
+                "formatExam.isNewMatrix": function () {
+                    var stt = this.formatExam.isNewMatrix
+                    if (stt == 'false') {
+                        this.getMatrixExams()
+                    }
+                    else {
+                        this.list_matrixs = {
+                            name: '',
+                            id: '',
+                            created: '',
+                            detailFormat: []
+                        }
+                        this.formatExam.titleFormat = ''
+                    }
+                },
+                "formatExam.matrixID": function () {
+                    var stt = this.formatExam.isNewMatrix
+                    if (stt == 'false') {
+                        var matrix = this.list_matrixs.find(x => x.ID == this.formatExam.matrixID)
+                        this.formatExam.titleFormat = matrix.Name
+                        //debugger
+                        this.list_detailMatrix.data = matrix.DetailFormat
+                        //debugger
+                    }
+                }
             },
             methods: {
                 getData() {
@@ -395,8 +422,10 @@
                             titleExam: '',
                             timer: 1,
                             limit: 1,
-                            template: '@BaseCustomerEntity.Database.EXAM_TYPE.ISEXAM',
+                            template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                             totalExam: 1,
+                            isNewMatrix: 'true',
+                            matrixID: '',
                             format:[
                             {
                                 level: '',
@@ -533,21 +562,26 @@
                     _form.append("Template", _that.formatExam.template)
                     _form.append("TotalExam", _that.formatExam.totalExam)
                     _form.append("isNew", isNew)
-                    for (var i = 0; i < _that.formatExam.format.length; i++) {
-                        var itemFormat = _that.formatExam.format[i]
-                        //debugger
-                        _form.append("matrixExams[" + i + "].Level", itemFormat.level)
-                        _form.append("matrixExams[" + i + "].Tags", itemFormat.tag)
-                        _form.append("matrixExams[" + i + "].Know.Theory", itemFormat.levelKnow.theory)
-                        _form.append("matrixExams[" + i + "].Know.Exercise", itemFormat.levelKnow.exercise)
-                        //debugger
-                        _form.append("matrixExams[" + i + "].Understanding.Theory", itemFormat.levelUnderstanding.theory)
-                        _form.append("matrixExams[" + i + "].Understanding.Exercise", itemFormat.levelUnderstanding.exercise)
-                        _form.append("matrixExams[" + i + "].Manipulate.Theory", itemFormat.levelManipulate.theory)
-                        _form.append("matrixExams[" + i + "].Manipulate.Exercise", itemFormat.levelManipulate.exercise)
-                        _form.append("matrixExams[" + i + "].ManipulateHighly.Theory", itemFormat.levelManipulateHighly.theory)
-                        _form.append("matrixExams[" + i + "].ManipulateHighly.Exercise", itemFormat.levelManipulateHighly.exercise)
-                        _form.append("matrixExams[" + i + "].Name", _that.formatExam.titleFormat)
+                    if (_that.formatExam.isNewMatrix == 'true') {
+                        for (var i = 0; i < _that.formatExam.format.length; i++) {
+                            var itemFormat = _that.formatExam.format[i]
+                            //debugger
+                            _form.append("matrixExams[" + i + "].Level", itemFormat.level)
+                            _form.append("matrixExams[" + i + "].Tags", itemFormat.tag)
+                            _form.append("matrixExams[" + i + "].Know.Theory", itemFormat.levelKnow.theory)
+                            _form.append("matrixExams[" + i + "].Know.Exercise", itemFormat.levelKnow.exercise)
+                            //debugger
+                            _form.append("matrixExams[" + i + "].Understanding.Theory", itemFormat.levelUnderstanding.theory)
+                            _form.append("matrixExams[" + i + "].Understanding.Exercise", itemFormat.levelUnderstanding.exercise)
+                            _form.append("matrixExams[" + i + "].Manipulate.Theory", itemFormat.levelManipulate.theory)
+                            _form.append("matrixExams[" + i + "].Manipulate.Exercise", itemFormat.levelManipulate.exercise)
+                            _form.append("matrixExams[" + i + "].ManipulateHighly.Theory", itemFormat.levelManipulateHighly.theory)
+                            _form.append("matrixExams[" + i + "].ManipulateHighly.Exercise", itemFormat.levelManipulateHighly.exercise)
+                            _form.append("matrixExams[" + i + "].Name", _that.formatExam.titleFormat)
+                        }
+                    }
+                    else if (_that.formatExam.isNewMatrix == 'false') {
+                        _form.append("MatrixID", _that.formatExam.matrixID)
                     }
                     axios.post(_url, _form)
                         .then(response =>
@@ -726,13 +760,31 @@
                     this.data_setupExam.timer = obj.Timer
                     this.data_setupExam.limit = obj.Limit
                     this.data_setupExam.id = obj.ID
+                    debugger
                     _that.$bvModal.show('setupexam-modal-xl')
                 },
                 SaveSetup() {
                     let _that = this
                     let _form = new FormData()
-                    let _url = '@processUrl("","ExamManage")'
-
+                    let _url = '@processUrl("SetupExam", "ExamManage")'
+                    _form.append("ID", _that.data_setupExam.id)
+                    _form.append("Timer", _that.data_setupExam.timer)
+                    _form.append("Limit", _that.data_setupExam.limit)
+                    _form.append("StartDate", _that.data_setupExam.startTime)
+                    _form.append("EndDate", _that.data_setupExam.endTime)
+                    //_form.append("ListClassID", _that.data_setupExam.targetClasses)
+                    if (_that.data_setupExam.targetClasses.length > 0) {
+                        for (var i = 0; i < _that.data_setupExam.targetClasses.length; i++) {
+                            var idclass = _that.data_setupExam.targetClasses[i]
+                            _form.append("ListClassID[" + i + "]", idclass)
+                        }
+                    }
+                    //debugger
+                    axios.post(_url, _form)
+                        .then(response => {
+                            //debugger
+                        })
+                        .catch(e => { alert(e)})
                 },
 
                 //support
@@ -792,8 +844,20 @@
                         $("#" + id).attr('class', d_none)
                     }
                 },
-            }
-        });
+                showDetailExam(obj) {
+                    let _form = new FormData();
+                    let _url = '@processUrl("ShowDetailExam", "ExamManage")'
+                    _form.append("ID", obj.ID)
+                    axios.post(_url, _form)
+                        .then(res => {
+                            debugger
+                            var cs = res.data.ClassSubjectID
+                            var lessonID = res.data.LessonID
+                            window.open('@processUrl("Detail", "Lesson")/' + lessonID + '/' + cs, '_blank');
+                        })
+                }
+                        }
+                    });
     </script>
     <style>
         #ed_table tr th:first-child,
@@ -865,12 +929,13 @@
                 </div>
                 <div class="col-md-6">
                     <label class="label">Tên ma trận đề</label>
-                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" />
+                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" v-if="formatExam.isNewMatrix == 'true'"/>
+                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" v-else disabled/>
                 </div>
                 @*<div class="col-md-6">
-                        <label class="label">Tiêu đề</label>
-                        <input type="text" class="form-control" placeholder="Tên đề" v-model="formatExam.titleExam"/>
-                    </div>*@
+                <label class="label">Tiêu đề</label>
+                <input type="text" class="form-control" placeholder="Tên đề" v-model="formatExam.titleExam"/>
+            </div>*@
             </div>
 
             <div class="row">
@@ -913,101 +978,185 @@
             </div>
 
             <div class="row mt-3">
+                <div class="col-md-6">
+                    <select class="form-control" v-model="formatExam.isNewMatrix">
+                        <option value="true">Tạo mới ma trận</option>
+                        <option value="false">Sử dụng ma trận có sẵn</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <template v-if="formatExam.isNewMatrix == 'true'">
+                        <select class="form-control" disabled>
+                            <option value="">Lựa chọn ma trận</option>
+                        </select>
+                    </template>
+                    <template v-else>
+                        <select v-model="formatExam.matrixID" class="form-control">
+                            <option value="">Lựa chọn ma trận</option>
+                            <option v-for="(matrix,k) in list_matrixs" :value="matrix.ID">{{matrix.Name}}</option>
+                        </select>
+                    </template>
+                </div>
+            </div>
+
+            <div class="row mt-3">
                 <label class="label">Cấu trúc</label>
-                <table class="table table-bordered table-sm">
-                    <thead>
-                        <tr>
-                            <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
-                            <td rowspan="2" class="text-center align-middle">Nội dung</td>
-                            <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
-                            <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
-                            <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
-                            <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
-                            <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
-                            <td rowspan="2" class="text-center align-middle" style="width:85px">Tác vụ</td>
-                        </tr>
-                        <tr>
-                            <td class="text-center align-middle" style="width:80px">LT</td>
-                            <td class="text-center align-middle" style="width:80px">BT</td>
-                            <td class="text-center align-middle" style="width:80px">LT</td>
-                            <td class="text-center align-middle" style="width:80px">BT</td>
-                            <td class="text-center align-middle" style="width:80px">LT</td>
-                            <td class="text-center align-middle" style="width:80px">BT</td>
-                            <td class="text-center align-middle" style="width:80px">LT</td>
-                            <td class="text-center align-middle" style="width:80px">BT</td>
-                        </tr>
-                    </thead>
+                <template v-if="formatExam.matrixID == ''">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
+                                <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                                <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
+                                <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                                <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                                <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                                <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                                <td rowspan="2" class="text-center align-middle" style="width:85px">Tác vụ</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
-                            <td class="text-center align-middle">{{k+1}}</td>
-                            <td>
-                                <input type="text" class="form-control" v-model="item.tag" />
-                            </td>
+                        <tbody>
+                            <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
+                                <td class="text-center align-middle">{{k+1}}</td>
+                                <td>
+                                    <input type="text" class="form-control" v-model="item.tag" />
+                                </td>
 
-                            <td>
-                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow + item.levelUnderstanding + item.levelManipulate + item.levelManipulateHighly" disabled readonly />
-                            </td>
+                                <td>
+                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow + item.levelUnderstanding + item.levelManipulate + item.levelManipulateHighly" disabled readonly />
+                                </td>
 
-                            <td v-for="(_item,i) in item.levelKnow">
-                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow[i]" />
-                            </td>
-                            @*<td>
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow" />
-                                </td>*@
+                                <td v-for="(_item,i) in item.levelKnow">
+                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow[i]" />
+                                </td>
+                                @*<td>
+                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow" />
+                    </td>*@
 
-                            <td v-for="(_item,i) in item.levelUnderstanding">
-                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding[i]" />
-                            </td>
-                            @*<td>
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.exercise" />
-                                </td>*@
+                                <td v-for="(_item,i) in item.levelUnderstanding">
+                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding[i]" />
+                                </td>
+                                @*<td>
+                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.exercise" />
+                    </td>*@
 
-                            <td v-for="(_item,i) in item.levelManipulate">
-                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate[i]" />
-                            </td>
-                            @*<td>
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.exercise" />
-                                </td>*@
+                                <td v-for="(_item,i) in item.levelManipulate">
+                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate[i]" />
+                                </td>
+                                @*<td>
+                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.exercise" />
+                    </td>*@
 
-                            <td v-for="(_item,i) in item.levelManipulateHighly">
-                                <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly[i]" />
-                            </td>
-                            @*<td>
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.exercise" />
-                                </td>*@
+                                <td v-for="(_item,i) in item.levelManipulateHighly">
+                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly[i]" />
+                                </td>
+                                @*<td>
+                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.exercise" />
+                    </td>*@
 
-                            <td class="text-center align-middle">
-                                <button title="Xoá điều kiện" v-on:click="removeOption(k)" class="btn-act"><i class="ti-trash"></i></button>
-                                <button title="Đặt lại" v-on:click="refreshOption(k)" class="btn-act"><i class="ti-reload"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="12" class="text-right p-2">
-                                <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center align-middle">Tổng</td>
-                            <td class="text-center align-middle">
-                                <input type="number" class="form-control text-center align-middle" disabled readonly />
-                            </td>
-                            <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" disabled readonly />
-                            </td>
-                            <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" disabled readonly />
-                            </td>
-                            <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" disabled readonly />
-                            </td>
-                            <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" disabled readonly />
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+                                <td class="text-center align-middle">
+                                    <button title="Xoá điều kiện" v-on:click="removeOption(k)" class="btn-act"><i class="ti-trash"></i></button>
+                                    <button title="Đặt lại" v-on:click="refreshOption(k)" class="btn-act"><i class="ti-reload"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="12" class="text-right p-2">
+                                    <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-center align-middle">Tổng</td>
+                                <td class="text-center align-middle">
+                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
+                                </td>
+                                <td colspan="2">
+                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
+                                </td>
+                                <td colspan="2">
+                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
+                                </td>
+                                <td colspan="2">
+                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
+                                </td>
+                                <td colspan="2">
+                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <td rowspan="2" class="text-center align-middle" style="width: 35px;">STT</td>
+                                <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                                <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
+                                <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                                <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                                <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                                <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                                <td class="text-center align-middle" style="width:80px">LT</td>
+                                <td class="text-center align-middle" style="width:80px">BT</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(detail,k) in list_detailMatrix.data">
+                                <td>{{k+1}}</td>
+                                <td>
+                                    <input type="text" class="form-control" v-model="detail.Tags" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" :value="detail.Know.Total + detail.Understanding.Total + detail.Manipulate.Total + detail.ManipulateHighly.Total" disabled readonly />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Know.Theory" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Know.Exercise" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Understanding.Theory" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Understanding.Exercise" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Manipulate.Theory" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.Manipulate.Exercise" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Theory" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Exercise" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
             </div>
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
@@ -1621,7 +1770,7 @@
                             <td>{{k+1}}</td>
                             <td>{{exam.CodeExam}}</td>
                             <td>
-                                <a href="#">Xem chi tiết</a>
+                                <a href="javascript:void(0)" v-on:click="showDetailExam(exam)">Xem chi tiết</a>
                             </td>
                         </tr>
                     </tbody>

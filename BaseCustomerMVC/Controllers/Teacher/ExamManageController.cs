@@ -530,6 +530,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ExamQuestionArchiveID = ID,
                         GradeID = GradeID,
                         SubjectID = examQuestionArchive.SubjectID,
+                        TypePart = lessonPartExtension.TypePart
                     };
 
                     if(!String.IsNullOrEmpty(lessonPartExtension.Tags))
@@ -739,6 +740,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public JsonResult ChangeTypePart(String basis,String ID,Int32 NewTypePart)
+        {
+            try
+            {
+                if (String.IsNullOrEmpty(ID))
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"ID",null },
+                        {"NewType",null },
+                        {"Error","Khong tim thay cau hoi tuong ung" }
+                    });
+                }
+
+                //var question = _lessonPartQuestionExtensionServie.GetItemByID(ID);
+                var lessonpart = _lessonPartExtensionService.GetItemByID(ID);
+                if (lessonpart == null)
+                {
+                    return Json(new Dictionary<String, Object>
+                    {
+                        {"ID",null },
+                        {"NewType",null },
+                        {"Error","Khong tim thay cau hoi tuong ung" }
+                    });
+                }
+
+                lessonpart.TypePart = NewTypePart;
+                lessonpart.Updated = DateTime.Now;
+                _lessonPartExtensionService.Save(lessonpart);
+                return Json(new Dictionary<String, Object>
+                {
+                    {"ID",lessonpart.ID },
+                    {"NewType",lessonpart.TypePart }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(ex.Message);
+            }
+        }
+
         public JsonResult ChangeTimer(String basis, String ID, Int32 Timer)
         {
             try
@@ -880,46 +922,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var centerID = _centerService.GetItemByCode(basis).ID;
-
-                //Lưu format đề
-                var matrixExam = new MatrixExamEntity
-                {
-                    Name = matrixExams.FirstOrDefault().Name,
-                    ExamQuestionArchiveID = item.ExamQuestionArchiveID,
-                    Created = DateTime.UtcNow,
-                    CreateUser = UserID,
-                    Center = centerID,
-                };
+                MatrixExamEntity matrixExam = new MatrixExamEntity();
 
                 List<String> Tags = new List<string>();
-
-                for (var i = 0; i < matrixExams.Count; i++)
+                if (String.IsNullOrEmpty(item.MatrixID))
                 {
-                    var f = matrixExams.ElementAtOrDefault(i);
-                    f.Know.Total = f.Know.Theory + f.Know.Exercise;
-                    f.Understanding.Total = f.Understanding.Theory + f.Understanding.Exercise;
-                    f.Manipulate.Total = f.Manipulate.Theory + f.Manipulate.Exercise;
-                    f.ManipulateHighly.Total = f.ManipulateHighly.Theory + f.ManipulateHighly.Exercise;
-                    var detail = new DetailMatrixExam
-                    {
-                        Level = f.Level,
-                        Order = i,
-                        Tags = f.Tags,
-                        Know = f.Know,
-                        Understanding = f.Understanding,
-                        Manipulate = f.Manipulate,
-                        ManipulateHighly = f.ManipulateHighly,
-                        
-                    };
-                    matrixExam.DetailFormat.Add(detail);
-                    Tags.Add(f.Tags);
+                    //Lưu format đề
+                   matrixExam = CreateOrUpdateMatrix(item, matrixExams, UserID, centerID, out Tags);
                 }
-
-                _matrixExamService.Save(matrixExam);
+                else
+                {
+                    matrixExam = _matrixExamService.GetItemByID(item.MatrixID);
+                }
 
                 if (item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
                 {
-                    return Json("");
+                    return Json("Chức năng đang chờ");
                 }
                 else //kiem tra thi tao de truoc
                 {
@@ -1062,11 +1080,52 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        private MatrixExamEntity CreateOrUpdateMatrix(ExamProcessViewModel item, List<MatrixExamViewModel> matrixExams, string UserID, string centerID, out List<String> Tags)
+        {
+            var matrixExam = new MatrixExamEntity
+            {
+                Name = matrixExams.FirstOrDefault().Name,
+                ExamQuestionArchiveID = item.ExamQuestionArchiveID,
+                Created = DateTime.UtcNow,
+                CreateUser = UserID,
+                Center = centerID,
+            };
+
+            List<String> _Tags = new List<string>();
+
+            for (var i = 0; i < matrixExams.Count; i++)
+            {
+                var f = matrixExams.ElementAtOrDefault(i);
+                f.Know.Total = f.Know.Theory + f.Know.Exercise;
+                f.Understanding.Total = f.Understanding.Theory + f.Understanding.Exercise;
+                f.Manipulate.Total = f.Manipulate.Theory + f.Manipulate.Exercise;
+                f.ManipulateHighly.Total = f.ManipulateHighly.Theory + f.ManipulateHighly.Exercise;
+                var total = f.Know.Total + f.Understanding.Total + f.Manipulate.Total + f.ManipulateHighly.Total;
+                var detail = new DetailMatrixExam
+                {
+                    Level = f.Level,
+                    Order = i,
+                    Tags = f.Tags,
+                    Know = f.Know,
+                    Understanding = f.Understanding,
+                    Manipulate = f.Manipulate,
+                    ManipulateHighly = f.ManipulateHighly,
+                    Total = total
+                };
+                matrixExam.DetailFormat.Add(detail);
+                _Tags.Add(f.Tags);
+            }
+
+            Tags = _Tags;
+            _matrixExamService.Save(matrixExam);
+            return matrixExam;
+        }
+
         private async Task<String> RenderExam(LessonExamEntity lessonExam, MatrixExamEntity matrixExam, String ID,String UserID,List<String> Tags)
         {
             //lay danh sach cac lessonpart trong ngan hang cau hoi
-            //var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
-            var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Contains(x.Tags)).ToEnumerable();
+            var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
+            //var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Contains(x.Tags)).ToEnumerable();
             if (lessonParts.Count() == 0)
             {
                 return "";
@@ -1082,15 +1141,47 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var newListAns = new List<LessonPartAnswerExtensionEntity>();
             foreach (var item in matrixExam.DetailFormat)
             {
-                var _listPartKnow = lessonParts.Where(x => x.LevelPart == LEVELPART.KNOW && item.Tags.Contains(x.Tags)).Take(item.Total); // 
-                var _listPartUnderstanding = lessonParts.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING && item.Tags.Contains(x.Tags)).Take(item.Total);
-                var _listPartManipulate = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATE && item.Tags.Contains(x.Tags)).Take(item.Total);
-                var _listPartManipulateHighly = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY && item.Tags.Contains(x.Tags)).Take(item.Total);
+                var _listPartKnow = lessonParts.Where(x => x.LevelPart == LEVELPART.KNOW); // 
+                //var _listPartKnow = lessonParts.Where(x => x.LevelPart == LEVELPART.KNOW && item.Tags.Contains(x.Tags)).Take(item.Total); // 
+                {
+                    var partKnowTheory = _listPartKnow.Where(x => x.TypePart == TYPE_PART.THEORY);
+                    var partKnowExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
 
-                newListParts.AddRange(_listPartKnow);
-                newListParts.AddRange(_listPartUnderstanding);
-                newListParts.AddRange(_listPartManipulate);
-                newListParts.AddRange(_listPartManipulateHighly);
+                    //lấy câu lý thuyết
+                    newListParts.AddRange(GetParts(item, partKnowTheory.ToList()));
+                    //lấy câu bài tập
+                    newListParts.AddRange(GetParts(item, partKnowExercise.ToList()));
+                }
+                var _listPartUnderstanding = lessonParts.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING );
+                {
+                    var partUnderstandingTheory = _listPartKnow.Where(x => x.TypePart == TYPE_PART.THEORY);
+                    var partUnderstandingExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
+
+                    //lấy câu lý thuyết
+                    newListParts.AddRange(GetParts(item, partUnderstandingTheory.ToList()));
+                    //lấy câu bài tập
+                    newListParts.AddRange(GetParts(item, partUnderstandingExercise.ToList()));
+                }
+                var _listPartManipulate = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATE );
+                {
+                    var partManipulateTheory = _listPartKnow.Where(x => x.TypePart == TYPE_PART.THEORY);
+                    var partManipulateExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
+
+                    //lấy câu lý thuyết
+                    newListParts.AddRange(GetParts(item, partManipulateTheory.ToList()));
+                    //lấy câu bài tập
+                    newListParts.AddRange(GetParts(item, partManipulateExercise.ToList()));
+                }
+                var _listPartManipulateHighly = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY );
+                {
+                    var partManipulateHighlyTheory = _listPartKnow.Where(x => x.TypePart == TYPE_PART.THEORY);
+                    var partManipulateHighlyExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
+
+                    //lấy câu lý thuyết
+                    newListParts.AddRange(GetParts(item, partManipulateHighlyTheory.ToList()));
+                    //lấy câu bài tập
+                    newListParts.AddRange(GetParts(item, partManipulateHighlyExercise.ToList()));
+                }
             }
 
             if (newListParts.Count() > 0)
@@ -1115,7 +1206,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //ClassID = lesson.ClassID,
                     //ClassSubjectID = lesson.ClassSubjectID,
                     TeacherID = UserID,
-                    Media = part.Media == null ? null : new Media { Created = part.Media.Created, Extension = part.Media.Extension, Name = part.Media.Name, OriginalName = part.Media.OriginalName, Path = part.Media.Path, Size = part.Media.Size }
+                    Media = part.Media == null ? null : new Media { Created = part.Media.Created, Extension = part.Media.Extension, Name = part.Media.Name, OriginalName = part.Media.OriginalName, Path = part.Media.Path, Size = part.Media.Size },
+                    LessonExamID = lessonExam.ID
                 };
 
                 _cloneLessonPartExtensionService.Save(clonelessonpart);
@@ -1123,6 +1215,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
 
             return "";
+        }
+
+        private List<LessonPartExtensionEntity> GetParts( DetailMatrixExam item, List<LessonPartExtensionEntity> listParts)
+        {
+            List<LessonPartExtensionEntity> newListParts = new List<LessonPartExtensionEntity>();
+            if (item.Know.Theory > 0 && item.Know.Theory == 1)
+            {
+                var index = new Random().Next(0, listParts.Count());
+                var part = listParts.ElementAtOrDefault(index);
+                newListParts.Add(part);
+            }
+            else if (item.Know.Theory > 1)
+            {
+                var indexs = RandomIndex(item.Know.Theory, listParts.Count(), 0);
+                var part = (from i in indexs
+                            let p = listParts.ElementAtOrDefault(i)
+                            where p != null
+                            select p).ToList();
+                newListParts.AddRange(part);
+            }
+            return newListParts;
         }
 
         public JsonResult UpdateExam(String ID)
@@ -1269,7 +1382,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ParentID = clonelessonpart.ID,
                     ClassID = lesson == null ? "" : lesson.ClassID,
                     ClassSubjectID = lesson == null ? "" : lesson.ClassSubjectID,
-                    LessonID = lesson == null ? "" : lesson.ID
+                    LessonID = lesson == null ? "" : lesson.ID,
+                    LessonExamID = clonelessonpart.LessonExamID
                 };
 
                 _cloneLessonPartQuestionExtensionService.Save(clonelessonpartquestion);
@@ -1374,9 +1488,205 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public async Task<JsonResult> SetupExam(String basis, ManageExamEntity item,List<String> ListClassID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            try
+            {
+                var manageExam = _manageExamService.GetItemByID(item.ID);
+                if(manageExam == null)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Msg","Không tìm thấy kì thi." },
+                        {"Data",null }
+                    });
+                }
+
+                var csbjs = _classSubjectService.GetItemsExamByClassIDs(ListClassID);
+                if(csbjs.Count() == 0)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Msg","Không tìm thấy thông tin lớp." },
+                        {"Data",null }
+                    });
+                }
+
+                var lessonExams = _lessonExamService.GetItemsByManageExamID(item.ID);
+                var lessonExamIDs = lessonExams.Select(x => x.ID).ToList();
+                if(lessonExams.Count() == 0)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Msg","Không tìm thấy thông tin đề thi." },
+                        {"Data",null }
+                    });
+                }
+
+                var lessonParts = _cloneLessonPartExtensionService.GetItemsByLessonExamID(lessonExamIDs);
+                var lessonPartsQuiz = _cloneLessonPartQuestionExtensionService.GetItemsByLessonExamID(lessonExamIDs);
+                var lessonPartsQuizIDs = lessonPartsQuiz.Select(x => x.ID).ToList();
+                var lessonPartsAns = _cloneLessonPartAnswerExtensionService.GetItemsByQuestionIDs(lessonPartsQuizIDs);
+
+                foreach (var cs in csbjs)
+                {
+                    foreach (var lessonExam in lessonExams)
+                    {
+                        var lesson = new LessonEntity
+                        {
+                            TemplateType = 2,
+                            Timer = item.Timer,
+                            CreateUser = UserID,
+                            Title = $"{manageExam.Name} - {lessonExam.CodeExam}",
+                            Created = DateTime.Now,
+                            Updated = DateTime.Now,
+                            Limit = manageExam.Limtit,
+                            Multiple = 1,
+                            Etype = 0,
+                            ClassID = cs.ClassID,
+                            ClassSubjectID = cs.ID,
+                            ChapterID = "0",
+                            IsParentCourse = true,
+                            LessonExamID = lessonExam.ID
+                        };
+                        _lessonService.Save(lesson);
+                        CopyLessonPart(lesson, lessonParts.ToList(), lessonPartsQuiz.ToList(), lessonPartsAns.ToList(), lessonExamIDs);
+                    }
+                }
+
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data",null }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data",null }
+                });
+            }
+        }
+
+        private async Task<CloneLessonPartEntity> CopyLessonPart(
+            LessonEntity lesson
+            , List<CloneLessonPartExtensionEntity> cloneLessonPartExtensions
+            , List<CloneLessonPartQuestionExtensionEntity> cloneLessonPartQuestionExtensions
+            , List<CloneLessonPartAnswerExtensionEntity> cloneLessonPartAnswerExtensions
+            , List<String> lessonExamIDs
+            )
+        {
+            try
+            {
+                foreach (var lessonExamID in lessonExamIDs)
+                {
+                    var parts = cloneLessonPartExtensions.Where(x => x.LessonExamID == lessonExamID);
+                    var questions = cloneLessonPartQuestionExtensions.Where(x => x.LessonExamID == lessonExamID);
+                    var questionIDs = questions.Select(x => x.ID);
+                    var ans = cloneLessonPartAnswerExtensions.Where(x => questionIDs.Contains(x.ParentID));
+
+                    foreach (var part in parts)
+                    {
+                        var newPart = new CloneLessonPartEntity
+                        {
+                            OriginID = part.ID,
+                            ParentID = lesson.ID,
+                            Title = part.Title,
+                            Timer = part.Timer,
+                            Description = part.Description,
+                            Type = part.Type,
+                            Point = part.Point,
+                            Created = DateTime.UtcNow,
+                            Updated = DateTime.UtcNow,
+                            Order = part.Order,
+                            Media = part.Media,
+                            CourseID = part.CourseID,
+                            TeacherID = lesson.CreateUser,
+                            ClassID = lesson.ClassID,
+                            ClassSubjectID = lesson.ClassSubjectID
+                        };
+
+                        _cloneLessonPartService.Save(newPart);
+                        var listQuiz = questions.Where(x => x.ParentID == part.ID).ToList();
+                        var listAns = ans.Where(x => listQuiz.Select(y => y.ID).ToList().Contains(x.ParentID)).ToList();
+                        CopyQuiz(newPart.ID, listQuiz, listAns, lesson);
+                    }
+                }
+                return new CloneLessonPartEntity();
+            }
+            catch (Exception ex)
+            {
+                return new CloneLessonPartEntity { Title = ex.Message };
+            }
+        }
+
+        private async Task CopyQuiz(
+            String partID
+            , List<CloneLessonPartQuestionExtensionEntity> cloneLessonPartQuestionExtensions
+            , List<CloneLessonPartAnswerExtensionEntity> cloneLessonPartAnswerExtensions
+            , LessonEntity lesson
+        )
+        {
+            foreach(var q in cloneLessonPartQuestionExtensions)
+            {
+                var newQ = new CloneLessonPartQuestionEntity
+                {
+                    OriginID = q.ID,
+                    Content = q.Content,
+                    CreateUser = lesson.CreateUser,
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                    Point = q.Point,
+                    Order = q.Order,
+                    Description = q.Description,
+                    Media = q.Media,
+                    ParentID = partID,
+                    CourseID = q.CourseID,
+                    TeacherID = lesson.CreateUser,
+                    ClassID = lesson.ClassID,
+                    ClassSubjectID = lesson.ClassSubjectID,
+                    LessonID = lesson.ID
+                };
+
+                _cloneLessonPartQuestionService.Save(newQ);
+                var listAns = cloneLessonPartAnswerExtensions.Where(x => x.ParentID == q.ID).ToList();
+                CopyAns(newQ.ID, listAns,lesson);
+            }
+        }
+
+        private async Task CopyAns(
+            String quizID
+            , List<CloneLessonPartAnswerExtensionEntity> cloneLessonPartAnswerExtensions
+            , LessonEntity lesson
+        )
+        {
+            foreach(var a in cloneLessonPartAnswerExtensions)
+            {
+                var newA = new CloneLessonPartAnswerEntity
+                {
+                    OriginID = a.ID,
+                    ParentID = quizID,
+                    Content = a.Content,
+                    IsCorrect = a.IsCorrect,
+                    CreateUser = lesson.CreateUser,
+                    Created = DateTime.UtcNow,
+                    Updated = DateTime.UtcNow,
+                    Media = a.Media,
+                    Order = a.Order,
+                    CourseID = a.CourseID,
+                    TeacherID = lesson.CreateUser,
+                    ClassID = lesson.ClassID,
+                    ClassSubjectID = lesson.ClassSubjectID
+                };
+                _cloneLessonPartAnswerService.Save(newA);
+            }
+        }
+
         #endregion
 
-        #region Option
         public JsonResult GetOptionFormatExam(String basis, String ID)
         {
             try
@@ -1410,7 +1720,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }    
         }
-        #endregion
 
         public List<Int32> RandomIndex(Int32 TotalIndex, Int32 max,Int32 min = 0)
         {
@@ -1426,6 +1735,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             while (listIndex.Count() != TotalIndex);
             return listIndex;
+        }
+
+        public JsonResult ShowDetailExam(String ID)
+        {
+            try
+            {
+                    var lesson = _lessonService.CreateQuery().Find(x => x.LessonExamID == ID).FirstOrDefault();
+                    return Json(new Dictionary<String, object> {
+                        {"ClassSubjectID",lesson.ClassSubjectID },
+                        {"LessonID",lesson.ID }
+                    });
+            }
+            catch(Exception ex)
+            {
+                return Json(ex.Message);
+            }
         }
     }
 }

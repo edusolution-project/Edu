@@ -25,6 +25,8 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("Tags")]
         //public List<String> Tags = new List<String>();
         public String Tags { get; set; }
+        [JsonProperty("TypePart")]
+        public Int32 TypePart { get; set; }
     }
 
     public class LEVELPART //mức độ
@@ -33,6 +35,12 @@ namespace BaseCustomerEntity.Database
             UNDERSTANDING = 2, //Thông hiểu
             MANIPULATE = 3, //Vận dụng
             MANIPULATEHIGHLY = 4; // vận dụng cao
+    }
+
+    public class TYPE_PART
+    {
+        public const Int32 THEORY = 1,//Lý thuyết
+            EXERCISE = 2;//bài tập
     }
 
     public class LessonPartExtensionService : ServiceBase<LessonPartExtensionEntity>

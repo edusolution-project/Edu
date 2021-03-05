@@ -47,5 +47,7 @@ namespace BaseCustomerMVC.Models
         public Int32 Template { get; set; }
         [JsonProperty("Subject")]
         public String Subject { get; set; }
+        [JsonProperty("MatrixID")]
+        public String MatrixID { get; set; }
     }
 }

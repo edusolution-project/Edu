@@ -137,6 +137,11 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => classIds.Contains(t.ClassID)).ToList();
         }
+
+        public List<ClassSubjectEntity> GetItemsExamByClassIDs(List<string> listClassID)
+        {
+            return Collection.Find(t => listClassID.Contains(t.ClassID) && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+        }
     }
 
     public class CLASSSUBJECT_TYPE

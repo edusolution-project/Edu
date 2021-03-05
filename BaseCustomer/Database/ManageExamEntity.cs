@@ -26,6 +26,10 @@ namespace BaseCustomerEntity.Database
         public Int32 Limtit { get; set; }
         [JsonProperty("ListClassID")]
         public List<String> ListClassID = new List<string>();
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
     }
 
     public class ManageExamService : ServiceBase<ManageExamEntity>

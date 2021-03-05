@@ -1,6 +1,7 @@
 ﻿using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,8 @@ namespace BaseCustomerEntity.Database
 {
     public class CloneLessonPartExtensionEntity : CloneLessonPartEntity
     {
-
+        [JsonProperty("LessonExamID")]
+        public String LessonExamID { get; set; }
     }
 
     public class CloneLessonPartExtensionService : ServiceBase<CloneLessonPartExtensionEntity>
@@ -37,6 +39,11 @@ namespace BaseCustomerEntity.Database
         public List<String> GetIDsByLessonID(string ParentID)
         {
             return CreateQuery().Find(x => x.ParentID == ParentID).Project(x=>x.ID).ToList();
+        }
+
+        public IEnumerable<CloneLessonPartExtensionEntity> GetItemsByLessonExamID(List<string> lessonExamIDs)
+        {
+            return CreateQuery().Find(x => lessonExamIDs.Contains(x.LessonExamID)).ToEnumerable();
         }
     }
 }

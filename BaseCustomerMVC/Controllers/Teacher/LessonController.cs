@@ -23,7 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassService _classService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseService _courseService;
-        private readonly CourseChapterService _courseChapterService;
+        //private readonly CourseChapterService _courseChapterService;
         private readonly LessonHelper _lessonHelper;
         private readonly ClassHelper _classHelper;
 

@@ -31,6 +31,7 @@ namespace BaseCustomerMVC.Models
             this.Questions = new List<QuestionViewModel>();
             this.Tags = o.Tags;
             this.LevelPart = o.LevelPart;
+            this.TypePart = o.TypePart;
         }
 
         [JsonProperty("Questions")]

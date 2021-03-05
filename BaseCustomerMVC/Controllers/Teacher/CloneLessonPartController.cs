@@ -134,8 +134,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         [Obsolete]
         [HttpPost]
-        public JsonResult GetList(string LessonID, string ClassID, string ClassSubjectID)
+        public JsonResult GetList(string LessonID, string ClassID, string ClassSubjectID,String CodeExam,String lessonExamID = "")
         {
+            //var root = new LessonEntity();
+            //if (!String.IsNullOrEmpty(lessonExamID))
+            //{
+            //    root = _lessonService.CreateQuery().Find(x => x.LessonExamID == lessonExamID).FirstOrDefault();
+            //}
+            //else
+            //{
+            //    root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
+            //}
+
             var root = _lessonService.CreateQuery().Find(o => o.ID == LessonID).SingleOrDefault();
 
             var currentCs = _classSubjectService.GetItemByID(ClassSubjectID);
