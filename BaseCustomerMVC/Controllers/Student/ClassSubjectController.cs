@@ -370,7 +370,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     var _activelesson = activelessonTemp.Where(x => x.ClassID == item.ID).ToList();
                     activelesson.AddRange(_activelesson);
-                }
+                }  
             }
             //data Practice
             List<StudentSummaryViewModel> practiceResult = new List<StudentSummaryViewModel>();

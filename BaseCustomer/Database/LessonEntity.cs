@@ -26,6 +26,8 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("TeacherID")]
         public string TeacherID { get; set; }
 
+        [JsonProperty("GroupIDs")]
+        public List<string> GroupIDs { get; set; }
 
         //[JsonProperty("LessonExtension")]
         //public List<LessonExtensionEntity> LessonExtension = new List<LessonExtensionEntity>();

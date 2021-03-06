@@ -92,9 +92,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var userId = User?.FindFirst("UserID").Value;
                     if (center != null && userId != null)
                     {
-                        var listClass = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER) && o.Center == center.ID)?.ToList();
-                        if (listClass == null || listClass.Count <= 0) return Task.FromResult(new JsonResult(new { }));
-                        var data = _calendarHelper.GetListEvent(start, end, listClass.Select(o => o.ID).ToList(), userId);
+                        var listClassID = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER) && o.Center == center.ID)?.Project(t=> t.ID).ToList();
+                        if (listClassID == null || listClassID.Count <= 0) return Task.FromResult(new JsonResult(new { }));
+                        var data = _calendarHelper.GetListEvent(start, end, listClassID, userId);
                         if (data == null) return Task.FromResult(new JsonResult(new { }));
                         return Task.FromResult(new JsonResult(data));
                     }

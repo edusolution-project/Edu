@@ -37,6 +37,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly ClassHelper _classHelper;
         private readonly LessonHelper _lessonHelper;
 
+        private readonly ClassGroupService _classGroupService;
+
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
         private readonly ProgressHelper _progressHelper;
@@ -102,6 +104,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseHelper courseHelper,
             ClassHelper classHelper,
 
+            ClassGroupService classGroupService,
+
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ProgressHelper progressHelper,
@@ -155,6 +159,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
             _progressHelper = progressHelper;
+
+            _classGroupService = classGroupService;
 
             _chapterService = chapterService;
             _chapterExtendService = chapterExtendService;
@@ -1408,7 +1414,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        #region Manage
+        #region Class Manage
         public JsonResult GetManageList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             var center = new CenterEntity();
@@ -2688,10 +2694,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        #region Fix Data
-
-        #endregion
-
         #region Edit
         public IActionResult Editor(string basis, string ID)
         {
@@ -3722,6 +3724,75 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
             }
         }
+        #endregion
+
+
+        #region Group
+        public JsonResult SaveGroup(ClassGroupEntity item)
+        {
+            if (string.IsNullOrEmpty(item.Name) || string.IsNullOrEmpty(item.ClassID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            if (!string.IsNullOrEmpty(item.ID))
+            {
+                var oldItem = _classGroupService.GetItemByID(item.ID);
+                if (oldItem == null)
+                    return Json(new { error = "Nhóm không tồn tại hoặc đã bị xóa" });
+
+                oldItem.Name = item.Name;
+                _classGroupService.Save(oldItem);
+                item.ID = oldItem.ID;
+            }
+            else
+            {
+                item.Created = DateTime.Now.ToUniversalTime();
+                item.IsActive = true;
+                _classGroupService.Save(item);
+            }
+            return Json(item);
+        }
+
+        [HttpPost]
+        public JsonResult PublishGroup(ClassGroupEntity item)
+        {
+            if (string.IsNullOrEmpty(item.ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            var oldItem = _classGroupService.GetItemByID(item.ID);
+            if (oldItem == null)
+                return Json(new { error = "Nhóm không tồn tại hoặc đã bị xóa" });
+            oldItem.IsActive = item.IsActive;
+            _classGroupService.Save(oldItem);
+            return Json(item);
+        }
+
+        [HttpPost]
+        public JsonResult GetGroupList(string ID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            var currentClass = _classService.GetItemByID(ID);
+            if (currentClass == null)
+                return Json(new { error = "Không tìm thấy lớp" });
+            var data = _classGroupService.GetByClassID(ID);
+            return Json(data.Select(t => new ClassGroupViewModel
+            {
+                ID = t.ID,
+                IsActive = t.IsActive,
+                Name = t.Name,
+                Created = t.Created,
+                StudentCount = t.Members == null ? 0 : t.Members.Count()
+            }).ToList());
+        }
+
+        public JsonResult RemoveGroup(string ID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+
+            _classGroupService.Remove(ID);
+            return Json("Removed");
+        }
+
+
         #endregion
 
         private class StudentResult

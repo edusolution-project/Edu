@@ -46,11 +46,12 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
+                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
             <div class="c-right">
-                <b-button class="btn-addevent" v-on:click="showRefModal()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
+                <b-button class="btn-addevent" v-on:click="addGroup()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
             </div>
         </div>
 
@@ -81,39 +82,7 @@
                     </template>
                 </select>
             </div>
-            @*<div class="m-1 position-relative col-md-9 col-sm-12" v-if="searchCsbj != ''">
-                    <button type="button" tabindex="-1" data-toggle="dropdown" class="btn btn-default dropdown-toggle filter-box" v-on:click="toggleSelect()" style="border:1px solid #D0DFE8">
-                        Xem điểm theo tuần <span class="caret"></span>
-                    </button>
-                    <div style="position:absolute;left:0;top:40px;z-index:2" v-if="displaySelect">
-                        <div id="selectCenters">
-                            <ul class="chapSelect" role="menu" style="overflow-y:auto; min-width: 200px; list-style:none; padding: 7px; border: solid 1px #CCC; background: #FFF;">
-                                <li>
-                                    <input type="checkbox" v-model="filterChap.SelectAll" v-on:change="checkToggleAll()" /><span class="lbl"> Tất cả chương </span>
-                                </li>
-                                <li v-for="(item,k) in scoreSbjChap" class="d-flex flex-row align-items-center">
-                                    <input type="checkbox" :value="item.ID" v-model="filterChap.TargetChaps" v-on:change="checkToggle()" /><span class="ml-1 lbl"> {{item.Name}} </span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>*@
-            <!--<div class="box filter-box m-1 col-12 col-md-2" v-if="!searchCsbj">
-            <select v-model="searchPoint">
-                <option value="">Theo phân công giáo viên</option>
-                <option value="1">Tất cả</option>-->
-            @*<option value="2">Theo thời gian</option>*@
-            <!--</select>
-            </div>-->
-            <!--<div class="box m-1 col-12 col-md-6" v-if="displaySelectTime">
-            <div class="form-row">
-                <input type="date" v-model="searchwidthTime.startTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">
-                <input type="date" v-model="searchwidthTime.endTime" v-on:change="loadClassScore(1)" class="form-control col-md-4 col-sm-12">-->
-            @*<button type="button" class="btn btn-outline-primary" v-on:click="fillterWithTime()">Lọc</button>*@
-            <!--</div>
-            </div>
-            <div class="float-right" v-if="searchCsbj==''">
-                <template v-if="!isLoading">-->
+
             <button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="exportExcel('table_point')"><i title="Xuất file" class="ti-import"></i></button>
             @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" v-on:click="export2ExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
             @*<button type="button" class="btn btn-addevent btn-student btn-sm m-1 btn-secondary" style="margin-left: 5px;" onclick="ExportExcelV2()"><i title="Xuất file" class="ti-export"></i></button>*@
@@ -321,6 +290,45 @@
                     <div class="view" v-else style="text-align:center">Chưa có bài</div>
                 </template>
             </div>
+        </div>
+        <div class="box" v-show="tab[3]">
+            <template v-if="group_data.length == 0">
+                Chưa có danh sách nhóm
+            </template>
+            <template v-else>
+                <table id="ed_table" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th>Tên nhóm</th>
+                            <th style="width:100px;">Số học viên</th>
+                            <th style="width:120px;">Ngày tạo</th>
+                            <th style="width:100px;">Trạng thái</th>
+                            <th style="width:150px">Tác vụ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in group_data">
+                            <td>{{(k+1)}}</td>
+                            <td>
+                                <a :title="item.Name">
+                                    {{item.Name}}
+                                </a>
+                            </td>
+                            <td>{{item.StudentCount}}</td>
+                            <td>{{formatShortDate(item.Created)}}</td>
+                            <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupState(item)"></b-form-checkbox></td>
+                            <td>
+                                <div class="btn-group" style="display:block">
+                                    <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="addGroup(item)"><i class="ti-pencil-alt"></i></a>
+                                    <a href="javascript:;" title="Quản lý học viên" v-on:click="manageGroupStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                                    <button class="btn-act btn-trash" title="Xóa" v-on:click="removeGroup(item)"><i class="ti-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
         </div>
         <div class="box" v-show="tab[5]">
             <template v-if="lessonToMark.data.length == 0">
@@ -742,17 +750,17 @@
             padding: 0px;
         }
 
-        .table td, .table th {
+        #table_point td, #table_point th {
             padding: 0px
         }
 
-        .table thead th {
+        #table_point thead th {
             border: 0.5px solid gray;
             text-align: center;
             vertical-align: middle
         }
 
-        .table tbody td {
+        #table_point tbody td {
             text-align: center;
             border: 0.5px solid gray;
             vertical-align: middle
@@ -1303,9 +1311,9 @@
                         case 'score':
                             this.tabChange(2);
                             break;
-                        //case 'reference':
-                        //    this.tabChange(3);
-                        //    break;
+                        case 'group':
+                            this.tabChange(3);
+                            break;
                         case 'result':
                             this.tabChange(4);
                             break;
@@ -1340,6 +1348,8 @@
                 skillName: '@currentClass.SkillName',
                 classSubjects: [],
                 list_data: [],
+                group_data: [],
+                group_info: {},
                 list_subjects: [],
                 list_chapters: [],
                 list_chapters_result: [],
@@ -1436,6 +1446,29 @@
                     Name: '',
                     History: []
                 },
+                student_data:[],
+                students_fields: [
+                    {
+                        key: 'stt',
+                        label: '#'
+                    },
+                    {
+                        key: 'name',
+                        label: 'Họ tên'
+                    },
+                    {
+                        key: 'email',
+                        label: 'Email'
+                    },
+                    {
+                        key: 'phone',
+                        label: 'SĐT'
+                    },
+                    {
+                        key: 'actions',
+                        label: 'Tác vụ'
+                    }
+                ],
                 linkFile: '',
                 typeFile: [
                     "application/msword",
@@ -1488,6 +1521,7 @@
                     title: '',
                     list_chapters:[]
                 },
+                groupList:[],
                 isExam: false,
                 exam: {
                     name: '',
@@ -1577,8 +1611,8 @@
                             this.loadClassScore();
                             break;
                         case 3:
-                            history.replaceState({ tab: a }, this.className + " - Tài liệu tham khảo", "#reference");
-                            this.loadPreference();
+                            history.replaceState({ tab: a }, this.className + " - Nhóm học sinh", "#group");
+                            this.loadGroup();
                             break;
                         case 4:
                             history.replaceState({ tab: a }, this.className + " - Kết quả", "#result");
@@ -2333,56 +2367,185 @@
                     }
                 },
                 //REF
-                showRefModal(obj) {
+                //GROUP
+                addGroup(obj) {
+                    var classID = '@currentClass.ID'
+                    Swal.fire({
+                        title: obj != null  ? 'Cập nhật nhóm':'Tạo nhóm mới',
+                        text: obj != null ? 'Nhập tên nhóm' : 'Nhập tên nhóm cần tạo',
+                        icon: 'info',
+                        input: 'text',
+                        showCancelButton: true,
+                        cancelButtonText: 'Hủy',
+                        confirmButtonText: obj != null ? 'Cập nhật':'Tạo',
+                        inputLabel: 'Tên nhóm',
+                        inputValidator: (value) => {
+                            return (value.length == 0) && 'Tên nhóm không được để trống'
+                        },
+                        inputValue: obj != null ? obj.Name : '',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (name) => {
+                            let _form = new FormData()
+                            if(obj != null)
+                                _form.append('ID', obj.ID);
+                            _form.append('Name', name);
+                            _form.append('ClassID', classID);
+                            let _url = '@processUrl("SaveGroup", "Class")'
+                            axios.post(_url, _form)
+                                .then(rsp => {
+                                    if (rsp.data.error != null) {
+                                        throw new Error(rsp.data.error);
+                                    }
+                                    else {
+                                        var item = rsp.data;
+                                        console.log(item);
+                                        var filter = this.group_data.filter(t => t.ID == item.ID);
+                                        if (filter.length > 0) {
+                                            obj.Name = item.Name;
+                                            console.log(obj);
+                                        }
+                                        else
+                                            this.group_data.push({
+                                                ID: item.ID,
+                                                Name: item.Name,
+                                                StudentCount: 0,
+                                                IsActive: item.IsActive,
+                                                Created: item.Created
+                                            });
+                                    }
+                                }).catch(e => {
+                                    //console.log(e)
+                                    Swal.showValidationMessage(
+                                        `Có lỗi: ${e}`
+                                    )
+                                })
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        console.log(result);
+                        if (result.isConfirmed) {
+
+                        }
+                    })
+                },
+                toggleGroupState(item) {
+                    let _that = this;
+                    var item = _that.group_data.filter(t => t.ID == item.ID);
+                    console.log(item);
+                    if (item.length > 0) {
+                        let _url = '@processUrl("PublishGroup", "Class")';
+                        let _form = new FormData()
+                        _form.append('ID', item[0].ID);
+                        _form.append('IsActive', !item[0].IsActive);
+                        axios.post(_url, _form)
+                            .then(rsp => {
+                                if (rsp.data.error != null) {
+                                    Swal.fire({
+                                        title: 'Có lỗi',
+                                        text: rsp.data.error,
+                                        icon: 'danger'
+                                    })
+                                }
+                                else {
+                                    var newitem = rsp.data;
+                                    item[0].IsActive = newitem.IsActive;
+                                    Swal.fire({
+                                        title: 'Thông báo',
+                                        text: newitem.IsActive ? 'Đã kích hoạt nhóm' : 'Đã vô hiệu nhóm',
+                                        icon: 'success'
+                                    })
+                                }
+                            }).catch(e => { })
+                    }
+
+                },
+                loadGroup() {
+                    let _that = this
+                    let _form = new FormData()
+                    _that.group_data = [];
+                    _form.append('ID', '@currentClass.ID');
+                    let _url = '@processUrl("GetGroupList", "Class")';
+                    axios.post(_url, _form)
+                        .then(rsp => {
+                            if (rsp.data.error != null) {
+                                Swal.fire({
+                                    title: 'Có lỗi',
+                                    text: rsp.data.error,
+                                    icon: 'warning'
+                                })
+                            }
+                            else {
+                                data = rsp.data;
+                                if (data.length > 0) {
+                                    data.forEach(function (item, idx) {
+                                        _that.group_data.push({
+                                            ID: item.ID,
+                                            Name: item.Name,
+                                            StudentCount: item.StudentCount,
+                                            IsActive: item.IsActive,
+                                            Created: item.Created
+                                        });
+                                    })
+                                    this.group_data = _that.group_data
+                                }
+                            }
+                        }).catch(e => { })
+                },
+                removeGroup(obj) {
+                    var classID = '@currentClass.ID'
+                    Swal.fire({
+                        title: 'Xác nhận xóa',
+                        text: 'Các bài đã phân công cho học sinh trong nhóm cũng sẽ bị hủy',
+                        icon: 'question',
+                        showCancelButton: true,
+                        cancelButtonText: 'Bỏ qua',
+                        confirmButtonText: 'Xóa',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (name) => {
+                            let _form = new FormData()
+                            if(obj != null)
+                                _form.append('ID', obj.ID);
+                            let _url = '@processUrl("RemoveGroup", "Class")'
+                            axios.post(_url, _form)
+                                .then(rsp => {
+                                    console.log(rsp);
+                                    if (rsp.data.error != null) {
+                                        throw new Error(rsp.data.error);
+                                    }
+                                    else {
+                                        this.group_data.splice(this.group_data.indexOf(obj), 1);
+                                    }
+                                }).catch(e => {
+                                    //console.log(e)
+                                    Swal.showValidationMessage(
+                                        `Có lỗi: ${e}`
+                                    )
+                                })
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        console.log(result);
+                        if (result.isConfirmed) {
+
+                        }
+                    })
+                },
+
+                //GROUP_STUDENT
+                manageGroupStudent(data) {
                     let _that = this;
                     this.hideModal();
-                    if (obj == null) {
-                        _that.addRef.ID = '';
-                        _that.addRef.Title = '';
-                        _that.addRef.Range = '@BaseCustomerEntity.Database.REF_RANGE.ALL';
-                        _that.addRef.Link = '';
-                        _that.addRef.Target = '@currentClass.ID';
-                        _that.addRef.Description = '';
-                        _that.addRef.FileName = '';
-                        _that.addRef.coverName = '';
-                        _that.addRef.Image = '';
-                        _that.addRef.subjectID = '';
-                        _that.addRef.gradeID = '';
-                        _that.addRef.isDownload = false;
-                        _that.addRef.Tags = '';
-                        _that.addRef.isCheckDownload = false;
-                        _that.addRef.cover = null;
+                    if (data != null) {
+                        _that.group_info.ID = data.ID
+                        _that.group_info.Name = data.Name
                     }
-                    else {
-                        _that.addRef.ID = obj.ID;
-                        _that.addRef.Title = obj.Title;
-                        _that.addRef.Range = obj.Range;
-                        _that.addRef.Link = obj.Link;
-                        _that.addRef.Description = obj.Description;
-                        _that.addRef.Target = obj.Target;
-                        _that.addRef.Image = obj.Image;
-                        _that.addRef.subject = obj.SubjectID;
-                        _that.addRef.gradeID = obj.GradeID;
-                        _that.addRef.isDownload = obj.isDownload;
-                        _that.addRef.tags = obj.Tags;
-                        _that.addRef.cover = null;
-                        if (obj.Media != null) {
-                            _that.addRef.FileName = obj.Media.Name;
-                            _that.addRef.isCheckDownload = true;
-                        }
-                        else {
-                            _that.addRef.FileName = '';
-                            _that.addRef.isCheckDownload = false;
-                        }
-
-                        if (obj.Image != null) {
-                            _that.addRef.Image = obj.Image;
-                            _that.cover = null;
-                        }
-                    }
-                    _that.addRef.file = {};
-                    _that.$bvModal.show('modal_event')
+                    _that.student_data = [];
+                    this.loadGroupStudent(data);
+                    _that.$bvModal.show('modal_student')
                 },
+                loadGroupStudent(data) { },
+                removeGroupStudent(obj) { },
+                //
                 showPointModal(obj) {
                     let _that = this;
                     let _url = '@processUrl("GetDetail", "Exam")'
@@ -2407,16 +2570,6 @@
                         }).catch(e => { })
 
                     _that.$bvModal.show('modal_essay');
-                },
-                openLink(obj) {
-                    obj.Viewed = obj.Viewed + 1;
-                    window.open('@processUrl("OpenLink", "Reference")/' + obj.ID);
-                },
-                download(obj) {
-                    if (obj.Media == null)
-                        return false;
-                    obj.Downloaded = obj.Downloaded + 1;
-                    window.open('@processUrl("Download", "Reference")/' + obj.ID);
                 },
                 updateCheckPoint() {
                     let _that = this
@@ -2474,142 +2627,6 @@
                         return false;
                     }
                     _that.hideModal();
-                },
-                updateRef() {
-                    let _that = this
-                    let _form = new FormData()
-
-
-                    if (_that.addRef.Title == '') {
-                        swal.fire({
-                            title: "Có lỗi",
-                            text: "Vui lòng nhập đủ thông tin",
-                            icon: 'warning',
-                        });
-                        this.$refs["addName"].focus();
-                        return false;
-                    }
-                    _form.append('ID', _that.addRef.ID)
-                    _form.append('Title', _that.addRef.Title)
-                    _form.append('Link', _that.addRef.Link)
-                    _form.append('Target', _that.addRef.Target)
-                    _form.append('Name', _that.addRef.Title)
-                    _form.append('Description', _that.addRef.Description)
-                    _form.append('Range', _that.addRef.Range)
-                    _form.append('Image', _that.addRef.Image)
-                    _form.append('subjectID', _that.addRef.subjectID)
-                    _form.append('gradeID', _that.addRef.gradeID)
-                    _form.append('isDownload', _that.addRef.isDownload)
-                    _form.append('Tags', _that.addRef.tags)
-                    if (_that.addRef.file) {
-                        _form.append('fileUpload', this.addRef.file)
-                    }
-                    //debugger
-                    if (_that.addRef.cover) {
-                        _form.append('coverImage', this.addRef.cover)
-                    }
-                    let _url = '@processUrl("Save", "Reference")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            if (response.Error == null) {
-                                Swal.fire(
-                                    'Đã cập nhât!',
-                                    'Tài liệu đã cập nhật thành công',
-                                    'success'
-                                )
-                                this.loadPreference()
-                                this.hideModal()
-                            }
-                            else {
-                                Swal.fire(
-                                    'Có lỗi!',
-                                    response.Error,
-                                    'error'
-                                )
-                            }
-
-                        }).catch(e => { })
-                },
-                deleteRef(obj) {
-                    Swal.fire({
-                        title: 'Chắc chắn xóa?',
-                        text: "Bạn sẽ không thể khôi phục lại dữ liệu này sau khi xóa",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        cancelButtonText: 'Hủy',
-                        confirmButtonText: 'Đồng ý'
-                    }).then((result) => {
-                        if (result.value == true) {
-                            let _form = new FormData()
-                            _form.append('ID', obj.ID)
-                            let _url = '@processUrl("Remove", "Reference")'
-                            axios.post(_url, _form)
-                                .then(response => {
-                                    if (response.Error == null) {
-                                        Swal.fire(
-                                            'Đã xóa!',
-                                            'Tài liệu của bạn đã được xóa',
-                                            'success'
-                                        )
-                                        this.loadPreference()
-                                    }
-                                    else {
-                                        Swal.fire(
-                                            'Có lỗi!',
-                                            response.Error,
-                                            'error'
-                                        )
-                                    }
-
-                                }).catch(e => { })
-                        }
-                    })
-                },
-                changeFile() {
-                    var listFiles = $('#modal_event input[type=file]')
-                    if (listFiles[1].files[0] != null) { //file dinh kem
-                        if (this.typeFile.includes(listFiles[1].files[0]['type'])) {
-                            this.addRef.FileName = listFiles[1].files[0].name
-                            this.addRef.file = listFiles[1].files[0]
-                            this.addRef.isCheckDownload = true;
-                        }
-                        else {
-                            alert("File không đúng định dạng, chọn lại!")
-                            this.addRef.isCheckDownload = false;
-                            return false;
-                        }
-                    }
-                    if (listFiles[0].files[0] != null) { //anh dai dien
-                        this.addRef.coverName = listFiles[0].files[0].name
-                        this.addRef.cover = listFiles[0].files[0]
-                    }
-                },
-                showPreview(obj) {
-                    let _form = new FormData()
-                    _form.append('ID', obj.ID)
-                    var link = obj.Media.Path;
-                    var title = obj.Title;
-                    let _url = '@processUrl("View", "Reference")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            obj.Viewed = obj.Viewed + 1;
-                        }).catch(e => { })
-                    let _that = this;
-                    _that.linkFile = link;
-                    _that.title = title;
-                    this.linkFile = _that.linkFile;
-                    this.title = _that.title;
-                    _that.$bvModal.show('modal_preview')
-                },
-                isDocType(path) {
-                    if (path == null || path == "") return false;
-                    var idx = path.toString().lastIndexOf('.');
-                    if (idx <= 0) {
-                        var ext = path.substring(idx, path.length - idx);
-                        return this.allow_doc_ext.findIndex(t => t === ext) >= 0;
-                    }
                 },
                 changeAddSubject(obj) {
                     let _that = this;
@@ -3955,6 +3972,47 @@
             </template>
         </template>
     </b-modal>
+
+    <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Cập nhật học viên cho nhóm" style="width:800px">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="flex border-b padding-b25 justify-content-between">
+                    <div class="flex width-100">
+                        <label class="label font-weight-bold">{{group_info.Name}} </label>
+                        <input type="hidden" value="{{group_info.ID}}" />
+                    </div>
+
+                    <div class="flex">
+                        <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentAddModal()"><i class="ti-plus"></i></b-button>
+                    </div>
+                </div>
+                <template v-if="student_data.length > 0">
+                    <table id="st_table" class="table">
+                        <thead>
+                            <tr>
+                                <th v-for="(field,k) in students_fields">{{field.label}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item,k) in student_data">
+                                <td>{{k + 1}}</td>
+                                <td>{{item.FullName}}</td>
+                                <td>{{item.Email}}</td>
+                                <td>{{item.Phone}}</td>
+                                <td><button class="btn-act btn-trash" v-on:click="removeGroupStudent(item)"><i class="ti-trash"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </template>
+                <template v-else>Chưa có học viên</template>
+            </div>
+        </div>
+
+        <template v-slot:modal-footer>
+            <b-button variant="danger" v-on:click="hideModal()">Đóng</b-button>
+        </template>
+    </b-modal>
+
 }
 
 @section TopStar{

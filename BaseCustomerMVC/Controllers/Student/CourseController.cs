@@ -173,10 +173,22 @@ namespace BaseCustomerMVC.Controllers.Student
                     List<StudentRankingViewModel> classresult = _cacheHelper.GetCache(cacheKey) as List<StudentRankingViewModel>;
                     if (classresult == null)
                     {
-                        var examIds = _lessonService.CreateQuery().Find(o => o.ClassID == classid && o.StartDate <= endWeek && o.EndDate >= startWeek && (o.TemplateType == 2 || o.IsPractice)).Project(t => t.ID).ToList();
+                        var exLessons = _lessonService.CreateQuery().Find(o => o.ClassID == classid && o.StartDate <= endWeek && o.EndDate >= startWeek && (o.TemplateType == 2 || o.IsPractice)).Project(t => new LessonEntity
+                        {
+                            ID = t.ID,
+                            GroupIDs = t.GroupIDs
+                        }).ToList();
+
+                        var examIds = exLessons.Select(t => t.ID).ToList();
 
                         //var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
                         //var examIds = activeLessons.Find(x =>).Project(x => x.ID).ToList();
+
+
+                        //get groups in class => calculate group lesson count
+                        //map student progress with group
+
+                        var classGroups = new List<ClassGroupEntity>();
 
                         if (examIds.Count() > 0)
                         {
@@ -185,12 +197,13 @@ namespace BaseCustomerMVC.Controllers.Student
                             if (activeProgress.Count() > 0)
                             {
                                 var studentResults = (from r in activeProgress
-                                                      group r by r.StudentID
-                                                          into g
+                                                      group r by r.StudentID into g
+                                                      let studentGrps = classGroups.Where(t => t.Members.Any(m => m.MemberID == g.Key)).Select(t => t.ID).ToList()
+                                                      let exCount = exLessons.Count(e => e.GroupIDs == null || studentGrps == null || studentGrps.Intersect(e.GroupIDs).Any())
                                                       select new StudentRankingViewModel
                                                       {
                                                           StudentID = g.Key,
-                                                          AvgPoint = g.Sum(t => t.LastPoint) / examIds.Count(),
+                                                          AvgPoint = g.Sum(t => t.LastPoint) / exCount,
                                                       }).OrderByDescending(t => t.AvgPoint).Take(limit).ToList();
 
                                 rtn.AddRange(studentResults);
@@ -1059,7 +1072,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 var _schedulemapping = new MappingEntity<LessonEntity, LessonScheduleViewModel>();
 
                 listProgress.Lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == "0").SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList()
-                                        //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
+                                            //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                                         let lastjoin = _learningHistoryService.CreateQuery().Find(x => x.StudentID == userId && x.LessonID == r.ID && x.ClassSubjectID == ID).SortByDescending(o => o.ID).FirstOrDefault()
                                         let lastexam = r.TemplateType == LESSON_TEMPLATE.EXAM ? _examService.CreateQuery().Find(x => x.StudentID == userId && x.LessonID == r.ID && x.ClassSubjectID == ID
                                         //&& x.Status
