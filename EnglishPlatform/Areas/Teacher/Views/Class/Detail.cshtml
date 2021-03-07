@@ -2665,7 +2665,7 @@
                     let _that = this
                     let _form = new FormData()
                     _that.student_data = [];
-                    _form.append('ID', '@currentClass.ID');
+                    _form.append('ClassID', '@currentClass.ID');
                     let _url = '@processUrl("GetList", "StudentManage")';
                     axios.post(_url, _form)
                         .then(rsp => {
