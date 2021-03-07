@@ -8,16 +8,10 @@ using System.Text;
 
 namespace BaseCustomerMVC.Models
 {
-    public class ClassGroupViewModel 
+    public class ClassGroupViewModel :ClassGroupEntity
     {
-        [JsonProperty("ID")]
-        public string ID { get; set; }
-        [JsonProperty("Name")]
-        public string Name { get; set; }
-        [JsonProperty("IsActive")]
-        public bool IsActive { get; set; }
-        [JsonProperty("Created")]
-        public DateTime Created { get; set; }
+        [JsonProperty("Members")]
+        public List<string> Members { get; set; }
         [JsonProperty("StudentCount")]
         public long StudentCount { get; set; }
     }

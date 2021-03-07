@@ -92,11 +92,18 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var userId = User?.FindFirst("UserID").Value;
                     if (center != null && userId != null)
                     {
-                        var listClassID = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER) && o.Center == center.ID)?.Project(t=> t.ID).ToList();
+                        var listClassID = _classService.Collection.Find(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER) && o.Center == center.ID)?.Project(t => t.ID).ToList();
                         if (listClassID == null || listClassID.Count <= 0) return Task.FromResult(new JsonResult(new { }));
-                        var data = _calendarHelper.GetListEvent(start, end, listClassID, userId);
-                        if (data == null) return Task.FromResult(new JsonResult(new { }));
-                        return Task.FromResult(new JsonResult(data));
+                        var activeLessons = _lessonService.GetClassActiveLesson(start, end, listClassID);
+                        if (activeLessons.Any())
+                        {
+                            var data = activeLessons.Select(t => _calendarHelper.ConvertEventFromLesson(t)).ToList();
+                            return Task.FromResult(new JsonResult(data));
+                        }
+                        //_calendarHelper.GetListEvent(start, end, listClassID, userId);
+                        //if (data == null) 
+                        return Task.FromResult(new JsonResult(new { }));
+
                     }
                 }
                 return Task.FromResult(new JsonResult(new { }));
@@ -107,51 +114,82 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        [HttpPost]
-        [Obsolete]
+        [HttpPost]//V2 - get directly from lesson
         public Task<JsonResult> GetDetail(string id)
         {
-            var map = new MappingEntity<CalendarEntity, CalendarViewModel>();
-            var calendar = _calendarService.GetItemByID(id);
+            var lesson = _lessonService.GetItemByID(id);
             var data = new CalendarViewModel();
-            data = map.AutoOrtherType(calendar, data);
-            if (!string.IsNullOrEmpty(data.ScheduleID))
+            if (lesson != null)
             {
-                if (string.IsNullOrEmpty(data.Path))
+                string url = $"{Url.Action("Detail", "Lesson")}/{lesson.ID}/{lesson.ClassSubjectID}";
+                var content = "";
+                var course = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
+                if (course != null)
+                    content += course.CourseName;
+                if (lesson.ChapterID != "0")
                 {
-                    var lesson = string.IsNullOrEmpty(data.ScheduleID) ? null : _lessonService.GetItemByID(data.ScheduleID);
-                    //schedule -> LessonID + class -> classubject -> skill
-                    if (lesson != null && string.IsNullOrEmpty(calendar.Content))
-                    {
-                        string url = $"{Url.Action("Detail", "Lesson")}/{lesson.ID}/{lesson.ClassSubjectID}";
-                        var content = "";
-                        var course = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
-                        if (course != null)
-                            content += course.CourseName;
-                        if (lesson.ChapterID != "0")
-                        {
-                            var chap = _chapterService.GetItemByID(lesson.ChapterID);
-                            if (chap != null)
-                                content += " - " + chap.Name;
-                        }
-                        calendar.Content = content;
-                        calendar.Path = url;
-                        _calendarService.Save(calendar);
-                        data.Content = calendar.Content;
-                        data.LinkLesson = url;
-                    }
+                    var chap = _chapterService.GetItemByID(lesson.ChapterID);
+                    if (chap != null)
+                        content += " - " + chap.Name;
                 }
-                else
-                    data.LinkLesson = data.Path;
+                data.StartDate = lesson.StartDate;
+                data.EndDate = lesson.EndDate;
+                data.Title = lesson.Title;
+                data.GroupID = lesson.ClassID;
+                data.Status = lesson.IsOnline ? 5 : 0;
+                data.UrlRoom = _teacherService.GetItemByID(course.TeacherID).ZoomID;
+                data.Content = content;
+                data.LinkLesson = url;
             }
-            if (data.UserBook == null || data.UserBook.Count == 0)
-            {
-
-            }
-            // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
 
             return Task.FromResult(new JsonResult(data));
         }
+
+        //public Task<JsonResult> GetDetail(string id)
+        //{
+        //    var map = new MappingEntity<CalendarEntity, CalendarViewModel>();
+        //    var calendar = _calendarService.GetItemByID(id);
+        //    var data = new CalendarViewModel();
+        //    data = map.AutoOrtherType(calendar, data);
+        //    if (!string.IsNullOrEmpty(data.ScheduleID))
+        //    {
+        //        if (string.IsNullOrEmpty(data.Path))
+        //        {
+        //            var lesson = string.IsNullOrEmpty(data.ScheduleID) ? null : _lessonService.GetItemByID(data.ScheduleID);
+        //            //schedule -> LessonID + class -> classubject -> skill
+        //            if (lesson != null && string.IsNullOrEmpty(calendar.Content))
+        //            {
+        //                string url = $"{Url.Action("Detail", "Lesson")}/{lesson.ID}/{lesson.ClassSubjectID}";
+        //                var content = "";
+        //                var course = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
+        //                if (course != null)
+        //                    content += course.CourseName;
+        //                if (lesson.ChapterID != "0")
+        //                {
+        //                    var chap = _chapterService.GetItemByID(lesson.ChapterID);
+        //                    if (chap != null)
+        //                        content += " - " + chap.Name;
+        //                }
+        //                calendar.Content = content;
+        //                calendar.Path = url;
+        //                _calendarService.Save(calendar);
+        //                data.Content = calendar.Content;
+        //                data.LinkLesson = url;
+        //            }
+        //        }
+        //        else
+        //            data.LinkLesson = data.Path;
+        //    }
+        //    if (data.UserBook == null || data.UserBook.Count == 0)
+        //    {
+
+        //    }
+        //    // scheduleId => classID + lesson ID => student/lesson/detail/lessonid/classsubject;
+
+        //    return Task.FromResult(new JsonResult(data));
+        //}
+
+
         [HttpPost]
         [Obsolete]
         public JsonResult Create(CalendarEntity item)
@@ -183,6 +221,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 data = data
             });
         }
+
         [HttpPost]
         [Obsolete]
         public bool Delete(string id)

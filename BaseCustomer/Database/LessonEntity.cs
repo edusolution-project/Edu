@@ -166,6 +166,11 @@ namespace BaseCustomerEntity.Database
                 return Collection.CountDocuments(t => t.ClassID == ClassID && t.TemplateType == LESSON_TEMPLATE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
         }
 
+        public IEnumerable<LessonEntity> GetClassActiveLesson(DateTime StartTime, DateTime EndTime, List<String> ClassIDs)
+        {
+            return Collection.Find(o => ClassIDs.Contains(o.ClassID) && o.StartDate <= EndTime && o.EndDate >= StartTime).ToEnumerable();
+        }
+
         public IEnumerable<LessonEntity> GetClassSubjectActiveLesson(DateTime StartTime, DateTime EndTime, String ClassSubjectID)
         {
             return Collection.Find(o => o.ClassSubjectID == ClassSubjectID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToEnumerable();

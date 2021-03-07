@@ -40,6 +40,11 @@ namespace BaseCustomerEntity.Database
         {
             return Collection.Find(t => t.ClassID == ClassID).ToEnumerable();
         }
+
+        public IEnumerable<ClassGroupEntity> GetByClassIDs(List<string> ClassIDs)
+        {
+            return Collection.Find(t => ClassIDs.Contains(t.ClassID)).ToEnumerable();
+        }
     }
 
     public class GroupMember

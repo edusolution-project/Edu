@@ -143,8 +143,13 @@
                                               v-bind:classbj="obj.ID"
                                               v-bind:pos="k"
                                               v-bind:owner="obj.TeacherID"
-                                              v-bind:listchaps="list_chapters"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                              v-bind:listchaps="list_chapters"
+                                              v-bind:group="group_data"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})"
+                                             v-bind:data="lesson"
+                                             v-bind:owner="obj.TeacherID"
+                                             v-bind:classSubject="obj.ID"
+                                             v-bind:group="group_data"></lesson-item>
                             </ul>
                         </b-collapse>
                     </li>
@@ -175,8 +180,13 @@
                                               v-bind:classbj="obj.ID"
                                               v-bind:pos="k"
                                               v-bind:owner="obj.TeacherID"
-                                              v-bind:listchaps="list_chapters"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID"></lesson-item>
+                                              v-bind:listchaps="list_chapters"
+                                              v-bind:group="group_data"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})"
+                                             v-bind:data="lesson"
+                                             v-bind:owner="obj.TeacherID"
+                                             v-bind:classSubject="obj.ID"
+                                             v-bind:group="group_data"></lesson-item>
                             </ul>
                         </b-collapse>
                     </li>
@@ -211,8 +221,14 @@
                                           v-bind:pos="k"
                                           v-bind:owner="obj.TeacherID"
                                           v-bind:listchaps="list_chapters"
-                                          v-bind:type="'exam'"></chap-content>
-                            <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})" v-bind:data="lesson" v-bind:owner="obj.TeacherID" v-bind:classSubject="obj.ID" v-bind:type="'exam'"></lesson-item>
+                                          v-bind:type="'exam'"
+                                          v-bind:group="group_data"></chap-content>
+                            <lesson-item v-for="lesson in filterLesson({ID:'0', ClassSubject: obj.ID})"
+                                         v-bind:data="lesson"
+                                         v-bind:owner="obj.TeacherID"
+                                         v-bind:classSubject="obj.ID"
+                                         v-bind:type="'exam'"
+                                         v-bind:group="group_data"></lesson-item>
                         </ul>
                         @*</b-collapse>*@
                     </li>
@@ -315,7 +331,7 @@
                                     {{item.Name}}
                                 </a>
                             </td>
-                            <td>{{item.StudentCount}}</td>
+                            <td>{{item.Members != null ? item.Members.length : 0}}</td>
                             <td>{{formatShortDate(item.Created)}}</td>
                             <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupState(item)"></b-form-checkbox></td>
                             <td>
@@ -865,6 +881,10 @@
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
         }
+
+        #modal_student .modal-dialog {
+            max-width: 1100px;
+        }
     </style>
 
     <script type="text/x-template" id="chapContentTemp">
@@ -936,8 +956,14 @@
                                               v-bind:pos="j"
                                               v-bind:owner="owner"
                                               v-bind:listchaps="listchaps"
-                                              v-bind:type="type"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson(data)" v-bind:data="lesson" v-bind:owner="owner" v-bind:classSubject="data.ClassSubject" v-bind:type="type"></lesson-item>
+                                              v-bind:type="type"
+                                              v-bind:group="group_data"></chap-content>
+                                <lesson-item v-for="lesson in filterLesson(data)" 
+                                             v-bind:data="lesson" 
+                                             v-bind:owner="owner" 
+                                             v-bind:classSubject="data.ClassSubject" 
+                                             v-bind:type="type"
+                                             v-bind:group="group"></lesson-item>
                             </template>
                         </ul>
                     </b-card-body>
@@ -965,6 +991,15 @@
                 </a>
                 @*<div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">*@
                 <div class="picker-schedule d-flex align-items-center" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">
+                    <template v-if="group != null && group.length > 0">
+                        <select v-on:change="chooseGroup(data)" v-model="data.GroupID" class="form-control mr-2" style="max-width:100px">
+                            <option value="">Cả lớp</option>
+                            <option v-for="grp in group" :value="grp.ID">
+                                {{grp.Name}}
+                            </option>
+                        </select>
+                    </template>
+
                     <datepicker :date="data.StartDate" :idx="0" :obj="data" class="date st mr-2" v-on:input="updateSchedule(data)"></datepicker>
                     <datepicker :date="data.EndDate" :idx="1" :obj="data" class="date ed mr-2 ml-0" v-on:input="updateSchedule(data)"></datepicker>
                     <i class="fas fa-redo ic-ac d-flex align-items-center mr-2" title="Xóa lịch học" v-on:click="clearSchedule(data)"></i>
@@ -974,6 +1009,14 @@
                     </template>
                 </div>
                 <div class="d-flex picker-schedule" v-else>
+                    <template v-if="group != null && group.length > 0">
+                        <select v-model="data.GroupID" class="form-control mr-2" style="max-width:100px" disabled>
+                            <option value="">Cả lớp</option>
+                            <option v-for="grp in group" :value="grp.ID">
+                                {{grp.Name}}
+                            </option>
+                        </select>
+                    </template>
                     <div class="input-group date date st bg-light mr-2"><input type="text" class="form-control bg-light noselect" disabled="disabled" :value="formatTime(data.StartDate)"></div>
                     <div class="input-group date date ed bg-light mr-2"><input type="text" class="form-control bg-light noselect" disabled="disabled" :value="formatTime(data.EndDate)"></div>
                     <template v-if="type != 'exam'">
@@ -1088,7 +1131,8 @@
                 data: Object,
                 pos: String,
                 owner: String,
-                type: String
+                type: String,
+                group: Object
             }
         })
 
@@ -1098,7 +1142,8 @@
                 data: Object,
                 classSubject: String,
                 owner: String,
-                type: String
+                type: String,
+                group: Object
             }
         })
 
@@ -1278,6 +1323,7 @@
                 window.loadContent = this.loadContent
                 window.loadResult = this.loadResult
                 window.updateSchedule = this.updateSchedule
+                window.chooseGroup = this.chooseGroup
                 window.updateChapPoint = this.updateChapPoint
                 window.updateChapSchedule = this.updateChapSchedule
                 window.updateSubchapSchedule = this.updateSubchapSchedule
@@ -1348,8 +1394,6 @@
                 skillName: '@currentClass.SkillName',
                 classSubjects: [],
                 list_data: [],
-                group_data: [],
-                group_info: {},
                 list_subjects: [],
                 list_chapters: [],
                 list_chapters_result: [],
@@ -1446,29 +1490,7 @@
                     Name: '',
                     History: []
                 },
-                student_data:[],
-                students_fields: [
-                    {
-                        key: 'stt',
-                        label: '#'
-                    },
-                    {
-                        key: 'name',
-                        label: 'Họ tên'
-                    },
-                    {
-                        key: 'email',
-                        label: 'Email'
-                    },
-                    {
-                        key: 'phone',
-                        label: 'SĐT'
-                    },
-                    {
-                        key: 'actions',
-                        label: 'Tác vụ'
-                    }
-                ],
+
                 linkFile: '',
                 typeFile: [
                     "application/msword",
@@ -1521,7 +1543,14 @@
                     title: '',
                     list_chapters:[]
                 },
-                groupList:[],
+                //group
+                //groupList: [],
+                group_student: [],
+                group_data: [],
+                group_info: {},
+                student_data: [],
+                student_init: false,
+                //
                 isExam: false,
                 exam: {
                     name: '',
@@ -1604,6 +1633,7 @@
                         case 1:
                             history.replaceState({ tab: a }, this.className + " - Môn học", "#module");
                             this.loadClassSubjects();
+                            this.loadGroup();
                             break;
                         case 2:
                             history.replaceState({ tab: a }, this.className + " - Bảng điểm", "#score");
@@ -1727,7 +1757,8 @@
                                     IsActive: lesson.IsActive,
                                     IsUpdating: false,
                                     IsOnline: lesson.IsOnline,
-                                    IsHideAnswer: lesson.IsHideAnswer
+                                    IsHideAnswer: lesson.IsHideAnswer,
+                                    GroupID: lesson.GroupIDs != null && lesson.GroupIDs.length > 0? lesson.GroupIDs[0] : ""
                                 })
 
                             })
@@ -2046,6 +2077,36 @@
                             });
                         }
                     }
+                },
+                chooseGroup(obj) {
+                    obj.IsUpdating = true
+                    console.log(obj);
+                    var selectedGroup = obj.GroupID;
+
+                    let _form = new FormData()
+                    _form.append('ID', obj.ID)
+                    _form.append('GroupID', selectedGroup)
+                    let _url = '@processUrl("UpdateGroup", "Lesson")'
+                    axios.post(_url, _form)
+                        .then(rsp => {
+                            obj.IsUpdating = false
+                            if (rsp.error != null) {
+                                Swal.fire({
+                                    title: "Có lỗi",
+                                    text: rsp.error,
+                                    icon: 'warning',
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    title: "Thông báo",
+                                    text: "Đã cập nhật nhóm",
+                                    icon: 'success',
+                                });
+                            }
+
+                        }).catch(e => {
+                        })
                 },
                 updateChapSchedule(obj, pos) {
                     obj.IsUpdating = true
@@ -2483,7 +2544,8 @@
                                             Name: item.Name,
                                             StudentCount: item.StudentCount,
                                             IsActive: item.IsActive,
-                                            Created: item.Created
+                                            Created: item.Created,
+                                            Members: item.Members
                                         });
                                     })
                                     this.group_data = _that.group_data
@@ -2539,12 +2601,150 @@
                         _that.group_info.ID = data.ID
                         _that.group_info.Name = data.Name
                     }
-                    _that.student_data = [];
-                    this.loadGroupStudent(data);
+
+                    if (this.student_init) {
+                        this.group_student = [];
+                        this.loadGroupStudent(data);
+                    }
+                    else {
+                        _that.student_data = [];
+                        this.initStudentList(data, this.loadGroupStudent);
+                    }
+                        
                     _that.$bvModal.show('modal_student')
                 },
-                loadGroupStudent(data) { },
-                removeGroupStudent(obj) { },
+                loadGroupStudent(data) {
+                    var _that = this;
+
+                    if (_that.student_data != null && _that.student_data.length > 0) {
+                        _that.student_data.forEach(function (item, idx) {
+                            item.IsActive = false
+                        });
+                    }
+
+                    _that.group_student = [];
+                    if (data != null && data.Members != null && data.Members.length > 0) {
+                        data.Members.forEach(function (item, idx) {
+                            _that.group_student.push(item);
+                            var item = _that.student_data.filter(t => t.ID == item);
+                            if (item != null && item.length > 0)
+                                item[0].IsActive = true;
+                        });
+                        //console.log(_that.group_student);
+                    }
+
+                    @*let _that = this
+                    let _form = new FormData()
+                    _that.group_student = [];
+                    _form.append('ID', '@currentClass.ID');
+                    let _url = '@processUrl("GetGroupStudentID", "Class")';
+                    axios.post(_url, _form)
+                        .then(rsp => {
+                            if (rsp.data.error != null) {
+                                Swal.fire({
+                                    title: 'Có lỗi',
+                                    text: rsp.data.error,
+                                    icon: 'warning'
+                                })
+                            }
+                            else {
+                                data = rsp.data;
+                                if (data.length > 0) {
+                                    data.forEach(function (item, idx) {
+                                        _that.group_data.push({
+                                            ID: item
+                                        });
+                                    })
+                                    this.group_student = _that.group_student
+                                }
+                                this.student_init = true;
+                            }
+                        }).catch(e => { })*@
+                },
+                initStudentList(obj, callback) {
+                    let _that = this
+                    let _form = new FormData()
+                    _that.student_data = [];
+                    _form.append('ID', '@currentClass.ID');
+                    let _url = '@processUrl("GetList", "StudentManage")';
+                    axios.post(_url, _form)
+                        .then(rsp => {
+                            if (rsp.data.error != null) {
+                                Swal.fire({
+                                    title: 'Có lỗi',
+                                    text: rsp.data.error,
+                                    icon: 'warning'
+                                })
+                            }
+                            else {
+                                data = rsp.data.Data;
+                                if (data.length > 0) {
+                                    data.forEach(function (item, idx) {
+                                        _that.student_data.push({
+                                            ID: item.ID,
+                                            FullName: item.FullName,
+                                            Email: item.Email,
+                                            Phone: item.Phone
+                                        });
+                                    })
+                                    this.student_data = _that.student_data
+                                }
+                                this.student_init = true;
+                                if (callback != null)
+                                    callback(obj);
+                            }
+                        }).catch(e => { })
+                },
+                toggleGroupStudent(item, groupID) {
+                    let _that = this;
+                    let _url = '@processUrl("ToggleGroupStudent", "Class")';
+                    let _form = new FormData()
+                    _form.append('StudentID', item.ID);
+                    _form.append('GroupID', groupID);
+                    axios.post(_url, _form)
+                        .then(rsp => {
+                            if (rsp.data.error != null) {
+                                Swal.fire({
+                                    title: 'Có lỗi',
+                                    text: rsp.data.error,
+                                    icon: 'danger'
+                                })
+                            }
+                            else {
+                                var result = rsp.data;
+
+
+                                var idx = this.group_student.indexOf(item.ID);
+                                var student = this.student_data.filter(t=> t.ID == item.ID);
+
+                                if (idx >= 0)//remove from group
+                                    this.group_student.splice(idx, 1);
+
+                                if (result.isActive) {
+                                    Swal.fire({
+                                        title: 'Thông báo',
+                                        text:'Đã thêm học viên vào nhóm' ,
+                                        icon: 'success'
+                                    })
+                                    this.group_student.push(item.ID);
+                                    student.IsActive = true;
+                                }
+                                else
+                                {
+                                    student.IsActive = false;
+                                    Swal.fire({
+                                        title: 'Thông báo',
+                                        text: 'Đã đưa học sinh ra khỏi nhóm',
+                                        icon: 'success'
+                                    })
+                                }
+                                var grp = this.group_data.filter(g => g.ID == groupID);
+                                if (grp != null && grp.length > 0)
+                                    grp[0].Members = this.group_student;
+
+                            }
+                        }).catch(e => { })
+                },
                 //
                 showPointModal(obj) {
                     let _that = this;
@@ -3973,38 +4173,46 @@
         </template>
     </b-modal>
 
-    <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Cập nhật học viên cho nhóm" style="width:800px">
+    <b-modal :no-close-on-backdrop="true" id="modal_student" centered title="Danh sách học viên trong nhóm" style="width:800px">
         <div class="row">
             <div class="col-md-12">
                 <div class="flex border-b padding-b25 justify-content-between">
                     <div class="flex width-100">
-                        <label class="label font-weight-bold">{{group_info.Name}} </label>
+                        <label class="label font-weight-bold">{{group_info.Name}} ({{group_student.length}} học viên)</label>
                         <input type="hidden" value="{{group_info.ID}}" />
                     </div>
-
-                    <div class="flex">
-                        <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentAddModal()"><i class="ti-plus"></i></b-button>
-                    </div>
+                    @*<div class="flex">
+                            <b-button class="btn-addevent btn-student btn-sm" v-on:click="showStudentAddModal()"><i class="ti-plus"></i></b-button>
+                        </div>*@
                 </div>
                 <template v-if="student_data.length > 0">
                     <table id="st_table" class="table">
                         <thead>
                             <tr>
-                                <th v-for="(field,k) in students_fields">{{field.label}}</th>
+                                <th>#</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th class="text-center">Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item,k) in student_data">
+                            <tr v-for="(item,k) in student_data" :class="item.IsActive ? 'font-weight-bold':''">
                                 <td>{{k + 1}}</td>
                                 <td>{{item.FullName}}</td>
                                 <td>{{item.Email}}</td>
                                 <td>{{item.Phone}}</td>
-                                <td><button class="btn-act btn-trash" v-on:click="removeGroupStudent(item)"><i class="ti-trash"></i></button></td>
+                                <td class="text-center">
+                                    <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupStudent(item, group_info.ID)" class="mt-2">
+                                    </b-form-checkbox>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </template>
-                <template v-else>Chưa có học viên</template>
+                <template v-else>
+                    Chưa có học viên
+                </template>
             </div>
         </div>
 

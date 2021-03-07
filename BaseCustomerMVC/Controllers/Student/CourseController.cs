@@ -5,6 +5,7 @@ using Core_v2.Globals;
 using Core_v2.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
@@ -27,6 +28,8 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly GradeService _gradeService;
         private readonly LessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
+        private readonly ClassGroupService _classGroupService;
+
         ////private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonPartQuestionService _lessonPartQuestionService;
         private readonly LessonPartAnswerService _lessonPartAnswerService;
@@ -78,6 +81,7 @@ namespace BaseCustomerMVC.Controllers.Student
             , ChapterExtendService chapterExtendService
             , LessonPartQuestionService lessonPartQuestionService
             , LessonPartAnswerService lessonPartAnswerService
+            , ClassGroupService classGroupService
             ////, LessonScheduleService lessonScheduleService
             , CloneLessonPartService cloneLessonPartService
             , CloneLessonPartAnswerService cloneLessonPartAnswerService
@@ -109,6 +113,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _skillService = skillService;
             _classSubjectService = classSubjectService;
             _courseService = courseService;
+            _classGroupService = classGroupService;
             //_classStudentService = classStudentService;
             _teacherService = teacherService;
             _subjectService = subjectService;
@@ -603,8 +608,14 @@ namespace BaseCustomerMVC.Controllers.Student
 
             List<StudentLessonScheduleViewModel> listSchedule = new List<StudentLessonScheduleViewModel>();
 
-            foreach (var classid in classids)
-                listSchedule.AddRange(GetThisWeekClassLesson(startWeek, endWeek, classid));
+            var studentGroups = _classGroupService.GetByClassIDs(classids).Where(t => t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
+
+
+            var lessons = GetActiveClassLesson(startWeek, endWeek, classids);
+            if (studentGroups == null || studentGroups.Count == 0)
+                listSchedule = ConvertFromLessonToScheduleView(lessons.Where(t => t.GroupIDs == null));
+            else
+                listSchedule = ConvertFromLessonToScheduleView(lessons.Where(t => t.GroupIDs == null || studentGroups.Intersect(t.GroupIDs).Any()));
 
             if (listSchedule != null && listSchedule.Count > 0)
                 foreach (var schedule in listSchedule)
@@ -622,46 +633,56 @@ namespace BaseCustomerMVC.Controllers.Student
 
         }
 
+        private IEnumerable<LessonEntity> GetActiveClassLesson(DateTime start, DateTime end, List<string> classIDs)
+        {
+            var filter = new List<FilterDefinition<LessonEntity>>();
+            filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= end && o.EndDate >= start));
+            filter.Add(Builders<LessonEntity>.Filter.Where(o => classIDs.Contains(o.ClassID)));
+
+            return _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToEnumerable();
+        }
+
+        private List<StudentLessonScheduleViewModel> ConvertFromLessonToScheduleView(IEnumerable<LessonEntity> data)
+        {
+            return (from o in data
+                    let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
+                    where _class != null
+                    let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
+                    where _cs != null
+                    let skill = _skillService.GetItemByID(_cs.SkillID)
+                    let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
+                    //where _subject != null
+                    let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
+                    let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
+                    select new StudentLessonScheduleViewModel
+                    {
+                        id = o.ID,
+                        classID = _class.ID,
+                        className = _class.Name,
+                        classSubjectID = _cs.ID,
+                        subjectName = _subject == null ? "" : _subject.Name,
+                        title = o.Title,
+                        lessonID = o.ID,
+                        startDate = o.StartDate,
+                        endDate = o.EndDate,
+                        skill = skill,
+                        type = o.TemplateType,
+                        onlineUrl = o.IsOnline ? onlineUrl : "",
+                        bookName = _cs.CourseName
+                    }).ToList();
+        }
+
+        //temp not use
         private List<StudentLessonScheduleViewModel> GetThisWeekClassLesson(DateTime startWeek, DateTime endWeek, string classid)
         {
             var cacheKey = "classschedule_" + classid;
             var cacheClass = _cacheHelper.GetCache(cacheKey) as List<StudentLessonScheduleViewModel>;
             if (cacheClass == null)
             {
-
-                var filter = new List<FilterDefinition<LessonEntity>>();
-                filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-                filter.Add(Builders<LessonEntity>.Filter.Where(o => o.ClassID == classid));
-
-                var data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
+                var data = GetActiveClassLesson(startWeek, endWeek, new List<string> { classid }).ToList();
 
                 if (data.Count > 0)
-                    cacheClass = (from o in data
-                                  let _class = _service.Collection.Find(t => t.ID == o.ClassID).SingleOrDefault()
-                                  where _class != null
-                                  let _cs = _classSubjectService.Collection.Find(t => t.ID == o.ClassSubjectID).SingleOrDefault()
-                                  where _cs != null
-                                  let skill = _skillService.GetItemByID(_cs.SkillID)
-                                  let _subject = _subjectService.Collection.Find(t => t.ID == _cs.SubjectID).SingleOrDefault()
-                                  //where _subject != null
-                                  let lessonCalendar = _calendarHelper.GetByScheduleId(o.ID)
-                                  let onlineUrl = (o.IsOnline && lessonCalendar != null) ? lessonCalendar.UrlRoom : ""
-                                  select new StudentLessonScheduleViewModel
-                                  {
-                                      id = o.ID,
-                                      classID = _class.ID,
-                                      className = _class.Name,
-                                      classSubjectID = _cs.ID,
-                                      subjectName = _subject == null ? "" : _subject.Name,
-                                      title = o.Title,
-                                      lessonID = o.ID,
-                                      startDate = o.StartDate,
-                                      endDate = o.EndDate,
-                                      skill = skill,
-                                      type = o.TemplateType,
-                                      onlineUrl = o.IsOnline ? onlineUrl : "",
-                                      bookName = _cs.CourseName
-                                  }).OrderBy(t => t.startDate).ToList();
+                    cacheClass = ConvertFromLessonToScheduleView(data).OrderBy(t => t.startDate).ToList();
                 else
                     cacheClass = new List<StudentLessonScheduleViewModel>();
 
