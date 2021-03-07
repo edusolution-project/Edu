@@ -39,7 +39,7 @@ namespace EnglishPlatform.Controllers
         private readonly MailHelper _mailHelper;
         private readonly ClassService _classService;
         private readonly StudentHelper _studentHelper;
-        private readonly LessonScheduleService _scheduleService;
+        //private readonly LessonScheduleService _scheduleService;
         private readonly CalendarHelper _calendarHelper;
         private readonly UserAndRoleService _userAndRoleService;
         private readonly CenterService _centerService;
@@ -86,7 +86,7 @@ namespace EnglishPlatform.Controllers
             MailHelper mailHelper,
             UserAndRoleService userAndRoleService,
             CenterService centerService,
-            LessonScheduleService scheduleService,
+            //LessonScheduleService scheduleService,
             AuthorityService authorityService,
             ILog log,
             NewsService newsService,
@@ -129,7 +129,7 @@ namespace EnglishPlatform.Controllers
             _studentHelper = studentHelper;
             _calendarHelper = calendarHelper;
             _log = log;
-            _scheduleService = scheduleService;
+            //_scheduleService = scheduleService;
             _mailHelper = mailHelper;
             _default = defaultvalue.Value;
             _userAndRoleService = userAndRoleService;
@@ -879,13 +879,13 @@ namespace EnglishPlatform.Controllers
                 }
             }
 
-            var schedule = _scheduleService.GetItemByID(@event.ScheduleID);
+            var schedule = _lessonService.GetItemByID(@event.ScheduleID);
             if (schedule != null)
             {
                 try
                 {
                     var center = _centerService.GetItemByID(_classService.GetItemByID(schedule.ClassID).Center).Code;
-                    ViewBag.LessonUrl = $"/{center}/student/Lesson/Detail/{schedule.LessonID}/{schedule.ClassSubjectID}";
+                    ViewBag.LessonUrl = $"/{center}/student/Lesson/Detail/{schedule.ID}/{schedule.ClassSubjectID}";
                 }
                 catch (Exception e)
                 {
@@ -1055,7 +1055,7 @@ namespace EnglishPlatform.Controllers
         public IActionResult RestoreBak()
         {
             ClassSubjectService _classSubjectServiceBak = new ClassSubjectService(_config, "Backup");
-            LessonScheduleService _lessonScheduleServiceBak = new LessonScheduleService(_config, "Backup");
+            //LessonService _lessonScheduleServiceBak = new LessonScheduleService(_config, "Backup");
             ChapterService _chapterServiceBak = new ChapterService(_config, "Backup");
             LessonService _lessonServiceBak = new LessonService(_config, "Backup");
             CloneLessonPartService _partServiceBak = new CloneLessonPartService(_config, dbName: "Backup");
@@ -1068,7 +1068,7 @@ namespace EnglishPlatform.Controllers
             ChapterProgressService _chapterProgressServiceBak = new ChapterProgressService(_config, dbName: "Backup");
             LessonProgressService _lessonProgressServiceBak = new LessonProgressService(_config, dbName: "Backup");
 
-            LessonScheduleService _lessonScheduleService = new LessonScheduleService(_config);
+            //LessonScheduleService _lessonScheduleService = new LessonScheduleService(_config);
             ChapterService _chapterService = new ChapterService(_config);
             LessonService _lessonService = new LessonService(_config);
             CloneLessonPartService _partService = new CloneLessonPartService(_config);
@@ -1180,11 +1180,11 @@ namespace EnglishPlatform.Controllers
                     _lessonProgressService.CreateQuery().InsertManyAsync(oldLsPrgs);
                 }
                 //restore schedule
-                var oldSchedules = _lessonScheduleServiceBak.GetByClassSubject(cs.ID);
-                if (oldSchedules != null && oldSchedules.Count() > 0)
-                {
-                    _lessonScheduleService.CreateQuery().InsertManyAsync(oldSchedules);
-                }
+                //var oldSchedules = _lessonScheduleServiceBak.GetByClassSubject(cs.ID);
+                //if (oldSchedules != null && oldSchedules.Count() > 0)
+                //{
+                //    _lessonScheduleService.CreateQuery().InsertManyAsync(oldSchedules);
+                //}
 
 
 

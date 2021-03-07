@@ -23,7 +23,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         private readonly ExamService _service;
         private readonly ExamDetailService _examDetailService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly LessonService _lessonService;
 
         private readonly LessonPartQuestionService _lessonPartQuestionService;
@@ -52,7 +52,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             StudentService studentService,
             ClassService classService,
             LessonService lessonService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             CloneLessonPartService cloneLessonPartService,
             CloneLessonPartAnswerService cloneLessonPartAnswerService,
             CloneLessonPartQuestionService cloneLessonPartQuestionService,
@@ -73,7 +73,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
             _lessonService = lessonService;
             _lessonHelper = lessonHelper;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _cloneLessonPartAnswerService = cloneLessonPartAnswerService;
             _cloneLessonPartService = cloneLessonPartService;
             _cloneLessonPartQuestionService = cloneLessonPartQuestionService;
@@ -337,7 +337,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         currentExam = _service.GetItemByID(ExamID);
                     }
-                    else { 
+                    else
+                    {
                         currentExam = _service.GetItemByID(oldItem.ExamID);
                     }
                     var point = 0.0;
@@ -439,179 +440,179 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json("Khong tim thay lop tuong ung");
             }
 
-            var classSbjExam = _classSubjectService.GetByClassID(@class.ID).Where(x=>x.TypeClass == CLASSSUBJECT_TYPE.EXAM);
+            var classSbjExam = _classSubjectService.GetByClassID(@class.ID).Where(x => x.TypeClass == CLASSSUBJECT_TYPE.EXAM);
             var result = new List<StudentLessonResultViewModel>();
-            foreach(var item in classSbjExam)
+            foreach (var item in classSbjExam)
             {
-                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item,true);
+                result = await _progressHelper.GetLessonProgressList(item.StartDate, DateTime.Now, student, item, true);
             }
 
             return Json(result);
         }
 
-        public JsonResult GetDetailProgessExam(String LessonScheduleID)
-        {
-            try
-            {
-                //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
-                //    new ExamVM
-                //    {
-                //        StudentID = x.Key,
-                //        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID,
-                //        LessonID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().LessonID,
-                //        ClassSubjectID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassSubjectID,
-                //        TotalLearn = x.ToList().Count,
-                //        ClassID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassID,
-                //    }
-                //);
+        //public JsonResult GetDetailprogressExam(String LessonScheduleID)
+        //{
+        //    try
+        //    {
+        //        //var exams = _service.GetItemByLessonScheduleID(LessonScheduleID).GroupBy(x=>x.StudentID).Select(x=>
+        //        //    new ExamVM
+        //        //    {
+        //        //        StudentID = x.Key,
+        //        //        ID = x.ToList().OrderByDescending(y=>y.Number).FirstOrDefault().ID,
+        //        //        LessonID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().LessonID,
+        //        //        ClassSubjectID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassSubjectID,
+        //        //        TotalLearn = x.ToList().Count,
+        //        //        ClassID = x.ToList().OrderByDescending(y => y.Number).FirstOrDefault().ClassID,
+        //        //    }
+        //        //);
 
-                var exams = from e in _service.GetItemByLessonScheduleID(LessonScheduleID)
-                           group e by e.StudentID
-                             into g
-                           let item = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
-                           select new ExamVM
-                           {
-                               StudentID = g.Key,
-                               StudentName = _studentService.GetItemByID(g.Key).FullName,
-                               TotalLearn = item == null ? 0 : item.Number,
-                               LastPoint = item == null ? 0 : (item.Point == 0 ? 0 : (item.Point * 100) / item.MaxPoint),
-                               Created = item?.Created ?? new DateTime(1900, 1, 1),
-                               ID = item.ID,
-                               Status = item.Status
-                           };
-                if (exams == null)
-                {
-                    return Json(
-                            new Dictionary<String, Object>
-                            {
-                                {"Status",false },
-                                {"Message","Không tìm thấy bài học"}
-                            }
-                        );
-                }
+        //        var exams = from e in _service.GetItemByLessonScheduleID(LessonScheduleID)
+        //                    group e by e.StudentID
+        //                     into g
+        //                    let item = g.ToList().OrderByDescending(x => x.Number).FirstOrDefault()
+        //                    select new ExamVM
+        //                    {
+        //                        StudentID = g.Key,
+        //                        StudentName = _studentService.GetItemByID(g.Key).FullName,
+        //                        TotalLearn = item == null ? 0 : item.Number,
+        //                        LastPoint = item == null ? 0 : (item.Point == 0 ? 0 : (item.Point * 100) / item.MaxPoint),
+        //                        Created = item?.Created ?? new DateTime(1900, 1, 1),
+        //                        ID = item.ID,
+        //                        Status = item.Status
+        //                    };
+        //        if (exams == null)
+        //        {
+        //            return Json(
+        //                    new Dictionary<String, Object>
+        //                    {
+        //                        {"Status",false },
+        //                        {"Message","Không tìm thấy bài học"}
+        //                    }
+        //                );
+        //        }
 
-                var examIDs = exams.Select(x => x.ID).ToList();
-                var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
-                var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
-                var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x=>new {ID = x.ID,Title = x.Title,Type = x.Type }).ToList();
-                //if(examIDs.Count() == 0)
-                //{
-                //    var result1 = new {
-                //        ExamID = "",
-                //        TitleLessonPart = "",
-                //        CountFalse = 1,
-                //        CountTrue = 0,
-                //        TotalAns = 1
-                //    };
-                //    return Json(
-                //        new Dictionary<String, Object>
-                //        {
-                //            {"Status",true },
-                //            {"Data",result1 },
-                //            {"DetailLesson",exams }
-                //        }
-                //    );
-                //}
+        //        var examIDs = exams.Select(x => x.ID).ToList();
+        //        var detailExams = _examDetailService.GetByExamIDs(examIDs).ToList().GroupBy(x => x.LessonPartID);
+        //        var lessonPartIDs = detailExams.Select(y => y.Key).ToList();
+        //        var listLessonPart = _cloneLessonPartService.CreateQuery().Find(x => lessonPartIDs.Contains(x.ID)).ToList().Select(x => new { ID = x.ID, Title = x.Title, Type = x.Type }).ToList();
+        //        //if(examIDs.Count() == 0)
+        //        //{
+        //        //    var result1 = new {
+        //        //        ExamID = "",
+        //        //        TitleLessonPart = "",
+        //        //        CountFalse = 1,
+        //        //        CountTrue = 0,
+        //        //        TotalAns = 1
+        //        //    };
+        //        //    return Json(
+        //        //        new Dictionary<String, Object>
+        //        //        {
+        //        //            {"Status",true },
+        //        //            {"Data",result1 },
+        //        //            {"DetailLesson",exams }
+        //        //        }
+        //        //    );
+        //        //}
 
-                List<ExamDetailEntity> listDetailExams = new List<ExamDetailEntity>();
-                foreach(var item in _examDetailService.GetByExamIDs(examIDs).ToList())
-                {
-                    var cloneLessonPart = listLessonPart.Where(x=>x.ID == item.LessonPartID).FirstOrDefault();
-                    //if (item.LessonPartID == "5f6b11892618882ab86de2f2") { var test1 = ""; }
-                    if(cloneLessonPart.Type == "QUIZ2")
-                    {
-                        if(item.AnswerValue != item.RealAnswerValue)
-                        {
-                            item.AnswerID = "1";
-                            item.RealAnswerID = "2";
-                        }
-                        else
-                        {
-                            item.AnswerID = item.RealAnswerID;
-                        }
-                    }
-                    listDetailExams.Add(item);
-                }
+        //        List<ExamDetailEntity> listDetailExams = new List<ExamDetailEntity>();
+        //        foreach (var item in _examDetailService.GetByExamIDs(examIDs).ToList())
+        //        {
+        //            var cloneLessonPart = listLessonPart.Where(x => x.ID == item.LessonPartID).FirstOrDefault();
+        //            //if (item.LessonPartID == "5f6b11892618882ab86de2f2") { var test1 = ""; }
+        //            if (cloneLessonPart.Type == "QUIZ2")
+        //            {
+        //                if (item.AnswerValue != item.RealAnswerValue)
+        //                {
+        //                    item.AnswerID = "1";
+        //                    item.RealAnswerID = "2";
+        //                }
+        //                else
+        //                {
+        //                    item.AnswerID = item.RealAnswerID;
+        //                }
+        //            }
+        //            listDetailExams.Add(item);
+        //        }
 
-                //var result = from d in _examDetailService.GetByExamIDs(examIDs).ToList()
-                var result = from d in listDetailExams
-                             group d by d.LessonPartID
-                              into g
-                              let detailExams1 = g
-                              select new
-                              {
-                                  ExamID = g.FirstOrDefault().ExamID,
-                                  TitleLessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault().Title,
-                                  CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID ).Count(),
-                                  CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID ).Count(),
-                                  TotalAns = g.Count()
-                              };
+        //        //var result = from d in _examDetailService.GetByExamIDs(examIDs).ToList()
+        //        var result = from d in listDetailExams
+        //                     group d by d.LessonPartID
+        //                      into g
+        //                     let detailExams1 = g
+        //                     select new
+        //                     {
+        //                         ExamID = g.FirstOrDefault().ExamID,
+        //                         TitleLessonPart = listLessonPart.Where(y => y.ID == g.Key).FirstOrDefault().Title,
+        //                         CountFalse = g.Where(x => x.RealAnswerID != x.AnswerID).Count(),
+        //                         CountTrue = g.Where(x => x.RealAnswerID == x.AnswerID).Count(),
+        //                         TotalAns = g.Count()
+        //                     };
 
-                return Json(
-                        new Dictionary<String, Object>
-                        {
-                            {"Status",true },
-                            {"Data",result },
-                            {"DetailLesson",exams }
-                        }
-                    );
-            }
-            catch(Exception ex)
-            {
-                return Json(
-                        new Dictionary<String, Object>
-                        {
-                            {"Status",false },
-                            {"Message",ex.Message }
-                        }
-                    );
-            }
-        }
+        //        return Json(
+        //                new Dictionary<String, Object>
+        //                {
+        //                    {"Status",true },
+        //                    {"Data",result },
+        //                    {"DetailLesson",exams }
+        //                }
+        //            );
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(
+        //                new Dictionary<String, Object>
+        //                {
+        //                    {"Status",false },
+        //                    {"Message",ex.Message }
+        //                }
+        //            );
+        //    }
+        //}
 
-        public JsonResult ResetExam(String basis, String LessonID,String ExamID)
+        public JsonResult ResetExam(String basis, String LessonID, String ExamID)
         {
             try
             {
                 var UserID = User.Claims.GetClaimByType("UserID").Value;
-                if(!UserID.Equals("5d8389c2d5d1bf27e4410c04")) return Json(new Dictionary<String, Object> //chỉ tài khoản huonghl@utc.edu.vn mới sd chức năng này được
+                if (!UserID.Equals("5d8389c2d5d1bf27e4410c04")) return Json(new Dictionary<String, Object> //chỉ tài khoản huonghl@utc.edu.vn mới sd chức năng này được
                 {
                     {"Msg","Bạn không có quyền thực hiện chức năng này" }
                 });
-                var lessonSchedule = _lessonScheduleService.GetItemByLessonID(LessonID);
-                if(DateTime.UtcNow > lessonSchedule.EndDate) return Json(new Dictionary<String, Object>
+                var lesson = _lessonService.GetItemByID(LessonID);
+                if (DateTime.UtcNow > lesson.EndDate) return Json(new Dictionary<String, Object>
                 {
                     {"Msg","Đã hết thời gian làm bài, không thể reset." }
                 });
                 var exam = _examService.GetItemByID(ExamID);
-                if (exam == null) return Json(new Dictionary<String, Object> 
+                if (exam == null) return Json(new Dictionary<String, Object>
                 {
                     {"Msg","Chưa có thông tin bài kiểm tra" }
                 });
                 var student = _studentService.GetItemByID(exam.StudentID);
-                if(student == null) return Json(new Dictionary<String, Object>
+                if (student == null) return Json(new Dictionary<String, Object>
                 {
                     {"Msg","Thông tin học sinh không chính xác." }
                 });
-                var lessonprogess = _lessonProgressService.GetByStudentID_LessonID(student.ID, LessonID);
-                if(lessonprogess == null) return Json(new Dictionary<String, Object>
+                var lessonprogress = _lessonProgressService.GetByStudentID_LessonID(student.ID, LessonID);
+                if (lessonprogress == null) return Json(new Dictionary<String, Object>
                 {
-                    {"Msg","Chưa có thông tin bài kiểm tra" }
+                    {"Msg","Chưa có thông tin bài làm" }
                 });
-                _examService.CreateQuery().DeleteOne(x=>x.ID == exam.ID);
-                if (lessonprogess.Tried == 1)
-                    _lessonProgressService.CreateQuery().DeleteOne(x => x.ID == lessonprogess.ID);
+                _examService.CreateQuery().DeleteOne(x => x.ID == exam.ID);
+                if (lessonprogress.Tried == 1)
+                    _lessonProgressService.CreateQuery().DeleteOne(x => x.ID == lessonprogress.ID);
                 else
                 {
-                    lessonprogess.Tried = lessonprogess.Tried - 1;
+                    lessonprogress.Tried = lessonprogress.Tried - 1;
                     var exams = _examService.CreateQuery().Find(x => x.LessonID == LessonID && student.ID == x.StudentID).SortByDescending(x => x.Created);
-                    lessonprogess.LastDate = exams.FirstOrDefault().Created;
-                    lessonprogess.LastPoint = exams.FirstOrDefault().LastPoint;
-                    lessonprogess.AvgPoint = exams.ToList().Average(x => x.LastPoint);
-                    lessonprogess.MinPoint = exams.ToList().Min(x => x.LastPoint);
-                    lessonprogess.MaxPoint = exams.ToList().Max(x => x.LastPoint);
+                    lessonprogress.LastDate = exams.FirstOrDefault().Created;
+                    lessonprogress.LastPoint = exams.FirstOrDefault().LastPoint;
+                    lessonprogress.AvgPoint = exams.ToList().Average(x => x.LastPoint);
+                    lessonprogress.MinPoint = exams.ToList().Min(x => x.LastPoint);
+                    lessonprogress.MaxPoint = exams.ToList().Max(x => x.LastPoint);
                     Int32 index = (Int32)exams.CountDocuments() - 1;
-                    lessonprogess.PointChange = exams.FirstOrDefault().LastPoint - exams.ToList().ElementAtOrDefault(index).LastPoint;
-                    _lessonProgressService.CreateQuery().ReplaceOne(x => x.ID == lessonprogess.ID, lessonprogess, new UpdateOptions() { IsUpsert = false });
+                    lessonprogress.PointChange = exams.FirstOrDefault().LastPoint - exams.ToList().ElementAtOrDefault(index).LastPoint;
+                    _lessonProgressService.CreateQuery().ReplaceOne(x => x.ID == lessonprogress.ID, lessonprogress, new UpdateOptions() { IsUpsert = false });
                 }
 
                 return Json(new Dictionary<String, Object>
@@ -619,7 +620,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Msg","Reset thành công, báo học sinh làm bài tiếp tục." }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(ex.Message);
             }

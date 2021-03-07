@@ -13,6 +13,20 @@ namespace BaseCustomerEntity.Database
         public string ClassID { get; set; }
         [JsonProperty("ClassSubjectID")]
         public string ClassSubjectID { get; set; }
+        [JsonProperty("StartDate")]
+        public DateTime StartDate { get; set; }
+        [JsonProperty("EndDate")]
+        public DateTime EndDate { get; set; }
+        //[JsonProperty("IsActive")]
+        //public bool IsActive { get; set; }
+        [JsonProperty("IsOnline")]
+        public bool IsOnline { get; set; }
+        [JsonProperty("IsHideAnswer")]
+        public bool IsHideAnswer { get; set; }
+        [JsonProperty("TeacherID")]
+        public string TeacherID { get; set; }
+
+
         //[JsonProperty("LessonExtension")]
         //public List<LessonExtensionEntity> LessonExtension = new List<LessonExtensionEntity>();
         [JsonProperty("LessonExamID")]
@@ -68,19 +82,25 @@ namespace BaseCustomerEntity.Database
             var indexs = new List<CreateIndexModel<LessonEntity>>
             {
                 //ClassSubjectID_1_ChapterID_1_Order_1_ID_1
-                new CreateIndexModel<LessonEntity>(
-                    new IndexKeysDefinitionBuilder<LessonEntity>()
-                    .Ascending(t => t.ClassSubjectID)
-                    .Ascending(t=> t.ChapterID)
-                    ),
+                //new CreateIndexModel<LessonEntity>(
+                //    new IndexKeysDefinitionBuilder<LessonEntity>()
+                //    .Ascending(t => t.ClassSubjectID)),
                 //ChapterID_1_Order_1_ID_1
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
                     .Ascending(t=> t.ChapterID)
                     .Ascending(t=> t.Order)),
+                //new CreateIndexModel<LessonEntity>(
+                //    new IndexKeysDefinitionBuilder<LessonEntity>()
+                //    .Ascending(t => t.ClassID)),
+
                 new CreateIndexModel<LessonEntity>(
                     new IndexKeysDefinitionBuilder<LessonEntity>()
-                    .Ascending(t => t.ClassID))
+                    .Ascending(t => t.ClassID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
+
+                 new CreateIndexModel<LessonEntity>(
+                    new IndexKeysDefinitionBuilder<LessonEntity>()
+                    .Ascending(t => t.ClassSubjectID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -131,6 +151,29 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<LessonEntity> GetClassSubjectPractices(string ClassSubjectID)
         {
             return Collection.Find(t => t.ClassSubjectID == ClassSubjectID && t.IsPractice).ToEnumerable();
+        }
+
+        public long CountClassExam(string ClassID, DateTime? start = null, DateTime? end = null)
+        {
+            var validTime = new DateTime(1900, 1, 1);
+            if (start == null && end == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.TemplateType == LESSON_TEMPLATE.EXAM);
+            else if (start == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.TemplateType == LESSON_TEMPLATE.EXAM && (t.StartDate <= end));
+            else if (end == null)
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.TemplateType == LESSON_TEMPLATE.EXAM && (t.StartDate <= validTime || t.StartDate >= start));
+            else
+                return Collection.CountDocuments(t => t.ClassID == ClassID && t.TemplateType == LESSON_TEMPLATE.EXAM && (t.StartDate <= validTime || (t.StartDate >= start && t.StartDate <= end)));
+        }
+
+        public IEnumerable<LessonEntity> GetClassSubjectActiveLesson(DateTime StartTime, DateTime EndTime, String ClassSubjectID)
+        {
+            return Collection.Find(o => o.ClassSubjectID == ClassSubjectID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToEnumerable();
+        }
+
+        public IEnumerable<LessonEntity> GetIncomingSchedules(DateTime time, int period, string ClassID)
+        {
+            return Collection.Find(o => o.ClassID == ClassID && o.StartDate >= time && o.StartDate < time.AddMinutes(period)).ToEnumerable();
         }
     }
 }

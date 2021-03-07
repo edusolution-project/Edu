@@ -282,8 +282,9 @@
                                     <tr>
                                         <th class="sticky-col first-col" rowspan="2">STT</th>
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
-                                        <th rowspan="2" class="sticky-col third-col">Điểm trung bình</th>
-                                        <th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm trung bình/Điểm mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col third-col" v-else>Điểm trung bình</th>
+                                        @*<th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>*@
                                         <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
                                     </tr>
                                     <tr style="font-size:80%">
@@ -294,8 +295,9 @@
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
                                         <td class="sticky-col second-col">{{ list_students[i-1].FullName}}</td>
-                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
-                                        <td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>
+                                        <td class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}/{{roundPoint(list_students[i-1].Target,1)}}</td>
+                                        <td class="sticky-col third-col" v-else>{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
+                                        @*<td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>*@
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
                                             <template v-for="item in items">
@@ -876,7 +878,7 @@
                                 <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
                             </div>
 
-                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="true || owner == '@currentuser'">
+                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">
                                 <i class="fas fa-ellipsis-h indicator"></i>
                                 <template v-if="type != 'exam'">
                                     <div class="act_ic">
@@ -1273,9 +1275,8 @@
                 window.updateSubchapSchedule = this.updateSubchapSchedule
                 window.updateChapCondition = this.updateChapCondition
                 window.clearSchedule = this.clearSchedule
-                window.clearChapSchedule = this.clearChapSchedule
                 window.resetChap = this.resetChap
-                window.toggleLessonState = this.toggleLessonState
+                //window.toggleLessonState = this.toggleLessonState
                 window.toggleOnlineClass = this.toggleOnlineClass
                 window.toggleHideAnswer = this.toggleHideAnswer
                 window.toggleChapterHideAnswer = this.toggleChapterHideAnswer
@@ -1682,7 +1683,7 @@
 
                                 _that.list_lessons.push({
                                     ID: lesson.ID,
-                                    ScheduleID: lesson.ScheduleID,
+                                    ScheduleID: lesson.ID,
                                     Title: lesson.Title,
                                     TemplateType: lesson.TemplateType,
                                     ClassSubject: subject,
@@ -1750,7 +1751,7 @@
 
                                 _that.list_lessons_result.push({
                                     ID: lesson.ID,
-                                    ScheduleID: lesson.ScheduleID,
+                                    ScheduleID: lesson.ID,
                                     Title: lesson.Title,
                                     TemplateType: lesson.TemplateType,
                                     ClassSubject: subject,
@@ -1928,10 +1929,10 @@
                     var enddate = moment(obj.EndDate).format("MM-DD-YYYY HH:mm:ss");
 
                     let _form = new FormData()
-                    _form.append('ID', obj.ScheduleID)
+                    _form.append('ID', obj.ID)
                     _form.append('StartDate', startdate)
                     _form.append('EndDate', enddate)
-                    let _url = '@processUrl("Update", "LessonSchedule")'
+                    let _url = '@processUrl("UpdateSchedule", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.IsUpdating = false
@@ -2022,7 +2023,7 @@
                     _form.append('StartDate', startdate)
                     _form.append('EndDate', enddate)
                     let _that = this;
-                    let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
+                    let _url = '@processUrl("UpdateChapterSchedule", "Lesson")'
 
                     axios.post(_url, _form)
                         .then(response => {
@@ -2070,40 +2071,12 @@
                     obj.IsUpdating = true
                     obj.StartDate = ''
                     obj.EndDate = ''
-
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID)
-                    let _url = '@processUrl("Update", "LessonSchedule")'
+                    let _url = '@processUrl("UpdateSchedule", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
                             obj.IsUpdating = false
-                        }).catch(e => { })
-                },
-                clearChapSchedule(obj, pos) {
-                    obj.IsUpdating = true
-                    obj.StartDate = ''
-                    obj.EndDate = ''
-
-                    let _form = new FormData()
-                    _form.append('ID', obj.ID)
-                    let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
-                    axios.post(_url, _form)
-                        .then(response => {
-                            //console.log(obj);
-                            obj.IsUpdating = false;
-                            mainInstance.$forceUpdate();
-                            var chapter = response.data.Data;
-                            if (chapter == null) {
-                                alert("có lỗi, vui lòng tải lại trang & thực hiện lại thao tác");
-                                return false;
-                            }
-                            else {
-                                var _container = '#prc-' + chapter.ID + '-' + pos;
-                                var startdate = formatTime(chapter.StartDate);
-                                var enddate = formatTime(chapter.EndDate);
-                                $(_container).find('.input-group.date.st > input').val(startdate);
-                                $(_container).find('.input-group.date.ed > input').val(enddate);
-                            }
                         }).catch(e => { })
                 },
                 resetChap(obj, pos) {
@@ -2118,7 +2091,7 @@
                     _form.append('ID', obj.ID)
                     _form.append('reset', true)
 
-                    let _url = '@processUrl("UpdateChapter", "LessonSchedule")'
+                    let _url = '@processUrl("UpdateChapterSchedule", "Lesson")'
                     axios.post(_url, _form)
                         .then(response => {
                             //console.log(obj);
@@ -2204,7 +2177,7 @@
                     return filter;
                 },
                 //Lesson Action
-                toggleLessonState(obj) {
+                @*toggleLessonState(obj) {
                     let _that = this;
                     //console.log(obj)
                     //_that.tableData.forEach(function (item, k) {
@@ -2220,9 +2193,9 @@
                         }).catch(e => { })
                     //}
                     //})
-                },
+                },*@
                 toggleOnlineClass(obj) {
-                    let _url = '@processUrl("ToggleOnline", "LessonSchedule")'
+                    let _url = '@processUrl("ToggleOnline", "Lesson")'
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID);
                     axios.post(_url, _form)
@@ -2258,7 +2231,7 @@
                 },
 
                 toggleHideAnswer(obj) {
-                    let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
+                    let _url = '@processUrl("ToggleHideAnswer", "Lesson")'
                     let _form = new FormData()
                     _form.append('ID', obj.ScheduleID);
                     axios.post(_url, _form)
@@ -2295,10 +2268,10 @@
                         }).catch(e => { })
                 },
                 toggleChapterHideAnswer(obj) {
-                    let _url = '@processUrl("ToggleHideAnswer", "LessonSchedule")'
+                    let _url = '@processUrl("ToggleHideAnswer", "Lesson")'
                     let _form = new FormData()
                     _form.append('ChapterID', obj.ID);
-                    _form.append('', obj.ScheduleID);
+                    _form.append('', obj.ID);
                     axios.post(_url, _form)
                         .then(response => {
                             if (response.data.error == null) {
@@ -3211,19 +3184,20 @@
                             var stt = response.data.Status
                             if (stt) {
                                 alert(response.data.Message)
-                                var data = response.data.Data
-                                this.hideModal('autocreateexam-modal-xl');
+                                //var data = response.data.Data
+                                //this.hideModal('autocreateexam-modal-xl');
 
-                                var listliexam = $("[classsubject=" + data.ClassSubjectID + "]").parent()
-                                var html = '<li class="sub-practice pt-2 pb-1 pl-2 rounded" classsubject="' + data.ClassSubjectID + '"><div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center"><a ' +
-                                    'href="/eduso/teacher/Lesson/Detail/' + data.ID + '/' + data.ClassSubjectID + '" title="' + data.Title + '" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis;"><span ' +
-                                    'class="text-danger"><i class="ic far fa-edit mr-2"></i>' +
-                                    data.Title +
-                                    ' </span></a> <div class="picker-schedule d-flex align-items-center"><div class="input-group date date st mr-2"><input type="text" readonly="readonly" class="form-control" style="font-size: ' +
-                                    '95%;"></div> <div class="input-group date date ed mr-2 ml-0"><input type="text" readonly="readonly" class="form-control" style="font-size: 95%;"></div> <i title="Xóa lịch học" class="fas fa-redo ic-ac d-flex align-' +
-                                    'items-center mr-2"></i></div></div></li>';
-                                
-                                listliexam.append(html)
+                                //var listliexam = $("[classsubject=" + data.ClassSubjectID + "]").parent()
+                                //var html = '<li class="sub-practice pt-2 pb-1 pl-2 rounded" classsubject="' + data.ClassSubjectID + '"><div class="d-flex w-100 flex-column flex-md-row align-items-start align-items-md-center"><a ' +
+                                //    'href="/eduso/teacher/Lesson/Detail/' + data.ID + '/' + data.ClassSubjectID + '" title="' + data.Title + '" class="flex-grow-1 overflow-hidden text-dark" style="text-overflow: ellipsis;"><span ' +
+                                //    'class="text-danger"><i class="ic far fa-edit mr-2"></i>' +
+                                //    data.Title +
+                                //    ' </span></a> <div class="picker-schedule d-flex align-items-center"><div class="input-group date date st mr-2"><input type="text" readonly="readonly" class="form-control" style="font-size: ' +
+                                //    '95%;"></div> <div class="input-group date date ed mr-2 ml-0"><input type="text" readonly="readonly" class="form-control" style="font-size: 95%;"></div> <i title="Xóa lịch học" class="fas fa-redo ic-ac d-flex align-' +
+                                //    'items-center mr-2"></i></div></div></li>';
+
+                                //listliexam.append(html)
+                                location.reload()
                             }
                             else {
                                 alert(response.data.Message)

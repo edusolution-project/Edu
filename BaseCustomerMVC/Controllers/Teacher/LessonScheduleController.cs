@@ -517,290 +517,241 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    }
         //}
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult ToggleOnline(string ID)
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            var schedule = _lessonScheduleService.GetItemByID(ID);
-            if (schedule == null)
-            {
-                return Json(new { error = "Thông tin không đúng" });
-            }
-            schedule.IsOnline = !schedule.IsOnline;
+        //[HttpPost]
+        //[Obsolete]
+        //public JsonResult ToggleOnline(string ID)
+        //{
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    var lesson = _lessonService.GetItemByID(ID);
+        //    if (lesson == null)
+        //    {
+        //        return Json(new { error = "Thông tin không đúng" });
+        //    }
+        //    lesson.IsOnline = !lesson.IsOnline;
 
-            UpdateCalendar(schedule, UserID);
-            _lessonScheduleService.Save(schedule);
-            return Json(new { isOnline = schedule.IsOnline });
-        }
+        //    UpdateCalendar(lesson, UserID);
+        //    _lessonService.Save(lesson);
+        //    return Json(new { isOnline = lesson.IsOnline });
+        //}
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult ToggleHideAnswer(string ID, string ChapterID = "")
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (string.IsNullOrEmpty(ChapterID))
-            {
-                var schedule = _lessonScheduleService.GetItemByID(ID);
-                if (schedule == null)
-                {
-                    return Json(new { error = "Thông tin không đúng" });
-                }
-                schedule.IsHideAnswer = !schedule.IsHideAnswer;
-                _lessonScheduleService.Save(schedule);
-                return Json(new { schedule.IsHideAnswer });
-            }
-            else
-            {
-                var chap = _chapterService.GetItemByID(ChapterID);
-                if (chap == null)
-                {
-                    return Json(new { error = "Thông tin không đúng" });
-                }
+        //[HttpPost]
+        //[Obsolete]
+        //public JsonResult ToggleHideAnswer(string ID, string ChapterID = "")
+        //{
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    if (string.IsNullOrEmpty(ChapterID))
+        //    {
+        //        var schedule = _lessonScheduleService.GetItemByID(ID);
+        //        if (schedule == null)
+        //        {
+        //            return Json(new { error = "Thông tin không đúng" });
+        //        }
+        //        schedule.IsHideAnswer = !schedule.IsHideAnswer;
+        //        _lessonScheduleService.Save(schedule);
+        //        return Json(new { schedule.IsHideAnswer });
+        //    }
+        //    else
+        //    {
+        //        var chap = _chapterService.GetItemByID(ChapterID);
+        //        if (chap == null)
+        //        {
+        //            return Json(new { error = "Thông tin không đúng" });
+        //        }
 
-                var isHide = ToggleChapHideAnswer(chap);
-
-
-                return Json(new { IsHideAnswer = isHide });
-            }
-        }
-
-        private bool ToggleChapHideAnswer(ChapterEntity chap, int resetState = 0)
-        {
-            var isHide = !chap.IsHideAnswer;
-            if (resetState > 0)
-                isHide = true;
-            else if (resetState < 0)
-                isHide = false;
-
-            var chapids = new List<string> { chap.ID };
-            var subchap = new List<string>();
-            var lessonids = GetChapterLessonID(chap.ID, out subchap);
-
-            chapids.AddRange(subchap);
-
-            _chapterService.CreateQuery().UpdateMany(
-                Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
-                Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
-                new UpdateOptions() { });
-
-            _lessonScheduleService.CreateQuery().UpdateMany(
-                Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
-                Builders<LessonScheduleEntity>.Update.Set(t => t.IsHideAnswer, isHide),
-                new UpdateOptions() { });
-
-            return isHide;
-        }
+        //        var isHide = ToggleChapHideAnswer(chap);
 
 
-        private List<string> GetChapterLessonID(string chapterID, out List<string> lstChap)
-        {
-            lstChap = new List<string>();
-            var ret = new List<string>();
-            ret = _lessonService.GetChapterLesson("", chapterID).Select(t => t.ID).ToList(); ;
+        //        return Json(new { IsHideAnswer = isHide });
+        //    }
+        //}
 
-            var subchaps = _chapterService.GetSubChapters("", chapterID).ToList();
-            if (subchaps != null && subchaps.Count > 0)
-            {
-                foreach (var sc in subchaps)
-                {
-                    lstChap.Add(sc.ID);
-                    var subchap = new List<string>();
-                    ret.AddRange(GetChapterLessonID(sc.ID, out subchap));
-                    lstChap.AddRange(subchap);
-                }
+        //private bool ToggleChapHideAnswer(ChapterEntity chap, int resetState = 0)
+        //{
+        //    var isHide = !chap.IsHideAnswer;
+        //    if (resetState > 0)
+        //        isHide = true;
+        //    else if (resetState < 0)
+        //        isHide = false;
 
-            }
-            return ret;
-        }
+        //    var chapids = new List<string> { chap.ID };
+        //    var subchap = new List<string>();
+        //    var lessonids = GetChapterLessonID(chap.ID, out subchap);
 
+        //    chapids.AddRange(subchap);
 
+        //    _chapterService.CreateQuery().UpdateMany(
+        //        Builders<ChapterEntity>.Filter.In(t => t.ID, chapids),
+        //        Builders<ChapterEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+        //        new UpdateOptions() { });
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult Update(LessonScheduleEntity entity)
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            if (entity == null || string.IsNullOrEmpty(entity.ID))
-            {
-                entity.StartDate = entity.StartDate.ToUniversalTime();
-                entity.EndDate = entity.EndDate.ToUniversalTime();
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", "Không tìm thấy lịch học" }
-                    });
-            }
-            else
-            {
-                var oldItem = _lessonScheduleService.GetItemByID(entity.ID);
-                if (oldItem == null)
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", "Không tìm thấy lịch học" }
-                    });
-                var oldLesson = _lessonService.GetItemByID(oldItem.LessonID);
-                if (oldLesson == null)
-                {
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", "Không tìm thấy bài kiểm tra" }
-                    });
-                }
-                if (oldLesson.TemplateType == LESSON_TEMPLATE.EXAM)
-                {
-                    oldItem.IsHideAnswer = true;
-                }
-                oldItem.StartDate = entity.StartDate.ToUniversalTime();
-                oldItem.EndDate = entity.EndDate.ToUniversalTime();
+        //    _lessonScheduleService.CreateQuery().UpdateMany(
+        //        Builders<LessonScheduleEntity>.Filter.In(t => t.LessonID, lessonids),
+        //        Builders<LessonScheduleEntity>.Update.Set(t => t.IsHideAnswer, isHide),
+        //        new UpdateOptions() { });
 
-                if (oldItem.StartDate < DateTime.UtcNow)
-                    oldItem.IsOnline = false;
-
-                UpdateCalendar(oldItem, UserID);
-                _lessonScheduleService.CreateOrUpdate(oldItem);
-
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data", oldItem },
-                        {"Error", null }
-                    });
-            }
-        }
+        //    return isHide;
+        //}
 
 
-        [HttpPost]
-        [Obsolete]
-        public JsonResult UpdateChapter(ChapterEntity entity, bool reset = false)
-        {
-            var UserID = User.Claims.GetClaimByType("UserID").Value;
-            entity.StartDate = entity.StartDate.ToUniversalTime();
-            entity.EndDate = entity.EndDate.ToUniversalTime();
-            if (entity == null || string.IsNullOrEmpty(entity.ID))
-            {
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", "Không tìm thấy chương" }
-                    });
-            }
-            else
-            {
-                var oldItem = _chapterService.GetItemByID(entity.ID);
-                if (oldItem == null)
-                    return new JsonResult(new Dictionary<string, object> {
-                        {"Data",null },
-                        {"Error", "Không tìm thấy chương" }
-                    });
+        //private List<string> GetChapterLessonID(string chapterID, out List<string> lstChap)
+        //{
+        //    lstChap = new List<string>();
+        //    var ret = new List<string>();
+        //    ret = _lessonService.GetChapterLesson("", chapterID).Select(t => t.ID).ToList(); ;
 
-                var defDate = new DateTime(1900, 1, 1);
-                if (reset)
-                {
-                    oldItem.ConditionChapter = "";
-                    oldItem.BasePoint = 0;
-                    oldItem.StartDate = defDate;
-                    oldItem.EndDate = defDate;
-                    oldItem.IsHideAnswer = false;
-                }
-                else
-                {
-                    oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
-                    oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
-                }
+        //    var subchaps = _chapterService.GetSubChapters("", chapterID).ToList();
+        //    if (subchaps != null && subchaps.Count > 0)
+        //    {
+        //        foreach (var sc in subchaps)
+        //        {
+        //            lstChap.Add(sc.ID);
+        //            var subchap = new List<string>();
+        //            ret.AddRange(GetChapterLessonID(sc.ID, out subchap));
+        //            lstChap.AddRange(subchap);
+        //        }
 
-                _chapterService.Save(oldItem);//Save chapter
-
-                ToggleChapHideAnswer(oldItem, -1); //set hide answer to false
-
-                UpdateChapterCalendar(oldItem, UserID);
-
-                return new JsonResult(new Dictionary<string, object> {
-                        {"Data", oldItem },
-                    });
-            }
-        }
+        //    }
+        //    return ret;
+        //}
 
 
-        private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
-        {
-            var lessonids = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
-            foreach (var id in lessonids)
-            {
-                var schedule = _lessonScheduleService.GetItemByLessonID(id);
-                schedule.StartDate = entity.StartDate;
-                schedule.EndDate = entity.EndDate;
-                UpdateCalendar(schedule, UserID);
-                _lessonScheduleService.CreateOrUpdate(schedule);
-            }
-            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
-            foreach (var subchap in subchaps)
-            {
-                subchap.StartDate = entity.StartDate;
-                subchap.EndDate = entity.EndDate;
-                _chapterService.Save(subchap);
-                UpdateChapterCalendar(subchap, UserID);
-            }
-        }
 
-        private void UpdateCalendar(LessonScheduleEntity entity, string userid)
-        {
-            //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
-            //if (oldcalendar != null)
-            _calendarHelper.RemoveSchedule(entity.ID);
-            if (entity.IsActive)
-                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
-        }
 
-        [Obsolete]
-        public JsonResult CreateCalendar()
-        {
-            _calendarHelper.ScheduleAutoConvertEvent();
-            return new JsonResult("OK");
-        }
 
-        private string GetMarkText(int type)
-        {
-            switch (type)
-            {
-                case LESSON_ETYPE.PRACTICE:
-                    return "Bài luyện tập";
-                case LESSON_ETYPE.WEEKLY:
-                    return "Bài kiểm tra tuần";
-                case LESSON_ETYPE.CHECKPOINT:
-                    return "Bài tập lớn";
-                case LESSON_ETYPE.EXPERIMENT:
-                    return "Báo cáo thí nghiệm";
-                case LESSON_ETYPE.INTERSHIP:
-                    return "Báo cáo thực tập";
-                case LESSON_ETYPE.END:
-                    return "Cuối kì";
-                default:
-                    return "";
-            }
-        }
+        //[HttpPost]
+        //[Obsolete]
+        //public JsonResult UpdateChapter(ChapterEntity entity, bool reset = false)
+        //{
+        //    var UserID = User.Claims.GetClaimByType("UserID").Value;
+        //    entity.StartDate = entity.StartDate.ToUniversalTime();
+        //    entity.EndDate = entity.EndDate.ToUniversalTime();
+        //    if (entity == null || string.IsNullOrEmpty(entity.ID))
+        //    {
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error", "Không tìm thấy chương" }
+        //            });
+        //    }
+        //    else
+        //    {
+        //        var oldItem = _chapterService.GetItemByID(entity.ID);
+        //        if (oldItem == null)
+        //            return new JsonResult(new Dictionary<string, object> {
+        //                {"Data",null },
+        //                {"Error", "Không tìm thấy chương" }
+        //            });
 
-        public JsonResult FixScheduleType()
-        {
-            var schedules = _lessonScheduleService.GetAll().ToList();
-            long deleted = 0, process = 0;
-            foreach (var schedule in schedules)
-            {
-                process++;
-                if (schedule.StartDate == DateTime.MinValue && schedule.EndDate == DateTime.MinValue)
-                {
-                    _calendarHelper.RemoveSchedule(schedule.ID);
-                    deleted++;
-                }
-                //var lesson = _lessonService.GetItemByID(schedule.LessonID);
-                //if (lesson == null)
-                //{
-                //    _lessonScheduleService.Remove(schedule.ID);
-                //    deleted++;
-                //}
-                //else
-                //{
-                //    schedule.Type = lesson.TemplateType;
-                //    _lessonScheduleService.Save(schedule);
-                //}
-            }
-            return Json("ok: " + deleted + " deleted - " + process + " processed");
-        }
+        //        var defDate = new DateTime(1900, 1, 1);
+        //        if (reset)
+        //        {
+        //            oldItem.ConditionChapter = "";
+        //            oldItem.BasePoint = 0;
+        //            oldItem.StartDate = defDate;
+        //            oldItem.EndDate = defDate;
+        //            oldItem.IsHideAnswer = false;
+        //        }
+        //        else
+        //        {
+        //            oldItem.StartDate = entity.StartDate > defDate ? entity.StartDate : defDate;
+        //            oldItem.EndDate = entity.EndDate > defDate ? entity.EndDate : defDate;
+        //        }
+
+        //        _chapterService.Save(oldItem);//Save chapter
+
+        //        ToggleChapHideAnswer(oldItem, -1); //set hide answer to false
+
+        //        UpdateChapterCalendar(oldItem, UserID);
+
+        //        return new JsonResult(new Dictionary<string, object> {
+        //                {"Data", oldItem },
+        //            });
+        //    }
+        //}
+
+
+        //private void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        //{
+        //    var lessonids = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).Project(t => t.ID).ToList();
+        //    foreach (var id in lessonids)
+        //    {
+        //        var schedule = _lessonScheduleService.GetItemByLessonID(id);
+        //        schedule.StartDate = entity.StartDate;
+        //        schedule.EndDate = entity.EndDate;
+        //        UpdateCalendar(schedule, UserID);
+        //        _lessonScheduleService.CreateOrUpdate(schedule);
+        //    }
+        //    var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+        //    foreach (var subchap in subchaps)
+        //    {
+        //        subchap.StartDate = entity.StartDate;
+        //        subchap.EndDate = entity.EndDate;
+        //        _chapterService.Save(subchap);
+        //        UpdateChapterCalendar(subchap, UserID);
+        //    }
+        //}
+
+        //private void UpdateCalendar(LessonEntity entity, string userid)
+        //{
+        //    //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
+        //    //if (oldcalendar != null)
+        //    //_calendarHelper.RemoveSchedule(entity.ID);
+        //    if (entity.IsActive)
+        //        _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+        //}
+
+        //[Obsolete]
+        //public JsonResult CreateCalendar()
+        //{
+        //    _calendarHelper.ScheduleAutoConvertEvent();
+        //    return new JsonResult("OK");
+        //}
+
+        //private string GetMarkText(int type)
+        //{
+        //    switch (type)
+        //    {
+        //        case LESSON_ETYPE.PRACTICE:
+        //            return "Bài luyện tập";
+        //        case LESSON_ETYPE.WEEKLY:
+        //            return "Bài kiểm tra tuần";
+        //        case LESSON_ETYPE.CHECKPOINT:
+        //            return "Bài tập lớn";
+        //        case LESSON_ETYPE.EXPERIMENT:
+        //            return "Báo cáo thí nghiệm";
+        //        case LESSON_ETYPE.INTERSHIP:
+        //            return "Báo cáo thực tập";
+        //        case LESSON_ETYPE.END:
+        //            return "Cuối kì";
+        //        default:
+        //            return "";
+        //    }
+        //}
+
+        //public JsonResult FixScheduleType()
+        //{
+        //    var schedules = _lessonScheduleService.GetAll().ToList();
+        //    long deleted = 0, process = 0;
+        //    foreach (var schedule in schedules)
+        //    {
+        //        process++;
+        //        if (schedule.StartDate == DateTime.MinValue && schedule.EndDate == DateTime.MinValue)
+        //        {
+        //            //_calendarHelper.RemoveSchedule(schedule.ID);
+        //            deleted++;
+        //        }
+        //        //var lesson = _lessonService.GetItemByID(schedule.LessonID);
+        //        //if (lesson == null)
+        //        //{
+        //        //    _lessonScheduleService.Remove(schedule.ID);
+        //        //    deleted++;
+        //        //}
+        //        //else
+        //        //{
+        //        //    schedule.Type = lesson.TemplateType;
+        //        //    _lessonScheduleService.Save(schedule);
+        //        //}
+        //    }
+        //    return Json("ok: " + deleted + " deleted - " + process + " processed");
+        //}
     }
 }

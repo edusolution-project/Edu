@@ -29,7 +29,7 @@ namespace BaseCustomerMVC.Globals
         private readonly ExamDetailService _examDetailService;
         private readonly StudentService _studentService;
 
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
 
         public ProgressHelper(
             ClassProgressService classProgressService,
@@ -46,7 +46,7 @@ namespace BaseCustomerMVC.Globals
 
             ExamService examService,
             ExamDetailService examDetailService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             StudentService studentService
         )
         {
@@ -64,7 +64,7 @@ namespace BaseCustomerMVC.Globals
 
             _examService = examService;
             _examDetailService = examDetailService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _courseService = courseService;
         }
@@ -806,33 +806,42 @@ namespace BaseCustomerMVC.Globals
         #endregion
 
         #region
-        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj,Boolean isExam = false)
+        public async Task<List<StudentLessonResultViewModel>> GetLessonProgressList(DateTime StartWeek, DateTime EndWeek, StudentEntity student, ClassSubjectEntity classSbj, Boolean isExam = false)
         {
 
             //TODO: RECHECK !!!!!!!!!!!!!!!!!!
             List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
             if (StartWeek > classSbj.EndDate) return result;
-            
-            //lay danh sach bai hoc trogn tuan
-            var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate > StartWeek).ToList();
-            var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
 
-            //danh sach bai luyen tap
-            var a = _lessonService.CreateQuery().Find(t => activeLessonIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
+            //lay danh sach bai hoc trogn tuan
+            var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassSubjectID == classSbj.ID && o.StartDate <= EndWeek && o.EndDate > StartWeek).Project(t => new LessonEntity
+            {
+                ID = t.ID,
+                TemplateType = t.TemplateType,
+                IsPractice = t.IsPractice,
+                Title = t.Title,
+                ChapterID = t.ChapterID,
+                ClassSubjectID = t.ClassSubjectID,
+                CourseID = t.CourseID
+            }).ToList();
+            var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
+
+            ////danh sach bai luyen tap
+            //var a = _lessonService.CreateQuery().Find(t => activeLessonIds.Contains(t.ID) && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Project(t => t.ID).ToList();
             List<LessonEntity> practices = new List<LessonEntity>();
 
             if (isExam)
             {
-                practices = _lessonService.CreateQuery().Find(x => x.TemplateType == 2 && activeLessonIds.Contains(x.ID)).ToList();
+                practices = activeLessons.Where(x => x.TemplateType == 2).ToList();
             }
             else
             {
-                practices = _lessonService.CreateQuery().Find(x => x.IsPractice == true && activeLessonIds.Contains(x.ID)).ToList();
+                practices = activeLessons.Where(x => x.IsPractice == true).ToList();
             }
 
             foreach (var practice in practices)
             {
-                var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(x=>x.Number).ToList();
+                var examresult = _examService.CreateQuery().Find(t => t.StudentID == student.ID && t.LessonID == practice.ID).SortByDescending(x => x.Number).ToList();
                 var progress = _lessonProgressService.GetByStudentID_LessonID(student.ID, practice.ID);
                 var tried = examresult.Count();
                 var maxpoint = tried == 0 ? 0 : examresult.Max(t => t.MaxPoint > 0 ? t.Point * 100 / t.MaxPoint : 0);

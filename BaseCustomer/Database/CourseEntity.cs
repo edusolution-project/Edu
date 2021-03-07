@@ -63,10 +63,10 @@ namespace BaseCustomerEntity.Database
         public DateTime PublishedVer { get; set; } // root to current
         [JsonProperty("LastSync")]
         public DateTime LastSync { get; set; } // current to clone
-        [JsonProperty("IsPublic")]
-        public Boolean IsPublic { get; set; }
-        [JsonProperty("PublicWStudent")]
-        public Boolean PublicWStudent { get; set; }
+        //[JsonProperty("IsPublic")]
+        //public Boolean IsPublic { get; set; }
+        //[JsonProperty("PublicWStudent")]
+        //public Boolean PublicWStudent { get; set; }
     }
 
     public class CourseService : ServiceBase<CourseEntity>
@@ -124,6 +124,13 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<CourseEntity> GetItemBySubjectID_GradeID(String SubjectID, String GradeID, String CenterID)
         {
             return CreateQuery().Find(x => x.GradeID.Equals(GradeID) && x.SubjectID.Equals(SubjectID) && x.Center.Equals(CenterID)).ToEnumerable();
+        }
+
+        public IEnumerable<CourseEntity> GetCloneCourse(string courseID, List<string> centers = null)
+        {
+            if (centers == null || centers.Count == 0)
+                return CreateQuery().Find(x => x.OriginID.Equals(courseID)).ToEnumerable();
+            return CreateQuery().Find(x => centers.Contains(x.Center) && x.OriginID.Equals(courseID)).ToEnumerable();
         }
     }
 }

@@ -537,8 +537,8 @@ var Lesson = (function () {
                 var tabs = $("<ul>", { "id": "pills-tab", "class": "nav flex-column nav-pills", "role": "tablist", "aria-orientation": "vertical" });
 
                 //thêm nút xoá nhiều
-                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá","onclick":"delManyPart()" })
-                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)","class":"ml-4","style":"margin-top:10px","id":"del2all" })
+                var btnDelMany = $("<button>", { "class": "btn btn-danger ml-3", "value": "Xoá", "text": "Xoá", "onclick": "delManyPart()" })
+                var inputCheckAll = $("<input>", { "type": "checkbox", "onclick": "checkAll2Del('pills-tab',this)", "class": "ml-4", "style": "margin-top:10px", "id": "del2all" })
                 var div = $("<div>", { "class": "row ml-3 mt-2" })
                 div.append(inputCheckAll).append(btnDelMany)
                 tabs.append(div);
@@ -1836,7 +1836,7 @@ var Lesson = (function () {
     }
 
     var modalAddPart = function (lessonID, type) {
-        debugger
+
         $(".swal2-container").hide();
         $('#partModal').modal('hide');
         $('#partModal').modal('show');
@@ -2988,7 +2988,7 @@ var Lesson = (function () {
                         $(completeButton).removeClass("mt-3").removeClass("mb-3").addClass("m-2");
                         $('.top-menu[for=lesson-info]').append(completeButton);
                         if (schend > moment(new Date(2000, 1, 1)))
-                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                            $('.top-menu[for=lesson-info]').show().addClass("justify-content-between").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                         $('.right-content').removeClass("no-info-bar");
                     }
                     else {
@@ -3053,10 +3053,10 @@ var Lesson = (function () {
                 var schend = moment(schedule.EndDate);
                 if (schend > moment(new Date(2000, 1, 1))) {
                     if (isMobileDevice()) {
-                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                        $('.top-menu[for=lesson-info]').show().append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                     }
                     else
-                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger' }));
+                        $('.top-menu[for=lesson-info]').show().addClass("text-right").append($("<span>", { text: "Hạn cuối: " + schend.format("DD/MM/YYYY HH:mm a"), class: 'font-weight-bold m-2 d-block text-danger lesson_schedule' }));
                 }
 
 
@@ -3180,6 +3180,7 @@ var Lesson = (function () {
         dataform.append("LessonID", config.lesson_id);
         dataform.append("ClassSubjectID", config.class_subject_id);
         dataform.append("ClassID", config.class_id);
+        showLoading('Đang tải dữ liệu ...')
         Ajax(config.url.start, dataform, "POST", false)
             .then(function (res) {
                 var data = JSON.parse(res);
@@ -3192,10 +3193,9 @@ var Lesson = (function () {
                     //console.log("NewID: " + data.Data.ID);
                     $("#ExamID").val(data.Data.ID);
                     setLocalData("CurrentExam", data.Data.ID);
+                    $('.top-menu[for=lesson-info]').empty().show();
 
                     renderExamDetail();
-
-                    $('.top-menu[for=lesson-info]').show();
 
                     //console.log(data);
                     if (data.Data.Timer > 0) {
@@ -3220,9 +3220,10 @@ var Lesson = (function () {
                     if (obj != null)
                         $(obj).prop("disabled", false);
                 }
+                hideLoading()
             })
             .catch(function (err) {
-
+                hideLoading()
                 Swal.fire({
                     title: 'Có lỗi',
                     text: err,
@@ -3241,7 +3242,7 @@ var Lesson = (function () {
         Swal.fire({
             title: 'Điểm mục tiêu cho môn này của bạn là mấy?',
             html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + config.class_subject_name + '</span>',
-            icon: 'info',
+            icon: 'question',
             input: 'number',
             showCancelButton: true,
             cancelButtonText: 'Hủy',
@@ -3253,7 +3254,7 @@ var Lesson = (function () {
                 step: 1
             },
             inputValidator: (value) => {
-                return value > 10 && 'Điểm mục tiêu trong khoảng 1 đến 10'
+                return (value > 10 || value < 0) && 'Điểm mục tiêu trong khoảng 1 đến 10'
             },
             inputValue: learningTarget / 10,
             showLoaderOnConfirm: true,
@@ -4223,7 +4224,8 @@ var Lesson = (function () {
         }
 
         var lesson_action_holder = $('.top-menu[for=lesson-info]')
-        lesson_action_holder.empty()
+        var sch = lesson_action_holder.find('.lesson_schedule').clone();
+        lesson_action_holder.empty().append(sch);
         console.log("Redo Exam");
         localStorage.clear();
         startExam(obj);
@@ -4418,8 +4420,9 @@ var Lesson = (function () {
                 Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                     __answer_sending = false;
                     var rsp = JSON.parse(res)
+                    console.log(rsp);
                     if (rsp != null && rsp.error != null) {
-
+                        console.log(rsp);
                         Swal.fire({
                             title: 'Có lỗi',
                             text: rsp.error,
@@ -4438,8 +4441,6 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        //debugger
-                        console.log("line 4060 to fix");
                         //if (value == "") {//??
                         //    delAnswerForStudent(questionId);
                         //} else {
@@ -4535,13 +4536,16 @@ var Lesson = (function () {
                         icon: 'error',
                         confirmButtonText: "Đóng"
                     }).then(() => {
+                        if (rsp.reset) {
+                            setLocalData("Timer", "00:00");
+                            CompleteLectureExam(true);
+                        }
                     });
 
                     //notification("error", rsp.error, 3000);
                     return false;
                 }
                 else {
-                    console.log("line 4161 to fix");
                     //if (value == "") {
                     //    delAnswerForStudent(questionId);
                     //} else {
@@ -5303,7 +5307,7 @@ var Lesson = (function () {
         }
         else {
             if (idPart2ManyDel.indexOf(idInput) >= 0) {
-                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput),1)
+                idPart2ManyDel.splice(idPart2ManyDel.indexOf(idInput), 1)
             }
 
             $("#del2all").prop("checked", false)

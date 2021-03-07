@@ -106,12 +106,16 @@
 
                     @* exam *@
                     <div class="form-group" v-if="classSubjects.filter(csbj => csbj.ClassID == item.ID && csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM).length > 0">
-
-                        <a v-for="(csbj,j) in classSubjects" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID" :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-danger font-weight-bold">
-                            <h2 style="font-size:15px;" class="font-weight-bold pb-3">
-                                Bài kiểm tra
-                            </h2>
-                        </a>
+                        <template v-for="(csbj,j) in classSubjects" v-if="csbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && csbj.ClassID == item.ID">
+                            <a :href="'@processUrl("Modules","Course")/' + csbj.ID" :title="csbj.CourseName" class="text-danger font-weight-bold">
+                                <h2 style="font-size:15px;" class="font-weight-bold">
+                                    Bài kiểm tra
+                                </h2>
+                            </a>
+                            <p style="font-size:13px" class="pb-3">
+                                Điểm mục tiêu: <btn class="csbj_target text-info" v-on:click="chooseTarget(csbj)"> {{csbj.Target  > 0 ? csbj.Target / 10 : "Chưa đặt"}}</btn>
+                            </p>
+                        </template>
                         <ul class="list ls-practice">
                             <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM && obj.ClassID == item.ID" :for="obj.ID">
                                 <ul class="list">
@@ -572,9 +576,9 @@
                 },
                 chooseTarget(csbj) {
                     Swal.fire({
-                        title: 'Điểm mục tiêu cho môn học này của bạn là mấy điểm?',
+                        title: 'Điểm mục tiêu cho môn này của bạn là mấy?',
                         html: '<span style="font-size:20px; color:#D03239; font-weight:bold;">' + csbj.CourseName + '</span>',
-                        icon: 'info',
+                        icon: 'question',
                         input: 'number',
                         showCancelButton: true,
                         cancelButtonText: 'Hủy',
@@ -586,7 +590,7 @@
                             step: 1
                         },
                         inputValidator: (value) => {
-                            return value > 10 && 'Điểm mục tiêu trong khoảng 1 đến 10'
+                            return (value > 10 || value < 0) && 'Điểm mục tiêu trong khoảng 1 đến 10'
                         },
                         inputValue: csbj.Target / 10,
                         showLoaderOnConfirm: true,

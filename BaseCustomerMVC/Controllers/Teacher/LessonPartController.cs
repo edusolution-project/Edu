@@ -37,7 +37,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //private readonly ClassService _classService;
         //private readonly CourseService _courseService;
         //private readonly ChapterService _chapterService;
-        //private readonly LessonScheduleService _lessonScheduleService;
+        ////private readonly LessonScheduleService _lessonScheduleService;
 
         private readonly CourseLessonService _lessonService;
         private readonly LessonPartService _lessonPartService;
@@ -72,7 +72,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //ClassService classService,
             //CourseService courseService,
             //ChapterService chapterService,
-            //LessonScheduleService lessonScheduleService,
+            ////LessonScheduleService lessonScheduleService,
 
             CourseLessonService lessonService,
             LessonPartService lessonPartService,
@@ -95,7 +95,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             //_courseService = courseService;
             //_classService = classService;
             //_chapterService = chapterService;
-            //_lessonScheduleService = lessonScheduleService;
+            ////_lessonScheduleService = lessonScheduleService;
 
             _lessonService = lessonService;
             _lessonPartService = lessonPartService;
@@ -504,16 +504,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE && parentLesson.IsPractice != isPractice)//non-practice => practice
                     {
                         parentLesson.IsPractice = isPractice;
-                        _lessonService.Save(parentLesson);
+
                         //increase practice counter
                         await _courseHelper.ChangeLessonPracticeState(parentLesson);
                     }
-                    _lessonHelper.calculateLessonPoint(item.ParentID);
-                    IDictionary<string, object> valuePairs = new Dictionary<string, object>
-                        {
-                            { "Data", item },
-                            //{ "LessonPartExtends", files }
-                        };
+                    parentLesson.Point = _lessonHelper.calculateLessonPoint(item.ParentID);
+                    parentLesson.Updated = DateTime.UtcNow;
+                    _lessonService.Save(parentLesson);
+
+                    //IDictionary<string, object> valuePairs = new Dictionary<string, object>
+                    //    {
+                    //        { "Data", item },
+                    //        //{ "LessonPartExtends", files }
+                    //    };
 
                     return new JsonResult(new Dictionary<string, object>
                             {
@@ -643,6 +646,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                     await RemoveLessonPart(ID);
 
+
                     return new JsonResult(new Dictionary<string, object>
                             {
                                 { "Data", "Remove OK" },
@@ -668,18 +672,30 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public async Task<JsonResult> RemoveMany(String basis,List<String> PartIDs,String LessonID)
+        public async Task<JsonResult> RemoveMany(String basis, List<String> PartIDs, String LessonID)
         {
             try
             {
-                _lessonPartService.CreateQuery().DeleteMany(x=>PartIDs.Contains(x.ID) && x.ParentID.Equals(LessonID));
-                return Json(new Dictionary<String, Object> 
+                var cltask = _lessonPartService.Collection.DeleteManyAsync(o => o.ParentID == LessonID && PartIDs.Contains(o.ID));
+                var quizs = _questionService.Collection.Find(o => PartIDs.Contains(o.ParentID)).Project(t => t.ID).ToList();
+                var cqtask = _questionService.Collection.DeleteManyAsync(o => PartIDs.Contains(o.ParentID));
+                Task<DeleteResult> catask = null;
+                if (quizs != null && quizs.Count > 0)
+                {
+                    catask = _answerService.Collection.DeleteManyAsync(o => quizs.Contains(o.ParentID));
+                    await Task.WhenAll(cltask, cqtask, catask);
+                }
+                else
+                    await Task.WhenAll(cltask, cqtask);
+
+                /*_lessonPartService.CreateQuery().DeleteMany(x=>PartIDs.Contains(x.ID) && x.ParentID.Equals(LessonID));*/
+                return Json(new Dictionary<String, Object>
                 {
                     {"Status",true },
                     {"Msg",$"Đã xoá {PartIDs.Count()} bài." }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Json(new Dictionary<String, Object>
                 {
@@ -706,19 +722,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var isQuiz = quizType.Contains(item.Type);
                     if (isQuiz)
                     {
-                        _lessonHelper.calculateLessonPoint(parentLesson.ID);
+                        parentLesson.Point = _lessonHelper.calculateLessonPoint(parentLesson.ID);
                         if (parentLesson.TemplateType == LESSON_TEMPLATE.LECTURE)
                         {
                             var quizPartCount = _lessonPartService.GetByLessonID(item.ParentID).Count(t => quizType.Contains(t.Type));
                             if (quizPartCount == 0)//no quiz part
                             {
                                 parentLesson.IsPractice = false;
-                                _lessonService.Save(parentLesson);
+
                                 //decrease practice counter
                                 _ = _courseHelper.ChangeLessonPracticeState(parentLesson);
                             }
+
                         }
                     }
+                    parentLesson.Updated = DateTime.UtcNow;
+                    _lessonService.Save(parentLesson);//check point
                 }
             }
             catch (Exception ex)

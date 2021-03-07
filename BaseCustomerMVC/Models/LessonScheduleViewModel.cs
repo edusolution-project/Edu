@@ -11,10 +11,10 @@ namespace BaseCustomerMVC.Models
 
         [JsonProperty("ScheduleID")]
         public string ScheduleID { get; set; }
-        [JsonProperty("StartDate")]
-        public DateTime StartDate { get; set; }
-        [JsonProperty("EndDate")]
-        public DateTime EndDate { get; set; }
+        //[JsonProperty("StartDate")]
+        //public DateTime StartDate { get; set; }
+        //[JsonProperty("EndDate")]
+        //public DateTime EndDate { get; set; }
         [JsonProperty("IsView")]
         public bool IsView { get; set; }
         [JsonProperty("StudentJoins")]
@@ -31,9 +31,9 @@ namespace BaseCustomerMVC.Models
         public long Tried { get; set; }
         [JsonProperty("LastExam")]
         public string LastExam { get; set; }
-        [JsonProperty("IsOnline")]
-        public bool IsOnline { get; set; }
-        [JsonProperty("IsHideAnswer")]
-        public bool IsHideAnswer { get; set; }
+        //[JsonProperty("IsOnline")]
+        //public bool IsOnline { get; set; }
+        //[JsonProperty("IsHideAnswer")]
+        //public bool IsHideAnswer { get; set; }
     }
 }

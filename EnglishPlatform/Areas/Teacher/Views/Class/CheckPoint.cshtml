@@ -8,6 +8,7 @@
     var model = ViewBag.Model as BaseCustomerMVC.Models.DefaultModel;
     var currentClass = ViewBag.Class as BaseCustomerEntity.Database.ClassEntity;
     var currentLesson = ViewBag.Lesson as BaseCustomerMVC.Models.StudentLessonViewModel;
+    var IsLocked = (bool)ViewBag.IsLocked;
     ViewData["Title"] = "CheckPoint";
 
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
@@ -23,26 +24,37 @@
         <div class="flex border-b justify-content-between align-items-start">
             @*<h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/<span id="total-point-head"></span>)</span></h2>*@
             <h2 class="title">@lesson.Title <span class="point">(Điểm : <span class="current-point">@exam.Point</span>/@exam.MaxPoint)</span></h2>
-            <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
-            <button class="btn btn-sm btn-circle btn-primary" onclick="NextPart()">NextPart</button>
+            @if (!IsLocked)
+            {
+                <button class="btn btn-sm btn-circle btn-primary" style="margin-right:10px" onclick="PrevPart()">PrevPart</button>
+                <button class="btn btn-sm btn-circle btn-primary" onclick="NextPart()">NextPart</button>
+            }
         </div>
     </div>
     <div class="card-body" style="height:100%">
         <div class="box" style="height:100%">
-            <div id="exam-review"></div>
+            <div id="exam-review" class="h-100">
+                @if (IsLocked)
+                {
+                    <div class="p-3 col-md-12 text-center"><div class="col-md-12 text-center p-3 h5 text-danger">Chi tiết bài làm bị khóa vì bài học đã cập nhật phiên bản mới!</div></div>
+                    <div class="p-3 col-md-12 text-center"><a class="col-md-12 text-center p-2 h6 text-success" href="@processUrl("Detail", "Lesson")/@currentLesson.ID/@currentLesson.ClassSubjectID"> Quay về bài học</a></div>
+                }
+            </div>
         </div>
     </div>
 </section>
-@section style{
-    <link href="~/css/minify/detail.min.css" rel="stylesheet" />
-}
-@section Scripts{
-    <script src="~/js/plugins/ck4/ckeditor.js"></script>
-    <script>
-        var CKEDITOR_BASEPATH = '/Scripts/ckeditor/';
-    </script>
-    <script src="~/js/student-exam-review.js?20200525"></script>
-    <script>
+@if (!IsLocked)
+{
+    @section style{
+        <link href="~/css/minify/detail.min.css" rel="stylesheet" />
+    }
+    @section Scripts{
+        <script src="~/js/plugins/ck4/ckeditor.js"></script>
+        <script>
+            var CKEDITOR_BASEPATH = '/Scripts/ckeditor/';
+        </script>
+        <script src="~/js/student-exam-review.js?20200525"></script>
+        <script>
         //localStorage.clear();
         function stopAllMedia() {
             $("video").each(function () {
@@ -65,295 +77,296 @@
         };
         var widget = new ExamReview();
         widget.onReady(config);
-    </script>
-    <style>
-        div#review_navition {
-            margin-bottom: 30px;
-            border-bottom: 1px solid #ccc;
-        }
-
-            div#review_navition > ul {
-                list-style: none;
-                display: block;
-                margin: 0;
-                padding: 5px;
+        </script>
+        <style>
+            div#review_navition {
+                margin-bottom: 30px;
+                border-bottom: 1px solid #ccc;
             }
 
-                div#review_navition > ul > li {
-                    display: inline-block;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    margin-left: 5px;
-                    position: relative;
+                div#review_navition > ul {
+                    list-style: none;
+                    display: block;
+                    margin: 0;
+                    padding: 5px;
                 }
 
-                    div#review_navition > ul > li > a {
-                        cursor: pointer;
-                        display: block;
-                        text-align: center;
-                        padding: 4px;
-                        color: #fff;
-                        font-weight: 500;
-                        border: 1px solid #ccc;
+                    div#review_navition > ul > li {
+                        display: inline-block;
+                        width: 30px;
+                        height: 30px;
                         border-radius: 50%;
-                        box-shadow: 0 0 10px #ccc;
+                        margin-left: 5px;
+                        position: relative;
                     }
 
-                    div#review_navition > ul > li.unchecked > a {
-                        background: #ccc;
-                    }
+                        div#review_navition > ul > li > a {
+                            cursor: pointer;
+                            display: block;
+                            text-align: center;
+                            padding: 4px;
+                            color: #fff;
+                            font-weight: 500;
+                            border: 1px solid #ccc;
+                            border-radius: 50%;
+                            box-shadow: 0 0 10px #ccc;
+                        }
 
-                    div#review_navition > ul > li.success > a {
-                        background: #385623;
-                    }
+                        div#review_navition > ul > li.unchecked > a {
+                            background: #ccc;
+                        }
 
-                    div#review_navition > ul > li.danger > a {
-                        background: #dc3545;
-                    }
+                        div#review_navition > ul > li.success > a {
+                            background: #385623;
+                        }
 
-                    div#review_navition > ul > li > a.selection {
-                        border-color: #004085;
-                        box-shadow: 0 0 10px #004085;
-                    }
+                        div#review_navition > ul > li.danger > a {
+                            background: #dc3545;
+                        }
 
-        .right-content .left-col {
-            padding: 0 12px;
-            position: absolute;
-            width: 100%;
-        }
+                        div#review_navition > ul > li > a.selection {
+                            border-color: #004085;
+                            box-shadow: 0 0 10px #004085;
+                        }
 
-            .right-content .left-col .page-title {
-                padding: 12px;
-            }
-
-            .right-content .left-col .main-container {
+            .right-content .left-col {
+                padding: 0 12px;
                 position: absolute;
-                padding: 0;
-                top: 23px;
-                bottom: 7px;
-                right: 0;
-                left: 0;
-                overflow-x: hidden;
-                overflow-y: auto;
-                z-index: 1000;
-                height: auto;
-            }
-
-        .part-box {
-            /*position: absolute;*/
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            overflow: hidden;
-        }
-
-            .part-box .part-column {
-                /*overflow-x: hidden !important;*/
-                /*overflow-y: auto !important;*/
-                height: 100%;
-                /*padding: 0 12px;*/
-            }
-
-                .part-box .part-column p {
-                    margin: 0.25rem 0;
-                }
-
-            .part-box .part-column {
-                font-size: 1rem;
-            }
-
-                .part-box .part-column.dragging {
-                    overflow: visible !important;
-                    /*overflow-y: auto !important;*/
-                }
-
-                .part-box .part-column.droptarget {
-                    z-index: -1;
-                    /*overflow-y: auto !important;*/
-                }
-
-        .description img {
-            max-width: 100%;
-        }
-
-        #lessonSummary {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #004085;
-            /*transition: ease 0.5s;*/
-            z-index: 1001;
-        }
-
-            #lessonSummary.expand {
-                opacity: 0.85;
-            }
-
-            #lessonSummary .btn {
-                line-height: 1;
-                padding: .255rem .75rem;
-            }
-
-            #lessonSummary #quizNavigator {
-                display: none;
-            }
-
-            #lessonSummary.expand #quizNavigator {
-                display: block;
-            }
-
-        .rounded-quiz {
-            width: 28px;
-            height: 28px;
-        }
-
-            .rounded-quiz.completed {
-                background-color: #28a745 !important;
-            }
-
-        .QUIZ1 .answer-item,
-        .QUIZ4 .answer-item {
-            max-width: 25%;
-        }
-
-        .item-review-nav.essay::before {
-            content: attr(data-maxpoint);
-            pointer-events: none;
-            position: absolute;
-            top: -4px;
-            right: -7px;
-            font-size: 80%;
-            font-weight: bold;
-            text-shadow: 1px 1px 1px green;
-            background: #FFF;
-            height: 16px;
-            width: 16px;
-            line-height: 12px;
-            text-align: center;
-            border-radius: 10px;
-            border: solid 1px #CCC;
-        }
-    </style>
-    <style>
-        #nav-menu {
-            z-index: 2;
-            padding: 8px;
-        }
-
-            #nav-menu.bd-top {
-                border-top: dashed 1px #CCC;
-            }
-
-            #nav-menu.bd-bottom {
-                border-bottom: dashed 1px #CCC;
-            }
-
-
-            #nav-menu .lesson-tab {
-                height: 42px;
-            }
-
-        #pills-tab {
-            width: 100%;
-            overflow: hidden;
-            background: #DDD;
-            border: solid 1px #999;
-            z-index: 1021;
-            border-radius: 10px;
-        }
-
-            #pills-tab.compact {
-                height: 42px;
-                background: #DDD;
-            }
-
-            #pills-tab .nav-item {
                 width: 100%;
             }
 
-                #pills-tab .nav-item .nav-link {
-                    padding: 3px 10px;
-                    cursor: pointer;
+                .right-content .left-col .page-title {
+                    padding: 12px;
                 }
 
+                .right-content .left-col .main-container {
+                    position: absolute;
+                    padding: 0;
+                    top: 23px;
+                    bottom: 7px;
+                    right: 0;
+                    left: 0;
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                    z-index: 1000;
+                    height: auto;
+                }
 
-
-        /*************** SIMPLE OUTER SCROLLBAR ***************/
-
-        .scrollbar-outer > .scroll-element,
-        .scrollbar-outer > .scroll-element div {
-            border: none;
-            margin: 0;
-            padding: 0;
-            position: absolute;
-            z-index: 10;
-        }
-
-        .scrollbar-outer > .scroll-element {
-            background-color: #ffffff;
-        }
-
-            .scrollbar-outer > .scroll-element div {
-                display: block;
-                height: 100%;
-                left: 0;
+            .part-box {
+                /*position: absolute;*/
                 top: 0;
-                width: 100%;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-x {
+                left: 0;
                 bottom: 0;
-                height: 12px;
-                left: 0;
-                width: 100%;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-y {
-                height: 100%;
                 right: 0;
-                top: 0;
-                width: 12px;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-x .scroll-element_outer {
-                height: 8px;
-                top: 2px;
-            }
-
-            .scrollbar-outer > .scroll-element.scroll-y .scroll-element_outer {
-                left: 2px;
-                width: 8px;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-element_outer {
                 overflow: hidden;
             }
 
-            .scrollbar-outer > .scroll-element .scroll-element_track {
-                background-color: #eeeeee;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-element_outer,
-            .scrollbar-outer > .scroll-element .scroll-element_track,
-            .scrollbar-outer > .scroll-element .scroll-bar {
-                -webkit-border-radius: 8px;
-                -moz-border-radius: 8px;
-                border-radius: 8px;
-            }
-
-            .scrollbar-outer > .scroll-element .scroll-bar {
-                background-color: #d9d9d9;
-            }
-
-                .scrollbar-outer > .scroll-element .scroll-bar:hover {
-                    background-color: #c2c2c2;
+                .part-box .part-column {
+                    /*overflow-x: hidden !important;*/
+                    /*overflow-y: auto !important;*/
+                    height: 100%;
+                    /*padding: 0 12px;*/
                 }
 
-            .scrollbar-outer > .scroll-element.scroll-draggable .scroll-bar {
-                background-color: #919191;
+                    .part-box .part-column p {
+                        margin: 0.25rem 0;
+                    }
+
+                .part-box .part-column {
+                    font-size: 1rem;
+                }
+
+                    .part-box .part-column.dragging {
+                        overflow: visible !important;
+                        /*overflow-y: auto !important;*/
+                    }
+
+                    .part-box .part-column.droptarget {
+                        z-index: -1;
+                        /*overflow-y: auto !important;*/
+                    }
+
+            .description img {
+                max-width: 100%;
             }
-    </style>
+
+            #lessonSummary {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #004085;
+                /*transition: ease 0.5s;*/
+                z-index: 1001;
+            }
+
+                #lessonSummary.expand {
+                    opacity: 0.85;
+                }
+
+                #lessonSummary .btn {
+                    line-height: 1;
+                    padding: .255rem .75rem;
+                }
+
+                #lessonSummary #quizNavigator {
+                    display: none;
+                }
+
+                #lessonSummary.expand #quizNavigator {
+                    display: block;
+                }
+
+            .rounded-quiz {
+                width: 28px;
+                height: 28px;
+            }
+
+                .rounded-quiz.completed {
+                    background-color: #28a745 !important;
+                }
+
+            .QUIZ1 .answer-item,
+            .QUIZ4 .answer-item {
+                max-width: 25%;
+            }
+
+            .item-review-nav.essay::before {
+                content: attr(data-maxpoint);
+                pointer-events: none;
+                position: absolute;
+                top: -4px;
+                right: -7px;
+                font-size: 80%;
+                font-weight: bold;
+                text-shadow: 1px 1px 1px green;
+                background: #FFF;
+                height: 16px;
+                width: 16px;
+                line-height: 12px;
+                text-align: center;
+                border-radius: 10px;
+                border: solid 1px #CCC;
+            }
+        </style>
+        <style>
+            #nav-menu {
+                z-index: 2;
+                padding: 8px;
+            }
+
+                #nav-menu.bd-top {
+                    border-top: dashed 1px #CCC;
+                }
+
+                #nav-menu.bd-bottom {
+                    border-bottom: dashed 1px #CCC;
+                }
+
+
+                #nav-menu .lesson-tab {
+                    height: 42px;
+                }
+
+            #pills-tab {
+                width: 100%;
+                overflow: hidden;
+                background: #DDD;
+                border: solid 1px #999;
+                z-index: 1021;
+                border-radius: 10px;
+            }
+
+                #pills-tab.compact {
+                    height: 42px;
+                    background: #DDD;
+                }
+
+                #pills-tab .nav-item {
+                    width: 100%;
+                }
+
+                    #pills-tab .nav-item .nav-link {
+                        padding: 3px 10px;
+                        cursor: pointer;
+                    }
+
+
+
+            /*************** SIMPLE OUTER SCROLLBAR ***************/
+
+            .scrollbar-outer > .scroll-element,
+            .scrollbar-outer > .scroll-element div {
+                border: none;
+                margin: 0;
+                padding: 0;
+                position: absolute;
+                z-index: 10;
+            }
+
+            .scrollbar-outer > .scroll-element {
+                background-color: #ffffff;
+            }
+
+                .scrollbar-outer > .scroll-element div {
+                    display: block;
+                    height: 100%;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+
+                .scrollbar-outer > .scroll-element.scroll-x {
+                    bottom: 0;
+                    height: 12px;
+                    left: 0;
+                    width: 100%;
+                }
+
+                .scrollbar-outer > .scroll-element.scroll-y {
+                    height: 100%;
+                    right: 0;
+                    top: 0;
+                    width: 12px;
+                }
+
+                .scrollbar-outer > .scroll-element.scroll-x .scroll-element_outer {
+                    height: 8px;
+                    top: 2px;
+                }
+
+                .scrollbar-outer > .scroll-element.scroll-y .scroll-element_outer {
+                    left: 2px;
+                    width: 8px;
+                }
+
+                .scrollbar-outer > .scroll-element .scroll-element_outer {
+                    overflow: hidden;
+                }
+
+                .scrollbar-outer > .scroll-element .scroll-element_track {
+                    background-color: #eeeeee;
+                }
+
+                .scrollbar-outer > .scroll-element .scroll-element_outer,
+                .scrollbar-outer > .scroll-element .scroll-element_track,
+                .scrollbar-outer > .scroll-element .scroll-bar {
+                    -webkit-border-radius: 8px;
+                    -moz-border-radius: 8px;
+                    border-radius: 8px;
+                }
+
+                .scrollbar-outer > .scroll-element .scroll-bar {
+                    background-color: #d9d9d9;
+                }
+
+                    .scrollbar-outer > .scroll-element .scroll-bar:hover {
+                        background-color: #c2c2c2;
+                    }
+
+                .scrollbar-outer > .scroll-element.scroll-draggable .scroll-bar {
+                    background-color: #919191;
+                }
+        </style>
+    }
 }

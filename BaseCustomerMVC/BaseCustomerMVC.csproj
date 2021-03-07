@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\Teacher\LessonScheduleController.cs" />
     <Compile Remove="Controllers\Teacher\ScoreController.cs" />
   </ItemGroup>
 

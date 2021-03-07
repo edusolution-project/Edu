@@ -25,8 +25,8 @@ namespace BaseCustomerEntity.Database
         public string TeacherID { get; set; }
         [JsonProperty("LessonID")]
         public string LessonID { get; set; }
-        [JsonProperty("LessonScheduleID")]
-        public string LessonScheduleID { get; set; }
+        //[JsonProperty("LessonScheduleID")]
+        //public string LessonScheduleID { get; set; }
         [JsonProperty("StudentID")]
         public string StudentID { get; set; } // admin/student/teacher
         [JsonProperty("Status")]
@@ -62,6 +62,9 @@ namespace BaseCustomerEntity.Database
 
         [JsonProperty("ListPartIDs")]
         public List<String> ListPartIDs { get; set; }
+
+        [JsonProperty("IsLockReview")]//Khóa xem đáp án
+        public bool IsLockReview { get; set; }
     }
 
     public class ExamService : ServiceBase<ExamEntity>
@@ -87,12 +90,12 @@ namespace BaseCustomerEntity.Database
                     .Ascending(t=> t.LessonID)
                     .Ascending(t=> t.StudentID)
                     .Descending(t=> t.Status)),
-                //LessonScheduleID_1_StudentID_1
-                new CreateIndexModel<ExamEntity>(
-                    new IndexKeysDefinitionBuilder<ExamEntity>()
-                    .Ascending(t=> t.LessonScheduleID)
-                    .Ascending(t=> t.StudentID)
-                    )
+                ////LessonScheduleID_1_StudentID_1
+                //new CreateIndexModel<ExamEntity>(
+                //    new IndexKeysDefinitionBuilder<ExamEntity>()
+                //    .Ascending(t=> t.LessonScheduleID)
+                //    .Ascending(t=> t.StudentID)
+                //    )
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -144,6 +147,7 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).FirstOrDefault();
         }
+        
         public IEnumerable<ExamEntity> GetListByLessonAndStudent(string LessonID, string StudentID)
         {
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID).SortByDescending(o => o.ID).ToEnumerable();
@@ -411,10 +415,10 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(o => o.LessonID == LessonID && o.StudentID == StudentID && o.Status == false && o.Number < Number).SortBy(t => t.Number).ToEnumerable();
         }
 
-        public IEnumerable<ExamEntity> GetItemByLessonScheduleID(String LessonScheduleID)
-        {
-            return CreateQuery().Find(x=>x.LessonScheduleID == LessonScheduleID).ToEnumerable();
-        }
+        //public IEnumerable<ExamEntity> GetItemByLessonScheduleID(String LessonID)
+        //{
+        //    return CreateQuery().Find(x => x.LessonID == LessonID).ToEnumerable();
+        //}
 
         public List<Int32> RandomIndex(Int32 TotalIndex)
         {

@@ -15,20 +15,22 @@ namespace BaseCustomerMVC.Globals
         private readonly LessonService _lessonService;
         private readonly ClassService _classService;
         private readonly SkillService _skillService;
+        private readonly ChapterService _chapterService;
         private readonly ClassSubjectService _classSubjectService;
         private readonly TeacherService _teacherService;
-        private readonly LessonScheduleService _lessonScheduleService;
+        //private readonly LessonScheduleService _lessonScheduleService;
         private readonly StudentService _studentService;
 
         private readonly IZoomHelpers _zoomHelpers;
 
         public CalendarHelper(
             CalendarService calendarService,
-            LessonScheduleService lessonScheduleService,
+            //LessonScheduleService lessonScheduleService,
             LessonService lessonService,
             ClassService classService,
             SkillService skillService,
             ClassSubjectService classSubjectService,
+            ChapterService chapterService,
             TeacherService teacherService,
             StudentService studentService,
             IZoomHelpers zoomHelpers
@@ -39,8 +41,9 @@ namespace BaseCustomerMVC.Globals
             _classService = classService;
             _skillService = skillService;
             _classSubjectService = classSubjectService;
+            _chapterService = chapterService;
             _teacherService = teacherService;
-            _lessonScheduleService = lessonScheduleService;
+            //_lessonScheduleService = lessonScheduleService;
             _studentService = studentService;
             _zoomHelpers = zoomHelpers;
         }
@@ -232,14 +235,41 @@ namespace BaseCustomerMVC.Globals
             return _calendarService.CreateQuery().DeleteMany(t => t.ID == ID).DeletedCount;
         }
 
-        public long RemoveSchedule(string ScheduleID)
+        public long RemoveLessonSchedule(string LessonID)
         {
-            return _calendarService.CreateQuery().DeleteMany(t => t.ScheduleID == ScheduleID).DeletedCount;
+            return _calendarService.CreateQuery().DeleteMany(t => t.ScheduleID == LessonID).DeletedCount;
         }
 
-        public long RemoveManySchedules(List<string> schids)
+        public long RemoveManySchedules(List<string> lessonIds)
         {
-            return _calendarService.CreateQuery().DeleteMany(t => schids.Contains(t.ScheduleID)).DeletedCount;
+            return _calendarService.CreateQuery().DeleteMany(t => lessonIds.Contains(t.ScheduleID)).DeletedCount;
+        }
+
+        public void UpdateChapterCalendar(ChapterEntity entity, string UserID)
+        {
+            var lessons = _lessonService.CreateQuery().Find(t => t.ChapterID == entity.ID && t.ClassSubjectID == entity.ClassSubjectID).ToList();
+            foreach (var lesson in lessons)
+            {
+                lesson.StartDate = entity.StartDate;
+                lesson.EndDate = entity.EndDate;
+                UpdateCalendar(lesson, UserID);
+                _lessonService.Save(lesson);
+            }
+            var subchaps = _chapterService.GetSubChapters(entity.ClassSubjectID, entity.ID);
+            foreach (var subchap in subchaps)
+            {
+                subchap.StartDate = entity.StartDate;
+                subchap.EndDate = entity.EndDate;
+                _chapterService.Save(subchap);
+                UpdateChapterCalendar(subchap, UserID);
+            }
+        }
+
+        public void UpdateCalendar(LessonEntity entity, string userid)
+        {
+            //RemoveLessonSchedule(entity.ID);
+            //if (entity.IsActive)
+            ConvertCalendarFromLesson(entity, userid);
         }
 
 
@@ -247,22 +277,22 @@ namespace BaseCustomerMVC.Globals
         public async Task ScheduleAutoConvertEvent()
         {
             await _calendarService.RemoveAllAsync();
-            var data = _lessonScheduleService.GetAll()?.ToList();
+            var data = _lessonService.GetAll()?.ToList();
             for (int i = 0; data != null && i < data.Count(); i++)
             {
                 var item = data[i];
-                if (item.IsActive)
-                    ConvertCalendarFromSchedule(item, "");
+                //if (item.IsActive)
+                ConvertCalendarFromLesson(item, "");
             }
             await Task.CompletedTask;
         }
 
-        public bool ConvertCalendarFromSchedule(LessonScheduleEntity item, string userCreate)
+        public bool ConvertCalendarFromLesson(LessonEntity item, string userCreate)
         {
             if (item.StartDate == DateTime.MinValue) return false;
-            var lesson = _lessonService.GetItemByID(item.LessonID);
-            if (lesson == null)
-                return false;
+            //var lesson = _lessonService.GetItemByID(item.LessonID);
+            //if (lesson == null)
+            //    return false;
             var ourClass = _classService.GetItemByID(item.ClassID);
             if (ourClass == null)
                 return false;
@@ -272,7 +302,9 @@ namespace BaseCustomerMVC.Globals
             var teacher = _teacherService.GetItemByID(classSbj.TeacherID);
             if (teacher == null)
                 return false;
-            CalendarEntity oldItem = _calendarService.CreateQuery().Find(o => o.ScheduleID == item.ID && o.GroupID == item.ClassID)?.FirstOrDefault();
+            CalendarEntity oldItem = _calendarService.CreateQuery().Find(o => o.ScheduleID == item.ID
+            //&& o.GroupID == item.ClassID
+            )?.FirstOrDefault();
             CalendarEntity calendar;
             if (oldItem == null)
             {
@@ -280,16 +312,16 @@ namespace BaseCustomerMVC.Globals
                 {
                     Created = DateTime.UtcNow,
                     CreateUser = userCreate,
-                    EndDate = item.StartDate,
+                    EndDate = item.EndDate,
                     StartDate = item.StartDate,
                     GroupID = item.ClassID,
-                    Title = lesson.Title,
+                    Title = item.Title,
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
                     Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = 0,
-                    UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
+                    UrlRoom = item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
                     UserBook = new List<string>(),
                     ScheduleID = item.ID
                 };
@@ -301,22 +333,31 @@ namespace BaseCustomerMVC.Globals
                     ID = oldItem.ID,
                     Created = oldItem.Created,
                     CreateUser = userCreate,
-                    EndDate = item.StartDate,
+                    EndDate = item.EndDate,
                     StartDate = item.StartDate,
                     GroupID = item.ClassID,
-                    Title = lesson.Title,
+                    Title = item.Title,
                     TeacherID = teacher.ID,
                     TeacherName = teacher.FullName,
                     Skype = teacher.Skype,//TODO: kiểm tra tại thời điểm call giáo viên thay skype ?
                     Status = item.IsOnline ? 5 : 0,
                     LimitNumberUser = oldItem.LimitNumberUser,
                     UrlRoom = (item.IsOnline && oldItem.Status == 5) ? oldItem.UrlRoom : //not change => keep event
-                        item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(lesson.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
+                        item.IsOnline ? (string.IsNullOrEmpty(teacher.ZoomID) ? _zoomHelpers.CreateScheduled(item.Title, item.StartDate, 60).Id : teacher.ZoomID.Replace("-", "")) : "",
                     UserBook = oldItem.UserBook,
                     ScheduleID = item.ID
                 };
             }
             _calendarService.CreateOrUpdate(calendar);
+            //oldItem.CreateUser = userCreate;
+            //oldItem.EndDate = item.EndDate;
+            //oldItem.StartDate = item.StartDate;
+            //oldItem.GroupID = item.ClassID;
+            //oldItem.Title = item.Title;
+            //oldItem.TeacherID = teacher.ID;
+            //oldItem.TeacherName = teacher.FullName;
+            //oldItem.Skype = teacher.Skype;
+            //oldItem.Status = item.IsOnline ? 5 : 0;
             return true;
         }
     }

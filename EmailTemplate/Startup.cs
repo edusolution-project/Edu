@@ -42,12 +42,12 @@ namespace EmailTemplate
             services.AddSingleton<ClassSubjectService>();
             services.AddSingleton<CenterService>();
             services.AddSingleton<LessonService>();
-            services.AddSingleton<LessonScheduleService>();
+            //services.AddSingleton<LessonScheduleService>();
             services.AddSingleton<AccountService>();
             services.AddSingleton<StudentService>();
             services.AddSingleton<TeacherService>();
             services.AddSingleton<SkillService>();
-            services.AddSingleton<LessonScheduleService>();
+            //services.AddSingleton<LessonScheduleService>();
             services.AddSingleton<RoleService>();
             services.AddSingleton<CourseService>();
             services.AddSingleton<LearningHistoryService>();

@@ -624,6 +624,9 @@
         @:rightPart.append($("<i>", { "class": "fas fa-first-aid", "data-toggle": "modal", "data-target": "#joinLessonModal", "data-placement": "top", "title": "Ghép", "onclick": "JoinLesson(this,'" + item.ID + "'); return false;" }));
         @:rightPart.append($("<i>", { "class": "fas fa-trash", "data-toggle": "tooltip", "data-placement": "top", "title": "Xóa", "onclick": "DeleteLesson('" + item.ID + "'); return false;" }));
         }
+        @if(user == "5d8389c2d5d1bf27e4410c04") {
+        @:rightPart.append($("<i>", { "class": "fas fa-cloud-upload-alt", "data-placement": "top", "title": "Đồng bộ", "onclick": "return SyncLesson('" + item.ID + "'); return false;", }));
+        }
         rowData.append(wPart);
         rowData.append(leftPart);
         rowData.append(rightPart);
@@ -1437,6 +1440,53 @@
             if (result.value) {
                 ExcuteOnlyItem(ID, '@processUrl("RemoveLesson", "Curriculum")', DeleteLessonCallback);
             }
+        })
+    }
+
+    function SyncLesson(ID) {
+        Swal.fire({
+            title: 'Xác nhận cập nhật dữ liệu?',
+            text: "Dữ liệu sẽ được cập nhật sang các bài liên quan!",
+            icon: 'warning',
+            showCancelButton: true,
+            focusConfirm: false,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#CCC',
+            cancelButtonText: 'Hủy',
+            confirmButtonText: 'Đồng ý!',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                let _form = new FormData()
+                _form.append('ID', ID);
+
+                console.log('@processUrl("SyncLesson", "Curriculum")')
+                return Ajax('@processUrl("SyncLesson", "Curriculum")', "POST", _form, false)
+                    .then(function (res) {
+                        var data = JSON.parse(res);
+                        var error = data.error;
+                        if (error != null) {
+                            Swal.fire({
+                                title: 'Có lỗi!',
+                                text: data.error,
+                                icon: 'danger',
+                            });
+                        }
+                        else {
+                            Swal.fire({
+                                title: 'Cập nhật thành công!',
+                                text: data.message,
+                                icon: 'success',
+                            });
+                        }
+                    })
+                    .catch(e => {
+                        //console.log(e)
+                        Swal.showValidationMessage(
+                            `Có lỗi: ${e}`
+                        )
+                    })
+            },
+            allowOutsideClick: () => !Swal.isLoading()
         })
     }
 

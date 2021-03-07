@@ -54,7 +54,10 @@ namespace BaseCustomerEntity.Database
                 //ClassID_1_StartDate_1_EndDate_1
                 new CreateIndexModel<LessonScheduleEntity>(
                     new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
-                    .Ascending(t=> t.ClassID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
+                    .Ascending(t=> t.ClassID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate)),
+                new CreateIndexModel<LessonScheduleEntity>(
+                    new IndexKeysDefinitionBuilder<LessonScheduleEntity>()
+                    .Ascending(t=> t.ClassSubjectID).Ascending(t=> t.StartDate).Ascending(t=> t.EndDate))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);
@@ -163,14 +166,14 @@ namespace BaseCustomerEntity.Database
 
         public IEnumerable<LessonScheduleEntity> GetActiveLesson(DateTime StartTime,DateTime EndTime,String ClassSubjectID,String ClassID = "")
         {
-            if (String.IsNullOrEmpty(ClassID))
-            {
+            //if (String.IsNullOrEmpty(ClassID))
+            //{
                 return Collection.Find(o => o.StartDate <= EndTime && o.EndDate >= StartTime && o.ClassSubjectID == ClassSubjectID).ToEnumerable();
-            }
-            else
-            {
-                return Collection.Find(o => o.StartDate <= EndTime && o.EndDate >= StartTime && o.ClassSubjectID == ClassSubjectID && o.ClassID == ClassID).ToEnumerable();
-            }
+            //}
+            //else
+            //{
+            //    return Collection.Find(o => o.StartDate <= EndTime && o.EndDate >= StartTime && o.ClassSubjectID == ClassSubjectID && o.ClassID == ClassID).ToEnumerable();
+            //}
         }
     }
 }

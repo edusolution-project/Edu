@@ -49,7 +49,8 @@ namespace BaseCustomerEntity.Database
         public string Skype { get; set; }
         [JsonProperty("Content")]
         public string Content { get; set; }
-
+        [JsonProperty("Path")]
+        public string Path { get; set; }
     }
     public class CalendarService : ServiceBase<CalendarEntity>
     {

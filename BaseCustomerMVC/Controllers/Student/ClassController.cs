@@ -22,7 +22,7 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ClassSubjectService _classSubjectService;
         private readonly CourseHelper _courseHelper;
         //private readonly MailHelper _mailHelper;
-        private readonly LessonScheduleService _lessonScheduleService;
+        private readonly LessonService _lessonService;
         private readonly CalendarHelper _calendarHelper;
         private readonly ChapterService _chapterService;
         private readonly LessonHelper _lessonHelper;
@@ -47,7 +47,7 @@ namespace BaseCustomerMVC.Controllers.Student
             ExamService examService,
             //CourseLessonService courseLessonService,
             CourseChapterService courseChapterService,
-            LessonScheduleService lessonScheduleService,
+            LessonService lessonService,
             CalendarHelper calendarHelper
         )
         {
@@ -66,7 +66,7 @@ namespace BaseCustomerMVC.Controllers.Student
             _examService = examService;
             //_courseLessonService = courseLessonService;
             _courseChapterService = courseChapterService;
-            _lessonScheduleService = lessonScheduleService;
+            _lessonService = lessonService;
             _calendarHelper = calendarHelper;
         }
 
@@ -442,11 +442,11 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 //remove old schedule
                 //remove calendar
-                var schids = _lessonScheduleService.GetByClassSubject(cs.ID).Select(t => t.ID).ToList();
+                var lids = _lessonService.GetClassSubjectLesson(cs.ID).Select(t => t.ID).ToList();
 
-                _calendarHelper.RemoveManySchedules(schids);
+                _calendarHelper.RemoveManySchedules(lids);
 
-                var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
+                //var CsTask = _lessonScheduleService.RemoveClassSubject(cs.ID);
                 //remove chapter
                 var CtTask = _chapterService.RemoveClassSubjectChapter(cs.ID);
                 //remove clone lesson
@@ -545,7 +545,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             var courseDetail = new Dictionary<string, object>
             {
-                { "Chapters", _courseChapterService.GetCourseChapters(CourseID) } ,
+                { "Chapters", _courseChapterService.GetCourseChapters(CourseID).ToList() } ,
                 //{ "Lessons", _courseLessonService.CreateQuery().Find(o => o.CourseID == course.ID).SortBy(o => o.ChapterID).ThenBy(o => o.Order).ThenBy(o => o.ID).ToList() },
                 //{"Classes",_classService.CreateQuery().Find(x=>x.TeacherID==teacher.ID).ToList() }
             };
