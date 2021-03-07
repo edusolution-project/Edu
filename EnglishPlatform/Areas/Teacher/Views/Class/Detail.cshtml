@@ -1910,7 +1910,12 @@
                     }
                     this.progessSbj.startTime = objTime.startTime
                     this.progessSbj.endTime = objTime.endTime
-                    this.progessSbj.title = this.searchCsbj.CourseName
+                    if (this.searchCsbj.TypeClass == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM') {
+                        this.progessSbj.title = 'Kiểm tra & Đánh giá'
+                    }
+                    else {
+                        this.progessSbj.title = this.searchCsbj.CourseName
+                    }
                     let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
                     console.log(_url);
                     axios.post(_url, _form)
@@ -3026,7 +3031,8 @@
                     this.isLoading = false
                     this.$bvModal.show("detailLessonInWeek-modal")
                 },
-                DetailProgessLesson(LessonScheduleID,Title,obj) {
+                DetailProgessLesson(LessonScheduleID, Title, obj) {
+                    debugger
                     let _that = this
                     let _form = new FormData()
                     _form.append("LessonScheduleID", LessonScheduleID)

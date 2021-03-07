@@ -1752,5 +1752,45 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 return Json(ex.Message);
             }
         }
+
+        public JsonResult SearchTags(String Term,String basis)
+        {
+            try
+            {
+                var filter = new List<FilterDefinition<TagsEntity>>();
+                var center = _centerService.GetItemByCode(basis);
+                if (center == null)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Data", null },
+                        {"Msg","Cơ sở không đúng" }
+                    });
+                }
+
+                //filter.Add(Builders<TagsEntity>.Filter.Where(o => o.CenterCode.Contains(center.Code)));
+
+                if (!string.IsNullOrEmpty(Term))
+                    filter.Add(Builders<TagsEntity>.Filter.Text("\"" + Term + "\""));
+
+                var data = _tagsService.CreateQuery().Find(Builders<TagsEntity>.Filter.And(filter)).Limit(100).ToList();
+
+                if (data.Count() == 0)
+                    data = _tagsService.GetAll().ToList();
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Data", data },
+                    {"Msg","" }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Data", null },
+                    {"Msg",ex.Message }
+                });
+            }
+        }
     }
 }

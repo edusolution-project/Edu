@@ -222,8 +222,158 @@
 </section>
 
 @section Scripts{
-    <script>
 
+    <script type="text/x-template" id="autocomplete">
+        <div class="autocomplete">
+            <input type="text" v-on:input="onChange" v-model="search" v-on:keyup.down="onArrowDown" v-on:keyup.up="onArrowUp" v-on:keyup.enter="onEnter" class="form-control" :placeholder="plhd" />
+            <ul id="autocomplete-results" v-show="isOpen" class="autocomplete-results">
+                <li class="loading" v-if="isLoading">
+                    Đang gửi dữ liệu ...
+                </li>
+                <li v-else v-for="(result, i) in results" :key="i" v-on:click="setResult(result)" class="autocomplete-result" :class="{'is-active': i === arrowCounter }">
+                    {{ result.Name }}
+                </li>
+            </ul>
+
+        </div>
+    </script>
+
+    <style>
+        .autocomplete {
+            position: relative;
+            width: 100%;
+        }
+
+        .autocomplete-results {
+            padding: 0;
+            margin: 0;
+            border: 1px solid #eeeeee;
+            max-height: 120px;
+            overflow: auto;
+            width: 100%;
+            position: absolute;
+            min-width: 200px;
+            background: #FFF;
+            z-index:1
+        }
+
+        .autocomplete-result {
+            list-style: none;
+            text-align: left;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+            .autocomplete-result.is-active,
+            .autocomplete-result:hover {
+                background-color: #4aae9b;
+                color: white;
+            }
+    </style>
+
+    <script>
+        Vue.component("autocomplete",
+            {
+                template: "#autocomplete",
+                props: {
+                    items: {
+                        type: Array,
+                        required: false,
+                        default: () => []
+                    },
+                    url: {
+                        type: String,
+                        required: false,
+                        default: () => ''
+                    },
+                    plhd: {
+                        type: String,
+                        required: false,
+                        default: () => 'Nhập để tìm kiếm (>2 chữ)'
+                    }
+                },
+                data() {
+                    return {
+                        isOpen: false,
+                        results: [],
+                        search: "",
+                        isLoading: false,
+                        arrowCounter: 0,
+                        loadedTerms: [],
+                    };
+                },
+                methods: {
+                    onChange() {
+                        // Let's warn the parent that a change was made
+                        this.$emit("input", this.search, this.filterResults);
+                        if (this.search.length < 2) {
+                            this.isOpen = false
+                        }
+                        else {
+                            this.isOpen = true
+                        }
+                    },
+                    searchResult() {
+                        this.filterResults();
+                        this.isOpen = true;
+                        this.$forceUpdate();
+                    },
+                    filterResults() {
+                        this.results = this.items
+                        this.isOpen = true
+                    },
+                    setResult(result) {
+                        this.search = result.Name;
+                        this.isOpen = false;
+                        this.arrowCounter = -1;
+                        this.$emit("chooseitem", result);
+                    },
+                    onArrowDown(evt) {
+                        if (this.arrowCounter < this.results.length) {
+                            this.arrowCounter = this.arrowCounter + 1;
+                        }
+                    },
+                    onArrowUp() {
+                        if (this.arrowCounter > 0) {
+                            this.arrowCounter = this.arrowCounter - 1;
+                        }
+                    },
+                    onEnter() {
+                        if (this.arrowCounter < 0 || this.arrowCounter > this.results.length)
+                            return false;
+                        this.setResult(this.results[this.arrowCounter])
+                        //this.search = this.results[this.arrowCounter].FullName;
+                        //this.isOpen = false;
+                        //this.arrowCounter = -1;
+                        //this.$emit("chooseStudent", result);
+                    },
+                    handleClickOutside(evt) {
+                        if (!this.$el.contains(evt.target)) {
+                            this.isOpen = false;
+                            this.arrowCounter = -1;
+                        }
+                    }
+                },
+                watch: {
+                    items: function (val, oldValue) {
+                        // actually compare them
+                        if (val.length !== oldValue.length) {
+                            this.results = val;
+                            this.isLoading = false;
+                        }
+                    }
+                },
+                mounted() {
+                    document.addEventListener("click", this.handleClickOutside);
+                },
+                destroyed() {
+                    document.removeEventListener("click", this.handleClickOutside);
+                }
+            }
+        )
+    </script>
+
+    <script>
         new Vue({
             el: "#main_content",
             mounted() {
@@ -232,15 +382,17 @@
                 this.currentUser = @Html.Raw(Json.Serialize(currentUser));
                 this.list_classes = @Html.Raw(Json.Serialize(classlist));
                 //this.getData();
-                this.getExamManage()
+                //this.getExamManage()
                 @*this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses = @Html.Raw(Json.Serialize(courses));*@
+                this.tabChange(1)
             },
             components: {
                 //Multiselect
             },
             data: {
                 isLoading: false,
+                isComfirm: false,
                 currentUser:[],
                 list_subject: [],
                 list_grades_full:[],
@@ -342,6 +494,26 @@
                     timer: '',
                     limit: '',
                     selectAll: false
+                },
+                defaultOutput: {
+                    total: 0,
+                    percentKnow: 0,
+                    percentUnderstand: 0,
+                    percentManipulate: 0,
+                    percentManipulatehighly: 0,
+                    percentTotal:100
+                },
+                customOutput: {
+                    total: 0,
+                    totalKnow: 0,
+                    totalUnderstand: 0,
+                    totalManipulate: 0,
+                    totalManipulatehighly: 0,
+                    percentTotal: 0,
+                    percentKnow: 0,
+                    percentUnderstand: 0,
+                    percentManipulate: 0,
+                    percentManipulatehighly: 0
                 }
             },
             computed: {},
@@ -855,9 +1027,168 @@
                             var lessonID = res.data.LessonID
                             window.open('@processUrl("Detail", "Lesson")/' + lessonID + '/' + cs, '_blank');
                         })
-                }
-                        }
-                    });
+                },
+                calc() {
+                    var total = parseInt(this.defaultOutput.percentKnow) + parseInt(this.defaultOutput.percentUnderstand) + parseInt(this.defaultOutput.percentManipulate) + parseInt(this.defaultOutput.percentManipulatehighly)
+                    //debugger
+                    var input = event.target
+                    if (total > parseInt(this.defaultOutput.percentTotal)) {
+                        $(input).attr('data-toggle', 'tooltip')
+                        $(input).attr('data-placement', 'auto')
+                        $(input).attr('title', 'Tổng phải nhỏ hơn 100')
+                        $(input).attr('trigger', 'hover')
+                        $(input).attr('style', 'border: 1px solid red')
+                    }
+                    else {
+                        $(input).removeAttr('data-toggle')
+                        $(input).removeAttr('data-placement')
+                        $(input).removeAttr('title')
+                        $(input).removeAttr('trigger')
+                        $(input).removeAttr('style')
+                    }
+
+                    if (total != 100) {
+                        $('#btn_comfirm').attr('disabled', 'disabled')
+                        this.isComfirm = false
+                    }
+                    else {
+                        $('#btn_comfirm').removeAttr('disabled')
+                    }
+                },
+                calcMaxtrix() {
+
+                    this.customOutput.total = 0
+                    this.customOutput.totalKnow = 0
+                    this.customOutput.totalUnderstand = 0
+                    this.customOutput.totalManipulate = 0
+                    this.customOutput.totalManipulatehighly = 0
+
+                    for (var i = 0; i < this.formatExam.format.length; i++) {
+                        var item = this.formatExam.format[i]
+                        item.total = parseInt(item.levelKnow.exercise) + parseInt(item.levelKnow.theory) +
+                            parseInt(item.levelUnderstanding.exercise) + parseInt(item.levelUnderstanding.theory) +
+                            parseInt(item.levelManipulate.exercise) + parseInt(item.levelManipulate.theory) +
+                            parseInt(item.levelManipulateHighly.exercise) + parseInt(item.levelManipulateHighly.theory)
+                        this.customOutput.total += parseInt(item.total)
+                        this.customOutput.totalKnow += parseInt(item.levelKnow.exercise) + parseInt(item.levelKnow.theory)
+                        this.customOutput.totalUnderstand += parseInt(item.levelUnderstanding.exercise) + parseInt(item.levelUnderstanding.theory)
+                        this.customOutput.totalManipulate += parseInt(item.levelManipulate.exercise) + parseInt(item.levelManipulate.theory)
+                        this.customOutput.totalManipulatehighly += parseInt(item.levelManipulateHighly.exercise) + parseInt(item.levelManipulateHighly.theory)
+                    }
+
+                    this.customOutput.percentTotal = 100
+                    this.customOutput.percentKnow = this.customOutput.total > 0 ? (this.customOutput.totalKnow / this.customOutput.total) * 100 : 0
+                    this.customOutput.percentUnderstand = this.customOutput.total > 0 ? (this.customOutput.totalUnderstand / this.customOutput.total) * 100 : 0
+                    this.customOutput.percentManipulate = this.customOutput.total > 0 ? (this.customOutput.totalManipulate / this.customOutput.total) * 100 : 0
+                    this.customOutput.percentManipulatehighly = this.customOutput.total > 0 ? (this.customOutput.totalManipulatehighly / this.customOutput.total) * 100 : 0
+
+                    if (this.customOutput.percentKnow > this.defaultOutput.percentKnow) {
+                        $('#percentKnow').attr('style', 'color:red')
+                    }
+                    else {
+                        $('#percentKnow').attr('style', '')
+                    }
+
+                    if (this.customOutput.percentUnderstand > this.defaultOutput.percentUnderstand) {
+                        $('#percentUnderstand').attr('style', 'color:red')
+                    }
+                    else {
+                        $('#percentUnderstand').attr('style', '')
+                    }
+
+                    if (this.customOutput.percentManipulate > this.defaultOutput.percentManipulate) {
+                        $('#percentManipulate').attr('style', 'color:red')
+                    }
+                    else {
+                        $('#percentManipulate').attr('style', '')
+                    }
+
+                    if (this.customOutput.percentManipulatehighly > this.defaultOutput.percentManipulatehighly) {
+                        $('#percentManipulatehighly').attr('style', 'color:red')
+                    }
+                    else {
+                        $('#percentManipulatehighly').attr('style', '')
+                    }
+                    //compare
+                    //var a = parseInt(this.defaultOutput.percentKnow)
+                    //var b = parseInt(this.customOutput.totalKnow)
+                    //var c = parseInt(this.customOutput.total)
+                    //debugger
+                    //var input = event.target
+                    //if (a < ((b / c) * 100)) {
+                    //    $(input).attr('data-toggle', 'tooltip')
+                    //    $(input).attr('data-placement', 'auto')
+                    //    $(input).attr('title', 'Tổng phải nhỏ hơn 100')
+                    //    $(input).attr('trigger', 'hover')
+                    //    $(input).attr('style', 'border: 1px solid red')
+                    //}
+                    //else {
+                    //    $(input).attr('data-toggle', '')
+                    //    $(input).attr('data-placement', '')
+                    //    $(input).attr('title', '')
+                    //    $(input).attr('trigger', '')
+                    //    $(input).attr('style', '')
+                    //}
+                },
+                comfirm() {
+                    this.isComfirm = !this.isComfirm
+                },
+                roundPercent(value, precision) {
+                    if (value > 0) {
+                        //value = value / 10
+                        var multiplier = Math.pow(10, precision || 0);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                    }
+                    else return value
+                },
+
+                //tags
+                chooseTags() {
+                    debugger
+                },
+                autocompleteTags(term, callback) {
+                    let _that = this
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            if (_that.loadedTermsST == null)
+                                _that.loadedTermsST = []
+
+                            if (_that.loadedTermsST.filter(item => item.term.indexOf(term) > -1).length == 0) {
+                                let _form = new FormData()
+                                _form.append('Term', term)
+                                //_form.append('Center', '@center')
+                                let _url = '@processUrl("SearchTags", "ExamManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = []
+                                        var stt = response.data.Status
+                                        if (stt) {
+                                            if (response.data.Data.length > 0)
+                                            response.data.Data.forEach(function (item){
+                                                data.push({
+                                                    ID: item.ID,
+                                                    Name: item.Name
+                                                });
+                                            })
+                                        }
+                                        _that.list_Tags = data
+                                        _that.loadedTermsST.push({
+                                            term: term,
+                                            data: data
+                                        })
+                                        callback()
+                                    }).catch(e => { })
+                            } else {
+                                //_that.student_data.data = _that.loadedTermsST.filter(item => item.term.indexOf(term) > -1)[0].data;
+                                callback()
+                            }
+                        }, 500)
+                    }
+                },
+            }
+        });
     </script>
     <style>
         #ed_table tr th:first-child,
@@ -928,29 +1259,6 @@
                     <input type="text" class="form-control" placeholder="Kì kiểm tra" v-model="formatExam.titleExam" />
                 </div>
                 <div class="col-md-6">
-                    <label class="label">Tên ma trận đề</label>
-                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" v-if="formatExam.isNewMatrix == 'true'"/>
-                    <input type="text" class="form-control" placeholder="Tên ma trận đề" v-model="formatExam.titleFormat" v-else disabled/>
-                </div>
-                @*<div class="col-md-6">
-                <label class="label">Tiêu đề</label>
-                <input type="text" class="form-control" placeholder="Tên đề" v-model="formatExam.titleExam"/>
-            </div>*@
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <label class="label">Thời gian làm bài</label>
-                    <input type="number" min="1" class="form-control" v-model="formatExam.timer" />
-                </div>
-                <div class="col-md-6">
-                    <label class="label">Lượt làm</label>
-                    <input type="number" min="1" class="form-control" v-model="formatExam.limit" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
                     <label class="label">Môn</label>
                     <select class="form-control" v-model="formatExam.Subject">
                         <option value="english">Tiếng anh</option>
@@ -959,205 +1267,263 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6">
-                    <label class="label">Loại đề</label>
-                    <select class="form-control" v-model="formatExam.template">
-                        <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Kiểm tra</option>
-                        <option value="@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.STANDARD">Luyện tập</option>
-                    </select>
+                <div class="col-md-4">
+                    <label class="label">Thời gian làm bài</label>
+                    <input type="number" min="1" class="form-control" v-model="formatExam.timer" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label class="label">Lượt làm</label>
+                    <input type="number" min="1" class="form-control" v-model="formatExam.limit" />
+                </div>
+                <div class="col-md-4">
                     <label class="label">Số đề</label>
-                    <template v-if="formatExam.template == '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM'">
-                        <input type="number" min="1" class="form-control" v-model="formatExam.totalExam" />
-                    </template>
-                    <template v-else>
-                        <input type="number" min="1" class="form-control" placeholder="Không giới hạn" disabled readonly />
-                    </template>
+                    <input type="number" min="1" class="form-control" v-model="formatExam.totalExam" />
                 </div>
             </div>
+
+            @*<div class="row mt-3">
+                    <div class="col-md-6">
+                        <select class="form-control" v-model="formatExam.isNewMatrix">
+                            <option value="true">Tạo mới ma trận</option>
+                            <option value="false">Sử dụng ma trận có sẵn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <template v-if="formatExam.isNewMatrix == 'true'">
+                            <select class="form-control" disabled>
+                                <option value="">Lựa chọn ma trận</option>
+                            </select>
+                        </template>
+                        <template v-else>
+                            <select v-model="formatExam.matrixID" class="form-control">
+                                <option value="">Lựa chọn ma trận</option>
+                                <option v-for="(matrix,k) in list_matrixs" :value="matrix.ID">{{matrix.Name}}</option>
+                            </select>
+                        </template>
+                    </div>
+                </div>*@
 
             <div class="row mt-3">
-                <div class="col-md-6">
-                    <select class="form-control" v-model="formatExam.isNewMatrix">
-                        <option value="true">Tạo mới ma trận</option>
-                        <option value="false">Sử dụng ma trận có sẵn</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <template v-if="formatExam.isNewMatrix == 'true'">
-                        <select class="form-control" disabled>
-                            <option value="">Lựa chọn ma trận</option>
-                        </select>
+                <label class="label">Chuẩn đầu ra</label>
+                <table class="table table-bordered table-sm">
+
+                    <thead>
+                        <tr>
+                            <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
+                            <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                            <td rowspan="2" class="text-center align-middle" style="width:100px">Số câu hỏi</td>
+                            <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                            <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                            <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                            <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                            <td rowspan="2" class="text-center align-middle" style="width:85px"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                            <td class="text-center align-middle" style="width:80px"></td>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td colspan="2" class="text-center align-middle">Tổng(%)</td>
+                            <td>
+                                @*<input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentTotal" min="0" max="100" disabled />*@
+                            </td>
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentKnow" min="0" max="100" required v-on:change="calc()" />
+                            </td>
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentUnderstand" min="0" max="100" required v-on:change="calc()" />
+                            </td>
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulate" min="0" max="100" required v-on:change="calc()" />
+                            </td>
+                            <td colspan="2">
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulatehighly" min="0" max="100" required v-on:change="calc()" />
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn-act " v-on:click="comfirm()" id="btn_comfirm" disabled><i class="far fa-check-circle"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <template v-if="isComfirm == true">
+                <div class="row" style="margin-top:-10px">
+                    <label class="label">Cấu trúc</label>
+                    <template v-if="formatExam.matrixID == ''">
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
+                                    <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                                    <td rowspan="2" class="text-center align-middle" style="width:100px">Số câu hỏi</td>
+                                    <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                                    <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                                    <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                                    <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                                    <td rowspan="2" class="text-center align-middle" style="width:85px">Tác vụ</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
+                                    <td class="text-center align-middle">{{k+1}}</td>
+                                    <td>
+                                        @*<input type="text" class="form-control" v-model="item.tag" />*@
+                                        <autocomplete v-on:chooseitem="chooseTags" :items="list_Tags" v-on:input="autocompleteTags" />
+                                    </td>
+
+                                    <td class="text-center align-middle">
+                                        @*<input type="number" min="0" class="form-control text-center align-middle" v-model="item.total" disabled readonly />*@
+                                        <span>{{item.total}}</span>
+                                    </td>
+
+                                    <td v-for="(_item,i) in item.levelKnow">
+                                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow[i]" v-on:change="calcMaxtrix()" />
+                                    </td>
+                                    @*<td>
+                                            <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow" />
+                                        </td>*@
+
+                                    <td v-for="(_item,i) in item.levelUnderstanding">
+                                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding[i]" v-on:change="calcMaxtrix()" />
+                                    </td>
+                                    @*<td>
+                                            <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.exercise" />
+                                        </td>*@
+
+                                    <td v-for="(_item,i) in item.levelManipulate">
+                                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate[i]" v-on:change="calcMaxtrix()" />
+                                    </td>
+                                    @*<td>
+                                            <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.exercise" />
+                                        </td>*@
+
+                                    <td v-for="(_item,i) in item.levelManipulateHighly">
+                                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly[i]" v-on:change="calcMaxtrix()" />
+                                    </td>
+                                    @*<td>
+                                            <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.exercise" />
+                                        </td>*@
+
+                                    <td class="text-center align-middle">
+                                        <button title="Xoá điều kiện" v-on:click="removeOption(k)" class="btn-act"><i class="ti-trash"></i></button>
+                                        <button title="Đặt lại" v-on:click="refreshOption(k)" class="btn-act"><i class="ti-reload"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="12" class="text-right p-2">
+                                        <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center align-middle">Tổng</td>
+                                    <td class="text-center align-middle">
+                                        @*<input type="number" class="form-control text-center align-middle" disabled readonly v-model="customOutput.total" />*@
+                                        <span style="font-weight:bold">{{customOutput.total}}</span> (<span>{{customOutput.percentTotal}}%</span>)
+                                    </td>
+                                    <td colspan="2" class="text-center align-middle" id="percentKnow">
+                                        @*<input type="number" class="form-control text-center align-middle" disabled readonly v-model="customOutput.totalKnow" />*@
+                                        <span style="font-weight:bold">{{customOutput.totalKnow}}</span> (<span>{{roundPercent(customOutput.percentKnow)}}/{{defaultOutput.percentKnow}}%</span>)
+                                    </td>
+                                    <td colspan="2" class="text-center align-middle" id="percentUnderstand">
+                                        @*<input type="number" class="form-control text-center align-middle" disabled readonly v-model="customOutput.totalUnderstand" />*@
+                                        <span style="font-weight:bold">{{customOutput.totalUnderstand}}</span> (<span>{{roundPercent(customOutput.percentUnderstand)}}/{{defaultOutput.percentUnderstand}}%</span>)
+                                    </td>
+                                    <td colspan="2" class="text-center align-middle" id="percentManipulate">
+                                        @*<input type="number" class="form-control text-center align-middle" disabled readonly v-model="customOutput.totalManipulate" />*@
+                                        <span style="font-weight:bold">{{customOutput.totalManipulate}}</span> (<span>{{roundPercent(customOutput.percentManipulate)}}/{{defaultOutput.percentManipulate}}%</span>)
+                                    </td>
+                                    <td colspan="2" class="text-center align-middle" id="percentManipulatehighly">
+                                        @*<input type="number" class="form-control text-center align-middle" disabled readonly v-model="customOutput.totalManipulatehighly" />*@
+                                        <span style="font-weight:bold">{{customOutput.totalManipulatehighly}}</span> (<span>{{roundPercent(customOutput.percentManipulatehighly)}}/{{defaultOutput.percentManipulatehighly}}%</span>)
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </template>
                     <template v-else>
-                        <select v-model="formatExam.matrixID" class="form-control">
-                            <option value="">Lựa chọn ma trận</option>
-                            <option v-for="(matrix,k) in list_matrixs" :value="matrix.ID">{{matrix.Name}}</option>
-                        </select>
+                        <table class="table table-bordered table-sm">
+                            <thead>
+                                <tr>
+                                    <td rowspan="2" class="text-center align-middle" style="width: 35px;">STT</td>
+                                    <td rowspan="2" class="text-center align-middle">Nội dung</td>
+                                    <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
+                                    <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
+                                    <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
+                                    <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
+                                    <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                    <td class="text-center align-middle" style="width:80px">LT</td>
+                                    <td class="text-center align-middle" style="width:80px">BT</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(detail,k) in list_detailMatrix.data">
+                                    <td>{{k+1}}</td>
+                                    <td>
+                                        <input type="text" class="form-control" v-model="detail.Tags" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control" :value="detail.Know.Total + detail.Understanding.Total + detail.Manipulate.Total + detail.ManipulateHighly.Total" disabled readonly />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Know.Theory" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Know.Exercise" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Understanding.Theory" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Understanding.Exercise" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Manipulate.Theory" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.Manipulate.Exercise" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Theory" />
+                                    </td>
+                                    <td>
+                                        <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Exercise" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </template>
                 </div>
-            </div>
-
-            <div class="row mt-3">
-                <label class="label">Cấu trúc</label>
-                <template v-if="formatExam.matrixID == ''">
-                    <table class="table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <td rowspan="2" class="text-center align-middle" style="width:35px">STT</td>
-                                <td rowspan="2" class="text-center align-middle">Nội dung</td>
-                                <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
-                                <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
-                                <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
-                                <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
-                                <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
-                                <td rowspan="2" class="text-center align-middle" style="width:85px">Tác vụ</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr v-for="(item,k) in formatExam.format" :id="'formatExam_' + k">
-                                <td class="text-center align-middle">{{k+1}}</td>
-                                <td>
-                                    <input type="text" class="form-control" v-model="item.tag" />
-                                </td>
-
-                                <td>
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow + item.levelUnderstanding + item.levelManipulate + item.levelManipulateHighly" disabled readonly />
-                                </td>
-
-                                <td v-for="(_item,i) in item.levelKnow">
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow[i]" />
-                                </td>
-                                @*<td>
-                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelKnow" />
-                    </td>*@
-
-                                <td v-for="(_item,i) in item.levelUnderstanding">
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding[i]" />
-                                </td>
-                                @*<td>
-                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelUnderstanding.exercise" />
-                    </td>*@
-
-                                <td v-for="(_item,i) in item.levelManipulate">
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate[i]" />
-                                </td>
-                                @*<td>
-                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulate.exercise" />
-                    </td>*@
-
-                                <td v-for="(_item,i) in item.levelManipulateHighly">
-                                    <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly[i]" />
-                                </td>
-                                @*<td>
-                        <input type="number" min="0" class="form-control text-center align-middle" v-model="item.levelManipulateHighly.exercise" />
-                    </td>*@
-
-                                <td class="text-center align-middle">
-                                    <button title="Xoá điều kiện" v-on:click="removeOption(k)" class="btn-act"><i class="ti-trash"></i></button>
-                                    <button title="Đặt lại" v-on:click="refreshOption(k)" class="btn-act"><i class="ti-reload"></i></button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="12" class="text-right p-2">
-                                    <a class="btn-add-sub" title="Thêm điều kiện" href="javascript:;" v-on:click="addTdFormatExam(formatExam.format)"><i class="ic ic-plus-c"></i>Thêm điều kiện</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="text-center align-middle">Tổng</td>
-                                <td class="text-center align-middle">
-                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
-                                </td>
-                                <td colspan="2">
-                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
-                                </td>
-                                <td colspan="2">
-                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
-                                </td>
-                                <td colspan="2">
-                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
-                                </td>
-                                <td colspan="2">
-                                    <input type="number" class="form-control text-center align-middle" disabled readonly />
-                                </td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </template>
-                <template v-else>
-                    <table class="table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <td rowspan="2" class="text-center align-middle" style="width: 35px;">STT</td>
-                                <td rowspan="2" class="text-center align-middle">Nội dung</td>
-                                <td rowspan="2" class="text-center align-middle" style="width:80px">Số câu hỏi</td>
-                                <td colspan="2" class="text-center align-middle">BL1 - Nhận biết</td>
-                                <td colspan="2" class="text-center align-middle">BL2 - Thông hiểu</td>
-                                <td colspan="2" class="text-center align-middle">BL3 - Vận dụng</td>
-                                <td colspan="2" class="text-center align-middle">BL3+ - Vận dụng cao</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                                <td class="text-center align-middle" style="width:80px">LT</td>
-                                <td class="text-center align-middle" style="width:80px">BT</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(detail,k) in list_detailMatrix.data">
-                                <td>{{k+1}}</td>
-                                <td>
-                                    <input type="text" class="form-control" v-model="detail.Tags" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control" :value="detail.Know.Total + detail.Understanding.Total + detail.Manipulate.Total + detail.ManipulateHighly.Total" disabled readonly />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Know.Theory" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Know.Exercise" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Understanding.Theory" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Understanding.Exercise" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Manipulate.Theory" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.Manipulate.Exercise" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Theory" />
-                                </td>
-                                <td>
-                                    <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Exercise" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </template>
-            </div>
+            </template>
         </b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
@@ -1165,7 +1531,7 @@
             </template>
             <template v-else>
                 <b-button variant="primary" v-on:click="createNewExam(true)">Tạo mới</b-button>
-                <b-button variant="success" v-on:click="createNewExam(false)">Lưu</b-button>
+                @*<b-button variant="success" v-on:click="createNewExam(false)">Lưu</b-button>*@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>
@@ -1227,528 +1593,6 @@
                         <input type="number" class="form-control text-center" v-model="detail.ManipulateHighly.Exercise" />
                     </td>
                 </tr>
-                @*<tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Sự điện ly</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="1" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Cacbon - Silic</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="1" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Nito - Photpho</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="1" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Hidrocacbon</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="3" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Đại cương về kim loại</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="4" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Kim loại kiềm, kim loại kiềm thổ, nhôm và hợp chất</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="6" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Kim loại kiềm, kim loại kiềm thổ, nhôm và hợp chất</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="6" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Sắt - một số kim loại nhóm B và hợp chất</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="5" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Tổng hợp hoá học vô cơ</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="2" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Este - Lipit</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="8" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Amin, amino axit, protein</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="4" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Cacbohidrat</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="3" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Polime, vật liệu</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="1" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>
-                            <select class="form-control">
-                                <option value="">Tổng hợp nội dung hoá học hữu cơ</option>
-                            </select>
-                        </td>
-                        <td>
-                            <input type="number" value="1" class="form-control" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" />
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td style="font-weight:bold" class="text-center align-middle">
-                            Tổng câu
-                        </td>
-                        <td>
-                            <input type="number" value="40" class="form-control" style="font-weight:bold" disabled />
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control text-center" style="font-weight:bold"/>
-                        </td>
-                    </tr>*@
             </tbody>
         </table>
     </b-modal>
@@ -1786,41 +1630,41 @@
         <b-col>
             <div class="row">
                 <div class="col-sm-6">
-                    <label class="label">Thời gian</label>
-                    <input type="number" class="form-control" v-model="data_setupExam.timer"/>
+                    <label class="label">Thời gian</label> : <span>{{data_setupExam.timer}}</span>
+                    @*<input type="number" class="form-control" v-model="data_setupExam.timer" />*@
                 </div>
                 <div class="col-sm-6">
-                    <label class="label">Lượt làm</label>
-                    <input type="number" class="form-control" v-model="data_setupExam.limit"/>
+                    <label class="label">Lượt làm</label> : <span>{{data_setupExam.limit}}</span>
+                    @*<input type="number" class="form-control" v-model="data_setupExam.limit" />*@
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-6">
                     <label class="label">Ngày bắt đầu</label>
-                    <input type="date" class="form-control" v-model="data_setupExam.startTime"/>
+                    <input type="datetime-local" class="form-control" v-model="data_setupExam.startTime" />
                 </div>
                 <div class="col-sm-6">
                     <label class="label">Ngày kết thúc</label>
-                    <input type="date" class="form-control" v-model="data_setupExam.endTime"/>
+                    <input type="datetime-local" class="form-control" v-model="data_setupExam.endTime" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-sm-6" style="position:relative">
-                    <label class="label">Chọn lớp</label>
-                    <input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass"/>
-                    <div class="col-sm-11 pt-1 d-none" id="selectClass" style="position:absolute;background-color:white;z-index:3">
-                        <template v-if="list_classes.length > 0">
-                            <ul style="list-style:none">
-                                <li class="pt-1 pb-1" v-for="(_class,k) in list_classes">
-                                    {{_class.Name}}<input type="checkbox" class="checkbox float-md-right" :id="_class.ID" v-on:click="checkToggle(_class.ID)"/>
-                                </li>
-                            </ul>
-                        </template>
-                        <template v-else>
-                            Không có lớp nào đang hoạt động
-                        </template>
-                    </div>
+                    
+                    @*<input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass" />
+        <div class="col-sm-11 pt-1 d-none" id="selectClass" style="position:absolute;background-color:white;z-index:3">
+            <template v-if="list_classes.length > 0">
+                <ul style="list-style:none">
+                    <li class="pt-1 pb-1" v-for="(_class,k) in list_classes">
+                        {{_class.Name}}<input type="checkbox" class="checkbox float-md-right" :id="_class.ID" v-on:click="checkToggle(_class.ID)" />
+                    </li>
+                </ul>
+            </template>
+            <template v-else>
+                Không có lớp nào đang hoạt động
+            </template>
+        </div>*@
                 </div>
             </div>
         </b-col>

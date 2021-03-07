@@ -573,9 +573,8 @@ namespace BaseCustomerMVC.Globals
                 if (completedQ.Contains(examDetail.QuestionID)) continue;
                 completedQ.Add(examDetail.QuestionID);
 
-
-                var part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
                 var part = new CloneLessonPartEntity();
+                part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);
                 if(String.IsNullOrEmpty(exam.LessonExtensionID))
                 {
                     part = _cloneLessonPartService.GetItemByID(examDetail.LessonPartID);

@@ -772,9 +772,12 @@ namespace BaseCustomerMVC.Controllers.Admin
         {
             //var oldcalendar = _calendarHelper.GetByScheduleId(entity.ID);
             //if (oldcalendar != null)
-            _calendarHelper.RemoveSchedule(entity.ID);
+            //_calendarHelper.RemoveSchedule(entity.ID);
+            _calendarHelper.RemoveLessonSchedule(entity.ID);
             if (entity.IsActive)
-                _calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+            //_calendarHelper.ConvertCalendarFromSchedule(entity, userid);
+            //_calendarHelper.ConvertCalendarFromLesson(entity, userid);
+            { }    
         }
 
         //public async Task<JsonResult> Remark(string ExamID)//Big fix
@@ -1119,22 +1122,22 @@ namespace BaseCustomerMVC.Controllers.Admin
             return Json("OK");
         }
 
-        public JsonResult ShareStudent()
-        {
-            var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
-            var count = 0;
-            foreach (var course in courses)
-            {
-                if (course.StudentTargetCenters == null)
-                {
-                    course.StudentTargetCenters = course.TargetCenters;
-                    course.PublicWStudent = false;
-                    _courseService.Save(course);
-                    count++;
-                }
-            }
-            return Json("OK:" + count);
-        }
+        //public JsonResult ShareStudent()
+        //{
+        //    var courses = _courseService.CreateQuery().Find(t => t.IsActive && t.PublicWStudent).ToList();
+        //    var count = 0;
+        //    foreach (var course in courses)
+        //    {
+        //        if (course.StudentTargetCenters == null)
+        //        {
+        //            course.StudentTargetCenters = course.TargetCenters;
+        //            course.PublicWStudent = false;
+        //            _courseService.Save(course);
+        //            count++;
+        //        }
+        //    }
+        //    return Json("OK:" + count);
+        //}
 
         public JsonResult ChangeLinkImage()
         {
