@@ -1990,8 +1990,8 @@
                 updateSchedule(obj) {
                     obj.IsUpdating = true
 
-                    var startdate = moment(obj.StartDate).format("MM-DD-YYYY HH:mm:ss");
-                    var enddate = moment(obj.EndDate).format("MM-DD-YYYY HH:mm:ss");
+                    var startdate = moment(obj.StartDate).format("YYYY-MM-DD HH:mm:ss");
+                    var enddate = moment(obj.EndDate).format("YYYY-MM-DD HH:mm:ss");
 
                     let _form = new FormData()
                     _form.append('ID', obj.ID)
@@ -3342,7 +3342,7 @@
                     var _date = moment(start);
                     if (!_date._isValid || _date < moment(new Date(2000, 1, 1)))
                         _date = moment();
-                    date = _date.format("MM/DD/YYYY")
+                    date = _date.format("YYYY-MM-DD")
                     _form.append('today', date)
                     _form.append('ClassID', '@currentClass.ID')
                     _form.append('seekStart', false)
