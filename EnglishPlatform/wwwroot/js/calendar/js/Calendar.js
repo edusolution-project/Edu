@@ -24,7 +24,8 @@ var EduCalendar = (function(){
     }
     var RenderCalendar = function(){
         this.schedule.onLoad(this.config);
-        if(this.config.useTemplate == true){
+        if (this.config.useTemplate == true) {
+            console.log(this.schedule);
            renderHeader(this.schedule);
         }
     }

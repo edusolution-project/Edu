@@ -19,6 +19,7 @@ using OfficeOpenXml.Style;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -36,6 +37,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CourseHelper _courseHelper;
         private readonly ClassHelper _classHelper;
         private readonly LessonHelper _lessonHelper;
+
+        private readonly ClassGroupService _classGroupService;
 
         private readonly ClassProgressService _classProgressService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
@@ -102,6 +105,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             CourseHelper courseHelper,
             ClassHelper classHelper,
 
+            ClassGroupService classGroupService,
+
             ClassProgressService classProgressService,
             ClassSubjectProgressService classSubjectProgressService,
             ProgressHelper progressHelper,
@@ -155,6 +160,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classProgressService = classProgressService;
             _classSubjectProgressService = classSubjectProgressService;
             _progressHelper = progressHelper;
+
+            _classGroupService = classGroupService;
 
             _chapterService = chapterService;
             _chapterExtendService = chapterExtendService;
@@ -352,7 +359,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         var totalStudents = _studentService.GetStudentsByClassId(@class.ID).Count();
                         if (totalStudents == 0) continue;
 
-                        var activeLessonIds = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => t.ID).ToList();
+                        var activeLessonIds = _lessonService.GetClassActiveLesson(startWeek, endWeek, new List<string> { @class.ID }).Select(t => t.ID).ToList();
+                        //_lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => t.ID).ToList();
 
                         if (activeLessonIds.Count() == 0) continue;
 
@@ -1348,22 +1356,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 if (!string.IsNullOrEmpty(Center))
                 {
                     var @center = _centerService.GetItemByCode(Center);
-                    if (@center == null) return new JsonResult(new Dictionary<string, object>
-                {
-                    { "Error", "Cơ sở không đúng"}
-                });
+                    if (@center == null)
+                        return new JsonResult(new Dictionary<string, object>
+                            {
+                                { "Error", "Cơ sở không đúng"}
+                            });
                     classFilter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId) && o.Center == @center.ID));
                 }
 
                 var classIds = _service.Collection.Find(Builders<ClassEntity>.Filter.And(classFilter)).Project(t => t.ID).ToList();
 
-                var filter = new List<FilterDefinition<LessonEntity>>();
-                filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-                filter.Add(Builders<LessonEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
+                //var filter = new List<FilterDefinition<LessonEntity>>();
+                //filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                //filter.Add(Builders<LessonEntity>.Filter.Where(t => classIds.Contains(t.ClassID)));
 
                 //var csIds = _lessonScheduleService.Collection.Distinct(t => t.ClassSubjectID, Builders<LessonScheduleEntity>.Filter.And(filter)).ToList();
 
-                data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
+                data = _lessonService.GetClassActiveLesson(startWeek, endWeek, classIds).ToList();
+                //_lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
                 classes = _service.GetItemsByIDs(classIds).ToList();
                 classSbjs = _classSubjectService.GetByClassIds(classIds).ToList();
             }
@@ -1371,10 +1381,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var currentClass = _service.GetItemByID(ClassID);
                 if (currentClass == null) return Json(new { });
-                var filter = new List<FilterDefinition<LessonEntity>>();
-                filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
-                filter.Add(Builders<LessonEntity>.Filter.Where(t => t.ClassID == ClassID));
-                data = _lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
+                //var filter = new List<FilterDefinition<LessonEntity>>();
+                //filter.Add(Builders<LessonEntity>.Filter.Where(o => o.StartDate <= endWeek && o.EndDate >= startWeek));
+                //filter.Add(Builders<LessonEntity>.Filter.Where(t => t.ClassID == ClassID));
+                var _data = _lessonService.GetClassActiveLesson(startWeek, endWeek, new List<string> { ClassID });
+
+                data = _data.ToList();
+                //_lessonService.Collection.Find(Builders<LessonEntity>.Filter.And(filter)).ToList();
                 classes.Add(currentClass);
                 classSbjs = _classSubjectService.GetByClassID(ClassID);
             }
@@ -1408,7 +1421,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
         #endregion
 
-        #region Manage
+        #region Class Manage
         public JsonResult GetManageList(DefaultModel model, string Center, string SubjectID = "", string GradeID = "", string TeacherID = "", bool skipActive = true)
         {
             var center = new CenterEntity();
@@ -2688,10 +2701,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #endregion
 
-        #region Fix Data
-
-        #endregion
-
         #region Edit
         public IActionResult Editor(string basis, string ID)
         {
@@ -3722,6 +3731,99 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
             }
         }
+        #endregion
+
+
+        #region Group
+        public JsonResult SaveGroup(ClassGroupEntity item)
+        {
+            if (string.IsNullOrEmpty(item.Name) || string.IsNullOrEmpty(item.ClassID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            if (!string.IsNullOrEmpty(item.ID))
+            {
+                var oldItem = _classGroupService.GetItemByID(item.ID);
+                if (oldItem == null)
+                    return Json(new { error = "Nhóm không tồn tại hoặc đã bị xóa" });
+
+                oldItem.Name = item.Name;
+                _classGroupService.Save(oldItem);
+                item.ID = oldItem.ID;
+            }
+            else
+            {
+                item.Created = DateTime.Now.ToUniversalTime();
+                item.IsActive = true;
+                _classGroupService.Save(item);
+            }
+            return Json(item);
+        }
+
+        [HttpPost]
+        public JsonResult PublishGroup(ClassGroupEntity item)
+        {
+            if (string.IsNullOrEmpty(item.ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            var oldItem = _classGroupService.GetItemByID(item.ID);
+            if (oldItem == null)
+                return Json(new { error = "Nhóm không tồn tại hoặc đã bị xóa" });
+            oldItem.IsActive = item.IsActive;
+            _classGroupService.Save(oldItem);
+            return Json(item);
+        }
+
+        [HttpPost]
+        public JsonResult GetGroupList(string ID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            var currentClass = _classService.GetItemByID(ID);
+            if (currentClass == null)
+                return Json(new { error = "Không tìm thấy lớp" });
+            var data = _classGroupService.GetByClassID(ID);
+            return Json(data.Select(t => new ClassGroupViewModel
+            {
+                ID = t.ID,
+                IsActive = t.IsActive,
+                Name = t.Name,
+                Created = t.Created,
+                Members = t.Members == null ? new List<string>(): t.Members.Select(m => m.MemberID).ToList(),
+                StudentCount = t.Members == null ? 0 : t.Members.Count()
+            }).ToList());
+        }
+
+        [HttpPost]
+        public JsonResult RemoveGroup(string ID)
+        {
+            if (string.IsNullOrEmpty(ID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+
+            //Remove group progress also
+            _classGroupService.Remove(ID);
+            return Json("Removed");
+        }
+
+        [HttpPost]
+        public JsonResult ToggleGroupStudent(string StudentID, string GroupID)
+        {
+            if (string.IsNullOrEmpty(StudentID) || string.IsNullOrEmpty(GroupID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+            var group = _classGroupService.GetItemByID(GroupID);
+            if (group == null)
+                return Json(new { error = "Nhóm không hợp lệ" });
+            var isMember = false;
+            if (group.Members == null)
+                group.Members = new List<GroupMember>();
+            if (group.Members.Any(t => t.MemberID == StudentID))//exit => delete
+                group.Members.RemoveAll(t => t.MemberID == StudentID);
+            else
+            {
+                group.Members.Add(new GroupMember { MemberID = StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                isMember = true;
+            }
+            _classGroupService.Save(group);
+            return Json(new { IsActive = isMember });
+        }
+
         #endregion
 
         private class StudentResult

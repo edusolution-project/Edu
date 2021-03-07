@@ -180,17 +180,20 @@ namespace BaseCustomerMVC.Globals
             ));
             if (startDate > DateTime.MinValue && endDate > DateTime.MinValue)
             {
-                var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
-                var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+                var _startDate = startDate.AddDays(-1);
+                //new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
+
+                var _endDate = endDate.AddDays(1);
+                //new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
                 filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate && o.EndDate <= _endDate)));
             }
             else
             {
-                startDate = DateTime.UtcNow;
+                startDate = DateTime.UtcNow.AddDays(-1);
                 endDate = startDate.AddMonths(1);
-                var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
-                var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
-                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= _startDate && o.EndDate <= _endDate)));
+                //var _startDate = new DateTime(startDate.Year, startDate.Month, 1, 0, 0, 0);
+                //var _endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+                filter.Add(Builders<CalendarEntity>.Filter.Where(o => (o.StartDate >= startDate && o.EndDate <= endDate)));
             }
             filter.Add(Builders<CalendarEntity>.Filter.Where(o => o.IsDel == false));
 
@@ -285,6 +288,21 @@ namespace BaseCustomerMVC.Globals
                 ConvertCalendarFromLesson(item, "");
             }
             await Task.CompletedTask;
+        }
+
+        public CalendarEventModel ConvertEventFromLesson(LessonEntity item)
+        {
+            return new CalendarEventModel
+            {
+                start = item.StartDate,
+                groupid = (item.GroupIDs != null && item.GroupIDs.Count > 0) ? item.GroupIDs.First() : item.ClassID,
+                id = item.ID,
+                title = item.Title,// + (skill == null ? "" : (" (" + skill.Name + ")")),
+                url = "",
+                skype = "",//isTeacher && o.Status != 5 ? _studentService.GetItemByID(o.StudentID)?.Skype  : _teacherService.GetItemByID(o.TeacherID)?.Skype,
+                Status = item.IsOnline ? 5 : 0,
+                Color = item.IsOnline ? "#ccc" : ""
+            };
         }
 
         public bool ConvertCalendarFromLesson(LessonEntity item, string userCreate)
