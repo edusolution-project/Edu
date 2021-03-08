@@ -157,9 +157,9 @@ namespace BaseCustomerEntity.Database
         public IEnumerable<ClassEntity> GetActiveClass(DateTime time, string Center = null)
         {
             if (string.IsNullOrEmpty(Center))
-                return Collection.Find(t => t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToEnumerable();
+                return Collection.Find(t => t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL && t.IsActive).ToEnumerable();
             else
-                return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL).ToEnumerable();
+                return Collection.Find(t => t.Center == Center && t.StartDate < time && t.EndDate > time && t.IsActive && t.ClassMechanism != CLASS_MECHANISM.PERSONAL && t.IsActive).ToEnumerable();
         }
 
         public IEnumerable<ClassEntity> GetActiveClass4Report(DateTime firstTime, DateTime lastTime, String centerID)

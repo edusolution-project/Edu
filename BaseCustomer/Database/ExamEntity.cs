@@ -435,6 +435,11 @@ namespace BaseCustomerEntity.Database
             while (listIndex.Count() != TotalIndex);
             return listIndex;
         }
+
+        public IEnumerable<ExamEntity> GetItemByLessonID(string lessonID)
+        {
+            return CreateQuery().Find(x => x.LessonID.Equals(lessonID)).ToEnumerable();
+        }
     }
 
     public class EXAM_TYPE
