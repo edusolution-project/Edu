@@ -1,4 +1,5 @@
-﻿using Core_v2.Repositories;
+﻿using BaseCustomerEntity.Database;
+using Core_v2.Repositories;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using System;
@@ -96,7 +97,7 @@ namespace BaseEasyRealTime.Entities
             var update = Builders<GroupEntity>.Update.Set(t => t.DisplayName, DisplayName);
             return Collection.UpdateMany(Builders<GroupEntity>.Filter.And(filter), update, new UpdateOptions { IsUpsert = false }).ModifiedCount;
         }
-
+    
     }
     public class MemberGroupInfo
     {

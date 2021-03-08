@@ -59,6 +59,8 @@ namespace BaseCustomerEntity.Globals
             //services.AddSingleton<ClassStudentService>();
             services.AddSingleton<ClassProgressService>();
             services.AddSingleton<ClassSubjectProgressService>();
+            services.AddSingleton<ClassGroupService>();
+
 
             services.AddSingleton<ExamService>();
             services.AddSingleton<ExamDetailService>();
@@ -79,7 +81,7 @@ namespace BaseCustomerEntity.Globals
             services.AddSingleton<NewsCategoryService>();
             services.AddSingleton<NewsService>();
             services.AddSingleton<QCService>();
-			services.AddSingleton<UserAndRoleService>();
+            services.AddSingleton<UserAndRoleService>();
             services.AddSingleton<TransactionService>();
             services.AddSingleton<GroupAndUserService>();
             services.AddSingleton<GroupLastLifeService>();

@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Core_v2.Globals;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Microsoft.AspNetCore.Razor.Language;
+using AndcultureCode.ZoomClient.Models.Groups;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -27,6 +28,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly LessonHelper _lessonHelper;
         private readonly ClassHelper _classHelper;
         private readonly CalendarHelper _calendarHelper;
+        private readonly ClassGroupService _classGroupService;
 
 
         private readonly ChapterService _chapterService;
@@ -55,6 +57,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             LessonService lessonService,
             LessonHelper lessonHelper,
             CalendarHelper calendarHelper,
+            ClassGroupService classGroupService,
 
             LessonPartService lessonPartService,
             LessonPartQuestionService questionService,
@@ -83,6 +86,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classHelper = classHelper;
             _lessonHelper = lessonHelper;
             _calendarHelper = calendarHelper;
+            _classGroupService = classGroupService;
 
             _clonepartService = cloneLessonPartService;
             _clonequestionService = cloneLessonPartQuestionService;
@@ -398,7 +402,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 _lessonService.Save(oldItem);
 
                 _calendarHelper.UpdateCalendar(oldItem, UserID);
-                
+
 
                 return new JsonResult(new Dictionary<string, object> {
                         {"Data", oldItem },
@@ -457,6 +461,34 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
         [HttpPost]
+        public JsonResult UpdateGroup(string ID, string GroupID)
+        {
+            var UserID = User.Claims.GetClaimByType("UserID").Value;
+            if (string.IsNullOrEmpty(ID))
+            {
+                return Json(new { error = "Thông tin không đúng" });
+            }
+            else
+            {
+                var lesson = _lessonService.GetItemByID(ID);
+                if (lesson == null)
+                    return Json(new { error = "Thông tin bài không đúng" });
+
+                lesson.GroupIDs = null;
+                if (!string.IsNullOrEmpty(GroupID))
+                {
+                    var group = _classGroupService.GetItemByID(GroupID);
+                    if (group == null)
+                        return Json(new { error = "Thông tin nhóm không đúng" });
+                    lesson.GroupIDs = new List<string> { GroupID };
+                }
+
+                _lessonService.Save(lesson);
+                return Json(new { data = GroupID });
+            }
+        }
+
+        [HttpPost]
         public JsonResult ToggleOnline(string ID)
         {
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -470,7 +502,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             //_calendarHelper.RemoveLessonSchedule(lesson.ID);
             //if (lesson.IsActive)
-                _calendarHelper.ConvertCalendarFromLesson(lesson, UserID);
+            _calendarHelper.ConvertCalendarFromLesson(lesson, UserID);
 
             return Json(new { isOnline = lesson.IsOnline });
         }
