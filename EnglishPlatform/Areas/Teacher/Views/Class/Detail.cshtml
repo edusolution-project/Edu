@@ -327,7 +327,7 @@
                         <tr v-for="(item,k) in group_data">
                             <td>{{(k+1)}}</td>
                             <td>
-                                <a :title="item.Name">
+                                <a :title="item.Name" v-on:click="showGroupStudent(item)" href="javascript:;">
                                     {{item.Name}}
                                 </a>
                             </td>
@@ -957,7 +957,7 @@
                                               v-bind:owner="owner"
                                               v-bind:listchaps="listchaps"
                                               v-bind:type="type"
-                                              v-bind:group="group_data"></chap-content>
+                                              v-bind:group="group"></chap-content>
                                 <lesson-item v-for="lesson in filterLesson(data)" 
                                              v-bind:data="lesson" 
                                              v-bind:owner="owner" 
@@ -1550,6 +1550,7 @@
                 group_info: {},
                 student_data: [],
                 student_init: false,
+                group_view_mode: 0,
                 //
                 isExam: false,
                 exam: {
@@ -2594,8 +2595,29 @@
                 },
 
                 //GROUP_STUDENT
+                showGroupStudent(data) {
+                    let _that = this;
+                    this.group_view_mode = 1;
+                    this.hideModal();
+                    if (data != null) {
+                        _that.group_info.ID = data.ID
+                        _that.group_info.Name = data.Name
+                    }
+
+                    if (this.student_init) {
+                        this.group_student = [];
+                        this.loadGroupStudent(data);
+                    }
+                    else {
+                        _that.student_data = [];
+                        this.initStudentList(data, this.loadGroupStudent);
+                    }
+
+                    _that.$bvModal.show('modal_student')
+                },
                 manageGroupStudent(data) {
                     let _that = this;
+                    this.group_view_mode = 0;
                     this.hideModal();
                     if (data != null) {
                         _that.group_info.ID = data.ID
@@ -4193,20 +4215,30 @@
                                 <th>Họ tên</th>
                                 <th>Email</th>
                                 <th>SĐT</th>
-                                <th class="text-center">Trạng thái</th>
+                                <th class="text-center" v-if="group_view_mode == 0">Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(item,k) in student_data" :class="item.IsActive ? 'font-weight-bold':''">
-                                <td>{{k + 1}}</td>
-                                <td>{{item.FullName}}</td>
-                                <td>{{item.Email}}</td>
-                                <td>{{item.Phone}}</td>
-                                <td class="text-center">
-                                    <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupStudent(item, group_info.ID)" class="mt-2">
-                                    </b-form-checkbox>
-                                </td>
-                            </tr>
+                            <template v-if="group_view_mode == 1">
+                                <tr v-for="(item,k) in student_data.filter(t=> t.IsActive)" class="font-weight-bold">
+                                    <td>{{k + 1}}</td>
+                                    <td>{{item.FullName}}</td>
+                                    <td>{{item.Email}}</td>
+                                    <td>{{item.Phone}}</td>
+                                </tr>
+                            </template>
+                            <template v-else>
+                                <tr v-for="(item,k) in student_data" :class="item.IsActive ? 'font-weight-bold':''">
+                                    <td>{{k + 1}}</td>
+                                    <td>{{item.FullName}}</td>
+                                    <td>{{item.Email}}</td>
+                                    <td>{{item.Phone}}</td>
+                                    <td class="text-center">
+                                        <b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupStudent(item, group_info.ID)" class="mt-2">
+                                        </b-form-checkbox>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </template>

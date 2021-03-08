@@ -20,6 +20,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using AndcultureCode.ZoomClient.Models.Groups;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -932,6 +933,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var _listStudent = new List<InforStudent>();
                 var csbjprogress = _classSubjectProgressService.GetItemsByClassSubjectID_StudentIDs(ClassSubjectID, listStudent.Select(x => x.ID).ToList());
 
+                var groups = _classGroupService.GetByClassID(@class.ID).ToList();
+
+
                 Debug.WriteLine("data: " + DateTime.Now);
 
                 foreach (var student in listStudent)
@@ -939,11 +943,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
 
+                    //get student groups
+                    var stGrpIDs = groups.Where(t => t.Members.Any(m => m.MemberID == student.ID)).Select(t => t.ID).ToList();
+
                     foreach (var item in listTime)
                     {
                         if (!activeLessonDic.ContainsKey(item.Key))
                         {
-                            var activePractice = activeLessons.Where(t => t.EndDate > item.Value.StartTime && t.StartDate <= item.Value.EndTime && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Select(t => t.ID).ToList();
+                            //get active practice from class subject & group
+                            var activePractice = activeLessons.Where(t =>
+                             t.EndDate > item.Value.StartTime &&
+                             t.StartDate <= item.Value.EndTime &&
+                             (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM) &&
+                             (t.GroupIDs == null || stGrpIDs.Intersect(t.GroupIDs).Any())
+                             ).Select(t => t.ID).ToList();
                             //var activePractice = _lessonService.CreateQuery().Find(t => activeIds.Contains(t.ID) && ).Project(t => t.ID).ToList();
                             activeLessonDic[item.Key] = activePractice;
                         }
