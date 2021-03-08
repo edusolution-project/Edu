@@ -1775,8 +1775,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var data = _tagsService.CreateQuery().Find(Builders<TagsEntity>.Filter.And(filter)).Limit(100).ToList();
 
-                if (data.Count() == 0)
-                    data = _tagsService.GetAll().ToList();
+                //if (data.Count() == 0)
+                //    data = _tagsService.GetAll().ToList();
                 return Json(new Dictionary<String, Object> {
                     {"Status",true },
                     {"Data", data },

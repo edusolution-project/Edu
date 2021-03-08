@@ -30,7 +30,7 @@ namespace BaseCustomerEntity.Database
             {
                 new CreateIndexModel<TagsEntity>(
                     new IndexKeysDefinitionBuilder<TagsEntity>()
-                    .Text(t=> t.Code))
+                    .Text(t=> t.Code).Text(t=>t.Name))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

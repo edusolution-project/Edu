@@ -624,6 +624,12 @@
                         }
                     }
                     //debugger
+
+                    this.defaultOutput.percentKnow = 0
+                    this.defaultOutput.percentManipulate = 0
+                    this.defaultOutput.percentUnderstand = 0
+                    this.defaultOutput.percentManipulatehighly = 0
+                    this.isComfirm = false
                     _that.$bvModal.show('create-exam-modal-xl')
                 },
                 saveItem() {
@@ -1039,20 +1045,31 @@
                         $(input).attr('trigger', 'hover')
                         $(input).attr('style', 'border: 1px solid red')
                     }
-                    else {
-                        $(input).removeAttr('data-toggle')
-                        $(input).removeAttr('data-placement')
-                        $(input).removeAttr('title')
-                        $(input).removeAttr('trigger')
-                        $(input).removeAttr('style')
-                    }
+                    //else {
+                    //    $(input).removeAttr('data-toggle')
+                    //    $(input).removeAttr('data-placement')
+                    //    $(input).removeAttr('title')
+                    //    $(input).removeAttr('trigger')
+                    //    $(input).removeAttr('style')
+                    //}
 
+                    //debugger
                     if (total != 100) {
                         $('#btn_comfirm').attr('disabled', 'disabled')
                         this.isComfirm = false
                     }
                     else {
                         $('#btn_comfirm').removeAttr('disabled')
+
+                        var listInput = $(input.parentNode.parentNode).find('input')
+                        for (var i = 0; i < listInput.length; i++) {
+                            var item = listInput[i]
+                            $(item).removeAttr('data-toggle')
+                            $(item).removeAttr('data-placement')
+                            $(item).removeAttr('title')
+                            $(item).removeAttr('trigger')
+                            $(item).removeAttr('style')
+                        }
                     }
                 },
                 calcMaxtrix() {
@@ -1109,26 +1126,18 @@
                     else {
                         $('#percentManipulatehighly').attr('style', '')
                     }
-                    //compare
-                    //var a = parseInt(this.defaultOutput.percentKnow)
-                    //var b = parseInt(this.customOutput.totalKnow)
-                    //var c = parseInt(this.customOutput.total)
-                    //debugger
-                    //var input = event.target
-                    //if (a < ((b / c) * 100)) {
-                    //    $(input).attr('data-toggle', 'tooltip')
-                    //    $(input).attr('data-placement', 'auto')
-                    //    $(input).attr('title', 'Tổng phải nhỏ hơn 100')
-                    //    $(input).attr('trigger', 'hover')
-                    //    $(input).attr('style', 'border: 1px solid red')
-                    //}
-                    //else {
-                    //    $(input).attr('data-toggle', '')
-                    //    $(input).attr('data-placement', '')
-                    //    $(input).attr('title', '')
-                    //    $(input).attr('trigger', '')
-                    //    $(input).attr('style', '')
-                    //}
+
+                    var totalPercent = this.customOutput.percentKnow + this.customOutput.percentUnderstand + this.customOutput.percentManipulate + this.customOutput.percentManipulatehighly
+                    
+                    if (totalPercent == 100) {
+                        $('#createnewexam').removeAttr('disabled')
+                        $('#createnewexam').removeAttr('class')
+                        $('#createnewexam').attr('class','btn btn-primary')
+                    }
+                    else {
+                        $('#createnewexam').attr('disabled', 'disabled')
+                        $('#createnewexam').attr('class', 'disabled')
+                    }
                 },
                 comfirm() {
                     this.isComfirm = !this.isComfirm
@@ -1137,7 +1146,7 @@
                     if (value > 0) {
                         //value = value / 10
                         var multiplier = Math.pow(10, precision || 0);
-                        return (Math.round(value * multiplier) / multiplier).toFixed(1);
+                        return (Math.round(value * multiplier) / multiplier).toFixed(2);
                     }
                     else return value
                 },
@@ -1337,16 +1346,16 @@
                                 @*<input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentTotal" min="0" max="100" disabled />*@
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentKnow" min="0" max="100" required v-on:change="calc()" />
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentKnow" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentUnderstand" min="0" max="100" required v-on:change="calc()" />
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentUnderstand" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulate" min="0" max="100" required v-on:change="calc()" />
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulate" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulatehighly" min="0" max="100" required v-on:change="calc()" />
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulatehighly" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
                             </td>
                             <td class="text-center">
                                 <button type="button" class="btn-act " v-on:click="comfirm()" id="btn_comfirm" disabled><i class="far fa-check-circle"></i></button>
@@ -1530,7 +1539,7 @@
                 <b-button>Đang thực hiện...</b-button>
             </template>
             <template v-else>
-                <b-button variant="primary" v-on:click="createNewExam(true)">Tạo mới</b-button>
+                <b-button variant="primary" v-on:click="createNewExam(true)" id="createnewexam" disabled>Tạo mới</b-button>
                 @*<b-button variant="success" v-on:click="createNewExam(false)">Lưu</b-button>*@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
