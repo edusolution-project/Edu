@@ -1975,7 +1975,13 @@
                     }
                     this.progessSbj.startTime = objTime.startTime
                     this.progessSbj.endTime = objTime.endTime
-                    this.progessSbj.title = this.searchCsbj.CourseName
+                    //debugger
+                    if (this.searchCsbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                        this.progessSbj.title = 'Kiểm tra & Đánh giá'
+                    }
+                    else {
+                        this.progessSbj.title = this.searchCsbj.CourseName
+                    }
                     let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
                     console.log(_url);
                     axios.post(_url, _form)
@@ -3246,7 +3252,7 @@
                 DetailProgessLesson(LessonScheduleID,Title,obj) {
                     let _that = this
                     let _form = new FormData()
-                    _form.append("LessonScheduleID", LessonScheduleID)
+                    _form.append("LessonID", LessonScheduleID)
                     let _url = '@processUrl("GetDetailProgessExam", "Exam")'
                     this.isLoading = true
                     axios.post(_url, _form)
@@ -3936,7 +3942,7 @@
 
     <b-modal id="progessmodal-xl" size="xl" :title="progessSbj.title +' (' + formatShortDate(progessSbj.startTime) + ' - ' + formatShortDate(progessSbj.endTime) +')'">
         <div class="modal-body">
-            <table class="table" id="id_table">
+            <table class="table" id="table_point">
                 <thead>
                     <tr>
                         <th rowspan="2">STT</th>
@@ -3977,7 +3983,7 @@
     <b-modal id="detailLessonInClass-modal" size="xl" :title="detailProgessLesson.title">
         <div class="modal-body">
             <template v-if="detailProgessLesson.dataLesson.length > 0">
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>
@@ -4008,7 +4014,7 @@
         </div>
 
         <div class="modal-body" v-if="detailProgessLesson.isShow">
-            <table class="table" id="id_table">
+            <table class="table" id="table_point">
                 <thead>
                     <tr>
                         <td colspan="4" style="text-align:center;border:0.5px solid gray">{{detailProgessLesson.title}}</td>
