@@ -1366,7 +1366,7 @@ namespace AutoEmailEduso
                 {
                     //if (center.Abbr.Contains("utc"))
                     //if (center.Abbr.Contains("c3vyvp"))
-                    if (center.Abbr.Contains("_qt"))
+                    if (center.Abbr.Contains("c3yl1vp"))
                     {
                         var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
                         var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
@@ -1433,8 +1433,8 @@ namespace AutoEmailEduso
                             //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
                             var listTime = new Dictionary<Int32, DataTime>()
                             {
-                                {1,new DataTime{ StartTime = new DateTime(2021,1,18,0,0,0),EndTime = new DateTime(2021,1,24,23,59,0)} },
-                                {2,new DataTime{ StartTime = new DateTime(2021,1,25,0,0,0),EndTime = new DateTime(2021,1,31,23,59,0)} },
+                                //{1,new DataTime{ StartTime = new DateTime(2021,1,18,0,0,0),EndTime = new DateTime(2021,1,24,23,59,0)} },
+                                //{2,new DataTime{ StartTime = new DateTime(2021,1,25,0,0,0),EndTime = new DateTime(2021,1,31,23,59,0)} },
 
                                 {3,new DataTime{ StartTime = new DateTime(2021,2,1,0,0,0),EndTime = new DateTime(2021,2,7,23,59,0)} },
                                 {4,new DataTime{ StartTime = new DateTime(2021,2,8,0,0,0),EndTime = new DateTime(2020,2,14,23,59,0)} },
