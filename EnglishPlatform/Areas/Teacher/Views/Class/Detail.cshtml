@@ -61,7 +61,7 @@
                 <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
                 <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
                     v-on:click="showWeekLesson(addDays(startDate, index * 7 - padRoute))"
-                    :class="addDays(startDate, (index + 1) * 7 + 1 - padRoute) < moment() ? 'passed' : (addDays(startDate, (index + 1) * 7 - 6 - padRoute) > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(addDays(startDate, index * 7 - padRoute))}} - {{formatDatenoYear(addDays(startDate, (index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute)))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+                    :class="addDays(startDate, (index + 1) * 7 - padRoute) < moment() ? 'passed' : (addDays(startDate, (index) * 7 - padRoute) > moment() ? '': 'now')"><a class="route_title">{{formatDatenoYear(addDays(startDate, index * 7 - padRoute))}} - {{formatDatenoYear(addDays(startDate, (index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute)))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
                 <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
             </ul>
         </div>
@@ -957,7 +957,7 @@
                                               v-bind:owner="owner"
                                               v-bind:listchaps="listchaps"
                                               v-bind:type="type"
-                                              v-bind:group="group_data"></chap-content>
+                                              v-bind:group="group"></chap-content>
                                 <lesson-item v-for="lesson in filterLesson(data)" 
                                              v-bind:data="lesson" 
                                              v-bind:owner="owner" 

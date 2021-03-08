@@ -4316,13 +4316,13 @@ var Lesson = (function () {
             //    dataform.append("LessonPartID", partID);
             //    dataform.append("AnswerValue", value);
             //}
-            showLoading('Đang trả lời ...')
+
             if (config.mod != mod.TEACHERPREVIEW && config.mod != mod.TEACHERPREVIEWEXAM) {
                 Ajax(config.url.answer, dataform, "POST", false).then(function (res) {
                     __answer_sending = false;
                     var rsp = JSON.parse(res)
                     if (rsp != null && rsp.error != null) {
-                        hideLoading()
+
                         Swal.fire({
                             title: 'Có lỗi',
                             text: rsp.error,
@@ -4340,7 +4340,6 @@ var Lesson = (function () {
                         return false;
                     }
                     else {
-                        hideLoading()
                         //debugger
                         //console.log("line 4060 to fix");
                         //if (value == "") {//??
