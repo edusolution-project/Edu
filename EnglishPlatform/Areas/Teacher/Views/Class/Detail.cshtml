@@ -46,7 +46,7 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>
+                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>*@
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
@@ -1976,7 +1976,13 @@
                     }
                     this.progessSbj.startTime = objTime.startTime
                     this.progessSbj.endTime = objTime.endTime
-                    this.progessSbj.title = this.searchCsbj.CourseName
+                    //debugger
+                    if (this.searchCsbj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM) {
+                        this.progessSbj.title = 'Kiểm tra & Đánh giá'
+                    }
+                    else {
+                        this.progessSbj.title = this.searchCsbj.CourseName
+                    }
                     let _url = '@processUrl("GetResultsWithTime", "ClassSubject")'
                     console.log(_url);
                     axios.post(_url, _form)
@@ -2687,7 +2693,7 @@
                     let _that = this
                     let _form = new FormData()
                     _that.student_data = [];
-                    _form.append('ID', '@currentClass.ID');
+                    _form.append('ClassID', '@currentClass.ID');
                     let _url = '@processUrl("GetList", "StudentManage")';
                     axios.post(_url, _form)
                         .then(rsp => {
@@ -3268,7 +3274,7 @@
                 DetailProgessLesson(LessonScheduleID,Title,obj) {
                     let _that = this
                     let _form = new FormData()
-                    _form.append("LessonScheduleID", LessonScheduleID)
+                    _form.append("LessonID", LessonScheduleID)
                     let _url = '@processUrl("GetDetailProgessExam", "Exam")'
                     this.isLoading = true
                     axios.post(_url, _form)
@@ -3767,7 +3773,7 @@
         <div class="row">
             <div class="col-md-12">
                 <template v-if="student_result.History.length > 0">
-                    <table id="st_table" class="table">
+                    <table id="table_point" class="table">
                         <thead>
                             <tr class="text-center">
                                 <th scope="col" class="text-center">#</th>
@@ -3829,7 +3835,7 @@
             </template>
             <template v-else>
                 <div style="padding-bottom:5px;font-size:80%;color:red;font-style:italic">Điểm trung bình được tính trên tổng các bài đã giao của các môn</div>
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th rowspan="2" style="width:50px">STT</th>
@@ -3884,7 +3890,7 @@
     <b-modal id="model_week_lesson" size="xl" :title="this.weekTitle">
         <div class="modal-body">
             <template v-if="lesson_week.length > 0">
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>
@@ -3917,7 +3923,7 @@
     <b-modal id="detailLessonInWeek-modal" size="xl" :title=" result_data.length > 0 ? result_data[0].StudentName : ''">
         <div class="modal-body">
             <template v-if="result_data.length > 0">
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>
@@ -3958,7 +3964,7 @@
 
     <b-modal id="progessmodal-xl" size="xl" :title="progessSbj.title +' (' + formatShortDate(progessSbj.startTime) + ' - ' + formatShortDate(progessSbj.endTime) +')'">
         <div class="modal-body">
-            <table class="table" id="id_table">
+            <table class="table" id="table_point">
                 <thead>
                     <tr>
                         <th rowspan="2">STT</th>
@@ -3999,7 +4005,7 @@
     <b-modal id="detailLessonInClass-modal" size="xl" :title="detailProgessLesson.title">
         <div class="modal-body">
             <template v-if="detailProgessLesson.dataLesson.length > 0">
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>
@@ -4030,7 +4036,7 @@
         </div>
 
         <div class="modal-body" v-if="detailProgessLesson.isShow">
-            <table class="table" id="id_table">
+            <table class="table" id="table_point">
                 <thead>
                     <tr>
                         <td colspan="4" style="text-align:center;border:0.5px solid gray">{{detailProgessLesson.title}}</td>
@@ -4060,7 +4066,7 @@
     <b-modal id="LessonToMark-modal" size="xl" :title="lessonToMark.title + ' - ' + lessonToMark.courseName">
         <div class="modal-body">
             <template v-if="lessonToMark.dataDetail.length > 0">
-                <table id="id_table" class="table">
+                <table id="table_point" class="table">
                     <thead>
                         <tr>
                             <th style="width:50px">STT</th>

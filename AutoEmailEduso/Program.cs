@@ -28,6 +28,8 @@ namespace AutoEmailEduso
         private static MailHelper _mailHelper;
         private static bool isTest = true;
         private static int count = 0;
+        private static List<String> bcc = new List<String>();
+        private static List<String> cc = new List<String>();
 
         //private static LessonScheduleService _lessonScheduleService;
         private static RoleService _roleService;
@@ -71,6 +73,8 @@ namespace AutoEmailEduso
             _chapterService = new ChapterService(configuration);
 
             isTest = configuration["Test"] == "1";
+            bcc = configuration["BccAddress"].Split(',').ToList();
+            cc = configuration["CcAddress"].Split(',').ToList();
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -104,26 +108,13 @@ namespace AutoEmailEduso
                         Console.WriteLine("Processing Auto Deactive Class ...");
                         await AutoDeactiveClass();
                         break;
-                    //case "sendmail":
-                    //    Console.WriteLine("Processing Send Teacher Schedule To Lesson ...");
-                    //    await sendmail();
-                    //    break;
-                    //case "ReportToExcel":
-                    //    Console.WriteLine("Dang xuat bao cao");
-                    //    await ReportToExcel();
-                    //    break;
                     case "ServiceRenewalNotice":
                         Console.WriteLine(ServiceRenewalNotice().Result);
                         break;
-                    case "GetReport4Chi":
-                        //GetReport4Chi();
+                    case "ReportToExcel":
+                        Console.WriteLine("Xuat file");
+                        await ReportToExcel();
                         break;
-                    //case "BenTre":
-                    //    await BenTre();
-                    //    break;
-                    //case "HPNY":
-                    //    await HPNY();
-                    //    break;
                     default:
                         break;
                 }
@@ -163,7 +154,7 @@ namespace AutoEmailEduso
                 foreach (var center in centersActive)
                 {
                     //var percent = "";
-                    //if (center.Abbr == "c3vyvp")//test truong Vinh Yen
+                    //if (center.Abbr == "c3yl1vp")//test truong Vinh Yen
                     {
                         var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
                         if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
@@ -180,7 +171,6 @@ namespace AutoEmailEduso
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Lớp</td>
                                             <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Sĩ số lớp</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Học sinh chưa học</td>
                                             <td colspan='5' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
                                             <!--<td colspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Tiến độ</td>-->
                                         </tr>
@@ -195,7 +185,6 @@ namespace AutoEmailEduso
                                     <tbody>";
                         var tbody = "";
                         tbody += "<tbody>";
-                        //var classesActive = _classService.GetActiveClass(currentTime, center.ID);//lay danh sach lop dang hoat dong
                         var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
                         var index = 1;
                         long totalStudent = 0, totalstChuaVaoLop = 0, totalActiveStudents = 0;
@@ -258,7 +247,7 @@ namespace AutoEmailEduso
                             }).ToList();
 
                             var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
-
+                            //if (activeLessonIds.Count() == 0) continue;
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
                                 x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
@@ -270,19 +259,19 @@ namespace AutoEmailEduso
                             //var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
                             //    x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
                             //    && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-                            var activeStudents = _lessonProgressService.CreateQuery().Find(x =>
-                            studentIds.Contains(x.StudentID)
-                                && x.TotalLearnt > 0)
-                                .ToList()
-                                .Select(x => x.StudentID)
-                                .Distinct();
+                            //var activeStudents = _lessonProgressService.CreateQuery().Find(x =>
+                            //studentIds.Contains(x.StudentID)
+                            //    && x.TotalLearnt > 0)
+                            //    .ToList()
+                            //    .Select(x => x.StudentID)
+                            //    .Distinct();
 
-                            var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-                                x => studentIds.Contains(x.StudentID)).ToEnumerable();
-                            totalActiveStudents += activeStudents.Count();
+                            //var _activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
+                            //    x => studentIds.Contains(x.StudentID)).ToEnumerable();
+                            //totalActiveStudents += activeStudents.Count();
 
-                            var stChuaVaoLop = classStudent - activeStudents.Count();
-                            totalstChuaVaoLop += stChuaVaoLop;
+                            //var stChuaVaoLop = classStudent - activeStudents.Count();
+                            //totalstChuaVaoLop += stChuaVaoLop;
 
                             // danh sach bai kiem tra
                             var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
@@ -294,7 +283,8 @@ namespace AutoEmailEduso
                                                {
                                                    StudentID = g.Key,
                                                    ExamCount = g.Count(),
-                                                   AvgPoint = g.Average(t => t.LastPoint),
+                                                   AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
+                                                   //AvgPoint = g.Average(t => t.LastPoint),
                                                    StudentName = _studentService.GetItemByID(g.Key)?.FullName,
                                                }).ToList();
 
@@ -317,15 +307,6 @@ namespace AutoEmailEduso
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{index}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{_class.Name}{listNameTeachers}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count()}</td>";
-                            if (stChuaVaoLop == 0)
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>--</td>";
-                            }
-                            else
-                            {
-                                tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{stChuaVaoLop}</td>";
-                            }
-
 
                             List<double> points = new List<double>();
                             var classSbjes_active = _classSubjectService.CreateQuery().Find(o => o.StartDate <= endWeek && o.EndDate >= startWeek && o.TotalExams > 0 && o.ClassID == _class.ID).ToEnumerable();//danh sach mon hoc trong lop dang hoat dong
@@ -334,11 +315,7 @@ namespace AutoEmailEduso
                             var diemtren5 = min5 == 0 ? "--" : min5.ToString();
                             var diemtren2 = min2 == 0 ? "--" : min2.ToString();
                             var diemtren0 = min0 == 0 ? "--" : min0.ToString();
-                            //tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren8}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren5}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren2}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{diemtren0}</td>" +
-                            //    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{studentIds.Count() - min8 - min5 - min2 - min0}</td>";
+
                             tbody += $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#7dcbca'>{diemtren8}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#cae9e0'>{diemtren5}</td>" +
                                 $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse; background-color:#f3d2ac'>{diemtren2}</td>" +
@@ -366,7 +343,7 @@ namespace AutoEmailEduso
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse'></td>
                             <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>Tổng</td>" +
                                    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalStudent}</td>" +
-                                   $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop} (<span style='color:red'>{tilechuavaolop.ToString("#0.00")}%</span>)</td>" +
+                                   //$"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{totalstChuaVaoLop} (<span style='color:red'>{tilechuavaolop.ToString("#0.00")}%</span>)</td>" +
                                    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren8} (<span style='color:red'>{tiletren8.ToString("#0.00")}%</span>)</td>" +
                                    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren5} (<span style='color:red'>{tiletren5.ToString("#0.00")}%</span>)</td>" +
                                    $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;font-weight: 600'>{tren2} (<span style='color:red'>{tiletren2.ToString("#0.00")}%</span>)</td>" +
@@ -386,21 +363,23 @@ namespace AutoEmailEduso
                             $"<div style='font-style: italic;font-size: 12px'>Kết quả được cập nhật lần cuối lúc {endWeek.ToString("HH:mm - dd/MM/yyyy")}</div>" +
                             body;
 
+                        bcc.Add("huonghl@utc.edu.vn");
+
                         if (listTeacherHeader.Count() > 1)
                         {
                             foreach (var item in listTeacherHeader)
                             {
-                                var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
+                                var toAddress = isTest == true ? cc : new List<string> { item.Email };
                                 //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                                var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                                var bccAddress = isTest == true ? null : bcc;
                                 _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                             }
                         }
                         else if (listTeacherHeader.Count() == 1)
                         {
-                            var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { listTeacherHeader[0].Email };
+                            var toAddress = isTest == true ? cc : new List<string> { listTeacherHeader[0].Email };
                             //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                            var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+                            var bccAddress = isTest == true ? null : bcc;
                             _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{listTeacherHeader[0].FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                         }
                         else
@@ -471,6 +450,7 @@ namespace AutoEmailEduso
                                 Title = t.Title
                             }).ToList();
                             var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
+                            if (activeLessonIds.Count() == 0) continue;// khong giao bai khong gui email
 
                             //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
                             var activeProgress = _lessonProgressService.CreateQuery().Find(
@@ -512,7 +492,7 @@ namespace AutoEmailEduso
                                                {
                                                    StudentID = g.Key,
                                                    ExamCount = g.Count() == 0 ? 0 : g.Count(),
-                                                   AvgPoint = g.Average(t => t.LastPoint),
+                                                   AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
                                                    StudentName = _studentService.GetItemByID(g.Key)?.FullName.Trim(),
                                                    AvgTimeDoExam = _AvgTimeDoExam,
                                                    CompletedLesson = _CompletedLesson,
@@ -656,7 +636,7 @@ namespace AutoEmailEduso
                                            {
                                                StudentID = g.Key,
                                                ExamCount = g.Count(),
-                                               AvgPoint = g.Average(t => t.LastPoint),
+                                               AvgPoint = activeLessonIds.Count() > 0 ? g.Sum(t => t.LastPoint) / activeLessonIds.Count() : 0,
                                                StudentName = _studentService.GetItemByID(g.Key)?.FullName,
                                            }).ToList();
 
@@ -918,17 +898,17 @@ namespace AutoEmailEduso
                 {
                     foreach (var item in listTeacher)
                     {
-                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { item.Email };
+                        var toAddress = isTest == true ? cc : new List<string> { item.Email };
                         //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com"} : new List<string> { "shin.l0v3.ly@gmail.com" };
-                        var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
+                        var bccAddress = isTest == true ? null : bcc;
                         _ = await _mailHelper.SendBaseEmail(toAddress, Subject(item.FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                     }
                 }
                 else if (listTeacher.Count == 1)
                 {
-                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { listTeacher[0].Email };
+                    var toAddress = isTest == true ? cc : new List<string> { listTeacher[0].Email };
                     //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                    var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com" };
+                    var bccAddress = isTest == true ? null : bcc;
                     _ = await _mailHelper.SendBaseEmail(toAddress, Subject(listTeacher[0].FullName, @class.Name, centerName, startweek, endWeek), $"<div>Kính gửi Thầy/Cô: <span style='font-weight:600'>{listTeacher[0].FullName}</span>,</div>" + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                 }
                 else
@@ -1007,8 +987,8 @@ namespace AutoEmailEduso
                     foreach (var @class in activeClasses)
                     {
                         //if (!@class.ID.Equals("5fc4ac49724ca92a649159f0")) continue;
-                        //var activeSchedules = _scheduleService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
-                        var activeSchedules = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime).ToEnumerable()
+                        var activeSchedules = _lessonService.GetIncomingSchedules(time: currentTime, period: period, ClassID: @class.ID)
+                        //var activeSchedules = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate >= currentTime).ToEnumerable()
                             .OrderBy(t => t.ClassID)
                             .ThenBy(t => t.ClassSubjectID)
                             .ThenBy(t => t.StartDate).ToList();
@@ -1202,162 +1182,335 @@ namespace AutoEmailEduso
             var toAddress = isTest ? new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" } : new List<string> { "vietphung.it@gmail.com", "shin.l0v3.ly@gmail.com" };
             _ = await _mailHelper.SendBaseEmail(new List<string>(), subject, body, MailPhase.WEEKLY_SCHEDULE, null, toAddress);
         }
+
+        private static async Task AutoDeactiveClass()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                int offset = currentTime.DayOfWeek - DayOfWeek.Monday;
+                var monday = currentTime.AddDays(-offset);
+                var monday2weekago = monday.AddDays(-14);
+                var sundayweekago = monday.AddDays(-1);
+                var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
+                var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
+                var activeCenters = _centerService.GetActiveCenter(currentTime);
+                if (activeCenters.Count() == 0)
+                {
+                    Console.WriteLine("Không có cơ sở hoạt động");
+                }
+
+                Int32 totalClass = 0;
+
+                foreach (var center in activeCenters)
+                {
+                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);
+                    if (classesActive.Count() == 0) continue;
+                    foreach (var @class in classesActive)
+                    {
+                        if (@class.StartDate > firstDay) continue;
+                        var activeLessons = _lessonService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
+                        if (activeLessons == 0)
+                        {
+                            if (!@class.IsActive) continue;
+                            @class.IsActive = false;
+                            totalClass++;
+                            Console.WriteLine("Lop khong co hoat dong " + @class.Name + " - " + center.Name);
+                            _classService.Save(@class);
+                            var students = _studentService.GetStudentIdsByClassId(@class.ID).Count();
+                            if (students == 0) continue;
+                            var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                            var listTeacher = new List<TeacherEntity>();
+                            var subject = "Thông báo đóng lớp không hoạt động";
+                            foreach (var mem in members.ToList())
+                            {
+                                var _teacher = _teacherService.GetItemByID(mem.TeacherID);
+                                if (!listTeacher.Any(x => x.Email == _teacher.Email))
+                                {
+                                    listTeacher.Add(_teacher);
+                                    var content = "<div>" +
+                                        $"<p>Kính gửi thầy/cô: {_teacher.FullName}</p>" +
+                                        $"<p>EDUSO nhận thấy trong thời gian từ ngày {firstDay.ToString("dd-MM-yyyy")} đến ngày {lastDay.ToString("dd-MM-yyyy")} " +
+                                        $"lớp {@class.Name} - cơ sở {center.Name}" +
+                                        $"của giáo viên {_teacher.FullName} không có hoạt động (lên lịch dạy, giao bài tập cho học sinh).</p>" +
+                                        $"<p>Vì vậy EDUSO đóng lớp {@class.Name} kể từ ngày {currentTime.ToString("dd-MM-yyyy")}</p>" +
+                                        $"<p>Mọi thông tin thắc mắc vui lòng liên hệ CSKH: 0989 085 398 </p>" +
+                                        "</div>";
+                                    var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { _teacher.Email };
+                                    //var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                                    var toBCC = isTest ? null : new List<String> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" };
+                                    _ = _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT, null, toBCC);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"Tổng lớp: {totalClass}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static async Task<String> ServiceRenewalNotice()
+        {
+            try
+            {
+                var currentTime = DateTime.UtcNow;
+                //lay danh sach co so dang hoat dong
+                var centers = _centerService.CreateQuery().Find(x => x.Status == true).ToList();
+                //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
+                foreach (var item in centers)
+                {
+                    //lay danh sach lop dang hoat dong
+                    var classesActive = _classService.GetActiveClass4Report(item.StartDate, item.ExpireDate, item.ID);
+                    if (classesActive.Count() == 0) continue;
+
+                    var endTime = item.ExpireDate;
+                    var totalTotalMilliseconds = currentTime.Subtract(endTime).TotalMilliseconds;
+                    var totalTotalDays = currentTime.Subtract(endTime).TotalDays;
+                    if (totalTotalDays >= 0 && totalTotalDays <= 7 && item.ExpireDate.Month == currentTime.Month)
+                    {
+                        //gui mail thong bao het han
+                        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == item.ID)).ToList().FindAll(y => HasRole(y.ID, item.ID, "head-teacher")).ToList();
+                        if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
+                        {
+                            listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
+                        }
+
+                        if (listTeacherHeader.Count == 0) continue;
+
+                        String listNameTeachers = "";
+                        List<String> listEmailTeachers = new List<string>();
+                        foreach (var teacher in listTeacherHeader)
+                        {
+                            listNameTeachers += $"{teacher.FullName}, ";
+                            listEmailTeachers.Add(teacher.Email);
+                        }
+                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim() + ".";
+                        String subject = "THÔNG BÁO GIA HẠN DỊCH VỤ";
+
+                        var thead = "<thead>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:18pt;font-family:Arial,sans-serif;font-weight:bold;text-align: center'>THƯ THÔNG BÁO GIA HẠN DỊCH VỤ</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            "<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center;font-style: italic'>(Thành thật xin lỗi, nếu trong thời gian thư đang chuyển đi mà quý thầy cô đã thực hiện gia hạn)</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center'>Ngày gửi: {DateTime.Now.ToString("dd-MM-yyyy")}</td>" +
+                            "</tr>" +
+                            "</thead>";
+                        var tbody = "<tbody>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Kính gửi: thầy/cô <span style='font-weight: bold;font-family:\"Segoe UI\",sans-serif; color: black; background-image:initial; background-position:initial; background-size:initial; background-repeat:initial; background-origin:initial; background-clip:initial'>{listNameTeachers}<span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Lời đầu tiên, <span style='font-weight:bold'>EDUSO</span> xin trân trọng cảm ơn sự hợp tác giữa <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> về việc sử dụng Eduso Platform trong giảng dạy và học tập.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Theo như thời gian sử dụng dịch vụ của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> từ <span style='font-weight:bold'>{item.StartDate.ToUniversalTime().ToString("HH:mm dd/MM/yyyy")}</span> đến <span style='font-weight:bold'>{item.ExpireDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")}.</span></td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'><span style='font-weight:bold'>EDUSO</span> nhận thấy <span style='font-weight:bold'>{item.Name}</span> sắp đến ngày hết hạn sử dụng, sau ngày hết hạn thì các dịch vụ trên hệ thống Eduso sẽ tạm dừng hoạt động.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Để gia hạn dịch vụ, vui lòng liên hệ bộ phận chăm sóc khách hàng theo số điện thoại 0989085398 - 02432444439</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Chân thành cảm ơn sự hợp tác của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span>.</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>Trân trọng!</td>" +
+                            "</tr>" +
+                            "<tr>" +
+                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>----------------o0o-----------</td>" +
+                            "</tr>" +
+                            "</tbody>";
+
+                        var table2 = @"<table cellpadding='0' cellspacing='0' style='margin:auto;border-spacing:0px; border-collapse:collapse; color: rgb(68, 68, 68); width: 480px; font-size:9pt; font-family:Arial,sans-serif; line-height:14px'><tbody><tr><td colspan='2' style='padding: 0px 0px 5px; width: 480px'><font color='#134f5c'><font face='Arial, sans-serif'><span style='font-size:14.6667px'><b>EDU</b></span><span style='font-weight:bold;font-size:14.6667px'>SO</span></font><b style='font-size:9pt'>.,JSC</b></font><font color='#ff9900'><font face='Arial, sans-serif'><b><span style='font-size:14.6667px'><br></span></b></font></font></td></tr><tr><td colspan='2' style='padding:0px 0px 5px;width:480px;color:rgb(23,147,210)'></td></tr><tr><td colspan='2' style='padding:0px 0px 2px;width:480px;border-top:1px dotted rgb(19,19,19)'>&nbsp;</td></tr><tr><td valign='middle' style='padding:0px;width:120px;vertical-align:middle'><img src='https://ci3.googleusercontent.com/proxy/QAgPRZBFrmIBlGmpla2ITc2bGA9bDK-jAclDqfTcfevFuuKJSYrVRL3tBSDbre6GDcdcRw7fRTECfG5ANvDxMvkQiXZbAd56B4pNx3a8cSg2THUFbi0kScAaG8p1jrykO5s4=s0-d-e1-ft#https://drive.google.com/uc?id=1P2PWW0Do8B1PfWW-r1Kjy_tDK2mp92ma&amp;export=download' width='96' height='95' class='CToWUd'></td><td valign='middle' style='font-family:Arial,sans-serif;padding:0px;width:360px;color:rgb(19,19,19);vertical-align:middle'><table cellpadding='0' cellspacing='0' style='border-spacing:0px;border-collapse:collapse;background-color:transparent'><tbody><tr><td style='padding:1px'><br></td></tr><tr><td style='padding:1px'><span style='font-family:Arial,sans-serif;font-size:9pt'>Hotline: (+84)989 085 398</span></td></tr><tr><td style='font-family:Arial,sans-serif;padding:1px;font-size:9pt'><span style='font-size:9pt'>Mail:&nbsp;<a href='http://buithihong98@gmail.com/' target='_blank' data-saferedirecturl='https://www.google.com/url?q=http://buithihong98@gmail.com/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNETDHvUCqOIe01CJEJwgt6gTrPCkw'>eduso.vn@gmail.com</a></span>&nbsp;</td></tr><tr><td style='padding:1px'><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Trường&nbsp;</span></font><span style='font-size:9pt'>Đại học Giao thông vận tải -&nbsp;</span></span><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Số 3 Phố Cầu Giâ</span></font></span><font style='background-color:transparent;font-size:12px' face='Arial, sans-serif'>y <br>-&nbsp;</font><font face='Arial, sans-serif' style='background-color:transparent'><span style='font-size:12px'>Láng Thượng - Đống Đa -&nbsp;</span></font><span style='background-color:transparent;font-size:9pt'>Hà Nội -&nbsp; Việt Nam</span><font face='Arial, sans-serif' style='background-color:transparent;font-size:9pt'><br></font></td></tr><tr><td style='padding:2px 0px 0px 1px'><span style='display:inline-block;height:23px'><a href='https://www.facebook.com/engcooacademy/' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.facebook.com/engcooacademy/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGKOaTRls1lZt_lcFHOqghSGBtnLQ'><img alt='Facebook icon' border='0' width='23' height='23' src='https://ci3.googleusercontent.com/proxy/mjiWTZdOYIWVF9PvTDENxZ6wQOuPAlFcn8ifTjfAuWRilo8dSpvX4l41IZgRY291qHCNVuF42W5YnOsux7SW-_NZ_nzBFoyx9RXY096p16IIPundLZxXuJgdlBEEyn-qrPROAmxOkxQ=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/fb.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;<a href='https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as=subscriber' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as%3Dsubscriber&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGfTeFFzglJMtBFYrt1A1mPlgwklw'><img alt='Youtbue icon' border='0' width='23' height='23' src='https://ci4.googleusercontent.com/proxy/3yJ04s_GTj8Eck5ACth9ub3_mXYz9hUld0f6NMft-hC_i9M91dE06tpBbNOnc--l8okk-gS8GKbpichkfW88R2CG3u_8n0H_bU6tVdcUcTjLX8JkjbKpSJuY2xg2PWulNFSbyAuW60M=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/yt.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;</span></td></tr></tbody></table></td></tr><tr><td colspan='2' style='padding:2px 0px 0px;width:480px;border-bottom:1px dotted rgb(19,19,19)'>&nbsp;</td></tr></tbody></table>";
+
+                        var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
+
+                        var toAddress = isTest == true ? cc : listEmailTeachers;
+                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
+                        var bccAddress = isTest == true ? null : bcc;
+                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
+                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+                    }
+                }
+                return "Thong bao thanh cong";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
         #endregion
 
         #region ReportToExcel
-        //public static async Task ReportToExcel()
-        //{
-        //    try
-        //    {
-        //        //var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
-        //        var activeCenters = _centerService.GetActiveCenter(new DateTime(2020, 12, 31));
-        //        if (activeCenters.Count() == 0)
-        //        {
-        //            Console.WriteLine($"active Centers = 0");
-        //        }
+        public static async Task ReportToExcel()
+        {
+            try
+            {
+                //var activeCenters = _centerService.GetActiveCenter(DateTime.Now);
+                var activeCenters = _centerService.GetActiveCenter(new DateTime(2020, 12, 31));
+                if (activeCenters.Count() == 0)
+                {
+                    Console.WriteLine($"active Centers = 0");
+                }
 
-        //        foreach (var center in activeCenters)
-        //        {
-        //            //if (center.Abbr.Contains("utc"))
-        //            //if (center.Abbr.Contains("c3vyvp"))
-        //            if (center.Abbr.Contains("c3cvpvp"))
-        //            {
-        //                var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
-        //                var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
-        //                var Teachers = _teacherService.CreateQuery().Find(x => x.Centers.Any(y => y.CenterID == center.ID) && x.Email != "huonghl@utc.edu.vn").ToList();
-        //                var TotalTeachersinCenter = Teachers.Count(); //Tong so giao vien
-        //                var ExpireDate = center.ExpireDate; //Han muc
-        //                var ClassesinCenter = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
-        //                var TotalClassesinCenter = ClassesinCenter.Count(); //Tong so lop hoc co trong co so
-        //                var ListStudentIDs = Students.Select(x => x.ID).ToList();
-        //                var ActiveStudents = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt > 0 && ListStudentIDs.Contains(x.StudentID)).ToList().GroupBy(x => x.StudentID);
-        //                var InactiveStudentsnoGroup = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt == 0 && ListStudentIDs.Contains(x.StudentID)).ToList();
-        //                var TotalActiveStudents = ActiveStudents.Count();
+                foreach (var center in activeCenters)
+                {
+                    //if (center.Abbr.Contains("utc"))
+                    //if (center.Abbr.Contains("c3vyvp"))
+                    if (center.Abbr.Contains("_qt"))
+                    {
+                        var Students = _studentService.CreateQuery().Find(x => x.Centers.Contains(center.ID)).ToList();
+                        var TotalStudentsinCenter = Students.Count(); //Tong so hoc sinh
+                        var Teachers = _teacherService.CreateQuery().Find(x => x.Centers.Any(y => y.CenterID == center.ID) && x.Email != "huonghl@utc.edu.vn").ToList();
+                        var TotalTeachersinCenter = Teachers.Count(); //Tong so giao vien
+                        var ExpireDate = center.ExpireDate; //Han muc
+                        var ClassesinCenter = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
+                        var TotalClassesinCenter = ClassesinCenter.Count(); //Tong so lop hoc co trong co so
+                        var ListStudentIDs = Students.Select(x => x.ID).ToList();
+                        var ActiveStudents = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt > 0 && ListStudentIDs.Contains(x.StudentID)).ToList().GroupBy(x => x.StudentID);
+                        var InactiveStudentsnoGroup = _lessonProgressService.CreateQuery().Find(x => x.TotalLearnt == 0 && ListStudentIDs.Contains(x.StudentID)).ToList();
+                        var TotalActiveStudents = ActiveStudents.Count();
 
-        //                Center4Report2Excel dataCenter = new Center4Report2Excel()
-        //                {
-        //                    CenterID = center.ID,
-        //                    CenterName = center.Name,
-        //                    StartDate = center.StartDate,
-        //                    //EndDate = center.ExpireDate,
-        //                    EndDate = new DateTime(2020, 12, 31),
-        //                    Limit = (Int32)center.Limit,
-        //                    TotalTeachersinCenter = TotalTeachersinCenter,
-        //                    TotalStudentsinCenter = TotalStudentsinCenter,
-        //                    TotalClass = TotalClassesinCenter,
-        //                    TotalClassActive = ClassesinCenter.Where(x => x.IsActive == true).Count(),
-        //                    DaHoc = TotalActiveStudents
-        //                };
+                        Center4Report2Excel dataCenter = new Center4Report2Excel()
+                        {
+                            CenterID = center.ID,
+                            CenterName = center.Name,
+                            StartDate = center.StartDate,
+                            //EndDate = center.ExpireDate,
+                            EndDate = new DateTime(2021, 3, 7),
+                            Limit = (Int32)center.Limit,
+                            TotalTeachersinCenter = TotalTeachersinCenter,
+                            TotalStudentsinCenter = TotalStudentsinCenter,
+                            TotalClass = TotalClassesinCenter,
+                            TotalClassActive = ClassesinCenter.Where(x => x.IsActive == true).Count(),
+                            DaHoc = TotalActiveStudents
+                        };
 
-        //                List<Class4Report2Excel> dataResponse = new List<Class4Report2Excel>();
+                        List<Class4Report2Excel> dataResponse = new List<Class4Report2Excel>();
 
-        //                foreach (var @class in ClassesinCenter.OrderBy(x => x.Name))
-        //                {
-        //                    //lay danh sach giao vien trong lop
-        //                    var listNameTeachers = "";
-        //                    if (@class.Members != null)
-        //                    {
-        //                        var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
-        //                        if (members.Count() > 0)
-        //                        {
-        //                            foreach (var mem in members)
-        //                            {
-        //                                var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
-        //                                //var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
-        //                                var str = teacherFName.Split(" ");
-        //                                //var teacherName = str[str.Length - 1];
-        //                                var teacherName = teacherFName;
-        //                                listNameTeachers += $"{teacherName}, ";
-        //                            }
-        //                            listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
-        //                        }
-        //                        else
-        //                        {
-        //                            listNameTeachers = "";
-        //                        }
-        //                    }
-        //                    else
-        //                    {
-        //                        listNameTeachers = "";
-        //                    }
+                        foreach (var @class in ClassesinCenter.OrderBy(x => x.Name))
+                        {
+                            //lay danh sach giao vien trong lop
+                            var listNameTeachers = "";
+                            if (@class.Members != null)
+                            {
+                                var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
+                                if (members.Count() > 0)
+                                {
+                                    foreach (var mem in members)
+                                    {
+                                        var teacherFName = _teacherService.GetItemByID(mem.TeacherID).FullName.Trim();
+                                        //var teacherName = teacherFName.Substring(teacherFName.LastIndexOf(" "));
+                                        var str = teacherFName.Split(" ");
+                                        //var teacherName = str[str.Length - 1];
+                                        var teacherName = teacherFName;
+                                        listNameTeachers += $"{teacherName}, ";
+                                    }
+                                    listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim();
+                                }
+                                else
+                                {
+                                    listNameTeachers = "";
+                                }
+                            }
+                            else
+                            {
+                                listNameTeachers = "";
+                            }
 
-        //                    var studentsinClass = Students.Where(x => x.JoinedClasses.Contains(@class.ID));
-        //                    var studentIDsinClass = studentsinClass.Select(x => x.ID).ToList();
+                            var studentsinClass = Students.Where(x => x.JoinedClasses.Contains(@class.ID));
+                            var studentIDsinClass = studentsinClass.Select(x => x.ID).ToList();
 
-        //                    //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
-        //                    var listTime = new Dictionary<Int32, DataTime>()
-        //                    {
-        //                        //{8,new DataTime{ StartTime = new DateTime(2020,8,1,0,0,0),EndTime = new DateTime(2020,8,31,23,59,0)} },
-        //                        //{9,new DataTime{ StartTime = new DateTime(2020,9,1,0,0,0),EndTime = new DateTime(2020,9,30,23,59,0)} },
-        //                        //{10,new DataTime{ StartTime = new DateTime(2020,10,1,0,0,0),EndTime = new DateTime(2020,10,31,23,59,0)} },
-        //                        //{11,new DataTime{ StartTime = new DateTime(2020,11,1,0,0,0),EndTime = new DateTime(2020,11,30,23,59,0)} },
-        //                        //{12,new DataTime{ StartTime = new DateTime(2020,12,1,0,0,0),EndTime = new DateTime(2020,12,31,23,59,0)} },
-        //                    };
-        //                    foreach (var time in listTime)
-        //                    {
-        //                        var dataClass = new Class4Report2Excel();
-        //                        dataClass = NewMethod(center, @class, studentIDsinClass, time.Value.StartTime, time.Value.EndTime, listNameTeachers, studentsinClass.ToList(), InactiveStudentsnoGroup.ToList());
-        //                        dataResponse.Add(dataClass);
-        //                    }
-        //                }
-        //                //var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
-        //                var test1 = Export2Excel(dataResponse, dataCenter, "8").Result;
-        //                //Console.WriteLine(error);
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex.Message);
-        //    }
-        //}
+                            //var listTime = GetListMonth(center.StartDate,center.ExpireDate);
+                            var listTime = new Dictionary<Int32, DataTime>()
+                            {
+                                {1,new DataTime{ StartTime = new DateTime(2021,1,18,0,0,0),EndTime = new DateTime(2021,1,24,23,59,0)} },
+                                {2,new DataTime{ StartTime = new DateTime(2021,1,25,0,0,0),EndTime = new DateTime(2021,1,31,23,59,0)} },
 
-        //private static Class4Report2Excel NewMethod(CenterEntity center, ClassEntity @class, List<string> studentIDsinClass, DateTime StartTime, DateTime EndTime, String listNameTeachers, List<StudentEntity> studentsinClass, List<LessonProgressEntity> InactiveStudentsnoGroup)
-        //{
-        //    Class4Report2Excel dataClass = new Class4Report2Excel();
+                                {3,new DataTime{ StartTime = new DateTime(2021,2,1,0,0,0),EndTime = new DateTime(2021,2,7,23,59,0)} },
+                                {4,new DataTime{ StartTime = new DateTime(2021,2,8,0,0,0),EndTime = new DateTime(2020,2,14,23,59,0)} },
+                                {5,new DataTime{ StartTime = new DateTime(2021,2,15,0,0,0),EndTime = new DateTime(2021,2,21,23,59,0)} },
+                                {6,new DataTime{ StartTime = new DateTime(2021,2,22,0,0,0),EndTime = new DateTime(2021,2,28,23,59,0)} },
+                                {7,new DataTime{ StartTime = new DateTime(2021,3,1,0,0,0),EndTime = new DateTime(2021,3,7,23,59,0)} }
+                            };
+                            foreach (var time in listTime)
+                            {
+                                var dataClass = new Class4Report2Excel();
+                                dataClass = NewMethod(center, @class, studentIDsinClass, time.Value.StartTime, time.Value.EndTime, listNameTeachers, studentsinClass.ToList(), InactiveStudentsnoGroup.ToList());
+                                dataResponse.Add(dataClass);
+                            }
+                        }
+                        var error = Export2Excelv2(dataResponse, dataCenter,"3thang").Result;
+                        //var test1 = Export2Excel(dataResponse, dataCenter, "8").Result;
+                        //Console.WriteLine(error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
 
-        //    dataClass.CenterID = center.ID;
-        //    dataClass.ClassID = @class.ID;
-        //    dataClass.ClassName = @class.Name;
-        //    dataClass.TeacherName = listNameTeachers;
-        //    dataClass.StartDate = @class.StartDate;
-        //    dataClass.EndDate = @class.EndDate;
-        //    dataClass.StudentinClass = studentsinClass.Count();
-        //    dataClass.DontActiveStudent = InactiveStudentsnoGroup.Where(x => x.ClassID == @class.ID).Count();
-        //    dataClass.Status = @class.IsActive ? "Hoạt động" : "Không hoạt động";
+        private static Class4Report2Excel NewMethod(CenterEntity center, ClassEntity @class, List<string> studentIDsinClass, DateTime StartTime, DateTime EndTime, String listNameTeachers, List<StudentEntity> studentsinClass, List<LessonProgressEntity> InactiveStudentsnoGroup)
+        {
+            Class4Report2Excel dataClass = new Class4Report2Excel();
 
-        //    //danh sach mon hoc trong lop
-        //    var classSbjs = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID).ToList();
-        //    //danh sach bai hoc trong lop
-        //    var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToList();
-        //    var activeLessonIds = activeLessons.Select(x => x.LessonID).ToList();
-        //    //danh sach bai luyen tap + kiem tra
-        //    var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-        //    //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //    var activeProgress = _lessonProgressService.CreateQuery().Find(x => studentIDsinClass.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-        //        && x.LastDate <= new DateTime(2020, 12, 31, 23, 59, 00) && x.LastDate >= center.StartDate).ToList();
-        //    //ket qua lam bai cua hoc sinh trong lop
-        //    var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-        //                       group r by r.StudentID
-        //                       into g
-        //                       select new StudentResult
-        //                       {
-        //                           StudentID = g.Key,
-        //                           AvgPoint = g.Average(t => t.LastPoint),
-        //                       }).ToList();
+            dataClass.CenterID = center.ID;
+            dataClass.ClassID = @class.ID;
+            dataClass.ClassName = @class.Name;
+            dataClass.TeacherName = listNameTeachers;
+            dataClass.StartDate = @class.StartDate;
+            dataClass.EndDate = @class.EndDate;
+            dataClass.StudentinClass = studentsinClass.Count();
+            dataClass.DontActiveStudent = InactiveStudentsnoGroup.Where(x => x.ClassID == @class.ID).Count();
+            dataClass.Status = @class.IsActive ? "Hoạt động" : "Không hoạt động";
 
-        //    //render ket qua hoc tap
-        //    var minPoint8 = classResult.Count(t => t.AvgPoint >= 80);
-        //    var minPoint5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-        //    var minPoint2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
-        //    var minPoint0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+            //danh sach mon hoc trong lop
+            var classSbjs = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID).ToList();
+            //danh sach bai hoc trong lop
+            var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == @class.ID && o.StartDate <= EndTime && o.EndDate >= StartTime).ToList();
+            var activeLessonIds = activeLessons.Select(x => x.ID).ToList();
+            //danh sach bai luyen tap + kiem tra
+            var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
+            //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
+            var activeProgress = _lessonProgressService.CreateQuery().Find(x => 
+            studentIDsinClass.Contains(x.StudentID) && 
+            activeLessonIds.Contains(x.LessonID) &&
+            //x.LastDate <= new DateTime(2020, 12, 31, 23, 59, 00) && 
+            x.LastDate >= center.StartDate
+            ).ToList();
+            //ket qua lam bai cua hoc sinh trong lop
+            var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
+                               group r by r.StudentID
+                               into g
+                               select new StudentResult
+                               {
+                                   StudentID = g.Key,
+                                   AvgPoint = g.Average(t => t.LastPoint),
+                               }).ToList();
 
-        //    dataClass.MinPoint0 = minPoint0;
-        //    dataClass.MinPoint2 = minPoint2;
-        //    dataClass.MinPoint5 = minPoint5;
-        //    dataClass.MinPoint8 = minPoint8;
-        //    return dataClass;
-        //}
+            //render ket qua hoc tap
+            var minPoint8 = classResult.Count(t => t.AvgPoint >= 80);
+            var minPoint5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
+            var minPoint2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
+            var minPoint0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
+
+            dataClass.MinPoint0 = minPoint0;
+            dataClass.MinPoint2 = minPoint2;
+            dataClass.MinPoint5 = minPoint5;
+            dataClass.MinPoint8 = minPoint8;
+            return dataClass;
+        }
 
         private static async Task<String> Export2Excel(List<Class4Report2Excel> data, Center4Report2Excel dataCenter, String month = "")
         {
@@ -1843,11 +1996,6 @@ namespace AutoEmailEduso
                             var _colIndex = colIndex;
                             var _item = item.ElementAtOrDefault(j);
 
-                            if (item.Key == "5f5af539171ba81edc6ec410")
-                            {
-                                var a = "";
-                            }
-
                             var persentMinPoint8 = Math.Round((((double)_item.MinPoint8 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
                             var persentMinPoint5 = Math.Round((((double)_item.MinPoint5 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
                             var persentMinPoint2 = Math.Round((((double)_item.MinPoint2 / _item.StudentinClass) * 100), 0, MidpointRounding.ToEven);
@@ -1862,7 +2010,7 @@ namespace AutoEmailEduso
 
                             {
                                 var cell = ws.Cells[rowIndex + j, _colIndex++];
-                                cell.Value = $"Tháng { 9 + j}";
+                                cell.Value = $"Tuần " + (j + 1);
                                 var border = cell.Style.Border;
                                 border.Bottom.Style =
                                     border.Top.Style =
@@ -2013,7 +2161,7 @@ namespace AutoEmailEduso
 
                     //Lưu file lại
                     Byte[] bin = p.GetAsByteArray();
-                    File.WriteAllBytes($"H:\\Hoa\\BenTre\\{Month}{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
+                    File.WriteAllBytes($"H:\\Chi\\VinhYen\\{dataCenter.CenterName}{DateTime.Now.ToString("HHmmssddMMyyyy")}v2.xlsx", bin);
                 }
                 return "";
             }
@@ -2044,589 +2192,102 @@ namespace AutoEmailEduso
         #endregion
 
         #region ReportToChi
-        private static async Task GetReport4Chi()
-        {
-            try
-            {
-                var centers = _centerService.GetAll();
-                foreach (var center in centers.ToList())
-                {
-                    if (center.Abbr == null) continue;
-                    if (center.Abbr.Equals("c3vyvp") || center.Abbr.Equals("c3btvp"))
-                    {
-                        var students = _studentService.GetItemByCenterID(center.ID);
-                        string fileLPath = @"H:\Eduso\Chi\" + center.Abbr + ".txt";
-                        List<string> lines = new List<string>();
-                        if (students.Count() == 0)
-                        {
-                            lines.Add("Khong co hoc sinh nao");
-                            System.IO.File.WriteAllLines(fileLPath, lines);
-                        }
-                        else
-                        {
-                            var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x => x.CreateDate);
-                            var studentinM10 = students.Where(x => x.CreateDate.Month.Equals(10)).OrderBy(x => x.CreateDate);
-                            var studentinM11 = students.Where(x => x.CreateDate.Month.Equals(11)).OrderBy(x => x.CreateDate);
-                            var studentinM12 = students.Where(x => x.CreateDate.Month.Equals(12)).OrderBy(x => x.CreateDate);
-                            lines.Add($"Tháng 9 tạo: {studentinM9.Count()} tài khoản - Tạo ngày: {studentinM9.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 10 tạo: {studentinM10.Count()} tài khoản - Tạo ngày: {studentinM10.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 11 tạo: {studentinM11.Count()} tài khoản - Tạo ngày: {studentinM11.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Tháng 12 tạo: {studentinM12.Count()} tài khoản - Tạo ngày: {studentinM12.FirstOrDefault()?.CreateDate}");
-                            lines.Add($"Hoạt động: {students.Where(x => x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
-                            System.IO.File.WriteAllLines(fileLPath, lines);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                string fileLPath = @"H:\Eduso\Chi\Error.txt";
-                List<string> lines = new List<string>();
-                lines.Add(ex.Message);
-                System.IO.File.WriteAllLines(fileLPath, lines);
-            }
-        }
-        private static void WriteText()
-        {
-            string fileLPath = @"G:\New folder\listStudenID.txt";
+        //private static async Task GetReport4Chi()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetAll();
+        //        foreach (var center in centers.ToList())
+        //        {
+        //            if (center.Abbr == null) continue;
+        //            if (center.Abbr.Equals("c3vyvp") || center.Abbr.Equals("c3btvp"))
+        //            {
+        //                var students = _studentService.GetItemByCenterID(center.ID);
+        //                string fileLPath = @"H:\Eduso\Chi\" + center.Abbr + ".txt";
+        //                List<string> lines = new List<string>();
+        //                if (students.Count() == 0)
+        //                {
+        //                    lines.Add("Khong co hoc sinh nao");
+        //                    System.IO.File.WriteAllLines(fileLPath, lines);
+        //                }
+        //                else
+        //                {
+        //                    var studentinM9 = students.Where(x => x.CreateDate.Month.Equals(9)).OrderBy(x => x.CreateDate);
+        //                    var studentinM10 = students.Where(x => x.CreateDate.Month.Equals(10)).OrderBy(x => x.CreateDate);
+        //                    var studentinM11 = students.Where(x => x.CreateDate.Month.Equals(11)).OrderBy(x => x.CreateDate);
+        //                    var studentinM12 = students.Where(x => x.CreateDate.Month.Equals(12)).OrderBy(x => x.CreateDate);
+        //                    lines.Add($"Tháng 9 tạo: {studentinM9.Count()} tài khoản - Tạo ngày: {studentinM9.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 10 tạo: {studentinM10.Count()} tài khoản - Tạo ngày: {studentinM10.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 11 tạo: {studentinM11.Count()} tài khoản - Tạo ngày: {studentinM11.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Tháng 12 tạo: {studentinM12.Count()} tài khoản - Tạo ngày: {studentinM12.FirstOrDefault()?.CreateDate}");
+        //                    lines.Add($"Hoạt động: {students.Where(x => x.IsActive).Count()} - Không hoạt động: {students.Where(x => !x.IsActive).Count()}");
+        //                    System.IO.File.WriteAllLines(fileLPath, lines);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        string fileLPath = @"H:\Eduso\Chi\Error.txt";
+        //        List<string> lines = new List<string>();
+        //        lines.Add(ex.Message);
+        //        System.IO.File.WriteAllLines(fileLPath, lines);
+        //    }
+        //}
+        //private static void WriteText()
+        //{
+        //    string fileLPath = @"G:\New folder\listStudenID.txt";
 
-            List<string> lines = new List<string>();
-            var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
-            lines.AddRange(StudentsID);
+        //    List<string> lines = new List<string>();
+        //    var StudentsID = _studentService.GetAll().Project(x => x.ID).ToList();
+        //    lines.AddRange(StudentsID);
 
-            System.IO.File.WriteAllLines(fileLPath, lines);
-        }
-        #endregion
-
-        #region Service renewal notice
-        private static async Task<String> ServiceRenewalNotice()
-        {
-            try
-            {
-                var currentTime = DateTime.UtcNow;
-                //lay danh sach co so dang hoat dong
-                var centers = _centerService.CreateQuery().Find(x => x.Status == true).ToList();
-                //var centers = _centerService.CreateQuery().Find(t => t.ExpireDate >= currentTime && t.Status == true).ToList();
-                foreach (var item in centers)
-                {
-                    //lay danh sach lop dang hoat dong
-                    var classesActive = _classService.GetActiveClass4Report(item.StartDate, item.ExpireDate, item.ID);
-                    if (classesActive.Count() == 0) continue;
-
-                    var endTime = item.ExpireDate;
-                    var totalTotalMilliseconds = currentTime.Subtract(endTime).TotalMilliseconds;
-                    var totalTotalDays = currentTime.Subtract(endTime).TotalDays;
-                    if (totalTotalDays >= 0 && totalTotalDays <= 7 && item.ExpireDate.Month == currentTime.Month)
-                    {
-                        //gui mail thong bao het han
-                        var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == item.ID)).ToList().FindAll(y => HasRole(y.ID, item.ID, "head-teacher")).ToList();
-                        if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
-                        {
-                            listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
-                        }
-
-                        if (listTeacherHeader.Count == 0) continue;
-
-                        String listNameTeachers = "";
-                        List<String> listEmailTeachers = new List<string>();
-                        foreach (var teacher in listTeacherHeader)
-                        {
-                            listNameTeachers += $"{teacher.FullName}, ";
-                            listEmailTeachers.Add(teacher.Email);
-                        }
-                        listNameTeachers = listNameTeachers.Remove(listNameTeachers.LastIndexOf(",")).Trim() + ".";
-                        String subject = "THÔNG BÁO GIA HẠN DỊCH VỤ";
-
-                        var thead = "<thead>" +
-                            "<tr>" +
-                            "<td style='padding: 0.75pt;font-size:18pt;font-family:Arial,sans-serif;font-weight:bold;text-align: center'>THƯ THÔNG BÁO GIA HẠN DỊCH VỤ</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            "<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center;font-style: italic'>(Thành thật xin lỗi, nếu trong thời gian thư đang chuyển đi mà quý thầy cô đã thực hiện gia hạn)</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='padding: 0.75pt;font-size:8pt;font-family:Arial,sans-serif;text-align: center'>Ngày gửi: {DateTime.Now.ToString("dd-MM-yyyy")}</td>" +
-                            "</tr>" +
-                            "</thead>";
-                        var tbody = "<tbody>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Kính gửi: thầy/cô <span style='font-weight: bold;font-family:\"Segoe UI\",sans-serif; color: black; background-image:initial; background-position:initial; background-size:initial; background-repeat:initial; background-origin:initial; background-clip:initial'>{listNameTeachers}<span></td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Lời đầu tiên, <span style='font-weight:bold'>EDUSO</span> xin trân trọng cảm ơn sự hợp tác giữa <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> về việc sử dụng Eduso Platform trong giảng dạy và học tập.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Theo như thời gian sử dụng dịch vụ của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span> từ <span style='font-weight:bold'>{item.StartDate.ToUniversalTime().ToString("HH:mm dd/MM/yyyy")}</span> đến <span style='font-weight:bold'>{item.ExpireDate.ToLocalTime().ToString("HH:mm dd/MM/yyyy")}.</span></td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'><span style='font-weight:bold'>EDUSO</span> nhận thấy <span style='font-weight:bold'>{item.Name}</span> sắp đến ngày hết hạn sử dụng, sau ngày hết hạn thì các dịch vụ trên hệ thống Eduso sẽ tạm dừng hoạt động.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Để gia hạn dịch vụ, vui lòng liên hệ bộ phận chăm sóc khách hàng theo số điện thoại 0989085398 - 02432444439</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif'>Chân thành cảm ơn sự hợp tác của <span style='font-weight:bold'>{item.Name}</span> với <span style='font-weight:bold'>EDUSO</span>.</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>Trân trọng!</td>" +
-                            "</tr>" +
-                            "<tr>" +
-                            $"<td style='font-size:10pt;font-family:Helvetica,sans-serif;color:#0000ff;text-align: center'>----------------o0o-----------</td>" +
-                            "</tr>" +
-                            "</tbody>";
-
-                        var table2 = @"<table cellpadding='0' cellspacing='0' style='margin:auto;border-spacing:0px; border-collapse:collapse; color: rgb(68, 68, 68); width: 480px; font-size:9pt; font-family:Arial,sans-serif; line-height:14px'><tbody><tr><td colspan='2' style='padding: 0px 0px 5px; width: 480px'><font color='#134f5c'><font face='Arial, sans-serif'><span style='font-size:14.6667px'><b>EDU</b></span><span style='font-weight:bold;font-size:14.6667px'>SO</span></font><b style='font-size:9pt'>.,JSC</b></font><font color='#ff9900'><font face='Arial, sans-serif'><b><span style='font-size:14.6667px'><br></span></b></font></font></td></tr><tr><td colspan='2' style='padding:0px 0px 5px;width:480px;color:rgb(23,147,210)'></td></tr><tr><td colspan='2' style='padding:0px 0px 2px;width:480px;border-top:1px dotted rgb(19,19,19)'>&nbsp;</td></tr><tr><td valign='middle' style='padding:0px;width:120px;vertical-align:middle'><img src='https://ci3.googleusercontent.com/proxy/QAgPRZBFrmIBlGmpla2ITc2bGA9bDK-jAclDqfTcfevFuuKJSYrVRL3tBSDbre6GDcdcRw7fRTECfG5ANvDxMvkQiXZbAd56B4pNx3a8cSg2THUFbi0kScAaG8p1jrykO5s4=s0-d-e1-ft#https://drive.google.com/uc?id=1P2PWW0Do8B1PfWW-r1Kjy_tDK2mp92ma&amp;export=download' width='96' height='95' class='CToWUd'></td><td valign='middle' style='font-family:Arial,sans-serif;padding:0px;width:360px;color:rgb(19,19,19);vertical-align:middle'><table cellpadding='0' cellspacing='0' style='border-spacing:0px;border-collapse:collapse;background-color:transparent'><tbody><tr><td style='padding:1px'><br></td></tr><tr><td style='padding:1px'><span style='font-family:Arial,sans-serif;font-size:9pt'>Hotline: (+84)989 085 398</span></td></tr><tr><td style='font-family:Arial,sans-serif;padding:1px;font-size:9pt'><span style='font-size:9pt'>Mail:&nbsp;<a href='http://buithihong98@gmail.com/' target='_blank' data-saferedirecturl='https://www.google.com/url?q=http://buithihong98@gmail.com/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNETDHvUCqOIe01CJEJwgt6gTrPCkw'>eduso.vn@gmail.com</a></span>&nbsp;</td></tr><tr><td style='padding:1px'><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Trường&nbsp;</span></font><span style='font-size:9pt'>Đại học Giao thông vận tải -&nbsp;</span></span><span style='background-color:transparent'><font face='Arial, sans-serif'><span style='font-size:12px'>Số 3 Phố Cầu Giâ</span></font></span><font style='background-color:transparent;font-size:12px' face='Arial, sans-serif'>y <br>-&nbsp;</font><font face='Arial, sans-serif' style='background-color:transparent'><span style='font-size:12px'>Láng Thượng - Đống Đa -&nbsp;</span></font><span style='background-color:transparent;font-size:9pt'>Hà Nội -&nbsp; Việt Nam</span><font face='Arial, sans-serif' style='background-color:transparent;font-size:9pt'><br></font></td></tr><tr><td style='padding:2px 0px 0px 1px'><span style='display:inline-block;height:23px'><a href='https://www.facebook.com/engcooacademy/' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.facebook.com/engcooacademy/&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGKOaTRls1lZt_lcFHOqghSGBtnLQ'><img alt='Facebook icon' border='0' width='23' height='23' src='https://ci3.googleusercontent.com/proxy/mjiWTZdOYIWVF9PvTDENxZ6wQOuPAlFcn8ifTjfAuWRilo8dSpvX4l41IZgRY291qHCNVuF42W5YnOsux7SW-_NZ_nzBFoyx9RXY096p16IIPundLZxXuJgdlBEEyn-qrPROAmxOkxQ=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/fb.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;<a href='https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as=subscriber' style='background-color:transparent;color:rgb(51,122,183)' target='_blank' data-saferedirecturl='https://www.google.com/url?q=https://www.youtube.com/channel/UCC4hOZxED2bHeZJSZT8jydw?view_as%3Dsubscriber&amp;source=gmail&amp;ust=1609476250700000&amp;usg=AFQjCNGfTeFFzglJMtBFYrt1A1mPlgwklw'><img alt='Youtbue icon' border='0' width='23' height='23' src='https://ci4.googleusercontent.com/proxy/3yJ04s_GTj8Eck5ACth9ub3_mXYz9hUld0f6NMft-hC_i9M91dE06tpBbNOnc--l8okk-gS8GKbpichkfW88R2CG3u_8n0H_bU6tVdcUcTjLX8JkjbKpSJuY2xg2PWulNFSbyAuW60M=s0-d-e1-ft#https://codetwocdn.azureedge.net/images/mail-signatures/generator/compact-logo/yt.png' style='border:0px;vertical-align:middle;height:23px;width:23px' class='CToWUd'></a>&nbsp;&nbsp;</span></td></tr></tbody></table></td></tr><tr><td colspan='2' style='padding:2px 0px 0px;width:480px;border-bottom:1px dotted rgb(19,19,19)'>&nbsp;</td></tr></tbody></table>";
-
-                        var body = $"<table style='margin: auto'>{thead}{tbody}</table>{table2}";
-
-                        var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com", "vietphung.it@gmail.com" } : listEmailTeachers;
-                        //var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
-                        var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                        _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
-                        //_ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-                    }
-                }
-                return "Thong bao thanh cong";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-        }
+        //    System.IO.File.WriteAllLines(fileLPath, lines);
+        //}
         #endregion
 
         #region
-        //private static async Task sendmail()
-        //{
-        //    List<DateTime> dateTimes = new List<DateTime>
-        //    {
-        //        new DateTime(2020,10,1,8,0,0),
-        //        new DateTime(2020,10,8,8,0,0),
-        //        new DateTime(2020,10,15,8,0,0),
-        //        new DateTime(2020,10,22,8,0,0),
-        //        new DateTime(2020,10,29,8,0,0),
-        //        new DateTime(2020,11,5,8,0,0),
-        //        new DateTime(2020,11,12,8,0,0),
-        //        new DateTime(2020,11,19,8,0,0),
-        //    };
-
-        //    List<Data> data = new List<Data>();
-
-        //    foreach(DateTime currentTime in dateTimes)
-        //    {
-        //        var _data = GetDataForExcel(currentTime).Result;
-        //        data.Add(_data);
-        //    }
-
-        //    String body = GetContent(data);
-        //    String subject = "Lấy data làm excel";
-        //    var toAddress = new List<String> { "nguyenvanhoa2017602593@gmail.com" };
-        //    _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-        //    Console.WriteLine($"Is Done!");
-        //}
-        //private static async Task<Data> GetDataForExcel(DateTime currentTime)
-        //{
-        //    var day = currentTime.Day;
-        //    var month = currentTime.Month;
-        //    var year = currentTime.Year;
-        //    var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
-        //    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
-
-        //    var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
-
-        //    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-        //    Int32 totalStudent = 0, totalActiveStudents = 0; ;
-        //    long tren8 = 0, tren5 = 0, tren2 = 0, tren0 = 0;
-        //    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-        //    if (classesActive.Count() == 0)
-        //    {
-        //        //continue;
-        //    }
-
-        //    foreach (var _class in classesActive.OrderBy(x => x.Name))
-        //    {
-        //        //Lay danh sach ID hoc sinh trong lop
-        //        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
-        //        var studentIds = students.Select(t => t.ID).ToList();
-
-        //        var classStudent = studentIds.Count();
-        //        totalStudent += classStudent;
-
-        //        //Lay danh sach ID bai hoc duoc mo trong tuan
-        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
-        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-        //            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-        //            x => studentIds.Contains(x.StudentID)).ToEnumerable();
-        //        totalActiveStudents += activeStudents.Count();
-
-        //        //var stChuaVaoLop = classStudent - activeStudents.Count();
-        //        //totalstChuaVaoLop += stChuaVaoLop;
-
-        //        // danh sach bai kiem tra
-        //        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-        //        //ket qua lam bai cua hoc sinh trong lop
-        //        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-        //                           group r by r.StudentID
-        //                           into g
-        //                           select new StudentResult
-        //                           {
-        //                               StudentID = g.Key,
-        //                               ExamCount = g.Count(),
-        //                               AvgPoint = g.Average(t => t.LastPoint),
-        //                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-        //                           }).ToList();
-
-        //        //render ket qua hoc tap
-        //        var min8 = classResult.Count(t => t.AvgPoint >= 80);
-        //        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-        //        var min2 = classResult.Count(t => t.AvgPoint >= 20 && t.AvgPoint < 50);
-        //        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 20);
-
-        //        tren8 += min8;
-        //        tren5 += min5;
-        //        tren2 += min2;
-        //        tren0 += min0;
-        //    }
-
-        //    double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100,2);
-        //    double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100,2);
-        //    double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
-        //    double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
-        //    //double tiletren0 = ((double)tren0 / totalActiveStudents) * 100;
-        //    var datarespone = new Data
-        //    {
-        //        TotalStudent = totalStudent,
-        //        TotalStudentActive = totalActiveStudents,
-        //        PersentPoint2 = tiletren0,
-        //        PersentPoint5 = tiletren2,
-        //        PersentPoint8 = tiletren5,
-        //        PersentPoint10 = tiletren8,
-        //        currentTime = currentTime
-        //    };
-        //    return datarespone;
-        //}
-
         //private static String GetContent(List<Data> datas)
         //{
         //    String body = "";
         //    body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
         //                    <thead>
         //                                <tr style='font-weight:bold;background-color: bisque'>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>Tháng</td>
-        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Số lượng tài khoản</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Sĩ số</td>
+        //                                    <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Chưa vào hệ thống</td>
         //                                    <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
         //                                </tr>
         //                                <tr style='font-weight:bold;background-color: bisque'>                                        
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 1.9</td>
-        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 2.0 -> 4.9</td>
+        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 4.9</td>
         //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
         //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
+        //                                    <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
         //                                </tr>
         //                            </thead>
         //                            <tbody>";
         //    String tbody = "";
-        //    foreach(var data in datas)
+        //    var listData = datas.GroupBy(x => x.Week.Substring(x.Week.Length - 2)).OrderByDescending(x => x.Key);
+        //    foreach (var _data in listData)
         //    {
-        //        tbody += $"<tr>" +
-        //            $"<td>Tháng {data.currentTime.Month}</td>" +
-        //            $"<td>{data.TotalStudentActive}/{data.TotalStudent}</td>" +
-        //            $"<td>{data.PersentPoint2} %</td>" +
-        //            $"<td>{data.PersentPoint5} %</td>" +
-        //            $"<td>{data.PersentPoint8} %</td>" +
-        //            $"<td>{data.PersentPoint10} %</td>" +
-        //            $"</tr>";
+        //        var _datas = _data.ToList().OrderByDescending(x => x.Week);
+        //        foreach (var data in _datas)
+        //        {
+        //            tbody += $"<tr>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.Week}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent - data.TotalStudentActive}</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color:#ffff33'>{data.PersentMinPoint0} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightblue'>{data.PersentMinPoint5} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightgreen'>{data.PersentMinPoint8} %</td>" +
+        //                $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: rgb(194,194,216)'>{data.DontWork} %</td>" +
+        //                $"</tr>";
+        //        }
         //    }
         //    tbody += "</tbody></table>";
         //    body += tbody;
         //    return body;
         //}
-
-        //private static async Task sendmail()
-        //{
-        //    List<DateTime> dateTimes = new List<DateTime>
-        //    {
-        //        new DateTime(2020,10,1,8,0,0),
-        //        new DateTime(2020,10,8,8,0,0),
-        //        new DateTime(2020,10,15,8,0,0),
-        //        new DateTime(2020,10,22,8,0,0),
-        //        new DateTime(2020,10,29,8,0,0),
-        //        new DateTime(2020,11,5,8,0,0),
-        //        new DateTime(2020,11,12,8,0,0),
-        //        new DateTime(2020,11,19,8,0,0),
-        //        new DateTime(2020,11,26,8,0,0),
-        //        new DateTime(2020,12,3,8,0,0),
-        //        new DateTime(2020,12,10,8,0,0),
-        //    };
-
-        //    List<Data> data = new List<Data>();
-
-        //    List<CenterEntity> listCenterActive = new List<CenterEntity>();
-        //    List<TeacherEntity> listTeacher = new List<TeacherEntity>();
-        //    //foreach (DateTime currentTime in dateTimes)
-        //    //{
-        //    //    var centersActive = _centerService.GetActiveCenter(currentTime) as CenterEntity;//lay co so dang hoat dong
-        //    //    listCenterActive.Add(centersActive);
-        //    //}
-
-        //    var a = dateTimes.LastOrDefault();
-        //    var centersActive = _centerService.GetActiveCenter(dateTimes.LastOrDefault()).ToList();//lay co so dang hoat dong
-        //    var b = _centerService.GetActiveCenter(DateTime.Now).ToList();
-
-        //    foreach (var center in centersActive)
-        //    {
-        //        if (center.Abbr == "c3vyvp")
-        //        {
-        //            var indexWeek = 0;
-        //            var index = 1;
-        //            data = new List<Data>();
-        //            foreach (DateTime currentTime in dateTimes)
-        //            {
-        //                var _data = await GetDataForExcel(currentTime, center);
-        //                if (currentTime.Month == dateTimes.ElementAtOrDefault(index).Month)
-        //                {
-        //                    indexWeek++;
-        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-        //                }
-        //                else
-        //                {
-        //                    indexWeek++;
-        //                    _data.Week = $"Tuần {indexWeek} tháng {currentTime.Month}";
-        //                    indexWeek = 0;
-        //                }
-        //                data.Add(_data);
-        //                index++;
-        //            }
-
-        //            var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
-        //            if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
-        //            {
-        //                listTeacherHeader.RemoveAt(listTeacherHeader.FindIndex(x => x.Email == "huonghl@utc.edu.vn"));
-        //            }
-
-        //            String body = GetContent(data);
-        //            String subject = $"B/c tháng {center.Name}";
-        //            var toAddress = isTest == true ? new List<String> { "nguyenvanhoa2017602593@gmail.com", "k.chee.dinh@gmail.com" } : listTeacherHeader.Select(x => x.Email).ToList();
-        //            var toBcc = isTest == true ? null : new List<String> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn", "kchidinh@gmail.com" };
-        //            _ = await _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE, null, toBcc);
-        //            Console.WriteLine($"{center.Name} Is Done!");
-        //        }
-        //    }
-        //}
-        
-        //private static async Task<Data> GetDataForExcel(DateTime currentTime, CenterEntity center)
-        //{
-        //    var day = currentTime.Day;
-        //    var month = currentTime.Month;
-        //    var year = currentTime.Year;
-        //    var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-3).AddMinutes(1);
-        //    var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
-
-        //    //var center = _centerService.CreateQuery().Find(x => x.ExpireDate >= currentTime && x.Abbr.Equals("c3vyvp") && x.Status == true).FirstOrDefault();//lay co so dang hoat dong
-
-        //    var classesActive = _classService.GetActiveClass4Report(startWeek, endWeek, center.ID);//lay danh sach lop dang hoat dong
-        //    Int32 totalStudent = 0, totalActiveStudents = 0; ;
-        //    long tren8 = 0, tren5 = 0, tren0 = 0;
-        //    string[] style = { "background-color: aliceblueT", "background-color: whitesmoke" };
-        //    if (classesActive.Count() == 0)
-        //    {
-        //        //continue;
-        //    }
-
-        //    foreach (var _class in classesActive.OrderBy(x => x.Name))
-        //    {
-        //        //Lay danh sach ID hoc sinh trong lop
-        //        var students = _studentService.GetStudentsByClassId(_class.ID).ToList();
-        //        var studentIds = students.Select(t => t.ID).ToList();
-
-        //        var classStudent = studentIds.Count();
-        //        totalStudent += classStudent;
-
-        //        //Lay danh sach ID bai hoc duoc mo trong tuan
-        //        var activeLessons = _lessonScheduleService.CreateQuery().Find(o => o.ClassID == _class.ID && o.StartDate <= endWeek && o.EndDate >= startWeek).ToList();
-        //        var activeLessonIds = activeLessons.Select(t => t.LessonID).ToList();
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeProgress = _lessonProgressService.CreateQuery().Find(
-        //            x => studentIds.Contains(x.StudentID) && activeLessonIds.Contains(x.LessonID)
-        //            && x.LastDate <= endWeek && x.LastDate >= startWeek).ToEnumerable();
-
-
-        //        //Lay danh sach hoc sinh da hoc cac bai tren trong tuan
-        //        var activeStudents = _lessonProgressService.CreateQuery().Distinct(t => t.StudentID,
-        //            x => studentIds.Contains(x.StudentID)).ToEnumerable();
-        //        totalActiveStudents += activeStudents.Count();
-
-        //        //var stChuaVaoLop = classStudent - activeStudents.Count();
-        //        //totalstChuaVaoLop += stChuaVaoLop;
-
-        //        // danh sach bai kiem tra
-        //        var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 2 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-        //        //var examIds = _lessonService.CreateQuery().Find(x => (x.TemplateType == 1 || x.IsPractice == true) && activeLessonIds.Contains(x.ID)).Project(x => x.ID).ToList();
-
-        //        //ket qua lam bai cua hoc sinh trong lop
-        //        var classResult = (from r in activeProgress.Where(t => examIds.Contains(t.LessonID) && t.Tried > 0)
-        //                           group r by r.StudentID
-        //                           into g
-        //                           select new StudentResult
-        //                           {
-        //                               StudentID = g.Key,
-        //                               ExamCount = g.Count(),
-        //                               AvgPoint = g.Average(t => t.LastPoint),
-        //                               StudentName = _studentService.GetItemByID(g.Key)?.FullName,
-        //                           }).ToList();
-
-        //        //render ket qua hoc tap
-        //        var min8 = classResult.Count(t => t.AvgPoint >= 80);
-        //        var min5 = classResult.Count(t => t.AvgPoint >= 50 && t.AvgPoint < 80);
-        //        var min0 = classResult.Count(t => t.AvgPoint >= 0 && t.AvgPoint < 50);
-
-        //        tren8 += min8;
-        //        tren5 += min5;
-        //        tren0 += min0;
-        //    }
-
-        //    double tiletren8 = Math.Round(((double)tren8 / totalActiveStudents) * 100, 2);
-        //    double tiletren5 = Math.Round(((double)tren5 / totalActiveStudents) * 100, 2);
-        //    //double tiletren2 = Math.Round(((double)tren2 / totalActiveStudents) * 100,2);
-        //    //double tiletren0 = 100 - tiletren2 - tiletren5 - tiletren8;
-        //    double tiletren0 = Math.Round(((double)tren0 / totalActiveStudents) * 100, 2);
-        //    double tilechualam = 100 - tiletren0 - tiletren5 - tiletren8;
-        //    var datarespone = new Data
-        //    {
-        //        TotalStudent = totalStudent,
-        //        TotalStudentActive = totalActiveStudents,
-        //        PersentMinPoint0 = tiletren0,
-        //        PersentMinPoint5 = tiletren5,
-        //        PersentMinPoint8 = tiletren8,
-        //        currentTime = currentTime,
-        //        DontWork = tilechualam
-        //    };
-        //    return datarespone;
-        //}
-
-        private static String GetContent(List<Data> datas)
-        {
-            String body = "";
-            body += @"<table style='margin-top:20px; width: 100%; border: solid 1px #333; border-collapse: collapse'>
-                            <thead>
-                                        <tr style='font-weight:bold;background-color: bisque'>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:10px'>STT</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Sĩ số</td>
-                                            <td rowspan='2' style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:100px'>Chưa vào hệ thống</td>
-                                            <td colspan='4' style='text-align:center; border: solid 1px #333; border-collapse: collapse'>Kết quả luyện tập & kiểm tra</td>
-                                        </tr>
-                                        <tr style='font-weight:bold;background-color: bisque'>                                        
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'> 0.0 -> 4.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>5.0 -> 7.9</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>8.0 -> 10</td>
-                                            <td style='text-align:center; border: solid 1px #333; border-collapse: collapse;width:50px'>Chưa làm</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>";
-            String tbody = "";
-            var listData = datas.GroupBy(x => x.Week.Substring(x.Week.Length - 2)).OrderByDescending(x => x.Key);
-            foreach (var _data in listData)
-            {
-                var _datas = _data.ToList().OrderByDescending(x => x.Week);
-                foreach (var data in _datas)
-                {
-                    tbody += $"<tr>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.Week}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse'>{data.TotalStudent - data.TotalStudentActive}</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color:#ffff33'>{data.PersentMinPoint0} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightblue'>{data.PersentMinPoint5} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: lightgreen'>{data.PersentMinPoint8} %</td>" +
-                        $"<td style='text-align:center; border: solid 1px #333; border-collapse: collapse;background-color: rgb(194,194,216)'>{data.DontWork} %</td>" +
-                        $"</tr>";
-                }
-            }
-            tbody += "</tbody></table>";
-            body += tbody;
-            return body;
-        }
-        #endregion
-
-        #region
-        private static async Task AutoDeactiveClass()
-        {
-            try
-            {
-                var currentTime = DateTime.UtcNow;
-                int offset = currentTime.DayOfWeek - DayOfWeek.Monday;
-                var monday = currentTime.AddDays(-offset);
-                var monday2weekago = monday.AddDays(-14);
-                var sundayweekago = monday.AddDays(-1);
-                var firstDay = new DateTime(monday2weekago.Year, monday2weekago.Month, monday2weekago.Day, 0, 0, 0);
-                var lastDay = new DateTime(sundayweekago.Year, sundayweekago.Month, sundayweekago.Day, 23, 59, 0);
-                var activeCenters = _centerService.GetActiveCenter(currentTime);
-                if (activeCenters.Count() == 0)
-                {
-                    Console.WriteLine("Không có cơ sở hoạt động");
-                }
-
-                Int32 totalClass = 0;
-
-                foreach (var center in activeCenters)
-                {
-                    var classesActive = _classService.GetActiveClass(currentTime, center.ID);
-                    if (classesActive.Count() == 0) continue;
-                    foreach (var @class in classesActive)
-                    {
-                        if (@class.StartDate > firstDay) continue;
-                        var activeLessons = _lessonService.CreateQuery().Find(o => o.StartDate <= lastDay && o.EndDate >= firstDay && o.ClassID == @class.ID).CountDocuments();
-                        if (activeLessons == 0)
-                        {
-                            if (!@class.IsActive) continue;
-                            @class.IsActive = false;
-                            totalClass++;
-                            Console.WriteLine("Lop khong co hoat dong " + @class.Name + " - " + center.Name);
-                            //_classService.Save(@class);
-                            var students = _studentService.GetStudentIdsByClassId(@class.ID).Count();
-                            if (students == 0) continue;
-                            var members = @class.Members.Where(x => x.Type == ClassMemberType.TEACHER);
-                            var listTeacher = new List<TeacherEntity>();
-                            var subject = "Thông báo đóng lớp không hoạt động";
-                            foreach (var mem in members.ToList())
-                            {
-                                var _teacher = _teacherService.GetItemByID(mem.TeacherID);
-                                if (!listTeacher.Any(x => x.Email == _teacher.Email))
-                                {
-                                    listTeacher.Add(_teacher);
-                                    var content = "<div>" +
-                                        $"<p>Kính gửi thầy/cô: {_teacher.FullName}</p>" +
-                                        $"<p>EDUSO nhận thấy trong thời gian từ ngày {firstDay.ToString("dd-MM-yyyy")} đến ngày {lastDay.ToString("dd-MM-yyyy")} " +
-                                        $"lớp {@class.Name} - cơ sở {center.Name}" +
-                                        $"của giáo viên {_teacher.FullName} không có hoạt động (lên lịch dạy, giao bài tập cho học sinh).</p>" +
-                                        $"<p>Vì vậy EDUSO đóng lớp {@class.Name} kể từ ngày {currentTime.ToString("dd-MM-yyyy")}</p>" +
-                                        $"<p>Mọi thông tin thắc mắc vui lòng liên hệ CSKH: 0989 085 398 </p>" +
-                                        "</div>";
-                                    var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { _teacher.Email };
-                                    //var toAddress = isTest ? new List<String> { "nguyenvanhoa2017602593@gmail.com" } : new List<string> { "nguyenvanhoa2017602593@gmail.com" };
-                                    var toBCC = isTest ? null : new List<String> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" };
-                                    _ = _mailHelper.SendBaseEmail(toAddress, subject, content, MailPhase.CSKH_REPORT, null, toBCC);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Console.WriteLine($"Tổng lớp: {totalClass}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
         #endregion
 
         //function
@@ -2638,25 +2299,6 @@ namespace AutoEmailEduso
             if (centerMember == null) return false;
             if (_roleService.GetItemByID(centerMember.RoleID).Code != role) return false;
             return true;
-        }
-
-        private class ClassSubjectInfo
-        {
-            public string Name { get; set; }
-            public string LessonName { get; set; }
-            public DateTime Start { get; set; }
-            public int Type { get; set; }
-        }
-
-        private class StudentResult
-        {
-            public string StudentID { get; set; }
-            public int ExamCount { get; set; }
-            public double AvgPoint { get; set; }
-            public string StudentName { get; set; }
-            public string AvgTimeDoExam { get; set; }
-            public int CompletedLesson { get; set; }
-            public int TotalLesson { get; set; }
         }
 
         private static readonly string extendTeacher =
@@ -2705,119 +2347,88 @@ namespace AutoEmailEduso
             }
         }
 
-        private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime, DateTime endTime)
-        {
-            var month = startTime.Month;
-            var year = startTime.Year;
-            var firstTime = new DateTime(year, month, 1, 0, 0, 0);
-            //List<DataTime> data = new List<DataTime>();
-            Dictionary<Int32, DataTime> data = new Dictionary<Int32, DataTime>();
-            var timeMonth = new DataTime()
-            {
-                StartTime = firstTime,
-                EndTime = firstTime.AddMonths(1).AddMinutes(-1)
-            };
-            data.Add(month, timeMonth);
+        //private static Dictionary<Int32, DataTime> GetListMonth(DateTime startTime, DateTime endTime)
+        //{
+        //    var month = startTime.Month;
+        //    var year = startTime.Year;
+        //    var firstTime = new DateTime(year, month, 1, 0, 0, 0);
+        //    //List<DataTime> data = new List<DataTime>();
+        //    Dictionary<Int32, DataTime> data = new Dictionary<Int32, DataTime>();
+        //    var timeMonth = new DataTime()
+        //    {
+        //        StartTime = firstTime,
+        //        EndTime = firstTime.AddMonths(1).AddMinutes(-1)
+        //    };
+        //    data.Add(month, timeMonth);
 
-            while (timeMonth.EndTime.Month <= 12 && year == 2020)
-            {
-                firstTime = timeMonth.StartTime.AddMonths(1);
-                var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
-                month = firstTime.Month;
-                timeMonth.StartTime = firstTime;
-                timeMonth.EndTime = lastTime;
-                data.Add(month, timeMonth);
-            }
-            return data;
-        }
+        //    while (timeMonth.EndTime.Month <= 12 && year == 2020)
+        //    {
+        //        firstTime = timeMonth.StartTime.AddMonths(1);
+        //        var lastTime = firstTime.AddMonths(1).AddMinutes(-1);
+        //        month = firstTime.Month;
+        //        timeMonth.StartTime = firstTime;
+        //        timeMonth.EndTime = lastTime;
+        //        data.Add(month, timeMonth);
+        //    }
+        //    return data;
+        //}
 
-        #region mở rộng
-        public static async Task BenTre()
-        {
-            var center = _centerService.CreateQuery().Find(x => x.Abbr == "c3btvp").FirstOrDefault();
-            var listClass = _classService.CreateQuery().Find(x => x.Center == center.ID).ToList();
-            foreach (var item in listClass)
-            {
-                var students = _studentService.GetStudentsByClassId(item.ID);
-                var lessonProgess = _lessonProgressService.CreateQuery().Find(x => x.ClassID == item.ID && x.TotalLearnt == 0).ToList().GroupBy(x => x.StudentID)
-                    .Select(x => new
-                    {
-                        StudentName = _studentService.GetItemByID(x.Key).FullName,
-                        ClassName = item.Name
-                    });
-                var a = "";
-            }
-        }
+        //public static async Task HPNY()
+        //{
+        //    try
+        //    {
+        //        var centers = _centerService.GetActiveCenter(DateTime.UtcNow);
+        //        if (centers.Count() == 0)
+        //            Console.WriteLine("Không có cơ sở hoạt động");
+        //        //Int32 index = 0;
+        //        foreach (var center in centers)
+        //        {
+        //            //if (index == 0)
+        //            //{
+        //            var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
+        //            String subject = "Thư cảm ơn và thông báo nghỉ tết";
+        //            String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
+        //                "<div>" +
+        //                "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
+        //                "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
+        //                "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
+        //                "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
+        //                "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
+        //                "<ul>" +
+        //                "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
+        //                "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
+        //                "<li>Hotline: 0989 085 398</li>" +
+        //                "</ul>" +
+        //                "</p>" +
+        //                "<p>Trân trọng</p>" +
+        //                "</div>" +
+        //                "";
 
-        public static async Task HPNY()
-        {
-            try
-            {
-                var centers = _centerService.GetActiveCenter(DateTime.UtcNow);
-                if (centers.Count() == 0)
-                    Console.WriteLine("Không có cơ sở hoạt động");
-                //Int32 index = 0;
-                foreach (var center in centers)
-                {
-                    //if (index == 0)
-                    //{
-                    var teachers = _teacherService.CreateQuery().Find(x => x.IsActive && x.Centers.Any(y => y.CenterID == center.ID)).ToList().Distinct();
-                    String subject = "Thư cảm ơn và thông báo nghỉ tết";
-                    String body = "<div style='text-align:center'><img src='https://static.eduso.vn//images/pannerHPNY.png' style='width:30%'/></div>" +
-                        "<div>" +
-                        "<p>Kính gửi: Quý Khách hàng và quý Đối tác</p>" +
-                        "<p>Tết Tân Sửu 2021 đang đến gần, Công ty cổ phần công nghệ và giải pháp giáo dục EDUSO xin kính chúc Quý khách hàng và quý Đối tác một năm mới An Khang - Thịnh Vượng - Vạn Sự - Như Ý</p>" +
-                        "<p>EDUSO chân thành cảm ơn toàn thể quý khách hàng đã tin tưởng và đồng hành cùng công ty trong suốt quãng thời gian vừa qua.</p>" +
-                        "<p>Tết đến xuân về, sang năm mới EDUSO cam kết sẽ nỗ lực hoàn thiện hơn nữa để đem đến cho quý Khách hàng và quý Đối tác những sản phẩm và dịch vụ chất lượng nhất</p>" +
-                        "<p>Hoà chung niềm vui năm mới, công ty EDUSO cũng xin trân trọng thông báo lịch nghỉ Tết Nguyên Đán như sau" +
-                        "<ul>" +
-                        "<li>Thời gian nghỉ: Từ ngày 07/02/2021 đến ngày 16/02/2021 ( Tức ngày 26/12 đến ngày 5/1 Âm Lịch)</li>" +
-                        "<li>Thời gian làm việc trở lại: Ngày 17/02/2021 ( Tức ngày 6/1 Âm Lịch)</li>" +
-                        "<li>Hotline: 0989 085 398</li>" +
-                        "</ul>" +
-                        "</p>" +
-                        "<p>Trân trọng</p>" +
-                        "</div>" +
-                        "";
-
-                    foreach (var teacher in teachers)
-                    {
-                        if (teacher.Email != null)
-                        {
-                            var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { teacher.Email };
-                            //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
-                            //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
-                            Console.WriteLine($"Send to {teacher.FullName} OK");
-                            _ = _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
-                        }
-                    }
-                    //_ = _mailHelper.SendBaseEmail(null, subject, body, MailPhase.WEEKLY_SCHEDULE,null,new List<string> { "huonghl@utc.edu.vn" });
-                    //}
-                    //index++;
-                }
-                Console.WriteLine("Chúc mừng năm mới ^^");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-        #endregion
+        //            foreach (var teacher in teachers)
+        //            {
+        //                if (teacher.Email != null)
+        //                {
+        //                    var toAddress = isTest == true ? new List<string> { "nguyenvanhoa2017602593@gmail.com", "vietphung.it@gmail.com", "k.chee.dinh@gmail.com" } : new List<string> { teacher.Email };
+        //                    //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+        //                    //var bccAddress = isTest == true ? null : new List<string> { "nguyenhoa.dev@gmail.com", "vietphung.it@gmail.com", "huonghl@utc.edu.vn" };
+        //                    Console.WriteLine($"Send to {teacher.FullName} OK");
+        //                    _ = _mailHelper.SendBaseEmail(toAddress, subject, body, MailPhase.WEEKLY_SCHEDULE);
+        //                }
+        //            }
+        //            //_ = _mailHelper.SendBaseEmail(null, subject, body, MailPhase.WEEKLY_SCHEDULE,null,new List<string> { "huonghl@utc.edu.vn" });
+        //            //}
+        //            //index++;
+        //        }
+        //        Console.WriteLine("Chúc mừng năm mới ^^");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
+        //}
     }
 
     #region class
-    //public class ScheduleView : LessonEntity
-    //{
-    //    public string LessonName { get; set; }
-
-    //    public ScheduleView(LessonEntity lesson)
-    //    {
-    //        LessonID = lesson.ID;
-    //        StartDate = lesson.StartDate;
-    //        EndDate = lesson.EndDate;
-    //    }
-    //}
-
     public class ReportViewModal : ReportEntity
     {
         public String CenterName { get; set; } //ten co so
@@ -2899,6 +2510,25 @@ namespace AutoEmailEduso
         public String LessonID { get; set; }
         public String CourseName { get; set; }
         public String ChapterName { get; set; }
+    }
+
+    public class ClassSubjectInfo
+    {
+        public string Name { get; set; }
+        public string LessonName { get; set; }
+        public DateTime Start { get; set; }
+        public int Type { get; set; }
+    }
+
+    public class StudentResult
+    {
+        public string StudentID { get; set; }
+        public int ExamCount { get; set; }
+        public double AvgPoint { get; set; }
+        public string StudentName { get; set; }
+        public string AvgTimeDoExam { get; set; }
+        public int CompletedLesson { get; set; }
+        public int TotalLesson { get; set; }
     }
     #endregion
 

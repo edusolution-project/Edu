@@ -25,9 +25,23 @@
 <link href="~/js/Chart.js/Chart.min.css" rel="stylesheet" />
 <script src="~/js/Chart.js/Chart.min.js"></script>
 <link href="~/js/Chart.js/css/site.css" rel="stylesheet" />
-<script>
-    setActiveMenu("course");
-</script>
+
+@{
+    if (isHeadTeacher)
+    {
+        @*<script>
+            setActiveMenu("course");
+            debugger
+        </script>*@
+    }
+    else
+    {
+        <script>
+            setActiveMenu("mycourse");
+        </script>
+    }
+}
+
 
 <section class="module" id="dashboard_content">
     <div class="h4 m-3" v-cloak cloak-holder>
@@ -66,7 +80,7 @@
                 <b-button class="btn-addevent btn-sm" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>
                 @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
             </div>
-            @if (isHeadTeacher)
+            @*@if (isHeadTeacher)
             {
                 <div class="flex flex-wrap align-items-center">
                     <div class="tab bg-none col-md-12 mt-2">
@@ -76,7 +90,7 @@
                         </ul>
                     </div>
                 </div>
-            }
+            }*@
         </div>
     </div>
     <div class="card-body" v-cloak v-if="tab[0]">
@@ -431,12 +445,19 @@
                 }
                 else
                     this.getData()
+
+                if (this.isPrivate == 'true') {
+                    setActiveMenu('mycourse')
+                }
+                else {
+                    setActiveMenu('course')
+                }
             },
             components: {
                 vuejsDatepicker
             },
             data: {
-                isPrivate: false,
+                isPrivate: true,
                 isLoading: false,
                 list_subject: [],
                 tableData: [],

@@ -3799,7 +3799,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 IsActive = t.IsActive,
                 Name = t.Name,
                 Created = t.Created,
-                Members = t.Members.Select(m => m.MemberID).ToList(),
+                Members = t.Members == null ? new List<string>(): t.Members.Select(m => m.MemberID).ToList(),
                 StudentCount = t.Members == null ? 0 : t.Members.Count()
             }).ToList());
         }

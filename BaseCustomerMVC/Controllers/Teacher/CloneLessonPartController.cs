@@ -1945,6 +1945,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             CreateUser = createUser,
                             Point = 1,
                             Answers = new List<CloneLessonPartAnswerEntity>() { },//danh sach cau tra loi,
+                            LessonID = item.ParentID
                         };
                         foreach (DocumentObject obj in para.ChildObjects)
                         {
@@ -2392,6 +2393,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     quiz.Created = DateTime.UtcNow;
                     quiz.Updated = DateTime.UtcNow;
                     quiz.CreateUser = UserID;
+                    quiz.LessonID = questionVM.LessonID;
                 }
                 _cloneQuestionService.CreateQuery().InsertOne(quiz);
 
