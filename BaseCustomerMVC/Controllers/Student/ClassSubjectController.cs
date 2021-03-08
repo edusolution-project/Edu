@@ -352,11 +352,11 @@ namespace BaseCustomerMVC.Controllers.Student
             List<LessonEntity> activelessonTemp = new List<LessonEntity>();
             if (TypeFilter == 1) //gv giao bai
             {
-                activelessonTemp = _lessonService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now).Project(t => new LessonEntity { ID = t.ID, ClassSubjectID = t.ClassSubjectID }).ToList();
+                activelessonTemp = _lessonService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StartDate <= DateTime.Now).Project(t => new LessonEntity { ID = t.ID, ClassSubjectID = t.ClassSubjectID, EndDate = t.EndDate, ClassID = t.ClassID }).ToList();
             }
             else
             {
-                activelessonTemp = _lessonService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID)).Project(t => new LessonEntity { ID = t.ID, ClassSubjectID = t.ClassSubjectID }).ToList();
+                activelessonTemp = _lessonService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID)).Project(t => new LessonEntity { ID = t.ID, ClassSubjectID = t.ClassSubjectID, EndDate = t.EndDate, ClassID = t.ClassID }).ToList();
             }
             var progress = _lessonProgressService.CreateQuery().Find(x => listClassSbjIds.Contains(x.ClassSubjectID) && x.StudentID == student.ID).ToList();
             foreach (var item in lclass)
@@ -736,7 +736,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 if (HasExam)
                 {
-                    var sbjExam = _classSubjectService.GetClassSubjectExamByClassID(sbj.ID);
+                    var sbjExam = _classSubjectService.GetClassSubjectExamByClassID(sbj.ClassID);
                     var exams = _lessonService.CreateQuery().Find(o => o.ClassSubjectID == sbjExam.ID && o.TemplateType == 2).ToList();
 
                     foreach (var exam in exams)
