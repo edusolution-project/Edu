@@ -46,7 +46,7 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    @*<li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>*@
+                    <li v-bind:class="{active : tab[3]}"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
@@ -267,8 +267,11 @@
                                     <tr>
                                         <th class="sticky-col first-col" rowspan="2">STT</th>
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
-                                        <th rowspan="2" class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm trung bình/Điểm mục tiêu</th>
-                                        <th rowspan="2" class="sticky-col third-col" v-else>Điểm trung bình</th>
+                                        <th rowspan="2" class="sticky-col third-col">Điểm <br /> Trung bình / Mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col forth-col" v-if="group_data.length > 0">
+                                            Nhóm
+                                        </th>
+                                        @*<th rowspan="2" class="sticky-col third-col" v-else>Điểm trung bình</th>*@
                                         @*<th rowspan="2" class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">Điểm mục tiêu</th>*@
                                         <th :colspan="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length" style="text-align:center">Tuần</th>
                                     </tr>
@@ -280,9 +283,17 @@
                                     <tr v-for="(items,i) in studentSummarySbj">
                                         <td class="sticky-col first-col">{{i}}</td>
                                         <td class="sticky-col second-col">{{ list_students[i-1].FullName}}</td>
-                                        <td class="sticky-col third-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}/{{roundPoint(list_students[i-1].Target,1)}}</td>
-                                        <td class="sticky-col third-col" v-else>{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>
+                                        <td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}/{{roundPoint(list_students[i-1].Target,1)}}</td>
+                                        @*<td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>*@
                                         @*<td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>*@
+                                        <td class="sticky-col fourth-col p-1">
+                                            <button class="btn btn-sm btn-secondary pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-if="list_students[i-1].GroupIDs != null && list_students[i-1].GroupIDs.length > 0">
+                                                {{displayGroup(list_students[i-1].GroupIDs[0])}}
+                                            </button>
+                                            <button class="btn btn-sm btn-light-blue pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-else>
+                                                ---
+                                            </button>
+                                        </td>
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
                                             <template v-for="item in items">
@@ -958,10 +969,10 @@
                                               v-bind:listchaps="listchaps"
                                               v-bind:type="type"
                                               v-bind:group="group"></chap-content>
-                                <lesson-item v-for="lesson in filterLesson(data)" 
-                                             v-bind:data="lesson" 
-                                             v-bind:owner="owner" 
-                                             v-bind:classSubject="data.ClassSubject" 
+                                <lesson-item v-for="lesson in filterLesson(data)"
+                                             v-bind:data="lesson"
+                                             v-bind:owner="owner"
+                                             v-bind:classSubject="data.ClassSubject"
                                              v-bind:type="type"
                                              v-bind:group="group"></lesson-item>
                             </template>
@@ -1640,6 +1651,7 @@
                             history.replaceState({ tab: a }, this.className + " - Bảng điểm", "#score");
                             this.loadClassSubjects();
                             this.loadClassScore();
+                            this.loadGroup();
                             break;
                         case 3:
                             history.replaceState({ tab: a }, this.className + " - Nhóm học sinh", "#group");
@@ -2107,7 +2119,7 @@
                             else {
                                 Swal.fire({
                                     title: "Thông báo",
-                                    text: "Đã cập nhật nhóm",
+                                    text: "Đã giao bài cho nhóm",
                                     icon: 'success',
                                 });
                             }
@@ -2331,7 +2343,6 @@
                             //_that.list_data[k].IsActive = !_that.list_data[k].IsActive;
                         }).catch(e => { })
                 },
-
                 toggleHideAnswer(obj) {
                     let _url = '@processUrl("ToggleHideAnswer", "Lesson")'
                     let _form = new FormData()
@@ -2436,6 +2447,12 @@
                 },
                 //REF
                 //GROUP
+                displayGroup(groupID) {
+                    var gp = this.group_data.filter(t => t.ID == groupID);
+                    if (gp.length > 0)
+                        return gp[0].Name;
+                    return "";
+                },
                 addGroup(obj) {
                     var classID = '@currentClass.ID'
                     Swal.fire({
@@ -2599,7 +2616,70 @@
                         }
                     })
                 },
+                async chooseGroupStudent(student) {
+                    console.log(student);
+                    let _that = this
+                    var options = {};
+                    options['all-class'] = 'Không xếp nhóm';
+                    _that.group_data.forEach(function (obj, idx) {
+                        //grp.push({ID : item.ID, Name : item.Name})
+                        options[obj.ID] = obj.Name;
+                    });
 
+                    var defValue = student.GroupIDs != null && student.GroupIDs.length > 0 ? student.GroupIDs[0] : '';
+
+                    const { value: grpID} = await Swal.fire({
+                        title: 'Chọn nhóm',
+                        input: 'select',
+                        icon: 'question',
+                        inputOptions: options,
+                        inputPlaceholder: 'Xếp nhóm cho học sinh',
+                        inputValue: defValue,
+                        showCancelButton: true,
+                        inputValidator: (value) => {
+                            return new Promise((resolve) => {
+                                resolve()
+                            })
+                        }
+                    })
+
+                    console.log(grpID);
+
+                    var newGrp = grpID;
+                    if (grpID == 'all-class') newGrp = '';
+                    console.log(newGrp);
+
+                    if (newGrp != defValue) {
+                        let _url = '@processUrl("SetGroupStudent", "Class")';
+                        let _form = new FormData()
+                        _form.append('StudentID', student.StudentID);
+                        _form.append('GroupID', newGrp);
+                        _form.append('ClassID', '@currentClass.ID');
+                        axios.post(_url, _form)
+                            .then(rsp => {
+                                if (rsp.data.error != null) {
+                                    Swal.fire({
+                                        title: 'Có lỗi',
+                                        text: rsp.data.error,
+                                        icon: 'danger'
+                                    })
+                                }
+                                else {
+                                    var result = rsp.data;
+
+                                    Swal.fire({
+                                        title: 'Thông báo',
+                                        text: newGrp == '' ? 'Đã cập nhật nhóm của học viên' : 'Đã thêm học viên vào nhóm' ,
+                                        icon: 'success'
+                                    })
+                                    if (newGrp != '')
+                                        student.GroupIDs = [newGrp];
+                                    else
+                                        student.GroupIDs = null;
+                                }
+                            }).catch(e => { })
+                    }
+                },
                 //GROUP_STUDENT
                 showGroupStudent(data) {
                     let _that = this;
@@ -2638,7 +2718,7 @@
                         _that.student_data = [];
                         this.initStudentList(data, this.loadGroupStudent);
                     }
-                        
+
                     _that.$bvModal.show('modal_student')
                 },
                 loadGroupStudent(data) {

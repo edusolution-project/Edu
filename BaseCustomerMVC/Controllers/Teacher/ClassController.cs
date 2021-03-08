@@ -205,6 +205,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
         }
 
+
         public IActionResult Index(DefaultModel model, string basis, int old = 0)
         {
 
@@ -231,6 +232,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
+
             if (old == 1)
                 return View("Index_o");
             return View();
@@ -935,7 +937,6 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 var groups = _classGroupService.GetByClassID(@class.ID).ToList();
 
-
                 Debug.WriteLine("data: " + DateTime.Now);
 
                 foreach (var student in listStudent)
@@ -993,6 +994,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         StudentID = student.ID,
                         FullName = student.FullName,
+                        GroupIDs = stGrpIDs,
                         AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---",
                         Target = _presult.Count() > 0 ? (target == 0 ? "---" : target.ToString()) : "---"
                     });
@@ -1240,6 +1242,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String AvgPointPratice { get; set; }
             [JsonProperty("Target")]
             public String Target { get; set; }
+            [JsonProperty("GroupIDs")]
+            public List<string> GroupIDs { get; set; }
         }
 
         public class Type_Filter
@@ -3799,7 +3803,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 IsActive = t.IsActive,
                 Name = t.Name,
                 Created = t.Created,
-                Members = t.Members == null ? new List<string>(): t.Members.Select(m => m.MemberID).ToList(),
+                Members = t.Members == null ? new List<string>() : t.Members.Select(m => m.MemberID).ToList(),
                 StudentCount = t.Members == null ? 0 : t.Members.Count()
             }).ToList());
         }
@@ -3835,6 +3839,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             _classGroupService.Save(group);
             return Json(new { IsActive = isMember });
+        }
+
+
+        [HttpPost]
+        public JsonResult SetGroupStudent(string StudentID, string GroupID, string ClassID)
+        {
+            if (string.IsNullOrEmpty(StudentID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+
+            if (!string.IsNullOrEmpty(GroupID))
+            {
+                var group = _classGroupService.GetItemByID(GroupID);
+                if (group == null)
+                    return Json(new { error = "Nhóm không hợp lệ" });
+
+                if (group.Members == null)
+                    group.Members = new List<GroupMember>();
+
+                if (group.Members.Any(t => t.MemberID == StudentID))//exit => delete
+                    return Json(new { IsActive = true });
+
+                //remove student from other groups
+                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                                    f => f.MemberID == StudentID);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == group.ClassID, update);
+                if (group.Members == null)
+                    group.Members = new List<GroupMember>();
+
+                group.Members.Add(new GroupMember { MemberID = StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                _classGroupService.Save(group);
+            }
+            else if (!string.IsNullOrEmpty(ClassID))//remove student from other groups
+            {
+                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                    f => f.MemberID == StudentID);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID, update);
+            }
+            return Json(new { IsActive = true });
         }
 
         #endregion
