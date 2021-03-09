@@ -43,7 +43,7 @@
                 <ul class="flex flex-row">
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Kì thi" v-on:click="tabChange(0)">Kì thi</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Ngân hàng câu hỏi" v-on:click="tabChange(1)">Ngân hàng câu hỏi</a></li>
-                    <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Ma trận đề" v-on:click="tabChange(2)">Ma trận đề</a></li>
+                    @*<li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Ma trận đề" v-on:click="tabChange(2)">Ma trận đề</a></li>*@
                 </ul>
             </div>
         </div>
@@ -61,13 +61,17 @@
                     <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
                 </select>
             </div>
-            <div class="search-box m-1">
+            @*<div class="search-box m-1">
                 <button><i class="ic ic-find"></i></button>
-                @*<input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">*@
-            </div>
+                <input type="text" name="" v-model="searchTerm" placeholder="Tên bài giảng cần tìm">
+            </div>*@
             <div class="ml-0 ml-md-auto">
-                <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
-                @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
+                <template v-if="tab[0]">
+                    <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
+                </template>
+                <template v-else-if="tab[1]">
+                    <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
+                </template>
             </div>
         </div>
     </div>
@@ -1242,7 +1246,7 @@
                     //this.options.push(_class);
                     //this.value.push(_class);
                     this.data_setupExam.targetClasses.push(_class)
-                    this.data_setupExam.nameClass.push(_class)
+                    //this.data_setupExam.nameClass.push(_class)
                 },
                 searchClass(term, callback) {
                     let _that = this
@@ -1274,7 +1278,7 @@
                                         if (data.length > 0) {
                                             data.forEach(function (item) {
                                                 //_that.options.push({
-                                                _that.data_setupExam.targetClasses.push({
+                                                _that.data_setupExam.nameClass.push({
                                                     name: item.Name,
                                                     code: item.ID
                                                 })
@@ -1284,7 +1288,7 @@
                             } else {
                                 data_class.forEach(function (item) {
                                     //_that.options.push({
-                                    _that.data_setupExam.targetClasses.push({
+                                    _that.data_setupExam.nameClass.push({
                                         name: item.Name,
                                         code: item.ID
                                     })
@@ -1306,7 +1310,8 @@
 
                             var index = id.replace('autocomplete_', '')
                             var item = _that.formatExam.format[index]
-                            var data_tags = item.filter(item => item.Name.indexOf(term) > -1)
+                            //debugger
+                            var data_tags = item.tags.filter(item => item.name.indexOf(term) > -1)
                             if (data_tags.length == 0) {
                                 let _form = new FormData()
                                 _form.append('Term', term)
@@ -1322,7 +1327,7 @@
 
                                                 for (var i = 0; i < data.length; i++) {
                                                     var current = data[i]
-                                                    item.tags.push({
+                                                    item.tagsName.push({
                                                         code: current.ID,
                                                         name: current.Name
                                                     })
@@ -1348,8 +1353,7 @@
                     var index = id.replace('autocomplete_', '')
                     var item = this.formatExam.format[index]
                     item.tags.push(tags)
-                    item.tagsName.push(tags)
-                    debugger
+                    //item.tagsName.push(tags)
                 }
             }
         });
@@ -1565,12 +1569,12 @@
                                         @*<input type="text" class="form-control" v-model="item.tag" />*@
                                         @*<autocomplete v-on:chooseitem="chooseTags" :id="'autocomplete_' + k" :items="list_Tags" v-on:input="autocompleteTags" />*@
                                         <div>
-                                            <multiselect v-model="item.tagsName"
+                                            <multiselect v-model="item.tags"
                                                          tag-placeholder="Thêm như 1 nội dung mới"
                                                          placeholder="Nhập nội dung muốn tìm kiếm"
                                                          label="name"
                                                          track-by="code"
-                                                         :options="item.tags"
+                                                         :options="item.tagsName"
                                                          :multiple="true"
                                                          :taggable="true"
                                                          @@tag="addTags"
@@ -1840,12 +1844,12 @@
                 <div class="col-sm-6" style="position:relative">
                     <div>
                         <label class="typo__label">Chọn lớp</label>
-                        <multiselect v-model="data_setupExam.nameClass"
+                        <multiselect v-model="data_setupExam.targetClass"
                                      tag-placeholder="Thêm như 1 nội dung mới"
                                      placeholder="Nhập tên lớp muốn tìm kiếm"
                                      label="name"
                                      track-by="code"
-                                     :options="data_setupExam.targetClasses"
+                                     :options="data_setupExam.nameClass"
                                      :multiple="true"
                                      :taggable="true"
                                      @@tag="addClass" 
