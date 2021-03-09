@@ -127,6 +127,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
             var teacher = _teacherService.CreateQuery().Find(t => t.ID == UserID).SingleOrDefault();//: new TeacherEntity();
+            var center = _centerService.GetItemByCode(basis);
 
             if (teacher == null)
                 return Redirect("/login");
@@ -141,6 +142,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 ViewBag.Subjects = subject;
                 ViewBag.CurrentUser = teacher;
                 ViewBag.ClassList = classes;
+                ViewBag.IsHeadTeacher = _teacherHelper.HasRole(UserID, center.ID, "head-teacher");
             }
 
             return View();

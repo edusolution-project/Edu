@@ -8,6 +8,7 @@
     var classlist = ViewBag.ClassList as List<BaseCustomerEntity.Database.ClassEntity>;
     var currentUser = ViewBag.CurrentUser as BaseCustomerEntity.Database.TeacherEntity;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    var isHeadTeacher = ViewBag.IsHeadTeacher;
     string processUrl(string act, string ctrl, Object param = null)
     {
         string url = Url.Action(act, ctrl, param);
@@ -22,6 +23,10 @@
 <link href="/libs/quill-editor/quill.core.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.snow.css" rel="stylesheet">
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
+
+@*<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>*@
+<script src="https://unpkg.com/vue-multiselect@2.1.0"></script>
+<link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css" />
 
 <script>
     setActiveMenu("curriculum");
@@ -388,9 +393,18 @@
                 this.tabChange(1)
             },
             components: {
-                //Multiselect
+                Multiselect: window.VueMultiselect.default
             },
             data: {
+                value: [
+                    //{ name: "Javascript", code: "js" }
+                ],
+                options: [
+                    //{ name: "Vue.js", code: "vu" },
+                    //{ name: "Javascript", code: "js" },
+                    //{ name: "Open Source", code: "os" },
+                ],
+
                 isLoading: false,
                 isComfirm: false,
                 currentUser:[],
@@ -450,6 +464,7 @@
                     format: {
                         level: '',
                         tags: [],
+                        tagsName:[],
                         levelKnow: {
                             theory: 0,//lý thuyết
                             exercise: 0 //bài tập
@@ -487,7 +502,7 @@
                 data_setupExam: {
                     id: '',
                     targetClasses: [],
-                    nameClass: '',
+                    nameClass: [],
                     nameExam: '',
                     startTime: '',
                     endTime: '',
@@ -514,9 +529,10 @@
                     percentUnderstand: 0,
                     percentManipulate: 0,
                     percentManipulatehighly: 0
-                }
+                },
             },
-            computed: {},
+            computed: {
+            },
             watch: {
                 "formatExam.isNewMatrix": function () {
                     var stt = this.formatExam.isNewMatrix
@@ -542,6 +558,9 @@
                         this.list_detailMatrix.data = matrix.DetailFormat
                         //debugger
                     }
+                },
+                value: function () {
+                    console.log(2)
                 }
             },
             methods: {
@@ -602,7 +621,8 @@
                             format:[
                             {
                                 level: '',
-                                tags: [],
+                                    tags: [],
+                                    tagsName:[],
                                     levelKnow: {
                                         theory: 0,//lý thuyết
                                         exercise: 0 //bài tập
@@ -778,7 +798,8 @@
                     var currentFormatExam = this.formatExam.format
                     var template = {
                         level: '',
-                        tag: '',
+                        tags: [],
+                        tagsName:[],
                         levelKnow: {
                             theory: 0,//lý thuyết
                             exercise: 0 //bài tập
@@ -842,7 +863,10 @@
                         theory: 0,//lý thuyết
                         exercise: 0 //bài tập
                     }
-                    option.tag = ''
+                    option.tags = []
+                    option.tagsName = []
+                    this.calc()
+                    this.calcMaxtrix()
                 },
                 getExamManage() {//load anh sach ki thi
                     let _that = this
@@ -943,7 +967,7 @@
                     this.data_setupExam.timer = obj.Timer
                     this.data_setupExam.limit = obj.Limit
                     this.data_setupExam.id = obj.ID
-                    debugger
+                    //debugger
                     _that.$bvModal.show('setupexam-modal-xl')
                 },
                 SaveSetup() {
@@ -1134,14 +1158,19 @@
 
                     var totalPercent = this.customOutput.percentKnow + this.customOutput.percentUnderstand + this.customOutput.percentManipulate + this.customOutput.percentManipulatehighly
 
-                    if (totalPercent == 100) {
+                    if (totalPercent == 100 &&
+                        this.customOutput.percentKnow == this.defaultOutput.percentKnow && 
+                        this.customOutput.percentUnderstand == this.defaultOutput.percentUnderstand &&
+                        this.customOutput.percentManipulate == this.defaultOutput.percentManipulate &&
+                        this.customOutput.percentManipulatehighly == this.defaultOutput.percentManipulatehighly
+                        ) {
                         $('#createnewexam').removeAttr('disabled')
                         $('#createnewexam').removeAttr('class')
                         $('#createnewexam').attr('class','btn btn-primary')
                     }
                     else {
                         $('#createnewexam').attr('disabled', 'disabled')
-                        $('#createnewexam').attr('class', 'disabled')
+                        $('#createnewexam').attr('class', 'disabled btn btn-primary')
                     }
                 },
                 comfirm() {
@@ -1156,8 +1185,7 @@
                     else return value
                 },
 
-                //tags
-                chooseTags(tag) {
+                @*chooseTags(tag) {
                     var idInput = event.target
                     var div = idInput.parentNode.parentNode
                     var index = $(div).attr('id').replace('autocomplete_', '')
@@ -1204,7 +1232,125 @@
                             }
                         }, 500)
                     }
+                },*@
+                //search class
+                addClass(item) {
+                    const _class = {
+                        name: item,
+                        code: item.substring(0, 2) + Math.floor(Math.random() * 10000000)
+                    };
+                    //this.options.push(_class);
+                    //this.value.push(_class);
+                    this.data_setupExam.targetClasses.push(_class)
+                    this.data_setupExam.nameClass.push(_class)
                 },
+                searchClass(term, callback) {
+                    let _that = this
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            if (_that.list_classes == null)
+                                _that.list_classes = []
+
+                            var data_class = _that.list_classes.filter(item => item.Name.indexOf(term) > -1)
+
+                            if (data_class.length == 0) {
+                                let _form = new FormData()
+                                _form.append('SearchText', term)
+                                _form.append('Center', '@center')
+                                let _url = ''
+                                //debugger
+                                if ('@isHeadTeacher' == 'True') {
+                                    _url = '@processUrl("GetManageList", "Class")'
+                                }
+                                else {
+                                    _url = '@processUrl("GetClassList", "Class")'
+                                }
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var data = response.data.Data
+                                        //debugger
+                                        if (data.length > 0) {
+                                            data.forEach(function (item) {
+                                                //_that.options.push({
+                                                _that.data_setupExam.targetClasses.push({
+                                                    name: item.Name,
+                                                    code: item.ID
+                                                })
+                                            })
+                                        }
+                                    }).catch(e => { })
+                            } else {
+                                data_class.forEach(function (item) {
+                                    //_that.options.push({
+                                    _that.data_setupExam.targetClasses.push({
+                                        name: item.Name,
+                                        code: item.ID
+                                    })
+                                })
+                            }
+                        }, 500)
+                    }
+                    console.log(term)
+                },
+
+                //search tags
+                searchTags(term,id) {
+                    let _that = this
+                    console.log(id)
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+
+                            var index = id.replace('autocomplete_', '')
+                            var item = _that.formatExam.format[index]
+                            var data_tags = item.filter(item => item.Name.indexOf(term) > -1)
+                            if (data_tags.length == 0) {
+                                let _form = new FormData()
+                                _form.append('Term', term)
+                                //_form.append('Center', '@center')
+                                let _url = '@processUrl("SearchTags", "ExamManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var stt = response.data.Status
+                                        if (stt) {
+                                            var data = response.data.Data
+                                            //debugger
+                                            if (data.length > 0) {
+
+                                                for (var i = 0; i < data.length; i++) {
+                                                    var current = data[i]
+                                                    item.tags.push({
+                                                        code: current.ID,
+                                                        name: current.Name
+                                                    })
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            alert(response.data.Msg)
+                                        }
+                                    }).catch(e => { alert(e) })
+                            } else {
+
+                            }
+                        }, 500)
+                    }
+                },
+                addTags(item,id) {
+                    //debugger
+                    const tags = {
+                        name: item,
+                        code: item.substring(0, 2) + Math.floor(Math.random() * 10000000)
+                    };
+                    var index = id.replace('autocomplete_', '')
+                    var item = this.formatExam.format[index]
+                    item.tags.push(tags)
+                    item.tagsName.push(tags)
+                    debugger
+                }
             }
         });
     </script>
@@ -1417,7 +1563,20 @@
                                     <td class="text-center align-middle">{{k+1}}</td>
                                     <td>
                                         @*<input type="text" class="form-control" v-model="item.tag" />*@
-                                        <autocomplete v-on:chooseitem="chooseTags" :id="'autocomplete_' + k" :items="list_Tags" v-on:input="autocompleteTags" />
+                                        @*<autocomplete v-on:chooseitem="chooseTags" :id="'autocomplete_' + k" :items="list_Tags" v-on:input="autocompleteTags" />*@
+                                        <div>
+                                            <multiselect v-model="item.tagsName"
+                                                         tag-placeholder="Thêm như 1 nội dung mới"
+                                                         placeholder="Nhập nội dung muốn tìm kiếm"
+                                                         label="name"
+                                                         track-by="code"
+                                                         :options="item.tags"
+                                                         :multiple="true"
+                                                         :taggable="true"
+                                                         @@tag="addTags"
+                                                         @@search-change="searchTags"
+                                                         :id="'autocomplete_' + k"></multiselect>
+                                        </div>
                                     </td>
 
                                     <td class="text-center align-middle">
@@ -1678,36 +1837,37 @@
             </div>
 
             <div class="row">
-                <label>Tags input with autocomplete:</label>
-                <input id="form-tags-4" name="tags-4" type="text" value="">
-                <script type="text/javascript">
-                    $('#form-tags-4').tagsInput({
-                        'autocomplete': {
-                            source: [
-                                'apple',
-                                'banana',
-                                'orange',
-                                'pizza'
-                            ]
-                        }
-                    });
-                </script>
-                @*<div class="col-sm-6" style="position:relative">
+                <div class="col-sm-6" style="position:relative">
+                    <div>
+                        <label class="typo__label">Chọn lớp</label>
+                        <multiselect v-model="data_setupExam.nameClass"
+                                     tag-placeholder="Thêm như 1 nội dung mới"
+                                     placeholder="Nhập tên lớp muốn tìm kiếm"
+                                     label="name"
+                                     track-by="code"
+                                     :options="data_setupExam.targetClasses"
+                                     :multiple="true"
+                                     :taggable="true"
+                                     @@tag="addClass" 
+                                     @@search-change="searchClass"
+                                     ></multiselect>
+                        @*<pre class="language-json"><code>{{ value  }}</code></pre>*@
+                    </div>
 
-                    <input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass" />
-        <div class="col-sm-11 pt-1 d-none" id="selectClass" style="position:absolute;background-color:white;z-index:3">
-            <template v-if="list_classes.length > 0">
-                <ul style="list-style:none">
-                    <li class="pt-1 pb-1" v-for="(_class,k) in list_classes">
-                        {{_class.Name}}<input type="checkbox" class="checkbox float-md-right" :id="_class.ID" v-on:click="checkToggle(_class.ID)" />
-                    </li>
-                </ul>
-            </template>
-            <template v-else>
-                Không có lớp nào đang hoạt động
-            </template>
-        </div>*@
-            </div>
+                    @*<input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass" />
+                        <div class="col-sm-11 pt-1 d-none" id="selectClass" style="position:absolute;background-color:white;z-index:3">
+                            <template v-if="list_classes.length > 0">
+                                <ul style="list-style:none">
+                                    <li class="pt-1 pb-1" v-for="(_class,k) in list_classes">
+                                        {{_class.Name}}<input type="checkbox" class="checkbox float-md-right" :id="_class.ID" v-on:click="checkToggle(_class.ID)" />
+                                    </li>
+                                </ul>
+                            </template>
+                            <template v-else>
+                                Không có lớp nào đang hoạt động
+                            </template>
+                        </div>*@
+                </div>
             </div>
         </b-col>
 
