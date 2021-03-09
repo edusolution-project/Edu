@@ -70,17 +70,16 @@
                 </li>*@
 
             <li for="home">
-                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="ic ic-home"></i>Trang chủ</a>
+                <a href="@processUrl("Index", "Home")" title="Trang chủ"><i class="fas fa-home mr-3" style="font-size:16px"></i>Trang chủ</a>
             </li>
-
             <li for="mycourse">
-                <a href="/@Model.Code/teacher/class/myclass" title="Lớp của tôi"><i class="ic ic-book-pen"></i>Lớp của tôi</a>
+                <a href="/@Model.Code/teacher/class/myclass" title="Lớp của tôi"><i class="fas fa-chalkboard mr-3" style="font-size:16px"></i>Lớp của tôi</a>
             </li>
 
             <li for="teacher" id="parentMenu">
                 <a href="#" title="Quản lý giáo viên" onclick="openChilMenu('chilMenu')">
-                    <i class="ic ic-multi-user"></i>Quản lý
-                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" style="font-size:20px;float:right"></i>
+                    <i class="fas fa-tasks mr-3" style="font-size:16px"></i>Quản lý
+                    <i class="ti-arrow-circle-left" id="ti-arrow-circle" style="font-size:16px;float:right"></i>
                 </a>
             </li>
 
@@ -88,18 +87,19 @@
                 @if (isHeadTeacher)
                 {
                     <li for="managecourse">
-                        <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="ic ic-book-pen"></i>Quản lý lớp học</a>
+                        <a href="@processUrl("Index" , "Class")" title="Quản lý lớp học"><i class="fas fa-chalkboard mr-3" style="font-size:16px"></i>Lớp học</a>
                     </li>
 
                     <li for="teacher">
-                        <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="ic ic-multi-user"></i>Quản lý giáo viên</a>
+                        <a href="@processUrl("Index" , "TeacherManage")" title="Quản lý giáo viên"><i class="fas fa-chalkboard-teacher mr-3" style="font-size:16px"></i>Giáo viên</a>
                     </li>
                 }
                 <li for="student">
-                    <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="ic ic-book-pen"></i>Quản lý học viên</a>
+                    <a href="@processUrl("Index" , "StudentManage")" title="Quản lý học viên"><i class="fas fa-user-graduate mr-3" style="font-size:16px"></i>Học viên</a>
                 </li>
+
                 <li for="curriculum">
-                    <a href="@processUrl("Index" , "Curriculum")" title="Tạo bài giảng"><i class="ic ic-book"></i>Quản lý bài giảng</a>
+                    <a href="@processUrl("Index" , "Curriculum")" title="Quản lý bài giảng"><i class="fas fa-book-open mr-3" style="font-size:16px"></i>Tạo bài giảng</a>
                 </li>
             </ul>
 
@@ -108,19 +108,19 @@
             </li>
 
             <li for="reference">
-                <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="ic ic-file"></i>Học liệu</a>
+                <a href="@processUrl("Index" , "Reference" )" title="Học liệu"><i class="far fa-clipboard mr-3" style="font-size:16px"></i>Học liệu</a>
             </li>
 
             <li for="calendar">
-                <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="ic ic-celendar"></i>Lịch dạy</a>
+                <a href="@processUrl("Index" , "Calendar" )" title="Quản lý lịch dạy"><i class="far fa-calendar-check mr-3" style="font-size:16px"></i>Lịch dạy</a>
             </li>
 
-            <li for="">
-                <a href="@processUrl("Index" , "ExamManage" )" title="Khảo thí"><i class="ic ic-book-pen"></i>Khảo thí</a>
+            <li for="examine">
+                <a href="@processUrl("Index" , "ExamManage" )" title="Khảo thí"><i class="fas fa-envelope-open-text mr-3" style="font-size:16px"></i>Khảo thí</a>
             </li>
 
             <li for="news">
-                <a href="/tin-tuc" title="Tin tức"><i class="ic ic-paper"></i>Tin tức</a>
+                <a href="/tin-tuc" title="Tin tức"><i class="far fa-comment-alt mr-3" style="font-size:16px"></i>Tin tức</a>
             </li>
         </ul>
         <div class="adv">
