@@ -20,6 +20,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using AndcultureCode.ZoomClient.Models.Groups;
 
 namespace BaseCustomerMVC.Controllers.Teacher
 {
@@ -204,7 +205,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _classService = classService;
         }
 
-        public IActionResult Index(DefaultModel model, string basis, int old = 0)
+
+        public IActionResult Index(DefaultModel model, string basis, int old = 0, bool IsPrivate = false)
         {
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -230,6 +232,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
+            ViewBag.IsPrivate = IsPrivate;
+
             if (old == 1)
                 return View("Index_o");
             return View();
@@ -932,6 +936,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var _listStudent = new List<InforStudent>();
                 var csbjprogress = _classSubjectProgressService.GetItemsByClassSubjectID_StudentIDs(ClassSubjectID, listStudent.Select(x => x.ID).ToList());
 
+                var groups = _classGroupService.GetByClassID(@class.ID).ToList();
+
                 Debug.WriteLine("data: " + DateTime.Now);
 
                 foreach (var student in listStudent)
@@ -939,11 +945,20 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     List<StudentLessonResultViewModel> result = new List<StudentLessonResultViewModel>();
                     List<StudentDetailVM> dataresponse = new List<StudentDetailVM>();
 
+                    //get student groups
+                    var stGrpIDs = groups.Where(t => t.Members.Any(m => m.MemberID == student.ID)).Select(t => t.ID).ToList();
+
                     foreach (var item in listTime)
                     {
                         if (!activeLessonDic.ContainsKey(item.Key))
                         {
-                            var activePractice = activeLessons.Where(t => t.EndDate > item.Value.StartTime && t.StartDate <= item.Value.EndTime && (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM)).Select(t => t.ID).ToList();
+                            //get active practice from class subject & group
+                            var activePractice = activeLessons.Where(t =>
+                             t.EndDate > item.Value.StartTime &&
+                             t.StartDate <= item.Value.EndTime &&
+                             (t.IsPractice || t.TemplateType == LESSON_TEMPLATE.EXAM) &&
+                             (t.GroupIDs == null || stGrpIDs.Intersect(t.GroupIDs).Any())
+                             ).Select(t => t.ID).ToList();
                             //var activePractice = _lessonService.CreateQuery().Find(t => activeIds.Contains(t.ID) && ).Project(t => t.ID).ToList();
                             activeLessonDic[item.Key] = activePractice;
                         }
@@ -980,6 +995,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {
                         StudentID = student.ID,
                         FullName = student.FullName,
+                        GroupIDs = stGrpIDs,
                         AvgPointPratice = _presult.Count() > 0 ? (_presult.Sum(x => x.LastPoint) / allWeekactivePractice.Count()).ToString() : "---",
                         Target = _presult.Count() > 0 ? (target == 0 ? "---" : target.ToString()) : "---"
                     });
@@ -1227,6 +1243,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
             public String AvgPointPratice { get; set; }
             [JsonProperty("Target")]
             public String Target { get; set; }
+            [JsonProperty("GroupIDs")]
+            public List<string> GroupIDs { get; set; }
         }
 
         public class Type_Filter
@@ -3786,7 +3804,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 IsActive = t.IsActive,
                 Name = t.Name,
                 Created = t.Created,
-                Members = t.Members == null ? new List<string>(): t.Members.Select(m => m.MemberID).ToList(),
+                Members = t.Members == null ? new List<string>() : t.Members.Select(m => m.MemberID).ToList(),
                 StudentCount = t.Members == null ? 0 : t.Members.Count()
             }).ToList());
         }
@@ -3822,6 +3840,44 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
             _classGroupService.Save(group);
             return Json(new { IsActive = isMember });
+        }
+
+
+        [HttpPost]
+        public JsonResult SetGroupStudent(string StudentID, string GroupID, string ClassID)
+        {
+            if (string.IsNullOrEmpty(StudentID))
+                return Json(new { error = "Thông tin không hợp lệ" });
+
+            if (!string.IsNullOrEmpty(GroupID))
+            {
+                var group = _classGroupService.GetItemByID(GroupID);
+                if (group == null)
+                    return Json(new { error = "Nhóm không hợp lệ" });
+
+                if (group.Members == null)
+                    group.Members = new List<GroupMember>();
+
+                if (group.Members.Any(t => t.MemberID == StudentID))//exit => delete
+                    return Json(new { IsActive = true });
+
+                //remove student from other groups
+                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                                    f => f.MemberID == StudentID);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == group.ClassID, update);
+                if (group.Members == null)
+                    group.Members = new List<GroupMember>();
+
+                group.Members.Add(new GroupMember { MemberID = StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                _classGroupService.Save(group);
+            }
+            else if (!string.IsNullOrEmpty(ClassID))//remove student from other groups
+            {
+                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                    f => f.MemberID == StudentID);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID, update);
+            }
+            return Json(new { IsActive = true });
         }
 
         #endregion

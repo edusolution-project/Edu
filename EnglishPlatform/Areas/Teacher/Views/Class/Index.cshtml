@@ -9,6 +9,7 @@
     var isHeadTeacher = ViewBag.IsHeadTeacher ?? false;
     var userid = User.Claims.Single(t => t.Type == "UserID").Value;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    bool isPrivate = (bool)ViewBag.IsPrivate;
     //List<BaseCustomerEntity.Database.CenterMemberEntity> allcenters = ViewBag.AllCenters as List<BaseCustomerEntity.Database.CenterMemberEntity>;
 
     string processUrl(string act, string ctrl, Object param = null)
@@ -27,19 +28,9 @@
 <link href="~/js/Chart.js/css/site.css" rel="stylesheet" />
 
 @{
-    if (isHeadTeacher)
-    {
-        @*<script>
-            setActiveMenu("course");
-            debugger
-        </script>*@
-    }
-    else
-    {
-        <script>
-            setActiveMenu("mycourse");
-        </script>
-    }
+    <script>
+        setActiveMenu('@(isPrivate ? "mycourse":"managecourse")');
+    </script>
 }
 
 
@@ -65,8 +56,8 @@
             </div>
             <div class="box private_box col-12 col-md-3 mb-1 ml-0 ml-md-2" v-if="isHeadTeacher">
                 <template v-if="tab[0]">
-                    <input type="checkbox" v-model="isPrivate" />
-                    <span> Chỉ hiện lớp của tôi</span>
+                    <input type="checkbox" v-model="isPrivate" class="d-none" />
+                    @*<span> Chỉ hiện lớp của tôi</span>*@
                 </template>
                 <template v-if="tab[1]">
                     <select v-model="filterReport" class="form-control">
@@ -81,16 +72,16 @@
                 @*<b-button class="btn-addevent btn-sm col-12 col-md-2 ml-auto" v-on:click="showClassModal()"><i class="ti-plus"></i> Thêm lớp</b-button>*@
             </div>
             @*@if (isHeadTeacher)
-            {
-                <div class="flex flex-wrap align-items-center">
-                    <div class="tab bg-none col-md-12 mt-2">
-                        <ul class="flex flex-row">
-                            <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Danh sách lớp" v-on:click="tabChange(0)">Danh sách lớp</a></li>
-                            <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Báo cáo" v-on:click="tabChange(1)">Báo cáo</a></li>
-                        </ul>
+                {
+                    <div class="flex flex-wrap align-items-center">
+                        <div class="tab bg-none col-md-12 mt-2">
+                            <ul class="flex flex-row">
+                                <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Danh sách lớp" v-on:click="tabChange(0)">Danh sách lớp</a></li>
+                                <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Báo cáo" v-on:click="tabChange(1)">Báo cáo</a></li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            }*@
+                }*@
         </div>
     </div>
     <div class="card-body" v-cloak v-if="tab[0]">
@@ -434,7 +425,6 @@
                         var cr = hash.split('-')[1]
                         this.page = cr;
                     }
-                    debugger
                     switch (hash) {
                         case 'listclasses':
                             this.tabChange(0);
@@ -442,29 +432,16 @@
                         case 'report':
                             this.tabChange(1);
                             break;
-                        case 'mycourse':
-                            this.isPrivate = 'true'
-                            break;
-                        default:
-                            this.isPrivate = 'false'
-                            break;
                     }
                 }
                 else
                     this.getData()
-
-                if (this.isPrivate == 'true') {
-                    setActiveMenu('mycourse')
-                }
-                else {
-                    setActiveMenu('course')
-                }
             },
             components: {
                 vuejsDatepicker
             },
             data: {
-                isPrivate: false,
+                isPrivate: @(isPrivate?"true":"false"),
                 isLoading: false,
                 list_subject: [],
                 tableData: [],
@@ -616,7 +593,6 @@
                     this.getData()
                 },
                 isPrivate: function () {
-                    debugger
                     this.getData()
                 },
                 searchTerm: function(){

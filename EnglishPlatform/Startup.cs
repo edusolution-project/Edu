@@ -313,7 +313,12 @@ namespace EnglishPlatform
                 routes.MapRoute(
                    name: "areas2",
                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}/{ClassID?}"
-                 );
+                );
+                routes.MapRoute(
+                    name: "myclass",
+                    template: "{basis:basis}/{area:exists}/class/myclass",
+                    defaults: new { area = "teacher", controller = "Class", action = "Index", IsPrivate = true }
+                );
                 routes.MapRoute(
                    name: "areas3",
                    template: "{basis:basis}/{area:exists}/{controller=Home}/{action=Index}"
