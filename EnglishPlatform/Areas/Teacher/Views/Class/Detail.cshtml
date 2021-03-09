@@ -14,6 +14,8 @@
         return $"/{center}{url}";
     }
     var startdate = currentClass.StartDate.ToLocalTime();
+
+    var isTeacher = currentClass.Members.Any(t => t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER);
 }
 
 
@@ -33,7 +35,7 @@
 <link href="/libs/quill-editor/quill.bubble.css" rel="stylesheet">
 @*<script src="~/js/export2excel/jquery.table2excel.js"></script>*@
 <script>
-    setActiveMenu("course");
+        setActiveMenu('@(isTeacher ? "mycourse":"managecourse")');
 </script>
 <section class="module" id="dashboard_content">
     <div class="card-header" v-cloak>
@@ -50,9 +52,12 @@
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
-            <div class="c-right">
-                <b-button class="btn-addevent" v-on:click="addGroup()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
-            </div>
+            @if (isTeacher)
+            {
+                <div class="c-right">
+                    <b-button class="btn-addevent" v-on:click="addGroup()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
+                </div>
+            }
         </div>
 
 
@@ -131,10 +136,13 @@
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
-                                <i class="far fa-edit ml-3"></i>
-                                Soạn thảo
-                            </a>
+                            @if (isTeacher)
+                            {
+                                <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showEditor(obj)">
+                                    <i class="far fa-edit ml-3"></i>
+                                    Soạn thảo
+                                </a>
+                            }
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
                             <ul class="list">
@@ -168,10 +176,13 @@
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="obj.TeacherID == '@currentuser'" v-on:click="showEditor(obj)">
-                                <i class="far fa-edit ml-3"></i>
-                                Soạn thảo
-                            </a>
+                            @if (isTeacher)
+                            {
+                                <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-on:click="showEditor(obj)">
+                                    <i class="far fa-edit ml-3"></i>
+                                    Soạn thảo
+                                </a>
+                            }
                         </div>
                         <b-collapse :id="`collapse-${i}`" accordion="my-accordion-0" role="tabpanel">
                             <ul class="list">
@@ -204,11 +215,11 @@
                                 <i class="fas fa-poll-h ml-3"></i>
                                 Bảng điểm
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")" v-on:click="showEditor(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(isTeacher ? "1==1":"1==0")" v-on:click="showEditor(obj)">
                                 <i class="far fa-edit ml-3"></i>
                                 Soạn thảo
                             </a>
-                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser) ? "1==1":"1==0")" v-on:click="showAutoCreateExam(obj)">
+                            <a href="javascript:;" class="font-weight-bolder pb-2 mb-0 pt-2 text-dark" v-if="@(isTeacher ? "1==1":"1==0")" v-on:click="showAutoCreateExam(obj)">
                                 <i class="far fa-edit ml-3"></i>
                                 Tạo đề tự động
                             </a>
@@ -286,8 +297,8 @@
                                         <td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}/{{roundPoint(list_students[i-1].Target,1)}}</td>
                                         @*<td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>*@
                                         @*<td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>*@
-                                        <td class="sticky-col fourth-col p-1">
-                                            @if (currentClass.Members.Any(t => t.TeacherID == currentuser))
+                                        <td class="sticky-col fourth-col p-1" v-if="group_data.length > 0">
+                                            @if (isTeacher)
                                             {
                                                 <button class="btn btn-sm btn-secondary pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-if="list_students[i-1].GroupIDs != null && list_students[i-1].GroupIDs.length > 0">
                                                     {{displayGroup(list_students[i-1].GroupIDs[0])}}
@@ -358,11 +369,14 @@
                             <td>{{formatShortDate(item.Created)}}</td>
                             <td><b-form-checkbox switch v-model="item.IsActive" v-on:change="toggleGroupState(item)"></b-form-checkbox></td>
                             <td>
-                                <div class="btn-group" style="display:block">
-                                    <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="addGroup(item)"><i class="ti-pencil-alt"></i></a>
-                                    <a href="javascript:;" title="Quản lý học viên" v-on:click="manageGroupStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
-                                    <button class="btn-act btn-trash" title="Xóa" v-on:click="removeGroup(item)"><i class="ti-trash"></i></button>
-                                </div>
+                                @if (isTeacher)
+                                {
+                                    <div class="btn-group" style="display:block">
+                                        <a class="btn-act btn-edit" title="Cập nhật" href="javascript:;" v-on:click="addGroup(item)"><i class="ti-pencil-alt"></i></a>
+                                        <a href="javascript:;" title="Quản lý học viên" v-on:click="manageGroupStudent(item)" class="btn-act btn-edit"><i class="ti-user"></i></a>
+                                        <button class="btn-act btn-trash" title="Xóa" v-on:click="removeGroup(item)"><i class="ti-trash"></i></button>
+                                    </div>
+                                }
                             </td>
                         </tr>
                     </tbody>
@@ -929,7 +943,7 @@
                                 <i class="ti-timer ml-2" style="background-color: #fbcbcb" v-if="moment(data.EndDate) > moment(new Date(1900,1,1))"><span class="pl-1">hết hạn {{formatTime(data.EndDate)}}</span></i>
                             </div>
 
-                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">
+                            <div class="row-action d-flex align-items-start align-items-md-center" v-if="@(isTeacher ? "1==1":"1==0")">
                                 <i class="fas fa-ellipsis-h indicator"></i>
                                 <template v-if="type != 'exam'">
                                     <div class="act_ic">
@@ -1013,7 +1027,7 @@
                     </template>
                 </a>
                 @*<div class="picker-schedule d-flex align-items-center" v-if="owner == '@currentuser' || @(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">*@
-                <div class="picker-schedule d-flex align-items-center" v-if="@(currentClass.Members.Any(t=> t.TeacherID == currentuser && t.Type == BaseCustomerEntity.Database.ClassMemberType.TEACHER) ? "1==1":"1==0")">
+                <div class="picker-schedule d-flex align-items-center" v-if="@(isTeacher ? "1==1":"1==0")">
                     <template v-if="group != null && group.length > 0">
                         <select v-on:change="chooseGroup(data)" v-model="data.GroupID" class="form-control mr-2" style="max-width:100px">
                             <option value="">Cả lớp</option>
