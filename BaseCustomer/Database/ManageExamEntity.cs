@@ -41,7 +41,7 @@ namespace BaseCustomerEntity.Database
                 //Code_1
                 new CreateIndexModel<ManageExamEntity>(
                     new IndexKeysDefinitionBuilder<ManageExamEntity>()
-                    .Ascending(t => t.ID))
+                    .Ascending(t => t.ID).Text(x=>x.Name))
             };
 
             Collection.Indexes.CreateManyAsync(indexs);

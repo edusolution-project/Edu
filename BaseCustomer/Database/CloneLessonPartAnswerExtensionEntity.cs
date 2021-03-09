@@ -34,5 +34,15 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(o => questionIDs.Contains(o.ParentID)).ToEnumerable();
         }
+
+        public List<CloneLessonPartAnswerEntity> ConvertToCloneLessonPartAns(List<CloneLessonPartAnswerExtensionEntity> datas)
+        {
+            var newlist = new List<CloneLessonPartAnswerEntity>();
+            foreach(var item in datas)
+            {
+                newlist.Add(item);
+            }
+            return newlist;
+        }
     }
 }

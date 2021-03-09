@@ -26,6 +26,23 @@ namespace BaseCustomerMVC.Models
             this.Media = o.Media;
             this.Questions = new List<CloneQuestionViewModel>();
         }
+
+        public CloneLessonPartViewModel(CloneLessonPartExtensionEntity o)
+        {
+            this.TeacherID = o.TeacherID;
+            this.Created = o.Created;
+            this.Description = o.Description;
+            this.ID = o.ID;
+            this.Order = o.Order;
+            this.ParentID = o.ParentID;
+            this.Point = o.Point;
+            this.Timer = o.Timer;
+            this.Title = o.Title;
+            this.Type = o.Type;
+            this.Updated = o.Updated;
+            this.Media = o.Media;
+            this.Questions = new List<CloneQuestionViewModel>();
+        }
         [JsonProperty("Questions")]
         public List<CloneQuestionViewModel> Questions { get; set; }
         public CloneLessonPartEntity ToEntity()

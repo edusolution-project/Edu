@@ -291,12 +291,22 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         {"Msg","Bạn không có quyền sử dụng chức năng này." }
                     });
                 }
+
+                var filter = new List<FilterDefinition<ManageExamEntity>>();
+                filter.Add(Builders<ManageExamEntity>.Filter.Where(o => o.Center.Contains(center.ID)));
+                if (!String.IsNullOrEmpty(model.SearchText))
+                {
+                    filter.Add(Builders<ManageExamEntity>.Filter.Text("\"" + model.SearchText + "\""));
+                }
+
                 List<ManageExamEntity> listData = new List<ManageExamEntity>();
                 if(_teacherHelper.HasRole(UserID,center.ID, "head-teacher"))
                 {
-                    var data = _manageExamService.GetItemsByTeacherAndCenter("",center.ID);
-                    var newData = (from d in data.ToList()
-                                  let user = _teacherService.GetItemByID(d.CreateUser)
+                    
+                    //var data = _manageExamService.GetItemsByTeacherAndCenter("",center.ID);
+                    var data = _manageExamService.Collection.Find(Builders<ManageExamEntity>.Filter.And(filter));
+                    var newData = (from d in data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).SortByDescending(x=>x.Created).ToList()
+                                   let user = _teacherService.GetItemByID(d.CreateUser)
                                   let listExam = _lessonExamService.GetItemsByManageExamID(d.ID)
                                   let totalExam = listExam.Count()
                                   select new ManageExamViewModel(d)
@@ -310,16 +320,31 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
                 else
                 {
-                    var data = _manageExamService.GetItemsByTeacherAndCenter(UserID,center.ID);
-                    listData.AddRange(data.ToList());
+                    filter.Add(Builders<ManageExamEntity>.Filter.Where(o => o.CreateUser.Contains(UserID)));
+                    //var data = _manageExamService.GetItemsByTeacherAndCenter(UserID,center.ID);
+                    var data = _manageExamService.Collection.Find(Builders<ManageExamEntity>.Filter.And(filter)); ;
+                    var newData = (from d in data.Skip(model.PageIndex * model.PageSize).Limit(model.PageSize).SortByDescending(x => x.Created).ToList()
+                                   let user = _teacherService.GetItemByID(d.CreateUser)
+                                   let listExam = _lessonExamService.GetItemsByManageExamID(d.ID)
+                                   let totalExam = listExam.Count()
+                                   select new ManageExamViewModel(d)
+                                   {
+                                       UserName = user == null ? "" : user.FullName,
+                                       TotalExam = totalExam,
+                                       ListExam = listExam,
+                                       ClassName = d.ListClassID.Count() > 0 ? string.Join("; ", _classService.GetMultipleClassName(d.ListClassID)) : ""
+                                   }).ToList();
+                    listData.AddRange(newData);
                 }
-                var listClass = GetClasses(center.ID,tc.ID);
+                model.TotalRecord = listData.Count();
+                //var listClass = GetClasses(center.ID,tc.ID);
                 return Json(new Dictionary<String, Object> 
                 {
                     {"Status",true },
                     {"Data", listData },
-                    {"Classes",listClass },
-                    {"Msg","" }
+                    //{"Classes",listClass },
+                    {"Msg","" },
+                     { "Model", model },
                 });
             }
             catch(Exception ex)
@@ -937,144 +962,92 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     matrixExam = _matrixExamService.GetItemByID(item.MatrixID);
                 }
 
-                if (item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
+                //if (item.Template == EXAM_TYPE.ISLECTURE) // luyen tap thi khong tao de truoc
+                //{
+                //    return Json("Chức năng đang chờ");
+                //}
+                //else //kiem tra thi tao de truoc
+                //{
+                if (isNew)
                 {
-                    return Json("Chức năng đang chờ");
-                }
-                else //kiem tra thi tao de truoc
-                {
-                    if (isNew)
-                    {
-                        List<String> listLessonExamIDs = new List<string>();
-                        List<LessonExamEntity> lessonExams = new List<LessonExamEntity>();
-                        //List<Int32> listIndex = new List<Int32>();
-                        //var rd = new Random();
-                        //var index = rd.Next(100, 999);
+                    List<String> listLessonExamIDs = new List<string>();
+                    List<LessonExamEntity> lessonExams = new List<LessonExamEntity>();
+                    //List<Int32> listIndex = new List<Int32>();
+                    //var rd = new Random();
+                    //var index = rd.Next(100, 999);
 
-                        //taoj mowis kif kierm tra
-                        var manageexam = new ManageExamEntity
+                    //taoj mowis kif kierm tra
+                    var manageexam = new ManageExamEntity
+                    {
+                        Name = item.Title,
+                        Created = DateTime.UtcNow,
+                        Updated = DateTime.UtcNow,
+                        CreateUser = UserID,
+                        Center = centerID,
+                        Limtit = item.Limit,
+                        Timer = item.Timer
+                    };
+                    _manageExamService.Save(manageexam);
+
+                    var listIndexs = RandomIndex(item.TotalExam, 0, item.TotalExam);
+
+                    //tạo mã đề, gán cho từng kì thi
+                    for (Int32 i = 0; i < listIndexs.Count(); i++)
+                    {
+                        //if (listIndex.Contains(index))
+                        //{
+                        //    index = rd.Next(100, 999);
+                        //}
+                        var codeExam = listIndexs.ElementAtOrDefault(i);
+                        //listIndex.Add(index);
+
+                        var lessonExam = new LessonExamEntity
                         {
-                            Name = item.Title,
+                            TemplateType = 2,
+                            Timer = item.Timer,
+                            CreateUser = UserID,
+                            Title = item.Title,
                             Created = DateTime.UtcNow,
                             Updated = DateTime.UtcNow,
-                            CreateUser = UserID,
-                            Center = centerID,
-                            Limtit = item.Limit,
-                            Timer = item.Timer
+                            Limit = item.Limit,
+                            Multiple = item.Multiple,//he so
+                            Etype = item.Etype,
+                            ChapterID = "0",
+                            IsParentCourse = true,
+                            //MatrixExamID = matrixExam.ID,
+                            CodeExam = codeExam.ToString(),
+                            ManageExamID = manageexam.ID
                         };
-                        _manageExamService.Save(manageexam);
-
-                        var listIndexs = RandomIndex(item.TotalExam,999,100);
-
-                        //tạo mã đề, gán cho từng kì thi
-                        for (Int32 i = 0; i < listIndexs.Count(); i++)
-                        {
-                            //if (listIndex.Contains(index))
-                            //{
-                            //    index = rd.Next(100, 999);
-                            //}
-                            var codeExam = listIndexs.ElementAtOrDefault(i);
-                            //listIndex.Add(index);
-
-                            var lessonExam = new LessonExamEntity
-                            {
-                                TemplateType = 2,
-                                Timer = item.Timer,
-                                CreateUser = UserID,
-                                Title = item.Title,
-                                Created = DateTime.UtcNow,
-                                Updated = DateTime.UtcNow,
-                                Limit = item.Limit,
-                                Multiple = item.Multiple,//he so
-                                Etype = item.Etype,
-                                ChapterID = "0",
-                                IsParentCourse = true,
-                                //MatrixExamID = matrixExam.ID,
-                                CodeExam = codeExam.ToString(),
-                                ManageExamID = manageexam.ID
-                            };
-                            _lessonExamService.Save(lessonExam);
-                            //lessonExams.Add(lessonExam);
-                            listLessonExamIDs.Add(lessonExam.ID);
-                            var str = RenderExam(lessonExam,matrixExam,item.ExamQuestionArchiveID,UserID,Tags).Result;
-                        }
+                        _lessonExamService.Save(lessonExam);
+                        //lessonExams.Add(lessonExam);
+                        listLessonExamIDs.Add(lessonExam.ID);
+                        var str = RenderExam(lessonExam, matrixExam, item.ExamQuestionArchiveID, UserID, Tags).Result;
                     }
-                    return Json("");
+
+                    var user = _teacherService.GetItemByID(UserID);
+                    var listExam = _lessonExamService.GetItemsByManageExamID(manageexam.ID);
+                    var totalExam = listExam.Count();
+                    var dataresponse = new ManageExamViewModel(manageexam)
+                    {
+                        UserName = user == null ? "" : user.FullName,
+                        TotalExam = totalExam,
+                        ListExam = totalExam == 0 ? new List<LessonExamEntity>() : listExam,
+                        ClassName = ""
+                    };
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",true },
+                        {"Data", dataresponse},
+                        {"Msg","Tạo đề thành công" }
+                    });
                 }
-
-                //
-
-                //var @class = _classService.GetItemByID(item.TargetClasses.FirstOrDefault());
-                //var classsbj = _classSubjectService.CreateQuery().Find(x => x.ClassID == @class.ID && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).FirstOrDefault();
-
-                //if (isNew)
-                //{
-                //    item.Created = DateTime.Now;
-                //    item.Updated = DateTime.Now;
-                //    item.CreateUser = UserID;
-
-                //    var _lesson = new LessonEntity
-                //    {
-                //        TemplateType = 2,
-                //        Timer = item.Timer,
-                //        CreateUser = UserID,
-                //        Title = item.Title,
-                //        Created = DateTime.Now,
-                //        Updated = DateTime.Now,
-                //        Limit = item.Limit,
-                //        Multiple = item.Multiple,
-                //        Etype = item.Etype,
-                //        ClassID = @class.ID,
-                //        ClassSubjectID = classsbj.ID,
-                //        ChapterID = "0",
-                //        IsParentCourse = true
-                //    };
-                //    _lessonService.Save(_lesson);
-
-                //    var lessonShechude = new LessonScheduleEntity
-                //    {
-                //        ClassID = _lesson.ClassID,
-                //        ClassSubjectID = _lesson.ClassSubjectID,
-                //        IsHideAnswer = true,
-                //        IsActive = _lesson.IsActive,
-                //        LessonID = _lesson.ID,
-                //        TeacherID = UserID,
-                //        Type = CLASSSUBJECT_TYPE.EXAM
-                //    };
-                //    _lessonScheduleService.Save(lessonShechude);
-
-                //    //render exam
-                //    for (Int32 i = 0; i < item.TotalExam; i++)
-                //    {
-                //        var lesson = new LessonExtensionEntity
-                //        {
-                //            TemplateType = 2,
-                //            Timer = item.Timer,
-                //            CreateUser = UserID,
-                //            Title = item.Title,
-                //            Created = DateTime.Now,
-                //            Updated = DateTime.Now,
-                //            Limit = item.Limit,
-                //            Multiple = item.Multiple,
-                //            Etype = item.Etype,
-                //            ClassID = _lesson.ClassID,
-                //            ClassSubjectID = _lesson.ClassSubjectID,
-                //            ChapterID = "0",
-                //            IsParentCourse = true,
-                //            LessonID = _lesson.ID,
-                //            Code = new Random().Next(1, 100).ToString()
-                //        };
-                //        _lessonExamService.Save(lesson);
-
-                //        item.LessonID = lesson.ID;
-                //        //_examProcessService.Save(item);
-                //        var msg = ProcessCreateExam(item, UserID, lesson).Result;
-                //    }
-
-                //    //tạo đề khác tương tự
-
-                //}
-                //return Json("");
+                else
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Data", new ManageExamEntity()},
+                        {"Msg","is new = false" }
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -1508,7 +1481,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                var csbjs = _classSubjectService.GetItemsExamByClassIDs(ListClassID);
+                var csbjs = _classSubjectService.GetClassSubjectExamByClassIDs(ListClassID);
                 if(csbjs.Count() == 0)
                 {
                     return Json(new Dictionary<String, Object> {
@@ -1742,21 +1715,21 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return listIndex;
         }
 
-        public JsonResult ShowDetailExam(String ID)
-        {
-            try
-            {
-                    var lesson = _lessonService.CreateQuery().Find(x => x.LessonExamID == ID).FirstOrDefault();
-                    return Json(new Dictionary<String, object> {
-                        {"ClassSubjectID",lesson.ClassSubjectID },
-                        {"LessonID",lesson.ID }
-                    });
-            }
-            catch(Exception ex)
-            {
-                return Json(ex.Message);
-            }
-        }
+        //public JsonResult ShowDetailExam(String ID)
+        //{
+        //    try
+        //    {
+        //            var lesson = _lessonService.CreateQuery().Find(x => x.LessonExamID == ID).FirstOrDefault();
+        //            return Json(new Dictionary<String, object> {
+        //                {"ClassSubjectID",lesson.ClassSubjectID },
+        //                {"LessonID",lesson.ID }
+        //            });
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return Json(ex.Message);
+        //    }
+        //}
 
         public JsonResult SearchTags(String Term,String basis)
         {
@@ -1798,9 +1771,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        public IActionResult Detail()
+        public IActionResult Detail(String LessonExamID)
         {
-            return View();
+            ViewBag.LessonExam = _lessonExamService.GetItemByID(LessonExamID);
+            return View("Detail");
         }
     }
 }

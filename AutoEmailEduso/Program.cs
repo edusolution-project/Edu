@@ -147,14 +147,16 @@ namespace AutoEmailEduso
                 var day = currentTime.Day;
                 var month = currentTime.Month;
                 var year = currentTime.Year;
-                var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-7).AddMinutes(1);
-                var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
+                //var startWeek = new DateTime(year, month, day, 0, 0, 0).AddDays(-7).AddMinutes(1);
+                //var endWeek = startWeek.AddDays(6).AddHours(23).AddMinutes(58).AddMilliseconds(59);
+                var startWeek = new DateTime(2021, 02, 01, 0, 0, 0);
+                var endWeek = new DateTime(2021, 03, 07, 23, 59, 0);
                 var centersActive = _centerService.GetActiveCenter(currentTime);//lay co so dang hoat dong
 
                 foreach (var center in centersActive)
                 {
                     //var percent = "";
-                    //if (center.Abbr == "c3yl1vp")//test truong Vinh Yen
+                    if (center.Abbr == "c3vyvp")//test truong Vinh Yen
                     {
                         var listTeacherHeader = _teacherService.CreateQuery().Find(x => x.IsActive == true && x.Centers.Any(y => y.CenterID == center.ID)).ToList().FindAll(y => HasRole(y.ID, center.ID, "head-teacher")).ToList();
                         if (listTeacherHeader.Any(x => x.Email == "huonghl@utc.edu.vn"))
@@ -369,16 +371,16 @@ namespace AutoEmailEduso
                         {
                             foreach (var item in listTeacherHeader)
                             {
-                                var toAddress = isTest == true ? cc : new List<string> { item.Email };
-                                //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                                //var toAddress = isTest == true ? cc : new List<string> { item.Email };
+                                var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "dangthuthao298@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com", "dangthuthao298@gmail.com" };
                                 var bccAddress = isTest == true ? null : bcc;
                                 _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{item.FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                             }
                         }
                         else if (listTeacherHeader.Count() == 1)
                         {
-                            var toAddress = isTest == true ? cc : new List<string> { listTeacherHeader[0].Email };
-                            //var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com" };
+                            //var toAddress = isTest == true ? cc : new List<string> { listTeacherHeader[0].Email };
+                            var toAddress = isTest == true ? new List<string> { "shin.l0v3.ly@gmail.com", "dangthuthao298@gmail.com" } : new List<string> { "shin.l0v3.ly@gmail.com", "dangthuthao298@gmail.com" };
                             var bccAddress = isTest == true ? null : bcc;
                             _ = await _mailHelper.SendBaseEmail(toAddress, subject, $"Kính gửi Thầy/Cô: <span style='font-weight:600'>{listTeacherHeader[0].FullName}</span>," + content, MailPhase.WEEKLY_SCHEDULE, null, bccAddress);
                         }

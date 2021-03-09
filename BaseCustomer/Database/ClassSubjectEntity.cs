@@ -138,9 +138,9 @@ namespace BaseCustomerEntity.Database
             return Collection.Find(t => classIds.Contains(t.ClassID)).ToEnumerable();
         }
 
-        public List<ClassSubjectEntity> GetItemsExamByClassIDs(List<string> listClassID)
+        public IEnumerable<ClassSubjectEntity> GetClassSubjectExamByClassIDs(List<String> ClassIDs)
         {
-            return Collection.Find(t => listClassID.Contains(t.ClassID) && t.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToList();
+            return Collection.Find(x => ClassIDs.Contains(x.ClassID) && x.TypeClass == CLASSSUBJECT_TYPE.EXAM).ToEnumerable();
         }
     }
 

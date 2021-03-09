@@ -2330,7 +2330,6 @@
     <Folder Include="wwwroot\Drive.Storge\" />
     <Folder Include="wwwroot\js\minify\" />
     <Folder Include="wwwroot\js\owlcarousel\" />
-    <Folder Include="wwwroot\tags\" />
   </ItemGroup>
 
 
