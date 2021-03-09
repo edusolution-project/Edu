@@ -206,7 +206,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         }
 
 
-        public IActionResult Index(DefaultModel model, string basis, int old = 0)
+        public IActionResult Index(DefaultModel model, string basis, int old = 0, bool IsPrivate = false)
         {
 
             var UserID = User.Claims.GetClaimByType("UserID").Value;
@@ -232,6 +232,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.User = UserID;
             ViewBag.Model = model;
             ViewBag.Managable = CheckPermission(PERMISSION.COURSE_EDIT);
+            ViewBag.IsPrivate = IsPrivate;
 
             if (old == 1)
                 return View("Index_o");
