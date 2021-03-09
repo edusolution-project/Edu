@@ -287,12 +287,24 @@
                                         @*<td class="sticky-col third-col">{{roundPoint(list_students[i-1].AvgPointPratice,1)}}</td>*@
                                         @*<td class="sticky-col fourth-col" v-if="searchCsbj.TypeClass != @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM">{{roundPoint(list_students[i-1].Target,1)}}</td>*@
                                         <td class="sticky-col fourth-col p-1">
-                                            <button class="btn btn-sm btn-secondary pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-if="list_students[i-1].GroupIDs != null && list_students[i-1].GroupIDs.length > 0">
-                                                {{displayGroup(list_students[i-1].GroupIDs[0])}}
-                                            </button>
-                                            <button class="btn btn-sm btn-light-blue pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-else>
-                                                ---
-                                            </button>
+                                            @if (currentClass.Members.Any(t => t.TeacherID == currentuser))
+                                            {
+                                                <button class="btn btn-sm btn-secondary pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-if="list_students[i-1].GroupIDs != null && list_students[i-1].GroupIDs.length > 0">
+                                                    {{displayGroup(list_students[i-1].GroupIDs[0])}}
+                                                </button>
+                                                <button class="btn btn-sm btn-light-blue pr-1 pl-1 m-0 w-100" v-on:click="chooseGroupStudent(list_students[i-1])" v-else>
+                                                    ---
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span class="btn btn-sm btn-secondary pr-1 pl-1 m-0 w-100" v-if="list_students[i-1].GroupIDs != null && list_students[i-1].GroupIDs.length > 0">
+                                                    {{displayGroup(list_students[i-1].GroupIDs[0])}}
+                                                </span>
+                                                <span class="btn btn-sm btn-light-blue pr-1 pl-1 m-0 w-100" v-else>
+                                                    ---
+                                                </span>
+                                            }
                                         </td>
                                         @*<td>{{calcAvginWeek(items)}}</td>*@
                                         <template v-if="Object.keys(fieldsTime).map((key) => [Number(key),fieldsTime[key]]).length > 0">
