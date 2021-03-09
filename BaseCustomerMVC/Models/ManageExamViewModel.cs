@@ -25,6 +25,8 @@ namespace BaseCustomerMVC.Models
             this.CreateUser = o.CreateUser;
             this.Updated = o.Updated;
             this.Center = o.Center;
+            this.Timer = o.Timer;
+            this.Limtit = o.Limtit;
         }
     }
 }

@@ -118,8 +118,8 @@
                         @*<td style="width:35px"><input type="checkbox" /></td>*@
                         <th>#</th>
                         <th>Tên</th>
-                        <th>Cấp độ</th>
-                        <th>Chương trình</th>
+                        @*<th>Cấp độ</th>*@
+                        <th>Môn</th>
                         <th>Số câu</th>
                         <th style="width:150px;max-width:150px">Tác vụ</th>
                     </tr>
@@ -128,7 +128,7 @@
                     <tr v-for="(item,k) in dataResult" :id="item.ID">
                         <td>{{(page - 1) * view + (k+1)}}</td>
                         <td><a :href="'@processUrl("StorageQuestion","ExamManage")/' + item.ID">{{item.Name}}</a></td>
-                        <td>{{item.GradeName}}</td>
+                        @*<td>{{item.GradeName}}</td>*@
                         <td>{{item.SubjectName}}</td>
                         <td>{{item.TotalQuestion}}</td>
                         <td>
@@ -254,7 +254,7 @@
             position: absolute;
             min-width: 200px;
             background: #FFF;
-            z-index:1
+            z-index: 1
         }
 
         .autocomplete-result {
@@ -449,7 +449,7 @@
                     matrixID:'',
                     format: {
                         level: '',
-                        tag: '',
+                        tags: [],
                         levelKnow: {
                             theory: 0,//lý thuyết
                             exercise: 0 //bài tập
@@ -583,9 +583,10 @@
                     }
                     _that.$bvModal.show('modal_event')
                 },
-                showCreateExam(itemID,item) {
+                showCreateExam(itemID, item) {
+                    //debugger
                     let _that = this
-                    this.getOptionFormatExam(itemID)
+                    //this.getOptionFormatExam(itemID)
                     this.getCurrentClass();
                     if (item == undefined) {
                         _that.formatExam = {
@@ -601,7 +602,7 @@
                             format:[
                             {
                                 level: '',
-                                tag: '',
+                                tags: [],
                                     levelKnow: {
                                         theory: 0,//lý thuyết
                                         exercise: 0 //bài tập
@@ -745,7 +746,7 @@
                             var itemFormat = _that.formatExam.format[i]
                             //debugger
                             _form.append("matrixExams[" + i + "].Level", itemFormat.level)
-                            _form.append("matrixExams[" + i + "].Tags", itemFormat.tag)
+                            _form.append("matrixExams[" + i + "].Tags", itemFormat.tags)
                             _form.append("matrixExams[" + i + "].Know.Theory", itemFormat.levelKnow.theory)
                             _form.append("matrixExams[" + i + "].Know.Exercise", itemFormat.levelKnow.exercise)
                             //debugger
@@ -756,6 +757,10 @@
                             _form.append("matrixExams[" + i + "].ManipulateHighly.Theory", itemFormat.levelManipulateHighly.theory)
                             _form.append("matrixExams[" + i + "].ManipulateHighly.Exercise", itemFormat.levelManipulateHighly.exercise)
                             _form.append("matrixExams[" + i + "].Name", _that.formatExam.titleFormat)
+                            //for (var j = 0; j < itemFormat.tags.length; j++) {
+                            //    _form.append("matrixExams[" + i + "].Tags[" + j + "].ID", itemFormat.tags[j].ID)
+                            //    _form.append("matrixExams[" + i + "].Tags[" + j + "].Name", itemFormat.tags[j].Name)
+                            //}
                         }
                     }
                     else if (_that.formatExam.isNewMatrix == 'false') {
@@ -1128,7 +1133,7 @@
                     }
 
                     var totalPercent = this.customOutput.percentKnow + this.customOutput.percentUnderstand + this.customOutput.percentManipulate + this.customOutput.percentManipulatehighly
-                    
+
                     if (totalPercent == 100) {
                         $('#createnewexam').removeAttr('disabled')
                         $('#createnewexam').removeAttr('class')
@@ -1152,8 +1157,12 @@
                 },
 
                 //tags
-                chooseTags() {
-                    debugger
+                chooseTags(tag) {
+                    var idInput = event.target
+                    var div = idInput.parentNode.parentNode
+                    var index = $(div).attr('id').replace('autocomplete_', '')
+                    var item = this.formatExam.format[index]
+                    item.tags.push(tag.ID)
                 },
                 autocompleteTags(term, callback) {
                     let _that = this
@@ -1199,6 +1208,7 @@
             }
         });
     </script>
+
     <style>
         #ed_table tr th:first-child,
         #ed_table tr td:first-child {
@@ -1213,26 +1223,35 @@
         <b-col class="form-group d-none">
             <input type="text" id="examQuestionArchiveID" v-model="createExam.examQuestionArchiveID" class="hide" disabled />
         </b-col>
-        <b-col class="form-group">
-            <label for="">Tên kho đề</label>
-            <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name">
-        </b-col>
-        <div class="d-flex">
-            <b-col class="form-group">
+        <b-col class="row">
+            <div class="col-sm-6">
+                <label for="">Tên kho đề</label>
+                <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name">
+            </div>
+            <div class="col-sm-6">
                 <label for="">Chương trình</label>
                 <select class="form-control" v-model="addItem.SubjectID">
-                    <option value="">Chọn chương trình</option>
+                    <option value="">Môn</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
-            </b-col>
-            <b-col class="form-group">
-                <label for="">Cấp độ</label>
-                <select class="form-control" v-model="addItem.GradeID">
-                    <option value="">Chọn cấp độ</option>
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>
-                </select>
-            </b-col>
-        </div>
+            </div>
+        </b-col>
+        @*<div class="d-flex">
+                <b-col class="form-group">
+                    <label for="">Chương trình</label>
+                    <select class="form-control" v-model="addItem.SubjectID">
+                        <option value="">Chọn chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+                <b-col class="form-group">
+                    <label for="">Cấp độ</label>
+                    <select class="form-control" v-model="addItem.GradeID">
+                        <option value="">Chọn cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == addItem.SubjectID">{{item.Name}}</option>
+                    </select>
+                </b-col>
+            </div>*@
         <div>
             <b-col class="form-group">
                 <label for="">Giáo viên soạn thảo</label>
@@ -1346,16 +1365,16 @@
                                 @*<input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentTotal" min="0" max="100" disabled />*@
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentKnow" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentKnow" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true" />
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentUnderstand" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentUnderstand" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true" />
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulate" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulate" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true" />
                             </td>
                             <td colspan="2">
-                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulatehighly" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true"/>
+                                <input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentManipulatehighly" min="0" max="100" required v-on:change="calc()" :disabled="isComfirm == true" />
                             </td>
                             <td class="text-center">
                                 <button type="button" class="btn-act " v-on:click="comfirm()" id="btn_comfirm" disabled><i class="far fa-check-circle"></i></button>
@@ -1398,7 +1417,7 @@
                                     <td class="text-center align-middle">{{k+1}}</td>
                                     <td>
                                         @*<input type="text" class="form-control" v-model="item.tag" />*@
-                                        <autocomplete v-on:chooseitem="chooseTags" :items="list_Tags" v-on:input="autocompleteTags" />
+                                        <autocomplete v-on:chooseitem="chooseTags" :id="'autocomplete_' + k" :items="list_Tags" v-on:input="autocompleteTags" />
                                     </td>
 
                                     <td class="text-center align-middle">
@@ -1623,7 +1642,7 @@
                             <td>{{k+1}}</td>
                             <td>{{exam.CodeExam}}</td>
                             <td>
-                                <a href="javascript:void(0)" v-on:click="showDetailExam(exam)">Xem chi tiết</a>
+                                <a href="@processUrl("Detail","ExamManage")" v-on:click="showDetailExam(exam)">Xem chi tiết</a>
                             </td>
                         </tr>
                     </tbody>
@@ -1659,9 +1678,23 @@
             </div>
 
             <div class="row">
-                <div class="col-sm-6" style="position:relative">
-                    
-                    @*<input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass" />
+                <label>Tags input with autocomplete:</label>
+                <input id="form-tags-4" name="tags-4" type="text" value="">
+                <script type="text/javascript">
+                    $('#form-tags-4').tagsInput({
+                        'autocomplete': {
+                            source: [
+                                'apple',
+                                'banana',
+                                'orange',
+                                'pizza'
+                            ]
+                        }
+                    });
+                </script>
+                @*<div class="col-sm-6" style="position:relative">
+
+                    <input type="text" class="form-control" readonly v-on:click="showSelectClass('selectClass')" v-model="data_setupExam.nameClass" />
         <div class="col-sm-11 pt-1 d-none" id="selectClass" style="position:absolute;background-color:white;z-index:3">
             <template v-if="list_classes.length > 0">
                 <ul style="list-style:none">
@@ -1674,7 +1707,7 @@
                 Không có lớp nào đang hoạt động
             </template>
         </div>*@
-                </div>
+            </div>
             </div>
         </b-col>
 

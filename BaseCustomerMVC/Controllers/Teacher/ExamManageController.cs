@@ -1105,7 +1105,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 {
                     Level = f.Level,
                     Order = i,
-                    Tags = f.Tags,
+                    //Tags = f.Tags,
                     Know = f.Know,
                     Understanding = f.Understanding,
                     Manipulate = f.Manipulate,
@@ -1113,7 +1113,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Total = total
                 };
                 matrixExam.DetailFormat.Add(detail);
-                _Tags.Add(f.Tags);
+                //_Tags.Add(f.Tags);
             }
 
             Tags = _Tags;
@@ -1400,9 +1400,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             List<LessonPartQuestionExtensionEntity> questions = new List<LessonPartQuestionExtensionEntity>();
             foreach (var item in lessonPartExtensions)
             {
-                var question = lessonPartQuestions.Where(x => x.ParentID == item.ID).ToList();
-                if (question == null) continue;
-                questions.AddRange(question);
+                if (item != null)
+                {
+                    var question = lessonPartQuestions.Where(x => x.ParentID == item.ID).ToList();
+                    if (question == null) continue;
+                    questions.AddRange(question);
+                }
             }
             return questions;
         }
@@ -1791,6 +1794,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     {"Msg",ex.Message }
                 });
             }
+        }
+
+        public IActionResult Detail()
+        {
+            return View();
         }
     }
 }

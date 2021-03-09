@@ -434,12 +434,19 @@
                         var cr = hash.split('-')[1]
                         this.page = cr;
                     }
+                    debugger
                     switch (hash) {
                         case 'listclasses':
                             this.tabChange(0);
                             break;
                         case 'report':
                             this.tabChange(1);
+                            break;
+                        case 'mycourse':
+                            this.isPrivate = 'true'
+                            break;
+                        default:
+                            this.isPrivate = 'false'
                             break;
                     }
                 }
@@ -457,7 +464,7 @@
                 vuejsDatepicker
             },
             data: {
-                isPrivate: true,
+                isPrivate: false,
                 isLoading: false,
                 list_subject: [],
                 tableData: [],
@@ -609,6 +616,7 @@
                     this.getData()
                 },
                 isPrivate: function () {
+                    debugger
                     this.getData()
                 },
                 searchTerm: function(){
