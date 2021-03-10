@@ -618,7 +618,7 @@
                             <td>{{item.bookName}}</td>
                             <td>{{item.className}}</td>
                             <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
-                            <td :class="item.lastPoint > 0 ? 'text-success':'text-danger'">{{item.lastPoint > 0 ? (item.lastPoint/10).toFixed(1) : '---'}}</td>
+                            <td :class="item.lastPoint > 0 ? 'text-success':'text-danger'">{{item.lastPoint >= 0 ? (item.lastPoint/10).toFixed(1) : '---'}}</td>
                         </tr>
                     </tbody>
                 </table>
