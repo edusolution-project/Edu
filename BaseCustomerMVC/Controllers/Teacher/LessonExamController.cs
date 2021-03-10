@@ -110,5 +110,78 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public JsonResult GetDetail(String ID)
+        {
+            try {
+
+                var part = _lessonPartExtensionService.CreateQuery().Find(o => o.ID == ID).SingleOrDefault();
+                if (part == null) return new JsonResult(new Dictionary<string, object>
+                    {
+                        { "Data", null },
+                        {"Error", "Data not found" }
+                    });
+                var full_item = new CloneLessonPartViewModel(part)
+                {
+                    Questions = _lessonPartQuestionExtensionService.CreateQuery().Find(o => o.ParentID == part.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList().Select(t =>
+                          new CloneQuestionViewModel(t)
+                          {
+                              Answers = _lessonPartAnswerExtensionService.ConvertToCloneLessonPartAns(_lessonPartAnswerExtensionService.CreateQuery().Find(a => a.ParentID == t.ID).SortBy(o => o.Order).ThenBy(o => o.ID).ToList())
+                          }).ToList()
+                };
+
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data", full_item }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data", null }
+                });
+            }
+        }
+        
+        public JsonResult CreateOrUpdate()
+        {
+            try {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data", null }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data", null }
+                });
+            }
+        }
+        
+        public JsonResult Remove()
+        {
+            try {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data", null }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data", null }
+                });
+            }
+        }
+
     }
 }

@@ -178,9 +178,11 @@ namespace BaseCustomerMVC.Controllers.Teacher
             var lessons = (from r in _lessonService.CreateQuery().Find(o => o.ClassSubjectID == currentCs.ID && o.ChapterID == Parent).SortBy(o => o.Order).ThenBy(o => o.ID).ToList()
                            //let schedule = _lessonScheduleService.CreateQuery().Find(o => o.LessonID == r.ID && o.ClassSubjectID == ID).FirstOrDefault()
                            //where schedule != null
+                           let lessonExam = r.LessonExamID == null ? new List<String>() : r.LessonExamID
                            select _lessonMapping.AutoOrtherType(r, new LessonScheduleViewModel()
                            {
                                ScheduleID = r.ID,
+                               LessonExamID = lessonExam
                            })).ToList();
 
             var response = new Dictionary<string, object>

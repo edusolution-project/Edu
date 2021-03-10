@@ -234,6 +234,21 @@
                     </li>
                 </ul>
             </div>
+            <div class="form-group">
+                <h3 style="font-size:15px;" class="font-weight-bold pt-3">Bài thi</h3>
+                <ul class="list ls-practice">
+                    <li v-for="(obj,i) in classSubjects" v-if="obj.TypeClass == @BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM" :for="obj.ID">
+                        <ul class="list">
+                            <lesson-item v-for="lesson in filterLessonExam({ID:'0', ClassSubject: obj.ID})"
+                                         v-bind:data="lesson"
+                                         v-bind:owner="obj.TeacherID"
+                                         v-bind:classSubject="obj.ID"
+                                         v-bind:type="'exam'"
+                                         v-bind:group="group_data"></lesson-item>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="box" v-if="tab[2]">
             <div class="container-fluid">
@@ -1771,7 +1786,8 @@
                                     IsUpdating: false,
                                     IsOnline: lesson.IsOnline,
                                     IsHideAnswer: lesson.IsHideAnswer,
-                                    GroupID: lesson.GroupIDs != null && lesson.GroupIDs.length > 0? lesson.GroupIDs[0] : ""
+                                    GroupID: lesson.GroupIDs != null && lesson.GroupIDs.length > 0 ? lesson.GroupIDs[0] : "",
+                                    LessonExamID: lesson.LessonExamID == null ? [] : lesson.LessonExamID
                                 })
 
                             })
@@ -2281,6 +2297,18 @@
                     if (filter.length > 0)
                     //debugger
                     return filter;
+                },
+                filterLessonExam(obj) {
+                    //debugger
+                    //console.log(obj);
+                    //console.log(obj.ClassSubject);
+                    //debugger
+                    var filter = this.list_lessons.filter((p) => {
+                        return p.Parent == obj.ID && p.ClassSubject == obj.ClassSubject && p.LessonExamID.length > 0
+                    })
+                    if (filter.length > 0)
+                        //debugger
+                        return filter;
                 },
                 filterResult(obj) {
                     //console.log(obj);

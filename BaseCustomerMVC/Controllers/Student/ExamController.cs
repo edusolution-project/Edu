@@ -43,6 +43,12 @@ namespace BaseCustomerMVC.Controllers.Student
         private readonly ClassSubjectService _classSubjectService;
         private readonly ClassSubjectProgressService _classSubjectProgressService;
 
+        //
+        private readonly ChapterService _chapterService;
+        private readonly CenterService _centerService;
+        private readonly LessonExamService _lessonExamService;
+        private readonly CloneLessonPartExtensionService _cloneLessonPartExtensionService;
+
         private readonly ProgressHelper _progressHelper;
 
         private readonly IRoxyFilemanHandler _roxyFilemanHandler;
@@ -72,7 +78,12 @@ namespace BaseCustomerMVC.Controllers.Student
 
             ProgressHelper progressHelper,
 
-            IRoxyFilemanHandler roxyFilemanHandler
+            IRoxyFilemanHandler roxyFilemanHandler,
+            /////////////
+            ChapterService chapterService,
+            CenterService centerService,
+            LessonExamService lessonExamService,
+            CloneLessonPartExtensionService cloneLessonPartExtensionService
             )
         {
             _lessonPartQuestionService = lessonPartQuestionService;
@@ -100,6 +111,11 @@ namespace BaseCustomerMVC.Controllers.Student
             _progressHelper = progressHelper;
 
             _roxyFilemanHandler = roxyFilemanHandler;
+            //////////
+            _chapterService = chapterService;
+            _centerService = centerService;
+            _lessonExamService = lessonExamService;
+            _cloneLessonPartExtensionService = cloneLessonPartExtensionService;
         }
 
         [Obsolete]
@@ -844,5 +860,272 @@ namespace BaseCustomerMVC.Controllers.Student
             return Json(result);
         }
 
+
+        #region Liên quan đến kì thi +  kho đề
+        public JsonResult GetLessonExams(DefaultModel model,String basis)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var st = _studentService.GetItemByID(UserID);
+                var listClassIDs = st.JoinedClasses;
+                var csbjExam = _classSubjectService.GetClassSubjectExamByClassIDs(listClassIDs);
+                var csbjExamIds = csbjExam.Select(x => x.ID).ToList();
+
+                var filter = new List<FilterDefinition<LessonEntity>>();
+                switch (model.Sort){
+                    case "latest":
+                        break;
+                    case "oldest":
+                        break;
+                    case "byname":
+                        break;
+                    case "created":
+                        break;
+                    default:
+                        break;
+                }
+
+                var lessons = _lessonService.CreateQuery().Find(x =>
+                            csbjExamIds.Contains(x.ClassSubjectID) &&
+                            x.TemplateType == LESSON_TEMPLATE.EXAM &&
+                            (x.LessonExamID != null || x.LessonExamID.Count() > 0)
+                            ).ToList().OrderByDescending(x=>x.Created);
+
+                model.TotalRecord = lessons.Count();
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Msg","" },
+                    {"Data",lessons }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Msg",ex.Message },
+                    {"Data",null }
+                });
+            }
+        }
+
+        public IActionResult Detail(String basis, DefaultModel model, String ClassID)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var student = _studentService.GetItemByID(UserID);
+                if (ClassID == null)
+                    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+                var currentCs = _classSubjectService.GetItemByID(ClassID);
+                if (currentCs == null)
+                    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+                var currentClass = _classService.GetItemByID(currentCs.ClassID);
+                if (currentClass == null)
+                    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+                var lesson = _lessonService.GetItemByID(model.ID);
+                var index = new Random().Next(0, lesson.LessonExamID.Count());
+                var lessonExam = _lessonExamService.GetItemByID(lesson.LessonExamID[index]);
+                if (lesson == null)
+                    return Redirect($"/{basis}{Url.Action("Index", "Course")}");
+
+                var chapter = _chapterService.GetItemByID(lesson.ChapterID);
+                //var pass = true;
+                ViewBag.Lesson = lessonExam;
+                ViewBag.Type = lesson.TemplateType;
+                //string condChap = "";
+                //if (chapter != null && !String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
+                //{
+                //    var conditionchap = _chapterService.GetItemByID(chapter.ConditionChapter);
+                //    if (conditionchap != null)
+                //    {
+                //        condChap = conditionchap.Name;
+                //        if (conditionchap.BasePoint > 0 && chapter.PracticeCount > 0)
+                //        {
+                //            //check condition
+                //            var progress = _chapterProgressService.GetItemByChapterID(conditionchap.ID, UserID);
+                //            if (progress == null)
+                //            {
+                //                pass = false;
+                //            }
+                //            else
+                //            {
+                //                pass = progress.PracticePoint / chapter.PracticeCount >= conditionchap.BasePoint;
+                //            }
+                //        }
+                //    }
+                //    else
+                //    {
+                //        //????
+                //    }
+                //}
+                //if (pass == false)
+                //{
+                //    ViewBag.FailPass = true;
+                //    ViewBag.CondChap = condChap;
+                //}
+                //else
+                //{
+                //    var nextLesson = _lessonService.CreateQuery().Find(t => t.ChapterID == lesson.ChapterID && t.Order > lesson.Order).SortBy(t => t.Order).FirstOrDefault();
+                ViewBag.Class = currentClass;
+                //    if (string.IsNullOrEmpty(currentCs.CourseName))
+                //        currentCs.CourseName = _courseService.GetItemByID(currentCs.CourseID)?.Name;
+                ViewBag.Subject = currentCs;
+                //    ViewBag.NextLesson = nextLesson;
+                //    ViewBag.Chapter = chapter == null ? new ChapterEntity() : chapter;
+                //}
+                ViewBag.Center = _centerService.GetItemByCode(basis);
+                ViewBag.CurrentUser = student;
+
+                ViewBag.Target = _classSubjectProgressService.GetItemByClassSubjectID(currentCs.ID, UserID)?.Target;
+                //if (newui == 1)
+                return View("Detail");
+                //return View();
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GetCurrentLessonExam(string LessonExamID, string ID)
+        {
+            var userID = User.Claims.GetClaimByType("UserID").Value;
+            var lesson = _lessonExamService.GetItemByID(LessonExamID);
+            if (lesson == null)
+                return new JsonResult(new { Error = "Bài học không đúng" });
+            var exam = _examService.GetLastestByLessonAndStudent(lesson.LessonID, userID);
+
+            //hết hạn => đóng luôn
+            //var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
+            //schedule.StartDate = schedule.StartDate.ToUniversalTime();
+            //schedule.EndDate = schedule.EndDate.ToUniversalTime();
+            if (exam != null && !exam.Status)
+            {
+                //if (lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                if (lesson.EndDate > new DateTime(1900, 1, 1) && lesson.EndDate <= DateTime.UtcNow)
+                {
+                    _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                }
+                else
+                {
+                    if (_lessonHelper.IsOvertime(exam, lesson, out _))//Overtime
+                        _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                    else if (exam.ID != ID)//change Exam
+                        _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
+                    else
+                        exam.CurrentDoTime = DateTime.UtcNow;
+                }
+            }
+            return new JsonResult(new { exam, schedule = new LessonEntity { StartDate = lesson.StartDate, EndDate = lesson.EndDate }, limit = lesson.Limit });
+        }
+
+        [HttpPost]
+        [Obsolete]
+        public async Task<JsonResult> CreateExam(ExamEntity item)
+        {
+            var userid = User.Claims.GetClaimByType("UserID").Value;
+
+            if (string.IsNullOrEmpty(item.ID) || item.ID == "0")
+            {
+                var _lesson = _lessonExamService.GetItemByID(item.LessonExamID);
+                var _class = _classService.GetItemByID(item.ClassID);
+
+                if (_class == null)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Thông tin không đúng" }
+                    });
+                }
+
+                //var _schedule = _lessonScheduleService.GetItemByLessonID(_lesson.ID);
+                //if (_schedule == null)
+                //{
+                //    return new JsonResult(new Dictionary<string, object>
+                //    {
+                //       { "Error", "Thông tin không đúng" }
+                //    });
+                //}
+
+                //COMPLETE ALL INCOMPLETE EXAMS
+                var incompleted_exs = _examService.GetPreviousIncompletedExams(_lesson.ID, userid).ToList();
+                if (incompleted_exs != null && incompleted_exs.Count() > 0)
+                {
+                    foreach (var ex in incompleted_exs)
+                    {
+                        _lessonHelper.CompleteNoEssay(ex, _lesson, out _, false);
+                    }
+                }
+
+                var isMarked = _examService.IsLessonMarked(_lesson.ID, userid);
+                if (isMarked)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài kiểm tra đã chấm, không thực hiện lại được!" }
+                    });
+                }
+
+                item.StudentID = userid;
+                item.Number = //(int)_indexService.GetNewIndex(_schedule.ID + "_" + item.StudentID);
+
+                (int)_examService.CountByStudentAndLesson(_lesson.ID, item.StudentID) + 1;
+                if (_lesson.Limit > 0 && item.Number > _lesson.Limit)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bạn đã hết lượt làm bài!" }
+                    });
+                }
+                if (_lesson.TemplateType == LESSON_TEMPLATE.EXAM)
+                {
+
+                    if (_lesson.StartDate > DateTime.UtcNow)
+                    {
+                        return new JsonResult(new Dictionary<string, object>
+                        {
+                           { "Error", "Bài kiểm tra chưa được mở!" }
+                        });
+                    }
+                }
+
+                if (_lesson.EndDate > new DateTime(1900, 1, 1) && _lesson.EndDate <= DateTime.UtcNow)
+                {
+                    return new JsonResult(new Dictionary<string, object>
+                    {
+                       { "Error", "Bài đã quá hạn!" }
+                    });
+                }
+
+                //item.LessonScheduleID = _lesson.ID;
+                item.Timer = _lesson.Timer;
+                item.Point = 0;
+                item.MaxPoint = _lesson.Point;
+                item.TeacherID = _class.TeacherID;
+                item.ID = null;
+                item.Created = DateTime.UtcNow;
+                item.CurrentDoTime = DateTime.UtcNow;
+                item.Status = false;
+
+                item.QuestionsTotal = _cloneLessonPartExtensionService.CountByLessonID(item.LessonExamID);
+                //TODO: Save Question Total in Lesson info
+                item.QuestionsDone = 0;
+                item.Marked = false;
+
+                //await _progressHelper.UpdateLessonPoint(item, item.Number == 1);//increase counter for first exam only
+            }
+
+            item.Updated = DateTime.UtcNow;
+
+            _examService.Save(item);
+
+            return new JsonResult(new Dictionary<string, object>
+            {
+                { "Data", item }
+            });
+        }
+        #endregion
     }
 }

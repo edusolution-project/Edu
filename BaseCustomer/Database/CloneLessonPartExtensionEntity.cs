@@ -45,5 +45,10 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(x => lessonExamIDs.Contains(x.LessonExamID)).ToEnumerable();
         }
+
+        public long CountByLessonID(string lessonExamID)
+        {
+            return CreateQuery().CountDocuments(t => t.LessonExamID == lessonExamID);
+        }
     }
 }

@@ -57,8 +57,8 @@ namespace BaseCustomerEntity.Database
         //public string OldExamID { get; set; }
         [JsonProperty("CodeExam")]
         public string CodeExam { get; set; }
-        [JsonProperty("LessonExtensionID")]
-        public string LessonExtensionID { get; set; }
+        [JsonProperty("LessonExamID")]
+        public string LessonExamID { get; set; }
 
         [JsonProperty("ListPartIDs")]
         public List<String> ListPartIDs { get; set; }

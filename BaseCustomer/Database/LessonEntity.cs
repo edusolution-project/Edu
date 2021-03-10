@@ -32,7 +32,7 @@ namespace BaseCustomerEntity.Database
         //[JsonProperty("LessonExtension")]
         //public List<LessonExtensionEntity> LessonExtension = new List<LessonExtensionEntity>();
         [JsonProperty("LessonExamID")]
-        public string LessonExamID { get; set; }
+        public List<String> LessonExamID { get; set; }
 
         public LessonEntity()
         {

@@ -994,10 +994,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //tạo mã đề, gán cho từng kì thi
                     for (Int32 i = 0; i < listIndexs.Count(); i++)
                     {
-                        //if (listIndex.Contains(index))
-                        //{
-                        //    index = rd.Next(100, 999);
-                        //}
+                        
                         var codeExam = listIndexs.ElementAtOrDefault(i);
                         //listIndex.Add(index);
 
@@ -1016,7 +1013,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                             IsParentCourse = true,
                             //MatrixExamID = matrixExam.ID,
                             CodeExam = codeExam.ToString(),
-                            ManageExamID = manageexam.ID
+                            ManageExamID = manageexam.ID,
+                            StartDate = manageexam.StartDate,
+                            EndDate = manageexam.EndDate
                         };
                         _lessonExamService.Save(lessonExam);
                         //lessonExams.Add(lessonExam);
@@ -1487,7 +1486,28 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
-                //ListClassID.RemoveAll(manageExam.ListClassID);
+                List<String> listClassIDs = new List<string>();
+                if(item.ListClassID.Count() > ListClassID.Count) //xoa lop
+                {
+                    manageExam.ListClassID = new List<string>();
+                    foreach(var c in ListClassID)
+                    {
+                        if (item.ListClassID.Any(x => x.Equals(c)))
+                        {
+                            listClassIDs.Add(c);
+                        }
+                    }
+                }
+                else if(item.ListClassID.Count() < ListClassID.Count) //them lop
+                {
+                    foreach (var c in ListClassID)
+                    {
+                        if (!item.ListClassID.Any(x => x.Equals(c)))
+                        {
+                            listClassIDs.Add(c);
+                        }
+                    }
+                }
 
                 var csbjs = _classSubjectService.GetClassSubjectExamByClassIDs(ListClassID);
                 if(csbjs.Count() == 0)
@@ -1500,6 +1520,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var lessonExams = _lessonExamService.GetItemsByManageExamID(item.ID);
+                foreach(var lessonExam in lessonExams)
+                {
+                    lessonExam.StartDate = item.StartDate;
+                    lessonExam.EndDate = item.EndDate;
+                    _lessonExamService.Save(lessonExam);
+                }
                 var lessonExamIDs = lessonExams.Select(x => x.ID).ToList();
                 if(lessonExams.Count() == 0)
                 {
@@ -1517,31 +1543,35 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
                 foreach (var cs in csbjs)
                 {
+                    var lesson = new LessonEntity
+                    {
+                        TemplateType = 2,
+                        Timer = item.Timer,
+                        CreateUser = UserID,
+                        Title = $"{manageExam.Name}",
+                        Created = DateTime.Now,
+                        Updated = DateTime.Now,
+                        Limit = manageExam.Limtit,
+                        Multiple = 1,
+                        Etype = 0,
+                        ClassID = cs.ClassID,
+                        ClassSubjectID = cs.ID,
+                        ChapterID = "0",
+                        IsParentCourse = true,
+                        LessonExamID = lessonExamIDs,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate
+                    };
+                    _lessonService.Save(lesson);
+                    //CopyLessonPart(lesson, lessonParts.ToList(), lessonPartsQuiz.ToList(), lessonPartsAns.ToList(), lessonExamIDs);
                     foreach (var lessonExam in lessonExams)
                     {
-                        var lesson = new LessonEntity
-                        {
-                            TemplateType = 2,
-                            Timer = item.Timer,
-                            CreateUser = UserID,
-                            Title = $"{manageExam.Name} - {lessonExam.CodeExam}",
-                            Created = DateTime.Now,
-                            Updated = DateTime.Now,
-                            Limit = manageExam.Limtit,
-                            Multiple = 1,
-                            Etype = 0,
-                            ClassID = cs.ClassID,
-                            ClassSubjectID = cs.ID,
-                            ChapterID = "0",
-                            IsParentCourse = true,
-                            LessonExamID = lessonExam.ID
-                        };
-                        _lessonService.Save(lesson);
-                        CopyLessonPart(lesson, lessonParts.ToList(), lessonPartsQuiz.ToList(), lessonPartsAns.ToList(), lessonExamIDs);
                     }
                 }
 
-                manageExam.ListClassID.AddRange(ListClassID);
+                manageExam.ListClassID.AddRange(listClassIDs);
+                manageExam.StartDate = item.StartDate;
+                manageExam.EndDate = item.EndDate;
                 _manageExamService.Save(manageExam);
 
                 return Json(new Dictionary<String, Object> {
