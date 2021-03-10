@@ -989,7 +989,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     };
                     _manageExamService.Save(manageexam);
 
-                    var listIndexs = RandomIndex(item.TotalExam, 0, item.TotalExam);
+                    var listIndexs = RandomIndex(item.TotalExam, item.TotalExam);
 
                     //tạo mã đề, gán cho từng kì thi
                     for (Int32 i = 0; i < listIndexs.Count(); i++)
@@ -1123,9 +1123,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var partKnowExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
 
                     //lấy câu lý thuyết
-                    newListParts.AddRange(GetParts(item, partKnowTheory.ToList()));
+                    newListParts.AddRange(GetParts(partKnowTheory.ToList(),item.Know.Theory));
                     //lấy câu bài tập
-                    newListParts.AddRange(GetParts(item, partKnowExercise.ToList()));
+                    newListParts.AddRange(GetParts(partKnowExercise.ToList(),item.Know.Exercise));
                 }
                 var _listPartUnderstanding = lessonParts.Where(x => x.LevelPart == LEVELPART.UNDERSTANDING );
                 {
@@ -1133,9 +1133,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var partUnderstandingExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
 
                     //lấy câu lý thuyết
-                    newListParts.AddRange(GetParts(item, partUnderstandingTheory.ToList()));
+                    newListParts.AddRange(GetParts(partUnderstandingTheory.ToList(), item.Understanding.Theory));
                     //lấy câu bài tập
-                    newListParts.AddRange(GetParts(item, partUnderstandingExercise.ToList()));
+                    newListParts.AddRange(GetParts(partUnderstandingExercise.ToList(),item.Understanding.Exercise));
                 }
                 var _listPartManipulate = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATE );
                 {
@@ -1143,9 +1143,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var partManipulateExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
 
                     //lấy câu lý thuyết
-                    newListParts.AddRange(GetParts(item, partManipulateTheory.ToList()));
+                    newListParts.AddRange(GetParts(partManipulateTheory.ToList(), item.Manipulate.Theory));
                     //lấy câu bài tập
-                    newListParts.AddRange(GetParts(item, partManipulateExercise.ToList()));
+                    newListParts.AddRange(GetParts(partManipulateExercise.ToList(), item.Manipulate.Exercise));
                 }
                 var _listPartManipulateHighly = lessonParts.Where(x => x.LevelPart == LEVELPART.MANIPULATEHIGHLY );
                 {
@@ -1153,9 +1153,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     var partManipulateHighlyExercise = _listPartKnow.Where(x => x.TypePart == TYPE_PART.EXERCISE);
 
                     //lấy câu lý thuyết
-                    newListParts.AddRange(GetParts(item, partManipulateHighlyTheory.ToList()));
+                    newListParts.AddRange(GetParts(partManipulateHighlyTheory.ToList(), item.ManipulateHighly.Theory));
                     //lấy câu bài tập
-                    newListParts.AddRange(GetParts(item, partManipulateHighlyExercise.ToList()));
+                    newListParts.AddRange(GetParts(partManipulateHighlyExercise.ToList(), item.ManipulateHighly.Exercise));
                 }
             }
 
@@ -1192,18 +1192,24 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return "";
         }
 
-        private List<LessonPartExtensionEntity> GetParts( DetailMatrixExam item, List<LessonPartExtensionEntity> listParts)
+        private List<LessonPartExtensionEntity> GetParts( 
+            //DetailMatrixExam item,
+            List<LessonPartExtensionEntity> listParts,
+            Int32 TotalPart
+            )
         {
             List<LessonPartExtensionEntity> newListParts = new List<LessonPartExtensionEntity>();
-            if (item.Know.Theory > 0 && item.Know.Theory == 1)
+
+            //lay cau li thuye
+            if (TotalPart > 0 && TotalPart == 1)
             {
                 var index = new Random().Next(0, listParts.Count());
                 var part = listParts.ElementAtOrDefault(index);
                 newListParts.Add(part);
             }
-            else if (item.Know.Theory > 1)
+            else if (TotalPart > 1)
             {
-                var indexs = RandomIndex(item.Know.Theory, listParts.Count(), 0);
+                var indexs = RandomIndex(TotalPart, listParts.Count(), 0);
                 var part = (from i in indexs
                             let p = listParts.ElementAtOrDefault(i)
                             where p != null
@@ -1481,6 +1487,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     });
                 }
 
+                //ListClassID.RemoveAll(manageExam.ListClassID);
+
                 var csbjs = _classSubjectService.GetClassSubjectExamByClassIDs(ListClassID);
                 if(csbjs.Count() == 0)
                 {
@@ -1532,6 +1540,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         CopyLessonPart(lesson, lessonParts.ToList(), lessonPartsQuiz.ToList(), lessonPartsAns.ToList(), lessonExamIDs);
                     }
                 }
+
+                manageExam.ListClassID.AddRange(ListClassID);
+                _manageExamService.Save(manageExam);
 
                 return Json(new Dictionary<String, Object> {
                     {"Status",true },
@@ -1774,6 +1785,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         public IActionResult Detail(String LessonExamID)
         {
             ViewBag.LessonExam = _lessonExamService.GetItemByID(LessonExamID);
+            ViewBag.Class = new ClassEntity();
+            ViewBag.Subject = new ClassSubjectEntity();
             return View("Detail");
         }
     }

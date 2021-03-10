@@ -1729,7 +1729,7 @@
                             <td>{{exam.CodeExam}}</td>
                             <td>
                                 @*<a href="@processUrl("Detail","ExamManage")" v-on:click="showDetailExam(exam)">Xem chi tiết</a>*@
-                                <a :href="'@processUrl("Detail","ExamManage")/' + exam.ID" target="_blank">Xem chi tiết</a>
+                                <a :href="'@processUrl("Detail","ExamManage")?LessonExamID=' + exam.ID" target="_blank">Xem chi tiết</a>
                             </td>
                         </tr>
                     </tbody>

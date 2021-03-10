@@ -171,7 +171,7 @@
 
     }
 
-    <script>
+<script>
         var config = {
             container: "exam-teacher",
             mod: @Html.Raw(currentLesson.TemplateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM ? "mod.TEACHERPREVIEWEXAM" : "mod.TEACHERPREVIEW"),
@@ -193,9 +193,10 @@
             class_name: '@currentClass.Name',
             center_name: '@currentCenter.Name',
             student_name: '...................................',
+            codeExam : '@currentLesson.Code'
         }
     var widget = new Lesson.onReady(config);
-    </script>
+</script>
     <link href="~/css/detailui.css" rel="stylesheet" />
     <script>
         $('#content').append($('<i>', { class: 'btn-close-preview', text: 'X', title: 'Đóng' }).click(function () {

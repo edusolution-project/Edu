@@ -38,7 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 var result = new List<CloneLessonPartViewModel>();
                 if (root != null)
                 {
-                    var listPart = _lessonPartExtensionService.CreateQuery().Find(x=>x.ParentID == LessonExamID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
+                    var listPart = _lessonPartExtensionService.CreateQuery().Find(x=>x.LessonExamID == LessonExamID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
                     
                     if ( listPart != null && listPart.Count > 0)
                     {
@@ -88,5 +88,27 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
+        public JsonResult GetDetailsLesson(string ID)
+        {
+            try
+            {
+                var lesson = _lessonExamService.CreateQuery().Find(o => o.ID == ID).FirstOrDefault();
+
+                var response = new Dictionary<string, object>
+                {
+                    { "Data", lesson }
+                };
+                return new JsonResult(response);
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new Dictionary<string, object>
+                {
+                    { "Data", null },
+                    {"Error", ex.Message }
+                });
+            }
+        }
+
     }
 }
