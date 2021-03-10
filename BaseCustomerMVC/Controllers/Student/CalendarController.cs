@@ -127,12 +127,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    if (chap != null)
                 //        content += " - " + chap.Name;
                 //}
+                var teacher = _teacherService.GetItemByID(course.TeacherID);
+                data.ID = lesson.ID;
+                data.TeacherID = course.TeacherID;
+                data.TeacherName = teacher?.FullName;
                 data.StartDate = lesson.StartDate;
                 data.EndDate = lesson.EndDate;
                 data.Title = lesson.Title;
                 data.GroupID = lesson.ClassID;
                 data.Status = lesson.IsOnline ? 5 : 0;
-                data.UrlRoom = _teacherService.GetItemByID(course.TeacherID).ZoomID;
+                data.UrlRoom = teacher?.ZoomID;
                 data.Content = content;
                 data.LinkLesson = url;
             }

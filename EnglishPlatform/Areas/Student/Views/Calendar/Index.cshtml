@@ -23,24 +23,30 @@
 <link href="~/js/calendar/css/style.css" rel="stylesheet" />
 <style>
     .swal-title {
-      margin: 0px;
-      font-size: 16px;
-      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
-      margin-bottom: 28px;
+        margin: 0px;
+        font-size: 16px;
+        box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+        margin-bottom: 28px;
     }
+
     .swal-text {
-      padding: 17px;
-      display: block;
-      margin: auto;
-      text-align: center;
-      color: #61534e;
+        padding: 17px;
+        display: block;
+        margin: auto;
+        text-align: center;
+        color: #61534e;
     }
+
     .swal-footer {
-      text-align:center;
-      background-color: rgb(245, 248, 250);
-      margin-top: 32px;
-      border-top: 1px solid #E9EEF1;
-      overflow: hidden;
+        text-align: center;
+        background-color: rgb(245, 248, 250);
+        margin-top: 32px;
+        border-top: 1px solid #E9EEF1;
+        overflow: hidden;
+    }
+
+    .fc-btnAddEvent-button {
+        display: none;
     }
 </style>
 <script>
@@ -291,7 +297,7 @@
                             //        window.open(`skype:${_skype}?call`, "_blank");
                             //    });
                             //} else {
-                                
+
                             //}
                         }
                     }
@@ -329,7 +335,7 @@
                 }
             })
         }
-        
+
     </script>
     <script>
         var formEvent = document.getElementById("form-event");
@@ -432,7 +438,7 @@
                 document.body.classList.remove("open-add-event");
             })
             }
-            
+
         }
         document.getElementById("btn-delete-event").onclick = function () {
 
@@ -453,7 +459,7 @@
                     var id = bodyEvent.querySelector("input[name='ID']").value;
                     EduCalendar.schedule.Ajax.PostAny("@processUrl("Delete","Calendar")?id=" + id, null).then(function (data) {
                         if (data == true || data == "true") {
-                           
+
                             var event = EduCalendar.schedule.EduCalendar.getEventById(id);
                             if (event != null) {
                                 event.remove();
@@ -468,7 +474,7 @@
                     })
                 });
 
-            
+
         }
         if ($ != void 0 && $('.timepicker') != void 0) {
             $('.timepicker').timepicker({
