@@ -2867,6 +2867,7 @@ var Lesson = (function () {
                     "onclick": "BeginExam(this)",
                     "style": "cursor: pointer",
                 }).append('<i class="fas fa-play mr-2"></i>').append('Làm bài');
+                console.log('2870')
             }
         }
         if (isNull(data) || config.mod == mod.TEACHERPREVIEWEXAM) {
@@ -2943,6 +2944,7 @@ var Lesson = (function () {
             lesson_action_holder.append(doButton)
                 .append(reviewButton);
         }
+        $("#exam-student").append(doButton)
     }
 
     var renderLectureExam = function (data, isContinue) {
@@ -4017,6 +4019,8 @@ var Lesson = (function () {
                 "style": "cursor: pointer",
                 "text": "Làm bài"
             });
+
+            
             //var backButton = $('<div>', {
             //    "class": "btn btn-primary m-3",
             //    "onclick": "$(this).prop('disabled',true); GoBack();",

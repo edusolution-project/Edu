@@ -560,32 +560,32 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         TypePart = lessonPartExtension.TypePart
                     };
 
-                    if(!String.IsNullOrEmpty(lessonPartExtension.Tags))
-                    {
-                        var listTags = lessonPartExtension.Tags.Split(';');
-                        var tag = "";
-                        foreach(var t in listTags)
-                        {
-                            var codeT= t.ConvertUnicodeToCode("-", true);
-                            Int32 pos = 0;
-                            while (_tagsService.GetItemByCode(codeT) != null)
-                            {
-                                pos++;
-                                codeT += ("-" + pos);
-                            }
-                            var newTag = new TagsEntity
-                            {
-                                Name = t,
-                                Code = codeT,
-                                ExamQuestionArchiveID = ID,
-                                CenterCode = center.Code,
-                                CreateUser = UserID
-                            };
-                            _tagsService.Save(newTag);
-                            tag += $"{codeT}; ";
-                        }
-                        lessonpart.Tags = tag;
-                    }    
+                    //if(!String.IsNullOrEmpty(lessonPartExtension.Tags))
+                    //{
+                    //    var listTags = lessonPartExtension.Tags.Split(';');
+                    //    var tag = "";
+                    //    foreach(var t in listTags)
+                    //    {
+                    //        var codeT= t.ConvertUnicodeToCode("-", true);
+                    //        Int32 pos = 0;
+                    //        while (_tagsService.GetItemByCode(codeT) != null)
+                    //        {
+                    //            pos++;
+                    //            codeT += ("-" + pos);
+                    //        }
+                    //        var newTag = new TagsEntity
+                    //        {
+                    //            Name = t,
+                    //            Code = codeT,
+                    //            ExamQuestionArchiveID = ID,
+                    //            CenterCode = center.Code,
+                    //            CreateUser = UserID
+                    //        };
+                    //        _tagsService.Save(newTag);
+                    //        tag += $"{codeT}; ";
+                    //    }
+                    //    lessonpart.Tags = tag;
+                    //}    
 
                     _lessonPartExtensionService.Save(lessonpart);
                     listPart.Add(lessonpart);
@@ -622,10 +622,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var newListPart = (from lp in listPart
-                                   let tagName = _tagsService.GetNamesByCodes(lp.Tags)
+                                   //let tagName = _tagsService.GetNamesByCodes(lp.Tags)
                                    select new LessonPartExtensionViewModel(lp)
                                    {
-                                       TagsName = tagName
+                                       //TagsName = tagName
                                    }).ToList();
 
                 return Json(new Dictionary<String, Object>
@@ -704,10 +704,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     //var DataResponse = data;
 
                     var listPart = (from lp in DataResponse.ToList()
-                                    let tagname = _tagsService.GetNamesByCodes(lp.Tags)
+                                    let listtags = _tagsService.GetList(lp.Tags)
                                     select new LessonPartExtensionViewModel(lp)
                                     {
-                                        TagsName = tagname
+                                        ListTags = listtags
                                     }).ToList();
                     response = new Dictionary<string, object>
                     {
@@ -938,7 +938,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
         #endregion
 
         #region CreateExam
-        public async Task<JsonResult> CreateOrUpdateExam(DefaultModel model, String basis, ExamProcessViewModel item,List<MatrixExamViewModel> matrixExams, Boolean isNew)
+        public async Task<JsonResult> CreateOrUpdateExam(
+            DefaultModel model, 
+            String basis, 
+            ExamProcessViewModel item,
+            List<MatrixExamViewModel> matrixExams, 
+            Boolean isNew)
         {
             try
             {
@@ -1054,7 +1059,54 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private MatrixExamEntity CreateOrUpdateMatrix(ExamProcessViewModel item, List<MatrixExamViewModel> matrixExams, string UserID, string centerID, out List<String> Tags)
+        public JsonResult RemoveExam(String ID)
+        {
+            try
+            {
+                var manageExam = _manageExamService.GetItemByID(ID);
+                if(manageExam == null)
+                {
+                        return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Data",null },
+                        {"Msg","Không tìm thấy thông tin kì thi." }
+                    });
+                }
+
+                var lessonExams= _lessonExamService.GetItemsByManageExamID(ID);
+                var lessonExamIDs = lessonExams.Select(x => x.ID).ToList();
+                var lesson = _lessonService.CreateQuery().Find(x => x.LessonExamID.Intersect(lessonExamIDs).Any()).Project(x => x.ID).ToList();
+                
+                foreach(var l in lesson)
+                {
+                    _lessonService.Remove(l);
+                }
+
+
+
+                _manageExamService.Remove(ID);
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Data",null },
+                    {"Msg","" }
+                });
+            }
+            catch(Exception ex)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Data",null },
+                    {"Msg",ex.Message }
+                });
+            }
+        }
+
+        private MatrixExamEntity CreateOrUpdateMatrix(
+            ExamProcessViewModel item, 
+            List<MatrixExamViewModel> matrixExams, 
+            string UserID, 
+            string centerID, 
+            out List<String> Tags)
         {
             var matrixExam = new MatrixExamEntity
             {
@@ -1344,7 +1396,13 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return listPart;
         }
 
-        private void SetQuestion(string UserID, LessonExamEntity lesson, List<LessonPartQuestionExtensionEntity> newListQuestion, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartExtensionEntity part, CloneLessonPartExtensionEntity clonelessonpart)
+        private void SetQuestion(
+            string UserID, 
+            LessonExamEntity lesson, 
+            List<LessonPartQuestionExtensionEntity> newListQuestion, 
+            List<LessonPartAnswerExtensionEntity> newListAns, 
+            LessonPartExtensionEntity part, 
+            CloneLessonPartExtensionEntity clonelessonpart)
         {
             foreach (var quiz in newListQuestion.Where(x => x.ParentID == part.ID))
             {
@@ -1375,7 +1433,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task<List<LessonPartQuestionExtensionEntity>> GetQuestion(List<LessonPartExtensionEntity> lessonPartExtensions, List<LessonPartQuestionExtensionEntity> lessonPartQuestions)
+        private async Task<List<LessonPartQuestionExtensionEntity>> GetQuestion(
+            List<LessonPartExtensionEntity> lessonPartExtensions, 
+            List<LessonPartQuestionExtensionEntity> lessonPartQuestions)
         {
             List<LessonPartQuestionExtensionEntity> questions = new List<LessonPartQuestionExtensionEntity>();
             foreach (var item in lessonPartExtensions)
@@ -1390,7 +1450,12 @@ namespace BaseCustomerMVC.Controllers.Teacher
             return questions;
         }
 
-        private void SetAnswer(string UserID, LessonExamEntity lesson, List<LessonPartAnswerExtensionEntity> newListAns, LessonPartQuestionExtensionEntity quiz, CloneLessonPartQuestionExtensionEntity clonelessonpartquestion)
+        private void SetAnswer(
+            string UserID, 
+            LessonExamEntity lesson, 
+            List<LessonPartAnswerExtensionEntity> newListAns, 
+            LessonPartQuestionExtensionEntity quiz, 
+            CloneLessonPartQuestionExtensionEntity clonelessonpartquestion)
         {
             foreach (var ans in newListAns.Where(x => x.ParentID == quiz.ID))
             {
@@ -1415,7 +1480,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
-        private async Task<List<LessonPartAnswerExtensionEntity>> GetAnswer(List<LessonPartQuestionExtensionEntity> lessonPartQuestions, List<LessonPartAnswerExtensionEntity> lessonPartAnswers)
+        private async Task<List<LessonPartAnswerExtensionEntity>> GetAnswer(
+            List<LessonPartQuestionExtensionEntity> lessonPartQuestions, 
+            List<LessonPartAnswerExtensionEntity> lessonPartAnswers)
         {
             List<LessonPartAnswerExtensionEntity> answers = new List<LessonPartAnswerExtensionEntity>();
             foreach (var question in lessonPartQuestions)
@@ -1772,6 +1839,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         //    }
         //}
 
+
+        #region Tags
         public JsonResult SearchTags(String Term,String basis)
         {
             try
@@ -1812,6 +1881,82 @@ namespace BaseCustomerMVC.Controllers.Teacher
             }
         }
 
+        public JsonResult UpdateTags(String basis,string lessonpartID,List<TagsEntity> listTags,Boolean isRemove = false)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var center = _centerService.GetItemByCode(basis);
+                var lessonpart = _lessonPartExtensionService.GetItemByID(lessonpartID);
+                var resData = new List<TagsEntity>();
+                if (!isRemove)
+                {
+                    foreach (var tags in listTags)
+                    {
+                        if (String.IsNullOrEmpty(tags.ID))
+                        {
+                            var codeT = tags.Name.ConvertUnicodeToCode("-", true);
+                            Int32 pos = 0;
+                            while (_tagsService.GetItemByCode(codeT) != null)
+                            {
+                                pos++;
+                                codeT += ("-" + pos);
+                            }
+                            var newTag = new TagsEntity
+                            {
+                                Name = tags.Name,
+                                Code = codeT,
+                                ExamQuestionArchiveID = tags.ExamQuestionArchiveID,
+                                CenterCode = center.Code,
+                                CreateUser = UserID
+                            };
+                            _tagsService.Save(newTag);
+                            resData.Add(newTag);
+
+                            if (tags != null)
+                            {
+                                lessonpart.Tags.Add(newTag.ID);
+                            }
+                            else
+                            {
+                                lessonpart.Tags = new List<string>();
+                                lessonpart.Tags.Add(newTag.ID);
+                            }
+                        }
+                        else
+                        {
+                            if(!lessonpart.Tags.Contains(tags.ID))
+                            {
+                                lessonpart.Tags.Add(tags.ID);
+                            }    
+                        }
+                    }
+                }
+                else
+                {
+                    if (listTags.Count() > 0)
+                    {
+                        lessonpart.Tags.Remove(listTags.FirstOrDefault().ID);
+                    }
+                }
+
+                _lessonPartExtensionService.Save(lessonpart);
+                return Json(new Dictionary<String, Object> {
+                    {"Status",true },
+                    {"Data",resData},
+                    {"Msg","" }
+                });
+            }
+            catch(Exception e)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Data",null },
+                    {"Msg",e.Message }
+                });
+            }
+        }
+        #endregion
         public IActionResult Detail(String LessonExamID)
         {
             ViewBag.LessonExam = _lessonExamService.GetItemByID(LessonExamID);

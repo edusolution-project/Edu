@@ -489,7 +489,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
         [System.Obsolete]
         [HttpPost]
-        public JsonResult GetLesson(string LessonID, string ClassID, string ClassSubjectID)
+        public JsonResult GetLesson(string LessonID, string ClassID, string ClassSubjectID,String LessonExamID)
         {
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
@@ -508,8 +508,6 @@ namespace BaseCustomerMVC.Controllers.Student
             if (currentcs == null)
                 return new JsonResult(
                 new Dictionary<string, object> { { "Error", "Subject not found" } });
-
-
 
             //var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
 
@@ -538,20 +536,19 @@ namespace BaseCustomerMVC.Controllers.Student
             var dataListParts = _cloneLessonPartService.CreateQuery().Find(o => o.ParentID == lesson.ID && o.ClassSubjectID == currentcs.ID).ToList();
             List<CloneLessonPartEntity> listParts = new List<CloneLessonPartEntity>();
 
-            var lastexam = _examService.CreateQuery().Find(o => o.LessonID == LessonID && o.ClassSubjectID == ClassSubjectID
+            var lastexam = _examService.CreateQuery().Find(o => (o.LessonID == LessonID || o.LessonExamID.Equals(LessonExamID)) && o.ClassSubjectID == ClassSubjectID
                 //&& o.ClassID == ClassID 
                 && o.StudentID == userId).SortByDescending(o => o.Created).FirstOrDefault();
 
             var rd = new Random();
             List<String> listPartIDs = new List<String>();
-            var lessonExtension = _lessonExamService.GetItemByLessonID(LessonID);
             if (currentcs.TypeClass == CLASSSUBJECT_TYPE.EXAM) //đảo vị trí câu hỏi trong bài kiểm tra
             {
-                if (lastexam != null)//????
+                if (lastexam != null)//????GetLesson
                 {
-                    if (lessonExtension.Count() == 0)
+                    if (lastexam.ListPartIDs == null || lastexam.ListPartIDs.Count() == 0)
                     {
-                        if (lastexam.ListPartIDs == null)
+                        if (String.IsNullOrEmpty(LessonExamID))
                         {
                             List<Int32> listIndex = new List<int>();
                             do
@@ -576,31 +573,16 @@ namespace BaseCustomerMVC.Controllers.Student
                         }
                         else
                         {
-                            foreach (var id in lastexam.ListPartIDs)
-                            {
-                                var data = dataListParts.Where(x => x.ID == id).FirstOrDefault();
-                                if (data != null)
-                                    listParts.Add(data);
-                            }
+                            listParts = _cloneLessonPartExtensionService.GetitemsByLessonExamID(LessonExamID);
                         }
                     }
                     else
                     {
-                        if (lessonExtension.Count() == 1) // 1 đề tạo từ ngân hàng câu hỏi
+                        foreach (var id in lastexam.ListPartIDs)
                         {
-                            listParts = _cloneLessonPartExtensionService.GetItemsByLessonID(lessonExtension.FirstOrDefault().ID, currentcs.ID).ToList<CloneLessonPartEntity>();
-                        }
-                        else if (lessonExtension.Count() > 1) // nhiều đề tạo từ ngân hàng câu hỏi
-                        {
-                            var index = new Random().Next(0, lessonExtension.Count());
-                            var currentLesson = lessonExtension.ElementAtOrDefault(index);
-                            //while (lastexam != null && lastexam.CodeExam != currentLesson.CodeExam)
-                            //{
-                            //    index = new Random().Next(0, lessonExtension.Count());
-                            //    currentLesson = lessonExtension.ElementAtOrDefault(index);
-                            //}
-
-                            listParts = _cloneLessonPartExtensionService.GetItemsByLessonID(currentLesson.ID, currentcs.ID).ToList<CloneLessonPartEntity>();
+                            var data = dataListParts.Where(x => x.ID == id).FirstOrDefault();
+                            if (data != null)
+                                listParts.Add(data);
                         }
                     }
                 }
@@ -624,7 +606,7 @@ namespace BaseCustomerMVC.Controllers.Student
                     case "QUIZ3":
                     case "QUIZ4":
                     case "ESSAY":
-                        if (lessonExtension.Count() == 0)
+                        if (String.IsNullOrEmpty(LessonExamID))
                         {
                             convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery()
                                 .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
@@ -634,39 +616,19 @@ namespace BaseCustomerMVC.Controllers.Student
                                     Description = q.Description
                                 }).ToList();
                         }
-                        else if (lessonExtension.Count() > 0)
+                        else
                         {
-                            //convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery()
-                            //    .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
-                            //    .Select(q => new QuestionViewModel(q)
-                            //    {
-                            //        CloneAnswers = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList(),
-                            //        Description = q.Description
-                            //    }).ToList();
-                            var quiz = _cloneLessonPartQuestionExtensionService.CreateQuery().Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList();
-                            var questions = new List<QuestionViewModel>();
-                            foreach(var q in quiz)
-                            {
-                                var question = new QuestionViewModel(q);
-                                //var ca = (from a in _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList()
-                                //         let an = a as CloneLessonPartAnswerEntity
-                                //         select an).ToList();
-                                var listans = _cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList();
-                                var nlistans = new List<CloneLessonPartAnswerEntity>();
-                                foreach(var a in listans)
+                            convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery()
+                                .Find(q => q.ParentID == part.ID).SortBy(q => q.Order).ThenBy(q => q.ID).ToList()
+                                .Select(q => new QuestionViewModel(q)
                                 {
-                                    var cloneans = a as CloneLessonPartAnswerEntity;
-                                    nlistans.Add(cloneans);
-                                }
-                                var des = q.Description;
-                                question.CloneAnswers = nlistans;
-                                question.Description = des;
-                                questions.Add(question);
-                            }
+                                    CloneAnswers = _cloneLessonPartAnswerExtensionService.ConvertToCloneLessonPartAns(_cloneLessonPartAnswerExtensionService.CreateQuery().Find(x => x.ParentID == q.ID).ToList()),
+                                    Description = q.Description
+                                }).ToList();
                         }
                         break;
                     case "QUIZ2":
-                        if (lessonExtension.Count() == 0)
+                        if (String.IsNullOrEmpty(LessonExamID))
                         {
                             convertedPart.Questions = _cloneLessonPartQuestionService.CreateQuery().Find(q => q.ParentID == part.ID)
                             //.SortBy(q => q.Order).ThenBy(q => q.ID)
@@ -677,7 +639,7 @@ namespace BaseCustomerMVC.Controllers.Student
                                 Description = null
                             }).ToList();
                         }
-                        else if (lessonExtension.Count() > 0)
+                        else
                         {
                             convertedPart.Questions = _cloneLessonPartQuestionExtensionService.CreateQuery().Find(q => q.ParentID == part.ID)
                             //.SortBy(q => q.Order).ThenBy(q => q.ID)

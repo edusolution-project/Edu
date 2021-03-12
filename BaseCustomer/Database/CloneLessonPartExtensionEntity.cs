@@ -36,9 +36,15 @@ namespace BaseCustomerEntity.Database
             return CreateQuery().Find(x => x.ParentID == ParentID && x.ClassSubjectID == classSubjectID).ToEnumerable();
         }
 
-        public List<String> GetIDsByLessonID(string ParentID)
+        public List<CloneLessonPartEntity> GetitemsByLessonExamID(string LessonExamID)
         {
-            return CreateQuery().Find(x => x.ParentID == ParentID).Project(x=>x.ID).ToList();
+            var list = CreateQuery().Find(x => x.LessonExamID == LessonExamID).ToList();
+            var newlist = new List<CloneLessonPartEntity>();
+            foreach(var item in list)
+            {
+                newlist.Add(item as CloneLessonPartEntity);
+            }
+            return newlist;
         }
 
         public IEnumerable<CloneLessonPartExtensionEntity> GetItemsByLessonExamID(List<string> lessonExamIDs)

@@ -10,6 +10,9 @@ namespace BaseCustomerMVC.Models
     {
         [JsonProperty("TagsName")]
         public String TagsName { get; set; }
+        [JsonProperty("ListTags")]
+        public List<TagsViewModal> ListTags { get; set; }
+
         public LessonPartExtensionViewModel()
         {
 

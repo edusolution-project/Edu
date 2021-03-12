@@ -19,21 +19,34 @@
 <script src="~/js/plugins/ck4/ckeditor.js"></script>
 <script src="~/js/content-render-lessonexam.js"></script>
 
+@*<script src="https://unpkg.com/vue-multiselect@2.1.0"></script>*@
+@*<link rel="stylesheet"
+    href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css" />*@
+<link href="~/lib/vue-multiselect@2.1.0/vue-multiselect.min.css?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")" rel="stylesheet" />
+<script src="~/lib/vue-multiselect@2.1.0/vue-multiselect.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+
 <section class="container-fluid">
     <div class="card-header border-b">
         <div class="flex flex-row flex-wrap align-items-center">
-            <div class="box filter-box w-152 m-1 ">
-                <select v-model="subject">
-                    <option value="">Chương trình</option>
-                    <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                </select>
+            <div class="">
+                <h3>@currentData.Name (Tiếng Anh)</h3>
+
             </div>
-            <div class="box filter-box w-152 m-1">
-                <select name="" v-model="grade">
-                    <option value="">Cấp độ</option>
-                    <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                </select>
-            </div>
+            @*<div class="box filter-box w-152 m-1 ">
+                    <select v-model="subject">
+                        <option value="">Chương trình</option>
+                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+                <div class="box filter-box w-152 m-1">
+                    <select name="" v-model="grade">
+                        <option value="">Cấp độ</option>
+                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
+                    </select>
+                </div>*@
+        </div>
+        <div class="flex flex-row flex-wrap align-items-center">
+
             <div class="box filter-box w-152 m-1 ">
                 <select v-model="filterLevelPart">
                     <option value="">Mức độ</option>
@@ -41,6 +54,13 @@
                     <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
                     <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
                     <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
+                </select>
+            </div>
+            <div class="box filter-box w-152 m-1 ">
+                <select>
+                    <option value="">Loại câu hỏi</option>
+                    <option value="">Lý thuyết</option>
+                    <option value="">Bài tập</option>
                 </select>
             </div>
             <div class="search-box m-1">
@@ -60,7 +80,7 @@
                 <tr>
                     <td style="width:30px;max-width:30px">#</td>
                     <td>Câu hỏi</td>
-                    <td style="width:250px;min-width:30px">Tags</td>
+                    <td style="width:250px;min-width:450px">Nội dung</td>
                     <td style="width:150px;max-width:150px;min-width:30px">Loại câu hỏi</td>
                     <td style="width:150px;max-width:130px;min-width:30px">Mức độ</td>
                     <td style="width:100px;max-width:100px;min-width:30px">Tác vụ</td>
@@ -71,7 +91,21 @@
                     <td>{{(page - 1) * view + (k+1)}}</td>
                     <td>{{item.Title}}</td>
                     <td>
-                        <input type="text" class="form-control" v-model="item.TagsName" disabled readonly />
+                        @*<input type="text" class="form-control" v-model="item.TagsName" disabled readonly />*@
+                        <multiselect v-model="item.ListTags"
+                                     tag-placeholder="Thêm mới"
+                                     placeholder="Chọn nội dung"
+                                     label="name"
+                                     track-by="id"
+                                     :options="optionsTags"
+                                     :multiple="true"
+                                     :taggable="true"
+                                     :id="item.ID"
+                                     @@tag="addTag"
+                                     @@search-change="searchTags"
+                                     @*@@input="changeValue"*@
+                                     @@remove="removeTags"
+                                     @@select="selectTags"></multiselect>
                     </td>
                     <td>
                         <select :id="item.ID" v-model="item.TypePart" v-on:change="changeTypePart(item.ID,item.TypePart)" class="form-control">
@@ -188,6 +222,23 @@
         </template>
     </b-modal>
 
+    <b-modal id="tags-modal-xl" size="xl" title="Môn: Tiếng anh">
+        <b-col>
+            <multiselect v-model="value"
+                         tag-placeholder="Thêm mới"
+                         placeholder="Chọn nội dung"
+                         label="name"
+                         track-by="id"
+                         :options="options"
+                         :multiple="true"
+                         :taggable="true"
+                         @@tag="addTag"
+                         @@search-change="searchTags"
+                         @@remove="removeTags"
+                         @@select="selectTags"></multiselect>
+        </b-col>
+    </b-modal>
+
     <b-modal id="selectTypeContent-modal-center" centered title="Chọn thao tác">
         <div class="text-center">
             <p>
@@ -235,7 +286,9 @@
                 this.list_grades_full = @Html.Raw(Json.Serialize(grades));
                 this.getListPart();
             },
-            components: {},
+            components: {
+                Multiselect: window.VueMultiselect.default
+            },
             data: {
                 list_grades_full: [],
                 list_subject: [],
@@ -255,7 +308,18 @@
                 totalRec: 0,
                 searchTerm: '',
                 filterLevelPart:'',
-                listLessonPart:[]
+                listLessonPart: [],
+
+                displayTags: [],
+                optionsTags: [],
+                value: [
+                    { name: 'Javascript', code: 'js' }
+                ],
+                options: [
+                    { name: 'Vue.js', code: 'vu' },
+                    { name: 'Javascript', code: 'js' },
+                    { name: 'Open Source', code: 'os' }
+                ]
             },
             computed: {},
             watch: {
@@ -281,13 +345,16 @@
                     //debugger
                     let _that = this
                     _that.addEditItem.GradeID = ""
-                    _that.addEditItem.SubjectID = ""
+                    _that.addEditItem.SubjectID = "@currentData.SubjectID"
                     _that.listCourses = []
+                    this.hideModal('selectTypeContent-modal-center')
                     _that.$bvModal.show('addEditItem-modal-xl')
                 },
                 showSelectTypeContent() {
                     let _that = this
-                    _that.$bvModal.show('selectTypeContent-modal-center')
+
+                    //_that.$bvModal.show('selectTypeContent-modal-center')
+                    _that.$bvModal.show('tags-modal-xl')
                     //Swal.fire({
                     //    title: '<strong>Chọn thao tác</strong>',
                     //    icon: 'question',
@@ -544,7 +611,9 @@
                         .then(response => {
                             //_that.isLoading = false
                             var data = response.data.Data
+
                             this.listLessonPart = data
+                            //debugger
                             this.totalRec = response.data.Model.totalRecord
                         }).catch(e => {
                             _that.isLoading = false;
@@ -625,6 +694,159 @@
                                 alert(e)
                             })
                     }
+                },
+                addTag(newTag, id) {
+                    console.log(id)
+                    //const tag = {
+                    //    name: newTag,
+                    //    id: ""
+                    //};
+                    //this.optionsTags.push(tag);
+                    //debugger
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("UpdateTags" ,"ExamManage")'
+                    _form.append("listTags[0].Name", newTag)
+                    _form.append("ExamQuestionArchiveID", '@currentData.ID')
+                    _form.append("lessonpartID", id)
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+                                debugger
+                                const tag = {
+                                    name: res.data.Data[0].Name,
+                                    id: res.data.Data[0].ID
+                                };
+                                this.optionsTags.push(tag);
+                            }
+                            else {
+                                console.log(res.data.Msg)
+                            }
+                        })
+                        .catch(e => { console.log(e) })
+                    //debugger
+                },
+                searchTags(term, id) {
+                    let _that = this
+                    //console.log(id)
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            var data_tags = _that.optionsTags.filter(item => item.name.indexOf(term) > -1)
+                            if (data_tags.length == 0) {
+                                let _form = new FormData()
+                                _form.append('Term', term)
+                                //_form.append('Center', '@center')
+                                let _url = '@processUrl("SearchTags", "ExamManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var stt = response.data.Status
+                                        if (stt) {
+                                            var data = response.data.Data
+                                            //debugger
+                                            if (data.length > 0) {
+                                                for (var i = 0; i < data.length; i++) {
+                                                    var current = data[i]
+                                                    _that.optionsTags.push({
+                                                        id: current.ID,
+                                                        name: current.Name
+                                                    })
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            alert(response.data.Msg)
+                                        }
+                                    }).catch(e => { alert(e) })
+                            } else {
+
+                            }
+                        }, 500)
+                    }
+                },
+                changeValue(value, id) {
+                    debugger
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("UpdateTags" ,"ExamManage")'
+
+                    _form.append("ExamQuestionArchiveID", '@currentData.ID')
+                    _form.append("lessonpartID", id)
+                    for (var i = 0; i < value.length; i++) {
+                        _form.append("listTags[" + i + "].Name", value[i].name)
+                        _form.append("listTags[" + i + "].ID", value[i].id)
+                    }
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            debugger
+                            if (stt) {
+                                const tag = {
+                                    name: res.data.Data.Name,
+                                    id: res.data.Data.ID
+                                };
+                                this.optionsTags.push(tag);
+                            }
+                            else {
+                                console.log(res.data.Msg)
+                            }
+                        })
+                        .catch(e => { console.log(e) })
+                },
+                removeTags(removedOption, id) {
+                    //debugger
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("UpdateTags" ,"ExamManage")'
+                    //_form.append("listTags[0].Name", newTag)
+                    _form.append("listTags[0].ID", removedOption.id)
+                    _form.append("ExamQuestionArchiveID", '@currentData.ID')
+                    _form.append("isRemove", true)
+                    _form.append("lessonpartID", id)
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+                                debugger
+                                const tag = {
+                                    name: res.data.Data[0].Name,
+                                    id: res.data.Data[0].ID
+                                };
+                                this.optionsTags.push(tag);
+                            }
+                            else {
+                                console.log(res.data.Msg)
+                            }
+                        })
+                        .catch(e => { console.log(e) })
+                },
+                selectTags(selectedOption, id) {
+                    debugger
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("UpdateTags" ,"ExamManage")'
+                    //_form.append("listTags[0].Name", newTag)
+                    _form.append("listTags[0].ID", selectedOption.id)
+                    _form.append("ExamQuestionArchiveID", '@currentData.ID')
+                    _form.append("lessonpartID", id)
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+                                debugger
+                                const tag = {
+                                    name: res.data.Data[0].Name,
+                                    id: res.data.Data[0].ID
+                                };
+                                this.optionsTags.push(tag);
+                            }
+                            else {
+                                console.log(res.data.Msg)
+                            }
+                        })
+                        .catch(e => { console.log(e) })
                 }
             }
         });
@@ -719,6 +941,45 @@
         /*ul li:hover {
             text-shadow: 2px 2px 8px #FF0000
         }*/
+
+        .multiselect__tag {
+            background-color: antiquewhite;
+            cursor: pointer;
+            color: black
+        }
+
+            .multiselect__tag:hover {
+                background-color: gray
+            }
+
+        .multiselect__tag-icon:after {
+            color: black
+        }
+
+        .multiselect__option--highlight {
+            background-color: antiquewhite;
+            cursor: pointer;
+            color: black
+        }
+
+            .multiselect__option--highlight:after {
+                background-color: antiquewhite;
+                cursor: pointer;
+                color: black
+            }
+
+        /*.multiselect__option--selected.multiselect__option--highlight {
+            background: #ff6a6a;
+            color: #fff
+        }*/
+        /*.multiselect__tag-icon {
+            visibility:hidden
+        }
+
+            .multiselect__tag-icon:focus, .multiselect__tag-icon:hover {*/
+                /*background: #369a6e*/
+                /*visibility: visible
+            }*/
     </style>
 }
 

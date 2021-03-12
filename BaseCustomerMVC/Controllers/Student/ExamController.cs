@@ -931,7 +931,8 @@ namespace BaseCustomerMVC.Controllers.Student
 
                 var chapter = _chapterService.GetItemByID(lesson.ChapterID);
                 //var pass = true;
-                ViewBag.Lesson = lessonExam;
+                ViewBag.LessonExam = lessonExam;
+                ViewBag.Lesson = lesson;
                 ViewBag.Type = lesson.TemplateType;
                 //string condChap = "";
                 //if (chapter != null && !String.IsNullOrEmpty(chapter.ConditionChapter))//has condition
@@ -989,13 +990,14 @@ namespace BaseCustomerMVC.Controllers.Student
         }
 
         [HttpPost]
-        public JsonResult GetCurrentLessonExam(string LessonExamID, string ID)
+        public JsonResult GetCurrentLessonExam(string LessonExamID, string ID,String ClassSubjectID)
         {
             var userID = User.Claims.GetClaimByType("UserID").Value;
-            var lesson = _lessonExamService.GetItemByID(LessonExamID);
+            var lessonExam = _lessonExamService.GetItemByID(LessonExamID);
+            var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID.Equals(ClassSubjectID) && x.LessonExamID.Contains(lessonExam.ID)).FirstOrDefault();
             if (lesson == null)
                 return new JsonResult(new { Error = "Bài học không đúng" });
-            var exam = _examService.GetLastestByLessonAndStudent(lesson.LessonID, userID);
+            var exam = _examService.GetLastestByLessonAndStudent(lesson.ID, userID);
 
             //hết hạn => đóng luôn
             //var schedule = _lessonScheduleService.GetItemByLessonID(LessonID);
@@ -1098,7 +1100,7 @@ namespace BaseCustomerMVC.Controllers.Student
                        { "Error", "Bài đã quá hạn!" }
                     });
                 }
-
+                var lesson = _lessonService.CreateQuery().Find(x => x.ClassSubjectID.Equals(item.ClassSubjectID) && x.LessonExamID.Contains(item.LessonExamID)).FirstOrDefault();
                 //item.LessonScheduleID = _lesson.ID;
                 item.Timer = _lesson.Timer;
                 item.Point = 0;
@@ -1108,13 +1110,15 @@ namespace BaseCustomerMVC.Controllers.Student
                 item.Created = DateTime.UtcNow;
                 item.CurrentDoTime = DateTime.UtcNow;
                 item.Status = false;
+                item.LessonID = lesson.ID;
+                item.CodeExam = _lesson.CodeExam;
 
                 item.QuestionsTotal = _cloneLessonPartExtensionService.CountByLessonID(item.LessonExamID);
                 //TODO: Save Question Total in Lesson info
                 item.QuestionsDone = 0;
                 item.Marked = false;
 
-                //await _progressHelper.UpdateLessonPoint(item, item.Number == 1);//increase counter for first exam only
+                await _progressHelper.UpdateLessonPoint(item, item.Number == 1);//increase counter for first exam only
             }
 
             item.Updated = DateTime.UtcNow;

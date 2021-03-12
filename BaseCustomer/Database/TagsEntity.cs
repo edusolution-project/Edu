@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace BaseCustomerEntity.Database
 {
@@ -20,6 +21,8 @@ namespace BaseCustomerEntity.Database
         public String CenterCode { get; set; }
         [JsonProperty("CreateUser")]
         public String CreateUser { get; set; }
+        [JsonProperty("ParentIDs")]
+        public List<String> ParentIDs { get; set; }
     }
 
     public class TagsService : ServiceBase<TagsEntity>
@@ -53,9 +56,9 @@ namespace BaseCustomerEntity.Database
 
                 if (listTags.Length > 0)
                 {
-                    var listCodes = new List<String>();
-                    listCodes.AddRange(listTags);
-                    var newListTags = CreateQuery().Find(x => listCodes.Contains(x.Code)).ToList();
+                    var listIDs = new List<String>();
+                    listIDs.AddRange(listTags);
+                    var newListTags = CreateQuery().Find(x => listIDs.Contains(x.ID)).ToList();
                     String str = "";
 
                     foreach (var t in newListTags)
@@ -82,5 +85,23 @@ namespace BaseCustomerEntity.Database
                 return CreateQuery().Find(x => x.CenterCode.Equals(basis) && x.CreateUser.Equals(userID)).ToList();
             }
         }
+
+        public List<TagsViewModal> GetList(List<String> ids)
+        {
+            List<TagsEntity> data = CreateQuery().Find(x => ids.Contains(x.ID)).ToList();
+            return (from item in data
+                    let tagsVM = new TagsViewModal
+                    {
+                        id = item.ID,
+                        name = item.Name
+                    }
+                    select tagsVM).ToList();
+        }
+    }
+
+    public class TagsViewModal
+    {
+        public String name { get; set; }
+        public String id { get; set; }
     }
 }

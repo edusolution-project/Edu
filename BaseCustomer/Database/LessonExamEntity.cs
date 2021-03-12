@@ -12,8 +12,8 @@ namespace BaseCustomerEntity.Database
     {
         [JsonProperty("CodeExam")]
         public String CodeExam { get; set; }
-        [JsonProperty("LessonID")]
-        public String LessonID { get; set; }
+        //[JsonProperty("LessonID")]
+        //public String LessonID { get; set; }
         [JsonProperty("MatrixExamID")]
         public String MatrixExamID { get; set; }
         [JsonProperty("ManageExamID")]
@@ -28,16 +28,16 @@ namespace BaseCustomerEntity.Database
             {
                 new CreateIndexModel<LessonExamEntity>(
                     new IndexKeysDefinitionBuilder<LessonExamEntity>()
-                    .Ascending(t => t.LessonID)
+                    //.Ascending(t => t.LessonID)
                     .Ascending(t=> t.CodeExam)
                     ),
             };
         }
 
-        public List<LessonExamEntity> GetItemByLessonID(string LessonID)
-        {
-            return CreateQuery().Find(x => x.LessonID == LessonID).ToList();
-        }
+        //public List<LessonExamEntity> GetItemByLessonID(string LessonID)
+        //{
+        //    return CreateQuery().Find(x => x.LessonID == LessonID).ToList();
+        //}
 
         public List<LessonExamEntity> GetItemsByManageExamID(String ID)
         {

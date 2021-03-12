@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css" />
 
 <script>
-    setActiveMenu("curriculum");
+    setActiveMenu("manageexam");
 </script>
 
 <section class="module" id="dashboard_content">
@@ -49,7 +49,7 @@
         </div>
 
         <div class="flex flex-row flex-wrap align-items-center">
-            <div class="box filter-box w-152 m-1 ">
+            @*<div class="box filter-box w-152 m-1 ">
                 <select v-model="subject">
                     <option value="">Chương trình</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
@@ -70,7 +70,7 @@
                 <template v-if="tab[0]">
                     <input type="text" name="" v-model="searchTerm" placeholder="Tên kì thi cần tìm">
                 </template>
-            </div>
+            </div>*@
             <div class="ml-0 ml-md-auto">
                 <template v-if="tab[1]">
                     <b-button class="btn-addevent btn-sm m-1" v-on:click="showEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>
@@ -112,9 +112,9 @@
                         <td class="text-center align-middle">{{exam.ClassName}}</td>
                         <td class="text-center align-middle">{{exam.UserName}}</td>
                         <td class="text-center align-middle">
-                            <button type="button" class="btn-act btn-edit" title="Sửa"><i class="ti-pencil-alt"></i></button>
+                            @*<button type="button" class="btn-act btn-edit" title="Sửa"><i class="ti-pencil-alt"></i></button>*@
                             <button type="button" class="btn-act btn-edit" title="Cài đặt" v-on:click="setupExam(exam)"><i class="ti-settings"></i></button>
-                            <button type="button" class="btn-act btn-trash" title="Xoá"><i class="ti-trash"></i></button>
+                            <button type="button" class="btn-act btn-trash" title="Xoá" v-on:click="removeExam(exam)"><i class="ti-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>
@@ -162,7 +162,8 @@
                         <td>{{(page - 1) * view + (k+1)}}</td>
                         <td><a :href="'@processUrl("StorageQuestion","ExamManage")/' + item.ID">{{item.Name}}</a></td>
                         @*<td>{{item.GradeName}}</td>*@
-                        <td>{{item.SubjectName}}</td>
+                        @*<td>{{item.SubjectName}}</td>*@
+                        <td>Tiếng anh</td>
                         <td>{{item.TotalQuestion}}</td>
                         <td>
                             <div class="btn-group" style="display:block">
@@ -506,6 +507,28 @@
                         })
                 },
                 showEditItem(item) {
+
+                    Swal.fire({
+                        title: 'Chọn môn học',
+                        html:
+                            '<div>' +
+                            '<select class="form-control">' +
+                            '<option>Tiếng anh</option>' +
+                            '</select>' +
+                            '</div>',
+                        showCancelButton: true,
+                        confirmButtonText: `Tiếp tục`,
+                        cancelButtonText: `Huỷ`,
+                        //icon: 'success'
+                    }).then((result) => {
+                        /* Read more about isConfirmed, isDenied below */
+                        if (result.value == true) {
+                            _that.$bvModal.show('modal_event')
+                        } else if (result.dismiss == 'cancel') {
+                            //Swal.fire('Changes are not saved', '', 'info')
+                        }
+                    })
+
                     let _that = this
                     this.addItem.CreateUser = this.currentUser.ID
                     this.addItem.displaySelect = false
@@ -521,7 +544,7 @@
                     else {
 
                     }
-                    _that.$bvModal.show('modal_event')
+                    //_that.$bvModal.show('modal_event')
                 },
                 showCreateExam(itemID, item) {
                     //debugger
@@ -953,7 +976,42 @@
                         .then(response => {
                             debugger
                         })
-                        .catch(e => { alert(e)})
+                        .catch(e => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Ôi hỏng...',
+                                text: e,
+                            })
+                        })
+                },
+                removeExam(obj) {
+                    if (window.confirm("Bạn muốn xoá " + obj.Name + " ?")){
+                        let _that = this
+                        let _url = '@processUrl("RemoveExam", "ExamManage")'
+                        let _form = new FormData()
+                        _form.append("ID", obj.ID)
+                        axios.post(_url, _form)
+                            .then(response => {
+                                var stt = response.data.Status
+                                if (stt) {
+
+                                }
+                                else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Ôi hỏng...',
+                                        text: response.data.Msg,
+                                    })
+                                }
+                            })
+                            .catch(e => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Ôi hỏng...',
+                                    text: e,
+                                })
+                            })
+                    }
                 },
 
                 //support
@@ -1225,7 +1283,7 @@
                 },
                 showEditLessonExam() {
                     let _that = this
-                    if (this.dataResult.length < 0) {
+                    if (this.dataResult.length == 0) {
                         this.getData()
                     }
 
@@ -1288,18 +1346,43 @@
             width: 30px;
             max-width: 30px;
         }
+        .multiselect__tag {
+            background-color: antiquewhite;
+            cursor: pointer;
+            color: black
+        }
+
+            .multiselect__tag:hover {
+                background-color: gray
+            }
+
+        .multiselect__tag-icon:after {
+            color: black
+        }
+
+        .multiselect__option--highlight {
+            background-color: antiquewhite;
+            cursor: pointer;
+            color: black
+        }
+
+            .multiselect__option--highlight:after {
+                background-color: antiquewhite;
+                cursor: pointer;
+                color: black
+            }
     </style>
 }
 
 @section Modals{
-    <b-modal id="modal_event" centered title="Kho đề thi" size="xl">
+    <b-modal id="modal_event" centered title="Tạo ngân hàng câu hỏi" size="xl">
         <b-col class="form-group d-none">
             <input type="text" id="examQuestionArchiveID" v-model="createExam.examQuestionArchiveID" class="hide" disabled />
         </b-col>
         <b-col class="row">
             <div class="col-sm-6">
-                <label for="">Tên kho đề</label>
-                <input type="text" name="" value="" class="form-control" placeholder="Tên bài giảng" v-model="addItem.Name">
+                <label for="">Tên ngân hàng</label>
+                <input type="text" name="" value="" class="form-control" placeholder="Tên" v-model="addItem.Name">
             </div>
             <div class="col-sm-6">
                 <label for="">Chương trình</label>
@@ -1367,7 +1450,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row pt-2">
                 <div class="col-md-4">
                     <label class="label">Thời gian làm bài</label>
                     <input type="number" min="1" class="form-control" v-model="formatExam.timer" />
@@ -1494,7 +1577,7 @@
                                         <div>
                                             <multiselect v-model="item.tags"
                                                          tag-placeholder="Thêm như 1 nội dung mới"
-                                                         placeholder="Nhập nội dung muốn tìm kiếm"
+                                                         placeholder="Chọn nội dung"
                                                          label="name"
                                                          track-by="code"
                                                          :options="item.tagsName"
@@ -1797,22 +1880,24 @@
         </template>
     </b-modal>
 
-    <b-modal id="lessonExam-modal" centered title="Kho đề thi" size="xl">
+    <b-modal id="lessonExam-modal" centered title="Tạo bài thi" size="xl">
         <b-col>
             <div class="row">
                 <div class="col-md-4">
-                    <label class="label">Kì kiểm tra</label>
-                    <input type="text" class="form-control" placeholder="Kì kiểm tra" v-model="lessonExam.name" />
-                </div>
-                <div class="col-md-4">
                     <label class="label">Môn</label>
-                    <select class="form-control" v-model="formatExam.Subject">
+                    <select class="form-control" >
                         <option value="english">Tiếng anh</option>
                     </select>
                 </div>
+
                 <div class="col-md-4">
-                    <label class="label">Chọn</label>
-                    <select class="form-control" v-model="lessonExam.bankQuestionID">
+                    <label class="label">Tên</label>
+                    <input type="text" class="form-control" placeholder="Nhập tên bài thi" v-model="lessonExam.name" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Ngân hàng câu hỏi</label>
+                    <select class="form-control" v-model="lessonExam.bankQuestionID" required>
                         <option value="">Chọn ngân hàng câu hỏi</option>
                         <option v-for="(item,k) in dataResult" :value="item.ID">{{item.Name}}</option>
                     </select>
@@ -1864,7 +1949,8 @@
                     <tbody>
                         <tr>
                             <td colspan="2" class="text-center align-middle">Tổng(%)</td>
-                            <td>
+                            <td class="text-center align-middle">
+                                <span style="font-weight:bold">100%</span>
                                 @*<input type="number" class="form-control text-center align-middle" v-model="defaultOutput.percentTotal" min="0" max="100" disabled />*@
                             </td>
                             <td colspan="2">

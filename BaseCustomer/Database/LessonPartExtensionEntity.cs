@@ -23,8 +23,8 @@ namespace BaseCustomerEntity.Database
         [JsonProperty("SubjectID")]
         public String SubjectID { get; set; }
         [JsonProperty("Tags")]
-        //public List<String> Tags = new List<String>();
-        public String Tags { get; set; }
+        public List<String> Tags = new List<String>();
+        //public String Tags { get; set; }
         [JsonProperty("TypePart")]
         public Int32 TypePart { get; set; }
     }
