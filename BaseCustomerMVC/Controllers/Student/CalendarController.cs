@@ -89,7 +89,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     List<StudentLessonScheduleViewModel> listSchedule = new List<StudentLessonScheduleViewModel>();
 
-                    var studentGroups = _classGroupService.GetByClassIDs(listClassID).Where(t => t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
+                    var studentGroups = _classGroupService.GetByClassIDs(listClassID).Where(t => t.Members != null && t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
 
                     var data = new List<CalendarEventModel>();
                     if (studentGroups == null || studentGroups.Count == 0)
