@@ -195,6 +195,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
                         var classGroups = new List<ClassGroupEntity>();
 
+                        classGroups = _classGroupService.GetByClassID(classid).Where(t => t.Members != null).ToList();
+
+
                         if (examIds.Count() > 0)
                         {
                             var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) && x.LastDate <= endWeek && x.LastDate >= startWeek && x.Tried > 0).ToList();
