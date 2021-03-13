@@ -507,7 +507,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
 
         #region Quiz
         //public JsonResult CreateOrUpdateLessonPart(String basis, List<String> IDs, List<String> Types, String ID, String GradeID)
-        public JsonResult CreateOrUpdateLessonPart(String basis, List<LessonPartExtensionEntity> lessonPartExtentsions, String ID, String GradeID)
+        public JsonResult CreateOrUpdateLessonPart(String basis, List<LessonPartExtensionEntity> lessonPartExtentsions, String ID, String GradeID,List<TagsEntity> tags)
         {
             try
             {
@@ -557,7 +557,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ExamQuestionArchiveID = ID,
                         GradeID = GradeID,
                         SubjectID = examQuestionArchive.SubjectID,
-                        TypePart = lessonPartExtension.TypePart
+                        TypePart = lessonPartExtension.TypePart,
+                        Tags = tags.Count() == 0 ? new List<string>() : tags.Select(x=>x.ID).ToList()
                     };
 
                     //if(!String.IsNullOrEmpty(lessonPartExtension.Tags))
@@ -1908,27 +1909,33 @@ namespace BaseCustomerMVC.Controllers.Teacher
                                 Code = codeT,
                                 ExamQuestionArchiveID = tags.ExamQuestionArchiveID,
                                 CenterCode = center.Code,
-                                CreateUser = UserID
+                                CreateUser = UserID,
+                                ParentIDs = tags.ParentIDs == null ? new List<string>() : tags.ParentIDs
                             };
                             _tagsService.Save(newTag);
                             resData.Add(newTag);
-
-                            if (tags != null)
+                            if (lessonpart != null)
                             {
-                                lessonpart.Tags.Add(newTag.ID);
-                            }
-                            else
-                            {
-                                lessonpart.Tags = new List<string>();
-                                lessonpart.Tags.Add(newTag.ID);
+                                if (tags != null)
+                                {
+                                    lessonpart.Tags.Add(newTag.ID);
+                                }
+                                else
+                                {
+                                    lessonpart.Tags = new List<string>();
+                                    lessonpart.Tags.Add(newTag.ID);
+                                }
                             }
                         }
                         else
                         {
-                            if(!lessonpart.Tags.Contains(tags.ID))
+                            if (lessonpart != null)
                             {
-                                lessonpart.Tags.Add(tags.ID);
-                            }    
+                                if (!lessonpart.Tags.Contains(tags.ID))
+                                {
+                                    lessonpart.Tags.Add(tags.ID);
+                                }
+                            }
                         }
                     }
                 }
@@ -1940,7 +1947,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     }
                 }
 
-                _lessonPartExtensionService.Save(lessonpart);
+                if (lessonpart != null)
+                {
+                    _lessonPartExtensionService.Save(lessonpart);
+                }
                 return Json(new Dictionary<String, Object> {
                     {"Status",true },
                     {"Data",resData},

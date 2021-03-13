@@ -13,11 +13,11 @@
         return $"/{center}{url}";
     }
 }
-<script src="~/js/vue@2.6.0.js"></script>
-<script src="~/js/bootstrap-vue.min.js"></script>
-<script src="~/js/axios.min.js"></script>
-<script src="~/js/plugins/ck4/ckeditor.js"></script>
-<script src="~/js/content-render-lessonexam.js"></script>
+<script src="~/js/vue@2.6.0.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+<script src="~/js/bootstrap-vue.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+<script src="~/js/axios.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+<script src="~/js/plugins/ck4/ckeditor.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+@*<script src="~/js/content-render-lessonexam.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>*@
 
 @*<script src="https://unpkg.com/vue-multiselect@2.1.0"></script>*@
 @*<link rel="stylesheet"
@@ -151,7 +151,7 @@
     </div>
 
     <!--Modals-->
-    <b-modal id="addEditItem-modal-xl" size="xl" title="Thêm câu hỏi" :no-close-on-backdrop="true">
+    <b-modal id="addEditItem-modal-xl" size="xl" :title="getTitle()" :no-close-on-backdrop="true">
         <b-col class="form-group">
             <b-col class="flex flex-row flex-wrap align-items-center">
                 <b-col class="box filter-box w-152 m-1">
@@ -222,21 +222,55 @@
         </template>
     </b-modal>
 
-    <b-modal id="tags-modal-xl" size="xl" title="Môn: Tiếng anh">
-        <b-col>
-            <multiselect v-model="value"
-                         tag-placeholder="Thêm mới"
-                         placeholder="Chọn nội dung"
-                         label="name"
-                         track-by="id"
-                         :options="options"
-                         :multiple="true"
-                         :taggable="true"
-                         @@tag="addTag"
-                         @@search-change="searchTags"
-                         @@remove="removeTags"
-                         @@select="selectTags"></multiselect>
-        </b-col>
+    <b-modal id="tags-modal" size="lg" title="Môn: Tiếng anh" :no-close-on-backdrop="true">
+        <div class="pt-1 pb-1">
+            <label class="">Chọn nội dung</label>
+            <div class="row" id="listTags">
+                <div v-for="(item,k) in list_tags" class="col-sm-6" style="position:relative">
+                    <multiselect v-model="item.value"
+                                 tag-placeholder="Thêm mới"
+                                 placeholder="Chọn nội dung có sẵn hoặc thêm mới"
+                                 label="name"
+                                 track-by="id"
+                                 :options="item.options"
+                                 :multiple="false"
+                                 :taggable="true"
+                                 :id="'multiselect_'+k"
+                                 @@tag="addTagtoList"
+                                 @@search-change="searchTagtoList"
+                                 @@input="inputTagstoList"
+                                 style="max-width:350px">
+                    </multiselect>
+                    @*<multiselect v-model="value"
+                                     :options="options"
+
+                                     placeholder="Chọn nội dung"
+                                     label="name"
+                                     track-by="name"
+                                     @@tag="addTagtoList"
+                                     @@search-change="searchTagtoList"
+                                     @@input="inputTagstoList"
+                                     style="max-width:300px">
+                        </multiselect>*@
+                    <i class="fas fa-long-arrow-alt-right" id="fa-long-arrow-alt-right" style="display:none"></i>
+                </div>
+            </div>
+            <div class="pt-1">
+                <button class="btn" title="Thêm nội dung cấp dưới" v-on:click="addChilTags()">Thêm nội dung cấp dưới(Nếu cần)</button>
+            </div>
+        </div>
+
+        @*<footer id="modal-footer"></footer>*@
+        <template v-slot:modal-footer="{ ok, cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang gửi dữ liệu ...</b-button>
+            </template>
+            <template v-else>
+                <b-button variant="success" v-on:click="nextStep()">Tiếp tục</b-button>
+                <b-button variant="danger" v-on:click="hideModal('tags-modal')">Huỷ</b-button>
+            </template>
+        </template>
+
     </b-modal>
 
     <b-modal id="selectTypeContent-modal-center" centered title="Chọn thao tác">
@@ -249,10 +283,19 @@
             </p>
         </div>
 
-        <template #modal-footer="{cancel}">
-            <b-button size="xl" v-on:click="hideModal('selectTypeContent-modal-center')">
-                Đóng
-            </b-button>
+        @*<template #modal-footer="{cancel}">
+                <b-button size="xl" v-on:click="hideModal('selectTypeContent-modal-center')">
+                    Đóng
+                </b-button>
+            </template>*@
+        <template v-slot:modal-footer="{cancel}">
+            <template v-if="isLoading">
+                <b-button>Đang gửi dữ liệu ...</b-button>
+            </template>
+            <template v-else>
+                @*<b-button variant="success" v-on:click="nextStep()">Tiếp tục</b-button>*@
+                <b-button variant="danger" v-on:click="hideModal('selectTypeContent')">Huỷ</b-button>
+            </template>
         </template>
     </b-modal>
 
@@ -266,7 +309,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="#" name="partForm" enctype="multipart/form-data"></form>
+                    <form action="#" name="partForm" enctype="multipart/form-data">
+                        <input type="text"/>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-close" data-dismiss="modal">Đóng</button>
@@ -312,14 +357,15 @@
 
                 displayTags: [],
                 optionsTags: [],
-                value: [
-                    { name: 'Javascript', code: 'js' }
-                ],
-                options: [
-                    { name: 'Vue.js', code: 'vu' },
-                    { name: 'Javascript', code: 'js' },
-                    { name: 'Open Source', code: 'os' }
-                ]
+                list_tags: {
+                    obj: {
+                        //value: [{ name: 'Javascript', id: 'js',parentids:[] }],
+                        value: [],
+                        options: [
+                            //{ name: 'Vue.js', id: 'vu', parentids: []},
+                        ]
+                    }
+                }
             },
             computed: {},
             watch: {
@@ -352,19 +398,16 @@
                 },
                 showSelectTypeContent() {
                     let _that = this
-
-                    //_that.$bvModal.show('selectTypeContent-modal-center')
-                    _that.$bvModal.show('tags-modal-xl')
-                    //Swal.fire({
-                    //    title: '<strong>Chọn thao tác</strong>',
-                    //    icon: 'question',
-                    //    html:
-                    //        '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" st v-on:click="AddPart()"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button></p>' +
-                    //        //'<p><button type="button" class="btn btn-primary w-50 p-2 m-2" onclick="ShowCloneQuestion(this,1)"><i class="far fa-file-word mr-2"></i> Input từ Word </button></p>',
-                    //    '<p><button type="button" class="btn btn-primary w-50 p-2 m-2" v-on:click="showAddEditItem()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button></p>',
-                    //    //'<button type="button" class="btn btn-info" onclick="ExportQuestion(this)"><i class="fas fa-download"></i> Xuất câu hỏi</button>',
-                    //    confirmButtonText: 'Đóng',
-                    //})
+                    this.list_tags = []
+                    var newobj = {
+                        //value: [{ name: 'Javascript', id: 'js', parentids: []}],
+                        value: [],
+                        options: [
+                            //{ name: 'Vue.js', id: 'vu', parentids: []},
+                        ]
+                    }
+                    this.list_tags.push(newobj)
+                    _that.$bvModal.show('tags-modal')
                 },
                 hideModal() {
                     $('.close').click();
@@ -525,34 +568,35 @@
                             var id = item.ParentID
                             var ul = $("#" + id)
 
-                            var selectOption = "<select id='lp_" + item.ID + "' class='form-control' required>" +
+                            var selectOption = "<select id='lp_" + item.ID + "' class='form-control' style='width:150px' required>" +
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.KNOW'>Nhận biết</option>"+
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING'>Thông hiểu</option>"+
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.MANIPULATE'>Vận dụng</option>"+
                                 "<option value='@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY'>Vận dụng cao</option>"+
                                 "</select>"
 
-                            var selectType = "<select id='type_" + item.ID + "' class='form-control' required>" +
+                            var selectType = "<select id='type_" + item.ID + "' class='form-control' style='width:150px' required>" +
                                 "<option value='@BaseCustomerEntity.Database.TYPE_PART.THEORY'>Lý thuyết</option>"+
                                 "<option value='@BaseCustomerEntity.Database.TYPE_PART.EXERCISE'>Bài tập</option>"+
                                 "</select>"
 
                             var input = "<input type='checkbox' class='form-check-input' style='width: 50px;vertical-align: middle;' onclick='chooseLessonPart(\"" + item.ID + "\",this)'/>"
 
-                            var tags = "<input type='text' id='tags_" + item.ID + "' class='form-control' required />"
+                            //var tags = "<input type='text' id='tags_" + item.ID + "' class='form-control' required />"
                             //var timer = "<input type='number' class='form-control' min='1' placeholder='Thời gian' id='tm_'" + item.ID + "/>"
                             //ul.append("<div class='row'><div class='col-sm-10'><li style='cursor:pointer'>" + item.Title + "</li></div><div class='col-sm-2' style='margin:auto'>" + timer + selectOption + input + "</div></div>")
                             //var table = "<div class='ml-sm-2 col-sm-9'>" + item.Title + "</div><div class='col-sm-1 p-0 m-0'>" + timer + "</div><div class='col-sm-1 p-0 m-0'>" + selectOption + "</div><div>" + input + "</div>"
-                            var table = "<div class='ml-sm-2 col-sm-7'>" + item.Title + "</div>" +
-                                "<div class='col-sm-1 p-0 m-0'>" + tags + "</div>" +
-                                "<div class='col-sm-1 p-0 m-0'>" + selectType + "</div>" +
-                                "<div class='col-sm-1 p-0 m-0'>" + selectOption + "</div>" +
-                                "<div>" + input + "</div>"
+                            var table = "<div class='ml-sm-2 col-sm-8'>" + item.Title + "</div>" +
+                                //"<div class='col-sm-1 p-0 m-0'>" + tags + "</div>" +
+                                "<div class='pl-1 pr-1'>" + selectType + "</div>" +
+                                "<div class='pl-1 pr-1'>" + selectOption + "</div>" +
+                                "<div class='pl-1 pr-1' style='margin-top:5px'>" + input + "</div>"
                             ul.append("<div class='row'>" + table + "</div>")
                         }
                     }
                 },
                 savePart() {
+                    debugger
                     if (array.length == 0) {
                         alert("Bạn chưa chọn câu hỏi nào. Vui lòng chọn ít nhất 1 câu hỏi")
                     }
@@ -565,9 +609,20 @@
                             item = array[i]
                             _form.append("lessonPartExtentsions[" + i +"].OriginID", item.LessonPartID)
                             _form.append("lessonPartExtentsions[" + i +"].LevelPart", item.LevelPart)
-                            _form.append("lessonPartExtentsions[" + i +"].Tags", item.Tags)
+                            //_form.append("lessonPartExtentsions[" + i +"].Tags", item.Tags)
                             _form.append("lessonPartExtentsions[" + i + "].TypePart", item.TypePart)
                         }
+
+                        for (var i = 0; i < this.list_tags.length; i++) {
+                            var value = this.list_tags[i].value
+                            debugger
+                            value.forEach((item, index) => {
+                                debugger
+                                _form.append("tags[" + index + "].ID", item.id)
+                                _form.append("tags[" + index + "].Name", item.name)
+                            })
+                        }
+
                         _form.append("GradeID", this.addEditItem.GradeID)
                         _form.append("ID", '@currentData.ID')
                         _that.isLoading = true
@@ -611,7 +666,6 @@
                         .then(response => {
                             //_that.isLoading = false
                             var data = response.data.Data
-
                             this.listLessonPart = data
                             //debugger
                             this.totalRec = response.data.Model.totalRecord
@@ -734,7 +788,7 @@
                         if (this.actimeout != null)
                             clearTimeout(this.actimeout);
                         this.actimeout = setTimeout(function () {
-                            var data_tags = _that.optionsTags.filter(item => item.name.indexOf(term) > -1)
+                            var data_tags = _that.optionsTags.filter(item => item.name.toLowerCase().indexOf(term.toLowerCase()) > -1)
                             if (data_tags.length == 0) {
                                 let _form = new FormData()
                                 _form.append('Term', term)
@@ -847,6 +901,145 @@
                             }
                         })
                         .catch(e => { console.log(e) })
+                },
+                addChilTags() {
+                    let _that = this
+                    if (_that.list_tags.length < 2) {
+                        var newobj = {
+                            //value: [{ name: 'Javascript', id: 'js', parentids: []}],
+                            value: [],
+                            options: [
+                                //{ name: 'Vue.js', id: 'vu', parentids: []},
+                            ]
+                        }
+                        this.list_tags.push(newobj)
+                    }
+                    if (_that.list_tags.length == 2) {
+                        $(event.target).attr('style','display:none')
+                    }
+                    $("#fa-long-arrow-alt-right").removeAttr('style')
+                    $("#fa-long-arrow-alt-right").attr('style','position:absolute;right:0;top:15px')
+                },
+                addTagtoList(newTag, id) {
+                    console.log('addTagtoList')
+                    let _that = this
+                    let _form = new FormData();
+                    let _url = '@processUrl("UpdateTags" ,"ExamManage")'
+                    _form.append("listTags[0].Name", newTag)
+                    _form.append("listTags[0].ExamQuestionArchiveID", '@currentData.ID')
+                    var index = parseInt(id.replace("multiselect_", ""))
+                    if (index > 0) {
+                        var parentIDs = _that.list_tags[index - 1].value[0].id
+                        _form.append("listTags[0].ParentIDs[0]", parentIDs)
+                    }
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+                                const tag = {
+                                    name: res.data.Data[0].Name,
+                                    id: res.data.Data[0].ID,
+                                    parentids: res.data.Data[0].ParentIDs
+                                };
+                                this.list_tags[index].options.push(tag);
+                            }
+                            else {
+                                console.log(res.data.Msg)
+                            }
+                        })
+                        .catch(e => { console.log(e) })
+                },
+                searchTagtoList(term, id) {
+                    let _that = this
+                    console.log(term)
+                    var index = parseInt(id.replace("multiselect_", ""))
+                    if (term.length >= 2) {
+                        if (this.actimeout != null)
+                            clearTimeout(this.actimeout);
+                        this.actimeout = setTimeout(function () {
+                            //debugger
+                            var data_tags = _that.list_tags[index].options.filter(item => item.name.toLowerCase().indexOf(term.toLowerCase()) > -1)
+                            if (data_tags.length == 0) {
+                                let _form = new FormData()
+                                _form.append('Term', term)
+                                //_form.append('Center', '@center')
+                                let _url = '@processUrl("SearchTags", "ExamManage")'
+                                axios.post(_url, _form)
+                                    .then(response => {
+                                        var stt = response.data.Status
+                                        if (stt) {
+                                            var data = response.data.Data
+                                            if (data.length > 0) {
+                                                for (var i = 0; i < data.length; i++) {
+                                                    var current = data[i]
+                                                    //debugger
+                                                    _that.list_tags[index].options.push({
+                                                        id: current.ID,
+                                                        name: current.Name
+                                                    })
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            alert(response.data.Msg)
+                                        }
+                                    }).catch(e => { alert(e) })
+                            } else {
+
+                            }
+                        }, 500)
+                    }
+                },
+                inputTagstoList(value, id) {
+                    console.log('inputTagstoList')
+                    var index = parseInt(id.replace("multiselect_", ""))
+                    if (this.list_tags.length > 1 && index > 0) {
+                        //debugger
+                        var parentTags = this.list_tags[0].value
+                        if (value.length == undefined) {
+                            debugger
+                        }
+                        else {
+                            value.parentids.push(parentTags.id)
+                        }
+                    }
+                    if (index == 0 && this.list_tags.length > 1) {
+                        var newtags = {
+                            value: [],
+                            options:[]
+                        }
+                        //debugger
+                        this.list_tags[1] = newtags
+                    }
+                },
+                nextStep() {
+                    this.hideModal('tags-modal')
+                    this.$bvModal.show('selectTypeContent-modal-center')
+                    //this.$bvModal.show('addEditItem-modal-xl')
+                },
+                getTitle() {
+                    if (this.list_tags.length > 0) {
+                        var title = ""
+                        for (var i = 0; i < this.list_tags.length; i++) {
+                            var value = this.list_tags[i].value
+                            //debugger
+                            if (value.length == undefined) {
+                                title += value.name + "; "
+                            }
+                            else {
+                                value.forEach(item => {
+                                    title += item.name + "; "
+                                })
+                            }
+                        }
+                        return title
+                    }
+                    else {
+                        return "Thêm câu hỏi"
+                    }
+                },
+                AddPart() {
+                    this.$bvModal.show('partModal')
                 }
             }
         });
@@ -867,12 +1060,12 @@
         var chooseLessonPart = function (id, obj) {
             var stt = $(obj).prop("checked")
             var levelPart = document.getElementById("lp_" + id).value
-            var tags = document.getElementById("tags_" + id).value
+            //var tags = document.getElementById("tags_" + id).value
             var typePart = document.getElementById("type_" + id).value
             //var timer = document.getElementById("tm_" + id).value
             if (stt) {
                 //array.push({ ID: id, Type: typePart, Timer: timer })
-                array.push({ LessonPartID: id, LevelPart: levelPart, Tags: tags, TypePart: typePart })
+                array.push({ LessonPartID: id, LevelPart: levelPart, TypePart: typePart })
             }
             else {
                 var index = array.findIndex(x => x.LessonPartID == id);
@@ -977,15 +1170,32 @@
         }
 
             .multiselect__tag-icon:focus, .multiselect__tag-icon:hover {*/
-                /*background: #369a6e*/
-                /*visibility: visible
+        /*background: #369a6e*/
+        /*visibility: visible
             }*/
+
+        .modal-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            padding: .75rem;
+            border-top: 1px solid #dee2e6;
+            border-bottom-right-radius: calc(.3rem - 1px);
+            border-bottom-left-radius: calc(.3rem - 1px);
+            height: 55px;
+            background-color: white
+        }
+
+        .modal-body {
+            z-index: 9999
+        }
     </style>
 }
 
 @section Modals{
     <!--modal thêm câu hỏi-->
-    <b-modal id="addEditItem-modal-xl" size="xl" title="Thêm câu hỏi" :no-close-on-backdrop="true">
+    <!--<b-modal id="addEditItem-modal-xl" size="xl" title="Thêm câu hỏi" :no-close-on-backdrop="true">
         <b-col class="form-group">
             <b-col class="flex flex-row flex-wrap align-items-center">
                 <b-col class="box filter-box w-152 m-1">
@@ -1040,11 +1250,11 @@
                         </li>
                     </template>
                 </ul>
-            </template>
-            @*<template v-else>
-                    Không có nội dung
-                </template>*@
-        </b-col>
+            </template>-->
+    @*<template v-else>
+            Không có nội dung
+        </template>*@
+    <!--</b-col>
         <template v-slot:modal-footer="{ ok, cancel}">
             <template v-if="isLoading">
                 <b-button>Đang thực hiện...</b-button>
@@ -1054,6 +1264,6 @@
                 <b-button variant="danger" v-on:click="hideModal()">Huỷ</b-button>
             </template>
         </template>
-    </b-modal>
+    </b-modal>-->
 }
 

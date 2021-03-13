@@ -1375,22 +1375,22 @@
 }
 
 @section Modals{
-    <b-modal id="modal_event" centered title="Tạo ngân hàng câu hỏi" size="xl">
+    <b-modal id="modal_event" centered title="Tạo ngân hàng câu hỏi" size="lg">
         <b-col class="form-group d-none">
             <input type="text" id="examQuestionArchiveID" v-model="createExam.examQuestionArchiveID" class="hide" disabled />
         </b-col>
         <b-col class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <label for="">Tên ngân hàng</label>
                 <input type="text" name="" value="" class="form-control" placeholder="Tên" v-model="addItem.Name">
             </div>
-            <div class="col-sm-6">
+            @*<div class="col-sm-6">
                 <label for="">Chương trình</label>
                 <select class="form-control" v-model="addItem.SubjectID">
                     <option value="">Môn</option>
                     <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
                 </select>
-            </div>
+            </div>*@
         </b-col>
         @*<div class="d-flex">
                 <b-col class="form-group">
