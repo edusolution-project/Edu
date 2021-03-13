@@ -48,7 +48,7 @@
                     <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Tổng quan" v-on:click="tabChange()">Tổng quan</a></li>
                     <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Môn học" v-on:click="tabChange(1)">Tạo lịch dạy</a></li>
                     <li v-bind:class="{active : tab[2]}"><a href="javascript:;" title="Bảng điểm" v-on:click="tabChange(2)">Bảng điểm</a></li>
-                    <li v-bind:class="{active : tab[3]}" class="d-none"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>
+                    <li v-bind:class="{active : tab[3]}" class="@(currentuser == "5d8389c2d5d1bf27e4410c04" ? "":"d-none")"><a href="javascript:;" title="Nhóm" v-on:click="tabChange(3)">Nhóm</a></li>
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
@@ -278,7 +278,7 @@
                                     <tr>
                                         <th class="sticky-col first-col" rowspan="2">STT</th>
                                         <th class="sticky-col second-col" rowspan="2">Họ tên</th>
-                                        <th rowspan="2" class="sticky-col third-col">Điểm <br /> Trung bình / Mục tiêu</th>
+                                        <th rowspan="2" class="sticky-col third-col">Điểm <br /> TB / MT</th>
                                         <th rowspan="2" class="sticky-col forth-col" v-if="group_data.length > 0">
                                             Nhóm
                                         </th>
