@@ -52,7 +52,7 @@
                     <li v-bind:class="{active : tab[5]}"><a href="javascript:;" title="Chấm bài tự luận" v-on:click="tabChange(5)">Chấm bài tự luận</a></li>
                 </ul>
             </div>
-            @if (isTeacher)
+            @if (currentuser == "5d8389c2d5d1bf27e4410c04")
             {
                 <div class="c-right">
                     <b-button class="btn-addevent" v-on:click="addGroup()" v-if="tab[3]"><i class="ti-plus"></i></b-button>
