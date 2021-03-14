@@ -35,6 +35,10 @@
     <input type="hidden" id="ClassID" value="@Data.ClassID" />
     <input type="hidden" id="ClassSubjectID" value="@Data.ClassSubjectID" />
 </div>
+@*<script src="~/lib/MathJs/MathJax.js"></script>*@
+<script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
 @section Sidebar
 {
     @await Html.PartialAsync("_sidebarExam")

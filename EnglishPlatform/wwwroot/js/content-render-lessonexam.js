@@ -45,7 +45,7 @@ CKEDITOR.on('instanceCreated', function (event) {
         $(e.editor.element.$).removeAttr("title").attr('title', $(e.editor.element.$).attr('data-title'));
     });
 });
-//CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
+CKEDITOR.plugins.addExternal('ckeditor_wiris', 'https://www.wiris.net/demo/plugins/ckeditor/', 'plugin.js');
 
 var quiz3m_ans = [];
 
@@ -1240,7 +1240,7 @@ var Lesson = (function () {
 
 
                     CKEDITOR.replace(esid, {
-                        extraPlugins: 'uploadimage,youtube'
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                         //, ckeditor_wiris'
                     });
                     //CKEDITOR.inline(esid, {
@@ -1775,8 +1775,10 @@ var Lesson = (function () {
     }
 
     var modalEditPart = function (id) {
+        console.log(id)
         stopAllMedia();
         var modalForm = window.partForm;
+        debugger
         $('#action').val(config.url.save_part);
         //showModal();
         $(modalForm).empty();
@@ -1791,7 +1793,7 @@ var Lesson = (function () {
         });
     }
 
-    var modalAddPart = function (lessonID, type) {
+    var modalAddPart = function (lessonID, type, listTags) {
 
         $(".swal2-container").hide();
         $('#partModal').modal('hide');
@@ -1968,14 +1970,31 @@ var Lesson = (function () {
         var answer_template_holder = $('.answer_template');
         answer_template_holder.empty();
 
+        var select1 = $("<select>", { "type": "text", "name": "TypePart", "class": "input-text form-control", "placeholder": "Loại câu hỏi", "required": "required", "id": "TypePart" })
+            .append($("<option>", { "text": "Lý thuyết", "value": "1" }))
+            .append($("<option>", { "text": "Bài tập", "value": "2" }))
+
+        var select2 = $("<select>", { "type": "text", "name": "LevelPart", "class": "input-text form-control", "placeholder": "Mức độ", "required": "required" })
+            .append($("<option>", { "text": "Nhận biết", "value": 1 }))
+            .append($("<option>", { "text": "Thông hiểu", "value": 2 }))
+            .append($("<option>", { "text": "Vận dụng", "value": 3 }))
+            .append($("<option>", { "text": "Vận dụng cao", "value": 4 }))
+
         var chilDiv1 = $("<div>", { "class": "col-sm-6" })
-            .append($("<label>", { "class": "title", "text": "Lớp:" }))
-            .append($("<input>", { "type": "text", "name": "Class", "class": "input-text form-control", "placeholder": "Lớp", "required": "required","id":"id_class" }))
+            .append($("<label>", { "class": "title", "text": "Loại câu hỏi" }))
+            .append(select1)
+            //.append($("<select>", { "type": "text", "name": "TypePart", "class": "input-text form-control", "placeholder": "Loại câu hỏi", "required": "required", "id":"TypePart" }))
+            //.append($("<option>"), { "text": "Lý thuyết","value":"1" })
+            //.append($("<option>"), { "text": "Bài tập","value":"2" })
 
         var chilDiv2 = $("<div>", { "class": "col-sm-6" })
-            .append($("<label>", { "class": "title", "text": "Chuyên môn/Nội dung:" }))
-            .append($("<select>", { "type": "text", "name": "Tags", "class": "input-text form-control", "placeholder": "tags", "required": "required" }))
-            .append($("<option>"), {"text":"Toeic"})
+            .append($("<label>", { "class": "title", "text": "Mức độ" }))
+            .append(select2)
+            //.append($("<select>", { "type": "text", "name": "LevelPart", "class": "input-text form-control", "placeholder": "Mức độ", "required": "required" }))
+            //.append($("<option>"), { "text": "Nhân biết", "value": "1" })
+            //.append($("<option>"), { "text": "Thông hiểu", "value": "2" })
+            //.append($("<option>"), { "text": "Vận dụng", "value": "3" })
+            //.append($("<option>"), { "text": "Vận dụng cao", "value": "4" })
 
         var div = $("<div>", { "class": "row mt-1" }).append(chilDiv1).append(chilDiv2)
 
@@ -2091,7 +2110,7 @@ var Lesson = (function () {
                 //    addNewQuestion();
                 $('.editorck').not('.d-none').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2213,7 +2232,7 @@ var Lesson = (function () {
                     addNewQuestion();
                 $('.editorck').each(function (idx, obj) {
                     CKEDITOR.replace($(obj)[0], {
-                        extraPlugins: 'uploadimage,youtube'//,ckeditor_wiris'
+                        extraPlugins: 'uploadimage,youtube,ckeditor_wiris'
                     });
                 });
                 break;
@@ -2226,7 +2245,7 @@ var Lesson = (function () {
             case "QUIZ2":
                 CKEDITOR.replace('editor', {
                     allowedContent: true,
-                    extraPlugins: 'uploadimage,youtube,fillquiz',//ckeditor_wiris,
+                    extraPlugins: 'uploadimage,youtube,fillquiz,ckeditor_wiris',
                     removeDialogTabs: 'textfield',
                     removePlugins: 'forms'
                 });
@@ -5297,7 +5316,10 @@ var submitForm = function (event, modalId, callback) {
     var Form = form.length > 0 ? form[0] : window.partForm;
     var formdata = new FormData(Form);
 
-
+    formdata.append('BankQuizID', config.bankquizid)
+    for (var i = 0; i < config.listtags.length; i++) {
+        formdata.append('TagsIDs[' + i + ']', config.listtags[i].id)
+    }
     //console.log(formdata);
     //debugger
     if ($('textarea[name="Description"]').length > 0) {
@@ -5348,10 +5370,11 @@ var submitForm = function (event, modalId, callback) {
     if (err) return false;
 
     var xhr = new XMLHttpRequest();
-
-    var actionUrl = $("#action").val()
-    if (form.length > 0)
-        actionUrl = form.attr('action');
+    debugger
+    //var actionUrl = $("#action").val()
+    var actionUrl = config.url.save_part
+    //if (form.length > 0)
+    //    actionUrl = form.attr('action');
 
     $('.btnSaveForm').after($("<div>", { class: "pending", text: "Đang gửi dữ liệu, vui lòng đợi..." }));
     xhr.open('POST', actionUrl);
@@ -5385,6 +5408,7 @@ var submitForm = function (event, modalId, callback) {
 
                     //alert(data.Error);
                 }
+                location.reload();
             }
             else {
                 console.log(xhr.status);

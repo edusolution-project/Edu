@@ -201,19 +201,19 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         { "Error", "Bạn không được quyền thực hiện thao tác này"}
                     });
                 }
-                if (!string.IsNullOrEmpty(SubjectID))
-                {
-                    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => o.SubjectID == SubjectID));
-                }
-                else
-                {
-                    //lọc các môn được phân công
-                    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
-                }
-                if (!string.IsNullOrEmpty(GradeID))
-                {
-                    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => o.GradeID == GradeID));
-                }
+                //if (!string.IsNullOrEmpty(SubjectID))
+                //{
+                //    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => o.SubjectID == SubjectID));
+                //}
+                //else
+                //{
+                //    //lọc các môn được phân công
+                //    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => teacher.Subjects.Contains(o.SubjectID)));
+                //}
+                //if (!string.IsNullOrEmpty(GradeID))
+                //{
+                //    filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Where(o => o.GradeID == GradeID));
+                //}
 
                 if (!string.IsNullOrEmpty(model.SearchText))
                     filter.Add(Builders<ExamQuestionArchiveEntity>.Filter.Text("\"" + model.SearchText + "\""));

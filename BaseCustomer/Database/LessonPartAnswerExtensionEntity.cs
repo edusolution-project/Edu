@@ -51,5 +51,15 @@ namespace BaseCustomerEntity.Database
         {
             return CreateQuery().Find(x => x.ParentID == iD).ToEnumerable();
         }
+
+        public List<LessonPartAnswerEntity> ConvertToCloneLessonPartAns(List<LessonPartAnswerExtensionEntity> datas)
+        {
+            var newlist = new List<LessonPartAnswerEntity>();
+            foreach (var item in datas)
+            {
+                newlist.Add(item);
+            }
+            return newlist;
+        }
     }
 }

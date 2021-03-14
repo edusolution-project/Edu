@@ -27,6 +27,37 @@ namespace BaseCustomerEntity.Database
         //public String Tags { get; set; }
         [JsonProperty("TypePart")]
         public Int32 TypePart { get; set; }
+
+        public LessonPartExtensionEntity()
+        {
+           
+        }
+
+        public LessonPartExtensionEntity(LessonPartEntity o)
+        {
+            this.ID = o.ID;
+
+            this.OriginID = o.OriginID;
+
+
+            this.ParentID = o.ParentID; // chính là lessonID
+
+            this.Title = o.Title;
+
+            this.Timer = o.Timer;
+
+            this.Description = o.Description;
+
+            this.Type = o.Type;
+
+
+            this.Point = o.Point;
+
+
+            this.Order = o.Order;
+
+            this.Media = o.Media;
+        }
     }
 
     public class LEVELPART //mức độ

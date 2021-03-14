@@ -17,13 +17,54 @@
 <script src="~/js/bootstrap-vue.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
 <script src="~/js/axios.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
 <script src="~/js/plugins/ck4/ckeditor.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
-@*<script src="~/js/content-render-lessonexam.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>*@
 
 @*<script src="https://unpkg.com/vue-multiselect@2.1.0"></script>*@
 @*<link rel="stylesheet"
     href="https://unpkg.com/vue-multiselect@2.1.0/dist/vue-multiselect.min.css" />*@
 <link href="~/lib/vue-multiselect@2.1.0/vue-multiselect.min.css?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")" rel="stylesheet" />
 <script src="~/lib/vue-multiselect@2.1.0/vue-multiselect.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+
+<script src="~/js/content-render-lessonexam.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+
+<script>
+        var config = {
+            container: "lessonContainer",
+            //mod: mod.TEACHERVIEW,
+            url: {
+                load: '@processUrl("GetDetailsLesson", "Lesson")',
+                list_part: '@processUrl("GetList", "CloneLessonPart")',
+                load_part: '@processUrl("GetDetail", "CloneLessonPartExam")',
+                save_part: '@processUrl("CreateOrUpdate", "CloneLessonPartExam")',
+                del_part: '@processUrl("Remove", "CloneLessonPart")',
+                move_part: '@processUrl("ChangePosition","CloneLessonPart")',
+                export_quiztemp: '@processUrl("ExportQuestionTemplate", "Curriculum")',
+                import_quiz: '@processUrl("ImportQuestion", "Curriculum")',
+                load_classsubject: '@processUrl("GetClassSubjects", "ClassSubject")',
+                load_contents: '@processUrl("GetFullStructure", "ClassSubject")',
+                create_exam: '@processUrl("CreateExamPart", "CloneLessonPart")',
+                export_quiztemp_with_word: '@processUrl("ExportWordTemplate", "Curriculum")',
+                import_quiz_with_word: '@processUrl("ImportFromWord", "CloneLessonPart")',
+                download_word: '@processUrl("ExportToWord", "CloneLessonPart")',
+            },
+            bankquizid: '@currentData.ID',
+            listtags: []
+            @*type: @Data.TemplateType,
+            lesson_id: '@Data.ID',
+            class_id: '@Class.ID',
+            class_subject_id: '@ClassSubject.ID',
+            chap_id: '@Data.ChapterID',
+            class_name: '@Class.Name',
+            center_name: '@currentCenter.Name',
+            student_name: '...................................',*@
+        }
+    var widget = new Lesson.onReady(config);
+</script>
+<link href="~/css/detailui.css" rel="stylesheet" />
+<script>
+    var RefreshPage = function () {
+        document.location = document.location
+    }
+</script>
 
 <section class="container-fluid">
     <div class="card-header border-b">
@@ -123,7 +164,8 @@
                     </td>
                     <td>
                         <div class="btn-group" style="display:block">
-                            <a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="showEditItem(item)"><i class="ti-pencil-alt"></i></a>
+                            @*<a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="EditPart(item.ID)"><i class="ti-pencil-alt"></i></a>*@
+                            <button class="btn-act btn-trash" title="Sửa" v-on:click="EditPart1(item)"><i class="ti-pencil-alt"></i></button>
                             <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
                         </div>
                     </td>
@@ -276,7 +318,7 @@
     <b-modal id="selectTypeContent-modal-center" centered title="Chọn thao tác">
         <div class="text-center">
             <p>
-                <button type="button" class="btn btn-primary w-50 p-2 m-2" st v-on:click="AddPart()"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>
+                <button type="button" class="btn btn-primary w-50 p-2 m-2" st v-on:click="AddPart1()"><i class="fas fa-plus-square mr-2"></i> Thêm trực tiếp </button>
             </p>
             <p>
                 <button type="button" class="btn btn-primary w-50 p-2 m-2" v-on:click="showAddEditItem()"><i class="far fa-folder-open mr-2"></i> Chọn từ học liệu </button>
@@ -299,6 +341,22 @@
         </template>
     </b-modal>
 
+    @*<b-modal id="partModal" size="xl" title="Extra Large Modal">
+            <div class="modal-body">
+                <form action="#" name="partForm" enctype="multipart/form-data">
+                </form>
+            </div>
+            <template v-slot:modal-footer="{ok,cancel}">
+                <template v-if="isLoading">
+                    <b-button>Đang gửi dữ liệu ...</b-button>
+                </template>
+                <template v-else>
+                    <b-button variant="danger" data-dismiss="modal">Đóng</b-button>
+                    <b-button variant=" success" onclick="submitForm(event)">Lưu</b-button>
+                </template>
+            </template>
+        </b-modal>*@
+
     <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
@@ -310,7 +368,7 @@
                 </div>
                 <div class="modal-body">
                     <form action="#" name="partForm" enctype="multipart/form-data">
-                        <input type="text"/>
+                        <input type="text" />
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -323,6 +381,7 @@
 </section>
 
 @section Scripts{
+
     <script>
         new Vue({
             el: "#right-content",
@@ -1038,8 +1097,21 @@
                         return "Thêm câu hỏi"
                     }
                 },
-                AddPart() {
-                    this.$bvModal.show('partModal')
+                AddPart1() {
+                    this.hideModal('selectTypeContent-modal-center')
+                    AddPart()
+                    config.listtags = []
+                    for (var i = 0; i < this.list_tags.length; i++) {
+                        var item = this.list_tags[i].value
+                        config.listtags.push(item)
+                    }
+                },
+                EditPart1(obj) {
+                    console.log(obj.ID)
+                    this.hideModal('selectTypeContent-modal-center')
+                    EditPart(obj.ID)
+                    $('#partModal').modal('hide');
+                    $('#partModal').modal('show');
                 }
             }
         });

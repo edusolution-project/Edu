@@ -34,6 +34,8 @@ namespace BaseCustomerEntity.Database
         public List<String> TargetClasses { get; set; }
         [JsonProperty("TotalTime")]
         public Int32 TotalTime { get; set; }
+        [JsonProperty("MainSubject")]
+        public String MainSubject { get; set; }
         //[JsonProperty("QuestionEasy")]
         //public Int32 QuestionEasy { get; set; } //so cau de
         //[JsonProperty("QuestionNormal")]
