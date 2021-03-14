@@ -23,7 +23,7 @@ namespace BaseCustomerMVC.Models
         [JsonProperty("Level")]
         public Int32 Level { get; set; }
         [JsonProperty("Tags")]
-        public String Tags { get; set; }
+        public List<String> Tags { get; set; }
         [JsonProperty("Know")] //so cau muc do nhan biet
         public TypeQuiz Know { get; set; }
         [JsonProperty("Understanding")] //so cau muc do thong hieu

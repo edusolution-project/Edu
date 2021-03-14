@@ -163,7 +163,7 @@
                         <td><a :href="'@processUrl("StorageQuestion","ExamManage")/' + item.ID">{{item.Name}}</a></td>
                         @*<td>{{item.GradeName}}</td>*@
                         @*<td>{{item.SubjectName}}</td>*@
-                        <td>Tiếng anh</td>
+                        <td>{{item.MainSubjectName}}</td>
                         <td>{{item.TotalQuestion}}</td>
                         <td>
                             <div class="btn-group" style="display:block">
@@ -318,6 +318,7 @@
                 @*this.list_skills = @Html.Raw(Json.Serialize(skills));
                 this.list_courses = @Html.Raw(Json.Serialize(courses));*@
                 this.tabChange(0)
+                this.getmainsubjects()
             },
             components: {
                 Multiselect: window.VueMultiselect.default
@@ -334,7 +335,8 @@
                     SubjectID: '',
                     GradeID: '',
                     Description: '',
-                    CreateUser: ''
+                    CreateUser: '',
+                    MainSbj: ''
                 },
                 editorOption: {
                     theme: 'snow'
@@ -367,7 +369,7 @@
                     selectAll: false,
                     totalExam: 1, //số đề, ít nhất là 1
                     examQuestionArchiveID: '',// ma kho de
-                    title:''
+                    title: ''
                 },
                 formatExam: {
                     titleFormat: '',//tên ma trận đề
@@ -378,7 +380,9 @@
                     totalExam: 1,
                     subject: '',
                     isNewMatrix: true,
-                    matrixID:'',
+                    matrixID: '',
+                    mainsbj: '',
+                    bankQuestionID:'',
                     format: {
                         level: '',
                         tags: [],
@@ -451,10 +455,12 @@
                 lessonExam: {
                     name: '',
                     bankQuestionID: '',
+                    mainsbj:''
                     //timer: 1,
                     //limit: 1,
                     //totalExam:1
-                }
+                },
+                mainsbjs:[]
             },
             computed: {
             },
@@ -483,6 +489,11 @@
                         this.list_detailMatrix.data = matrix.DetailFormat
                         //debugger
                     }
+                },
+                "lessonExam.bankQuestionID": function () {
+                    var item = this.dataResult.find(x => x.ID == this.lessonExam.bankQuestionID)
+                    var mainsjbid = item.MainSubjectID
+                    this.formatExam.mainsbj = mainsjbid
                 }
             },
             methods: {
@@ -506,14 +517,37 @@
                             alert(e)
                         })
                 },
+                getmainsubjects() {
+                    let _that = this
+                    let _form = new FormData
+                    let _url = '@processUrl("GetMainSubjects", "ExamManage")'
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+                                _that.mainsbjs = res.data.Data
+                                this.mainsbjs = _that.mainsbjs
+                            }
+                            else {
+                                alert(res.data.Msg)
+                            }
+                        })
+                        .catch(e => {
+                            alert(e)
+                        })
+                },
                 showEditItem(item) {
-
+                    var opt = "";
+                    for (var i = 0; i < this.mainsbjs.length; i++) {
+                        var item = this.mainsbjs[i]
+                        opt += "<option value=" + item.ID + ">"+item.Name+"</option>"
+                    }
                     Swal.fire({
                         title: 'Chọn môn học',
                         html:
                             '<div>' +
-                            '<select class="form-control">' +
-                            '<option>Tiếng anh</option>' +
+                            '<select class="form-control" id="addItem_MainSbj">' +
+                            opt +
                             '</select>' +
                             '</div>',
                         showCancelButton: true,
@@ -524,6 +558,8 @@
                         /* Read more about isConfirmed, isDenied below */
                         if (result.value == true) {
                             _that.$bvModal.show('modal_event')
+                            var mainsbj = $('select[id=addItem_MainSbj] option').filter(':selected').val();
+                            this.addItem.MainSbj = mainsbj
                         } else if (result.dismiss == 'cancel') {
                             //Swal.fire('Changes are not saved', '', 'info')
                         }
@@ -602,9 +638,11 @@
                     let _form = new FormData()
                     let _url = '@processUrl("CreateOrUpdate","ExamManage")'
                     _form.append("Name", _that.addItem.Name)
-                    _form.append("SubjectID", _that.addItem.SubjectID)
-                    _form.append("GradeID", _that.addItem.GradeID)
-                    _form.append("Description", _that.addItem.Description)
+                    _form.append("MainSubjectID", _that.addItem.MainSbj)
+                    debugger
+                    //_form.append("SubjectID", _that.addItem.SubjectID)
+                    //_form.append("GradeID", _that.addItem.GradeID)
+                    //_form.append("Description", _that.addItem.Description)
                     //debugger
                     //for (var i = 0; i < _that.addItem.TargetClasses.length; i++) {
                     //    var item = _that.addItem.TargetClasses[i]
@@ -684,6 +722,9 @@
                         case 1:
                             history.replaceState({ tab: a }, "Ngân hàng câu hỏi", "#bank-question");
                             this.getData()
+                            if (this.mainsbjs.length == 0) {
+                                this.getmainsubjects();
+                            }
                             break;
                         case 2:
                             history.replaceState({ tab: a }, "Ma trận đề", "#matrix-exam");
@@ -708,12 +749,9 @@
                     if (_that.formatExam.isNewMatrix == 'true') {
                         for (var i = 0; i < _that.formatExam.format.length; i++) {
                             var itemFormat = _that.formatExam.format[i]
-                            //debugger
                             _form.append("matrixExams[" + i + "].Level", itemFormat.level)
-                            _form.append("matrixExams[" + i + "].Tags", itemFormat.tags)
                             _form.append("matrixExams[" + i + "].Know.Theory", itemFormat.levelKnow.theory)
                             _form.append("matrixExams[" + i + "].Know.Exercise", itemFormat.levelKnow.exercise)
-                            //debugger
                             _form.append("matrixExams[" + i + "].Understanding.Theory", itemFormat.levelUnderstanding.theory)
                             _form.append("matrixExams[" + i + "].Understanding.Exercise", itemFormat.levelUnderstanding.exercise)
                             _form.append("matrixExams[" + i + "].Manipulate.Theory", itemFormat.levelManipulate.theory)
@@ -721,10 +759,12 @@
                             _form.append("matrixExams[" + i + "].ManipulateHighly.Theory", itemFormat.levelManipulateHighly.theory)
                             _form.append("matrixExams[" + i + "].ManipulateHighly.Exercise", itemFormat.levelManipulateHighly.exercise)
                             _form.append("matrixExams[" + i + "].Name", _that.formatExam.titleFormat)
-                            //for (var j = 0; j < itemFormat.tags.length; j++) {
-                            //    _form.append("matrixExams[" + i + "].Tags[" + j + "].ID", itemFormat.tags[j].ID)
-                            //    _form.append("matrixExams[" + i + "].Tags[" + j + "].Name", itemFormat.tags[j].Name)
-                            //}
+                            var datalistags = []
+                            var listtags = itemFormat.tagsName
+                            listtags.forEach(function (item) {
+                                datalistags.push(item.code)
+                            })
+                            _form.append("matrixExams[" + i + "].Tags", datalistags)
                         }
                     }
                     else if (_that.formatExam.isNewMatrix == 'false') {
@@ -965,7 +1005,7 @@
                     _form.append("StartDate", _that.data_setupExam.startTime)
                     _form.append("EndDate", _that.data_setupExam.endTime)
                     //_form.append("ListClassID", _that.data_setupExam.targetClasses)
-                    
+
                     if (_that.data_setupExam.targetClasses.length > 0) {
                         for (var i = 0; i < _that.data_setupExam.targetClasses.length; i++) {
                             var idclass = _that.data_setupExam.targetClasses[i]
@@ -1060,7 +1100,7 @@
                         $(input).attr('trigger', 'hover')
                         $(input).attr('style', 'border: 1px solid red')
                     }
-                    
+
                     if (total != 100) {
                         $('#btn_comfirm').attr('disabled', 'disabled')
                         this.isComfirm = false
@@ -1296,7 +1336,8 @@
                             template: '@BaseCustomerEntity.Database.CLASSSUBJECT_TYPE.EXAM',
                             totalExam: 1,
                             isNewMatrix: 'true',
-                            matrixID: '',
+                        matrixID: '',
+                        mainsbj:'',
                             format:[
                             {
                                 level: '',
@@ -1445,7 +1486,7 @@
                 <div class="col-md-6">
                     <label class="label">Môn</label>
                     <select class="form-control" v-model="formatExam.Subject">
-                        <option value="english">Tiếng anh</option>
+                        <option v-for="(item,k) in mainsbjs" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
             </div>
@@ -1883,12 +1924,6 @@
     <b-modal id="lessonExam-modal" centered title="Tạo bài thi" size="xl">
         <b-col>
             <div class="row">
-                <div class="col-md-4">
-                    <label class="label">Môn</label>
-                    <select class="form-control" >
-                        <option value="english">Tiếng anh</option>
-                    </select>
-                </div>
 
                 <div class="col-md-4">
                     <label class="label">Tên</label>
@@ -1900,6 +1935,14 @@
                     <select class="form-control" v-model="lessonExam.bankQuestionID" required>
                         <option value="">Chọn ngân hàng câu hỏi</option>
                         <option v-for="(item,k) in dataResult" :value="item.ID">{{item.Name}}</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Môn</label>
+                    <select class="form-control" v-model="formatExam.mainsbj" disabled>
+                        <option value="">Chọn môn</option>
+                        <option v-for="(item,k) in mainsbjs" :value="item.ID">{{item.Name}}</option>
                     </select>
                 </div>
             </div>

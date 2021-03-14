@@ -14,5 +14,7 @@ namespace BaseCustomerMVC.Models
         public String GradeName { get; set; }
         [JsonProperty("TotalQuestion")]
         public Int32 TotalQuestion { get; set; }
+        [JsonProperty("MainSubjectName")]
+        public String MainSubjectName { get; set; }
     }
 }

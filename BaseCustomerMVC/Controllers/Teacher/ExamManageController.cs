@@ -38,6 +38,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private readonly CloneLessonPartAnswerService _cloneLessonPartAnswerService;
         private readonly LessonScheduleService _lessonScheduleService;
         private readonly TeacherHelper _teacherHelper;
+        private readonly MainSubjectService _mainSubjectService;
 
         //extenstion
         private readonly LessonExamService _lessonExamService;
@@ -83,6 +84,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             , MatrixExamService matrixExamService
             , ManageExamService manageExamService
             , TeacherHelper teacherHelper
+            , MainSubjectService mainSubjectService
             )
         {
             _centerService = centerService;
@@ -116,6 +118,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             _matrixExamService = matrixExamService;
             _manageExamService = manageExamService;
             _teacherHelper = teacherHelper;
+            _mainSubjectService = mainSubjectService;
         }
         public IActionResult Index(String basis)
         {
@@ -244,9 +247,10 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         _examQuestionArchiveViewMapping.Auto(o, new ExamQuestionArchiveViewModel()
                         {
                             //SkillName = _skillService.GetItemByID(o.SkillID)?.Name,
-                            GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
-                            SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
-                            TotalQuestion = (int)_lessonPartExtensionService.CreateQuery().Find(x => x.ExamQuestionArchiveID == o.ID).CountDocuments()
+                            //GradeName = _gradeService.GetItemByID(o.GradeID)?.Name,
+                            //SubjectName = _subjectService.GetItemByID(o.SubjectID)?.Name,
+                            TotalQuestion = (int)_lessonPartExtensionService.CreateQuery().Find(x => x.ExamQuestionArchiveID == o.ID).CountDocuments(),
+                            MainSubjectName = String.IsNullOrEmpty(o.MainSubjectID) ? "" : _mainSubjectService.GetItemByID(o.MainSubjectID).Name
                         })).ToList();
 
                     response = new Dictionary<string, object>
@@ -419,8 +423,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ID = item.ID,
                         Name = item.Name,
                         CreateUser = item.CreateUser,
-                        GradeName = _gradeService.GetItemByID(item.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(item.SubjectID)?.Name
+                        MainSubjectName = String.IsNullOrEmpty(item.MainSubjectID) ? "" : _mainSubjectService.GetItemByID(item.MainSubjectID).Name
+                        //GradeName = _gradeService.GetItemByID(item.GradeID)?.Name,
+                        //SubjectName = _subjectService.GetItemByID(item.SubjectID)?.Name
                     };
 
                     return Json(new Dictionary<String, Object>
@@ -445,8 +450,9 @@ namespace BaseCustomerMVC.Controllers.Teacher
                         ID = oldItem.ID,
                         Name = oldItem.Name,
                         CreateUser = oldItem.CreateUser,
-                        GradeName = _gradeService.GetItemByID(oldItem.GradeID)?.Name,
-                        SubjectName = _subjectService.GetItemByID(oldItem.SubjectID)?.Name
+                        MainSubjectName = String.IsNullOrEmpty(oldItem.MainSubjectID) ? "" : _mainSubjectService.GetItemByID(oldItem.MainSubjectID).Name
+                        //GradeName = _gradeService.GetItemByID(oldItem.GradeID)?.Name,
+                        //SubjectName = _subjectService.GetItemByID(oldItem.SubjectID)?.Name
                     };
                     return Json(new Dictionary<String, Object>
                     {
@@ -1140,7 +1146,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     Total = total
                 };
                 matrixExam.DetailFormat.Add(detail);
-                //_Tags.Add(f.Tags);
+                _Tags.AddRange(f.Tags);
             }
 
             Tags = _Tags;
@@ -1151,8 +1157,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
         private async Task<String> RenderExam(LessonExamEntity lessonExam, MatrixExamEntity matrixExam, String ID,String UserID,List<String> Tags)
         {
             //lay danh sach cac lessonpart trong ngan hang cau hoi
-            var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
-            //var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Contains(x.Tags)).ToEnumerable();
+            //var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
+            var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Intersect(x.Tags).Any()).ToEnumerable();
             if (lessonParts.Count() == 0)
             {
                 return "";
@@ -1973,6 +1979,40 @@ namespace BaseCustomerMVC.Controllers.Teacher
             ViewBag.Class = new ClassEntity();
             ViewBag.Subject = new ClassSubjectEntity();
             return View("Detail");
+        }
+
+        //get list main subject
+        public JsonResult GetMainSubjects(String basis)
+        {
+            try
+            {
+                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var tc = _teacherService.GetItemByID(UserID);
+                if(tc == null)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Data",null },
+                        {"Msg","Thông tin giáo viên không đúng" }
+                    });
+                }
+
+                var sbjs = tc.Subjects;
+                var mainsubjects = _mainSubjectService.CreateQuery().Find(x => sbjs.Contains(x.ID)).ToList();
+                return Json(new Dictionary<String, Object> {
+                        {"Status",true },
+                        {"Data",mainsubjects },
+                        {"Msg","" }
+                    });
+            }
+            catch(Exception e)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status",false },
+                    {"Data",null },
+                    {"Msg",e.Message }
+                });
+            }
         }
     }
 }
