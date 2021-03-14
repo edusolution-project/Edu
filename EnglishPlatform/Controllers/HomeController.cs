@@ -846,53 +846,39 @@ namespace EnglishPlatform.Controllers
 
         public IActionResult OnlineClass(string ID)
         {
-            var @event = _calendarHelper.GetByEventID(ID);
-            var teacher = _teacherService.GetItemByID(@event.TeacherID);//check teacher of class
-
-            if (teacher == null)
-                throw (new Exception("Teacher not found"));
-            if (@event != null)
+            try
             {
-                //@event.UrlRoom = "6725744943";
+                var lesson = _lessonService.GetItemByID(ID);
+                if (lesson == null)
+                    throw (new Exception("Lesson not found"));
 
-                var UserID = User.Claims.GetClaimByType("UserID").Value;
+                var classSbj = _classSubjectService.GetItemByID(lesson.ClassSubjectID);
+                var @class = _classService.GetItemByID(lesson.ClassID);
+                var teacher = _teacherService.GetItemByID(classSbj.TeacherID);
+                var center = _centerService.GetItemByID(@class.Center);
+                //var teacher = _teacherService.GetItemByID(@event.TeacherID);//check teacher of class
+
+                if (teacher == null || @class == null || center == null || classSbj == null)
+                    throw (new Exception("Data not found"));
                 var type = User.Claims.GetClaimByType("Type").Value;
+
+                if (string.IsNullOrEmpty(teacher.ZoomID))
+                    throw (new Exception("Class not open"));
                 if (type == "teacher")
                 {
-                    //ViewBag.Role = "1";
-                    //var teacher = _teacherService.GetItemByID(UserID);
-                    //if (!string.IsNullOrEmpty(teacher.ZoomID))
-                    if (teacher.ZoomID == @event.UrlRoom)
-                    {
-                        //var roomID = "6725744943";//test
-                        ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "").Replace(" ", "") + "/join";
-                        //ViewBag.URL = Url.Action("ZoomClass", "Home", new { roomID });
-                    }
-                    else
-                        ViewBag.URL = @event.UrlRoom;
+                    ViewBag.URL = "https://zoom.us/wc/" + teacher.ZoomID.Replace("-", "").Replace(" ", "") + "/join";
                 }
                 else
                 {
-                    string zoomId = (teacher != null && !string.IsNullOrEmpty(teacher.ZoomID) ? teacher.ZoomID : @event.UrlRoom).Replace("-", "").Replace(" ", "");
-                    //ViewBag.Role = "0";
-                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = zoomId });
+                    ViewBag.Role = "0";
+                    ViewBag.Url = Url.Action("ZoomClass", "Home", new { roomID = teacher.ZoomID.Replace("-", "").Replace(" ", "") });
                 }
+                ViewBag.LessonUrl = $"/{center.Code}/student/Lesson/Detail/{lesson.ID}/{lesson.ClassSubjectID}";
             }
-
-            var schedule = _lessonService.GetItemByID(@event.ScheduleID);
-            if (schedule != null)
+            catch (Exception e)
             {
-                try
-                {
-                    var center = _centerService.GetItemByID(_classService.GetItemByID(schedule.ClassID).Center).Code;
-                    ViewBag.LessonUrl = $"/{center}/student/Lesson/Detail/{schedule.ID}/{schedule.ClassSubjectID}";
-                }
-                catch (Exception e)
-                {
-
-                }
+                return Json(e.Message);
             }
-
             return View();
         }
 

@@ -46,7 +46,7 @@
             <li class="route_item start"><a class="route_title">{{formatDatenoYear(startDate)}}</a><span class="route_period"></span></li>
             <li v-for="(obj,index) in (parseInt(period/7) + (period % 7 > 0 ? 1: 0))" class="route_item"
                 v-on:click="showWeekLesson(moment(startDate).add(index * 7 - padRoute, 'days'))"
-                :class="moment(startDate).add((index + 1) * 7 - padRoute, 'days') < moment() ? 'passed' : ((moment(startDate).add(index * 7 - padRoute, 'days') > moment()) ? '': 'now')">{{padRoute}}<a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
+                :class="moment(startDate).add((index + 1) * 7 - padRoute, 'days') < moment() ? 'passed' : ((moment(startDate).add(index * 7 - padRoute, 'days') > moment()) ? '': 'now')"><a class="route_title">{{formatDatenoYear(moment(startDate).add(index * 7 - padRoute, 'days'))}} - {{formatDatenoYear(moment(startDate).add((index * 7 + 6) > period ? (period - padRoute) : (index * 7 + 6 - padRoute), 'days'))}}</a><span class="route_period">Tuần {{index + 1}}</span></li>
             <li class="route_item end"><a class="route_title">{{formatDatenoYear(endDate)}}</a><span class="route_period"></span></li>
         </ul>
     </div>
@@ -618,7 +618,7 @@
                             <td>{{item.bookName}}</td>
                             <td>{{item.className}}</td>
                             <td>{{formatTime(item.startDate)}} - {{formatTime(item.endDate)}}</td>
-                            <td :class="item.lastPoint > 0 ? 'text-success':'text-danger'">{{item.lastPoint > 0 ? (item.lastPoint/10).toFixed(1) : '---'}}</td>
+                            <td :class="item.lastPoint > 0 ? 'text-success':'text-danger'">{{item.lastPoint >= 0 ? (item.lastPoint/10).toFixed(1) : '---'}}</td>
                         </tr>
                     </tbody>
                 </table>

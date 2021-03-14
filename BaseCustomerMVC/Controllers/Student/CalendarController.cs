@@ -89,7 +89,7 @@ namespace BaseCustomerMVC.Controllers.Student
                 {
                     List<StudentLessonScheduleViewModel> listSchedule = new List<StudentLessonScheduleViewModel>();
 
-                    var studentGroups = _classGroupService.GetByClassIDs(listClassID).Where(t => t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
+                    var studentGroups = _classGroupService.GetByClassIDs(listClassID).Where(t => t.Members != null && t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
 
                     var data = new List<CalendarEventModel>();
                     if (studentGroups == null || studentGroups.Count == 0)
@@ -127,12 +127,16 @@ namespace BaseCustomerMVC.Controllers.Student
                 //    if (chap != null)
                 //        content += " - " + chap.Name;
                 //}
+                var teacher = _teacherService.GetItemByID(course.TeacherID);
+                data.ID = lesson.ID;
+                data.TeacherID = course.TeacherID;
+                data.TeacherName = teacher?.FullName;
                 data.StartDate = lesson.StartDate;
                 data.EndDate = lesson.EndDate;
                 data.Title = lesson.Title;
                 data.GroupID = lesson.ClassID;
                 data.Status = lesson.IsOnline ? 5 : 0;
-                data.UrlRoom = _teacherService.GetItemByID(course.TeacherID).ZoomID;
+                data.UrlRoom = teacher?.ZoomID;
                 data.Content = content;
                 data.LinkLesson = url;
             }

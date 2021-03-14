@@ -195,6 +195,9 @@ namespace BaseCustomerMVC.Controllers.Student
 
                         var classGroups = new List<ClassGroupEntity>();
 
+                        classGroups = _classGroupService.GetByClassID(classid).Where(t => t.Members != null).ToList();
+
+
                         if (examIds.Count() > 0)
                         {
                             var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) && x.LastDate <= endWeek && x.LastDate >= startWeek && x.Tried > 0).ToList();
@@ -608,7 +611,7 @@ namespace BaseCustomerMVC.Controllers.Student
 
             List<StudentLessonScheduleViewModel> listSchedule = new List<StudentLessonScheduleViewModel>();
 
-            var studentGroups = _classGroupService.GetByClassIDs(classids).Where(t => t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
+            var studentGroups = _classGroupService.GetByClassIDs(classids).Where(t => t.Members != null && t.Members.Any(m => m.MemberID == userId)).Select(t => t.ID).ToList();
 
 
             var lessons = GetActiveClassLesson(startWeek, endWeek, classids);

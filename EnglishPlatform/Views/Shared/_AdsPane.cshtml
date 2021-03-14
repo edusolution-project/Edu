@@ -1,0 +1,50 @@
+﻿<div class="box p-3 ml-3 mr-3" style="border-radius: 7px; background: #D0DFE8;">
+    <div class="heading flex">
+        <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmctaHwtxAHU4oP4zcsPB7wx"><h4 class="box-head text-danger" target="_blank" style="font-size:110%">Hướng dẫn sử dụng</h4></a>
+    </div>
+    <ul class="list list-news m-0">
+        <li class="d-flex p-0">
+            <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmctaHwtxAHU4oP4zcsPB7wx" title="Hướng dẫn sử dụng" target="_blank" class="thumb w-25">
+                <img src="https://yt3.ggpht.com/a/AATXAJxE5ypJQ4Sgh69zWU7WNWx1wL7J4fbFvARxUyT_=s48-c-k-c0xffffffff-no-rj-mo">
+            </a>
+            <div class="info w-75">
+                <a href="https://www.youtube.com/playlist?list=PLEfslnTHZZmctaHwtxAHU4oP4zcsPB7wx" title="Hướng dẫn sử dụng" target="_blank">
+                    <p style="font-size:12px;color: #222;">Tổng hợp video hướng dẫn sử dụng platform Eduso.vn</p>
+                </a>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="box p-3 ml-3 mr-3 mt-3" style="border-radius: 7px; border: solid 1px #CCC; background:#F0F3F4;">
+    <div class="heading flex">
+        <a href="http://ts.utc.edu.vn/"><h4 class="box-head text-danger" target="_blank" style="font-size:110%">Tin tuyển sinh 2021</h4></a>
+    </div>
+    <ul class="list list-news m-0">
+        <li class="d-flex p-0">
+            <a href="http://ts.utc.edu.vn/" title="Thông tin tuyển sinh 2021" target="_blank" class="thumb w-25">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/LogoUTC.jpg/240px-LogoUTC.jpg">
+            </a>
+            <div class="info w-75">
+                <a href="http://ts.utc.edu.vn/" title="Thông tin tuyển sinh 2021 - trường Đại học Giao thông vận tải" target="_blank">
+                    <p style="font-size:12px;color: #222;">Trường Đại học Giao thông vận tải</p>
+                </a>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<div class="box padding-15 d-none">
+    <div class="heading flex">
+        <h4 class="box-head">Tin tức nổi bật</h4>
+        <a href="#" title="Xem tất cả" class="link-all">Xem tất cả <i class="ti-arrow-right"></i></a>
+    </div>
+    <ul class="list list-news list-articles">
+        <li v-for="(item,k) in list_news" class="d-flex">
+            <a :href="item.href" :title="item.title" target="_blank" class="thumb w-25"><img :src="item.thumbnail" /></a>
+            <div class="info w-75">
+                <a :href="item.href" target="_blank" :title="item.title" class="title">{{item.title}}</a>
+                <p>{{item.description}}</p>
+            </div>
+        </li>
+    </ul>
+</div>
