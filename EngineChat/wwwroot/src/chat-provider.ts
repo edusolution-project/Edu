@@ -19,16 +19,24 @@ export class ChatProvider{
     private readonly _master : IUserInfo;
     private _url: string;
     private readonly _requester: Requester;
-    protected constructor(url:string,master:IUserInfo,request:Requester){
+    public constructor(url:string,master:IUserInfo,request:Requester){
         this._requester = request;
         this._url = url;
         this._master = master;
     }
-    public getList():Promise<ChatResponse>| null{
-        if(this._master.id == undefined) return null;      
-        const requestParams : IRequestParams = {master:this._master.id,type:this._master.type}
+    public getList(listClass:string):Promise<ChatResponse>| null{
+        //const requestParams : IRequestParams = {"group" : listClass};
+        //var req : BodyInit = JSON.stringify(requestParams);
+        var frm : HTMLFormElement = document.createElement("form");
+        var req : BodyInit =new FormData(frm);  //"group="+listClass;
+        req.append("group" , listClass);
+        var header = new Headers();
+        //header.append("group",listClass);
+        //"Content-Type", "multipart/form-data"
+        //header.set('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
+        //header.set('Content-Type', 'application/json; charset=utf-8');
         return new Promise((resolve: (result: ChatResponse) => void, reject: (reason: string, code:number) => void) => {
-            this._requester.sendRequest<ChatResponse>(this._url, '/chat/getlist',requestParams)
+            this._requester.callRequest(this._url,'chat/GetContact','POST', req,true,header)
             .then((res:ChatResponse | IErrorResponse)=>{
                 if(res.code == 200){
                     resolve(res)

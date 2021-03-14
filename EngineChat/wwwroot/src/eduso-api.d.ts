@@ -41,9 +41,11 @@ export interface IErrorResponse extends IResponse{
 }
 export interface IRequestParams{
     [param:string]:any
-}
+} 
 export interface IConfiguration{
     debugger:boolean,
     element?:HTMLElement,
+    current:IUserInfo,
+    url : string,
     [key:string]:any
 }

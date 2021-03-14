@@ -29,25 +29,25 @@ namespace Core_v2.Repositories
         }
         public Task Debug(string function, object content)
         {
-            var path = Path.Combine(_path, function + "\\Debug");
+            var path = Path.Combine(_path,"weblog", function + "\\Debug");
             return writeLog(path, JsonConvert.SerializeObject(content));
         }
 
         public Task Error(string function, string content, Exception ex)
         {
-            var path = Path.Combine(_path, function + "\\Error");
+            var path = Path.Combine(_path, "weblog", function + "\\Error");
             return writeLog(path, content +"\n\r" + ex.ToString());
         }
 
         public Task Error(string function, Exception ex)
         {
-            var path = Path.Combine(_path, function + "\\Error");
+            var path = Path.Combine(_path, "weblog", function + "\\Error");
             return writeLog(path, ex.ToString());
         }
 
         public Task Info(string function, string content)
         {
-            var path = Path.Combine(_path,function + "\\Info");
+            var path = Path.Combine(_path, "weblog", function + "\\Info");
             return writeLog(path, content);
         }
 

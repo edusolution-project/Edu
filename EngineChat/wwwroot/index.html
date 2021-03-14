@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+
+<body>
+    <div id="root">
+        <div class="ball-chat">
+
+        </div>
+    </div>
+    <script src="dist/polyfills.js"></script>
+    <script src="dist/bundle.js"></script>
+    <script>
+        //     id?:string,
+        //username:string,
+        //avatar?: string,
+        //full_name?:string,
+        //type:USER_TYPE,
+        //status:boolean,
+        var eduso = new EdusoChat.ChatEngine({
+            id: "5d8389c2d5d1bf27e4410c04",
+            username: "huonghl@utc.edu.vn",
+            full_name: "Nami Ho",
+            type: 0
+        }, "http://local.easychat.eduso.vn/api", document.getElementById("root"));
+        eduso.getChatProvider().getList("5ef060724456f7243cbd162c,5ef060e14456f7243cbd1640");
+    </script>
+</body>
+
+</html>

@@ -13,14 +13,15 @@ namespace BaseEngineEntity
         public EMessageType Type { get; set; }
         public string Text { get; set; }
         public List<Attachment> Attachments { get; set; }
-        public long Created { get; set; }
+        public double Created { get; set; } = new UnixTime().Now;
     }
     public class ChatEntity : EntityBase
     {
+        public List<string> Admins { get; set; }
         public string Title { get; set; }
         public ECHAT Type { get; set; }
         public MessageEntity LastMessage { get; set; }
-        public long Created { get; set; }
+        public double Created { get; set; } = new UnixTime().Now;
 
     }
 
@@ -31,8 +32,9 @@ namespace BaseEngineEntity
         public List<Member> Members { get; set; }
     }
 
-    public class Member : User
+    public class Member
     {
+        public string ID { get; set; }
         public string LastRead { get; set; }
     }
 
@@ -41,25 +43,43 @@ namespace BaseEngineEntity
         public string ID { get; set; }
         public string Name { get; set; }
         public string Avatar { get; set; }
+        public string Type { get; set; }
     }
     public class Attachment
     {
         public string UserID { get; set; }
         public string Name { get; set; }
-        public EFileType Exts { get; set; } //doc, image,video, orther ...
+        public string Exts { get; set; } //doc, image,video, orther ...
         public string Path { get; set; }
-        public long Created { get; set; }
+        public double Created { get; set; } = new UnixTime().Now;
+    }
+
+    public class UnixTime
+    {
+        public UnixTime()
+        {
+
+        }
+
+        public double Now
+        {
+            get { return DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds; }
+        }
+        public double Date(DateTime dateTime)
+        {
+            return (dateTime.Subtract(new DateTime(1970, 1, 1))).TotalMilliseconds;
+        }
     }
     public enum EMessageType
     {
-        GROUP,PRIVATE
+        SYSTEM, SUPPORT, GROUP, USER
     }
     public enum EFileType
     {
-        DOC,IMAGE,VIDEO,AUDIO,ORTHER
+        DOC,IMAGE,VIDEO,AUDIO,LINK,ORTHER
     }
     public enum ECHAT
     {
-        SYSTEM,SUPPORT,GROUP,TYPE
+        SYSTEM,SUPPORT,GROUP,USER
     }
 }
