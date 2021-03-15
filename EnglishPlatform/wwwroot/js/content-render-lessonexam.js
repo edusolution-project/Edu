@@ -5318,7 +5318,10 @@ var submitForm = function (event, modalId, callback) {
 
     formdata.append('BankQuizID', config.bankquizid)
     for (var i = 0; i < config.listtags.length; i++) {
-        formdata.append('TagsIDs[' + i + ']', config.listtags[i].id)
+        var item = config.listtags[i];
+        if (item.id != undefined) {
+            formdata.append('TagsIDs[' + i + ']', item.id)
+        }
     }
     //console.log(formdata);
     //debugger
