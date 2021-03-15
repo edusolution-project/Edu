@@ -3864,7 +3864,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 //remove student from other groups
                 var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
                                                     f => f.MemberID == StudentID);
-                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == group.ClassID, update);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == group.ClassID && t.Members != null, update);
                 if (group.Members == null)
                     group.Members = new List<GroupMember>();
 
@@ -3875,7 +3875,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
             {
                 var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
                                     f => f.MemberID == StudentID);
-                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID, update);
+                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID && t.Members != null, update);
             }
             return Json(new { IsActive = true });
         }
