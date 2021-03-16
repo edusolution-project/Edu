@@ -1,5 +1,7 @@
-﻿using BaseCustomerEntity.Database;
+﻿using AndcultureCode.ZoomClient.Models.Groups;
+using BaseCustomerEntity.Database;
 using BaseCustomerMVC.Globals;
+using BaseCustomerMVC.Models;
 using Core_v2.Interfaces;
 using Google.Apis.Json;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +15,7 @@ using MongoDB.Driver.Core.Misc;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using OfficeOpenXml.Table.PivotTable;
 using RestSharp;
 using SkiaSharp;
 using System;
@@ -36,6 +39,7 @@ namespace BaseCustomerMVC.Controllers.Admin
         private readonly ChapterService _chapterService;
 
         private readonly ClassHelper _classHelper;
+        private readonly ClassGroupService _classGroupService;
         private readonly CourseHelper _courseHelper;
         private readonly LessonHelper _lessonHelper;
         private readonly ProgressHelper _progressHelper;
@@ -103,6 +107,7 @@ namespace BaseCustomerMVC.Controllers.Admin
                 ChapterService chapterService,
 
                 ClassHelper classHelper,
+                ClassGroupService classGroupService,
                 CourseHelper courseHelper,
                 LessonHelper lessonHelper,
                 ProgressHelper progressHelper,
@@ -146,6 +151,7 @@ namespace BaseCustomerMVC.Controllers.Admin
             _chapterService = chapterService;
 
             _classHelper = classHelper;
+            _classGroupService = classGroupService;
             _courseHelper = courseHelper;
             _lessonHelper = lessonHelper;
             _progressHelper = progressHelper;
@@ -2151,23 +2157,172 @@ namespace BaseCustomerMVC.Controllers.Admin
                 var exams = _examService.CreateQuery().Find(x => csbj.Contains(x.ClassSubjectID) && x.Created > new DateTime(2021, 03, 04, 00, 00, 00) && x.QuestionsTotal < 50).ToEnumerable();
                 var lessonIDs = exams.Select(x => x.LessonID).Distinct().ToList();
                 var lessons = _lessonService.CreateQuery().Find(x => lessonIDs.Contains(x.ID)).ToList();
-                foreach(var exam in exams.ToList())
+                foreach (var exam in exams.ToList())
                 {
                     var lesson = lessons.Where(x => x.ID == exam.LessonID).FirstOrDefault();
                     var lessonpart = _clonelessonPartService.GetByLessonID(lesson.ID).Select(x => x.ID).ToList();
                     var point = _clonequestionService.CreateQuery().Find(x => lessonpart.Contains(x.ParentID)).CountDocuments();
                     exam.QuestionsTotal = point;
                     _examService.Save(exam);
-                    _lessonHelper.CompleteNoEssay(exam, lesson,out _,false);
+                    _lessonHelper.CompleteNoEssay(exam, lesson, out _, false);
                 }
                 return Content($"ExamCount: {exams.Count()}");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Content(ex.Message);
             }
         }
 
+
+        public IActionResult CreateGroup(string CenterID, string ClassID)
+        {
+            var startWeek = new DateTime(2021, 2, 1);
+            var endWeek = new DateTime(2021, 2, 28);
+
+
+            if (!string.IsNullOrEmpty(ClassID))
+            {
+
+                var rtn = new List<StudentRankingViewModel>();
+
+                var students = _studentService.GetStudentsByClassId(ClassID).ToList();
+
+
+                var groups = _classGroupService.GetByClassID(ClassID).ToList();
+
+                if (groups == null) groups = new List<ClassGroupEntity>();
+
+                //create AutoGroup
+                var autoGroup = new List<string> { "Nhóm A", "Nhóm B", "Nhóm C" };
+                foreach (var _gr in autoGroup)
+                {
+                    if (!groups.Any(t => t.Name == _gr))
+                    {
+                        var grp = _classGroupService.Save(new ClassGroupEntity { ClassID = ClassID, Created = DateTime.Now, IsActive = true, Name = _gr });
+                        groups.Add(grp);
+                    }
+                }
+
+                var _grpA = groups.Find(t => t.Name == "Nhóm A");
+                var _grpB = groups.Find(t => t.Name == "Nhóm B");
+                var _grpC = groups.Find(t => t.Name == "Nhóm C");
+
+                if (students != null && students.Count() > 0)
+                {
+                    var activeLessons = _lessonService.CreateQuery().Find(o => o.ClassID == ClassID && o.StartDate <= endWeek && o.EndDate >= startWeek).Project(t => new LessonEntity
+                    {
+                        ID = t.ID,
+                        TemplateType = t.TemplateType,
+                        IsPractice = t.IsPractice
+                    }).ToList();
+
+                    if (activeLessons.Count() > 0)
+                    {
+                        //var activeLessonIds = activeLessons.Select(t => t.ID).ToList();
+                        var examIds = activeLessons.Where(x => (x.TemplateType == 2 || x.IsPractice == true)).Select(x => x.ID).ToList();
+
+                        var exCount = examIds.Count();
+
+                        if (exCount > 0)
+                        {
+                            var activeProgress = _lessonProgressService.CreateQuery().Find(x => examIds.Contains(x.LessonID) &&
+                            //x.LastDate <= endWeek && x.LastDate >= startWeek && 
+                            x.Tried > 0);
+
+                            if (activeProgress.CountDocuments() > 0)
+                            {
+                                var studentResults = (from r in activeProgress.ToList()
+                                                      group r by r.StudentID
+                                                          into g
+                                                      select new StudentRankingViewModel
+                                                      {
+                                                          StudentID = g.Key,
+                                                          TotalPoint = g.Sum(t => t.LastPoint), //SUM
+                                                      }).ToList();
+                                if (studentResults != null && studentResults.Count > 0)
+                                {
+                                    foreach(var student in students)
+                                    {
+                                        var st = studentResults.Find(t => t.StudentID == student.ID);
+                                        if(st == null || st.AvgPoint < 5)
+                                        {
+                                            if (_grpC.Members != null && _grpC.Members.Any(t => t.MemberID == student.ID))//already in group => continue
+                                            {
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                //remove student from other groups
+                                                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                                                                    f => f.MemberID == student.ID);
+                                                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID && t.Members != null, update);
+                                                if (_grpC.Members == null)
+                                                    _grpC.Members = new List<GroupMember>();
+
+                                                _grpC.Members.Add(new GroupMember { MemberID = st.StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                                                _classGroupService.Save(_grpC);
+                                            }
+                                        }   
+                                        else if (st.AvgPoint >= 8)//group A
+                                        {
+                                            if (_grpA.Members != null && _grpA.Members.Any(t => t.MemberID == st.StudentID))//already in group => continue
+                                            {
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                //remove student from other groups
+                                                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members, f => f.MemberID == st.StudentID);
+                                                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID && t.Members != null, update);
+                                                if (_grpA.Members == null)
+                                                    _grpA.Members = new List<GroupMember>();
+
+                                                _grpA.Members.Add(new GroupMember { MemberID = st.StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                                                _classGroupService.Save(_grpA);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (_grpB.Members != null && _grpB.Members.Any(t => t.MemberID == st.StudentID))//already in group => continue
+                                            {
+                                                continue;
+                                            }
+                                            else
+                                            {
+                                                //remove student from other groups
+                                                var update = Builders<ClassGroupEntity>.Update.PullFilter(p => p.Members,
+                                                                                    f => f.MemberID == st.StudentID);
+                                                _classGroupService.CreateQuery().UpdateMany(t => t.ClassID == ClassID && t.Members != null, update);
+                                                if (_grpB.Members == null)
+                                                    _grpB.Members = new List<GroupMember>();
+
+                                                _grpB.Members.Add(new GroupMember { MemberID = st.StudentID, MemberRole = "student", JoinDate = DateTime.Now });
+                                                _classGroupService.Save(_grpB);
+                                            }
+                                        }    
+
+                                    }    
+                                }
+
+                                //rtn.AddRange(studentResults);
+                                //if (rtn.Count() > 0)
+                                //{
+                                //    foreach (var st in rtn)
+                                //    {
+                                //        st.StudentName = _studentService.GetItemByID(st.StudentID)?.FullName;
+                                //        st.ClassName = @class.Name;
+                                //    }
+                                //}
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            return Json("OK");
+        }
         //public IActionResult FixData()
         //{
         //    try

@@ -32,7 +32,7 @@
         return $.ajax({
             type: "POST",
             url: '/email/SendMonthlyReport',
-            data: { Data: arrayData, isTest: false },
+            data: { Data: arrayData, isTest: true },
             //data: { Data: arrayData },
             success: function (res) {
                 console.log(res)

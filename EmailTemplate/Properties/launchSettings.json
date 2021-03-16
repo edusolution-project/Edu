@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "https://test.sendmail.eduso.vn",
+      "applicationUrl": "https://tsendmail.eduso.vn",
       "sslPort": 0
     },
     "iisExpress": {
