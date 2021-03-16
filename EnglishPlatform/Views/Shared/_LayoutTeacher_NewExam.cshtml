@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+@{
+    string center = ViewContext.RouteData.Values["basis"]?.ToString();
+    string processUrl(string act, string ctrl, Object param = null)
+    {
+        string url = Url.Action(act, ctrl, param);
+
+        return $"/{center}{url}";
+    }
+}
+@using Microsoft.AspNetCore.Http;
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>@ViewBag.Title</title>
+    <link href="~/vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles for this template-->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/css/custom.css" rel="stylesheet">
+    <link href="~/css/_sidebar.min.css" rel="stylesheet" />
+    <link href="~/css/layout.min.css" rel="stylesheet" />
+    <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178391156-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-178391156-1');
+    </script>
+
+    <script type="text/javascript">
+
+        const g_CurrentUser = {
+            email : "@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value",
+            name: "@User.Identity.Name",
+            type:'@User.FindFirst("Type")?.Value'
+        }
+
+    </script>
+
+    <script type="text/javascript" src="~/vendor/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="~/js/custom.js"></script>
+    <script type="text/javascript" src="~/js/popper.min.js"></script>
+    <script type="text/javascript" src="~/vendor/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="~/vendor/jquery-easing/jquery.easing.js"></script>
+
+    <script type="text/javascript" src="~/js/lib/notification/notification.js"></script>
+    <script src="~/js/lib/xhr.js"></script>
+    <script src="~/js/site.js"></script>
+    <script src="~/js/moment.min.js"></script>
+
+    <script type="text/javascript" src="~/js/lib/sweetalert2@9.js"></script>
+
+    <!--Hoà thêm-->
+    <link href="~/css/minify/minify.min.css" rel="stylesheet" />
+    <link href="~/css/stylesheet.min.css" rel="stylesheet" />
+
+</head>
+<body>
+    <script>
+        var activeTab;
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 5px; /* for vertical scrollbars */
+            height: 5px; /* for horizontal scrollbars */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-bar ul li{padding:0px}
+    </style>
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper">
+
+            <!-- Main Content -->
+            <div id="content" style="position:relative" data-spy="scroll" data-target="#tableContents" data-offset="20">
+
+                @await Component.InvokeAsync("SidebarTeacher", new { centerCode = center })
+
+                <div class="right-content" id="right-content" style="margin-left:240px">
+                    @RenderBody()
+                    @*<div v-cloak>
+                @RenderSection("Modals", false)
+            </div>*@
+                </div>
+
+                <!-- Footer -->
+                @await Html.PartialAsync("_Footer")
+                <!-- End of Footer -->
+
+            </div>
+            <!-- End of Content Wrapper -->
+
+        </div>
+        <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        @*<a class="scroll-to-top rounded" href="#page-top">
+                <i class="fas fa-angle-up"></i>
+            </a>*@
+    </div>
+    <div v-cloak>
+        @RenderSection("Modals", false)
+    </div>
+    <!-- Logout Modal-->
+    @*@await Html.PartialAsync("_modalLogout")*@
+    @RenderSection("Scripts", false)
+    @*@await Html.PartialAsync("_EasyChat")*@
+</body>
+</html>

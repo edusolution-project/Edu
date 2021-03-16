@@ -1,10 +1,11 @@
 ﻿
 @{
     ViewData["Title"] = "Ngân hàng câu hỏi";
-    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher_NewExam.cshtml";
     var subjects = ViewBag.Subjects as List<BaseCustomerEntity.Database.SubjectEntity>;
     var grades = ViewBag.Grades as List<BaseCustomerEntity.Database.GradeEntity>;
     var currentData = ViewBag.CurrentExamArchive as BaseCustomerEntity.Database.ExamQuestionArchiveEntity;
+    var currentMainsbj = ViewBag.CurrentMainSbj as BaseCustomerEntity.Database.MainSubjectEntity;
     string center = ViewContext.RouteData.Values["basis"]?.ToString();
     string processUrl(string act, string ctrl, Object param = null)
     {
@@ -25,6 +26,9 @@
 <script src="~/lib/vue-multiselect@2.1.0/vue-multiselect.min.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
 
 <script src="~/js/content-render-lessonexam.js?@DateTime.UtcNow.ToString("yyyyMMddHHmmss")"></script>
+<script>
+    setActiveMenu('manageexam');
+</script>
 
 <script>
         var config = {
@@ -66,130 +70,146 @@
     }
 </script>
 
-<section class="container-fluid">
-    <div class="card-header border-b">
+<section class="container-fluid pl-0 pr-0">
+    <div class="card-header border-b pl-0 pr-0">
         <div class="flex flex-row flex-wrap align-items-center">
-            <div class="">
-                <h3>@currentData.Name</h3>
-
+            <div class="col-sm-12">
+                @*<h3>@currentData.Name - Môn: @currentMainsbj.Name</h3>*@
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Ngân hàng câu hỏi</a></li>
+                        <li class="breadcrumb-item"><a href="#">Môn: @currentMainsbj.Name</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">@currentData.Name</li>
+                    </ol>
+                </nav>
             </div>
-            @*<div class="box filter-box w-152 m-1 ">
-                    <select v-model="subject">
-                        <option value="">Chương trình</option>
-                        <option v-for="(item,k) in list_subject" :value="item.ID">{{item.Name}}</option>
-                    </select>
-                </div>
-                <div class="box filter-box w-152 m-1">
-                    <select name="" v-model="grade">
-                        <option value="">Cấp độ</option>
-                        <option v-for="(item,k) in list_grades_full" :value="item.ID" v-if="item.SubjectID == subject">{{item.Name}}</option>
-                    </select>
-                </div>*@
-        </div>
-        <div class="flex flex-row flex-wrap align-items-center">
-
-            <div class="box filter-box w-152 m-1 ">
-                <select v-model="filterLevelPart">
-                    <option value="">Mức độ</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
-                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
-                </select>
+            <div class="tab bg-none col-md-4">
+                <ul class="flex flex-row">
+                    <li v-bind:class="{active : tab[0]}"><a href="javascript:;" title="Cấu trúc nội dung" v-on:click="tabChange(0)">Cấu trúc nội dung</a></li>
+                    <li v-bind:class="{active : tab[1]}"><a href="javascript:;" title="Câu hỏi" v-on:click="tabChange(1)">Câu hỏi</a></li>
+                </ul>
             </div>
-            <div class="box filter-box w-152 m-1 ">
-                <select>
-                    <option value="">Loại câu hỏi</option>
-                    <option value="">Lý thuyết</option>
-                    <option value="">Bài tập</option>
-                </select>
-            </div>
-            <div class="search-box m-1">
-                <button><i class="ic ic-find"></i></button>
-                <input type="text" name="" v-model="searchTerm" placeholder="Nội dung tìm kiếm">
-            </div>
-            <div class="ml-0 ml-md-auto">
-                @*<b-button class="btn-addevent btn-sm m-1" v-on:click="showAddEditItem()"><i class="ti-plus"></i>Thêm mới</b-button>*@
-                <b-button class="btn-addevent btn-sm m-1" v-on:click="showSelectTypeContent()"><i class="ti-plus"></i>Thêm nội dung</b-button>
-                @*<b-button class="btn-addevent btn-sm m-1 ml-0 ml-md-auto" v-on:click="showEditItem()"><i class="ti-plus"></i> Thêm bài giảng</b-button>*@
-            </div>
-        </div>
-    </div>
-    <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <td style="width:30px;max-width:30px">#</td>
-                    <td>Câu hỏi</td>
-                    <td style="width:250px;min-width:450px">Nội dung</td>
-                    <td style="width:150px;max-width:150px;min-width:30px">Loại câu hỏi</td>
-                    <td style="width:150px;max-width:130px;min-width:30px">Mức độ</td>
-                    <td style="width:100px;max-width:100px;min-width:30px">Tác vụ</td>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item,k) in listLessonPart">
-                    <td>{{(page - 1) * view + (k+1)}}</td>
-                    <td>{{item.Title}}</td>
-                    <td>
-                        @*<input type="text" class="form-control" v-model="item.TagsName" disabled readonly />*@
-                        <multiselect v-model="item.ListTags"
-                                     tag-placeholder="Thêm mới"
-                                     placeholder="Chọn nội dung"
-                                     label="name"
-                                     track-by="id"
-                                     :options="optionsTags"
-                                     :multiple="true"
-                                     :taggable="true"
-                                     :id="item.ID"
-                                     @@tag="addTag"
-                                     @@search-change="searchTags"
-                                     @*@@input="changeValue"*@
-                                     @@remove="removeTags"
-                                     @@select="selectTags"></multiselect>
-                    </td>
-                    <td>
-                        <select :id="item.ID" v-model="item.TypePart" v-on:change="changeTypePart(item.ID,item.TypePart)" class="form-control">
-                            <option value="@BaseCustomerEntity.Database.TYPE_PART.THEORY">Lý thuyết</option>
-                            <option value="@BaseCustomerEntity.Database.TYPE_PART.EXERCISE">Bài tập</option>
-                        </select>
-                    </td>
-                    <td>
-                        <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)" class="form-control">
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
-                            <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="btn-group" style="display:block">
-                            @*<a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="EditPart(item.ID)"><i class="ti-pencil-alt"></i></a>*@
-                            <button class="btn-act btn-trash" title="Sửa" v-on:click="EditPart1(item)"><i class="ti-pencil-alt"></i></button>
-                            <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
+            <template v-if="tab[1]">
+                <div class="tab bg-none col-md-8">
+                    <div class="flex flex-row flex-wrap align-items-center">
+                        <div class="box filter-box w-152 m-1 ">
+                            <select v-model="filterLevelPart">
+                                <option value="">Mức độ</option>
+                                <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
+                                <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
+                                <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
+                                <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
+                            </select>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="box margin-t20 flex">
-            <div class="paging-view">
-                Hiển thị:
-                <select v-model="view" v-on:change="getListPart()">
-                    <option value="10">10 kết quả</option>
-                    <option value="20">20 kết quả</option>
-                    <option value="30">30 kết quả</option>
-                </select>
-            </div>
-            <div class="page-control">
-                <div class="right">
-                    <b-pagination v-model="page"
-                                  :total-rows="totalRec"
-                                  :per-page="view"
-                                  v-on:input="getListPart()"></b-pagination>
+                        <div class="box filter-box w-152 m-1 ">
+                            <select>
+                                <option value="">Loại câu hỏi</option>
+                                <option value="">Lý thuyết</option>
+                                <option value="">Bài tập</option>
+                            </select>
+                        </div>
+                        <div class="search-box m-1">
+                            <button><i class="ic ic-find"></i></button>
+                            <input type="text" name="" v-model="searchTerm" placeholder="Nội dung tìm kiếm">
+                        </div>
+                        <div class="ml-0 ml-md-auto">
+                            <b-button class="btn-addevent btn-sm m-1" v-on:click="showSelectTypeContent()"><i class="ti-plus"></i>Thêm câu hỏi</b-button>
+                        </div>
+
+                    </div>
+                </div>
+            </template>
+            <template v-if="tab[0]">
+                <div class="col-md-8">
+                    <div class="flex flex-row flex-wrap align-items-center">
+                        <div class="ml-0 ml-md-auto">
+                            <b-button class="btn-addevent btn-sm m-1" v-on:click="showModal('addtags-modal-sm')"><i class="ti-plus"></i>Thêm nội dung</b-button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <template v-if="tab[1]">
+            <div class="card-body pt-0">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <td style="width:30px;max-width:30px">#</td>
+                            <td>Câu hỏi</td>
+                            <td style="width:250px;min-width:450px">Nội dung</td>
+                            <td style="width:150px;max-width:150px;min-width:30px">Loại câu hỏi</td>
+                            <td style="width:150px;max-width:130px;min-width:30px">Mức độ</td>
+                            <td style="width:100px;max-width:100px;min-width:30px">Tác vụ</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item,k) in listLessonPart">
+                            <td>{{(page - 1) * view + (k+1)}}</td>
+                            <td>{{item.Title}}</td>
+                            <td>
+                                @*<input type="text" class="form-control" v-model="item.TagsName" disabled readonly />*@
+                                <multiselect v-model="item.ListTags"
+                                             tag-placeholder="Thêm mới"
+                                             placeholder="Chọn nội dung"
+                                             label="name"
+                                             track-by="id"
+                                             :options="optionsTags"
+                                             :multiple="true"
+                                             :taggable="true"
+                                             :id="item.ID"
+                                             @@tag="addTag"
+                                             @@search-change="searchTags"
+                                             @*@@input="changeValue"*@
+                                             @@remove="removeTags"
+                                             @@select="selectTags"></multiselect>
+                            </td>
+                            <td>
+                                <select :id="item.ID" v-model="item.TypePart" v-on:change="changeTypePart(item.ID,item.TypePart)" class="form-control">
+                                    <option value="@BaseCustomerEntity.Database.TYPE_PART.THEORY">Lý thuyết</option>
+                                    <option value="@BaseCustomerEntity.Database.TYPE_PART.EXERCISE">Bài tập</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select :id="item.ID" v-model="item.LevelPart" v-on:change="changeStatus(item.ID,item.LevelPart)" class="form-control">
+                                    <option value="@BaseCustomerEntity.Database.LEVELPART.KNOW">Nhận biết</option>
+                                    <option value="@BaseCustomerEntity.Database.LEVELPART.UNDERSTANDING">Thông hiểu</option>
+                                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATE">Vận dụng</option>
+                                    <option value="@BaseCustomerEntity.Database.LEVELPART.MANIPULATEHIGHLY">Vận dụng cao</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="btn-group" style="display:block">
+                                    @*<a class="btn-act btn-edit" title="Sửa" href="javascript:;" v-on:click="EditPart(item.ID)"><i class="ti-pencil-alt"></i></a>*@
+                                    <button class="btn-act btn-trash" title="Sửa" v-on:click="EditPart1(item)"><i class="ti-pencil-alt"></i></button>
+                                    <button class="btn-act btn-trash" title="Xóa" v-on:click="removeItem(item)"><i class="ti-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="box margin-t20 flex">
+                    <div class="paging-view">
+                        Hiển thị:
+                        <select v-model="view" v-on:change="getListPart()">
+                            <option value="10">10 kết quả</option>
+                            <option value="20">20 kết quả</option>
+                            <option value="30">30 kết quả</option>
+                        </select>
+                    </div>
+                    <div class="page-control">
+                        <div class="right">
+                            <b-pagination v-model="page"
+                                          :total-rows="totalRec"
+                                          :per-page="view"
+                                          v-on:input="getListPart()"></b-pagination>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
+        <template v-if="tab[0]">
+                <div class="card-body pt-0"></div>
+            </template>
     </div>
 
     <!--Modals-->
@@ -264,7 +284,7 @@
         </template>
     </b-modal>
 
-    <b-modal id="tags-modal" size="lg" title="Môn: Tiếng anh" :no-close-on-backdrop="true">
+    <b-modal id="tags-modal" size="lg" title="Môn: @currentMainsbj.Name" :no-close-on-backdrop="true">
         <div class="pt-1 pb-1">
             <label class="">Chọn nội dung</label>
             <div class="row" id="listTags">
@@ -357,7 +377,34 @@
             </template>
         </b-modal>*@
 
-    <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static">
+<b-modal id="addtags-modal-sm" size="sm" title="Thêm nội dung" centered>
+    <b-col>
+        <div>
+            <multiselect v-model="displayTags"
+                         tag-placeholder="Thêm mới"
+                         placeholder="Chọn nội dung"
+                         label="name"
+                         track-by="code"
+                         :options="optionsTags"
+                         :multiple="true"
+                         :taggable="true"
+                         @@tag="addTag"
+                         @@search-change="searchTags"></multiselect>
+            @*<pre class="language-json"><code>{{ value  }}</code></pre>*@
+        </div>
+    </b-col>
+    <template v-slot:modal-footer="{ok,cancel}">
+        <template v-if="isLoading">
+            <b-button>Đang gửi dữ liệu ...</b-button>
+        </template>
+        <template v-else>
+            <b-button variant="success" v-on:click="nextStep()">Lưu</b-button>
+            <b-button variant="danger" v-on:click="hideModal('addtags-modal-sm')">Huỷ</b-button>
+        </template>
+    </template>
+</b-modal>
+
+    <div class="modal fade" role="dialog" aria-hidden="true" id="partModal" data-backdrop="static" style="overflow-y:auto">
         <div class="modal-dialog modal-xl lesson-modal" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -413,7 +460,7 @@
                 searchTerm: '',
                 filterLevelPart:'',
                 listLessonPart: [],
-
+                tab: [true, false],
                 displayTags: [],
                 optionsTags: [],
                 list_tags: {
@@ -424,7 +471,7 @@
                             //{ name: 'Vue.js', id: 'vu', parentids: []},
                         ]
                     }
-                }
+                },
             },
             computed: {},
             watch: {
@@ -446,6 +493,23 @@
                 }
             },
             methods: {
+                tabChange(a = 0) {
+                    let _that = this
+                    _that.tab.forEach(function (item, k) {
+                        _that.tab[k] = false;
+                    })
+                    this.tab = _that.tab
+                    this.tab[a] = true
+                    switch (a) {
+                        case 0:
+                            history.replaceState({ tab: a }, "Cấu trúc nội dung", "#structure");
+                            break;
+                        case 1:
+                            history.replaceState({ tab: a }, "Câu hỏi", "#bank-question");
+                            break;
+                    }
+                    this.$forceUpdate()
+                },
                 showAddEditItem() {
                     //debugger
                     let _that = this
@@ -470,6 +534,9 @@
                 },
                 hideModal() {
                     $('.close').click();
+                },
+                showModal(id) {
+                    this.$bvModal.show(id)
                 },
                 getData() {
                     let _that = this
@@ -936,7 +1003,6 @@
                         .catch(e => { console.log(e) })
                 },
                 selectTags(selectedOption, id) {
-                    debugger
                     let _that = this
                     let _form = new FormData();
                     let _url = '@processUrl("UpdateTags" ,"ExamManage")'
@@ -948,7 +1014,6 @@
                         .then(res => {
                             var stt = res.data.Status
                             if (stt) {
-                                debugger
                                 const tag = {
                                     name: res.data.Data[0].Name,
                                     id: res.data.Data[0].ID
@@ -987,9 +1052,12 @@
                     _form.append("listTags[0].Name", newTag)
                     _form.append("listTags[0].ExamQuestionArchiveID", '@currentData.ID')
                     var index = parseInt(id.replace("multiselect_", ""))
+                    //debugger
                     if (index > 0) {
-                        var parentIDs = _that.list_tags[index - 1].value[0].id
-                        _form.append("listTags[0].ParentIDs[0]", parentIDs)
+                        if (_that.list_tags[index - 1].value.length > 0) {
+                            var parentIDs = _that.list_tags[index - 1].value[0].id
+                            _form.append("listTags[0].ParentIDs[0]", parentIDs)
+                        }
                     }
                     axios.post(_url, _form)
                         .then(res => {
@@ -1001,6 +1069,13 @@
                                     parentids: res.data.Data[0].ParentIDs
                                 };
                                 this.list_tags[index].options.push(tag);
+                                if (index == 0)
+                                {
+                                    this.list_tags[index].value.push(tag);
+                                }
+                                //else if (index == 1) {
+                                //    this.list_tags[index].value.push(tag);
+                                //}
                             }
                             else {
                                 console.log(res.data.Msg)
@@ -1031,11 +1106,13 @@
                                             if (data.length > 0) {
                                                 for (var i = 0; i < data.length; i++) {
                                                     var current = data[i]
-                                                    //debugger
-                                                    _that.list_tags[index].options.push({
+                                                    var tag = {
                                                         id: current.ID,
                                                         name: current.Name
-                                                    })
+                                                    }
+                                                    //debugger
+                                                    _that.list_tags[index].options.push(tag)
+                                                    //_that.list_tags[index].value.push(tag)
                                                 }
                                             }
                                         }
@@ -1113,6 +1190,34 @@
                     EditPart(obj.ID)
                     $('#partModal').modal('hide');
                     $('#partModal').modal('show');
+                },
+                createStructure() {
+                    let _that = this
+                    let _url = '@processUrl("CreateStructure", "ExamManage")'
+                    let _form = new FormData()
+                    _form.append("ID", '@currentData.ID')
+                    debugger
+                    axios.post(_url, _form)
+                        .then(res => {
+                            var stt = res.data.Status
+                            if (stt) {
+
+                            }
+                            else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Ôi hỏng ',
+                                    text: res.data.Msg
+                                })
+                            }
+                        })
+                        .catch(e => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Ôi hỏng ',
+                                text: e
+                            })
+                        })
                 }
             }
         });

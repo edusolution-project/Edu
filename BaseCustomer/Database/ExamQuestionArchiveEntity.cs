@@ -36,12 +36,8 @@ namespace BaseCustomerEntity.Database
         public Int32 TotalTime { get; set; }
         [JsonProperty("MainSubjectID")]
         public String MainSubjectID { get; set; }
-        //[JsonProperty("QuestionEasy")]
-        //public Int32 QuestionEasy { get; set; } //so cau de
-        //[JsonProperty("QuestionNormal")]
-        //public Int32 QuestionNormal { get; set; } // so cau trung binh
-        //[JsonProperty("QuestionHard")]
-        //public Int32 QuestionHard { get; set; } // so cau kho
+        [JsonProperty("Tags")]
+        public List<String> Tags { get; set; }
     }
 
     public class ExamQuestionArchiveService : ServiceBase<ExamQuestionArchiveEntity>

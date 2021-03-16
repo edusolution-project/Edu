@@ -171,6 +171,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                     ViewBag.Subjects = subject;
                     ViewBag.CurrentUser = teacher;
                     ViewBag.CurrentExamArchive = currentExamArchive;
+                    ViewBag.CurrentMainSbj = currentExamArchive.MainSubjectID == null ? new MainSubjectEntity() : _mainSubjectService.GetItemByID(currentExamArchive.MainSubjectID);
                     //ViewBag.ClassList = classes;
                 }
                 return View();
@@ -961,6 +962,16 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var centerID = _centerService.GetItemByCode(basis).ID;
+
+                var TotalQuiz = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(item.ExamQuestionArchiveID).Count();
+                if(TotalQuiz < item.TotalQuiz)
+                {
+                    return Json(new Dictionary<String, Object> {
+                        {"Status",false },
+                        {"Data", new ManageExamEntity()},
+                        {"Msg",$"Số câu hỏi trong ngân hàng câu hỏi không đủ ({item.TotalQuiz} / {TotalQuiz})" }
+                    });
+                }
                 MatrixExamEntity matrixExam = new MatrixExamEntity();
 
                 List<String> Tags = new List<string>();
@@ -1158,7 +1169,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             //lay danh sach cac lessonpart trong ngan hang cau hoi
             //var lessonParts = _lessonPartExtensionService.GetItemsByExamQuestionArchiveID(ID);
-            var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && Tags.Intersect(x.Tags).Any()).ToEnumerable();
+            var lessonParts = _lessonPartExtensionService.CreateQuery().Find(x=>x.ExamQuestionArchiveID == ID && x.Tags.Any(y=>Tags.Contains(y))).ToEnumerable();
             if (lessonParts.Count() == 0)
             {
                 return "";
@@ -1972,6 +1983,26 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 });
             }
         }
+
+        public JsonResult CreateStructure(String ID,String tagsID,string parentTags)
+        {
+            try
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status", true},
+                    {"Data",null },
+                    {"Msg","" }
+                });
+            }
+            catch(Exception e)
+            {
+                return Json(new Dictionary<String, Object> {
+                    {"Status", false},
+                    {"Data",null },
+                    {"Msg",e.Message }
+                });
+            }
+        }
         #endregion
         public IActionResult Detail(String LessonExamID)
         {
@@ -1998,7 +2029,8 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 }
 
                 var sbjs = tc.Subjects;
-                var mainsubjects = _mainSubjectService.CreateQuery().Find(x => sbjs.Contains(x.ID)).ToList();
+                //var mainsubjects = _mainSubjectService.CreateQuery().Find(x => sbjs.Contains(x.ID)).ToList();
+                var mainsubjects = _mainSubjectService.GetAll().ToList();
                 return Json(new Dictionary<String, Object> {
                         {"Status",true },
                         {"Data",mainsubjects },

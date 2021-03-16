@@ -49,5 +49,7 @@ namespace BaseCustomerMVC.Models
         public String Subject { get; set; }
         [JsonProperty("MatrixID")]
         public String MatrixID { get; set; }
+        [JsonProperty("TotalQuiz")]
+        public Int32 TotalQuiz { get; set; }
     }
 }

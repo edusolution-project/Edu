@@ -382,7 +382,8 @@
                     isNewMatrix: true,
                     matrixID: '',
                     mainsbj: '',
-                    bankQuestionID:'',
+                    bankQuestionID: '',
+                    totalQuiz: 0,
                     format: {
                         level: '',
                         tags: [],
@@ -746,6 +747,7 @@
                     _form.append("Template", _that.formatExam.template)
                     _form.append("TotalExam", _that.formatExam.totalExam)
                     _form.append("isNew", isNew)
+                    _form.append("TotalQuiz", _that.formatExam.totalQuiz)
                     if (_that.formatExam.isNewMatrix == 'true') {
                         for (var i = 0; i < _that.formatExam.format.length; i++) {
                             var itemFormat = _that.formatExam.format[i]
@@ -1120,7 +1122,6 @@
                     }
                 },
                 calcMaxtrix() {
-
                     this.customOutput.total = 0
                     this.customOutput.totalKnow = 0
                     this.customOutput.totalUnderstand = 0
@@ -1138,6 +1139,8 @@
                         this.customOutput.totalUnderstand += parseInt(item.levelUnderstanding.exercise) + parseInt(item.levelUnderstanding.theory)
                         this.customOutput.totalManipulate += parseInt(item.levelManipulate.exercise) + parseInt(item.levelManipulate.theory)
                         this.customOutput.totalManipulatehighly += parseInt(item.levelManipulateHighly.exercise) + parseInt(item.levelManipulateHighly.theory)
+
+                        this.formatExam.totalQuiz = parseInt(item.total);
                     }
 
                     this.customOutput.percentTotal = 100
@@ -1337,7 +1340,8 @@
                             totalExam: 1,
                             isNewMatrix: 'true',
                         matrixID: '',
-                        mainsbj:'',
+                        mainsbj: '',
+                        totalQuiz:0,
                             format:[
                             {
                                 level: '',
@@ -2053,7 +2057,7 @@
                                         <div>
                                             <multiselect v-model="item.tags"
                                                          tag-placeholder="Thêm như 1 nội dung mới"
-                                                         placeholder="Nhập nội dung muốn tìm kiếm"
+                                                         placeholder="Nhập nội dung"
                                                          tagPlaceholder="Chọn"
                                                          selectLabel="Thêm"
                                                          selectedLabel="Đã chọn"
