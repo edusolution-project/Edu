@@ -1307,7 +1307,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
         {
             today = today.ToUniversalTime();
             var filter = new List<FilterDefinition<ClassEntity>>();
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
+            //filter.Add(Builders<ClassEntity>.Filter.Where(o => o.IsActive));
             var userId = User.Claims.GetClaimByType("UserID").Value;
             if (string.IsNullOrEmpty(userId))
             {
@@ -1323,7 +1323,7 @@ namespace BaseCustomerMVC.Controllers.Teacher
                 filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Center == @center.ID));
             }
             filter.Add(Builders<ClassEntity>.Filter.Where(o => o.Members.Any(t => t.TeacherID == userId && t.Type == ClassMemberType.TEACHER)));
-            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today));
+            filter.Add(Builders<ClassEntity>.Filter.Where(o => o.EndDate < today || !o.IsActive));
 
             var data = filter.Count > 0 ? _service.Collection.Find(Builders<ClassEntity>.Filter.And(filter)) : _service.GetAll();
             model.TotalRecord = data.CountDocuments();

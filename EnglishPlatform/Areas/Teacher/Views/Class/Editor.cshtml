@@ -162,22 +162,23 @@
                                 <input type="text" class="form-control" name="Limit" placeholder="0 = không giới hạn" required>
                             </div>
                         </div>
-                        @if (templateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM) {
-                        <div class="row">
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Kiểu bài kiểm tra:</label>
-                                <select name="Etype" class="form-control" onchange="showCoefficient(this)" required>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
-                                    <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
-                                </select>
-                            </div>
+                        @if (templateType == BaseCustomerEntity.Database.LESSON_TEMPLATE.EXAM)
+                        {
+                            <div class="row">
+                                <div class="form-group col-md-6" for="examOnly">
+                                    <label class="col-form-label">Kiểu bài kiểm tra:</label>
+                                    <select name="Etype" class="form-control" onchange="showCoefficient(this)" required>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.PRACTICE">Hệ số 1</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.WEEKLY">Giữa kì</option>
+                                        <option value="@BaseCustomerEntity.Database.LESSON_ETYPE.CHECKPOINT">Cuối kì</option>
+                                    </select>
+                                </div>
 
-                            <div class="form-group col-md-6" for="examOnly">
-                                <label class="col-form-label">Hệ số:</label>
-                                <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
+                                <div class="form-group col-md-6" for="examOnly">
+                                    <label class="col-form-label">Hệ số:</label>
+                                    <input type="text" class="form-control" name="Multiple" id="Multiple" placeholder="> 0" value="1" required readonly="readonly">
+                                </div>
                             </div>
-                        </div>
                         }
                         <div class="row chooseOrder" style="display:none">
                             <div class="form-group col-md-12">
